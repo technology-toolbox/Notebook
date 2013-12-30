@@ -1,28 +1,42 @@
-﻿# XAVIER2 (2013-12-29) - Windows Server 2012 R2
+﻿# XAVIER2 - Windows Server 2012 R2 Standard
 
 Sunday, December 29, 2013
 3:05 PM
 
-```Text
+```Console
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+PowerShell
 ```
 
-## Create virtual machine
+## # Create virtual machine
 
 ```PowerShell
-icacls 'C:\NotBackedUp\VMs\XAVIER2\Virtual Hard Disks\XAVIER2.vhd'
-
-copy '\\STORM\VM Library\ws2012std-r2\Virtual Hard Disks\ws2012std-r2.vhd' `
-    'C:\NotBackedUp\VMs\XAVIER2\Virtual Hard Disks\XAVIER2.vhd'
-
 $vmName = "XAVIER2"
+
+New-VM `
+    -Name $vmName `
+    -Path C:\NotBackedUp\VMs `
+    -MemoryStartupBytes 512MB `
+    -SwitchName "Virtual LAN 2 - 192.168.10.x"
 
 Set-VMMemory `
     -VMName $vmName `
     -DynamicMemoryEnabled $true `
-    -MaximumBytes 2GB `
-    -MinimumBytes 256MB `
-    -StartupBytes 512MB
+    -MaximumBytes 2GB
+
+$sysPrepedImage =
+    "\\ICEMAN\VM Library\ws2012std-r2\Virtual Hard Disks\ws2012std-r2.vhd"
+
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
+Convert-VHD `
+    -Path $sysPrepedImage `
+    -DestinationPath $vhdPath
+
+Set-VHD $vhdPath -PhysicalSectorSizeBytes 4096
+
+Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
 
 Start-VM $vmName
 ```
@@ -35,13 +49,52 @@ Start-VM $vmName
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/00/65DD2DDF9A6B95EE82F269413EE5C7B8BEADF800.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/52/D0DC7A8120091CB4E0A0C87D35452F6313019A52.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/369785CE95AEFDFE524D91BC64480EA02934C1D7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D6/36842CB5D7336F1CB4CF0F89B8271AF59FB8BFD6.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/10/3BE814FDDD6FCE9020BFFE7E5C62A363E6CCFF10.png)
 
-## Change drive letter for DVD-ROM
+## # Rename network connection
 
-### To change the drive letter for the DVD-ROM using PowerShell
+```PowerShell
+Get-NetAdapter -Physical
+
+Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName "LAN 1 - 192.168.10.x"
+```
+
+## # Configure static IP address
+
+```PowerShell
+$ipAddress = "192.168.10.104"
+
+New-NetIPAddress `
+    -InterfaceAlias "LAN 1 - 192.168.10.x" `
+    -IPAddress $ipAddress `
+    -PrefixLength 24 `
+    -DefaultGateway 192.168.10.1
+
+Set-DNSClientServerAddress `
+    -InterfaceAlias "LAN 1 - 192.168.10.x" `
+    -ServerAddresses 192.168.10.103
+```
+
+## # Rename the server and join domain
+
+```PowerShell
+Rename-Computer -NewName XAVIER2 -Restart
+
+Add-Computer -DomainName corp.technologytoolbox.com -Restart
+```
+
+## # Download PowerShell help files
+
+```PowerShell
+Update-Help
+```
+
+## # Change drive letter for DVD-ROM
+
+### # To change the drive letter for the DVD-ROM using PowerShell
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -55,178 +108,6 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-### Reference
-
-**Change CD ROM Drive Letter in Newly Built VM's to Z:\\ Drive**\
-Pasted from <[http://www.vinithmenon.com/2012/10/change-cd-rom-drive-letter-in-newly.html](http://www.vinithmenon.com/2012/10/change-cd-rom-drive-letter-in-newly.html)>
-
-## Rename the server and join domain
-
-```Console
-sconfig
-```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/31/77F8FFB92F52749671F56F5B2DE847273093B531.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/68/C31326C399FDE72552A14CC590DC1026D2AA2868.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/28C2EC69F80466908219CA2B4803DE2E3D0A7338.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/1C5F8E932EAE27E08857352BDBA7D2FDA55EE165.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/1935237937E431C0576742771F4BA093BFB796D7.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/70/DC832E2BC6BB1171070D86F8025A1B6DA77E1170.png)
-
-## Rename network connection
-
-```PowerShell
-Get-NetAdapter -Physical
-
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "LAN 1 - 192.168.10.x"
-```
-
-## Configure static IP address
-
-```PowerShell
-$ipAddress = "192.168.10.104"
-
-New-NetIPAddress -InterfaceAlias "LAN 1 - 192.168.10.x" -IPAddress $ipAddress `
-    -PrefixLength 24 -DefaultGateway 192.168.10.1
-
-Set-DNSClientServerAddress -InterfaceAlias "LAN 1 - 192.168.10.x" `
-    -ServerAddresses 192.168.10.103,192.168.10.104
-```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/25/5CFE3AB76865E7FB14ABB0083FF2576A180E4F25.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BF/C1701DF2C5E324097C72A697E4298A79EDD72DBF.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/95F18511CC7247AEBFB056D86C056311CDF89630.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2A/E0D0C0A53D17F9E2DCBC3A2ECB3387E403DAB32A.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/53FD22EF24962F60F270380E8C3E8A352BC150DB.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/54/EB6403E9F02D11A48E6836EC7A8B7C8E7283E954.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A5/9BDDC9D841D62E3A5B658AE6E6DA6475AB292EA5.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FA/29835D73F1783E60AE4570565720B1D28D7719FA.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8F/89013EB683AB8A7E2108016531D69C096FDDA38F.png)
-
-On the **Features** step, click **Next**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/26/9F952E3838E994BACAD3ECCD59F4358DA67F0026.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/90/44305DAAA0E7AA89C211BE4F1A4CE1FA5296F490.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/70FF3874946F7CA61DC5B64697E2BBF80B9BFA94.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/45/9FFF78B26CDCEA3FD07E229064F66F48855A8345.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1A/1A0F5A6B0CA38FD5897E01B74833085AFC19751A.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F2/1253437CB248293978956EA71C38F5074036C7F2.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/82A09619946260FC6D8B6BD7FE01086226F39CE1.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/17/9C5D0A2947FA127E7448B74C7D8130348CF6CD17.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/B7F4FB092FE45559E3697B91EBD8D439C47B6E5E.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/48/B7A12629D88B4E1672C3D5B9B3B8A508DED26848.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/64/AB604BC43A2F9429E5B3761933AA8C8B11C9DA64.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/8BDAAA5F87A584D46C8BE96094F0801D1AF1715E.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9B/9E4B48E7ECA5AE6899A305FA215EA6547638989B.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/0EFC0F81D75573B9562152EB1B4377EEB1E64893.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2B/288CC3157F01B1ED4105CE4D1178DDDA303D542B.png)
-
-Click **View script**
-
-```PowerShell
-#
-# Windows PowerShell script for AD DS Deployment
-#
-
-Import-Module ADDSDeployment
-Install-ADDSDomainController `
--NoGlobalCatalog:$false `
--CreateDnsDelegation:$true `
--CriticalReplicationOnly:$false `
--DatabasePath "C:\Windows\NTDS" `
--DomainName "corp.technologytoolbox.com" `
--InstallDns:$true `
--LogPath "C:\Windows\NTDS" `
--NoRebootOnCompletion:$false `
--SiteName "Default-First-Site" `
--SysvolPath "C:\Windows\SYSVOL" `
--Force:$true
-```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E8/DE1165A26F535E8225942626561620A292FBFDE8.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/828D5FBAA68C62AB52E60DBD40D56CDA1676D4E2.png)
-
-Wait for server to restart
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/0FF971159D593DD5BA088BC90E35377D815579B8.png)
-
-## Add network adapter (Virtual iSCSI 1 - 10.1.10.x)
-
-## Rename iSCSI network connection
-
-```PowerShell
-Get-NetAdapter -Physical
-
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter #2" |
-    Rename-NetAdapter -NewName "iSCSI 1 - 10.1.10.x"
-
-Get-NetAdapter -Physical
-```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/95/20E4C35F689933FC42CC887E6582187A5B4D5695.png)
-
-## # Configure iSCSI network adapter
-
-```PowerShell
-$ipAddress = "10.1.10.104"
-
-New-NetIPAddress -InterfaceAlias "iSCSI 1 - 10.1.10.x" -IPAddress $ipAddress `
-    -PrefixLength 24
-
-Disable-NetAdapterBinding -Name "iSCSI 1 - 10.1.10.x" `
-    -DisplayName "Client for Microsoft Networks"
-
-Disable-NetAdapterBinding -Name "iSCSI 1 - 10.1.10.x" `
-    -DisplayName "File and Printer Sharing for Microsoft Networks"
-
-Disable-NetAdapterBinding -Name "iSCSI 1 - 10.1.10.x" `
-    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
-
-Disable-NetAdapterBinding -Name "iSCSI 1 - 10.1.10.x" `
-    -DisplayName "Link-Layer Topology Discovery Responder"
-
-$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
-    -Filter "NetConnectionId = 'iSCSI 1 - 10.1.10.x'"
-
-$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
-    -Filter "Index= '$($adapter.DeviceID)'"
-
-# Do not register this connection in DNS
-$adapterConfig.SetDynamicDNSRegistration($false)
-
-# Disable NetBIOS over TCP/IP
-$adapterConfig.SetTcpipNetbios(2)
-```
-
 ## # Enable jumbo frames
 
 ```PowerShell
@@ -235,166 +116,38 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 Set-NetAdapterAdvancedProperty -Name "LAN 1 - 192.168.10.x" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-Set-NetAdapterAdvancedProperty -Name "iSCSI 1 - 10.1.10.x" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
-
-ping BEAST -f -l 8900
-ping 10.1.10.106 -f -l 8900
+ping ICEMAN -f -l 8900
 ```
 
-Note: Trying to ping BEAST or the iSCSI network adapter on ICEMAN with a 9000 byte packet from XAVIER2 resulted in an error (suggesting that jumbo frames were not configured). Note that 9000 works from ICEMAN to BEAST. When I decreased the packet size to 8900, it worked on XAVIER2. (It also worked with 8970 bytes.)
-
-## Enable iSCSI Initiator
-
-Start -> iSCSI Initiator
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/3F6DE64EBF1E201BDD47D798802EEBB2C9A72CDF.png)
-
-Click **Yes**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5B/38F75FA3835C75B20A80D63314FE3463D9B3095B.png)
-
-## Discover iSCSI Target portal
-
-On the **Discovery** tab, in the **Target portals** section, click **Discover Portal...**
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/01/5AF2023C517FB8FDD3FACC7214E310797B6A0401.png)
-
-In the **Discover Target Portal** window, in the **IP address or DNS name** box, type **10.1.10.106**, and then click **OK**.
-
-## Create iSCSI virtual disk (XAVIER2-Backup01.vhdx)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/D7E61D1EB8206FD6D5C5044BBE92767E9A6B5071.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/90/A222DAA567A68DE76ABEEA1FE95632349EEB3090.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5A/850F6496A17CB0821DD5E88252B32403C1091B5A.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/C39058A2E059B98FA52D494B4C8BAAB1F186BBA2.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/01/98CE812BBCC1D35A681B16B23D69916527994A01.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F9/551ED6B2353BA8DA0BB0EA94E461B00FC07A63F9.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/67/3F7B136DB150BEFD2033803A3C3AC8E6EA818367.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/AAD595666AA29AB645C763745695DA863923ABDA.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EA/B959B689AEC5207309B9262E89EED49B197D24EA.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/30153B16CA543BFB0D81B04FE31BF04792F1593D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4C/CBE127A313427057ED5A31303D0BB8212F1C024C.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E3/391185C152DBD047CD23F73891E2E0D74996C5E3.png)
-
-Wait for iSCSI virtual disk to be cleared.
-
-## Configure CHAP on iSCSI Target portal
+## # Install Active Directory Domain Services
 
 ```PowerShell
-Remove-IscsiTargetPortal -TargetPortalAddress 10.1.10.106
-
-$chapUserName = "iqn.1991-05.com.microsoft:xavier2.corp.technologytoolbox.com"
-
-New-IscsiTargetPortal -TargetPortalAddress 10.1.10.106 `
-    -AuthenticationType OneWayCHAP `
-    -ChapUserName $chapUserName -ChapSecret {password}
+Install-WindowsFeature AD-Domain-Services -IncludeManagementTools -Restart
 ```
 
-## Configure CHAP on iSCSI Target
+## # Promote server to domain controller
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/6029B939D5BA8F88098F2F9B8B425516CC35FADA.png)
+```PowerShell
+Import-Module ADDSDeployment
 
-Click **Connect**
+Install-ADDSDomainController `
+    -NoGlobalCatalog:$false `
+    -CreateDnsDelegation:$false `
+    -CriticalReplicationOnly:$false `
+    -DatabasePath "C:\Windows\NTDS" `
+    -DomainName "corp.technologytoolbox.com" `
+    -InstallDns:$true `
+    -LogPath "C:\Windows\NTDS" `
+    -NoRebootOnCompletion:$false `
+    -SiteName "Default-First-Site" `
+    -SysvolPath "C:\Windows\SYSVOL"
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/77/50DC77E45AA28D3BFF48AB02FBDF90144F668077.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C2/3EF7AB9D2670CE32C6F9E92B676C59D3AEBC21C2.png)
-
-On the **Volumes and Devices** tab, click **Auto Configure**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D3/A34E7F894EE4E7C175929A873C63A657500ED5D3.png)
-
-## Online the iSCSI LUN
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/964A9E28D8E0C0487BFB50CFB98545BAEB224C27.png)
-
-Right click **Disk 1** and then click **Online**.
-
-Right click **Disk 1** and then click **Initialize Disk**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/29131AA6EDE5CBFC5A52427B6154BCCE839750B8.png)
-
-## Add Windows Server Backup feature
+## # Add Windows Server Backup feature
 
 ```PowerShell
 Add-WindowsFeature Windows-Server-Backup -IncludeManagementTools
 ```
-
-## Configure and run backup
-
-## Convert VHD to new format
-
-Stop the virtual machine
-
-```Console
-cd 'C:\NotBackedUp\VMs\XAVIER2\Virtual Hard Disks'
-Convert-VHD -Path .\XAVIER2.vhd -DestinationPath .\XAVIER2.vhdx
-Set-VHD .\XAVIER2.vhdx -PhysicalSectorSizeBytes 4096
-Remove-Item .\XAVIER2.vhd
-```
-
-Modify VM settings to change path for virtual hard disk file
-
-## # Install SCOM agent
-
-```PowerShell
-$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-## # Approve manual agent install in Operations Manager
-
-## Remove Windows Server Backup
-
-```PowerShell
-wbadmin delete catalog
-
-wevtutil cl Microsoft-Windows-Backup
-
-Remove-WindowsFeature Windows-Server-Backup -Remove
-```
-
-## Remove iSCSI disks and stop iSCSI Initiator service
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/56/80FA8C5896BD1ECBF7D4F27BE0DC1BFFD371F756.png)
-
-Click **Remove**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/A8CC409F92D5BC05F0025A94EB22BA44D4CE02C5.png)
-
-Click **Remove**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/48/AD24DD5BD590F3DE7B457773C4E1A7EA14B8B248.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6C/659DC3CF16315FD81C3D1280DED5E57BA258B66C.png)
-
-Stop service and then change **Startup type** to **Manual**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8C/94E50655366996A40DBB22509D17530DD87BF48C.png)
-
-Restart the computer.
 
 ## # Install DPM agent
 
@@ -418,3 +171,117 @@ $installer = $imageDriveLetter + ":\SCDPM\Agents\DPMAgentInstaller_x64.exe"
 
 **Installing Protection Agents Manually**\
 Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
+
+## Attach DPM agent
+
+**Note: Did *not* create "Allow DPM Remote Agent Push" firewall rule**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/97/C2EBDBC18CAD62D7948875B1C4A24CC84BA31B97.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/29/3A987323C13C1AD9020B6F2EC3602CC74B951F29.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/E1DB4D360771821A2A05956589E2B8E6D2AC142C.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/09/ECFF5CC2AE843F8D0E1C79A50771BF5951775B09.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B7/09C288AB704BB1FF036B084768B9C4D8944F97B7.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/33/CD1ED6522C17EAA8F23B945DF6F3424291BAB433.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/A4BA5A9925C42417D34CB4ED41F05222DA722739.png)
+
+### Reference
+
+**Attaching Protection Agents**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757916.aspx](http://technet.microsoft.com/en-us/library/hh757916.aspx)>
+
+## # Copy Toolbox content
+
+```PowerShell
+robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+```
+
+## # Install SCOM agent
+
+```PowerShell
+$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=JUBILEE `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+## # Approve manual agent install in Operations Manager
+
+## Resolve SCOM alerts due to disk fragmentation
+
+### Alert Name
+
+Logical Disk Fragmentation Level is high
+
+### Alert Description
+
+The disk C: (C:) on computer XAVIER1.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 11%. Defragmentation recommended: true.
+
+### Resolution
+
+##### # Copy Toolbox content
+
+```PowerShell
+robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+```
+
+##### # Create scheduled task to optimize drives
+
+```PowerShell
+[string] $xml = Get-Content `
+  'C:\NotBackedUp\Public\Toolbox\Scheduled Tasks\Optimize Drives.xml'
+
+Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
+```
+
+## Resolve IPv6 issue
+
+### Configure static IPv6 address
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/13DB426CA9B5D35D261B52DB2BD05AE20D93E77D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/F2543DD416103365AFDEDC6D5B9622E844745688.png)
+
+## Configure NTP
+
+**Time Synchronization in Hyper-V**\
+From <[http://blogs.msdn.com/b/virtual_pc_guy/archive/2010/11/19/time-synchronization-in-hyper-v.aspx](http://blogs.msdn.com/b/virtual_pc_guy/archive/2010/11/19/time-synchronization-in-hyper-v.aspx)>
+
+```Console
+reg add HKLM\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\VMICTimeProvider /v Enabled /t reg_dword /d 0
+```
+
+When prompted to overwrite the value, type **yes**.
+
+```Console
+w32tm /config /syncfromflags:DOMHIER /update
+
+net stop w32time & net start w32time
+
+w32tm /resync /force
+
+w32tm /query /source
+```
+
+## # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
+```
