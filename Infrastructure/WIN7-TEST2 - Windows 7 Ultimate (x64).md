@@ -1,62 +1,50 @@
-﻿# WIN7-TEST2 (2015-03-13) - Windows 7 Ultimate (x64)
+﻿# WIN7-TEST2 - Windows 7 Ultimate (x64)
 
-Friday, March 13, 2015
-11:59 AM
+Monday, April 20, 2015
+9:54 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## WIN7-TEST2 - Baseline
+## Create VM
 
-Windows 7 (64-bit)\
-Microsoft Office Professional Plus 2010\
-Microsoft SharePoint Designer 2010\
-Microsoft Visio Premium 2010\
-Adobe Reader 8.3\
-Mozilla Firefox 17.0\
-Mozilla Thunderbird 17.0\
-Google Chrome\
-Remote Server Administration Tools for Windows 7 SP1\
-Microsoft Security Essentials\
-Disk Cleanup\
-Internet Explorer 10
+- Processors: **1**
+- Memory: **2048 MB**
+- VDI size: **25 GB**
 
 ## Configure VM settings
 
-- **General**
-  - **Advanced**
-    - **Shared Clipboard: Bidirectional**
-- **Network**
-  - **Adapter 1**
-    - **Attached to: Bridged adapter**
+- General
+  - Advanced
+    - Shared Clipboard:** Bidirectional**
+- System
+  - Processor
+    - Enable PAE/NX: **Yes (checked)**
+- Network
+  - Adapter 1
+    - Attached to:** Bridged adapter**
 
-## Install Windows 7 Ultimate (x64)
+## Install custom Windows 7 image
 
-## Reduce paging file size
-
-Virtual Memory
-
-- Automatically manage paging file size for all drives: No
-- C: drive
-  - Custom size
-  - Initial size (MB): 512
-  - Maximum size (MB): 1024
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- On the **Task Sequence** step, select **Windows 7 Ultimate (x64)** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **WIN7-TEST2** and click **Next**.
+- On the Applications step:
+  - Select the following items:
+    - Adobe
+      - **Adobe Reader 8.3.1**
+    - Google
+      - **Chrome**
+    - Mozilla
+      - **Firefox 36.0**
+      - **Thunderbird 31.3.0**
+  - Click **Next**.
 
 ## Install VirtualBox Guest Additions
 
-## # Set MaxPatchCacheSize to 0
-
 ```PowerShell
-reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize /t REG_DWORD /d 0 /f
-```
-
-## # Copy Toolbox content
-
-```PowerShell
-net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
-
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+cls
 ```
 
 ## # Change drive letter for DVD-ROM
@@ -73,12 +61,41 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-## # Join domain
+```PowerShell
+cls
+```
+
+## # Set password for local Administrator account
 
 ```PowerShell
-Add-Computer -DomainName corp.technologytoolbox.com -Credential (Get-Credential)
+$adminUser = [ADSI] "WinNT://./Administrator,User"
+$adminUser.SetPassword("{password}")
+```
 
-Restart-Computer
+```PowerShell
+cls
+```
+
+## # Install Remote Server Administration Tools for Windows 7 SP1
+
+```PowerShell
+net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+
+& '\\ICEMAN\Public\Download\Microsoft\Remote Server Administration Tools for Windows 7 SP1\Windows6.1-KB958830-x64-RefreshPkg.msu'
+```
+
+```PowerShell
+cls
+```
+
+## # Install Microsoft Security Essentials
+
+```PowerShell
+& "\\ICEMAN\Products\Microsoft\Security Essentials\Windows 7 (x64)\MSEInstall.exe"
+```
+
+```PowerShell
+cls
 ```
 
 ## # Enter a product key and activate Windows
@@ -87,51 +104,36 @@ Restart-Computer
 slmgr /ipk {product key}
 ```
 
-### # Click OK to dismiss dialog box
+**Note:** When notified that the product key was set successfully, click **OK**.
 
-```PowerShell
+```Console
 slmgr /ato
 ```
 
-## Install Microsoft Office Professional Plus 2010 (x86)
+## Activate Microsoft Office
 
-## Install Microsoft SharePoint Designer 2010 (x86)
+1. Start Word 2013
+2. Enter product key
 
-## Install Microsoft Visio Premium 2010 (x86)
+## Install updates using Windows Update
 
-## Install Adobe Reader 8.3
+**Note:** Repeat until there are no updates available for the computer.
 
-"[\\\\iceman\\Products\\Adobe\\AdbeRdr830_en_US.msi](\\iceman\Products\Adobe\AdbeRdr830_en_US.msi)"
+```PowerShell
+cls
+```
 
-"[\\\\iceman\\Products\\Adobe\\AdbeRdrUpd831_all_incr.msp](\\iceman\Products\Adobe\AdbeRdrUpd831_all_incr.msp)"
-
-## Install Mozilla Firefox 36.0
-
-## Install Mozilla Thunderbird 31.3
-
-"[\\\\ICEMAN\\Products\\Mozilla\\Thunderbird\\Thunderbird](\\ICEMAN\Products\Mozilla\Thunderbird\Thunderbird) Setup 31.3.0.exe" -ms
-
-## Install Google Chrome
-
-## Install Remote Server Administration Tools for Windows 7 SP1
-
-## Install Microsoft Security Essentials
-
-## Install updates
-
-### # Delete C:\\Windows\\SoftwareDistribution folder
+## # Delete C:\\Windows\\SoftwareDistribution folder (528 MB)
 
 ```PowerShell
 Stop-Service wuauserv
 
 Remove-Item C:\Windows\SoftwareDistribution -Recurse
-
-Restart-Computer
 ```
 
-Check for updates
-
-## Disk Cleanup
+```PowerShell
+cls
+```
 
 ## # Shutdown VM
 
@@ -142,3 +144,39 @@ Stop-Computer
 ## Remove disk from virtual CD/DVD drive
 
 ## Snapshot VM - "Baseline"
+
+Windows 7 Ultimate (x64)\
+Microsoft Office Professional Plus 2013 (x86)\
+Adobe Reader 8.3.1\
+Google Chrome\
+Mozilla Firefox 36.0\
+Mozilla Thunderbird 31.3.0\
+Remote Server Administration Tools for Windows 7 SP1\
+Microsoft Security Essentials\
+Activate Microsoft Office\
+Internet Explorer 10
+
+## Expand primary VHD
+
+When installing Windows Update, the C: drive (25GB) ran out of space
+
+---
+
+**WOLVERINE**
+
+Revert VM snapshot
+
+```Console
+cmd
+
+cd \NotBackedUp\VMs\Test\WIN7-TEST2
+
+"\Program Files\Oracle\VirtualBox\VBoxManage.exe" ^
+    modifyhd WIN7-TEST2.vdi --resizebyte 30064771072
+```
+
+**Note:** 30064771072 = 28GB
+
+---
+
+Use **Disk Management** to extend C: partition
