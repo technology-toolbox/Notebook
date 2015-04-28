@@ -1,58 +1,31 @@
-﻿# POLARIS-TEST (2014-01-05) - Windows Server 2012 R2 Standard
+﻿# POLARIS-TEST - Windows Server 2012 R2 Standard
 
-Sunday, January 05, 2014
-5:06 AM
+Tuesday, April 28, 2015
+4:30 AM
 
-```Console
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
 
-## # Create virtual machine
+## Create VM
+
+- Processors: **4**
+- Memory: **8 GB**
+- VHD size (GB): **45**
+- VHD file name:** POLARIS-TEST**
+
+## Install custom Windows Server 2012 R2 image
+
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **POLARIS-TEST** and click **Next**.
+- On the **Applications** step, click **Next**.
 
 ```PowerShell
-$vmName = "POLARIS-TEST"
-
-New-VM `
-    -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
-    -MemoryStartupBytes 8GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
-
-Set-VMProcessor -VMName $vmName -Count 4
-
-$sysPrepedImage =
-    "\\ICEMAN\VM-Library\VHDs\WS2012-R2-STD.vhdx"
-
-mkdir "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
-
-Copy-Item $sysPrepedImage $vhdPath
-
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
-
-Start-VM $vmName
-```
-
-## # Rename the server and join domain
-
-```PowerShell
-Rename-Computer -NewName POLARIS-TEST -Restart
-
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
-```
-
-## # Download PowerShell help files
-
-```PowerShell
-Update-Help
+cls
 ```
 
 ## # Change drive letter for DVD-ROM
-
-### # To change the drive letter for the DVD-ROM using PowerShell
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -64,6 +37,21 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
+```
+
+```PowerShell
+cls
+```
+
+## # Set password for local Administrator account
+
+```PowerShell
+$adminUser = [ADSI] "WinNT://./Administrator,User"
+$adminUser.SetPassword("{password}")
+```
+
+```PowerShell
+cls
 ```
 
 ## # Rename network connection
@@ -80,100 +68,244 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name "LAN 1 - 192.168.10.x" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
+Set-NetAdapterAdvancedProperty `
+    -Name "LAN 1 - 192.168.10.x" `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
 
 ping ICEMAN -f -l 8900
 ```
 
-## # Install SCOM agent
+## Configure VM storage
 
-```PowerShell
-$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | C:           | 45 GB       | 4K                   | OSDisk       |
+| 1    | D:           | 5 GB        | 4K                   | Data01       |
+| 2    | L:           | 5 GB        | 4K                   | Log01        |
 
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
+---
 
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+**BEAST**
 
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/06/37E3980F82E21B260ABBA2EA5CC5232317A21C06.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/62817D225C9E0B77EC7D2FFA156A5697866162F5.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EC/A32CEADD7C65691693F1C743BC2329F308411FEC.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/D5877113F7713D57FF7BEE522316769EE3681A37.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/B6FC333D9F4009163A8D40E990C6098EBA440894.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6F/BE8191D4800C23D900F4311E5A7DA30953D0B76F.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/4D59965EF1EE04026200372D58F1A9D935E8643D.png)
-
-## Approve manual agent install in Operations Manager
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FA/C14D8B6A59E45CBAF239ACB399ED61EDDA3248FA.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/63192D56B04BF6CEFF8E673EF7FBE5F779271BFF.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/81/74CE9B6DC7A0922F9948D0FF005DB6C56198E981.png)
-
-## # [ROGUE] Add disks for SharePoint storage (Data01 and Log01)
+### # Create Data01 and Log01 VHDs
 
 ```PowerShell
 $vmName = "POLARIS-TEST"
 
-Stop-VM $vmName
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+    + "_Data01.vhdx"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-    + $vmName + "_Data01.vhdx"
+New-VHD -Path $vhdPath -SizeBytes 5GB
+Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
 
-New-VHD -Path $vhdPath -Dynamic -SizeBytes 5GB
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath -ControllerType SCSI
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+    + "_Log01.vhdx"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-    + $vmName + "_Log01.vhdx"
-
-New-VHD -Path $vhdPath -Dynamic -SizeBytes 5GB
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath -ControllerType SCSI
-
-Start-VM $vmName
+New-VHD -Path $vhdPath -SizeBytes 5GB
+Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
 ```
 
-## # Initialize disks and format volumes
+---
+
+```PowerShell
+cls
+```
+
+### # Format Data01 drive
 
 ```PowerShell
 Get-Disk 1 |
     Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -UseMaximumSize -DriveLetter D |
+    New-Partition -DriveLetter D -UseMaximumSize |
     Format-Volume `
         -FileSystem NTFS `
         -NewFileSystemLabel "Data01" `
         -Confirm:$false
+```
 
+### # Format Log01 drive
+
+```PowerShell
 Get-Disk 2 |
     Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -UseMaximumSize -DriveLetter L |
+    New-Partition -DriveLetter L -UseMaximumSize |
     Format-Volume `
         -FileSystem NTFS `
         -NewFileSystemLabel "Log01" `
         -Confirm:$false
 ```
 
-## # [ROGUE] Checkpoint VM - "Baseline Windows Server 2012 R2"
+---
 
-```PowerShell
-Checkpoint-VM -Name POLARIS-TEST -SnapshotName "Baseline Windows Server 2012 R2"
+**HAVOK-TEST**
+
+## Configure Max Degree of Parallelism for SharePoint
+
+### -- Set Max Degree of Parallelism to 1
+
+```Console
+EXEC sys.sp_configure N'show advanced options', N'1'  RECONFIGURE WITH OVERRIDE
+GO
+EXEC sys.sp_configure N'max degree of parallelism', N'1'
+GO
+RECONFIGURE WITH OVERRIDE
+GO
+EXEC sys.sp_configure N'show advanced options', N'0'  RECONFIGURE WITH OVERRIDE
+GO
 ```
 
-## # Install Windows features for SharePoint 2013
+```Console
+cls
+```
+
+### # Restart SQL Server
+
+```PowerShell
+Stop-Service SQLSERVERAGENT
+
+Restart-Service MSSQLSERVER
+
+Start-Service SQLSERVERAGENT
+```
+
+---
+
+## Create service accounts for SharePoint
+
+---
+
+**XAVIER1**
+
+### # Create the SharePoint farm service account (TEST)
+
+```PowerShell
+$displayName = "Service account for SharePoint farm (TEST)"
+$defaultUserName = "s-sharepoint-test"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = `
+    "OU=Service Accounts,OU=Quality Assurance,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+### # Create the service account for SharePoint service applications (TEST)
+
+```PowerShell
+$displayName = "Service account for SharePoint service applications (TEST)"
+$defaultUserName = "s-spserviceapp-test"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = `
+    "OU=Service Accounts,OU=Quality Assurance,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+### # Create the service account for indexing content (TEST)
+
+```PowerShell
+$displayName = "Service account for indexing content (TEST)"
+$defaultUserName = "s-index-test"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = `
+    "OU=Service Accounts,OU=Quality Assurance,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+### # Create the service account for intranet websites (TEST)
+
+```PowerShell
+$displayName = "Service account for intranet websites (TEST)"
+$defaultUserName = "s-web-intranet-test"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = `
+    "OU=Service Accounts,OU=Quality Assurance,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+### # Create the service account for SharePoint My Sites and Team sites (TEST)
+
+```PowerShell
+$displayName = 'Service account for SharePoint "my" sites and team sites (TEST)'
+$defaultUserName = "s-web-my-team-test"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = `
+    "OU=Service Accounts,OU=Quality Assurance,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Install prerequisites for SharePoint 2013
+
+### # Install Windows features for SharePoint 2013
 
 ```PowerShell
 Install-WindowsFeature `
@@ -193,7 +325,9 @@ Install-WindowsFeature `
     AS-WAS-Support,AS-HTTP-Activation,AS-TCP-Activation,AS-Named-Pipes,
     AS-Net-Framework,WAS,WAS-Process-Model,WAS-NET-Environment,
     WAS-Config-APIs,Web-Lgcy-Scripting,Windows-Identity-Foundation,
-    Server-Media-Foundation,Xps-Viewer `-Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS' `-Restart
+    Server-Media-Foundation,Xps-Viewer `
+    -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS' `
+    -Restart
 ```
 
 ### Reference
@@ -201,7 +335,11 @@ Install-WindowsFeature `
 **The Products Preparation Tool in SharePoint Server 2013 may not progress past "Configuring Application Server Role, Web Server (IIS) Role"**\
 Pasted from <[http://support.microsoft.com/kb/2765260](http://support.microsoft.com/kb/2765260)>
 
-## # [ROGUE] Insert SharePoint 2013 ISO image into VM
+---
+
+**BEAST**
+
+### # Insert SharePoint 2013 ISO image into VM
 
 ```PowerShell
 $imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
@@ -210,30 +348,30 @@ $imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
 Set-VMDvdDrive -VMName POLARIS-TEST -Path $imagePath
 ```
 
-## # Install prerequisites for SharePoint 2013
+---
+
+```PowerShell
+cls
+```
+
+### # Install prerequisites for SharePoint 2013
 
 ```PowerShell
 $preReqPath = `
     "\\ICEMAN\Products\Microsoft\SharePoint 2013\PrerequisiteInstallerFiles_SP1"
 
 & X:\PrerequisiteInstaller.exe `
-  /SQLNCli:"$preReqPath\sqlncli.msi" `
-  /PowerShell:"$preReqPath\Windows6.1-KB2506143-x64.msu" `
-  /NETFX:"$preReqPath\dotNetFx45_Full_setup.exe" `
-  /IDFX:"$preReqPath\Windows6.1-KB974405-x64.msu" `
-  /Sync:"$preReqPath\Synchronization.msi" `
-  /AppFabric:"$preReqPath\WindowsServerAppFabricSetup_x64.exe" `
-  /IDFX11:"$preReqPath\MicrosoftIdentityExtensions-64.msi" `
-  /MSIPCClient:"$preReqPath\setup_msipc_x64.msi" `
-  /WCFDataServices:"$preReqPath\WcfDataServices.exe" `
-  /KB2671763:"$preReqPath\AppFabric1.1-RTM-KB2671763-x64-ENU.exe" `
-  /WCFDataServices56:"$preReqPath\WcfDataServices-5.6.exe"
-```
-
-## # [ROGUE] Checkpoint VM - "Install SharePoint Server 2013"
-
-```PowerShell
-Checkpoint-VM -Name POLARIS-TEST -SnapshotName "Install SharePoint Server 2013"
+    /SQLNCli:"$preReqPath\sqlncli.msi" `
+    /PowerShell:"$preReqPath\Windows6.1-KB2506143-x64.msu" `
+    /NETFX:"$preReqPath\dotNetFx45_Full_setup.exe" `
+    /IDFX:"$preReqPath\Windows6.1-KB974405-x64.msu" `
+    /Sync:"$preReqPath\Synchronization.msi" `
+    /AppFabric:"$preReqPath\WindowsServerAppFabricSetup_x64.exe" `
+    /IDFX11:"$preReqPath\MicrosoftIdentityExtensions-64.msi" `
+    /MSIPCClient:"$preReqPath\setup_msipc_x64.msi" `
+    /WCFDataServices:"$preReqPath\WcfDataServices.exe" `
+    /KB2671763:"$preReqPath\AppFabric1.1-RTM-KB2671763-x64-ENU.exe" `
+    /WCFDataServices56:"$preReqPath\WcfDataServices-5.6.exe"
 ```
 
 ## # Install SharePoint Server 2013
@@ -260,80 +398,179 @@ Click **Install SharePoint Server**. UAC, click Yes.
 
 Clear the checkbox and click **Close**.
 
-## # [ROGUE] Delete VM checkpoint subtree - "Baseline Windows Server 2012 R2"
+---
+
+**BEAST**
+
+## # Checkpoint VM - "Before SharePoint Server 2013 configuration"
 
 ```PowerShell
-Remove-VMSnapshot `
-    -VMName POLARIS-TEST `
-    -Name "Baseline Windows Server 2012 R2" `
-    -IncludeAllChildSnapshots
+Stop-VM POLARIS-TEST
+
+Checkpoint-VM `
+    -Name POLARIS-TEST `
+    -SnapshotName "Before SharePoint Server 2013 configuration"
+
+Start-VM POLARIS-TEST
 ```
 
-## # [ROGUE] Checkpoint VM - "Create SharePoint farm"
+---
 
 ```PowerShell
-Checkpoint-VM -Name POLARIS-TEST -SnapshotName "Create SharePoint farm"
+cls
 ```
 
-## # Copy Toolbox content
+## # Install SharePoint Cumulative Update
+
+### # Copy patch to local disk
 
 ```PowerShell
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+robocopy "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4701.1001 - SharePoint 2013 March 2015 CU" C:\NotBackedUp\Temp
 ```
 
-## # Create SharePoint farm
+### # Install patch
 
 ```PowerShell
-C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\New-SPFarm.ps1 `
-    -DatabaseServer HAVOK-TEST
+Push-Location C:\NotBackedUp\Temp
+
+.\Install.ps1
+
+Pop-Location
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F0/DC948D86544AD34498BB1A233E2A26EC0F6E1DF0.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D5/63A41BB761C5A6E225307ACBFE8657131DDBDAD5.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/3C3B831F2536C7B2A662437DEB335DF99B05B4F4.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BE/03DDBB8FBE0422ACA1D7EDF0BE14D79FA9FED7BE.png)
-
-## # Configure Service Principal Names for Central Administration
+### # Remove patch files from local disk
 
 ```PowerShell
-setspn -A http/polaris-test.corp.technologytoolbox.com:22182 svc-sharepoint-test
-setspn -A http/polaris-test:22182 svc-sharepoint-test
+Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb2956166-fullfile-x64-glb.exe
 ```
 
-## # Add the SharePoint bin folder to the PATH environment variable
+```PowerShell
+cls
+```
+
+## # Mirror Toolbox content
+
+```PowerShell
+robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
+```
+
+```PowerShell
+cls
+```
+
+## # Configure SharePoint Server 2013
+
+```PowerShell
+cls
+```
+
+### # Create SharePoint farm
+
+```PowerShell
+cd C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts
+
+& '.\Create Farm.ps1' -DatabaseServer HAVOK-TEST
+```
+
+When prompted for the credentials for the farm service account:
+
+1. In the **User name** box, type **TECHTOOLBOX\\s-sharepoint-test**.
+2. In the **Password** box, type the password for the service account.
+
+When prompted for the **Passphrase**, type a passphrase that meets the following criteria:
+
+- Contains at least eight characters
+- Contains at least three of the following four character groups:
+  - English uppercase characters (from A through Z)
+  - English lowercase characters (from a through z)
+  - Numerals (from 0 through 9)
+  - Nonalphabetic characters (such as !, \$, #, %)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CF/EBA2B44FEDD93940FCC035C8F2D3462BAD9673CF.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6E/E713F4F7DD238AD32EA382E1A65749A44B8CC56E.png)
+
+```PowerShell
+cls
+```
+
+### # Configure Service Principal Names for Central Administration
+
+```PowerShell
+setspn -A http/polaris-test.corp.technologytoolbox.com:22812 s-sharepoint-test
+setspn -A http/polaris-test:22812 s-sharepoint-test
+```
+
+```PowerShell
+cls
+```
+
+### # Add the SharePoint bin folder to the PATH environment variable
 
 ```PowerShell
 $sharePointBinFolder = $env:ProgramFiles +
-    "\Common Files\Microsoft Shared\web server extensions\15\BIN"
+    "\Common Files\Microsoft Shared\Web Server Extensions\15\BIN"
 
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     $sharePointBinFolder `
     -EnvironmentVariableTarget "Machine"
 ```
 
-## Grant DCOM permissions on IIS WAMREG admin Service
+```PowerShell
+cls
+```
+
+### # Grant permissions on DCOM applications for SharePoint
+
+```PowerShell
+& '.\Configure DCOM Permissions.ps1'
+```
 
 ### Reference
 
 **Event ID 10016, KB 920783, and the WSS_WPG Group**\
 Pasted from <[http://www.technologytoolbox.com/blog/jjameson/archive/2009/10/17/event-id-10016-kb-920783-and-the-wss-wpg-group.aspx](http://www.technologytoolbox.com/blog/jjameson/archive/2009/10/17/event-id-10016-kb-920783-and-the-wss-wpg-group.aspx)>
 
-## Grant DCOM permissions on MSIServer (000C101C-0000-0000-C000-000000000046)
+```PowerShell
+cls
+```
 
-Using the steps in the previous section, grant **Local Launch** and **Local Activation** permissions to the **WSS_ADMIN_WPG** group on the MSIServer application:
+### # Configure diagnostic logging
 
-**{000C101C-0000-0000-C000-000000000046}**
+```PowerShell
+Set-SPDiagnosticConfig `
+    -LogLocation "L:\Microsoft Office Servers\15.0\Logs" `
+    -LogDiskSpaceUsageGB 3 `
+    -LogMaxDiskSpaceUsageEnabled:$true
+```
 
-## # Configure outgoing e-mail settings
+```PowerShell
+cls
+```
+
+### # Configure usage and health data collection
+
+```PowerShell
+Set-SPUsageService `
+    -LoggingEnabled 1 `
+    -UsageLogLocation "L:\Microsoft Office Servers\15.0\Logs"
+
+New-SPUsageApplication
+```
+
+```PowerShell
+cls
+```
+
+### # Configure outgoing e-mail settings
 
 ```PowerShell
 Add-PSSnapin Microsoft.SharePoint.PowerShell
 
 $smtpServer = "smtp.technologytoolbox.com"
-$fromAddress = "svc-sharepoint-test@technologytoolbox.com"
+$fromAddress = "s-sharepoint-test@technologytoolbox.com"
 $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
@@ -347,72 +584,33 @@ $centralAdmin.UpdateMailSettings(
     $characterSet)
 ```
 
-## Configure diagnostic logging
+```PowerShell
+cls
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/0D5793AAB42D036FB5BCC8EFE720E4744F02C627.png)
+## # Backup SharePoint farm
 
-In the **Trace Log** section, in the **Path** box, type **L:\\Microsoft Shared\\Web Server Extensions\\15\\LOGS\\** .
+---
 
-## Configure usage and health data collection
+**ICEMAN**
 
-In the **Usage Data Collection **section, select **Enable usage data collection**.
-
-In the **Event Selection** section, select the following items:\
-
-- **Analytics Usage**
-- **App Monitoring**
-- **App Statistics.**
-- **~~Bandwidth Monitoring~~**
-- **Content Export Usage**
-- **Content Import Usage**
-- **Definition of usage fields for Education telemetry**
-- **Definition of usage fields for microblog telemetry**
-- **Definition of usage fields for service calls**
-- **Definition of usage fields for SPDistributedCache calls**
-- **Definition of usage fields for workflow telemetry**
-- **Feature Use**
-- **File IO**
-- **Page Requests**
-- **REST and Client API Action Usage**
-- **REST and Client API Request Usage**
-- **Sandbox Request Resource Measures**
-- **Sandbox Requests**
-- **~~SQL Exceptions Usage~~**
-- **~~SQL IO Usage~~**
-- **~~SQL Latency Usage~~**
-- **Task Use**
-- **~~Tenant Logging~~**
-- **Timer Jobs**
-- **User Profile ActiveDirectory Import Usage**
-- **User Profile to SharePoint Synchronization Usage**\
-  \
-  In the **Usage Data Collection Settings** section, in the **Log file location **box, type **L:\\Microsoft Shared\\Web Server Extensions\\15\\LOGS\\** .
-
-In the **Health Data Collection **section, select **Enable health data collection**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/E9F7781E652315847818F0AB52DB84FCB17981F5.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/61/9DC08D27EA37D0824920E72DC82325D234408161.png)
-
-## # Configure State Service
+### # Create share and configure permissions for SharePoint backups
 
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Configure State Service.ps1'
-```
-
-## # Create share and configure permissions for SharePoint backups
-
-On ICEMAN, run the following in an elevated command prompt (not PowerShell):
-
-```Console
 mkdir "D:\Shares\Backups\SharePoint - POLARIS-TEST"
 
-icacls "D:\Shares\Backups\SharePoint - POLARIS-TEST" /grant TECHTOOLBOX\svc-sharepoint-test:(OI)(CI)(F)
+icacls "D:\Shares\Backups\SharePoint - POLARIS-TEST" /grant "TECHTOOLBOX\s-sharepoint-test:(OI)(CI)(F)"
 
-icacls "D:\Shares\Backups\SharePoint - POLARIS-TEST" /grant TECHTOOLBOX\POLARIS-TEST$:(OI)(CI)(F)
+icacls "D:\Shares\Backups\SharePoint - POLARIS-TEST" /grant "TECHTOOLBOX\POLARIS-TEST`$:(OI)(CI)(F)"
 ```
 
-## # Backup Farm
+---
+
+```PowerShell
+cls
+```
+
+### # Backup farm
 
 ```PowerShell
 Backup-SPFarm `
@@ -420,145 +618,334 @@ Backup-SPFarm `
     -BackupMethod Full
 ```
 
-## # [ROGUE] Delete VM checkpoint - "Create SharePoint farm"
+## Backup production SharePoint databases
+
+---
+
+**ICEMAN**
+
+### # Create share for production backups
 
 ```PowerShell
-Remove-VMSnapshot -VMName POLARIS-TEST -Name "Create SharePoint farm"
+mkdir D:\Shares\Backups\HAVOK
 ```
 
-## -- [HAVOK-TEST] Restore content database for intranet Web application
+---
+
+---
+
+**HAVOK**
+
+### -- Backup SharePoint databases
 
 ```SQL
-RESTORE DATABASE [WSS_Content_ttweb]
- FROM  DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_ttweb.bak'
- WITH  FILE = 1
- ,  MOVE N'WSS_Content_ttweb' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_ttweb.mdf'
- ,  MOVE N'WSS_Content_ttweb_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_ttweb_log.LDF'
- ,  NOUNLOAD
- ,  STATS = 5
+BACKUP DATABASE [WSS_Content_ttweb]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_ttweb.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'WSS_Content_ttweb-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
+
+BACKUP DATABASE [WSS_Content_Team1]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_Team1.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'WSS_Content_Team1-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
+
+BACKUP DATABASE [WSS_Content_MySites]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_MySites.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'WSS_Content_MySites-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
+
+BACKUP DATABASE [ManagedMetadataService]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\ManagedMetadataService.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'ManagedMetadataService-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
+
+BACKUP DATABASE [ProfileDB]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\ProfileDB.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'ProfileDB-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
+
+BACKUP DATABASE [SocialDB]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\SocialDB.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'SocialDB-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
+
+BACKUP DATABASE [SyncDB]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\SyncDB.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'SyncDB-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
+
+BACKUP DATABASE [Secure_Store_Service_DB]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\Secure_Store_Service_DB.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'Secure_Store_Service_DB-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
 ```
 
-## # Restore intranet Web application
+---
 
 ```PowerShell
-$appPoolCredential = Get-Credential "TECHTOOLBOX\svc-ttweb-test"
-
-$appPoolAccount = New-SPManagedAccount -Credential $appPoolCredential
-
-$authProvider = New-SPAuthenticationProvider
-
-New-SPWebApplication `
-    -ApplicationPool "SharePoint - ttweb-test80" `-Name "SharePoint - ttweb-test80" `-ApplicationPoolAccount $appPoolAccount `-AuthenticationProvider $authProvider `-HostHeader "ttweb-test" `-Port 80
-
-Test-SPContentDatabase -Name WSS_Content_ttweb -WebApplication http://ttweb-test
-
-Mount-SPContentDatabase -Name WSS_Content_ttweb -WebApplication http://ttweb-test
-
-Get-SPContentDatabase -WebApplication http://ttweb-test |
-    Where-Object { $_.Name -ne "WSS_Content_ttweb" } |
-    Remove-SPContentDatabase
+cls
 ```
 
-## -- [HAVOK-TEST] Restore content database for team sites
+## # Configure service applications
 
-## # Restore team sites
+### # Change the service account for the Distributed Cache
 
 ```PowerShell
-$appPoolCredential = Get-Credential "TECHTOOLBOX\svc-web-my-team-test"
+$credential = Get-Credential "TECHTOOLBOX\s-spserviceapp-test"
 
-$appPoolAccount = New-SPManagedAccount -Credential $appPoolCredential
+$account = New-SPManagedAccount $credential
 
-$authProvider = New-SPAuthenticationProvider
+$farm = Get-SPFarm
+$cacheService = $farm.Services | where {$_.Name -eq "AppFabricCachingService"}
 
-New-SPWebApplication `
-    -ApplicationPool "SharePoint - team-test80" `-Name "SharePoint - team-test80" `-ApplicationPoolAccount $appPoolAccount `-AuthenticationProvider $authProvider `-HostHeader "team-test" `-Port 80
-
-Test-SPContentDatabase -Name WSS_Content_Team1 -WebApplication http://team-test
-
-Mount-SPContentDatabase -Name WSS_Content_Team1 -WebApplication http://team-test
-
-Get-SPContentDatabase -WebApplication http://team-test |
-    Where-Object { $_.Name -ne "WSS_Content_Team1" } |
-    Remove-SPContentDatabase
+$cacheService.ProcessIdentity.CurrentIdentityType = "SpecificUser"
+$cacheService.ProcessIdentity.ManagedAccount = $account
+$cacheService.ProcessIdentity.Update()
+$cacheService.ProcessIdentity.Deploy()
 ```
 
-## -- [HAVOK-TEST] Restore content database for My Sites
-
-## # Restore My Sites
+## # DEV - Constrain the Distributed Cache
 
 ```PowerShell
-$appPoolAccount = Get-SPManagedAccount "TECHTOOLBOX\svc-web-my-team-test"
-
-$authProvider = New-SPAuthenticationProvider
-
-New-SPWebApplication `
-    -ApplicationPool "SharePoint - my-test80" `-Name "SharePoint - my-test80" `-ApplicationPoolAccount $appPoolAccount `-AuthenticationProvider $authProvider `-HostHeader "my-test" `-Port 80
-
-Test-SPContentDatabase -Name WSS_Content_MySites -WebApplication http://my-test
-
-Mount-SPContentDatabase -Name WSS_Content_MySites -WebApplication http://my-test
-
-Get-SPContentDatabase -WebApplication http://my-test |
-    Where-Object { $_.Name -ne "WSS_Content_MySites" } |
-    Remove-SPContentDatabase
+Update-SPDistributedCacheSize -CacheSizeInMB 300
 ```
-
-## # Create application pool for SharePoint service applications
 
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Configure Service Application Pool.ps1'
+cls
 ```
 
-When prompted for the credentials for the application pool:
+### # Configure the State Service
 
-1. In the **User name** box, type **TECHTOOLBOX\\svc-spserviceapp-tst**.
+```PowerShell
+& '.\Configure State Service.ps1'
+```
+
+```PowerShell
+cls
+```
+
+### # Create application pool for SharePoint service applications
+
+```PowerShell
+& '.\Configure Service Application Pool.ps1'
+```
+
+When prompted for the credentials to use for SharePoint service applications:
+
+1. In the **User name** box, type **TECHTOOLBOX\\s-spserviceapp-test**.
 2. In the **Password** box, type the password for the service account.
 
-## -- [HAVOK-TEST] Restore the Managed Metadata Service database
-
-## # Restore the Managed Metadata Service
-
 ```PowerShell
-Get-SPServiceInstance |
-    Where-Object { $_.TypeName -eq "Managed Metadata Web Service" } |
-    Start-SPServiceInstance | Out-Null
-
-$serviceApplicationName = "Managed Metadata Service"
-
-$serviceApp = New-SPMetadataServiceApplication `
-    -Name $serviceApplicationName  `
-    -ApplicationPool "SharePoint Service Applications" `
-    -DatabaseName "ManagedMetadataService"
-
-New-SPMetadataServiceApplicationProxy `
-    -Name "$serviceApplicationName Proxy" `
-    -ServiceApplication $serviceApp `
-    -DefaultProxyGroup | Out-Null
+cls
 ```
 
-## -- [HAVOK-TEST] Restore the User Profile Service databases
-
-## # Restore the User Profile Service Application
+### # Configure SharePoint Search
 
 ```PowerShell
-Get-SPServiceInstance |
-    Where-Object { $_.TypeName -eq "User Profile Service" } |
-    Start-SPServiceInstance | Out-Null
-
-$serviceApplicationName = "User Profile Service Application"
-
-$serviceApp = New-SPProfileServiceApplication `
-    -Name $serviceApplicationName `
-    -ApplicationPool "SharePoint Service Applications" `-ProfileDBName "ProfileDB" `-SocialDBName "SocialDB" `-ProfileSyncDBName "SyncDB"
-
-New-SPProfileServiceApplicationProxy  `
-    -Name "$serviceApplicationName Proxy" `
-    -ServiceApplication $serviceApp `-DefaultProxyGroup | Out-Null
+& '.\Configure SharePoint 2013 Search.ps1'
 ```
 
-## -- [HAVOK-TEST] Restore the Secure Store Service database
+When prompted for the credentials for the default content access account:
 
-## # Restore the Secure Store Service
+1. In the **User name** box, type **TECHTOOLBOX\\s-index-test**.
+2. In the **Password** box, type the password for the service account.
+
+```PowerShell
+cls
+```
+
+#### # Configure VSS permissions for SharePoint Search
+
+```PowerShell
+$serviceAccount = "TECHTOOLBOX\s-spserviceapp-test"
+
+New-ItemProperty `
+    -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\VssAccessControl `
+    -Name $serviceAccount `
+    -PropertyType DWord `
+    -Value 1 | Out-Null
+
+$acl = Get-Acl HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag
+$rule = New-Object System.Security.AccessControl.RegistryAccessRule(
+    $serviceAccount, "FullControl", "Allow")
+
+$acl.SetAccessRule($rule)
+Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
+```
+
+---
+
+**HAVOK-TEST**
+
+#### -- Configure permissions on stored procedures in SharePoint_Config database
+
+```SQL
+USE [Sharepoint_Config]
+GO
+GRANT EXECUTE ON [dbo].[proc_putObjectTVP] TO [WSS_Content_Application_Pools]
+GRANT EXECUTE ON [dbo].[proc_putObject] TO [WSS_Content_Application_Pools]
+GRANT EXECUTE ON [dbo].[proc_putDependency] TO [WSS_Content_Application_Pools]
+GO
+```
+
+---
+
+##### References
+
+**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ‘proc_putObjectTVP’, database ‘SharePoint_Config’**\
+From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html](http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html)>
+
+**EXECUTE permission was denied on the object 'proc_putObjectTVP'**\
+From <[https://social.technet.microsoft.com/Forums/office/en-US/88c2c219-e1b0-4ed2-807a-267dba1a2c0b/execute-permission-was-denied-on-the-object-procputobjecttvp?forum=sharepointadmin](https://social.technet.microsoft.com/Forums/office/en-US/88c2c219-e1b0-4ed2-807a-267dba1a2c0b/execute-permission-was-denied-on-the-object-procputobjecttvp?forum=sharepointadmin)>
+
+#### # Enable continuous crawls
+
+```PowerShell
+Get-SPEnterpriseSearchServiceApplication |
+    Get-SPEnterpriseSearchCrawlContentSource |
+    Where-Object { $_.Type -eq "SharePoint" } |
+    ForEach-Object {
+        $_.EnableContinuousCrawls = $true
+        $_.Update()
+    }
+```
+
+```PowerShell
+cls
+```
+
+### # Restore Managed Metadata Service
+
+---
+
+**HAVOK-TEST**
+
+#### -- Restore service application database from production
+
+```SQL
+RESTORE DATABASE [ManagedMetadataService]
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\ManagedMetadataService.bak'
+    WITH FILE = 1
+    , MOVE N'ManagedMetadataService' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\ManagedMetadataService.mdf'
+    , MOVE N'ManagedMetadataService_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\ManagedMetadataService_log.LDF'
+    , NOUNLOAD
+    , STATS = 5
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Configure the Managed Metadata Service
+
+```PowerShell
+& '.\Configure Managed Metadata Service.ps1'
+```
+
+```PowerShell
+cls
+```
+
+### # Restore User Profile Service
+
+---
+
+**HAVOK-TEST**
+
+#### -- Restore service application databases from production
+
+```SQL
+RESTORE DATABASE [UserProfileService_Profile]
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\ProfileDB.bak'
+    WITH FILE = 1
+    , MOVE N'ProfileDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\UserProfileService_Profile.mdf'
+    , MOVE N'ProfileDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\UserProfileService_Profile_log.LDF'
+    , NOUNLOAD
+    , STATS = 5
+
+RESTORE DATABASE [UserProfileService_Social]
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SocialDB.bak'
+    WITH FILE = 1
+    , MOVE N'SocialDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\UserProfileService_Social.mdf'
+    , MOVE N'SocialDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\UserProfileService_Social_log.LDF'
+    , NOUNLOAD
+    , STATS = 5
+
+RESTORE DATABASE [UserProfileService_Sync]
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SyncDB.bak'
+    WITH FILE = 1
+    , MOVE N'SyncDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\UserProfileService_Sync.mdf'
+    , MOVE N'SyncDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\UserProfileService_Sync_log.LDF'
+    , NOUNLOAD
+    , STATS = 5
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Configure the User Profile Service
+
+```PowerShell
+& '.\Configure User Profile Service.ps1'
+```
+
+```PowerShell
+cls
+```
+
+### # Restore the Secure Store Service
+
+---
+
+**HAVOK-TEST**
+
+#### -- Restore service application database from production
+
+```SQL
+RESTORE DATABASE [SecureStoreService]
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\Secure_Store_Service_DB.bak'
+    WITH FILE = 1
+    , MOVE N'Secure_Store_Service_DB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\SecureStoreService.mdf'
+    , MOVE N'Secure_Store_Service_DB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\SecureStoreService_log.ldf'
+    , NOUNLOAD
+    , STATS = 5
+
+GO
+```
+
+#### -- Add service account to database
+
+```SQL
+USE [SecureStoreService]
+GO
+CREATE USER [TECHTOOLBOX\s-spserviceapp-test]
+ALTER ROLE [SPDataAccess] ADD MEMBER [TECHTOOLBOX\s-spserviceapp-test]
+```
+
+---
+
+#### # Configure the Secure Store Service
 
 ```PowerShell
 Get-SPServiceInstance |
@@ -570,7 +957,8 @@ $serviceApplicationName = "Secure Store Service"
 $serviceApp = New-SPSecureStoreServiceApplication `
     -Name $serviceApplicationName  `
     -ApplicationPool "SharePoint Service Applications" `
-    -DatabaseName "Secure_Store_Service_DB" `-AuditingEnabled
+    -DatabaseName "SecureStoreService" `
+    -AuditingEnabled
 
 $proxy = New-SPSecureStoreServiceApplicationProxy  `
     -Name "$serviceApplicationName Proxy" `
@@ -578,11 +966,20 @@ $proxy = New-SPSecureStoreServiceApplicationProxy  `
     -DefaultProxyGroup
 ```
 
-### Add group to Administrators for service application
+#### # Add domain group to Administrators for service application
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/98/7E813613FDA5FC707894B5B17E9FB2D33AA53E98.png)
+```PowerShell
+$principal = New-SPClaimsPrincipal "SharePoint Admins (TEST)" `
+    -IdentityType WindowsSecurityGroupName
 
-### Set the key for the Secure Store Service
+$security = Get-SPServiceApplicationSecurity $serviceApp -Admin
+
+Grant-SPObjectSecurity $security $principal "Full Control"
+
+Set-SPServiceApplicationSecurity $serviceApp $security -Admin
+```
+
+#### # Set the key for the Secure Store Service
 
 ```PowerShell
 Update-SPSecureStoreApplicationServerKey `
@@ -591,91 +988,298 @@ Update-SPSecureStoreApplicationServerKey `
 
 When prompted, type the passphrase for the Secure Store Service.
 
-## # [ROGUE] Checkpoint VM - "Create Search Service Application"
-
 ```PowerShell
-Checkpoint-VM `
-    -Name POLARIS-TEST `
-    -SnapshotName "Create Search Service Application"
+cls
 ```
 
-## # Create Search Service Application
+## # Restore Web application - http://ttweb-test
 
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Configure SharePoint 2013 Search.ps1'
+cls
 ```
 
-When prompted for the **Indexing Service Account**, specify the user name (**TECHTOOLBOX\\svc-index-test**) and corresponding password, and then click **OK**.
-
-## # [ROGUE] Delete VM checkpoint - "Create Search Service Application"
+### # Create Web application
 
 ```PowerShell
-Remove-VMSnapshot -VMName POLARIS-TEST -Name "Create Search Service Application"
+$appPoolCredential = Get-Credential "TECHTOOLBOX\s-web-intranet-test"
+
+$appPoolAccount = New-SPManagedAccount -Credential $appPoolCredential
+
+$authProvider = New-SPAuthenticationProvider
+
+New-SPWebApplication `
+    -ApplicationPool "SharePoint - ttweb-test80" `
+    -Name "SharePoint - ttweb-test80" `
+    -ApplicationPoolAccount $appPoolAccount `
+    -AuthenticationProvider $authProvider `
+    -HostHeader "ttweb-test" `
+    -Port 80
 ```
 
-## # [ROGUE] Expand VHD
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F2/42094FC9AF85C53238C252C896E30AE67973B4F2.png)
+
+---
+
+**HAVOK-TEST**
+
+### -- Restore content database from production
+
+```SQL
+RESTORE DATABASE [WSS_Content_ttweb]
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_ttweb.bak'
+    WITH FILE = 1
+    , MOVE N'WSS_Content_ttweb' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_ttweb.mdf'
+    , MOVE N'WSS_Content_ttweb_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_ttweb_log.LDF'
+    , NOUNLOAD
+    , STATS = 5
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Add content database to Web application
+
+```PowerShell
+Test-SPContentDatabase -Name WSS_Content_ttweb -WebApplication http://ttweb-test
+
+Mount-SPContentDatabase -Name WSS_Content_ttweb -WebApplication http://ttweb-test
+```
+
+```PowerShell
+cls
+```
+
+### # Remove default content database created with Web application
+
+```PowerShell
+Get-SPContentDatabase -WebApplication http://ttweb-test |
+    Where-Object { $_.Name -ne "WSS_Content_ttweb" } |
+    Remove-SPContentDatabase
+```
+
+```PowerShell
+cls
+```
+
+## # Restore Web application - http://team-test
+
+```PowerShell
+cls
+```
+
+### # Create Web application
+
+```PowerShell
+$appPoolCredential = Get-Credential "TECHTOOLBOX\s-web-my-team-test"
+
+$appPoolAccount = New-SPManagedAccount -Credential $appPoolCredential
+
+$authProvider = New-SPAuthenticationProvider
+
+New-SPWebApplication `
+    -ApplicationPool "SharePoint - my-team-test80" `
+    -Name "SharePoint - team-test80" `
+    -ApplicationPoolAccount $appPoolAccount `
+    -AuthenticationProvider $authProvider `
+    -HostHeader "team-test" `
+    -Port 80
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/BA22D97D4AF3509A3A450F1751D6938BE8AF1FE1.png)
+
+---
+
+**HAVOK-TEST**
+
+### -- Restore content database from production
+
+```SQL
+RESTORE DATABASE [WSS_Content_Team1]
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_Team1.bak'
+    WITH FILE = 1
+    , MOVE N'WSS_Content_Team1' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_Team1.mdf'
+    , MOVE N'WSS_Content_Team1_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_Team1_log.LDF'
+    , NOUNLOAD
+    , STATS = 5
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Add content database to Web application
+
+```PowerShell
+Test-SPContentDatabase -Name WSS_Content_Team1 -WebApplication http://team-test
+
+Mount-SPContentDatabase -Name WSS_Content_Team1 -WebApplication http://team-test
+```
+
+```PowerShell
+cls
+```
+
+### # Remove default content database created with Web application
+
+```PowerShell
+Get-SPContentDatabase -WebApplication http://team-test |
+    Where-Object { $_.Name -ne "WSS_Content_Team1" } |
+    Remove-SPContentDatabase
+```
+
+```PowerShell
+cls
+```
+
+## # Restore Web application - http://my-test
+
+```PowerShell
+cls
+```
+
+### # Create Web application
+
+```PowerShell
+$appPoolAccount = Get-SPManagedAccount "TECHTOOLBOX\s-web-my-team-test"
+
+$authProvider = New-SPAuthenticationProvider
+
+New-SPWebApplication `
+    -ApplicationPool "SharePoint - my-team-test80" `
+    -Name "SharePoint - my-test80" `
+    -AuthenticationProvider $authProvider `
+    -HostHeader "my-test" `
+    -Port 80
+```
+
+---
+
+**HAVOK-TEST**
+
+### -- Restore content database from production
+
+```SQL
+RESTORE DATABASE [WSS_Content_MySites]
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_MySites.bak'
+    WITH FILE = 1
+    , MOVE N'WSS_Content_MySites' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_MySites.mdf'
+    , MOVE N'WSS_Content_MySites_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_MySites_log.LDF'
+    , NOUNLOAD
+    , STATS = 5
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Add content database to Web application
+
+```PowerShell
+Test-SPContentDatabase -Name WSS_Content_MySites -WebApplication http://my-test
+
+Mount-SPContentDatabase -Name WSS_Content_MySites -WebApplication http://my-test
+```
+
+```PowerShell
+cls
+```
+
+### # Remove default content database created with Web application
+
+```PowerShell
+Get-SPContentDatabase -WebApplication http://my-test |
+    Where-Object { $_.Name -ne "WSS_Content_MySites" } |
+    Remove-SPContentDatabase
+```
+
+```PowerShell
+cls
+```
+
+### # Set My Site Host location on User Profile Service Application
+
+```PowerShell
+$serviceApp = Get-SPServiceApplication -Name "User Profile Service Application"
+
+Set-SPProfileServiceApplication `
+    -Identity $serviceApp `
+    -MySiteHostLocation "http://my-test/" `
+    -MySiteManagedPath sites
+```
+
+---
+
+**BEAST**
+
+## # Delete VM checkpoint - "Before SharePoint Server 2013 configuration"
 
 ```PowerShell
 $vmName = "POLARIS-TEST"
 
 Stop-VM $vmName
 
-Resize-VHD `
-    "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx" `
-    -SizeBytes 40GB
+Remove-VMSnapshot -VMName $vmName -Name "Before SharePoint Server 2013 configuration"
+
+while (Get-VM $vmName | Where Status -eq "Merging disks") {
+    Write-Host "." -NoNewline
+    Start-Sleep -Seconds 5
+}
+
+Write-Host
 
 Start-VM $vmName
 ```
 
-## # Expand C: drive
+---
+
+## # Select "High performance" power scheme
 
 ```PowerShell
-$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
-Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
 ```
-
-## Install Team Foundation Server Extensions for SharePoint Products
-
-Mount the TFS 2013 installation image and open the **Remote SharePoint Extensions** folder.\
-Open **tfs_sharePointExtensions.exe**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/29D202847FF727FA81F40C8C82CEDBFB7B665C2C.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6D/257CEBCB04E29C6DE4DAE4A99A7D5352DFA4FD6D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/15F71E41A0278958EB176C85BD5893670B2FE3BC.png)
-
-UAC, click **Yes**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/79/3FDFF5F241662E89F758BAAE8544F604A8050779.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C4/21CF1DADAA03CF99EA0E81842A092457D02E9BC4.png)
-
-## Resolve SCOM alerts due to disk fragmentation
-
-### Alert Name
-
-Logical Disk Fragmentation Level is high
-
-### Alert Description
-
-The disk L: (L:) on computer POLARIS-TEST.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 100%. Defragmentation recommended: true.
-
-### Resolution
-
-##### # Copy Toolbox content
 
 ```PowerShell
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+cls
 ```
 
-##### # Create scheduled task to optimize drives
+## # Enter a product key and activate Windows
 
 ```PowerShell
-[string] $xml = Get-Content `
-  'C:\NotBackedUp\Public\Toolbox\Scheduled Tasks\Optimize Drives.xml'
-
-Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
+slmgr /ipk {product key}
 ```
 
-## Reinstall SharePoint 2013 Service Pack 1 (SP1 rereleased)
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+## # Install SCOM agent
+
+```PowerShell
+$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=JUBILEE `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+## # Approve manual agent install in Operations Manager
