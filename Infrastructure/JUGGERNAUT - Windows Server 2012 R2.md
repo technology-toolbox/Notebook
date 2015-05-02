@@ -1,65 +1,52 @@
-﻿# JUGGERNAUT (2014-01-05) - Windows Server 2012 R2 Standard
+﻿# JUGGERNAUT - Windows Server 2012 R2 Standard
 
-Sunday, January 05, 2014
-10:17 AM
+Friday, May 01, 2015
+11:00 AM
 
-```Console
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
+---
 
-PowerShell
-```
+**MOONSTAR**
 
-## # Create virtual machine
+### # Delete old VM
 
 ```PowerShell
-$vmName = "JUGGERNAUT"
+Stop-SCVirtualMachine JUGGERNAUT
 
-New-VM `
-    -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
-    -MemoryStartupBytes 512MB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
-
-Set-VMProcessor -VMName $vmName -Count 2
-
-Set-VMMemory `
-    -VMName $vmName `
-    -DynamicMemoryEnabled $true `
-    -MaximumBytes 4GB
-
-$sysPrepedImage =
-    "\\ICEMAN\VM Library\ws2012std-r2\Virtual Hard Disks\ws2012std-r2.vhd"
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
-
-Convert-VHD `
-    -Path $sysPrepedImage `
-    -DestinationPath $vhdPath
-
-Set-VHD $vhdPath -PhysicalSectorSizeBytes 4096
-
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
-
-Start-VM $vmName
+Remove-SCVirtualMachine JUGGERNAUT
 ```
 
-## # Rename the server and join domain
+---
+
+## Create VM
+
+- Processors: **2**
+- Memory: **4 GB**
+- VHD size (GB): **32**
+- VHD file name:** JUGGERNAUT**
+
+## Install custom Windows Server 2012 R2 image
+
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **JUGGERNAUT** and click **Next**.
+- On the **Applications** step, click **Next**.
 
 ```PowerShell
-Rename-Computer -NewName JUGGERNAUT -Restart
-
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
+cls
 ```
 
-## # Download PowerShell help files
+## # Set password for local Administrator account
 
 ```PowerShell
-Update-Help
+$adminUser = [ADSI] "WinNT://./Administrator,User"
+$adminUser.SetPassword("{password}")
+```
+
+```PowerShell
+cls
 ```
 
 ## # Change drive letter for DVD-ROM
-
-### # To change the drive letter for the DVD-ROM using PowerShell
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -71,6 +58,34 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
+```
+
+```PowerShell
+cls
+```
+
+## # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
+```
+
+```PowerShell
+cls
+```
+
+## # Mirror Toolbox content
+
+```PowerShell
+robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
+```
+
+```PowerShell
+cls
 ```
 
 ## # Rename network connection
@@ -87,114 +102,218 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name "LAN 1 - 192.168.10.x" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
+Set-NetAdapterAdvancedProperty `
+    -Name "LAN 1 - 192.168.10.x" `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
 
 ping ICEMAN -f -l 8900
 ```
 
-## # Install SCOM agent
+## Configure VM storage
 
-```PowerShell
-$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | C:           | 32 GB       | 4K                   | OSDisk       |
+| 1    | D:           | 3 GB        | 64K                  | Data01       |
+| 2    | L:           | 1 GB        | 64K                  | Log01        |
+| 3    | T:           | 1 GB        | 64K                  | Temp01       |
+| 4    | Z:           | 10 GB       | 4K                   | Backup01     |
 
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
+---
 
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+**ICEMAN**
 
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-## # Approve manual agent install in Operations Manager
-
-## # Add disks for SQL Server storage (Data01, Log01, Temp01, and Backup01)
+### # Create Data01, Log01, Temp01, and Backup01 VHDs
 
 ```PowerShell
 $vmName = "JUGGERNAUT"
 
-Stop-VM $vmName
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+    + "_Data01.vhdx"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-    + $vmName + "_Data01.vhdx"
+New-VHD -Path $vhdPath -SizeBytes 3GB
+Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
 
-New-VHD -Path $vhdPath -Fixed -SizeBytes 2GB
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath -ControllerType SCSI
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+    + "_Log01.vhdx"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-    + $vmName + "_Log01.vhdx"
+New-VHD -Path $vhdPath -SizeBytes 1GB
+Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
 
-New-VHD -Path $vhdPath -Fixed -SizeBytes 1GB
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath -ControllerType SCSI
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+    + "_Temp01.vhdx"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-    + $vmName + "_Temp01.vhdx"
+New-VHD -Path $vhdPath -SizeBytes 1GB
+Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
 
-New-VHD -Path $vhdPath -Fixed -SizeBytes 1GB
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath -ControllerType SCSI
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+    + "_Backup01.vhdx"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-    + $vmName + "_Backup01.vhdx"
-
-New-VHD -Path $vhdPath -Dynamic -SizeBytes 6GB
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath -ControllerType SCSI
-
-Start-VM $vmName
+New-VHD -Path $vhdPath -SizeBytes 10GB
+Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
 ```
 
-## # Initialize disks and format volumes
+---
+
+```PowerShell
+cls
+```
+
+### # Format Data01 drive
 
 ```PowerShell
 Get-Disk 1 |
     Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -UseMaximumSize -DriveLetter D |
+    New-Partition -DriveLetter D -UseMaximumSize |
     Format-Volume `
-        -FileSystem NTFS `
         -AllocationUnitSize 64KB `
+        -FileSystem NTFS `
         -NewFileSystemLabel "Data01" `
         -Confirm:$false
+```
 
+### # Format Log01 drive
+
+```PowerShell
 Get-Disk 2 |
     Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -UseMaximumSize -DriveLetter L |
+    New-Partition -DriveLetter L -UseMaximumSize |
     Format-Volume `
-        -FileSystem NTFS `
         -AllocationUnitSize 64KB `
+        -FileSystem NTFS `
         -NewFileSystemLabel "Log01" `
         -Confirm:$false
+```
 
+### # Format Temp01 drive
+
+```PowerShell
 Get-Disk 3 |
     Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -UseMaximumSize -DriveLetter T |
+    New-Partition -DriveLetter T -UseMaximumSize |
     Format-Volume `
-        -FileSystem NTFS `
         -AllocationUnitSize 64KB `
+        -FileSystem NTFS `
         -NewFileSystemLabel "Temp01" `
         -Confirm:$false
+```
 
+### # Format Backup01 drive
+
+```PowerShell
 Get-Disk 4 |
     Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -UseMaximumSize -DriveLetter Z |
+    New-Partition -DriveLetter Z -UseMaximumSize |
     Format-Volume `
         -FileSystem NTFS `
-        -AllocationUnitSize 64KB `
         -NewFileSystemLabel "Backup01" `
         -Confirm:$false
 ```
 
-## # Install .NET Framework 3.5
+## Create service accounts for SQL Server
+
+---
+
+**XAVIER1**
+
+### # Create the SQL Server service account
 
 ```PowerShell
-Install-WindowsFeature `
-    NET-Framework-Core `
-    -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS'
+$displayName = "Service account for SQL Server"
+$defaultUserName = "s-sql"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
 ```
 
-## # Install SQL Server 2012 with SP1
+### # Create the service account for SQL Server Agent
+
+```PowerShell
+$displayName = "Service account for SQL Server Agent"
+$defaultUserName = "s-sql-agent"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+### # Create the service account for SQL Server Reporting Services
+
+```PowerShell
+$displayName = "Service account for SQL Server Reporting Services"
+$defaultUserName = "s-sql-rs"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+---
+
+## # Install SQL Server 2012 with SP2
+
+---
+
+**ICEMAN**
+
+### # Insert SQL Server 2012 ISO image into VM
+
+```PowerShell
+$imagePath = "\\ICEMAN\Products\Microsoft\SQL Server 2012" `
+    + "\en_sql_server_2012_enterprise_edition_with_service_pack_2_x64_dvd_4685849.iso"
+
+Set-VMDvdDrive -VMName JUGGERNAUT -Path $imagePath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Install SQL Server
+
+```PowerShell
+X:\setup.exe
+```
 
 **# Note: .NET Framework 3.5 is required for some SQL Server 2012 features (e.g. Reporting Services).**
 
@@ -206,8 +325,16 @@ On the **Feature Selection** step, select:
 
 On the **Server Configuration** step:
 
-- For the **SQL Server Agent** service, change the **Startup Type** to **Automatic**.
-- For the **SQL Server Browser** service, leave the **Startup Type** as **Disabled**.
+- For the **SQL Server Agent** service:
+  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-agent**.
+  - Change the **Startup Type** to **Automatic**.
+- For the **SQL Server Database Engine **service:
+  - Change the **Account Name** to **TECHTOOLBOX\\s-sql**.
+  - Ensure the **Startup Type** is set to **Automatic**.
+- For the **SQL Server Reporting Services **service:
+  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-rs**.
+  - Ensure the **Startup Type** is set to **Automatic**.
+- For the **SQL Server Browser** service, ensure the **Startup Type** is set to **Disabled**.
 
 On the **Database Engine Configuration** step:
 
@@ -221,11 +348,11 @@ On the **Database Engine Configuration** step:
 ## Fix permissions to avoid "ESENT" errors in event log
 
 ```Console
-icacls C:\Windows\System32\LogFiles\Sum\Api.chk /grant "TECHTOOLBOX\svc-sql":(M)
+icacls C:\Windows\System32\LogFiles\Sum\Api.chk /grant "NT Service\MSSQLSERVER":(M)
 
-icacls C:\Windows\System32\LogFiles\Sum\Api.log /grant "TECHTOOLBOX\svc-sql":(M)
+icacls C:\Windows\System32\LogFiles\Sum\Api.log /grant "NT Service\MSSQLSERVER":(M)
 
-icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant "TECHTOOLBOX\svc-sql":(M)
+icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant "NT Service\MSSQLSERVER":(M)
 ```
 
 ### Reference
@@ -233,9 +360,100 @@ icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant "TECHTOOLBOX\s
 **Error 1032 messages in the Application log in Windows Server 2012**\
 Pasted from <[http://support.microsoft.com/kb/2811566](http://support.microsoft.com/kb/2811566)>
 
-## # Add passthrough disks
+## -- Configure TempDB
+
+```SQL
+ALTER DATABASE [tempdb]
+    MODIFY FILE
+    (
+        NAME = N'tempdev'
+        , SIZE = 256MB
+        , MAXSIZE = 512MB
+        , FILEGROWTH = 128MB
+    );
+
+DECLARE @dataPath VARCHAR(300);
+
+SELECT
+    @dataPath = REPLACE([filename], '.mdf','')
+FROM
+    sysaltfiles s
+WHERE
+    name = 'tempdev';
+
+DECLARE @sqlStatement NVARCHAR(500);
+
+SELECT @sqlStatement =
+    N'ALTER DATABASE [tempdb]'
+    + 'ADD FILE'
+    + '('
+        + 'NAME = N''tempdev2'''
+        + ', FILENAME = ''' + @dataPath + '2.mdf'''
+        + ', SIZE = 256MB'
+        + ', MAXSIZE = 512MB'
+        + ', FILEGROWTH = 128MB'
+    + ')';
+
+EXEC sp_executesql @sqlStatement;
+
+ALTER DATABASE [tempdb]
+    MODIFY FILE (
+        NAME = N'templog',
+        SIZE = 25MB,
+        FILEGROWTH = 25MB
+    )
+```
+
+## Add passthrough disks
+
+---
+
+**ICEMAN**
+
+### # Add SCSI controller for pass-through disks
+
+```PowerShell
+$vmName = "JUGGERNAUT"
+
+Stop-VM $vmName
+
+Add-VMScsiController $vmName
+
+Start-VM $vmName
+```
+
+---
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/1B96AC5F13C6531D0A7EAC01616A8D02AA828AA2.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/B9D8027BBA5BC60748FAD23CED7C4ACBE51DB1CE.png)
 
 ## # Install Data Protection Manager 2012 R2
+
+---
+
+**ICEMAN**
+
+### # Insert DPM ISO image into VM
+
+```PowerShell
+$imagePath = "\\ICEMAN\Products\Microsoft\System Center 2012 R2" `
+    + "\mu_system_center_2012_r2_data_protection_manager_x86_and_x64_dvd_2945939.iso"
+
+Set-VMDvdDrive -VMName JUGGERNAUT -Path $imagePath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Install DPM 2012 R2
+
+```PowerShell
+X:\SCDPM\setup.exe
+```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/63/7EFABEE6E4F28F3CA7C38959AB5B5C02C6948563.png)
 
@@ -251,56 +469,15 @@ Pasted from <[http://support.microsoft.com/kb/2811566](http://support.microsoft.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/7A027013B98FA582639904D2A59AADCA79BD983F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0D/4D07BAA5B229356F8D0DBE38656382B9B884980D.png)
-
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/1B/DC78488C7E4BCEE3AF2541D28F39859FAD5BA31B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/63/B8FAE16DCBFB56E88E2171644612B17904BCB463.png)
+Restart-Computer
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0B/14D711CD0027DF2034BF3B2D7CF4AF05B4907A0B.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D0/EFA6E1AF2DA6D1B0B6F28C92E46EF3417840F2D0.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6F/5C3E28D3AD1151EEA666B549875721D82376A76F.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/89AE27C6E3DE19717751F5434E218563969A5DF4.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/19/A306233547F3203C655021775DF1393FA59E2619.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/05E44C83C60EE5E6649BF9ED64C9ECA1929B385F.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EC/61AC99C8E440769ED6ECF37421040FE2DDEF73EC.png)
-
-Click **Apply**. Reporting Services Configuration Manager prompts to backup the encryption key.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/A2DC2DA73369B944D881B79D724D5CBD3C420ED4.png)
-
-Click **OK**. Reporting Services Configuration Manager prompts for administrator credentials for applying permissions for the new service account.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/FFAC12FA3783F5325E7AAD977B9F65DACE116737.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/61/71CB7EC1638556092F0B567C991DF1B5474B6561.png)
-
-Open SQL Server Configuration manager and confirm the service accounts have been changed to domain accounts.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A5/BB7D87D6EE7053FF54704C792728B7E85DC489A5.png)
-
-## # Increase memory (minimum of 2GB)
+#### # Restart DPM setup
 
 ```PowerShell
-$vmName = "JUGGERNAUT"
-
-Stop-VM $vmName
-
-Set-VMMemory `
-    -VMName $vmName `
-    -DynamicMemoryEnabled $true `
-    -MaximumBytes 4GB `-MinimumBytes 2GB `-StartupBytes 2GB
-
-Start-VM $vmName
+X:\SCDPM\setup.exe
 ```
-
-## Install Data Protection Manager
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/63/7EFABEE6E4F28F3CA7C38959AB5B5C02C6948563.png)
 
@@ -327,6 +504,216 @@ Click **Use Microsoft Update when I check for updates (recommended)** and then c
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/9C/0B31DB8059F2B6CAC957B81DE2FAE625AB17889C.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/93E89F87922D670ED333C826AAEE492CED034C1E.png)
+
+```PowerShell
+cls
+```
+
+## # Move log file for DPM database from D: to L
+
+### # Stop the DPM service
+
+```PowerShell
+Stop-Service DPM
+Stop-Service DpmWriter
+```
+
+### -- Detach the DPM database
+
+```Console
+USE [master]
+GO
+EXEC master.dbo.sp_detach_db @dbname = N'DPMDB_JUGGERNAUT'
+GO
+```
+
+```Console
+cls
+```
+
+### # Move the log file for the DPM database
+
+```PowerShell
+move "D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\MSDPM2012`$DPMDB_JUGGERNAUT_log.ldf" "L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data"
+```
+
+### -- Attach the DPM database
+
+```Console
+USE [master]
+GO
+CREATE DATABASE [DPMDB_JUGGERNAUT] ON
+( FILENAME = N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\MSDPM2012$DPMDB_JUGGERNAUT.mdf' ),
+( FILENAME = N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\MSDPM2012$DPMDB_JUGGERNAUT_log.ldf' )
+ FOR ATTACH
+GO
+```
+
+```Console
+cls
+```
+
+### # Start the DPM services
+
+```PowerShell
+Start-Service DpmWriter
+Start-Service DPM
+```
+
+## Configure database file growth
+
+```SQL
+ALTER DATABASE [DPMDB_JUGGERNAUT]
+    MODIFY FILE (
+        NAME = N'MSDPM2012$DPMDB_JUGGERNAUT_dat',
+        FILEGROWTH = 100MB
+    )
+
+ALTER DATABASE [DPMDB_JUGGERNAUT]
+    MODIFY FILE (
+        NAME = N'MSDPM2012$DPMDB_JUGGERNAUTLog_dat',
+        FILEGROWTH = 25MB
+    )
+```
+
+## Configure SQL Server backup
+
+```PowerShell
+cls
+```
+
+### # Create maintenance plans to backup DPM database
+
+```PowerShell
+mkdir "Z:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full"
+mkdir "Z:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Differential"
+mkdir "Z:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Transaction Log"
+```
+
+#### Full backup of all databases
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/E9B4AD115094D24286E2FD4D91A834C611368CD7.png)
+
+Right-click **Maintenance Plans** and click **Maintenance Plan Wizard**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/704A09951485E3C05368B69C36408A1420DCBF9D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F9/74A07343F5EC0ADF19DC60BD77C0DDCF10A501F9.png)
+
+In the **Schedule** section, click **Change...**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/61/A16C7EA6E06310367C400A27C32F2517D00F0261.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/4A303D282592167075123900B75E5B39270EE021.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/1F526D384BD3B5362991EB03D53045B846E90830.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/C0402F796985C4D2CA811B0898D5AD58A237D51E.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/71FC6103F1C3048856E7DA098870A616A449794D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/10BCEA4758880B6AFB64B971921F2E4658A40DCA.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/02/07BDB2BE0B0324752C5B3995E00DDFD3B1C54302.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E7/5BC4DF7D314C5FDB0F74C7EF2EFCEB75D9871EE7.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/D07DCA4A3853B9F2EDD91B4C207E2943E8F5E86A.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3E/68EDCE3E0914FE79478DCC7DD8BC4D9ADAEA693E.png)
+
+#### Differential backup of all databases
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/67A8AB130CE9E9303899B4E0D75E3D6D0BE1F4BC.png)
+
+#### Transaction log backup of all databases
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/1804598D619F7D35A4C79C1ABB59348AD5189E0C.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/7F261629A3F51D9F3A5B880CFDCD78F583EF47AE.png)
+
+```PowerShell
+cls
+```
+
+### # Create scheduled task to delete old database backups
+
+```PowerShell
+[string] $xml = Get-Content `
+  'C:\NotBackedUp\Public\Toolbox\PowerShell\Remove Old Database Backups.xml'
+
+Register-ScheduledTask -TaskName "Remove Old Database Backups" -Xml $xml
+```
+
+## Execute maintenance plan to backup all databases
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BF/9B47F071EC5BE2FE29D61CC65F21C4B0E05184BF.png)
+
+Right-click **Full Backup of All Databases** and click **Execute**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/4A7B63AABFD12DD015D778C5CF536E8948EDBEAF.png)
+
+## Configure DCOM permissions for SQL Server Integration Services
+
+Log Name:      System\
+Source:        Microsoft-Windows-DistributedCOM\
+Date:          1/22/2014 5:18:02 AM\
+Event ID:      10016\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          TECHTOOLBOX\\svc-sql-agent\
+Computer:      JUGGERNAUT.corp.technologytoolbox.com\
+Description:\
+The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID\
+{FDC3723D-1588-4BA3-92D4-42C430735D7D}\
+ and APPID\
+{83B33982-693D-4824-B42E-7196AE61BB05}\
+ to the user TECHTOOLBOX\\svc-sql-agent SID (S-1-5-21-3914637029-2275272621-3670275343-4111) from address LocalHost (Using LRPC) running in the application container Unavailable SID (Unavailable). This security permission can be modified using the Component Services administrative tool.\
+Event Xml:\
+<Event xmlns="[http://schemas.microsoft.com/win/2004/08/events/event](http://schemas.microsoft.com/win/2004/08/events/event)">\
+  `<System>`\
+    `<Provider Name="Microsoft-Windows-DistributedCOM" Guid="{1B562E86-B7AA-4131-BADC-B6F3A001407E}" EventSourceName="DCOM" />`\
+    `<EventID Qualifiers="0">`10016`</EventID>`\
+    `<Version>`0`</Version>`\
+    `<Level>`2`</Level>`\
+    `<Task>`0`</Task>`\
+    `<Opcode>`0`</Opcode>`\
+    `<Keywords>`0x8080000000000000`</Keywords>`\
+    `<TimeCreated SystemTime="2014-01-22T12:18:02.869192000Z" />`\
+    `<EventRecordID>`11632`</EventRecordID>`\
+    `<Correlation />`\
+    `<Execution ProcessID="788" ThreadID="4364" />`\
+    `<Channel>`System`</Channel>`\
+    `<Computer>`JUGGERNAUT.corp.technologytoolbox.com`</Computer>`\
+    `<Security UserID="S-1-5-21-3914637029-2275272621-3670275343-4111" />`\
+  `</System>`\
+  `<EventData>`\
+    `<Data Name="param1">`application-specific`</Data>`\
+    `<Data Name="param2">`Local`</Data>`\
+    `<Data Name="param3">`Activation`</Data>`\
+    `<Data Name="param4">`{FDC3723D-1588-4BA3-92D4-42C430735D7D}`</Data>`\
+    `<Data Name="param5">`{83B33982-693D-4824-B42E-7196AE61BB05}`</Data>`\
+    `<Data Name="param6">`TECHTOOLBOX`</Data>`\
+    `<Data Name="param7">`svc-sql-agent`</Data>`\
+    `<Data Name="param8">`S-1-5-21-3914637029-2275272621-3670275343-4111`</Data>`\
+    `<Data Name="param9">`LocalHost (Using LRPC)`</Data>`\
+    `<Data Name="param10">`Unavailable`</Data>`\
+    `<Data Name="param11">`Unavailable`</Data>`\
+  `</EventData>`\
+`</Event>`
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F6/A5C0C95ECE956FF1DBD7B82E9F7AD8DC49CB32F6.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/7869E60C98C8F6102EFEEC5491788C50A966A60C.png)
+
+Right-click **Microsoft SQL Server Integration Services 11.0** and click **Properties**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BA/7E91310C21AA0F6678F9242B63F707EC0C5FB0BA.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/98/8B79030112E2E5FA5090E791619AD565D29E7298.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BE/3326BBC133CD87323E4290F6F20C042A85D903BE.png)
 
 ## Choose customer feedback option
 
@@ -422,9 +809,7 @@ In the **Application recovery points** section, click **Modify...**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/EB/7645163BA736F36A9B198B870169F0D0490BD0EB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5B/7C3DD344842CDCEE9AC6A0E70C37B537EAE4C15B.png)
-
-## Add "Local System" account to SQL Server sysadmin role
+### Add "Local System" account to SQL Server sysadmin role
 
 On the SQL Server (HAVOK-TEST), open SQL Server Management Studio and execute the following:
 
@@ -433,7 +818,7 @@ ALTER SERVER ROLE [sysadmin] ADD MEMBER [NT AUTHORITY\SYSTEM]
 GO
 ```
 
-### Reference
+#### Reference
 
 **Protection agent jobs may fail for SQL Server 2012 databases**\
 Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://technet.microsoft.com/en-us/library/dn281948.aspx)>
@@ -468,341 +853,86 @@ Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://t
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/1A/F6C3A482DAE8C68EEAEA6F00E19449551506B71A.png)
 
-## Expand disk allocation for "SQL Server Databases" protection groups
+## Create protection group for Hyper-V
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/8510CBA4F4BA7FA074B5183038320107ED90D09F.png)
+## Create protection group for critical files
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/9F7AA22E35F5283B86A8F46772E2EE43C11C3237.png)
+```PowerShell
+cls
+```
 
-Right-click the protection group and click **Modify disk allocation...**
+## # Enter a product key and activate Windows
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/560F04FCF7874975A9022FCD6110A228C41362DA.png)
+```PowerShell
+slmgr /ipk {product key}
+```
 
-Identify the storage pool that needs to be expanded (by clicking the **Co-located SQL Server** links).
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2D/C1ADC5356A154CADF204F7991F5AF311AED4E32D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/54/49382BC6D047948467F5A716684DF33034ADB854.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/8510CBA4F4BA7FA074B5183038320107ED90D09F.png)
-
-Right-click the alert and click **Create a recovery point...**
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/FE9A29C4FA9F2F543AC0C6BB0D4ECCDC4C31EC5C.png)
-
-## Move log file for DPM database from D: to L
-
-### Stop the DPM service
+**Note:** When notified that the product key was set successfully, click **OK**.
 
 ```Console
-net stop msdpm
+slmgr /ato
 ```
 
-### Detach the DPM database
-
-```SQL
-USE [master]
-GO
-EXEC master.dbo.sp_detach_db @dbname = N'DPMDB_JUGGERNAUT'
-GO
-```
-
-### Move the log file for the DPM database
-
-```Console
-move "D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\MSDPM2012$DPMDB_JUGGERNAUT_log.ldf" "L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data"
-```
-
-### Attach the DPM database
-
-```SQL
-USE [master]
-GO
-CREATE DATABASE [DPMDB_JUGGERNAUT] ON
-( FILENAME = N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\MSDPM2012$DPMDB_JUGGERNAUT.mdf' ),
-( FILENAME = N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\MSDPM2012$DPMDB_JUGGERNAUT_log.ldf' )
- FOR ATTACH
-GO
-```
-
-### Start the DPM service
-
-```Console
-net start msdpm
-```
-
-## Create maintenance plans to backup SQL Server databases
-
-```Console
-mkdir "Z:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full"
-mkdir "Z:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Differential"
-mkdir "Z:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Transaction Log"
-```
-
-### Full backup of all databases
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/E9B4AD115094D24286E2FD4D91A834C611368CD7.png)
-
-Right-click **Maintenance Plans** and click **Maintenance Plan Wizard**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/704A09951485E3C05368B69C36408A1420DCBF9D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F9/74A07343F5EC0ADF19DC60BD77C0DDCF10A501F9.png)
-
-In the **Schedule** section, click **Change...**
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/61/A16C7EA6E06310367C400A27C32F2517D00F0261.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/4A303D282592167075123900B75E5B39270EE021.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/1F526D384BD3B5362991EB03D53045B846E90830.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/C0402F796985C4D2CA811B0898D5AD58A237D51E.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/71FC6103F1C3048856E7DA098870A616A449794D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/10BCEA4758880B6AFB64B971921F2E4658A40DCA.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/02/07BDB2BE0B0324752C5B3995E00DDFD3B1C54302.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E7/5BC4DF7D314C5FDB0F74C7EF2EFCEB75D9871EE7.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/D07DCA4A3853B9F2EDD91B4C207E2943E8F5E86A.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3E/68EDCE3E0914FE79478DCC7DD8BC4D9ADAEA693E.png)
-
-### Differential backup of all databases
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/67A8AB130CE9E9303899B4E0D75E3D6D0BE1F4BC.png)
-
-### Transaction log backup of all databases
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/1804598D619F7D35A4C79C1ABB59348AD5189E0C.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/7F261629A3F51D9F3A5B880CFDCD78F583EF47AE.png)
-
-## Execute maintenance plan to backup all databases
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BF/9B47F071EC5BE2FE29D61CC65F21C4B0E05184BF.png)
-
-Right-click **Full Backup of All Databases** and click **Execute**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/4A7B63AABFD12DD015D778C5CF536E8948EDBEAF.png)
-
-## Configure DCOM permissions for SQL Server Integration Services
-
-Log Name:      System\
-Source:        Microsoft-Windows-DistributedCOM\
-Date:          1/22/2014 5:18:02 AM\
-Event ID:      10016\
-Task Category: None\
-Level:         Error\
-Keywords:      Classic\
-User:          TECHTOOLBOX\\svc-sql-agent\
-Computer:      JUGGERNAUT.corp.technologytoolbox.com\
-Description:\
-The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID\
-{FDC3723D-1588-4BA3-92D4-42C430735D7D}\
- and APPID\
-{83B33982-693D-4824-B42E-7196AE61BB05}\
- to the user TECHTOOLBOX\\svc-sql-agent SID (S-1-5-21-3914637029-2275272621-3670275343-4111) from address LocalHost (Using LRPC) running in the application container Unavailable SID (Unavailable). This security permission can be modified using the Component Services administrative tool.\
-Event Xml:\
-<Event xmlns="[http://schemas.microsoft.com/win/2004/08/events/event](http://schemas.microsoft.com/win/2004/08/events/event)">\
-  `<System>`\
-    `<Provider Name="Microsoft-Windows-DistributedCOM" Guid="{1B562E86-B7AA-4131-BADC-B6F3A001407E}" EventSourceName="DCOM" />`\
-    `<EventID Qualifiers="0">`10016`</EventID>`\
-    `<Version>`0`</Version>`\
-    `<Level>`2`</Level>`\
-    `<Task>`0`</Task>`\
-    `<Opcode>`0`</Opcode>`\
-    `<Keywords>`0x8080000000000000`</Keywords>`\
-    `<TimeCreated SystemTime="2014-01-22T12:18:02.869192000Z" />`\
-    `<EventRecordID>`11632`</EventRecordID>`\
-    `<Correlation />`\
-    `<Execution ProcessID="788" ThreadID="4364" />`\
-    `<Channel>`System`</Channel>`\
-    `<Computer>`JUGGERNAUT.corp.technologytoolbox.com`</Computer>`\
-    `<Security UserID="S-1-5-21-3914637029-2275272621-3670275343-4111" />`\
-  `</System>`\
-  `<EventData>`\
-    `<Data Name="param1">`application-specific`</Data>`\
-    `<Data Name="param2">`Local`</Data>`\
-    `<Data Name="param3">`Activation`</Data>`\
-    `<Data Name="param4">`{FDC3723D-1588-4BA3-92D4-42C430735D7D}`</Data>`\
-    `<Data Name="param5">`{83B33982-693D-4824-B42E-7196AE61BB05}`</Data>`\
-    `<Data Name="param6">`TECHTOOLBOX`</Data>`\
-    `<Data Name="param7">`svc-sql-agent`</Data>`\
-    `<Data Name="param8">`S-1-5-21-3914637029-2275272621-3670275343-4111`</Data>`\
-    `<Data Name="param9">`LocalHost (Using LRPC)`</Data>`\
-    `<Data Name="param10">`Unavailable`</Data>`\
-    `<Data Name="param11">`Unavailable`</Data>`\
-  `</EventData>`\
-`</Event>`
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F6/A5C0C95ECE956FF1DBD7B82E9F7AD8DC49CB32F6.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/7869E60C98C8F6102EFEEC5491788C50A966A60C.png)
-
-Right-click **Microsoft SQL Server Integration Services 11.0** and click **Properties**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BA/7E91310C21AA0F6678F9242B63F707EC0C5FB0BA.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/98/8B79030112E2E5FA5090E791619AD565D29E7298.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BE/3326BBC133CD87323E4290F6F20C042A85D903BE.png)
-
-## Resolve SCOM alerts due to disk fragmentation
-
-### Alert Name
-
-Logical Disk Fragmentation Level is high
-
-### Alert Description
-
-The disk C: (C:) on computer JUGGERNAUT.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 13%. Defragmentation recommended: true.
-
-### Resolution
-
-##### # Copy Toolbox content
+## # Install SCOM agent
 
 ```PowerShell
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=JUBILEE `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
 ```
 
-##### # Create scheduled task to optimize drives
+## # Approve manual agent install in Operations Manager
+
+## Resolve issues when connecting to SQL Server from FOOBAR8
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/A66B46FA9283C6626D58AAEC2FE1AD2EB85F5B7C.png)
+
+### # Configure firewall rule for SQL Server Database Engine
 
 ```PowerShell
-[string] $xml = Get-Content `
-  'C:\NotBackedUp\Public\Toolbox\Scheduled Tasks\Optimize Drives.xml'
-
-Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
+New-NetFirewallRule `
+    -Name "SQL Server Database Engine" `
+    -DisplayName "SQL Server Database Engine" `
+    -Group 'Technology Toolbox (Custom)' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 1433 `
+    -Action Allow
 ```
 
-## Expand Z: (Backup01) drive
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/412EF6ECCB80BC99BF7FD314DE306FB12818990E.png)
 
-### Alert Name
+### Reference
 
-Logical Disk Free Space is low
+**How to troubleshoot the "Cannot generate SSPI context" error message**\
+From <[https://support.microsoft.com/en-us/kb/811889](https://support.microsoft.com/en-us/kb/811889)>
 
-### Alert Description
-
-_The disk Z: on computer JUGGERNAUT.corp.technologytoolbox.com is running out of disk space._
-
-### Investigation
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D2/976034E38F193EA9E55010C4B3E995B0C91B59D2.png)
-
-### Resolution
-
-#### # Increase the size of "Backup01" VHD
+### # Fix SPNs for SQL Server instance (running as TECHTOOLBOX\\s-sql)
 
 ```PowerShell
-$vmName = "JUGGERNAUT"
+setspn -D MSSQLSvc/JUGGERNAUT.corp.technologytoolbox.com JUGGERNAUT
+setspn -D MSSQLSvc/JUGGERNAUT.corp.technologytoolbox.com:1433 JUGGERNAUT
 
-Stop-VM $vmName
-
-Resize-VHD `
-    ("C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-        + $vmName + "_Backup01.vhdx") `
-    -SizeBytes 8GB
-
-Start-VM $vmName
+setspn -S MSSQLSvc/JUGGERNAUT.corp.technologytoolbox.com s-sql
+setspn -S MSSQLSvc/JUGGERNAUT.corp.technologytoolbox.com:1433 s-sql
 ```
-
-#### # Extend partition
-
-```PowerShell
-$size = (Get-PartitionSupportedSize -DiskNumber 4 -PartitionNumber 1)
-Resize-Partition -DiskNumber 4 -PartitionNumber 1 -Size $size.SizeMax
-```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E4/650E5EFCBB93E63A3F9BD823C8F98B940CCF13E4.png)
-
-## Expand Z: (Backup01) drive
-
-### Alert Name
-
-Logical Disk Free Space is low
-
-### Alert Description
-
-_The disk Z: on computer JUGGERNAUT.corp.technologytoolbox.com is running out of disk space._
-
-### Investigation
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/00/E6F966A2EE68C6EF36AE78EF3B1665BF7F2EB400.png)
-
-### Resolution
-
-#### # Increase the size of "Backup01" VHD
-
-```PowerShell
-$vmName = "JUGGERNAUT"
-
-Stop-VM $vmName
-
-Resize-VHD `
-    ("C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-        + $vmName + "_Backup01.vhdx") `
-    -SizeBytes 10GB
-
-Start-VM $vmName
-```
-
-#### # Extend partition
-
-```PowerShell
-$size = (Get-PartitionSupportedSize -DiskNumber 4 -PartitionNumber 1)
-Resize-Partition -DiskNumber 4 -PartitionNumber 1 -Size $size.SizeMax
-```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/24/06B5626C22E74EB89C4FEB8358B8A7CFD1A7FF24.png)
-
-## Expand Z: (Backup01) drive
-
-### Alert Name
-
-Logical Disk Free Space is low
-
-### Alert Description
-
-_The disk Z: on computer JUGGERNAUT.corp.technologytoolbox.com is running out of disk space._
-
-### Investigation
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/53630C63BDB74DE198EDEA1CDD33F8CB3D53F3EF.png)
-
-### Resolution
-
-#### # Increase the size of "Backup01" VHD
-
-```PowerShell
-$vmName = "JUGGERNAUT"
-
-Stop-VM $vmName
-
-Resize-VHD `
-    ("C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-        + $vmName + "_Backup01.vhdx") `
-    -SizeBytes 12GB
-
-Start-VM $vmName
-```
-
-#### # Extend partition
-
-```PowerShell
-$size = (Get-PartitionSupportedSize -DiskNumber 4 -PartitionNumber 1)
-Resize-Partition -DiskNumber 4 -PartitionNumber 1 -Size $size.SizeMax
-```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/BB6A37AF1C2E984AE324DDE8398172FF1856DC55.png)
 
 ## # Expand Z: (Backup01) drive
 
 ---
 
-**ICEMAN**
+```PowerShell
+Enter-PSSession ICEMAN
+```
 
 ### # Increase the size of "Backup01" VHD
 
@@ -812,7 +942,9 @@ $vmName = "JUGGERNAUT"
 Resize-VHD `
     ("C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
         + $vmName + "_Backup01.vhdx") `
-    -SizeBytes 20GB
+    -SizeBytes 13GB
+
+Exit-PSSession
 ```
 
 ---
@@ -824,229 +956,139 @@ $size = (Get-PartitionSupportedSize -DiskNumber 4 -PartitionNumber 1)
 Resize-Partition -DiskNumber 4 -PartitionNumber 1 -Size $size.SizeMax
 ```
 
-## # Select "High performance" power scheme
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+---
+
+**FOOBAR8**
 
 ```PowerShell
-powercfg.exe /L
+$computer = 'JUGGERNAUT'
 
-powercfg.exe /S SCHEME_MIN
+$command = "New-NetFirewallRule ``
+    -Name 'Remote Windows Update (Dynamic RPC)' ``
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
+    -Group 'Technology Toolbox (Custom)' ``
+    -Program '%windir%\system32\dllhost.exe' ``
+    -Direction Inbound ``
+    -Protocol TCP ``
+    -LocalPort RPC ``
+    -Profile Domain ``
+    -Action Allow"
 
-powercfg.exe /L
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
 
-<table>
-<thead>
-<th>
-<p><strong>Protection Group</strong></p>
-</th>
-<th>
-<p><strong>Group Members</strong></p>
-</th>
-<th>
-<p><strong>Short-Term</strong></p>
-</th>
-<th>
-<p><strong>Goals</strong></p>
-</th>
-<th>
-</th>
-</thead>
-<tr>
-<td valign='top'>
-</td>
-<td valign='top'>
-</td>
-<td valign='top'>
-<p>Retention range</p>
-</td>
-<td valign='top'>
-<p>Synchronization frequency</p>
-</td>
-<td valign='top'>
-<p>Recovery points</p>
-</td>
-</tr>
-<tr>
-<td valign='top'>
-<p>Critical Files</p>
-</td>
-<td valign='top'>
-<p>ICEMAN</p>
-<ul>
-<li>All Volumes
-<ul>
-<li>D:\\</li>
-</ul>
-</li>
-</ul>
-</td>
-<td valign='top'>
-<p>10 days</p>
-</td>
-<td valign='top'>
-<p>Just before a recovery point</p>
-</td>
-<td valign='top'>
-<p>8:00 AM, 12:00 PM, 5:30 PM Everyday</p>
-</td>
-</tr>
-<tr>
-<td valign='top'>
-<p>Domain Controllers</p>
-</td>
-<td valign='top'>
-<p>XAVIER1</p>
-<ul>
-<li>System Protection
-<ul>
-<li>System State (includes Active Directory)<br />
-XAVIER2</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>System Protection
-<ul>
-<li>System State (includes Active Directory)</li>
-</ul>
-</li>
-</ul>
-</td>
-<td valign='top'>
-<p>5 days</p>
-</td>
-<td valign='top'>
-<p>N/A</p>
-</td>
-<td valign='top'>
-<p>8:00 PM Everyday</p>
-</td>
-</tr>
-<tr>
-<td valign='top'>
-<p>Hyper-V</p>
-</td>
-<td valign='top'>
-<p>BEAST</p>
-<ul>
-<li>HyperV
-<ul>
-<li>Host Component</li>
-<li>CIPHER01</li>
-<li>COLOSSUS</li>
-<li>CYCLOPS</li>
-<li>POLARIS-TEST<br />
-FORGE</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>HyperV
-<ul>
-<li>Host Component</li>
-<li>EXT-FOOBAR3</li>
-<li>EXT-RRAS1</li>
-<li>POLARIS-DEV<br />
-ICEMAN</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>HyperV
-<ul>
-<li>Host Component</li>
-<li>MOONSTAR<br />
-ROGUE</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>HyperV
-<ul>
-<li>Host Component</li>
-<li>BANSHEE</li>
-<li>CYCLOPS-TEST</li>
-<li>EXT-APP01A</li>
-<li>foobar</li>
-<li>EXT-WEB01B</li>
-<li>JUBILEE<br />
-STORM</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>HyperV
-<ul>
-<li>Host Component</li>
-<li>CRYPTID</li>
-<li>DAZZLER</li>
-<li>EXT-WEB01A</li>
-<li>foobar7</li>
-<li>FOOBAR8</li>
-<li>MIMIC</li>
-<li>POLARIS</li>
-</ul>
-</li>
-</ul>
-</td>
-<td valign='top'>
-<p>5 days</p>
-</td>
-<td valign='top'>
-<p>N/A</p>
-</td>
-<td valign='top'>
-<p>11:00 PM Everyday</p>
-</td>
-</tr>
-<tr>
-<td valign='top'>
-<p>SQL Server Databases</p>
-</td>
-<td valign='top'>
-<p>HAVOK</p>
-<ul>
-<li>All SQL Servers
-<ul>
-<li>(Auto) HAVOK</li>
-</ul>
-</li>
-</ul>
-</td>
-<td valign='top'>
-<p>10 days</p>
-</td>
-<td valign='top'>
-<p>Every 15 minutes</p>
-</td>
-<td valign='top'>
-<p>6:00 PM Everyday</p>
-</td>
-</tr>
-<tr>
-<td valign='top'>
-<p>SQL Server Databases (TEST)</p>
-</td>
-<td valign='top'>
-<p>HAVOK-TEST</p>
-<ul>
-<li>All SQL Servers
-<ul>
-<li>(Auto) HAVOK-TEST</li>
-</ul>
-</li>
-</ul>
-</td>
-<td valign='top'>
-<p>10 days</p>
-</td>
-<td valign='top'>
-<p>Every 4 hour(s)</p>
-</td>
-<td valign='top'>
-<p>7:00 PM Everyday</p>
-</td>
-</tr>
-</table>
+---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/17/755CC35E29B10446B41515C44F11ED70E75D6317.png)
+## Configure SMTP server for DPM
+
+### Configure spam filter in Office 365
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/09FEF23706EA73B094C68CD75E08DEDC2FDCEFF5.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/24/9957ADC6F7B4F58B9BE77304D1EA2F084F16A424.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/31/5ED7F2CE8F519924C92C61C0E3E17F6613ADEC31.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/7267C9530745145BE7CAF41FAF09A40102F55D69.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F7/DA5991FA2272153F9F786460CECDFD202E6C02F7.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0A/81CEF0E05B62EE1B9540BB58BB24FB837527020A.png)
+
+### Configure SMTP server in DPM
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/16A95681615397E1BCC3DE4515BAFA174F818F9A.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/31/6BB81B8253EA516A71622351DB6A4E8645BB8531.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/3103236B64CFC4BC20F0B2D2C83EA1B72D0E4F5F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A3/4AB6E7B339816FD971724CD70E70D8A5CB6D82A3.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/14/32238B5F055108C004AB9CB09C9105338B1FF314.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/96/C3B8E90C6EED5067D2D2F1A1E82A10293527A296.png)
+
+## Set up protection for live migration
+
+### Reference
+
+**Set up protection for live migration**\
+From <[https://technet.microsoft.com/en-us/library/jj656643.aspx](https://technet.microsoft.com/en-us/library/jj656643.aspx)>
+
+```PowerShell
+cls
+```
+
+### # Install the VMM console
+
+```PowerShell
+$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
+    + '\mu_system_center_2012_r2_virtual_machine_manager_x86_and_x64_dvd_2913737.iso'
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+& ($imageDriveLetter + ":\Setup.exe")
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/60997802DE1D0243391A2FA44927FF7E3F160962.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BE/EB8E82E613AB6B5A91576F47E0C3F1048C7715BE.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/63C2F0563CD8ABFE0BD9A12AFB1D3A360673C355.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7B/E25157D8EDCFD7C7327880EDEC8B42FF7AA05A7B.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/6782996D0CAA170F9A8FCB15AC2EAA6C6BDC4DD1.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/57/E403C040F0A39BEB1AB21A73D8D9454659E26957.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BE/85B51E633CFD2CE08467D8E30EDA1B7E4E1B58BE.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/E46B9AE2A518B3DA86EF87F29441793B3D815EB9.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/87A63FE2C78E00997B6628916CDB1F9E509BD971.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/47/17E8A97F5BD18071E9AFF932338A8FC175249047.png)
+
+### Update VMM using Windows Update
+
+**Update Rollup 9 for Microsoft System Center 2012 R2 - Virtual Machine Manager (KB3129783)**
+
+### Add DPM machine account as Read-Only Administrator in VMM
+
+**How to Create a Read-Only Administrator User Role in VMM**\
+From <[https://technet.microsoft.com/en-us/library/hh356036.aspx](https://technet.microsoft.com/en-us/library/hh356036.aspx)>
+
+---
+
+**FOOBAR8**
+
+1. Open **Virtual Machine Manager**.
+2. In the **Settings** workspace, on the **Home** tab in the **Create** group, click **Create User Role**.
+3. In the **Create User Role Wizard**:
+   1. On the **Name and description** page, in the **Name** box, type **DPM Servers** and click **Next**.
+   2. On the **Profile** page, select **Read-Only Administrator** and then click **Next**.
+   3. On the **Members** page, click **Add** to add **TECHTOOLBOX\\JUGGERNAUT\$** to the user role with the **Select Users, Computers, or Groups** dialog box. After you have added the members, click **Next**.
+   4. On the **Scope** page, select **All Hosts** and click **Next**.
+   5. On the **Library servers** page, click **Next**.
+   6. On the **Run As accounts** page, click **Next**.
+   7. On the **Summary** page, review the settings you have entered and then click **Finish** to create the Read-Only Administrator user role.
+
+---
+
+```PowerShell
+cls
+```
+
+### # Connect DPM server to VMM server
+
+```PowerShell
+Set-DPMGlobalProperty -DPMServerName JUGGERNAUT -KnownVMMServers MOONSTAR
+```
