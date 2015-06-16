@@ -1,7 +1,7 @@
-﻿# POLARIS-DEV (2015-04-26) - Windows Server 2012 R2 Standard
+﻿# POLARIS-DEV - Windows Server 2012 R2 Standard
 
-Sunday, April 26, 2015
-2:00 PM
+Tuesday, June 16, 2015
+7:00 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -10,13 +10,19 @@ Sunday, April 26, 2015
 ## Create VM
 
 - Processors: **4**
-- Memory: **8 GB**
+- Memory: **10 GB**
 - VHD size (GB): **50**
 - VHD file name:** POLARIS-DEV**
+- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+- Network Adapter 1:** Virtual LAN 2 - 192-168.10.x**
+- Host:** FORGE**
+- Automatic actions
+  - **Turn on the virtual machine if it was running with the physical server stopped**
+  - **Save State**
+  - Operating system: **Windows Server 2012 R2 Standard**
 
 ## Install custom SharePoint 2013 development image
 
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **SharePoint Server 2013 - Development** and click **Next**.
 - On the **Computer Details** step, in the **Computer name** box, type **POLARIS-DEV** and click **Next**.
 - On the Applications step:
@@ -34,6 +40,30 @@ Sunday, April 26, 2015
 cls
 ```
 
+## # Rename local Administrator account and set password
+
+```PowerShell
+$adminUser = [ADSI] "WinNT://./Administrator,User"
+$adminUser.Rename("foo")
+$adminUser.SetPassword("{password}")
+
+logoff
+```
+
+```PowerShell
+cls
+```
+
+## # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
+```
+
 ## # Change drive letter for DVD-ROM
 
 ```PowerShell
@@ -46,17 +76,6 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
-```
-
-```PowerShell
-cls
-```
-
-## # Set password for local Administrator account
-
-```PowerShell
-$adminUser = [ADSI] "WinNT://./Administrator,User"
-$adminUser.SetPassword("{password}")
 ```
 
 ```PowerShell
@@ -90,7 +109,7 @@ ping ICEMAN -f -l 8900
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------------------- | ------------ |
 | 0    | C:           | 50 GB       | 4K                   | OSDisk       |
-| 1    | D:           | 2 GB        | 64K                  | Data01       |
+| 1    | D:           | 5 GB        | 64K                  | Data01       |
 | 2    | L:           | 1 GB        | 64K                  | Log01        |
 | 3    | T:           | 1 GB        | 64K                  | Temp01       |
 | 4    | Z:           | 10 GB       | 4K                   | Backup01     |
@@ -107,7 +126,7 @@ $vmName = "POLARIS-DEV"
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
     + "_Data01.vhdx"
 
-New-VHD -Path $vhdPath -SizeBytes 2GB
+New-VHD -Path $vhdPath -SizeBytes 5GB
 Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
 
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
@@ -237,14 +256,14 @@ New-NetFirewallRule `
     -LocalPort 1433 `-Action Allow
 ```
 
-## Fix permissions to avoid "ESENT" errors in event log
+## # Fix permissions to avoid "ESENT" errors in event log
 
-```Console
-icacls C:\Windows\System32\LogFiles\Sum\Api.chk /grant "NT Service\MSSQLSERVER":(M)
+```PowerShell
+icacls C:\Windows\System32\LogFiles\Sum\Api.chk /grant 'NT Service\MSSQLSERVER:(M)'
 
-icacls C:\Windows\System32\LogFiles\Sum\Api.log /grant "NT Service\MSSQLSERVER":(M)
+icacls C:\Windows\System32\LogFiles\Sum\Api.log /grant 'NT Service\MSSQLSERVER:(M)'
 
-icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant "NT Service\MSSQLSERVER":(M)
+icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant 'NT Service\MSSQLSERVER:(M)'
 ```
 
 ---
@@ -295,7 +314,7 @@ Event Xml:\
 **Error 1032 messages in the Application log in Windows Server 2012**\
 Pasted from <[http://support.microsoft.com/kb/2811566](http://support.microsoft.com/kb/2811566)>
 
-## -- Change databases to Simple recovery model
+## DEV - Change databases to Simple recovery model
 
 ```SQL
 IF OBJECT_ID('tempdb..#CommandQueue') IS NOT NULL DROP TABLE #CommandQueue
@@ -350,40 +369,11 @@ END
 **Using the Simple Recovery Model for SharePoint Development Environments**\
 Pasted from <[http://www.technologytoolbox.com/blog/jjameson/archive/2011/03/19/using-the-simple-recovery-model-for-sharepoint-development-environments.aspx](http://www.technologytoolbox.com/blog/jjameson/archive/2011/03/19/using-the-simple-recovery-model-for-sharepoint-development-environments.aspx)>
 
-## Configure Max Degree of Parallelism for SharePoint
-
-### -- Set Max Degree of Parallelism to 1
-
-```Console
-EXEC sys.sp_configure N'show advanced options', N'1'  RECONFIGURE WITH OVERRIDE
-GO
-EXEC sys.sp_configure N'max degree of parallelism', N'1'
-GO
-RECONFIGURE WITH OVERRIDE
-GO
-EXEC sys.sp_configure N'show advanced options', N'0'  RECONFIGURE WITH OVERRIDE
-GO
-```
-
-```Console
-cls
-```
-
-### # Restart SQL Server
-
-```PowerShell
-Stop-Service SQLSERVERAGENT
-
-Restart-Service MSSQLSERVER
-
-Start-Service SQLSERVERAGENT
-```
-
 ## DEV - Constrain maximum memory for SQL Server
 
 ### -- Set maximum memory for SQL Server to 1 GB
 
-```Console
+```SQL
 EXEC sys.sp_configure N'show advanced options', N'1'  RECONFIGURE WITH OVERRIDE
 GO
 EXEC sys.sp_configure N'max server memory (MB)', N'1024'
@@ -394,18 +384,79 @@ EXEC sys.sp_configure N'show advanced options', N'0'  RECONFIGURE WITH OVERRIDE
 GO
 ```
 
-```Console
-cls
+## DEV - Configure TempDB data files
+
+```SQL
+ALTER DATABASE [tempdb]
+  MODIFY FILE
+  (
+    NAME = N'tempdev'
+    , SIZE = 64MB
+    , FILEGROWTH = 10MB
+  );
+
+DECLARE @dataPath VARCHAR(300);
+
+SELECT
+  @dataPath = REPLACE([filename], '.mdf','')
+FROM
+  sysaltfiles s
+WHERE
+  name = 'tempdev';
+
+DECLARE @sqlStatement NVARCHAR(500);
+
+SELECT @sqlStatement =
+  N'ALTER DATABASE [tempdb]'
+    + 'ADD FILE'
+    + '('
+      + 'NAME = N''tempdev2'''
+      + ', FILENAME = ''' + @dataPath + '2.mdf'''
+      + ', SIZE = 64MB'
+      + ', FILEGROWTH = 10MB'
+    + ')';
+
+EXEC sp_executesql @sqlStatement;
+
+
+SELECT @sqlStatement =
+  N'ALTER DATABASE [tempdb]'
+    + 'ADD FILE'
+    + '('
+      + 'NAME = N''tempdev3'''
+      + ', FILENAME = ''' + @dataPath + '3.mdf'''
+      + ', SIZE = 64MB'
+      + ', FILEGROWTH = 10MB'
+    + ')';
+
+EXEC sp_executesql @sqlStatement;
+
+SELECT @sqlStatement =
+  N'ALTER DATABASE [tempdb]'
+    + 'ADD FILE'
+    + '('
+      + 'NAME = N''tempdev4'''
+      + ', FILENAME = ''' + @dataPath + '4.mdf'''
+      + ', SIZE = 64MB'
+      + ', FILEGROWTH = 10MB'
+    + ')';
+
+EXEC sp_executesql @sqlStatement;
 ```
 
-### # Restart SQL Server
+## Configure "Max Degree of Parallelism" for SharePoint
 
-```PowerShell
-Stop-Service SQLSERVERAGENT
+### -- Set Max Degree of Parallelism to 1
 
-Restart-Service MSSQLSERVER
-
-Start-Service SQLSERVERAGENT
+```SQL
+EXEC sys.sp_configure N'show advanced options', N'1'  RECONFIGURE WITH OVERRIDE
+GO
+EXEC sys.sp_configure N'max degree of parallelism', N'1'
+GO
+RECONFIGURE WITH OVERRIDE
+GO
+EXEC sys.sp_configure N'show advanced options', N'0'  RECONFIGURE WITH OVERRIDE
+GO
 ```
 
 ## # Install SCOM agent
@@ -434,13 +485,15 @@ msiexec.exe /i $msiPath `
 ## # Checkpoint VM - "Baseline SharePoint Server 2013 configuration"
 
 ```PowerShell
-Stop-VM POLARIS-DEV
+$vmName = "POLARIS-DEV"
+
+Stop-VM $vmName
 
 Checkpoint-VM `
-    -Name POLARIS-DEV `
+    -Name $vmName `
     -SnapshotName "Baseline SharePoint Server 2013 configuration"
 
-Start-VM POLARIS-DEV
+Start-VM $vmName
 ```
 
 ---
@@ -593,6 +646,7 @@ Pop-Location
 ### # Remove patch files from local disk
 
 ```PowerShell
+Remove-Item C:\NotBackedUp\Temp\Install.ps1
 Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
 Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
 Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb2956166-fullfile-x64-glb.exe
@@ -635,12 +689,12 @@ When prompted for the **Passphrase**, type a passphrase that meets the following
 
 - Contains at least eight characters
 - Contains at least three of the following four character groups:
-- English uppercase characters (from A through Z)
-- English lowercase characters (from a through z)
-- Numerals (from 0 through 9)
-- Nonalphabetic characters (such as !, \$, #, %)
+  - English uppercase characters (from A through Z)
+  - English lowercase characters (from a through z)
+  - Numerals (from 0 through 9)
+  - Nonalphabetic characters (such as !, \$, #, %)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3E/08186F17F60E82A1844B0BD02D0C972BF851333E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/08/CE9B8AE88F483FA608DB164C29CC5F51EA594608.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/FDA1888FC8EA7331AE366E4121596AEDE00F0BA2.png)
 
@@ -653,21 +707,6 @@ cls
 ```PowerShell
 setspn -A http/polaris-dev.corp.technologytoolbox.com:22812 s-sharepoint-dev
 setspn -A http/polaris-dev:22812 s-sharepoint-dev
-```
-
-**HACK: Internet Explorer does not specify port number when requesting Kerberos ticket, so add the following SPNs as well:**
-
-```Console
-setspn -A http/polaris-dev.corp.technologytoolbox.com s-sharepoint-dev
-setspn -A http/polaris-dev s-sharepoint-dev
-```
-
-**However, this breaks Server Manager...**
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E3/6199F08A5792638E861C6410D206B37DB5F4FDE3.png)
-
-```PowerShell
-cls
 ```
 
 ### # Add the SharePoint bin folder to the PATH environment variable
@@ -708,20 +747,12 @@ Set-SPDiagnosticConfig -DaysToKeepLogs 3
 Set-SPDiagnosticConfig -LogDiskSpaceUsageGB 1 -LogMaxDiskSpaceUsageEnabled:$true
 ```
 
-```PowerShell
-cls
-```
-
 ### # Configure usage and health data collection
 
 ```PowerShell
 Set-SPUsageService -LoggingEnabled 1
 
 New-SPUsageApplication
-```
-
-```PowerShell
-cls
 ```
 
 ### # Change retention period for Usage and Health Data Collection service application
@@ -820,6 +851,8 @@ mkdir D:\Shares\Backups\HAVOK
 ### -- Backup SharePoint databases
 
 ```SQL
+-- Backup SharePoint databases
+
 BACKUP DATABASE [WSS_Content_ttweb]
 TO DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_ttweb.bak'
 WITH NOFORMAT, NOINIT
@@ -848,31 +881,31 @@ WITH NOFORMAT, NOINIT
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [ProfileDB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\ProfileDB.bak'
+BACKUP DATABASE [UserProfileService_Profile]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Profile.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'ProfileDB-Full Database Backup'
+    , NAME = N'UserProfileService_Profile-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [SocialDB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\SocialDB.bak'
+BACKUP DATABASE [UserProfileService_Social]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Social.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'SocialDB-Full Database Backup'
+    , NAME = N'UserProfileService_Social-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [SyncDB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\SyncDB.bak'
+BACKUP DATABASE [UserProfileService_Sync]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Sync.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'SyncDB-Full Database Backup'
+    , NAME = N'UserProfileService_Sync-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [Secure_Store_Service_DB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\Secure_Store_Service_DB.bak'
+BACKUP DATABASE [SecureStoreService]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\SecureStoreService.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'Secure_Store_Service_DB-Full Database Backup'
+    , NAME = N'SecureStoreService-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 ```
@@ -885,7 +918,23 @@ cls
 
 ## # Configure service applications
 
-### # DEV - Constrain Distributed Cache service
+### # Change the service account for the Distributed Cache
+
+```PowerShell
+$credential = Get-Credential "TECHTOOLBOX\s-spserviceapp-dev"
+
+$account = New-SPManagedAccount $credential
+
+$farm = Get-SPFarm
+$cacheService = $farm.Services | where {$_.Name -eq "AppFabricCachingService"}
+
+$cacheService.ProcessIdentity.CurrentIdentityType = "SpecificUser"
+$cacheService.ProcessIdentity.ManagedAccount = $account
+$cacheService.ProcessIdentity.Update()
+$cacheService.ProcessIdentity.Deploy()
+```
+
+### # DEV - Constrain the Distributed Cache
 
 ```PowerShell
 Update-SPDistributedCacheSize -CacheSizeInMB 150
@@ -969,7 +1018,7 @@ cls
 
 ```Console
 RESTORE DATABASE [UserProfileService_Profile]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\ProfileDB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Profile.bak'
     WITH FILE = 1
     , MOVE N'ProfileDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Profile.mdf'
     , MOVE N'ProfileDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Profile_log.LDF'
@@ -977,7 +1026,7 @@ RESTORE DATABASE [UserProfileService_Profile]
     , STATS = 5
 
 RESTORE DATABASE [UserProfileService_Social]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SocialDB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Social.bak'
     WITH FILE = 1
     , MOVE N'SocialDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Social.mdf'
     , MOVE N'SocialDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Social_log.LDF'
@@ -985,7 +1034,7 @@ RESTORE DATABASE [UserProfileService_Social]
     , STATS = 5
 
 RESTORE DATABASE [UserProfileService_Sync]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SyncDB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Sync.bak'
     WITH FILE = 1
     , MOVE N'SyncDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Sync.mdf'
     , MOVE N'SyncDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Sync_log.LDF'
@@ -1013,7 +1062,7 @@ cls
 
 ```SQL
 RESTORE DATABASE [SecureStoreService]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\Secure_Store_Service_DB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SecureStoreService.bak'
     WITH FILE = 1
     , MOVE N'Secure_Store_Service_DB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\SecureStoreService.mdf'
     , MOVE N'Secure_Store_Service_DB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\SecureStoreService_log.ldf'
@@ -1029,9 +1078,7 @@ GO
 USE [SecureStoreService]
 GO
 CREATE USER [TECHTOOLBOX\s-spserviceapp-dev]
-GO
 ALTER ROLE [SPDataAccess] ADD MEMBER [TECHTOOLBOX\s-spserviceapp-dev]
-GO
 ```
 
 #### # Configure the Secure Store Service
@@ -1352,112 +1399,43 @@ Get-SPEnterpriseSearchServiceApplication |
     % { $_.StartFullCrawl() }
 ```
 
-## Out of memory
+---
 
-Log Name:      System\
-Source:        Microsoft-Windows-Resource-Exhaustion-Detector\
-Date:          4/26/2015 4:30:59 PM\
-Event ID:      2004\
-Task Category: Resource Exhaustion Diagnosis Events\
-Level:         Warning\
-Keywords:      Events related to exhaustion of system commit limit (virtual memory).\
-User:          SYSTEM\
-Computer:      POLARIS-DEV.corp.technologytoolbox.com\
-Description:\
-Windows successfully diagnosed a low virtual memory condition. The following programs consumed the most virtual memory: w3wp.exe (5128) consumed 1095385088 bytes, w3wp.exe (8476) consumed 923058176 bytes, and noderunner.exe (2328) consumed 912764928 bytes.\
-Event Xml:\
-<Event xmlns="[http://schemas.microsoft.com/win/2004/08/events/event](http://schemas.microsoft.com/win/2004/08/events/event)">\
-  `<System>`\
-    `<Provider Name="Microsoft-Windows-Resource-Exhaustion-Detector" Guid="{9988748E-C2E8-4054-85F6-0C3E1CAD2470}" />`\
-    `<EventID>`2004`</EventID>`\
-    `<Version>`0`</Version>`\
-    `<Level>`3`</Level>`\
-    `<Task>`3`</Task>`\
-    `<Opcode>`33`</Opcode>`\
-    `<Keywords>`0x8000000020000000`</Keywords>`\
-    `<TimeCreated SystemTime="2015-04-26T22:30:59.914186600Z" />`\
-    `<EventRecordID>`3529`</EventRecordID>`\
-    `<Correlation ActivityID="{862DE20D-1BB8-4D2E-9F3F-B46BCBED3AAA}" />`\
-    `<Execution ProcessID="1676" ThreadID="5608" />`\
-    `<Channel>`System`</Channel>`\
-    `<Computer>`POLARIS-DEV.corp.technologytoolbox.com`</Computer>`\
-    `<Security UserID="S-1-5-18" />`\
-  `</System>`\
-  `<UserData>`\
-    <MemoryExhaustionInfo xmlns="[http://www.microsoft.com/Windows/Resource/Exhaustion/Detector/Events](http://www.microsoft.com/Windows/Resource/Exhaustion/Detector/Events)">\
-      `<SystemInfo>`\
-        `<SystemCommitLimit>`11810689024`</SystemCommitLimit>`\
-        `<SystemCommitCharge>`11708403712`</SystemCommitCharge>`\
-        `<ProcessCommitCharge>`10322837504`</ProcessCommitCharge>`\
-        `<PagedPoolUsage>`315576320`</PagedPoolUsage>`\
-        `<PhysicalMemorySize>`8589463552`</PhysicalMemorySize>`\
-        `<PhysicalMemoryUsage>`8277946368`</PhysicalMemoryUsage>`\
-        `<NonPagedPoolUsage>`110288896`</NonPagedPoolUsage>`\
-        `<Processes>`77`</Processes>`\
-      `</SystemInfo>`\
-      ...\
-    `</MemoryExhaustionInfo>`\
-  `</UserData>`\
-`</Event>`
+**FORGE**
 
-Log Name:      Application\
-Source:        MSSQLSERVER\
-Date:          4/26/2015 4:35:30 PM\
-Event ID:      701\
-Task Category: Server\
-Level:         Error\
-Keywords:      Classic\
-User:          TECHTOOLBOX\\jjameson-admin\
-Computer:      POLARIS-DEV.corp.technologytoolbox.com\
-Description:\
-There is insufficient system memory in resource pool 'internal' to run this query.\
-Event Xml:\
-<Event xmlns="[http://schemas.microsoft.com/win/2004/08/events/event](http://schemas.microsoft.com/win/2004/08/events/event)">\
-  `<System>`\
-    `<Provider Name="MSSQLSERVER" />`\
-    `<EventID Qualifiers="49152">`701`</EventID>`\
-    `<Level>`2`</Level>`\
-    `<Task>`2`</Task>`\
-    `<Keywords>`0x80000000000000`</Keywords>`\
-    `<TimeCreated SystemTime="2015-04-26T22:35:30.000000000Z" />`\
-    `<EventRecordID>`5707`</EventRecordID>`\
-    `<Channel>`Application`</Channel>`\
-    `<Computer>`POLARIS-DEV.corp.technologytoolbox.com`</Computer>`\
-    `<Security UserID="S-1-5-21-3914637029-2275272621-3670275343-10610" />`\
-  `</System>`\
-  `<EventData>`\
-    `<Data>`internal`</Data>`\
-    `<Binary>`BD020000110000000C00000050004F004C0041005200490053002D004400450056000000070000006D00610073007400650072000000`</Binary>`\
-  `</EventData>`\
-`</Event>`
+## # Delete VM checkpoint - "Baseline SharePoint Server 2013 configuration"
 
-Log Name:      Application\
-Source:        MSSQLSERVER\
-Date:          4/26/2015 4:35:30 PM\
-Event ID:      701\
-Task Category: Server\
-Level:         Error\
-Keywords:      Classic\
-User:          TECHTOOLBOX\\s-web-my-team-dev\
-Computer:      POLARIS-DEV.corp.technologytoolbox.com\
-Description:\
-There is insufficient system memory in resource pool 'default' to run this query.\
-Event Xml:\
-<Event xmlns="[http://schemas.microsoft.com/win/2004/08/events/event](http://schemas.microsoft.com/win/2004/08/events/event)">\
-  `<System>`\
-    `<Provider Name="MSSQLSERVER" />`\
-    `<EventID Qualifiers="49152">`701`</EventID>`\
-    `<Level>`2`</Level>`\
-    `<Task>`2`</Task>`\
-    `<Keywords>`0x80000000000000`</Keywords>`\
-    `<TimeCreated SystemTime="2015-04-26T22:35:30.000000000Z" />`\
-    `<EventRecordID>`5708`</EventRecordID>`\
-    `<Channel>`Application`</Channel>`\
-    `<Computer>`POLARIS-DEV.corp.technologytoolbox.com`</Computer>`\
-    `<Security UserID="S-1-5-21-3914637029-2275272621-3670275343-10642" />`\
-  `</System>`\
-  `<EventData>`\
-    `<Data>`default`</Data>`\
-    `<Binary>`BD020000110000000C00000050004F004C0041005200490053002D004400450056000000120000005700530053005F0043006F006E00740065006E0074005F005400650061006D0031000000`</Binary>`\
-  `</EventData>`\
-`</Event>`
+```PowerShell
+$vmName = "POLARIS-DEV"
+
+Stop-VM $vmName
+
+Remove-VMSnapshot -VMName $vmName -Name "Baseline SharePoint Server 2013 configuration"
+
+while (Get-VM $vmName | Where Status -eq "Merging disks") {
+    Write-Host "." -NoNewline
+    Start-Sleep -Seconds 5
+}
+
+Write-Host
+
+Start-VM $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
