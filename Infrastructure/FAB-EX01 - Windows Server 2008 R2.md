@@ -710,3 +710,25 @@ Revert the configuration change made previously in IIS Manager to clear the **Re
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/3BAE92BE5C4E4D2BB659BF709299459DFACCB89D.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/9856A066F686690FFE37FAF30EB4D5525AD53474.png)
+
+## Resolve EdgeSync initialization issue
+
+### Issue
+
+Log Name:      Application\
+Source:        MSExchange EdgeSync\
+Date:          6/19/2015 6:31:53 PM\
+Event ID:      1045\
+Task Category: Initialization\
+Level:         Warning\
+Keywords:      Classic\
+User:          N/A\
+Computer:      FAB-EX01.corp.fabrikam.com\
+Description:\
+Initialization failed with exception: Microsoft.Exchange.EdgeSync.Common.EdgeSyncServiceConfigNotFoundException: Couldn't find EdgeSync service configuration object for the site Azure-West-US. If the configuration object doesn't exist in the Active Directory location CN=EdgeSyncService,CN=Azure-West-US,CN=Sites,CN=Configuration,DC=corp,DC=fabrikam,DC=com, create it using the New-EdgeSyncServiceConfig cmdlet. If the object does exist, check its permissions.. If this warning frequently occurs, contact Microsoft Product Support.
+
+### # Resolution
+
+```PowerShell
+New-EdgeSyncServiceConfig
+```
