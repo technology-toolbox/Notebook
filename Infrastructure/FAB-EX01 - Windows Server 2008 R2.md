@@ -732,3 +732,31 @@ Initialization failed with exception: Microsoft.Exchange.EdgeSync.Common.EdgeSyn
 ```PowerShell
 New-EdgeSyncServiceConfig
 ```
+
+## Configure conference rooms
+
+---
+
+**FAB-DC01**
+
+### # Create OU for conference rooms
+
+```PowerShell
+New-ADOrganizationalUnit -Name 'Resources'
+
+New-ADOrganizationalUnit `
+    -Name 'Conference Rooms' `
+    -Path 'OU=Resources,DC=corp,DC=fabrikam,DC=com'
+```
+
+---
+
+### # Create mailboxes for conference rooms
+
+```PowerShell
+$orgUnit = 'corp.fabrikam.com/Resources/Conference Rooms'
+
+New-Mailbox -Name 'r-longspeak' -DisplayName 'Longs Peak (Conference Room)' -UserPrincipalName 'r-longspeak@corp.fabrikam.com' -Room
+```
+
+New-Mailbox -database "Storage Group 1\\Mailbox Database 1" -Name ConfRoom1 -OrganizationalUnit "Conference Rooms" -DisplayName "ConfRoom1" -UserPrincipalName ConfRoom1@contoso.com -Room
