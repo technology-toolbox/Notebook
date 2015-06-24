@@ -344,3 +344,17 @@ powercfg.exe /S SCHEME_MIN
 
 powercfg.exe /L
 ```
+
+## # Update static IPv6 address
+
+```PowerShell
+netsh int ipv6 delete address "LAN 1 - 192.168.10.x" 2601:1:8200:6000::124
+
+netsh int ipv6 delete dns "LAN 1 - 192.168.10.x" 2601:1:8200:6000::103
+netsh int ipv6 delete dns "LAN 1 - 192.168.10.x" 2601:1:8200:6000::104
+
+netsh int ipv6 add address "LAN 1 - 192.168.10.x" 2601:282:4201:e500::124
+
+netsh int ipv6 add dns "LAN 1 - 192.168.10.x" 2601:282:4201:e500::103
+netsh int ipv6 add dns "LAN 1 - 192.168.10.x" 2601:282:4201:e500::104
+```

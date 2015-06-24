@@ -85,7 +85,7 @@ ping ICEMAN.corp.technologytoolbox.com -f -l 8900
 
 #### Configure static IPv6 address
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C7/FBF6283E3660D97AE6716F590F07C5917C2661C7.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/06/25889C9CFFD2BFC09A990EC8C3847A8559396106.png)
 
 ### Configure VM storage
 
