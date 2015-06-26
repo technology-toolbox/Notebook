@@ -756,7 +756,143 @@ New-ADOrganizationalUnit `
 ```PowerShell
 $orgUnit = 'corp.fabrikam.com/Resources/Conference Rooms'
 
-New-Mailbox -Name 'r-longspeak' -DisplayName 'Longs Peak (Conference Room)' -UserPrincipalName 'r-longspeak@corp.fabrikam.com' -Room
+New-Mailbox `
+    -Name 'Blanca Peak (Conference Room)' `
+    -Room `
+    -OrganizationalUnit $orgUnit `
+    -ResourceCapacity 8 `
+    -SamAccountName 'r-blancapeak' `
+    -UserPrincipalName 'r-blancapeak@corp.fabrikam.com'
+
+Organizational unit "corp.fabrikam.com/Resources/Conference Rooms" was not found. Please make sure you have typed it correctly.
+    + CategoryInfo          : NotSpecified: (:) [], ManagementObjectNotFoundException
+    + FullyQualifiedErrorId : 382C1DB8
 ```
 
-New-Mailbox -database "Storage Group 1\\Mailbox Database 1" -Name ConfRoom1 -OrganizationalUnit "Conference Rooms" -DisplayName "ConfRoom1" -UserPrincipalName ConfRoom1@contoso.com -Room
+**Workaround:** Force replication from FAB-DC01 to FAB-DC02 using Active Directory Sites and Services.
+
+```PowerShell
+New-Mailbox `
+    -Name 'Blanca Peak (Conference Room)' `
+    -Room `
+    -OrganizationalUnit $orgUnit `
+    -ResourceCapacity 8 `
+    -SamAccountName 'r-blancapeak' `
+    -UserPrincipalName 'r-blancapeak@corp.fabrikam.com'
+
+New-Mailbox `
+    -Name 'Crestone Peak (Conference Room)' `
+    -Room `
+    -OrganizationalUnit $orgUnit `
+    -ResourceCapacity 12 `
+    -SamAccountName 'r-crestonepeak' `
+    -UserPrincipalName 'r-crestonepeak@corp.fabrikam.com'
+
+New-Mailbox `
+    -Name 'Longs Peak (Conference Room)' `
+    -Room `
+    -OrganizationalUnit $orgUnit `
+    -ResourceCapacity 22 `
+    -SamAccountName 'r-longspeak' `
+    -UserPrincipalName 'r-longspeak@corp.fabrikam.com'
+
+New-Mailbox `
+    -Name 'Mount Elbert (Conference Room)' `
+    -Room `
+    -OrganizationalUnit $orgUnit `
+    -ResourceCapacity 50 `
+    -SamAccountName 'r-mtelbert' `
+    -UserPrincipalName 'r-mtelbert@corp.fabrikam.com'
+
+New-Mailbox `
+    -Name 'Mount Evans(Conference Room)' `
+    -Room `
+    -OrganizationalUnit $orgUnit `
+    -ResourceCapacity 16 `
+    -SamAccountName 'r-mtevans' `
+    -UserPrincipalName 'r-mtevans@corp.fabrikam.com'
+
+New-Mailbox `
+    -Name 'Mount Shavano (Conference Room)' `
+    -Room `
+    -OrganizationalUnit $orgUnit `
+    -ResourceCapacity 12 `
+    -SamAccountName 'r-mtshavano' `
+    -UserPrincipalName 'r-mtshavano@corp.fabrikam.com'
+
+$rooms = Get-Mailbox -RecipientTypeDetails RoomMailbox
+
+$rooms |
+    ForEach-Object {
+        Set-CalendarProcessing `
+            -Identity $_.Name `
+            -AutomateProcessing AutoAccept
+    }
+
+$rooms |
+    ForEach-Object {
+        Set-MailboxFolderPermission `
+            -Identity $_":\Calendar" `
+            -User Default `
+            -AccessRights Reviewer
+    }
+
+Enable-DistributionGroup "Account Managers" `
+    -PrimarySmtpAddress "sales-accountmanagers@fabrikam.com"
+
+Enable-DistributionGroup "Sales Management" `
+    -PrimarySmtpAddress "sales-management@fabrikam.com"
+
+Enable-DistributionGroup "Sales Support" `
+    -PrimarySmtpAddress "sales-Support@fabrikam.com"
+
+Enable-DistributionGroup "All Sales Staff" `
+    -PrimarySmtpAddress "sales-all@fabrikam.com"
+```
+
+## Restart All Services Exchange Server 2010
+
+**Restart All Exchange 2007/2010 Services With PowerShell Script**\
+From <[http://heresjaken.com/restart-exchange-services-with-script/](http://heresjaken.com/restart-exchange-services-with-script/)>
+
+```PowerShell
+Stop-Service MSExchangeAB
+Stop-Service MSExchangeADTopology
+Stop-Service MSExchangeAntispamUpdate
+Stop-Service MSExchangeEdgeSync
+Stop-Service MSExchangeFBA
+Stop-Service MSExchangeFDS
+Stop-Service MSExchangeIS
+Stop-Service MSExchangeMailboxAssistants
+Stop-Service MSExchangeMailboxReplication
+Stop-Service MSExchangeMailSubmission
+Stop-Service MSExchangeProtectedServiceHost
+Stop-Service MSExchangeRepl
+Stop-Service MSExchangeRPC
+Stop-Service MSExchangeSA
+Stop-Service MSExchangeSearch
+Stop-Service MSExchangeServiceHost
+Stop-Service MSExchangeThrottling
+Stop-Service MSExchangeTransport
+Stop-Service MSExchangeTransportLogSearch
+
+Start-Service MSExchangeAB
+Start-Service MSExchangeADTopology
+Start-Service MSExchangeAntispamUpdate
+Start-Service MSExchangeEdgeSync
+Start-Service MSExchangeFBA
+Start-Service MSExchangeFDS
+Start-Service MSExchangeIS
+Start-Service MSExchangeMailboxAssistants
+Start-Service MSExchangeMailboxReplication
+Start-Service MSExchangeMailSubmission
+Start-Service MSExchangeProtectedServiceHost
+Start-Service MSExchangeRepl
+Start-Service MSExchangeRPC
+Start-Service MSExchangeSA
+Start-Service MSExchangeSearch
+Start-Service MSExchangeServiceHost
+Start-Service MSExchangeThrottling
+Start-Service MSExchangeTransport
+Start-Service MSExchangeTransportLogSearch
+```
