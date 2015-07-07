@@ -857,7 +857,6 @@ From <[http://heresjaken.com/restart-exchange-services-with-script/](http://here
 
 ```PowerShell
 Stop-Service MSExchangeAB
-Stop-Service MSExchangeADTopology
 Stop-Service MSExchangeAntispamUpdate
 Stop-Service MSExchangeEdgeSync
 Stop-Service MSExchangeFBA
@@ -875,9 +874,10 @@ Stop-Service MSExchangeServiceHost
 Stop-Service MSExchangeThrottling
 Stop-Service MSExchangeTransport
 Stop-Service MSExchangeTransportLogSearch
+Stop-Service MSExchangeADTopology -Force
 
-Start-Service MSExchangeAB
 Start-Service MSExchangeADTopology
+Start-Service MSExchangeAB
 Start-Service MSExchangeAntispamUpdate
 Start-Service MSExchangeEdgeSync
 Start-Service MSExchangeFBA
