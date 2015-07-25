@@ -1,56 +1,66 @@
 ﻿# WIN8-DEV1
 
-Monday, January 19, 2015
-8:12 AM
+Friday, July 24, 2015
+2:29 PM
 
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
+```
 
-## WIN8-DEV1- Baseline
+## Create VM
 
-Windows 8.1 Enterprise with Update (x64)\
-Visual Studio 2013 with Update 4\
-Web Essentials 2013 for Update 4\
-Node.js\
-Adobe Reader 8.3\
-Mozilla Firefox 35.0\
-Google Chrome
-
-## Install Windows 8.1 Enterprise with Update (x64)
-
-## Install VirtualBox Guest Additions
+- Processors: **4**
+- Memory: **8192 MB**
+- VDI size: **50 GB**
 
 ## Configure VM settings
 
-- **General**
-  - **Advanced**
-    - **Shared Clipboard: Bidirectional**
-- **Network**
-  - **Adapter 1**
-    - **Attached to: Bridged adapter**
+- General
+  - Advanced
+    - Shared Clipboard:** Bidirectional**
+- Network
+  - Adapter 1
+    - Attached to:** Bridged adapter**
 
-## # Set time zone
+## Install custom Windows 8.1 image
+
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- On the **Task Sequence** step, select **Windows 8 Enterprise (x64)** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **WIN8-DEV1** and click **Next**.
+- On the Applications step:
+  - Select the following items:
+    - Adobe
+      - **Adobe Reader 8.3.1**
+    - Google
+      - **Chrome**
+    - Mozilla
+      - **Firefox 36.0**
+      - **Thunderbird 31.3.0**
+  - Click **Next**.
+
+## Install VirtualBox Guest Additions
 
 ```PowerShell
-tzutil /s "Mountain Standard Time"
+cls
 ```
 
-## # Set MaxPatchCacheSize to 0
+## # Set password for local Administrator account
 
 ```PowerShell
+$adminUser = [ADSI] "WinNT://./Administrator,User"
+$adminUser.SetPassword("{password}")
+
+cls
+# Set MaxPatchCacheSize to 0
+
 reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize /t REG_DWORD /d 0 /f
 ```
 
-## # Copy Toolbox content
-
 ```PowerShell
-net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
-
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+cls
 ```
 
 ## # Change drive letter for DVD-ROM
-
-### # To change the drive letter for the DVD-ROM using PowerShell
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -64,61 +74,17 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-## # Join domain
+```PowerShell
+cls
+```
+
+## # Copy Toolbox content
 
 ```PowerShell
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
+net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
+
+robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 ```
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-# Click OK to dismiss dialog box
-
-```Console
-slmgr /ato
-```
-
-## # Download PowerShell help files
-
-## Update-Help
-
-## Install Microsoft Visual Studio 2013 Ultimate with Update 4
-
-## Install Web Essentials 2013 for Update 4
-
-## Install Node.js
-
-## Install Adobe Reader 8.3
-
-"[\\\\iceman\\Products\\Adobe\\AdbeRdr830_en_US.msi](\\iceman\Products\Adobe\AdbeRdr830_en_US.msi)"
-
-"[\\\\iceman\\Products\\Adobe\\AdbeRdrUpd831_all_incr.msp](\\iceman\Products\Adobe\AdbeRdrUpd831_all_incr.msp)"
-
-## Install Mozilla Firefox
-
-"[\\\\ICEMAN\\Products\\Mozilla\\Firefox\\Firefox](\\ICEMAN\Products\Mozilla\Firefox\Firefox) Setup 35.0.exe" -ms
-
-## Install Google Chrome
-
-## Install updates
-
-## # Delete C:\\Windows\\SoftwareDistribution folder
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-
-Restart-Computer
-```
-
-## Check for updates
-
-## Disk Cleanup
 
 ## Reduce paging file size
 
@@ -130,6 +96,101 @@ Restart-Computer
   - **Initial size (MB): 512**
   - **Maximum size (MB): 1024**
 
+## Install Microsoft Visual Studio 2013 Ultimate with Update 5
+
+## # Install Python (dependency for many node.js packages)
+
+### # Install Python (using default options)
+
+```PowerShell
+net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
+
+& "\\ICEMAN\Products\Python\python-2.7.10.amd64.msi"
+```
+
+### # Add Python folders to PATH environment variable
+
+```PowerShell
+Set-ExecutionPolicy RemoteSigned -Force
+
+$pythonPathFolders = 'C:\Python27\', 'C:\Python27\Scripts'
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    -Folders $pythonPathFolders `
+    -EnvironmentVariableTarget Machine
+```
+
+## # Install Git (required by npm to download packages from GitHub)
+
+### # Install Git (using default options)
+
+```PowerShell
+& "\\ICEMAN\Products\Git\Git-1.9.5-preview20150319.exe"
+```
+
+### # Add Git folder to PATH environment variable
+
+```PowerShell
+$gitPathFolder = 'C:\Program Files (x86)\Git\cmd'
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    -Folders $gitPathFolder `
+    -EnvironmentVariableTarget Machine
+```
+
+## # Install Node.js
+
+```PowerShell
+& \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
+```
+
+> **Important**
+>
+> Restart PowerShell for change to PATH environment variable to take effect.
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+## Activate Microsoft Office
+
+1. Start Word 2013
+2. Enter product key
+
+## Install updates using Windows Update
+
+**Note:** Repeat until there are no updates available for the computer.
+
+```PowerShell
+cls
+```
+
+## # Delete C:\\Windows\\SoftwareDistribution folder (338 MB)
+
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```
+
+## Disk Cleanup
+
+```PowerShell
+cls
+```
+
 ## # Shutdown VM
 
 ```PowerShell
@@ -139,3 +200,16 @@ Stop-Computer
 ## Remove disk from virtual CD/DVD drive
 
 ## Snapshot VM - "Baseline"
+
+Windows 8.1 Enterprise (x64)\
+Microsoft Office Professional Plus 2013 (x86)\
+Adobe Reader 8.3.1\
+Google Chrome\
+Mozilla Firefox 36.0\
+Mozilla Thunderbird 31.3.0\
+Microsoft Visual Studio 2013 with Update 5\
+Python 2.7.10
+Git 1.9.5\
+Node.js v0.12.5
+
+## Install Web Essentials 2013
