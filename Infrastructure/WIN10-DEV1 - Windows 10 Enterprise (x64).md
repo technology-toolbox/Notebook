@@ -7,34 +7,24 @@ Thursday, June 25, 2015
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## WIN10-DEV1- Baseline
+## Create VM
 
-Windows 10 Enterprise (x64)\
-Visual Studio 2015 Enterprise RC\
-Web Essentials 2015\
-Python 2.7.10\
-Git 1.9.5\
-Node.js v0.12.5\
-Grunt CLI v0.1.13\
-Gulp 3.9.0\
-Bower 1.4.1\
-Yeoman 1.4.7\
-Adobe Reader 8.3\
-Mozilla Firefox 39.0\
-Google Chrome
+- Processors: **4**
+- Memory: **4096 MB**
+- VDI size: **50 GB**
+
+## Configure VM settings
+
+- General
+  - Advanced
+    - Shared Clipboard:** Bidirectional**
+- Network
+  - Adapter 1
+    - Attached to:** Bridged adapter**
 
 ## Install Windows 10 Enterprise (x64)
 
 ## Install VirtualBox Guest Additions
-
-## Configure VM settings
-
-- **General**
-  - **Advanced**
-    - **Shared Clipboard: Bidirectional**
-- **Network**
-  - **Adapter 1**
-    - **Attached to: Bridged adapter**
 
 ## # Rename computer
 
@@ -42,9 +32,9 @@ Google Chrome
 Rename-Computer -NewName WIN10-DEV1 -Restart
 ```
 
-## REM Create default folders
+## # Create default folders
 
-```Console
+```PowerShell
 mkdir C:\NotBackedUp\Public
 mkdir C:\NotBackedUp\Temp
 ```
@@ -70,8 +60,6 @@ robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 ```
 
 ## # Change drive letter for DVD-ROM
-
-### # To change the drive letter for the DVD-ROM using PowerShell
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -132,9 +120,17 @@ Disable-AutomaticallyDetectProxySettings
 Update-Help
 ```
 
-## Install Microsoft Visual Studio 2015 Enterprise RC
+## TODO: Reduce paging file size
 
-## Install Web Essentials 2015
+**Virtual Memory**
+
+- **Automatically manage paging file size for all drives: No**
+- **C: drive**
+  - **Custom size**
+  - **Initial size (MB): 512**
+  - **Maximum size (MB): 1024**
+
+## Install Microsoft Visual Studio 2015 Enterprise
 
 ## # Install Python (dependency for many node.js packages)
 
@@ -179,14 +175,103 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
 ## # Install Node.js
 
 ```PowerShell
-# & \\ICEMAN\Products\node.js\node-v0.10.39-x64.msi
-
 & \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
 ```
 
 > **Important**
 >
 > Restart PowerShell for change to PATH environment variable to take effect.
+
+```PowerShell
+cls
+```
+
+## # Install Adobe Reader 8.3
+
+```PowerShell
+& "\\iceman\Products\Adobe\AdbeRdr830_en_US.msi"
+
+& "\\iceman\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
+```
+
+```PowerShell
+cls
+```
+
+## # Install Mozilla Firefox
+
+```PowerShell
+& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 39.0.exe" -ms
+```
+
+```PowerShell
+cls
+```
+
+## # Install Google Chrome
+
+```PowerShell
+& "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup64.exe"
+```
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+## Install updates using Windows Update
+
+**Note:** Repeat until there are no updates available for the computer.
+
+```PowerShell
+cls
+```
+
+## # Delete C:\\Windows\\SoftwareDistribution folder (314 MB)
+
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```
+
+## Disk Cleanup
+
+```PowerShell
+cls
+```
+
+## # Shutdown VM
+
+```PowerShell
+Stop-Computer
+```
+
+## Remove disk from virtual CD/DVD drive
+
+## Snapshot VM - "Baseline"
+
+Windows 10 Enterprise (x64)\
+Microsoft Visual Studio 2015 Enterprise\
+Python 2.7.10
+Git 1.9.5\
+Node.js v0.12.5\
+Adobe Reader 8.3.1\
+Google Chrome\
+Mozilla Firefox 39.0
+
+## Install Web Essentials 2015
 
 ## Configure NPM to use HTTP instead of HTTPS
 
@@ -233,86 +318,6 @@ npm install -g bower
 ```PowerShell
 npm install -g yo
 ```
-
-```PowerShell
-cls
-```
-
-## # Install Adobe Reader 8.3
-
-```PowerShell
-& "\\iceman\Products\Adobe\AdbeRdr830_en_US.msi"
-
-& "\\iceman\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
-```
-
-```PowerShell
-cls
-```
-
-## # Install Mozilla Firefox
-
-```PowerShell
-& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 39.0.exe" -ms
-```
-
-```PowerShell
-cls
-```
-
-## # Install Google Chrome
-
-& "[\\\\ICEMAN\\Products\\Google\\Chrome\\ChromeStandaloneSetup64.exe](\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup64.exe)"
-
-## Install updates
-
-## # Delete C:\\Windows\\SoftwareDistribution folder
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-
-Restart-Computer
-```
-
-## Check for updates
-
-## Disk Cleanup
-
-### Before
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/B5602C7399BAF255CC221B7352A4E6966AC3FA9A.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6C/F2CCEFFF81FAA2FE9CE638F801029D70C547D16C.png)
-
-### After
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/473441BE51E0ADE5CBA635B9C11FE151B9B289F5.png)
-
-## # Shutdown VM
-
-```PowerShell
-Stop-Computer
-```
-
-## Remove disk from virtual CD/DVD drive
-
-## Snapshot VM - "Baseline"
-
-Windows 10 Enterprise (x64)\
-Visual Studio 2015 Enterprise RC\
-Web Essentials 2015\
-Python 2.7.10\
-Git 1.9.5\
-Node.js v0.12.5\
-Grunt CLI v0.1.13\
-Gulp 3.9.0\
-Bower 1.4.1\
-Yeoman 1.4.7\
-Adobe Reader 8.3\
-Mozilla Firefox 39.0\
-Google Chrome
 
 ## # Install AngularJS generator
 
