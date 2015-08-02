@@ -391,6 +391,13 @@ SELECT @sqlStatement =
     + ')';
 
 EXEC sp_executesql @sqlStatement;
+
+ALTER DATABASE [tempdb]
+    MODIFY FILE (
+        NAME = N'templog',
+        SIZE = 50MB,
+        FILEGROWTH = 10MB
+    )
 ```
 
 ## -- Restore content database for intranet Web application
