@@ -250,10 +250,13 @@ cls
 
 ```PowerShell
 New-NetFirewallRule `
+    -Name "SQL Server Database Engine" `
     -DisplayName "SQL Server Database Engine" `
+    -Group 'Technology Toolbox (Custom)' `
     -Direction Inbound `
     -Protocol TCP `
-    -LocalPort 1433 `-Action Allow
+    -LocalPort 1433 `
+    -Action Allow
 ```
 
 ## # Fix permissions to avoid "ESENT" errors in event log

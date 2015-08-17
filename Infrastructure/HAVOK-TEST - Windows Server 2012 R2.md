@@ -211,13 +211,17 @@ On the **Analysis Services Configuration** step:
 
 ```PowerShell
 New-NetFirewallRule `
+    -Name "SQL Server Analysis Services" `
     -DisplayName "SQL Server Analysis Services" `
+    -Group 'Technology Toolbox (Custom)' `
     -Direction Inbound `
     -Protocol TCP `
     -LocalPort 2383 `-Action Allow
 
 New-NetFirewallRule `
+    -Name "SQL Server Database Engine" `
     -DisplayName "SQL Server Database Engine" `
+    -Group 'Technology Toolbox (Custom)' `
     -Direction Inbound `
     -Protocol TCP `
     -LocalPort 1433 `-Action Allow
@@ -619,6 +623,7 @@ powercfg.exe /L
 $computer = 'HAVOK-TEST'
 
 $command = "New-NetFirewallRule ``
+    -Name 'Remote Windows Update (Dynamic RPC)' ``
     -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
     -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
     -Group 'Technology Toolbox (Custom)' ``

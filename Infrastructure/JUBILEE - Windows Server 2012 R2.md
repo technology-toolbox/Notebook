@@ -319,7 +319,9 @@ Action: **Allow**
 
 ```PowerShell
 New-NetFirewallRule `
+    -Name "SCOM 2012 Installation - TCP" `
     -DisplayName "SCOM 2012 Installation - TCP" `
+    -Group 'Technology Toolbox (Custom)' `
     -Protocol "TCP" `
     -LocalPort "135", "445", "49152-65535" `
     -Profile Domain `
@@ -327,7 +329,9 @@ New-NetFirewallRule `
     -Action Allow
 
 New-NetFirewallRule `
+    -Name "SCOM 2012 Installation - UDP" `
     -DisplayName "SCOM 2012 Installation - UDP" `
+    -Group 'Technology Toolbox (Custom)' `
     -Protocol "UDP" `
     -LocalPort "137" `
     -Profile Domain `
@@ -860,6 +864,7 @@ Fix Web address in notification emails
 $computer = 'JUBILEE'
 
 $command = "New-NetFirewallRule ``
+    -Name 'Remote Windows Update (Dynamic RPC)' ``
     -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
     -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
     -Group 'Technology Toolbox (Custom)' ``
