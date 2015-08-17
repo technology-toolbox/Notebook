@@ -363,3 +363,31 @@ powercfg.exe /S SCHEME_MIN
 
 powercfg.exe /L
 ```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+$computer = 'MOONSTAR'
+
+$command = "New-NetFirewallRule ``
+    -Name 'Remote Windows Update (Dynamic RPC)' ``
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
+    -Group 'Technology Toolbox (Custom)' ``
+    -Program '%windir%\system32\dllhost.exe' ``
+    -Direction Inbound ``
+    -Protocol TCP ``
+    -LocalPort RPC ``
+    -Profile Domain ``
+    -Action Allow"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+```
+
+---

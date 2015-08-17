@@ -483,3 +483,29 @@ Get-ADUser -Filter {SamAccountName -like "svc-*"} |
         }
     }
 ```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+$computer = 'XAVIER1'$command = "New-NetFirewallRule ``
+    -Name 'Remote Windows Update (Dynamic RPC)' ``
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
+    -Group 'Technology Toolbox (Custom)' ``
+    -Program '%windir%\system32\dllhost.exe' ``
+    -Direction Inbound ``
+    -Protocol TCP ``
+    -LocalPort RPC ``
+    -Profile Domain ``
+    -Action Allow"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+```
+
+---

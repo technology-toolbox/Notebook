@@ -660,6 +660,7 @@ netsh int ipv6 add dns "LAN 1 - 192.168.10.x" 2601:282:4201:e500::104
 $computer = 'ICEMAN'
 
 $command = "New-NetFirewallRule ``
+    -Name 'Remote Windows Update (Dynamic RPC)' ``
     -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
     -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
     -Group 'Technology Toolbox (Custom)' ``

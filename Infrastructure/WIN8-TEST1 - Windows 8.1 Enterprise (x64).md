@@ -191,6 +191,7 @@ $scriptBlock = [scriptblock]::Create($command)
 Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 
 $command = "New-NetFirewallRule ``
+    -Name 'Remote Windows Update (Dynamic RPC)' ``
     -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
     -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
     -Group 'Technology Toolbox (Custom)' ``
@@ -200,6 +201,25 @@ $command = "New-NetFirewallRule ``
     -LocalPort RPC ``
     -Profile Domain ``
     -Action Allow"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+```
+
+---
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+$computer = 'WIN8-TEST1'
+
+$command = "Disable-NetFirewallRule ``
+    -DisplayName 'Remote Windows Update (Dynamic RPC)'"
 
 $scriptBlock = [scriptblock]::Create($command)
 
@@ -218,3 +238,5 @@ Mozilla Firefox 36.0\
 Mozilla Thunderbird 31.3.0\
 Remote Server Administration Tools for Windows 8.1\
 Hyper-V Management Tools enabled
+
+**TODO:**

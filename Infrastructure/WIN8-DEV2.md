@@ -199,6 +199,76 @@ Stop-Computer
 
 ## Remove disk from virtual CD/DVD drive
 
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+$computer = 'WIN8-DEV2'
+
+$command = "Get-NetFirewallRule |
+    Where-Object { `$_.Profile -eq 'Domain' ``
+        -and `$_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
+    Enable-NetFirewallRule"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+
+$command = "New-NetFirewallRule ``
+    -Name 'Remote Windows Update (Dynamic RPC)' ``
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
+    -Group 'Technology Toolbox (Custom)' ``
+    -Program '%windir%\system32\dllhost.exe' ``
+    -Direction Inbound ``
+    -Protocol TCP ``
+    -LocalPort RPC ``
+    -Profile Domain ``
+    -Action Allow"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+```
+
+---
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+$computer = 'WIN8-DEV2'
+
+$command = "Disable-NetFirewallRule ``
+    -DisplayName 'Remote Windows Update (Dynamic RPC)'"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+```
+
+---
+
 ## Snapshot VM - "Baseline"
 
 Windows 8.1 Enterprise (x64)\

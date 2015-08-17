@@ -338,3 +338,31 @@ netsh int ipv6 add address "LAN 1 - 192.168.10.x" 2601:282:4201:e500::101
 netsh int ipv6 add dns "LAN 1 - 192.168.10.x" 2601:282:4201:e500::103
 netsh int ipv6 add dns "LAN 1 - 192.168.10.x" 2601:282:4201:e500::104
 ```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+$computer = 'BEAST'
+
+$command = "New-NetFirewallRule ``
+    -Name 'Remote Windows Update (Dynamic RPC)' ``
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
+    -Group 'Technology Toolbox (Custom)' ``
+    -Program '%windir%\system32\dllhost.exe' ``
+    -Direction Inbound ``
+    -Protocol TCP ``
+    -LocalPort RPC ``
+    -Profile Domain ``
+    -Action Allow"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+```
+
+---

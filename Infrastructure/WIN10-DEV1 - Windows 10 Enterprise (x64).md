@@ -73,6 +73,40 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+Get-NetFirewallRule |
+  Where-Object { `
+    $_.Profile -eq 'Domain' `
+      -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
+  Enable-NetFirewallRule
+
+New-NetFirewallRule `
+  -Name 'Remote Windows Update (Dynamic RPC)' `
+  -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+  -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+  -Group 'Technology Toolbox (Custom)' `
+  -Program '%windir%\system32\dllhost.exe' `
+  -Direction Inbound `
+  -Protocol TCP `
+  -LocalPort RPC `
+  -Profile Domain `
+  -Action Allow
+```
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+Disable-NetFirewallRule -DisplayName 'Remote Windows Update (Dynamic RPC)'
+```
+
 ## Disable proxy auto-detect
 
 ### Reference
@@ -260,6 +294,68 @@ Stop-Computer
 
 ## Remove disk from virtual CD/DVD drive
 
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+$computer = 'WIN10-DEV1'
+
+$command = "Get-NetFirewallRule |
+    Where-Object { `$_.Profile -eq 'Domain' ``
+        -and `$_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
+    Enable-NetFirewallRule"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+
+$command = "New-NetFirewallRule ``
+    -Name 'Remote Windows Update (Dynamic RPC)' ``
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
+    -Group 'Technology Toolbox (Custom)' ``
+    -Program '%windir%\system32\dllhost.exe' ``
+    -Direction Inbound ``
+    -Protocol TCP ``
+    -LocalPort RPC ``
+    -Profile Domain ``
+    -Action Allow"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+```
+
+---
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+$computer = 'WIN10-DEV1'
+
+$command = "Disable-NetFirewallRule ``
+    -DisplayName 'Remote Windows Update (Dynamic RPC)'"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+```
+
+---
+
 ## Snapshot VM - "Baseline"
 
 Windows 10 Enterprise (x64)\
@@ -270,6 +366,8 @@ Node.js v0.12.5\
 Adobe Reader 8.3.1\
 Google Chrome\
 Mozilla Firefox 39.0
+
+**TODO:**
 
 ## Install Web Essentials 2015
 

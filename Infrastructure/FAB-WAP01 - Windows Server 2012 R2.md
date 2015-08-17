@@ -269,3 +269,36 @@ Install-WebApplicationProxy `
     -CertificateThumbprint $cert.Thumbprint `
     -FederationServiceName 'fs.fabrikam.com'
 ```
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+Get-NetFirewallRule |
+    Where-Object { $_.Profile -eq 'Domain' `
+        -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
+    Enable-NetFirewallRule
+
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Technology Toolbox (Custom)' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+```
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
+```
