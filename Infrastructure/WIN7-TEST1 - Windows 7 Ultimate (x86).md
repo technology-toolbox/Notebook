@@ -1,29 +1,43 @@
 ﻿# WIN7-TEST1 - Windows 7 Ultimate (x86)
 
-Monday, April 20, 2015
-8:28 AM
+Monday, August 17, 2015
+5:56 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Create VM
+---
 
-- Processors: **1**
-- Memory: **2048 MB**
-- VDI size: **25 GB**
+**WOLVERINE**
 
-## Configure VM settings
+### # Create virtual machine (WIN7-TEST1)
 
-- General
-  - Advanced
-    - Shared Clipboard:** Bidirectional**
-- System
-  - Processor
-    - Enable PAE/NX: **Yes (checked)**
-- Network
-  - Adapter 1
-    - Attached to:** Bridged adapter**
+```PowerShell
+$vmName = "WIN7-TEST1"
+
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
+New-VM `
+    -Name $vmName `
+    -Path C:\NotBackedUp\VMs `
+    -NewVHDPath $vhdPath `
+    -NewVHDSizeBytes 25GB `
+    -MemoryStartupBytes 2GB `
+    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+
+Set-VMMemory `
+    -VMName $vmName `
+    -DynamicMemoryEnabled $true `
+    -MinimumBytes 256MB `
+    -MaximumBytes 4GB
+
+#Set-VMDvdDrive -VMName $vmName -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
+
+Start-VM $vmName
+```
+
+---
 
 ## Install custom Windows 7 image
 
@@ -37,11 +51,9 @@ Monday, April 20, 2015
     - Google
       - **Chrome**
     - Mozilla
-      - **Firefox 36.0**
-      - **Thunderbird 31.3.0**
+      - **Firefox 40.0.2**
+      - **Thunderbird 38.2.0**
   - Click **Next**.
-
-## Install VirtualBox Guest Additions
 
 ```PowerShell
 cls
@@ -123,7 +135,7 @@ slmgr /ato
 cls
 ```
 
-## # Delete C:\\Windows\\SoftwareDistribution folder (528 MB)
+## # Delete C:\\Windows\\SoftwareDistribution folder (739 MB)
 
 ```PowerShell
 Stop-Service wuauserv
@@ -149,8 +161,8 @@ Windows 7 Ultimate (x86)\
 Microsoft Office Professional Plus 2013 (x86)\
 Adobe Reader 8.3.1\
 Google Chrome\
-Mozilla Firefox 36.0\
-Mozilla Thunderbird 31.3.0\
+Mozilla Firefox 40.0.2\
+Mozilla Thunderbird 38.2.0\
 Remote Server Administration Tools for Windows 7 SP1\
 Microsoft Security Essentials\
 Internet Explorer 10
