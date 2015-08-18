@@ -796,6 +796,7 @@ Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
 USE [Sharepoint_Config]
 GO
 GRANT EXECUTE ON [dbo].[proc_GetTimerRunningJobs] TO [WSS_Content_Application_Pools]
+GRANT EXECUTE ON [dbo].[proc_GetTimerJobLastRunTime] TO [WSS_Content_Application_Pools]
 GRANT EXECUTE ON [dbo].[proc_putObjectTVP] TO [WSS_Content_Application_Pools]
 GRANT EXECUTE ON [dbo].[proc_putObject] TO [WSS_Content_Application_Pools]
 GRANT EXECUTE ON [dbo].[proc_putDependency] TO [WSS_Content_Application_Pools]
