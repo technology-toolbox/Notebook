@@ -984,3 +984,26 @@ Mozilla Thunderbird 31.3.0\
 Remote Server Administration Tools for Windows 7 SP1\
 Microsoft Security Essentials\
 Internet Explorer 10
+
+**TODO:**
+
+cls
+
+## # Configure VSS permissions for SharePoint Search
+
+```PowerShell
+$serviceAccount = "EXTRANET\svc-spserviceapp-dev"
+
+New-ItemProperty `
+    -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\VssAccessControl `
+    -Name $serviceAccount `
+    -PropertyType DWord `
+    -Value 1 | Out-Null
+
+$acl = Get-Acl HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag
+$rule = New-Object System.Security.AccessControl.RegistryAccessRule(
+    $serviceAccount, "FullControl", "Allow")
+
+$acl.SetAccessRule($rule)
+Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
+```
