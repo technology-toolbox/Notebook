@@ -916,19 +916,6 @@ Remove-Item C:\Windows\Temp\* -Recurse -Force
 cls
 ```
 
-## # Delete Windows Update files
-
-```PowerShell
-net stop wuauserv
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-```
-
-**TODO:**
-
-```PowerShell
-cls
-```
-
 ## # Enter a product key and activate Windows
 
 ```PowerShell
@@ -954,7 +941,7 @@ slmgr /ato
 cls
 ```
 
-## # Delete C:\\Windows\\SoftwareDistribution folder (528 MB)
+## # Delete C:\\Windows\\SoftwareDistribution folder (? MB)
 
 ```PowerShell
 net stop wuauserv
@@ -973,21 +960,34 @@ Stop-Computer
 
 ## Remove disk from virtual CD/DVD drive
 
-## Snapshot VM - "Baseline"
+## # Expand C: drive
 
-Windows 7 Ultimate (x86)\
-Microsoft Office Professional Plus 2013 (x86)\
-Adobe Reader 8.3.1\
-Google Chrome\
-Mozilla Firefox 36.0\
-Mozilla Thunderbird 31.3.0\
-Remote Server Administration Tools for Windows 7 SP1\
-Microsoft Security Essentials\
-Internet Explorer 10
+---
+
+**WOLVERINE**
+
+### # Increase the size of "EXT-FOOBAR2" VHD
+
+```PowerShell
+$vmName = "EXT-FOOBAR2"
+
+Resize-VHD `
+    ("C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 37GB
+```
+
+---
+
+### # Extend C: partition
+
+## Snapshot VM - "Baseline Client Portal 3.0.633.0 / Cloud Portal 1.0.104.0"
 
 **TODO:**
 
+```PowerShell
 cls
+```
 
 ## # Configure VSS permissions for SharePoint Search
 
