@@ -460,6 +460,10 @@ git config --global user.email "jeremy_jameson@live.com"
 git config --global user.name "Jeremy Jameson"
 ```
 
+## Install GitHub Desktop
+
+[https://desktop.github.com/](https://desktop.github.com/)
+
 ## # Install Microsoft Azure PowerShell
 
 ```PowerShell
