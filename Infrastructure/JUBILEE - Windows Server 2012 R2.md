@@ -1,44 +1,41 @@
 ﻿# JUBILEE - Windows Server 2012 R2 Standard
 
-Sunday, January 05, 2014
-10:52 AM
+Wednesday, August 26, 2015
+8:27 AM
 
-```Console
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
 
-## # [BEAST] Create virtual machine
+---
 
-```PowerShell
-$vmName = "JUBILEE"
+**FOOBAR8**
 
-New-VM `
-    -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
-    -MemoryStartupBytes 2GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+### # Get the list of processes
 
-Set-VMProcessor -VMName $vmName -Count 2
+## Create VM using Virtual Machine Manager
 
-Set-VMMemory `
-    -VMName $vmName `
-    -DynamicMemoryEnabled $true `
-    -MaximumBytes 6GB
+- Processors: **2**
+- Startup memory: **2 GB**
+- Minimum memory: **2 GB**
+- Maximum memory: **4 GB**
+- VHD size (GB): **22**
+- VHD file name:** JUBILEE**
+- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+- Network Adapter 1:** Virtual LAN 2 - 192-168.10.x**
+- Host:** ROGUE**
+- Automatic actions
+  - **Turn on the virtual machine if it was running with the physical server stopped**
+  - **Save State**
+  - Operating system: **Windows Server 2012 R2 Standard**
 
-New-Item -ItemType Directory "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
+---
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+## Install custom Windows Server 2012 R2 image
 
-$sysPrepedImage = "\\ICEMAN\VM-Library\VHDs\WS2012-R2-STD.vhdx"
-
-Copy-Item $sysPrepedImage $vhdPath
-
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
-
-Start-VM $vmName
-```
+- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **JUBILEE** and click **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
 
 Configure server settings
 
@@ -53,16 +50,30 @@ On the **Settings** page:
 4. Review the software license terms and then click **I accept**.
 5. Type a password for the built-in administrator account and then click **Finish**.
 
-## # Rename the server and join domain
+## # Rename local Administrator account and set password
 
 ```PowerShell
-Rename-Computer -NewName JUBILEE -Restart
+$adminUser = [ADSI] "WinNT://./Administrator,User"
+$adminUser.Rename("foo")
+$adminUser.SetPassword("{password}")
 ```
 
-Wait for the VM to restart and then execute the following command to join the **TECHTOOLBOX **domain:
+```PowerShell
+cls
+```
+
+## # Select "High performance" power scheme
 
 ```PowerShell
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
+```
+
+```PowerShell
+cls
 ```
 
 ## # Change drive letter for DVD-ROM
@@ -111,6 +122,48 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Technology Toolbox (Custom)' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+```
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+```Console
+cls
+```
+
 ## # Add SCOM Administrators domain group to local Administrators group
 
 ```PowerShell
@@ -120,8 +173,128 @@ $group.Add("WinNT://TECHTOOLBOX/Operations Manager Admins")
 
 **Note:** "net localgroup ... /add" is simpler, but it doesn't work with long group names
 
-Reference:\
+### Reference
+
 [http://serverfault.com/questions/21826/net-localgroup-add-group-with-spaces-and-ampersand](http://serverfault.com/questions/21826/net-localgroup-add-group-with-spaces-and-ampersand)
+
+## Create SCOM service accounts
+
+---
+
+**FOOBAR8**
+
+### # Create the SCOM "action" service account
+
+```PowerShell
+$displayName = 'Service account for Operations Manager "action" account'
+$defaultUserName = 's-scom-action'
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+### # Create the SCOM "Configuration service and Data Access" service account
+
+```PowerShell
+$displayName =
+    'Service account for Operations Manager Config and Data Access'
+
+$defaultUserName = "s-scom-config-das"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+### # Create the SCOM "Data Reader" service account
+
+```PowerShell
+$displayName = 'Service account for Operations Manager Data Reader'
+$defaultUserName = "s-scom-data-reader"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+### # Create the SCOM "Data Writer" service account
+
+```PowerShell
+$displayName = 'Service account for Operations Manager Data Writer'
+$defaultUserName = "s-scom-data-writer"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Add SCOM service account to local Administrators group
+
+```PowerShell
+net localgroup Administrators /add TECHTOOLBOX\s-scom-config-das
+```
+
+### Reference
+
+This account can be configured as either Local System or as a domain account. The account must have local administrative credentials.
+
+**Deploying System Center 2012 - Operations Manager**\
+From <[https://technet.microsoft.com/library/hh298609.aspx](https://technet.microsoft.com/library/hh298609.aspx)>
 
 ## Install SCOM prerequisites
 
@@ -141,24 +314,6 @@ Install-WindowsFeature `
 
 **Note:** .NET Framework 3.5 is required for SQL Server Reporting Services.
 
-#### Reference
-
-**Set up SQL Server for TFS**\
-Pasted from <[http://msdn.microsoft.com/en-us/library/jj620927.aspx](http://msdn.microsoft.com/en-us/library/jj620927.aspx)>
-
-```PowerShell
-cls
-```
-
-#### # [BEAST] Insert SQL Server 2012 ISO image into VM
-
-```PowerShell
-$imagePath = "\\ICEMAN\Products\Microsoft\SQL Server 2012\" `
-    + "en_sql_server_2012_enterprise_edition_with_service_pack_2_x64_dvd_4685849.iso"
-
-Set-VMDvdDrive -VMName JUBILEE -Path $imagePath
-```
-
 ```PowerShell
 cls
 ```
@@ -166,7 +321,15 @@ cls
 #### # Install SQL Server 2012 Reporting Services
 
 ```PowerShell
-X:\setup.exe
+$imagePath = "\\ICEMAN\Products\Microsoft\SQL Server 2012\" `
+    + "en_sql_server_2012_enterprise_edition_with_service_pack_2_x64_dvd_4685849.iso"
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$installer = $imageDriveLetter + ":\setup.exe"
+
+& $installer
 ```
 
 On the **Feature Selection** step, select **Reporting Services - Native**.
@@ -217,6 +380,20 @@ The Report Manager virtual directory name is not configured. To configure the di
 > Store the key on a separate computer from the one that is running Reporting Services.
 
 **[\\\\iceman\\Users\$\\jjameson-admin\\Documents\\Reporting Services - JUBILEE.snk](\\iceman\Users$\jjameson-admin\Documents\Reporting Services - JUBILEE.snk)**
+
+If the **Backup** button is disabled...
+
+```PowerShell
+$path = '\\ICEMAN\Users$\jjameson-admin\Documents\Reporting Services - JUBILEE.snk'
+
+& 'C:\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn\RSKeyMgmt.exe' `
+    -e -f $path -p {password}
+```
+
+#### Reference
+
+**Set up SQL Server for TFS**\
+Pasted from <[http://msdn.microsoft.com/en-us/library/jj620927.aspx](http://msdn.microsoft.com/en-us/library/jj620927.aspx)>
 
 ```PowerShell
 cls
@@ -296,26 +473,13 @@ cls
 
 & "[\\\\iceman\\Products\\Microsoft\\System Center 2012 R2\\Microsoft Report Viewer Runtime\\ReportViewer.msi](\\iceman\Products\Microsoft\System Center 2012 R2\Microsoft Report Viewer Runtime\ReportViewer.msi)"
 
-## [HAVOK] Create temporary firewall rules on database server for SCOM 2012 installation
+## Create temporary firewall rules on database server for SCOM 2012 installation
 
-**SCOM 2012 - Installing Operations Manager Database on server behind a firewall**\
-Pasted from <[http://social.technet.microsoft.com/Forums/systemcenter/en-US/6c3dc8ff-4f66-4c73-9c9e-4ca948cde3ff/scom-2012-installing-operations-manager-database-on-server-behind-a-firewall?forum=operationsmanagerdeployment](http://social.technet.microsoft.com/Forums/systemcenter/en-US/6c3dc8ff-4f66-4c73-9c9e-4ca948cde3ff/scom-2012-installing-operations-manager-database-on-server-behind-a-firewall?forum=operationsmanagerdeployment)>
+---
 
-Add "temporary" firewall rules for SCOM 2012 installation:
+**HAVOK**
 
-Name: **SCOM 2012 Installation - TCP**\
-Protocol:** TCP**\
-Local Port:** 135, 445, 49152-65535**\
-Profile: **Domain**\
-Direction: **Inbound**\
-Action: **Allow**
-
-Name: **SCOM 2012 Installation - UDP**\
-Protocol:** UDP**\
-Local Port:** 137**\
-Profile: **Domain**\
-Direction: **Inbound**\
-Action: **Allow**
+### # Create temporary firewall rules for SCOM 2012 installation
 
 ```PowerShell
 New-NetFirewallRule `
@@ -339,19 +503,29 @@ New-NetFirewallRule `
     -Action Allow
 ```
 
-## # Install Operations Manager
+---
+
+### Reference
+
+**SCOM 2012 - Installing Operations Manager Database on server behind a firewall**\
+Pasted from <[http://social.technet.microsoft.com/Forums/systemcenter/en-US/6c3dc8ff-4f66-4c73-9c9e-4ca948cde3ff/scom-2012-installing-operations-manager-database-on-server-behind-a-firewall?forum=operationsmanagerdeployment](http://social.technet.microsoft.com/Forums/systemcenter/en-US/6c3dc8ff-4f66-4c73-9c9e-4ca948cde3ff/scom-2012-installing-operations-manager-database-on-server-behind-a-firewall?forum=operationsmanagerdeployment)>
 
 ```PowerShell
 cls
 ```
 
-#### # [BEAST] Insert SCOM 2012 ISO image into VM
+## # Install Operations Manager
 
 ```PowerShell
 $imagePath = "\\iceman\Products\Microsoft\System Center 2012 R2\" `
     + "en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso"
 
-Set-VMDvdDrive -VMName JUBILEE -Path $imagePath
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$installer = $imageDriveLetter + ":\Setup.exe"
+
+& $installer
 ```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/06/37E3980F82E21B260ABBA2EA5CC5232317A21C06.png)
@@ -396,7 +570,7 @@ Press Tab to connect to the database server.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/8C/5D06F0E8094EA01126252D515F76FC5F5B28E18C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/7E47881C2E96CD9774BC85984E7E436C02E360FF.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/42/19A24DD13B11BAE1F7F42357B40EBF69DB7C6C42.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/22/DD519A5F991933B895B28B8B3EEE7F5DBAEB3C22.png)
 
@@ -406,12 +580,88 @@ Press Tab to connect to the database server.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/08/75B28D59F45DA77D9EB209A99FD259CFB3F61108.png)
 
-## # [HAVOK] Disable temporary firewall rules on database server
+---
+
+**HAVOK**
+
+## # Disable temporary firewall rules on database server
 
 ```PowerShell
-Disable-NetFirewallRule -DisplayName "SCOM 2012 Installation - TCP"
-Disable-NetFirewallRule -DisplayName "SCOM 2012 Installation - UDP"
+Disable-NetFirewallRule -Name "SCOM 2012 Installation - TCP"
+Disable-NetFirewallRule -Name "SCOM 2012 Installation - UDP"
 ```
+
+---
+
+## Fix Web address in notification emails
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F6/3A8AC3D6E6A9F3212455443048C14FDB630090F6.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/BFE63FA980FEF9DEB949523E48F5B472EA989E46.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/40/1108A7087A63B2F799619CDE7F7B07AAF168E140.png)
+
+## # Install SMTP relay for System Center Operations Manager
+
+```PowerShell
+cls
+```
+
+### # Install IIS dependencies for SMTP Server
+
+```PowerShell
+Install-WindowsFeature `
+    Web-ODBC-Logging, `
+    Web-Mgmt-Console, `
+    Web-Lgcy-Mgmt-Console, `
+    Web-Metabase `
+    -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS' `
+    -Restart
+```
+
+```PowerShell
+cls
+```
+
+### # Install SMTP Server
+
+```PowerShell
+Install-WindowsFeature `
+    Smtp-Server `
+    -IncludeManagementTools `
+    -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS' `
+    -Restart
+```
+
+### Configure SMTP Server
+
+1. Open **Server Manager**, select **Tools**, and then select **Internet Information Services (IIS) 6.0 Manager**.
+2. Expand the current server, right-click the **SMTP Virtual Server**, and then click **Properties**.
+3. In the **SMTP Virtual Server Properties** window:
+   1. On the **Access** tab:
+      1. In the **Connection control **section, click **Connection...**
+      2. In the **Connection **window:
+         1. Select the **Only the list below** option.
+         2. Click **Add...**
+         3. In the **Computer** window:
+            1. Ensure the **Single computer** option is selected.
+            2. In the **IP address **box, type **127.0.0.1**.
+            3. Click **OK**.
+         4. Click **OK**.
+      3. In the **Relay restrictions **section, click **Relay...**
+      4. In the **Relay Restrictions **window:
+         1. Select the **Only the list below** option.
+         2. Click **Add...**
+         3. In the **Computer** window:
+            1. Ensure the **Single computer** option is selected.
+            2. In the **IP address **box, type **127.0.0.1**.
+            3. Click **OK**.
+         4. Click **OK**.
+   2. Click **OK**.
+4. Expand the **SMTP Virtual Server** node, right-click **Domains**, point to **New**, and select **Domain...**
+5. In the **New SMTP Domain Wizard**:
+   1. On the welcome page, ensure the **Remote** option is selected, and click **Next**.
+   2. On the **Domain Name** page, in the **Name** box, type **technologytoolbox.com**, and click **Finish**.
 
 ## Create SMTP Channel
 
@@ -423,9 +673,9 @@ Disable-NetFirewallRule -DisplayName "SCOM 2012 Installation - UDP"
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/1B/7F86DFDA7287D581B56138123702FACF62BC211B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/81/1D8E8796D2FF93578EE3EFF05DA7F8A24D64C081.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/D31DAC9E1BEE30BFC7060B010A8917D64EBE08EF.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/DFB3538463AF8CE1B80383AE6329A8CC76B996E2.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/32BA3C89EFF14E55892728BA8A7101C23503E039.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/22/ECCB260F0CE32376E509148ED80DE493140D2C22.png)
 
@@ -499,7 +749,19 @@ Click **Search**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/6707E1F4E350507E849BA75B7F599B520313CE2F.png)
 
+## Add members to Operations Manager Operators role
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/7FB8DB73BC23FCFAD76219277D823AA43B9128C6.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/6F06FEA17EB738564002BAA2C49BDF48F8E833CE.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/5DA365DEF6C85A7CC416DBFC9FA982884AA53327.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/60/66C5207B1368AB4EF8325D05BFFFF79028A72B60.png)
+
 ## Import management packs
+
+HACK: Attempting to import management packs directly from the catalog now results in errors ("Verification failed"). To workaround the issue, download the latest versions of the management packs, install them, and then import them from disk.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/0F/9179881C54AE5ADD73F3C5883399A0F4AB86DD0F.png)
 
@@ -600,6 +862,13 @@ Repeat the previous steps the remaining warnings.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/03/2F1FC208D4B63E76E23123F871A9234A4E74FB03.png)
 
+## Import DPM management packs
+
+1. Mount the DPM 2012 R2 DVD.
+2. Import the following management packs from **D:\\SCDPM\\ManagementPacks\\en-US**:
+3. **Microsoft.SystemCenter.DataProtectionManager.2012.Discovery.mp**
+4. **Microsoft.SystemCenter.DataProtectionManager.2012.Library.mp**
+
 ## Configure security settings for manual agent installations
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A4/E46318ED283C00A3BE5D3CF77CAA6FCB130AE6A4.png)
@@ -612,118 +881,6 @@ Repeat the previous steps the remaining warnings.
 
 **Operations Manager Alerts for Event Log Errors**\
 Pasted from <[http://www.technologytoolbox.com/blog/jjameson/archive/2011/03/18/operations-manager-alerts-for-event-log-errors.aspx](http://www.technologytoolbox.com/blog/jjameson/archive/2011/03/18/operations-manager-alerts-for-event-log-errors.aspx)>
-
-## Install SCOM agent on computers to manage
-
-## Configure domain controllers to manage
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/02/A71E4F54079FD0B2DB85A4FC0CB78F761EB46C02.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/73A4F65DD992BCF8CA070E4938A0FDFED809B2F5.png)
-
-In the **Agent Properties** window, on the **Security** tab, select **Allow this agent to act as a proxy and discover managed objects on other computers** and then click **OK**.
-
-## # Register Service Principal Name for System Center Operations Manager
-
-```PowerShell
-setspn -A MSOMSdkSvc/JUBILEE JUBILEE
-setspn -A MSOMSdkSvc/JUBILEE.corp.technologytoolbox.com JUBILEE
-```
-
-## Reinstall SCOM Web console on Default Web Site (to fix host header issue)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/04/957734D4961E603EED70C32014A2EEACB3B87904.png)
-
-Alert: Application Event Log Error
-Source: ROGUE.corp.technologytoolbox.com
-Path: Not Present
-Last modified by: TECHTOOLBOX\\jjameson-admin
-Last modified time: 1/13/2014 5:31:43 AM
-Alert description: Source: Microsoft-Windows-User Profiles Service
-Event ID: 1504
-Event Category: 0
-User: TECHTOOLBOX\\jjameson-admin
-Computer: ROGUE.corp.technologytoolbox.com
-Event Description: Windows cannot update your roaming profile completely. Check previous events for more details.\
-Alert view link: ["http://]("http://)[JUBILEE](JUBILEE)[/OperationsManager?DisplayMode=Pivot&AlertID=%7b3e7f44b2-19e9-460e-a269-5290785e86e4%7d"](/OperationsManager?DisplayMode=Pivot&AlertID=%7b3e7f44b2-19e9-460e-a269-5290785e86e4%7d")
-Notification subscription ID generating this message: {78899052-4C1D-3C2D-98A5-63E603521E1C}
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C7/2023633C0FCB02B32B704184432933FD8E0618C7.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/1C6943F92C89D6814236B6A89D03C6801F9EE993.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C7/37D9327AAC329667BD00AE3B21223692D918B0C7.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/7D9EDA7FCD457FF912A6DDAD68C8F42769776686.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/82/4C03EAD48B78D69DF9D5A71754E909FB9DC40582.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F2/CFC09A0718271243BF49763DB54B7F036B60C8F2.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/1B66255365B2ABB457F7E7E1B0BCDDB8230A3991.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/11/0A8F715EE7CDAA58FD3BF8B3E94E6AA28EFF2311.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/89/9BF7028710BFC9898A2A38A721AF417DD17C5B89.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DC/9F3D1CFA49E5CE33114AC56312C4C50D6C7AA8DC.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C1/98C19CEFE4312B7B2D45BDCAAF84A9008D23EFC1.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1D/35AEFB18B01B6C0AFF7B245CEB6B4DA8AFD0FC1D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BA/CB42C174DEC82A8833FD526BDD0DAE886F7D2DBA.png)
-
-Click **Cancel**. Repeat process by running **Setup.exe** from Operations Manager ISO file.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9E/1956F410F3F21CEC95AC34E829AC9B4351B5E89E.png)
-
-In IIS Manager, right-click **Sites** -> **System Center Web Site** and then click **Remove**.
-
-```Console
-rmdir C:\inetpub\wwwroot\SystemCenter
-```
-
-## # Install DPM 2012 R2 agent
-
-```PowerShell
-$imagePath = "\\iceman\Products\Microsoft\System Center 2012 R2\" `
-    + "mu_system_center_2012_r2_data_protection_manager_x86_and_x64_dvd_2945939.iso"
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$installer = $imageDriveLetter + ":\SCDPM\Agents\DPMAgentInstaller_x64.exe"
-
-& $installer JUGGERNAUT.corp.technologytoolbox.com
-```
-
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
-
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
-
-- Exception for DPMRA.exe in all profiles
-- Exception for Windows Management Instrumentation service
-- Exception for RemoteAdmin service
-- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
-
-### Reference
-
-**Installing Protection Agents Manually**\
-Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
-
-## Attach DPM agent
-
-On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the following commands:
-
-```PowerShell
-$productionServer = "JUBILEE"
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName JUGGERNAUT `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `-UserName jjameson-admin
-```
 
 ## Modify custom SCOM rule to filter out "noise"
 
@@ -788,12 +945,24 @@ On the **Application Event Log Error Properties** window, click **OK**.
 
 Repeat the steps above for the **System Event Log Error** rule.
 
-## Import DPM management packs
+## Install SCOM agent on computers to manage
 
-1. Mount the DPM 2012 R2 DVD.
-2. Import the following management packs from **D:\\SCDPM\\ManagementPacks\\en-US**:
-3. **Microsoft.SystemCenter.DataProtectionManager.2012.Discovery.mp**
-4. **Microsoft.SystemCenter.DataProtectionManager.2012.Library.mp**
+## Configure domain controllers to manage
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/02/A71E4F54079FD0B2DB85A4FC0CB78F761EB46C02.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/73A4F65DD992BCF8CA070E4938A0FDFED809B2F5.png)
+
+In the **Agent Properties** window, on the **Security** tab, select **Allow this agent to act as a proxy and discover managed objects on other computers** and then click **OK**.
+
+## # Register Service Principal Name for System Center Operations Manager
+
+```PowerShell
+setspn -A MSOMSdkSvc/JUBILEE JUBILEE
+setspn -A MSOMSdkSvc/JUBILEE.corp.technologytoolbox.com JUBILEE
+```
+
+**TODO:**
 
 ## Resolve SCOM alerts due to disk fragmentation
 
@@ -821,63 +990,3 @@ robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 
 Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
 ```
-
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-## Change SMTP channel for Operations Manager
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/68F1C036941ED40C37AA999B56A3C8B6AFCCE9DF.png)
-
-Fix Web address in notification emails
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F6/3A8AC3D6E6A9F3212455443048C14FDB630090F6.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/BFE63FA980FEF9DEB949523E48F5B472EA989E46.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/40/1108A7087A63B2F799619CDE7F7B07AAF168E140.png)
-
-## Add members to Operations Manager Operators role
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/7FB8DB73BC23FCFAD76219277D823AA43B9128C6.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/6F06FEA17EB738564002BAA2C49BDF48F8E833CE.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/5DA365DEF6C85A7CC416DBFC9FA982884AA53327.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/60/66C5207B1368AB4EF8325D05BFFFF79028A72B60.png)
-
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
-
-```PowerShell
-$computer = 'JUBILEE'
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-```
-
----
