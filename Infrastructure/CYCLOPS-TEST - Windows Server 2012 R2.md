@@ -3,63 +3,66 @@
 Sunday, January 05, 2014
 4:56 AM
 
-```Console
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
 
-## # Create virtual machine
+---
+
+**FOOBAR8**
+
+## Create VM using Virtual Machine Manager
+
+- Processors: **2**
+- Memory: **4 GB**
+- Startup memory: **2 GB**
+- Minimum memory: **512 GB**
+- Maximum memory: **4 GB**
+- VHD size (GB): **25**
+- VHD file name:** CYCLOPS-TEST**
+- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+- Network Adapter 1:** Virtual LAN 2 - 192-168.10.x**
+- Host:** ROGUE**
+- Automatic actions
+  - **Turn on the virtual machine if it was running with the physical server stopped**
+  - **Save State**
+  - Operating system: **Windows Server 2012 R2 Standard**
+
+---
+
+## Install custom Windows Server 2012 R2 image
+
+- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **CYCLOPS-TEST** and click **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
+
+## # Rename local Administrator account and set password
 
 ```PowerShell
-$vmName = "CYCLOPS-TEST"
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword('{password}')
 
-New-VM `
-    -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
-    -MemoryStartupBytes 512MB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
-
-Set-VMProcessor -VMName $vmName -Count 2
-
-Set-VMMemory `
-    -VMName $vmName `
-    -DynamicMemoryEnabled $true `
-    -MaximumBytes 2GB
-
-$sysPrepedImage =
-    "\\ICEMAN\VM Library\ws2012std-r2\Virtual Hard Disks\ws2012std-r2.vhd"
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
-
-Convert-VHD `
-    -Path $sysPrepedImage `
-    -DestinationPath $vhdPath
-
-Set-VHD $vhdPath -PhysicalSectorSizeBytes 4096
-
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
-
-Start-VM $vmName
+logoff
 ```
 
-## # Rename the server and join domain
-
 ```PowerShell
-Rename-Computer -NewName CYCLOPS-TEST -Restart
-
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
+cls
 ```
 
-## # Download PowerShell help files
+## # Select "High performance" power scheme
 
 ```PowerShell
-Update-Help
+powercfg.exe /L
+powercfg.exe /S SCHEME_MIN
+powercfg.exe /L
+```
+
+```PowerShell
+cls
 ```
 
 ## # Change drive letter for DVD-ROM
-
-### # To change the drive letter for the DVD-ROM using PowerShell
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -71,6 +74,10 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
+```
+
+```PowerShell
+cls
 ```
 
 ## # Rename network connection
@@ -87,30 +94,105 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name "LAN 1 - 192.168.10.x" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
+Set-NetAdapterAdvancedProperty `
+    -Name "LAN 1 - 192.168.10.x" `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
 
 ping ICEMAN -f -l 8900
 ```
 
-## # Install .NET Framework 3.5
-
 ```PowerShell
-Install-WindowsFeature `
-    NET-Framework-Core `
-    -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS'
+cls
 ```
 
-## # Install SQL Server Reporting Services
+## # Enable PowerShell remoting
 
-**# Note: .NET Framework 3.5 is required for SQL Server Reporting Services.**
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Technology Toolbox (Custom)' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+```
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+## Install SQL Server Reporting Services
 
 ### Reference
 
 **Set up SQL Server for TFS**\
 Pasted from <[http://msdn.microsoft.com/en-us/library/jj620927.aspx](http://msdn.microsoft.com/en-us/library/jj620927.aspx)>
 
-SQL Server 2012 with SP1
+**Note: **.NET Framework 3.5 is required for SQL Server Reporting Services.
+
+```PowerShell
+cls
+```
+
+### # Install .NET Framework 3.5
+
+```PowerShell
+$sourcePath = "\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS"
+
+Install-WindowsFeature NET-Framework-Core -Source $sourcePath
+```
+
+### # Install SQL Server Reporting Services
+
+---
+
+**FOOBAR8**
+
+### # Insert the SQL Server 2014 installation media
+
+```PowerShell
+$vmHost = "ROGUE"
+$vmName = "CYCLOPS-TEST"
+
+$isoPath = '\\ICEMAN\Products\Microsoft\SQL Server 2014\en_sql_server_2014_enterprise_edition_x64_dvd_3932700.iso'
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Launch SQL Server setup
+
+```PowerShell
+& X:\Setup.exe
+```
 
 On the **Feature Selection** step, select **Reporting Services - Native**.
 
@@ -119,48 +201,26 @@ On the **Server Configuration** step, on the **Service Accounts** tab:
 - In the **Account Name** column for **SQL Server Reporting Services**, type **NT AUTHORITY\\NETWORK SERVICE**.
 - In the **Startup Type** column for **SQL Server Reporting Services**, ensure **Automatic** is selected.
 
-## # Install SCOM agent
+## Backup SQL Server Reporting Services encryption key
+
+---
+
+**CYCLOPS**
 
 ```PowerShell
-$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+$path = '\\ICEMAN\Users$\jjameson-admin\Documents\Reporting Services - CYCLOPS.snk'
 
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
+& 'C:\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn\RSKeyMgmt.exe' `
+    -e -f $path -p {password}
 ```
 
-## # Approve manual agent install in Operations Manager
+---
 
-## Install TFS 2013
+## Backup TFS databases
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E6/65AABA80C93D17531C20149CA08428EB296DE2E6.png)
+## [HAVOK-TEST] Restore TFS databases (OLTP)
 
-UAC, click **Yes**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/13/BB4AA879AFA667688AC9CE95D33FF37D26FBBB13.png)
-
-Wait for the installation to finish. The Team Foundation Server Configuration Center appears.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/FD1454E31549D3D03F38B6AF99AC19CF48674DDB.png)
-
-## Restore TFS databases
-
-Initially restored databases using TFSRestore.exe ([http://msdn.microsoft.com/en-us/library/jj620932.aspx](http://msdn.microsoft.com/en-us/library/jj620932.aspx)). However that tool sets the database names to match the backup names (e.g. **Tfs_Configuration_backup_2014_01_04_064316_3470811**).
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6C/39ED492F95B1958C91AE74D1E3A704B75272C26C.png)
-
-To fix database names, dropped the "bad" databases and subsequently restored databases using SQL Server Management Studio on HAVOK-TEST
-
-## -- Restore TFS databases (OLTP) (HAVOK-TEST)
-
-## Restore TFS Analysis Services database (HAVOK-TEST)
+## [HAVOK-TEST] Restore TFS Analysis Services database
 
 ## Configure Reporting Services for TFS (using restored database)
 
@@ -199,22 +259,67 @@ Report Server Web Service is not configured. Default values have been provided t
 
 The Report Manager virtual directory name is not configured. To configure the directory, enter a name or use the default value that is provided, and then click Apply.
 
-**[\\\\iceman\\Users\$\\jjameson-admin\\Documents\\Reporting Services - CYCLOPS.snk](\\iceman\Users$\jjameson-admin\Documents\Reporting Services - CYCLOPS.snk)**
+**[\\\\ICEMAN\\Users\$\\jjameson-admin\\Documents\\Reporting Services - CYCLOPS.snk](\\ICEMAN\Users$\jjameson-admin\Documents\Reporting Services - CYCLOPS.snk)**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/98740CDFB118C8CE2628DD0BBCF124B539F51527.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/DA46661DC05ACB4806905D2FD15883565D069DF4.png)
 
 **Workaround:**
 
 ```Console
-    cd "\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn"
+    cd "\Program Files (x86)\Microsoft SQL Server\120\Tools\Binn"
     .\RSKeyMgmt.exe -l
-    .\RSKeyMgmt.exe -r 9676f436-13b9-4bef-8260-c01ee43ffb02
+    .\RSKeyMgmt.exe -r e56831c8-61ef-44f7-9295-c8a49acf417f
 ```
 
 ### Reference
 
 **Fix up the report server**\
 Pasted from <[http://msdn.microsoft.com/en-us/library/jj620932.aspx](http://msdn.microsoft.com/en-us/library/jj620932.aspx)>
+
+## -- Fix permissions for SQL Server Reporting Services
+
+```SQL
+USE master
+GO
+GRANT EXECUTE ON master.dbo.xp_sqlagent_notify TO RSExecRole
+GO
+GRANT EXECUTE ON master.dbo.xp_sqlagent_enum_jobs TO RSExecRole
+GO
+GRANT EXECUTE ON master.dbo.xp_sqlagent_is_starting TO RSExecRole
+GO
+USE msdb
+GO
+-- Permissions for SQL Agent SP's
+GRANT EXECUTE ON msdb.dbo.sp_help_category TO RSExecRole
+GO
+GRANT EXECUTE ON msdb.dbo.sp_add_category TO RSExecRole
+GO
+GRANT EXECUTE ON msdb.dbo.sp_add_job TO RSExecRole
+GO
+GRANT EXECUTE ON msdb.dbo.sp_add_jobserver TO RSExecRole
+GO
+GRANT EXECUTE ON msdb.dbo.sp_add_jobstep TO RSExecRole
+GO
+GRANT EXECUTE ON msdb.dbo.sp_add_jobschedule TO RSExecRole
+GO
+GRANT EXECUTE ON msdb.dbo.sp_help_job TO RSExecRole
+GO
+GRANT EXECUTE ON msdb.dbo.sp_delete_job TO RSExecRole
+GO
+GRANT EXECUTE ON msdb.dbo.sp_help_jobschedule TO RSExecRole
+GO
+GRANT EXECUTE ON msdb.dbo.sp_verify_job_identifiers TO RSExecRole
+GO
+GRANT SELECT ON msdb.dbo.sysjobs TO RSExecRole
+GO
+GRANT SELECT ON msdb.dbo.syscategories TO RSExecRole
+GO
+```
+
+### Reference
+
+**Reporting Errors with TFS Migration/Upgrade**\
+From <[http://www.technologytoolbox.com/blog/jjameson/archive/2010/05/20/reporting-errors-with-tfs-migration-upgrade.aspx](http://www.technologytoolbox.com/blog/jjameson/archive/2010/05/20/reporting-errors-with-tfs-migration-upgrade.aspx)>
 
 ## Update data sources in SQL Server Reporting Services
 
@@ -226,77 +331,159 @@ Repeat for the remaining data sources:
 - **TfsOlapReportDS**
 - **TfsReportDS**
 
+## Install TFS 2015
+
+---
+
+**FOOBAR8**
+
+### # Insert the TFS 2015 installation media
+
+```PowerShell
+$vmHost = "ROGUE"
+$vmName = "CYCLOPS-TEST"
+
+$isoPath = '\\ICEMAN\Products\Microsoft\Team Foundation Server 2015\en_visual_studio_team_foundation_server_2015_x86_x64_dvd_6909713.iso'
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Launch TFS setup
+
+```PowerShell
+& X:\tfs_server.exe
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EA/6D39BC62E175B233B1441C7C6FB65024A2604FEA.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/4DA3F24CA364993CF60A7D5B90046260FBA7A3D4.png)
+
+Wait for the installation to finish. The Team Foundation Server Configuration Center appears.
+
 ## Upgrade TFS
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/227CF7BA4CD5761128A36D5BB1E27EB56106775E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F2/4A2A32469EDCDCFF3F754A01CF39F6224EE23FF2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/89/BBED7022323381794575E54D9346F72A0F77CD89.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AC/025AC21DDB979B642E4269FEE285FD42DA760BAC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/99/A2EEAEBE91D666092CD2E6FC78A293289BAAEC99.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/68F65E532E77C24D3887873A477B6D69DF7AAFB9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C3/400D581E4115976261A8D0556414DFF574E453C3.png)
+In the **SQL Server Instance** box, type **HAVOK-TEST** and then click **List Available Databases**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/46EBE16590899994718DC1BFF07BB97E20CCE9E2.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8A/A2DF0B335515AE0CE5DD7E05260BEE1919140D8A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/C340FD954CD9E20B7EACF9740647D9773FA53A7F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/5339A5353F91CB4A787C2484E8C6136EA9EE66C6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B7/D5333D985C515CBD7AE8305D7D8086F1117236B7.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/7FB3C911AE85A76BC95FF7ACD3CD875D58D0772F.png)
 
-Click **Populate URLs**.
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C4/5764BF7BE6CA7438E7FEA2B3F0EF242ECBBA5FC4.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5D/521AD85AF5D0D211A47A07AFEC7A2B115C1E035D.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/08/0B970249C5BC06E3BFDE8C36C697FC9983FE8408.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5B/3E91AC06E98918A6BA12D1ECA5714A2C31E5505B.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/05/A4B01A5428A882E6A0CFC59AEF0E9F3FE6EA8005.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8B/A3E6619EBC99E5E7FD74A0559F7269A0E0EFEC8B.png)
 
 In the **SQL Server Instance** box, type the name of the database server and then click **Test**.
 
 Click **List Available Databases**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/689DB9E5E6157014D7BA6690E5D86C62C404BCB6.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/B283B78A85597F4E9F940004E46277BF90985084.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/6B4D15D7E1B9DCAFEBB3F3A8D013909D3B8CB49F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/147580D91919D84ABB6C0BDAC15ECAA7C8CA7B65.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/50/60D9A779A8EC34585E57A8439129F29207D2F050.png)
+In the **SQL Server Analysis Services Instance** box, type **HAVOK-TEST** and then click **Test**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/64/76569713B9917AEE904924B35A457C395035C164.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/98/BF8B972C4DAAE4664EB79955EFE0C4E9846AA998.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4A/441766C8630C5E5F3DDA3847FA0328BA90CFE84A.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/DD886632C13B26036C3A206FE9DA45290E2A6E3C.png)
 
-Ugh...cannot install TFS SharePoint Extensions on Windows Server 2012 R2.
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BF/C8B35BC6B1C8CEA42EBC9BE2DD549EB48917BFBF.png)
 
-Clear the **Configure SharePoint for use with Team Foundation Server** checkbox.
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/23/1D89F2C14D7E0B47C1C71350B8F31325B66CAF23.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/E42A6E4F7FC1600AD893F2DC0D51D4C72B77CC91.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/60/165976ACFA5FA6A023943DD604C05890323AF660.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D0/2C82F9A40DF88E7117472F32145BC38A5EEB15D0.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/8FB9410E48A0CC3251B4A35AC390C34BE5D1D23B.png)
 
-Click **Verify**.
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AB/15E87EE93F8864E5287D10B6FE29C2B94D7B98AB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6E/D20488E41A7EC800FA6DE0D08B64EE577CC6096E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/51/D8F594A4DBD08489E60503E6DA6CCAD66C3BAF51.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/57/BE1CCB3829BC1189D31A60562D0F8A4F82AC5057.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/C70B35BECEE42A03FC506228D81198F6411216DB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/AFE75AD26A5191AD403BF2EEF787F12CCDE3C40E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A3/D54C17E7B19D145CD710F6C63740052A15566BA3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/75/E91D15BDDB634BFB2239EC81BE309533E682EB75.png)
+As part of TFS configuration IIS dynamic compression was enabled to improve performance. This is a system-wide setting for IIS. See this link for additional details [http://go.microsoft.com/fwlink/?LinkId=534011](http://go.microsoft.com/fwlink/?LinkId=534011)\
+\
+Firewall exception added for port 8080\
+\
+The time allowed for Windows services to start was increased from 30 seconds to 600 seconds. This affects all Windows services on this server. (The registry value set is HKLM\\SYSTEM\\CurrentControlSet\\Control\\!ServicesPipeTimeout.)\
+\
+TF255450: The notification URL for this instance of Team Foundation Server is [http://cyclops:8080/tfs/](http://cyclops:8080/tfs/) and might need to be updated. You can modify the notification URL in the Team Foundation Administration Console by using the Change URLs command.\
+\
+To configure new features for team projects, follow the steps in [https://msdn.microsoft.com/library/ff432837(v=vs.140).aspx](https://msdn.microsoft.com/library/ff432837(v=vs.140).aspx)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8C/BDE1F7845BEBB954828192EDF15F3A0B19502E8C.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/33/8E046CB51EEB8A019E927C3CE35282363C2EEF33.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FC/125B280550982F97BA11B4C0A14DC5847D752BFC.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7B/70B89591DA425152ABF5E703E62FE6BF4C1E127B.png)
 
-To configure the new features for a team project, follow the steps in [http://go.microsoft.com/fwlink/?LinkID=229859](http://go.microsoft.com/fwlink/?LinkID=229859)
+## Update Notification URL
 
-## Configure an SMTP server for TFS
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/89/1D7314F9A61DBDCE755DC40E9CADC77819134E89.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/2012693F07470BD72CF7C6BC94D161B39C21D571.png)
+Click **Change URLs**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/52/FDC91099B6CEF1D4BEF4A08CACE430C19B932F52.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AB/FFF373F549B7236156BA3BAD0622504256DA4CAB.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/32/20BAA402F0C4296CD996686BFABB70AADD865B32.png)
+
+## Configure e-mail alert settings for TFS
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/C2E6B7A25589320B29588F538DCF1FA4C8B53A4D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/80/B0562BF81825626FC272B6C57ACBC70BF0A73080.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/EE966409F83C631F2849D5A4A344A503A8E22E2C.png)
 
 In the **Email Alert Settings** section, click **Send Test Email**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E9/10286ADAF5C842508DC38F8908D86A0FFD90A4E9.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/8952F39687F5E0BDDD0AF1FE8111711D5BB056D4.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E0/0C25F46F56FECDFD1A07E87EBEFD75A55BD7CDE0.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/FD7C5983AEB099CF0FB38CC5C48B97DC7B141627.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E8/FBD6EBD44D68A24D2AE46EA62D1EFF2C99B733E8.png)
+
+```PowerShell
+cls
+```
+
+## # Install SCOM agent
+
+```PowerShell
+$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=JUBILEE `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+## # Approve manual agent install in Operations Manager
+
+**TODO:**
 
 ## Resolve SCOM alerts due to disk fragmentation
 
@@ -324,43 +511,3 @@ robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 
 Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
 ```
-
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
-
-```PowerShell
-$computer = 'CYCLOPS-TEST'
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-```
-
----
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C7/C2A7CDF9457222993E1E0D9532E0F652655CD0C7.png)
