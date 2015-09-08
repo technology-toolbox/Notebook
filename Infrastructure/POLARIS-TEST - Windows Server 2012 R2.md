@@ -7,19 +7,53 @@ Tuesday, April 28, 2015
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Create VM
+---
+
+**FOOBAR8**
+
+## Create VM using Virtual Machine Manager
 
 - Processors: **4**
 - Memory: **8 GB**
 - VHD size (GB): **45**
 - VHD file name:** POLARIS-TEST**
+- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+- Network Adapter 1:** Virtual LAN 2 - 192-168.10.x**
+- Host:** ROGUE**
+- Automatic actions
+  - **Turn on the virtual machine if it was running with the physical server stopped**
+  - **Save State**
+  - Operating system: **Windows Server 2012 R2 Standard**
+
+---
 
 ## Install custom Windows Server 2012 R2 image
 
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
 - On the **Computer Details** step, in the **Computer name** box, type **POLARIS-TEST** and click **Next**.
-- On the **Applications** step, click **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
+
+## # Rename local Administrator account and set password
+
+```PowerShell
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword('{password}')
+
+logoff
+```
+
+```PowerShell
+cls
+```
+
+## # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+powercfg.exe /S SCHEME_MIN
+powercfg.exe /L
+```
 
 ```PowerShell
 cls
@@ -37,17 +71,6 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
-```
-
-```PowerShell
-cls
-```
-
-## # Set password for local Administrator account
-
-```PowerShell
-$adminUser = [ADSI] "WinNT://./Administrator,User"
-$adminUser.SetPassword("{password}")
 ```
 
 ```PowerShell
@@ -76,6 +99,48 @@ Set-NetAdapterAdvancedProperty `
 ping ICEMAN -f -l 8900
 ```
 
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Technology Toolbox (Custom)' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+```
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
 ## Configure VM storage
 
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
@@ -86,24 +151,33 @@ ping ICEMAN -f -l 8900
 
 ---
 
-**BEAST**
+**FOOBAR8**
 
-### # Create Data01 and Log01 VHDs
+### # Add disks to virtual machine
 
 ```PowerShell
+$vmHost = "BEAST"
 $vmName = "POLARIS-TEST"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Data01.vhdx"
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+    + $vmName + "_Data01.vhdx"
 
-New-VHD -Path $vhdPath -SizeBytes 5GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 5GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Log01.vhdx"
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+    + $vmName + "_Log01.vhdx"
 
-New-VHD -Path $vhdPath -SizeBytes 5GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 5GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
 ```
 
 ---
@@ -112,64 +186,31 @@ Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
 cls
 ```
 
-### # Format Data01 drive
+### # Initialize disks and format volumes
+
+#### # Format Data01 drive
 
 ```PowerShell
 Get-Disk 1 |
     Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter D -UseMaximumSize |
+    New-Partition -UseMaximumSize -DriveLetter D |
     Format-Volume `
         -FileSystem NTFS `
         -NewFileSystemLabel "Data01" `
         -Confirm:$false
 ```
 
-### # Format Log01 drive
+#### # Format Log01 drive
 
 ```PowerShell
 Get-Disk 2 |
     Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter L -UseMaximumSize |
+    New-Partition -UseMaximumSize -DriveLetter L |
     Format-Volume `
         -FileSystem NTFS `
         -NewFileSystemLabel "Log01" `
         -Confirm:$false
 ```
-
----
-
-**HAVOK-TEST**
-
-## Configure Max Degree of Parallelism for SharePoint
-
-### -- Set Max Degree of Parallelism to 1
-
-```Console
-EXEC sys.sp_configure N'show advanced options', N'1'  RECONFIGURE WITH OVERRIDE
-GO
-EXEC sys.sp_configure N'max degree of parallelism', N'1'
-GO
-RECONFIGURE WITH OVERRIDE
-GO
-EXEC sys.sp_configure N'show advanced options', N'0'  RECONFIGURE WITH OVERRIDE
-GO
-```
-
-```Console
-cls
-```
-
-### # Restart SQL Server
-
-```PowerShell
-Stop-Service SQLSERVERAGENT
-
-Restart-Service MSSQLSERVER
-
-Start-Service SQLSERVERAGENT
-```
-
----
 
 ## Create service accounts for SharePoint
 
@@ -299,6 +340,8 @@ New-ADUser `
 
 ---
 
+## [HAVOK-TEST] Configure Max Degree of Parallelism for SharePoint
+
 ```PowerShell
 cls
 ```
@@ -308,11 +351,6 @@ cls
 ### # Install Windows features for SharePoint 2013
 
 ```PowerShell
-Install-WindowsFeature `
-    NET-WCF-HTTP-Activation45,`
-    NET-WCF-TCP-Activation45, `
-    NET-WCF-Pipe-Activation45 `-Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS'
-
 Install-WindowsFeature `
     Net-Framework-Features,Web-Server,Web-WebServer,Web-Common-Http,
     Web-Static-Content,Web-Default-Doc,Web-Dir-Browsing,Web-Http-Errors,
@@ -324,28 +362,34 @@ Install-WindowsFeature `
     Web-Metabase,Application-Server,AS-Web-Support,AS-TCP-Port-Sharing,
     AS-WAS-Support,AS-HTTP-Activation,AS-TCP-Activation,AS-Named-Pipes,
     AS-Net-Framework,WAS,WAS-Process-Model,WAS-NET-Environment,
-    WAS-Config-APIs,Web-Lgcy-Scripting,Windows-Identity-Foundation,
-    Server-Media-Foundation,Xps-Viewer `
+    WAS-Config-APIs,Web-Lgcy-Scripting,NET-WCF-HTTP-Activation45,
+    NET-WCF-TCP-Activation45,NET-WCF-Pipe-Activation45,
+    Windows-Identity-Foundation,Server-Media-Foundation,Xps-Viewer `
     -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS' `
     -Restart
 ```
 
-### Reference
+#### Reference
 
 **The Products Preparation Tool in SharePoint Server 2013 may not progress past "Configuring Application Server Role, Web Server (IIS) Role"**\
 Pasted from <[http://support.microsoft.com/kb/2765260](http://support.microsoft.com/kb/2765260)>
 
+## Install SharePoint 2013 with Service Pack 1
+
 ---
 
-**BEAST**
+**FOOBAR8**
 
-### # Insert SharePoint 2013 ISO image into VM
+### # Insert the SharePoint 2013 installation media
 
 ```PowerShell
-$imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
-    + "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
+$vmHost = "BEAST"
+$vmName = "POLARIS-TEST"
 
-Set-VMDvdDrive -VMName POLARIS-TEST -Path $imagePath
+$isoPath = '\\ICEMAN\Products\Microsoft\SharePoint 2013\' `
+    + 'en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso'
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
 ```
 
 ---
@@ -374,10 +418,14 @@ $preReqPath = `
     /WCFDataServices56:"$preReqPath\WcfDataServices-5.6.exe"
 ```
 
-## # Install SharePoint Server 2013
+```PowerShell
+cls
+```
+
+### # Install SharePoint Server 2013
 
 ```PowerShell
-X:\setup.cmd
+& X:\setup.cmd
 ```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/59/6B1DE3E800C79386E287D5C9C6CE0EDAA054C059.png)
@@ -398,20 +446,27 @@ Click **Install SharePoint Server**. UAC, click Yes.
 
 Clear the checkbox and click **Close**.
 
+## Snapshot VM before configuring SharePoint
+
 ---
 
-**BEAST**
+**FOOBAR8**
 
-## # Checkpoint VM - "Before SharePoint Server 2013 configuration"
+## # Checkpoint VM
 
 ```PowerShell
-Stop-VM POLARIS-TEST
+$snapshotName = 'Before SharePoint Server 2013 configuration'
+$vmHost = 'BEAST'
+$vmName = 'POLARIS-TEST'
+
+Stop-VM -ComputerName $vmHost -VMName $vmName
 
 Checkpoint-VM `
-    -Name POLARIS-TEST `
-    -SnapshotName "Before SharePoint Server 2013 configuration"
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -SnapshotName $snapshotName
 
-Start-VM POLARIS-TEST
+Start-VM -ComputerName $vmHost -VMName $vmName
 ```
 
 ---
@@ -431,6 +486,8 @@ robocopy "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4701.1001 - S
 ### # Install patch
 
 ```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell
+
 Push-Location C:\NotBackedUp\Temp
 
 .\Install.ps1
@@ -444,16 +501,6 @@ Pop-Location
 Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
 Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
 Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb2956166-fullfile-x64-glb.exe
-```
-
-```PowerShell
-cls
-```
-
-## # Mirror Toolbox content
-
-```PowerShell
-robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
 ```
 
 ```PowerShell
@@ -525,7 +572,7 @@ cls
 ### # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
-& '.\Configure DCOM Permissions.ps1'
+& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Configure DCOM Permissions.ps1'
 ```
 
 ### Reference
@@ -594,14 +641,18 @@ cls
 
 **ICEMAN**
 
+```Console
+PowerShell
+```
+
 ### # Create share and configure permissions for SharePoint backups
 
 ```PowerShell
-mkdir "D:\Shares\Backups\SharePoint - POLARIS-TEST"
+mkdir 'D:\Shares\Backups\SharePoint - POLARIS-TEST'
 
-icacls "D:\Shares\Backups\SharePoint - POLARIS-TEST" /grant "TECHTOOLBOX\s-sharepoint-test:(OI)(CI)(F)"
+icacls 'D:\Shares\Backups\SharePoint - POLARIS-TEST' /grant 'TECHTOOLBOX\s-sharepoint-test:(OI)(CI)(F)'
 
-icacls "D:\Shares\Backups\SharePoint - POLARIS-TEST" /grant "TECHTOOLBOX\POLARIS-TEST`$:(OI)(CI)(F)"
+icacls 'D:\Shares\Backups\SharePoint - POLARIS-TEST' /grant 'TECHTOOLBOX\POLARIS-TEST`$:(OI)(CI)(F)'
 ```
 
 ---
@@ -697,6 +748,8 @@ WITH NOFORMAT, NOINIT
 ```
 
 ---
+
+**TODO:**
 
 ```PowerShell
 cls
@@ -1239,32 +1292,6 @@ Start-VM $vmName
 
 ---
 
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-```PowerShell
-cls
-```
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
 ## # Install SCOM agent
 
 ```PowerShell
@@ -1283,33 +1310,3 @@ msiexec.exe /i $msiPath `
 ```
 
 ## # Approve manual agent install in Operations Manager
-
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
-
-```PowerShell
-$computer = 'POLARIS-TEST'
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-```
-
----
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5B/A0B1362E922D2BB10C13F0C0C0DCDFE85E3D775B.png)
