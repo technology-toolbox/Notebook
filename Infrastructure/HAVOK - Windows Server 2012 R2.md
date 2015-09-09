@@ -1,60 +1,79 @@
-﻿# HAVOK (2014-01-04) - Windows Server 2012 R2 Standard
+﻿# HAVOK - Windows Server 2012 R2 Standard
 
-Saturday, January 04, 2014
-4:16 PM
+Tuesday, September 8, 2015
+1:30 PM
 
-```Console
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
+
+---
+
+**FOOBAR8**
 
 ## # Create virtual machine
 
 ```PowerShell
-$vmName = "HAVOK"
+$vmHost = 'BEAST'
+$vmName = 'HAVOK'
 
 New-VM `
+    -ComputerName $vmHost `
     -Name $vmName `
     -Path C:\NotBackedUp\VMs `
     -MemoryStartupBytes 8GB `
     -SwitchName "Virtual LAN 2 - 192.168.10.x"
 
-Set-VMProcessor -VMName $vmName -Count 4
-
-$sysPrepedImage =
-    "\\ICEMAN\VM Library\ws2012std-r2\Virtual Hard Disks\ws2012std-r2.vhd"
+Set-VMProcessor -ComputerName $vmHost -VMName $vmName -Count 4
 
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
-Convert-VHD `
-    -Path $sysPrepedImage `
-    -DestinationPath $vhdPath
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 25GB
 
-Set-VHD $vhdPath -PhysicalSectorSizeBytes 4096
+Add-VMHardDiskDrive -ComputerName $vmHost -VMName $vmName -Path $vhdPath
 
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
+$imagePath = '\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso'
 
-Start-VM $vmName
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
+
+Start-VM -ComputerName $vmHost -VMName $vmName
 ```
 
-## # Rename the server and join domain
+---
+
+## Install custom Windows Server 2012 R2 image
+
+- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **HAVOK** and click **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
+
+## # Rename local Administrator account and set password
 
 ```PowerShell
-Rename-Computer -NewName HAVOK -Restart
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword('{password}')
 
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
+logoff
 ```
 
-## # Download PowerShell help files
+```PowerShell
+cls
+```
+
+## # Select "High performance" power scheme
 
 ```PowerShell
-Update-Help
+powercfg.exe /L
+powercfg.exe /S SCHEME_MIN
+powercfg.exe /L
+```
+
+```PowerShell
+cls
 ```
 
 ## # Change drive letter for DVD-ROM
-
-### # To change the drive letter for the DVD-ROM using PowerShell
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -66,6 +85,10 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
+```
+
+```PowerShell
+cls
 ```
 
 ## # Rename network connection
@@ -82,44 +105,97 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name "LAN 1 - 192.168.10.x" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
+Set-NetAdapterAdvancedProperty `
+    -Name "LAN 1 - 192.168.10.x" `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
 
 ping ICEMAN -f -l 8900
 ```
 
-## # Add disks for SQL Server storage (Data01, Log01, Temp01, and Backup01)
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
 
 ```PowerShell
-$vmName = "HAVOK"
+Enable-PSRemoting -Confirm:$false
+```
 
-Stop-VM $vmName
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Technology Toolbox (Custom)' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+```
+
+## # Add disks for SQL Server storage (Data01, Log01, Temp01, and Backup01)
+
+---
+
+**FOOBAR8**
+
+## # Add disks to virtual machine
+
+```PowerShell
+$vmHost = "BEAST"
+$vmName = "HAVOK"
 
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data01.vhdx"
 
-New-VHD -Path $vhdPath -Fixed -SizeBytes 30GB
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath -ControllerType SCSI
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 35GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
 
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Log01.vhdx"
 
-New-VHD -Path $vhdPath -Fixed -SizeBytes 5GB
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath -ControllerType SCSI
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 8GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
 
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Temp01.vhdx"
 
-New-VHD -Path $vhdPath -Fixed -SizeBytes 2GB
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath -ControllerType SCSI
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 2GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
 
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Backup01.vhdx"
 
-New-VHD -Path $vhdPath -Dynamic -SizeBytes 50GB
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath -ControllerType SCSI
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 50GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
+```
 
-Start-VM $vmName
+---
+
+```PowerShell
+cls
 ```
 
 ## # Initialize disks and format volumes
@@ -162,27 +238,67 @@ Get-Disk 4 |
         -Confirm:$false
 ```
 
-## # Install .NET Framework 3.5
-
-```PowerShell
-Install-WindowsFeature `
-    NET-Framework-Core `
-    -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS'
-```
-
-## # Install SQL Server 2012 with SP1
-
-**# Note: .NET Framework 3.5 is required for SQL Server 2012 Management Tools.**
+## Install SQL Server 2014
 
 ### Reference
 
 **Set up SQL Server for TFS**\
 Pasted from <[http://msdn.microsoft.com/en-us/library/jj620927.aspx](http://msdn.microsoft.com/en-us/library/jj620927.aspx)>
 
-On the **Feature Selection** step:
+**Note: **.NET Framework 3.5 is required for SQL Server 2014 Management Tools.
 
-- Do not select **Reporting Services - Native**.
-- Select **Management Tools - Complete**.
+```PowerShell
+cls
+```
+
+### # Install .NET Framework 3.5
+
+```PowerShell
+$sourcePath = "\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS"
+
+Install-WindowsFeature NET-Framework-Core -Source $sourcePath
+```
+
+### # Install SQL Server 2014
+
+---
+
+**FOOBAR8**
+
+#### # Insert the SQL Server 2014 installation media
+
+```PowerShell
+$vmHost = "BEAST"
+$vmName = "HAVOK"
+
+$isoPath = '\\ICEMAN\Products\Microsoft\SQL Server 2014\en_sql_server_2014_enterprise_edition_x64_dvd_3932700.iso'
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Launch SQL Server setup
+
+```PowerShell
+& X:\Setup.exe
+```
+
+On the **Feature Selection** step, select the following checkboxes:
+
+- **Database Engine Services**
+  - **Full-Text and Semantic Extractions for Search**
+- **Analysis Services**
+- **Management Tools - Basic**
+  - **Management Tools - Complete**
+
+> **Important**
+>
+> Do not select **Reporting Services - Native**. This will be installed on the TFS App Tier server.
 
 On the **Server Configuration** step:
 
@@ -194,18 +310,22 @@ On the **Database Engine Configuration** step:
 - On the **Server Configuration** tab, in the **Specify SQL Server administrators** section, click **Add...** and then add the domain group for SQL Server administrators.
 - On the **Data Directories** tab:
   - In the **Data root directory** box, type **D:\\Microsoft SQL Server\\**.
-  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL11.MSSQLSERVER\\MSSQL\\Data**).
-  - In the **Temp DB directory** box, change the drive letter to **T:** (the value should be **T:\\Microsoft SQL Server\\MSSQL11.MSSQLSERVER\\MSSQL\\Data**).
-  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL11.MSSQLSERVER\\MSSQL\\Backup**).
+  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **Temp DB directory** box, change the drive letter to **T:** (the value should be **T:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup**).
 
 On the **Analysis Services Configuration** step:
 
 - On the **Server Configuration** tab, in the **Specify SQL Server administrators** section, click **Add...** and then add the domain group for SQL Server administrators.
 - On the **Data Directories** tab:
-  - In the **Data directory** box, type **D:\\Microsoft SQL Server\\MSAS11.MSSQLSERVER\\OLAP\\Data**.
-  - In the **Log file directory** box, type **L:\\Microsoft SQL Server\\MSAS11.MSSQLSERVER\\OLAP\\Log**.
-  - In the **Temp directory** box, type **T:\\Microsoft SQL Server\\MSAS11.MSSQLSERVER\\OLAP\\Temp**.
-  - In the **Backup directory** box, type **Z:\\Microsoft SQL Server\\MSAS11.MSSQLSERVER\\OLAP\\Backup**.
+  - In the **Data directory** box, type **D:\\Microsoft SQL Server\\MSAS12.MSSQLSERVER\\OLAP\\Data**.
+  - In the **Log file directory** box, type **L:\\Microsoft SQL Server\\MSAS12.MSSQLSERVER\\OLAP\\Log**.
+  - In the **Temp directory** box, type **T:\\Microsoft SQL Server\\MSAS12.MSSQLSERVER\\OLAP\\Temp**.
+  - In the **Backup directory** box, type **Z:\\Microsoft SQL Server\\MSAS12.MSSQLSERVER\\OLAP\\Backup**.
+
+```PowerShell
+cls
+```
 
 ## # Configure firewall rules for SQL Server
 
@@ -227,85 +347,34 @@ New-NetFirewallRule `
     -LocalPort 1433 `-Action Allow
 ```
 
-## # Install SCOM agent
+## Configure Max Degree of Parallelism for SharePoint
 
-```PowerShell
-$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+### -- Set Max Degree of Parallelism to 1
 
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-## # Approve manual agent install in Operations Manager
-
-## # Install DPM 2012 R2 agent
-
-```PowerShell
-$imagePath = "\\iceman\Products\Microsoft\System Center 2012 R2\" `
-    + "mu_system_center_2012_r2_data_protection_manager_x86_and_x64_dvd_2945939.iso"
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$installer = $imageDriveLetter + ":\SCDPM\Agents\DPMAgentInstaller_x64.exe"
-
-& $installer JUGGERNAUT.corp.technologytoolbox.com
-```
-
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
-
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
-
-- Exception for DPMRA.exe in all profiles
-- Exception for Windows Management Instrumentation service
-- Exception for RemoteAdmin service
-- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
-
-### Reference
-
-**Installing Protection Agents Manually**\
-Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
-
-## Attach DPM agent
-
-On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the following commands:
-
-```PowerShell
-$productionServer = "HAVOK"
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName JUGGERNAUT `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `-UserName jjameson-admin
-```
-
-## Add "Local System" account to SQL Server sysadmin role
-
-On the SQL Server (HAVOK), open SQL Server Management Studio and execute the following:
-
-```SQL
-ALTER SERVER ROLE [sysadmin] ADD MEMBER [NT AUTHORITY\SYSTEM]
+```Console
+EXEC sys.sp_configure N'show advanced options', N'1'  RECONFIGURE WITH OVERRIDE
+GO
+EXEC sys.sp_configure N'max degree of parallelism', N'1'
+GO
+RECONFIGURE WITH OVERRIDE
+GO
+EXEC sys.sp_configure N'show advanced options', N'0'  RECONFIGURE WITH OVERRIDE
 GO
 ```
 
-### Reference
+```Console
+cls
+```
 
-**Protection agent jobs may fail for SQL Server 2012 databases**\
-Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://technet.microsoft.com/en-us/library/dn281948.aspx)>
+### # Restart SQL Server
 
-## Configure Max Degree of Parallelism
+```PowerShell
+Stop-Service SQLSERVERAGENT
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/926CAFE390C10D8FF48C952CAC315CA44236DCEF.png)
+Restart-Service MSSQLSERVER
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/26/59828C332CD5C2E93579D7FCCDE90E7176BCC826.png)
+Start-Service SQLSERVERAGENT
+```
 
 ### Reference
 
@@ -313,20 +382,24 @@ Ensure the Max degree of parallelism is set to 1. For additional information abo
 
 Pasted from <[http://technet.microsoft.com/en-us/library/ee805948.aspx](http://technet.microsoft.com/en-us/library/ee805948.aspx)>
 
-## Fix permissions to avoid "ESENT" errors in event log
+```PowerShell
+cls
+```
 
-```Console
-icacls C:\Windows\System32\LogFiles\Sum\Api.chk /grant "NT Service\MSSQLSERVER":(M)
+## # Fix permissions to avoid "ESENT" errors in event log
 
-icacls C:\Windows\System32\LogFiles\Sum\Api.log /grant "NT Service\MSSQLSERVER":(M)
+```PowerShell
+icacls C:\Windows\System32\LogFiles\Sum\Api.chk /grant 'NT Service\MSSQLSERVER:(M)'
 
-icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant "NT Service\MSSQLSERVER":(M)
+icacls C:\Windows\System32\LogFiles\Sum\Api.log /grant 'NT Service\MSSQLSERVER:(M)'
 
-icacls C:\Windows\System32\LogFiles\Sum\Api.chk /grant "NT Service\MSSQLServerOLAPService":(M)
+icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant 'NT Service\MSSQLSERVER:(M)'
 
-icacls C:\Windows\System32\LogFiles\Sum\Api.log /grant "NT Service\MSSQLServerOLAPService":(M)
+icacls C:\Windows\System32\LogFiles\Sum\Api.chk /grant 'NT Service\MSSQLServerOLAPService:(M)'
 
-icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant "NT Service\MSSQLServerOLAPService":(M)
+icacls C:\Windows\System32\LogFiles\Sum\Api.log /grant 'NT Service\MSSQLServerOLAPService:(M)'
+
+icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant 'NT Service\MSSQLServerOLAPService:(M)'
 ```
 
 ### Reference
@@ -337,15 +410,6 @@ Pasted from <[http://support.microsoft.com/kb/2811566](http://support.microsoft.
 ## -- Configure TempDB
 
 ```SQL
-ALTER DATABASE [tempdb]
-    MODIFY FILE
-    (
-        NAME = N'tempdev'
-        , SIZE = 256MB
-        , MAXSIZE = 512MB
-        , FILEGROWTH = 128MB
-    );
-
 DECLARE @dataPath VARCHAR(300);
 
 SELECT
@@ -354,6 +418,15 @@ FROM
     sysaltfiles s
 WHERE
     name = 'tempdev';
+
+ALTER DATABASE [tempdb]
+    MODIFY FILE
+    (
+        NAME = N'tempdev'
+        , SIZE = 256MB
+        , MAXSIZE = 512MB
+        , FILEGROWTH = 128MB
+    );
 
 DECLARE @sqlStatement NVARCHAR(500);
 
@@ -404,274 +477,567 @@ ALTER DATABASE [tempdb]
     )
 ```
 
-## -- Restore content database for intranet Web application
+## -- Restore database logins
 
 ```SQL
-RESTORE DATABASE [WSS_Content_ttweb] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\WSS_Content_ttweb_backup_2014_01_04_064316_3783309.bak' WITH  FILE = 1,  MOVE N'WSS_Content_ttweb' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_ttweb.mdf',  MOVE N'WSS_Content_ttweb_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_ttweb_log.LDF',  NOUNLOAD,  STATS = 5
-```
-
-## -- Restore content database for team sites
-
-```SQL
-RESTORE DATABASE [WSS_Content_Team1] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\WSS_Content_Team1_backup_2014_01_04_064316_3627095.bak' WITH  FILE = 1,  MOVE N'WSS_Content_Team1' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_Team1.mdf',  MOVE N'WSS_Content_Team1_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_Team1_1.LDF',  NOUNLOAD,  STATS = 5
-```
-
-## -- Restore content database for My Sites
-
-```SQL
-RESTORE DATABASE [WSS_Content_MySites] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\WSS_Content_MySites_backup_2014_01_04_064316_3627095.bak' WITH  FILE = 1,  MOVE N'WSS_Content_MySites' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_MySites.mdf',  MOVE N'WSS_Content_MySites_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_MySites_log.LDF',  NOUNLOAD,  STATS = 5
-```
-
-## -- Restore the Managed Metadata Service database
-
-```SQL
-RESTORE DATABASE [ManagedMetadataService] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\ManagedMetadataService_backup_2014_01_04_064316_3314531.bak' WITH  FILE = 1,  MOVE N'ManagedMetadataService' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\ManagedMetadataService.mdf',  MOVE N'ManagedMetadataService_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\ManagedMetadataService_log.ldf',  NOUNLOAD,  STATS = 5
-```
-
-## -- Restore the User Profile Service databases
-
-```SQL
-RESTORE DATABASE [ProfileDB] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\ProfileDB_backup_2014_01_04_064316_4095824.bak' WITH  FILE = 1,  MOVE N'ProfileDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\ProfileDB.mdf',  MOVE N'ProfileDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\ProfileDB_log.ldf',  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [SocialDB] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\SocialDB_backup_2014_01_04_064316_4252085.bak' WITH  FILE = 1,  MOVE N'SocialDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\SocialDB.mdf',  MOVE N'SocialDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\SocialDB_log.ldf',  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [SyncDB] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\SyncDB_backup_2014_01_04_064316_4095824.bak' WITH  FILE = 1,  MOVE N'SyncDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\SyncDB.mdf',  MOVE N'SyncDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\SyncDB_log.ldf',  NOUNLOAD,  STATS = 5
-```
-
-## -- Restore the Secure Store Service database
-
-```SQL
-RESTORE DATABASE [Secure_Store_Service_DB] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\Secure_Store_Service_DB_backup_2014_01_04_064316_4252085.bak' WITH  FILE = 1,  MOVE N'Secure_Store_Service_DB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Secure_Store_Service_DB.mdf',  MOVE N'Secure_Store_Service_DB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\Secure_Store_Service_DB_log.ldf',  NOUNLOAD,  STATS = 5
-```
-
-## -- Restore TFS databases (OLTP)
-
-```SQL
-RESTORE DATABASE [ReportServer_TFS]
- FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\ReportServer_TFS_backup_2014_01_04_064316_4095824.bak' WITH  FILE = 1,  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [ReportServer_TFSTempDB]
- FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\ReportServer_TFSTempDB_backup_2014_01_04_064316_4095824.bak' WITH  FILE = 1,  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [Tfs_Configuration]
- FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\Tfs_Configuration_backup_2014_01_04_064316_3470811.bak' WITH  FILE = 1,  MOVE N'Tfs_Configuration' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Tfs_Configuration.mdf',  MOVE N'Tfs_Configuration_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\Tfs_Configuration_1.LDF',  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [Tfs_DefaultCollection]
- FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\Tfs_DefaultCollection_backup_2014_01_04_064316_3470811.bak' WITH  FILE = 1,  MOVE N'Tfs_DefaultCollection' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Tfs_DefaultCollection.mdf',  MOVE N'Tfs_DefaultCollection_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\Tfs_DefaultCollection_1.ldf',  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [Tfs_IntegrationPlatform]
- FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\Tfs_IntegrationPlatform_backup_2014_01_04_064316_3470811.bak' WITH  FILE = 1,  MOVE N'Tfs_IntegrationPlatform' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Tfs_IntegrationPlatform.mdf',  MOVE N'Tfs_IntegrationPlatform_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\Tfs_IntegrationPlatform_log.LDF',  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [Tfs_Warehouse]
- FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\Tfs_Warehouse_backup_2014_01_04_064316_3470811.bak' WITH  FILE = 1,  MOVE N'Tfs_Warehouse' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Tfs_Warehouse.mdf',  MOVE N'Tfs_Warehouse_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\Tfs_Warehouse_1.LDF',  NOUNLOAD,  STATS = 5
-
-GO
-
 USE [master]
 GO
-CREATE LOGIN [TECHTOOLBOX\svc-tfsreports]
+
+CREATE LOGIN [TECHTOOLBOX\COLOSSUS$]
 FROM WINDOWS WITH DEFAULT_DATABASE=[master]
-GO
+
+CREATE LOGIN [TECHTOOLBOX\CYCLOPS$]
+FROM WINDOWS WITH DEFAULT_DATABASE=[master]
+
+CREATE LOGIN [TECHTOOLBOX\JUBILEE$]
+FROM WINDOWS WITH DEFAULT_DATABASE=[master]
+
+CREATE LOGIN [TECHTOOLBOX\s-scom-action]
+FROM WINDOWS WITH DEFAULT_DATABASE=[master]
+
+CREATE LOGIN [TECHTOOLBOX\s-scom-config-das]
+FROM WINDOWS WITH DEFAULT_DATABASE=[master]
+
+CREATE LOGIN [TECHTOOLBOX\s-scom-data-reader]
+FROM WINDOWS WITH DEFAULT_DATABASE=[master]
+
+CREATE LOGIN [TECHTOOLBOX\s-scom-data-writer]
+FROM WINDOWS WITH DEFAULT_DATABASE=[master]
+
+CREATE LOGIN [TECHTOOLBOX\svc-vmm]
+FROM WINDOWS WITH DEFAULT_DATABASE=[master]
 ```
 
-## Restore TFS Analysis Services database
+## -- Restore OLTP databases
+
+```Console
+RESTORE DATABASE AdventureWorks2012
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\AdventureWorks2012.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'AdventureWorks2012_Data' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\AdventureWorks2012.mdf',
+    MOVE N'AdventureWorks2012_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\AdventureWorks2012.LDF'
+
+RESTORE DATABASE AdventureWorksLT2012
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\AdventureWorksLT2012.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'AdventureWorksLT2008_Data' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\AdventureWorksLT2012.mdf',
+    MOVE N'AdventureWorksLT2008_Log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\AdventureWorksLT2012.LDF'
+
+RESTORE DATABASE Caelum
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\Caelum.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'DB_29334_caelum_data' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Caelum.mdf',
+    MOVE N'DB_29334_caelum_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\Caelum.LDF'
+
+RESTORE DATABASE Caelum_Warehouse
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\Caelum_Warehouse.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'Caelum_Warehouse' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Caelum_Warehouse.mdf',
+    MOVE N'Caelum_Warehouse_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\Caelum_Warehouse.LDF'
+
+RESTORE DATABASE LoadTest2010
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\LoadTest2010.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'LoadTest2010' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\LoadTest2010.mdf',
+    MOVE N'LoadTest2010_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\LoadTest2010.LDF'
+
+RESTORE DATABASE ManagedMetadataService
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\ManagedMetadataService.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'ManagedMetadataService' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\ManagedMetadataService.mdf',
+    MOVE N'ManagedMetadataService_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\ManagedMetadataService.LDF'
+
+RESTORE DATABASE OperationsManager
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\OperationsManager.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'MOM_DATA' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\OperationsManager.mdf',
+    MOVE N'MOM_LOG' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\OperationsManager.LDF'
+
+RESTORE DATABASE OperationsManagerDW
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\OperationsManagerDW.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'MOM_DATA' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\OperationsManagerDW.mdf',
+    MOVE N'MOM_LOG' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\OperationsManagerDW.LDF'
+
+RESTORE DATABASE ReportServer_SCOM
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\ReportServer_SCOM.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'ReportServer_SCOM' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\ReportServer_SCOM.mdf',
+    MOVE N'ReportServer_SCOM_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\ReportServer_SCOM.LDF'
+
+RESTORE DATABASE ReportServer_SCOMTempDB
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\ReportServer_SCOMTempDB.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'ReportServer_SCOMTempDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\ReportServer_SCOMTempDB.mdf',
+    MOVE N'ReportServer_SCOMTempDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\ReportServer_SCOMTempDB.LDF'
+
+RESTORE DATABASE ReportServer_TFS
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\ReportServer_TFS.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'ReportServer' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\ReportServer_TFS.mdf',
+    MOVE N'ReportServer_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\ReportServer_TFS.LDF'
+
+RESTORE DATABASE ReportServer_TFSTempDB
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\ReportServer_TFSTempDB.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'ReportServerTempDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\ReportServer_TFSTempDB.mdf',
+    MOVE N'ReportServerTempDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\ReportServer_TFSTempDB.LDF'
+
+RESTORE DATABASE SecureStoreService
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\SecureStoreService.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'Secure_Store_Service_DB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\SecureStoreService.mdf',
+    MOVE N'Secure_Store_Service_DB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\SecureStoreService.LDF'
+
+RESTORE DATABASE SqlMaintenance
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\SqlMaintenance.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'SqlMaintenance' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\SqlMaintenance.mdf',
+    MOVE N'SqlMaintenance_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\SqlMaintenance.LDF'
+
+RESTORE DATABASE SUSDB
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\SUSDB.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'SUSDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\SUSDB.mdf',
+    MOVE N'SUSDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\SUSDB.LDF'
+
+RESTORE DATABASE Tfs_Configuration
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\Tfs_Configuration.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'Tfs_Configuration' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Tfs_Configuration.mdf',
+    MOVE N'Tfs_Configuration_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\Tfs_Configuration.LDF'
+
+RESTORE DATABASE Tfs_DefaultCollection
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\Tfs_DefaultCollection.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'Tfs_DefaultCollection' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Tfs_DefaultCollection.mdf',
+    MOVE N'Tfs_DefaultCollection_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\Tfs_DefaultCollection.ldf'
+
+RESTORE DATABASE Tfs_IntegrationPlatform
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\Tfs_IntegrationPlatform.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'Tfs_IntegrationPlatform' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Tfs_IntegrationPlatform.mdf',
+    MOVE N'Tfs_IntegrationPlatform_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\Tfs_IntegrationPlatform.LDF'
+
+RESTORE DATABASE Tfs_Warehouse
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\Tfs_Warehouse.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'Tfs_Warehouse' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Tfs_Warehouse.mdf',
+    MOVE N'Tfs_Warehouse_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\Tfs_Warehouse.LDF'
+
+RESTORE DATABASE UserProfileService_Profile
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Profile.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'ProfileDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Profile.mdf',
+    MOVE N'ProfileDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Profile.LDF'
+
+RESTORE DATABASE UserProfileService_Social
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Social.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'SocialDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Social.mdf',
+    MOVE N'SocialDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Social.LDF'
+
+RESTORE DATABASE UserProfileService_Sync
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Sync.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'SyncDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Sync.mdf',
+    MOVE N'SyncDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Sync.LDF'
+
+RESTORE DATABASE VirtualManagerDB
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\VirtualManagerDB.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'VirtualManagerDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\VirtualManagerDB.mdf',
+    MOVE N'VirtualManagerDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\VirtualManagerDB.LDF'
+
+RESTORE DATABASE WSS_Content_MySites
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_MySites.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'WSS_Content_MySites' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\WSS_Content_MySites.mdf',
+    MOVE N'WSS_Content_MySites_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\WSS_Content_MySites.LDF'
+
+RESTORE DATABASE WSS_Content_Team1
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_Team1.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'WSS_Content_Team1' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\WSS_Content_Team1.mdf',
+    MOVE N'WSS_Content_Team1_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\WSS_Content_Team1.LDF'
+
+RESTORE DATABASE WSS_Content_ttweb
+FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_ttweb.bak'
+WITH FILE = 1, NOUNLOAD, STATS = 5,
+    MOVE N'WSS_Content_ttweb' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\WSS_Content_ttweb.mdf',
+    MOVE N'WSS_Content_ttweb_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\WSS_Content_ttweb.LDF'
+```
+
+## Restore TFS OLAP database
 
 ```XML
 <Restore xmlns="http://schemas.microsoft.com/analysisservices/2003/engine">
-  <File>\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSAS11.MSSQLSERVER\OLAP\Backup\Tfs_Analysis.abf</File>
+  <File>\\ICEMAN\Backups\HAVOK\Tfs_Analysis.abf</File>
   <Password>{guess}</Password>
 </Restore>
 ```
 
-In the **Tfs_Analysis** database, add **TECHTOOLBOX\\svc-tfsreports-test** to **TfsWarehouseDataReader** role.
+## Replace service account in TFS_Warehouse database
 
-Modify **Tfs_AnalysisDataSource** to:
+---
 
-1. Change the database server in the **Connection String** property to **HAVOK-TEST**.
-2. Change the service account specified in the **Impersonation Info** property to **TECHTOOLBOX\\svc-tfsreports**.
+**FOOBAR8**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/332D19548A7AFCD5082D1680B0D784F69F804CAE.png)
+### # Create the "TFS reporting" service account
+
+```PowerShell
+$displayName = 'Service account for Team Foundation Server (Reports)'
+$defaultUserName = 's-tfs-reports'
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+---
+
+### -- Create database login for TFS reporting service account
+
+```SQL
+USE [master]
+GO
+CREATE LOGIN [TECHTOOLBOX\s-tfs-reports]
+FROM WINDOWS WITH DEFAULT_DATABASE=[master]
+GO
+USE [Tfs_Warehouse]
+GO
+CREATE USER [TECHTOOLBOX\s-tfs-reports]
+FOR LOGIN [TECHTOOLBOX\s-tfs-reports]
+GO
+ALTER ROLE [TfsWarehouseDataReader]
+ADD MEMBER [TECHTOOLBOX\s-tfs-reports]
+GO
+```
+
+### Add service account to role in TFS OLAP database
+
+In the **Tfs_Analysis** database, add **TECHTOOLBOX\\s-tfs-reports** to **TfsWarehouseDataReader** role.
+
+```XML
+<Alter AllowCreate="true" ObjectExpansion="ObjectProperties" xmlns="http://schemas.microsoft.com/analysisservices/2003/engine">
+  <Object>
+    <DatabaseID>Tfs_Analysis</DatabaseID>
+    <RoleID>TfsWarehouseDataReader</RoleID>
+  </Object>
+  <ObjectDefinition>
+    <Role xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ddl2="http://schemas.microsoft.com/analysisservices/2003/engine/2" xmlns:ddl2_2="http://schemas.microsoft.com/analysisservices/2003/engine/2/2" xmlns:ddl100_100="http://schemas.microsoft.com/analysisservices/2008/engine/100/100" xmlns:ddl200="http://schemas.microsoft.com/analysisservices/2010/engine/200" xmlns:ddl200_200="http://schemas.microsoft.com/analysisservices/2010/engine/200/200" xmlns:ddl300="http://schemas.microsoft.com/analysisservices/2011/engine/300" xmlns:ddl300_300="http://schemas.microsoft.com/analysisservices/2011/engine/300/300" xmlns:ddl400="http://schemas.microsoft.com/analysisservices/2012/engine/400" xmlns:ddl400_400="http://schemas.microsoft.com/analysisservices/2012/engine/400/400">
+      <ID>TfsWarehouseDataReader</ID>
+      <Name>TfsWarehouseDataReader</Name>
+      <Members>
+        <Member>
+          <Name>TECHTOOLBOX\s-tfs-reports</Name>
+        </Member>
+      </Members>
+    </Role>
+  </ObjectDefinition>
+</Alter>
+```
+
+### Update data source in TFS OLAP database
+
+Modify **Tfs_AnalysisDataSource** to change the service account specified in the **Impersonation Info** property to **TECHTOOLBOX\\s-tfs-reports**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E7/B92862848EBC745B9D14CB14B584CD827511D7E7.png)
 
 Process the **Tfs_Analysis** database.
 
-## -- Restore additional SQL Server databases
-
-```SQL
-RESTORE DATABASE [AdventureWorks2012] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\AdventureWorks2012_backup_2014_01_04_064316_3627095.bak' WITH  FILE = 1,  MOVE N'AdventureWorks2012_Data' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\AdventureWorks2012_Data.mdf',  MOVE N'AdventureWorks2012_Log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\AdventureWorks2012_log.ldf',  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [AdventureWorksLT2012]
- FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\AdventureWorksLT2012_backup_2014_01_04_064316_3158285.bak' WITH  FILE = 1,  MOVE N'AdventureWorksLT2008_Data' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\AdventureWorksLT2012_Data.mdf',  MOVE N'AdventureWorksLT2008_Log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\AdventureWorksLT2012_log.ldf',  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [Caelum]
- FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\Caelum_backup_2014_01_04_064316_3158285.bak' WITH  FILE = 1,  MOVE N'DB_29334_caelum_data' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Caelum.mdf',  MOVE N'DB_29334_caelum_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\Caelum.ldf',  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [Caelum_Warehouse] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\Caelum_Warehouse_backup_2014_01_04_064316_3314531.bak' WITH  FILE = 1,  MOVE N'Caelum_Warehouse' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Caelum_Warehouse.mdf',  MOVE N'Caelum_Warehouse_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\Caelum_Warehouse_log.LDF',  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [LoadTest2010]
- FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\LoadTest2010_backup_2014_01_04_064316_3314531.bak' WITH  FILE = 1,  MOVE N'LoadTest2010' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\LoadTest2010.mdf',  MOVE N'LoadTest2010_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\LoadTest2010_log.LDF',  NOUNLOAD,  STATS = 5
-
-RESTORE DATABASE [SqlMaintenance]
- FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\SqlMaintenance_backup_2014_01_04_064316_3314531.bak' WITH  FILE = 1,  MOVE N'SqlMaintenance' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\SqlMaintenance.mdf',  MOVE N'SqlMaintenance_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\SqlMaintenance_log.ldf',  NOUNLOAD,  STATS = 5
+```PowerShell
+cls
 ```
 
-## # Expand "Log01" VHD
+## # Install DPM 2012 R2 agent
+
+```PowerShell
+$imagePath = "\\iceman\Products\Microsoft\System Center 2012 R2\" `
+    + "mu_system_center_2012_r2_data_protection_manager_x86_and_x64_dvd_2945939.iso"
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$installer = $imageDriveLetter + ":\SCDPM\Agents\DPMAgentInstaller_x64.exe"
+
+& $installer JUGGERNAUT.corp.technologytoolbox.com
+```
+
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
+
+- Exception for DPMRA.exe in all profiles
+- Exception for Windows Management Instrumentation service
+- Exception for RemoteAdmin service
+- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
+
+### Reference
+
+**Installing Protection Agents Manually**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
+
+## Attach DPM agent
+
+On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the following commands:
+
+---
+
+**JUGGERNAUT**
+
+```PowerShell
+$productionServer = 'HAVOK'
+
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName JUGGERNAUT `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
+```
+
+---
+
+## Add "Local System" account to SQL Server sysadmin role
+
+On the SQL Server (HAVOK), open SQL Server Management Studio and execute the following:
+
+```SQL
+ALTER SERVER ROLE [sysadmin] ADD MEMBER [NT AUTHORITY\SYSTEM]
+GO
+```
+
+### Reference
+
+**Protection agent jobs may fail for SQL Server 2012 databases**\
+Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://technet.microsoft.com/en-us/library/dn281948.aspx)>
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+```Console
+cls
+```
+
+## # Install SCOM agent
+
+```PowerShell
+$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=JUBILEE `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+## # Approve manual agent install in Operations Manager
+
+## Upgrade to DPM 2016
+
+### Uninstall previous version of DPM agent
+
+Restart the server to complete the removal.
+
+### # Install new version of DPM agent
+
+```PowerShell
+$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+    + "\Agents\DPMAgentInstaller_x64.exe"
+
+& $installer TT-DPM01.corp.technologytoolbox.com
+```
+
+### Attach DPM agent
+
+## Expand C: drive
+
+---
+
+**FOOBAR10**
+
+### # Expand primary VHD for virtual machine
 
 ```PowerShell
 $vmName = "HAVOK"
+$vmHost = "TT-HV02C"
 
-Stop-VM $vmName
+Stop-VM -ComputerName $vmHost -Name $vmName
 
-Resize-VHD `
-    ("C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-        + $vmName + "_Log01.vhdx") `
-    -SizeBytes 8GB
+$vhdPath = "D:\NotBackedUp\VMs\$vmName\$vmName.vhdx"
 
-Start-VM $vmName
+Resize-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 27GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
-## # Expand L: drive
+---
+
+### # Expand C: partition
+
+```PowerShell
+$maxSize = (Get-PartitionSupportedSize -DriveLetter C).SizeMax
+
+Resize-Partition -DriveLetter C -Size $maxSize
+```
+
+## Expand L: (Log01) drive
+
+---
+
+**FOOBAR8**
+
+### # Increase the size of "Log01" VHD
+
+```PowerShell
+$vmHost = "BEAST"
+$vmName = "HAVOK"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + "_Log01.vhdx") `
+    -SizeBytes 10GB
+```
+
+---
+
+### # Extend partition
 
 ```PowerShell
 $size = (Get-PartitionSupportedSize -DiskNumber 2 -PartitionNumber 1)
 Resize-Partition -DiskNumber 2 -PartitionNumber 1 -Size $size.SizeMax
 ```
 
-## -- Shrink transaction log for Tfs_Warehouse database
+## Upgrade to System Center Operations Manager 2016
 
-```SQL
-USE [Tfs_Warehouse]
-GO
-DBCC SHRINKFILE (N'Tfs_Warehouse_log' , 100)
-GO
+### Uninstall SCOM 2012 R2 agent
+
+```Console
+msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
+
+Restart-Computer
 ```
 
-## Resolve SCOM alerts due to disk fragmentation
+### Install SCOM 2016 agent (using Operations Console)
 
-### Alert Name
+## # Resolve low disk space on C
 
-Logical Disk Fragmentation Level is high
-
-### Alert Description
-
-The disk T: (T:) on computer HAVOK.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 27%. Defragmentation recommended: true.
-
-### Resolution
-
-##### # Copy Toolbox content
+### # Clean up WinSxS folder
 
 ```PowerShell
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
 ```
 
-##### # Create scheduled task to optimize drives
+### # Clean up Windows Update files
 
 ```PowerShell
-[string] $xml = Get-Content `
-  'C:\NotBackedUp\Public\Toolbox\Scheduled Tasks\Optimize Drives.xml'
+Stop-Service wuauserv
 
-Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+
+Start-Service wuauserv
 ```
 
-## # Select "High performance" power scheme
+## Issue - Incorrect IPv6 DNS server assigned by Comcast router
+
+```Text
+PS C:\Users\jjameson-admin> nslookup
+Default Server:  cdns01.comcast.net
+Address:  2001:558:feed::1
+```
+
+> **Note**
+>
+> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on the Comcast router -- and subsequently restarting the VM -- the incorrect DNS server is assigned to the network adapter.
+
+### Solution
 
 ```PowerShell
-powercfg.exe /L
+Set-DnsClientServerAddress `
+    -InterfaceAlias Management `
+    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
 
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
+Restart-Computer
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## Configure Data Collection
 
 ---
 
-**FOOBAR8**
+**SQL Server Management Studio**
 
-```PowerShell
-$computer = 'HAVOK'
+### -- Create SqlManagement database
 
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+```SQL
+CREATE DATABASE SqlManagement
+ON PRIMARY
+(
+    NAME = N'SqlManagement'
+    , FILENAME = N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\SqlManagement.mdf'
+    , SIZE = 102400KB
+    , FILEGROWTH = 102400KB
+)
+LOG ON
+(
+    NAME = N'SqlManagement_log'
+    , FILENAME = N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\SqlManagement_log.ldf'
+    , SIZE = 20480KB
+    , FILEGROWTH = 10%
+)
 ```
 
 ---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/08/98B724F1546823F1D74789D0A47216C216262E08.png)
+### Configure management data warehouse
 
-## Script all database logins
+### Configure data collection
 
-### Reference
+#### Configure default data collection
 
-**Scripting All Logins on a SQL Server Instance**\
-From <[http://sqlity.net/en/2349/scripting-all-logins/](http://sqlity.net/en/2349/scripting-all-logins/)>
+#### Stop data collection for query statistics and server activity
 
-### SQL script
+## Rebuild DPM 2016 server (replace TT-DPM01 with TT-DPM02)
 
-```SQL
-SELECT
-    'IF(SUSER_ID(' + QUOTENAME(SP.name, '''') + ') IS NULL)BEGIN CREATE LOGIN ' + QUOTENAME(SP.name) +
-    CASE WHEN SP.type_desc = 'SQL_LOGIN'
-        THEN ' WITH PASSWORD = ' + CONVERT(NVARCHAR(MAX), SL.password_hash,1) + ' HASHED'
-        ELSE ' FROM WINDOWS'
-    END + ';/*' + SP.type_desc + '*/ END;'
-    COLLATE SQL_Latin1_General_CP1_CI_AS
-FROM
-    sys.server_principals AS SP
-    LEFT JOIN sys.sql_logins AS SL
-    ON SP.principal_id = SL.principal_id
-WHERE
-    SP.type_desc IN ('SQL_LOGIN','WINDOWS_GROUP','WINDOWS_LOGIN')
-    AND SP.name NOT LIKE '##%##'
-    AND SP.name NOT IN ('SA')
-ORDER BY
-    SP.name
-```
+### Remove DPM agent
 
-### Results
+Restart the server to complete the removal.
 
-```SQL
-IF(SUSER_ID('BUILTIN\Administrators') IS NULL)BEGIN CREATE LOGIN [BUILTIN\Administrators] FROM WINDOWS;/*WINDOWS_GROUP*/ END;
-IF(SUSER_ID('NT AUTHORITY\SYSTEM') IS NULL)BEGIN CREATE LOGIN [NT AUTHORITY\SYSTEM] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('NT Service\MSSQLSERVER') IS NULL)BEGIN CREATE LOGIN [NT Service\MSSQLSERVER] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('NT SERVICE\SQLSERVERAGENT') IS NULL)BEGIN CREATE LOGIN [NT SERVICE\SQLSERVERAGENT] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('NT SERVICE\SQLWriter') IS NULL)BEGIN CREATE LOGIN [NT SERVICE\SQLWriter] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('NT SERVICE\Winmgmt') IS NULL)BEGIN CREATE LOGIN [NT SERVICE\Winmgmt] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\COLOSSUS$') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\COLOSSUS$] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\CYCLOPS$') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\CYCLOPS$] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\JUBILEE$') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\JUBILEE$] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\SharePoint Administrators') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\SharePoint Administrators] FROM WINDOWS;/*WINDOWS_GROUP*/ END;
-IF(SUSER_ID('TECHTOOLBOX\SQL Server Administrators') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\SQL Server Administrators] FROM WINDOWS;/*WINDOWS_GROUP*/ END;
-IF(SUSER_ID('TECHTOOLBOX\s-scom-action') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\s-scom-action] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\s-scom-config-das') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\s-scom-config-das] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\s-scom-data-reader') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\s-scom-data-reader] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\s-scom-data-writer') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\s-scom-data-writer] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\s-sharepoint') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\s-sharepoint] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\s-spserviceapp') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\s-spserviceapp] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-scom-action') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-scom-action] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-scom-config-das') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-scom-config-das] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-scom-data-reader') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-scom-data-reader] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-scom-data-writer') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-scom-data-writer] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-sharepoint') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-sharepoint] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-spserviceapp') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-spserviceapp] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-tfs') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-tfs] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-tfsreports') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-tfsreports] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-ttweb') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-ttweb] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-vmm') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-vmm] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\svc-web-my-team') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\svc-web-my-team] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\s-web-intranet') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\s-web-intranet] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
-IF(SUSER_ID('TECHTOOLBOX\s-web-my-team') IS NULL)BEGIN CREATE LOGIN [TECHTOOLBOX\s-web-my-team] FROM WINDOWS;/*WINDOWS_LOGIN*/ END;
+### # Install DPM agent
+
+```PowerShell
+$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
+
+& $installer TT-DPM02.corp.technologytoolbox.com
 ```
