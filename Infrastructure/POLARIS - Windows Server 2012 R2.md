@@ -1313,4 +1313,47 @@ Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 
 ---
 
+```PowerShell
+cls
+```
+
+## # Install SharePoint Cumulative Update
+
+### # Copy patch to local disk
+
+```PowerShell
+robocopy '\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4727.1001 - SharePoint 2013 June 2015 CU' C:\NotBackedUp\Temp
+```
+
+### # Install patch
+
+```PowerShell
+Push-Location C:\NotBackedUp\Temp
+
+.\Install.ps1
+```
+
+When prompted to pause the Search Service Application or leave it running, specify to pause it.
+
+```PowerShell
+Pop-Location
+```
+
+### # Remove patch files from local disk
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\Install.ps1
+Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3054866-fullfile-x64-glb.exe
+```
+
+### # Upgrade SharePoint
+
+```PowerShell
+PSCONFIG.EXE -cmd upgrade -inplace b2b -wait
+```
+
 **TODO:**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/87D8F7F00E65C9FE5B09B4D655444EC47AD94D84.png)

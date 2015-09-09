@@ -1469,3 +1469,140 @@ Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
 
 ---
+
+## Move Package Cache to separate VHD
+
+### Reference
+
+**How to relocate the Package Cache**\
+From <[http://blogs.msdn.com/b/heaths/archive/2014/02/11/how-to-relocate-the-package-cache.aspx](http://blogs.msdn.com/b/heaths/archive/2014/02/11/how-to-relocate-the-package-cache.aspx)>
+
+Refer to comment from "Kazi" (23 Aug 2014 8:15 AM)
+
+Here is my 24 GB solution using a small SSD C: drive and 2TB traditional D: drive without mounting VHD drives. No problem so far on my computer, but USE AT YOU OWN RISK.:
+
+1. MoveDirectory.cmd
+
+robocopy "C:%~1" "D:\\- C -%~1" /e /j /copyall /dcopy:dat /sl /ndl /move\
+mklink /J "C:%~1" "D:\\- C -%~1"
+
+2. MoveDirectories.cmd
+
+call MoveDirectory.cmd "\\Program Files\\Microsoft SQL Server\\100\\Setup Bootstrap"\
+call MoveDirectory.cmd "\\Program Files\\Microsoft SQL Server\\110\\Setup Bootstrap"\
+call MoveDirectory.cmd "\\Program Files\\Microsoft SQL Server\\120\\Setup Bootstrap"\
+call MoveDirectory.cmd "\\Program Files (x86)\\Microsoft SQL Server\\100\\Setup Bootstrap"\
+call MoveDirectory.cmd "\\Program Files (x86)\\Microsoft SQL Server\\110\\Setup Bootstrap"\
+call MoveDirectory.cmd "\\Program Files (x86)\\Microsoft SQL Server\\120\\Setup Bootstrap"\
+call MoveDirectory.cmd "\\ProgramData\\Package Cache"\
+call MoveDirectory.cmd "\\Windows\\Installer"
+
+ps.: Save the two batch files, and run the second one in Admin level Command Prompt.
+
+From <[http://blogs.msdn.com/b/heaths/archive/2014/02/11/how-to-relocate-the-package-cache.aspx](http://blogs.msdn.com/b/heaths/archive/2014/02/11/how-to-relocate-the-package-cache.aspx)>
+
+---
+
+**FOOBAR8**
+
+### # Add disk to virtual machine
+
+```PowerShell
+$vmHost = "FORGE"
+$vmName = "POLARIS-DEV"
+
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+    + $vmName + "_PackageCache01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 20GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Initialize disks and format volumes
+
+#### # Format Data01 drive
+
+```PowerShell
+Get-Disk 5 |
+    Initialize-Disk -PartitionStyle MBR -PassThru |
+    New-Partition -UseMaximumSize -DriveLetter P |
+    Format-Volume `
+        -FileSystem NTFS `
+        -NewFileSystemLabel "PackageCache01" `
+        -Confirm:$false
+```
+
+### Create script to move cache folders
+
+```Console
+cd C:\NotBackedUp\Temp
+
+notepad MoveCacheFolder.cmd
+```
+
+Copy/paste the following commands into Notepad:
+
+```Console
+    robocopy "C:%~1" "P:\- C -%~1" /e /j /copyall /dcopy:dat /sl /ndl /move
+
+    mklink /J "C:%~1" "P:\- C -%~1"
+```
+
+### Move Package Cache folders
+
+Open a Command Prompt using the **Run as administrator** option.
+
+```Console
+call MoveCacheFolder.cmd "\Program Files\Microsoft SQL Server\120\Setup Bootstrap"
+
+call MoveCacheFolder.cmd "\ProgramData\Package Cache"
+
+call MoveCacheFolder.cmd "\Windows\Installer"
+```
+
+```Console
+cls
+```
+
+## # Install SharePoint Cumulative Update
+
+### # Copy patch to local disk
+
+```PowerShell
+robocopy '\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4727.1001 - SharePoint 2013 June 2015 CU' C:\NotBackedUp\Temp
+```
+
+### # Install patch
+
+```PowerShell
+Push-Location C:\NotBackedUp\Temp
+
+.\Install.ps1
+
+Pop-Location
+```
+
+### # Remove patch files from local disk
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\Install.ps1
+Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3054866-fullfile-x64-glb.exe
+```
+
+### # Upgrade SharePoint
+
+```PowerShell
+PSCONFIG.EXE -cmd upgrade -inplace b2b -wait
+```
