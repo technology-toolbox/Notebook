@@ -1,74 +1,70 @@
-﻿# DAZZLER - Windows Server 2012 R2 Standard
+﻿# DAZZLER (2015-09-09) - Windows Server 2012 R2 Standard
 
-Sunday, January 19, 2014
-10:39 AM
+Wednesday, September 9, 2015
+4:53 AM
 
-```Console
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
 
-## # [BEAST] Create virtual machine
+---
+
+**FOOBAR8**
+
+## Create VM using Virtual Machine Manager
+
+- Processors: **2**
+- Memory: **Dynamic**
+- Startup memory: **2 GB**
+- Minimum memory: **512 MB**
+- Maximum memory: **4 GB**
+- VHD size (GB): **45**
+- VHD file name:** DAZZLER**
+- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+- Network Adapter 1:** Virtual LAN 2 - 192-168.10.x**
+- Host:** STORM**
+- Automatic actions
+  - **Turn on the virtual machine if it was running with the physical server stopped**
+  - **Save State**
+  - Operating system: **Windows Server 2012 R2 Standard**
+
+---
+
+## Install custom Windows Server 2012 R2 image
+
+- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **DAZZLER** and click **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
+
+## # Rename local Administrator account and set password
 
 ```PowerShell
-$vmName = "DAZZLER"
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword('{password}')
 
-New-VM `
-    -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
-    -MemoryStartupBytes 512MB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
-
-Set-VMMemory `
-    -VMName $vmName `
-    -DynamicMemoryEnabled $true `-MaximumBytes 2GB
-
-Set-VM -VMName $vmName -ProcessorCount 2
-
-New-Item -ItemType Directory "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
-
-$sysPrepedImage = "\\ICEMAN\VM-Library\VHDs\WS2012-R2-STD.vhdx"
-
-Copy-Item $sysPrepedImage $vhdPath
-
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
-
-Start-VM $vmName
+logoff
 ```
 
-Configure server settings
-
-On the **Settings** page:
-
-1. Ensure the following default values are selected:
-   1. **Country or region: United States**
-   2. **App language: English (United States)**
-   3. **Keyboard layout: US**
-2. Click **Next**.
-3. Type the product key and then click **Next**.
-4. Review the software license terms and then click **I accept**.
-5. Type a password for the built-in administrator account and then click **Finish**.
-
-## # Rename the server and join domain
-
 ```PowerShell
-Rename-Computer -NewName DAZZLER -Restart
+cls
 ```
 
-Wait for the VM to restart and then execute the following command to join the **TECHTOOLBOX **domain:
+## # Select "High performance" power scheme
 
 ```PowerShell
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
+powercfg.exe /L
+powercfg.exe /S SCHEME_MIN
+powercfg.exe /L
+```
+
+```PowerShell
+cls
 ```
 
 ## # Change drive letter for DVD-ROM
 
 ```PowerShell
-# To change the drive letter for the DVD-ROM using PowerShell:
-
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
 $driveLetter = $cdrom.Drive
 
@@ -78,6 +74,10 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
+```
+
+```PowerShell
+cls
 ```
 
 ## # Rename network connection
@@ -102,146 +102,334 @@ Set-NetAdapterAdvancedProperty `
 ping ICEMAN -f -l 8900
 ```
 
-## # Install SCOM agent
-
 ```PowerShell
-$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
+cls
 ```
 
-## # Approve manual agent install in Operations Manager
-
-## # Install .NET Framework 3.5
+## # Enable PowerShell remoting
 
 ```PowerShell
-Install-WindowsFeature `
-    NET-Framework-Core `
-    -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS'
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Enable firewall rules for inbound "ping" requests (required for POSHPAIG)
+
+```PowerShell
+$profile = Get-NetFirewallProfile "Domain"
+
+Get-NetFirewallRule -AssociatedNetFirewallProfile $profile |
+    Where-Object { $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv4-In)" `
+        -or $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv6-In)" } |
+    Enable-NetFirewallRule
+```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Technology Toolbox (Custom)' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+```
+
+## Install TFS 2015
+
+---
+
+**FOOBAR8**
+
+### # Insert the TFS 2015 installation media
+
+```PowerShell
+$vmHost = 'STORM'
+$vmName = 'DAZZLER'
+
+$isoPath = '\\ICEMAN\Products\Microsoft\Team Foundation Server 2015\en_visual_studio_team_foundation_server_2015_x86_x64_dvd_6909713.iso'
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Launch TFS setup
+
+```PowerShell
+& X:\tfs_server.exe
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EA/6D39BC62E175B233B1441C7C6FB65024A2604FEA.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/4DA3F24CA364993CF60A7D5B90046260FBA7A3D4.png)
+
+Wait for the installation to finish. The Team Foundation Server Configuration Center appears.
+
+## Configure TFS build service
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/11/EA8A19941D52DBDF0474BE6D3945F2290E1FF311.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5D/275DC32A855B6954CFF5A9491EF0CE0AA8DE095D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/14/85713281FFF5FE1FB188972BA9850BB79AE6AE14.png)
+
+Click **Browse**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/7437EFA2C795F5A5805FFC66D85D36E3FCBFC8D9.png)
+
+Click **Servers...**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4B/E38081C7B25FADBA13091BDBCDAE4E13E3592E4B.png)
+
+Click **Add...**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/61/50A910F58DB543DEF3EA4DC855EAA0E05046BB61.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D0/161C14CC854832335E9A0ADB9CF0E25D606A73D0.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/35/B99099CDB96BE50644EF3E18371C992EEDD07E35.png)
+
+Click **Close**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/8FBDD55D163131A68054E7D6D2912F426A9208D7.png)
+
+Click **Connect**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/98/B122469608FCD9655ACA4C540F92C3AE797AE898.png)
+
+Click **No**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/54/AD0123D29CDA54FE7AA7E8DCC647CC5E86B30D54.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/CC8000F3C49CF64758A75BACAF2C4C5AE2FA193C.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/5931A738A34379B9DDD4702D160501A2D3F4CF7E.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/DD7564DC51D4E22EF36345EABD748E5AA432C669.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/D5D3BC92F4DC5B909DC92410E6B71E057B1C0AEF.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/D918193BF6F58B66DEA45A483A53F2483080ED21.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/66/D6F5A38658A15A5BB75C24A02C40457559FDEE66.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/18/F51B74A9137355C9F1AF5EFBB33CF212C7D19018.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/166961C21FDA6CBD1255196C7C2B17AC0772DB2C.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A7/EF08C700F48D205A19D110C76C6849BA74888DA7.png)
+
+## Configure permissions on drop folder for TFS builds
+
+```Console
+icacls \\ICEMAN\D$\Shares\Builds /grant 'TECHTOOLBOX\s-tfs-build:(OI)(CI)(M)'
+```
+
+The above works, but it is faster to run it locally...
+
+```Console
+icacls D:\Shares\Builds /grant 'TECHTOOLBOX\s-tfs-build:(OI)(CI)(M)'
 ```
 
 ## Install Visual Studio 2010
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/1009F1F2A3D40D598DE48BFBC3E0F8BBB75DE87F.png)
+---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/35A7FB5C8EEF5BD0DC0C5B9CAF18BBB1BF6D1D39.png)
+**FOOBAR8**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EA/0041AF9002242B47E6A3CF7725398ED210C653EA.png)
+### # Insert the Visual Studio 2010 installation media
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/29D714C58735C688CD566C35D3B3173B87F23F93.png)
+```PowerShell
+$vmHost = 'STORM'
+$vmName = 'DAZZLER'
 
-Select **Custom** and then click **Next**.
+$isoPath = '\\ICEMAN\Products\Microsoft\Visual Studio 2010\en_visual_studio_2010_ultimate_x86_dvd_509116.iso'
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/BC717F1AA6059D447AE4E9BE4F79607BE091F77C.png)
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+```
 
-Clear the checkbox for **Microsoft SQL Server 2008 Express Service Pack 1 (x64)** and then click **Install**.
+---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/67/C4C093368987E03339654638743AA09F8930DA67.png)
+```PowerShell
+cls
+```
+
+### # Launch Visual Studio 2010 setup
+
+```PowerShell
+& X:\setup.exe
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/146E5D20C292D377FC2574871795AD229670AD88.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/DA0C1589B3BAD5304249A682D122CC402C959ADA.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8E/38456F55A159451E4B397C071FE4BE910C77BD8E.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4C/3789D61F70E1CD7860B481EAF6012D2619B7244C.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/968CB57C822C2204B5A9B64F2FF0B2B1A234CC9F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/4E671485E5C0D0E4ADF9D9AD38EB7B296FD63621.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/F9D3B082A70D27B613213911583781844580BAC6.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/05/69127FB9449719D20CF70F4D249D7118781A0205.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/AC1F23424AF5A0DF2FAF8717FD82D96D227AD3C6.png)
 
 ## Install Visual Studio 2010 Service Pack 1
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E5/8CA4E18A021BDAB3BFC166F4088A00EDF75011E5.png)
+---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/61/DCAEDF788CE03ECC90662FAC83FD3F55BCF00261.png)
+**FOOBAR8**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1B/A2CC672C3AD3D422EDB28D3E422717A4002B301B.png)
+### # Insert the Visual Studio 2010 SP1 installation media
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/9D76042D7AA95269E01C6BFB73FBD8624E9591E1.png)
+```PowerShell
+$vmHost = 'STORM'
+$vmName = 'DAZZLER'
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F0/131D389EC11EF216C2EB88B4E4E836A4C3923DF0.png)
+$isoPath = '\\ICEMAN\Products\Microsoft\Visual Studio 2010\Patches\Service Pack 1\mu_visual_studio_2010_sp1_x86_x64_dvd_651704.iso'
 
-## Create share on ICEMAN for TFS builds
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+```
 
-## Install Team Foundation Server 2013 with Update 4
+---
 
-Mount the TFS 2013 with Update 4 installation image and open **tfs_server.exe**.
+```PowerShell
+cls
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/1327877DDD2B2CA0AA8F839EB9AE315DC9D49ECE.png)
+### # Launch Visual Studio 2010 SP1 setup
 
-UAC, click **Yes**.
+```PowerShell
+& X:\Setup.exe
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/35/04D4550CC8BC98F3875ACC105362BF1E1DDEDF35.png)
+```PowerShell
+cls
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/28585579BE3B2F70C330C83979C572272241E31C.png)
+## # Install Visual Studio 2015
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/A27A9A034AAF4831727AB713046A3325A294AFAE.png)
+---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/D7E2D952B94C330712574C4BA37F68B3F2641788.png)
+**FOOBAR8**
 
-Click **Browse**...
+### # Insert the Visual Studio 2015 installation media
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/2C034774A536453F17FBF925766830B230F190B1.png)
+```PowerShell
+$vmHost = 'STORM'
+$vmName = 'DAZZLER'
 
-Click **Servers...**
+$isoPath = '\\ICEMAN\Products\Microsoft\Visual Studio 2015\en_visual_studio_enterprise_2015_x86_x64_dvd_6850497.iso'
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2D/FBD0E0D13036C2C318F342DF42B88F93DA88C82D.png)
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+```
 
-Click **Add...**
+---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/68/F6B3F2DF8E3531EF7CDB6ABFDC3773457512E568.png)
+```PowerShell
+cls
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0D/0BEEB8C8446857557F573B8586A304D7AC75970D.png)
+### # Launch Visual Studio 2015 setup
 
-Click **Close**.
+```PowerShell
+& X:\vs_enterprise.exe
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/54/2211A91C05906F854782BF7D17E817A2509B2B54.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/CB8D2970754D88629E3E6D51F1E4BDCAB8A0FD4D.png)
 
-Click **Connect**.
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/FECD5CD3DB25CEF8B7E376A92F71B45AC6C4EC93.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/99/7DB920E233ADA00DA560001A5F84BAB419C78399.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/6AB2199E908EAA655850B6D365791212FCDD3130.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/5E6EF18B1F6D8885525D950E77E3FB2B03DA5A38.png)
+Select the following features:
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FE/B585F44D2CF8C9B0485582FFAC3C5DB7487044FE.png)
+- Windows and Web Development
+  - **Microsoft Office Developer Tools**
+  - **Microsoft Web Developer Tools**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CC/8A4F74A42143086A9C69ED8FE86577A76FEC3FCC.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/65B2F28CB988A0CF60367E1CCF3606394A8CDFCA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/80/2D582BEDBE8C9544E49E0D10DD577B7ED572D880.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4B/7F1B8CBAB3901BD011BBE30EE4C900CEC7D40D4B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/70191EFA936586174CEB644FD00A6C7EDBB40D86.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2B/FA482E8FD5C26A618DAE0445EC9BF7B7C5F2172B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/40091CCCF59C5FBC343E03C6EB90B7A412212088.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/64CCDFB28B91F862315258358F6AA7F3260A836A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/4DBEAFCAEAC7DE48F13E525AD22385548A945530.png)
+From log file:
+
+[0504:0554][2015-09-09T14:53:01]i000: MUX:  ExecuteError: Package (WindowsIdentityExtensions_x64) failed: Error Message Id: 0 ErrorMessage: Installation of Microsoft Identity Extensions requires Windows Identity Foundation v1.0 to be installed
+
+### # Install Windows Identity Foundation 3.5
+
+```PowerShell
+Install-WindowsFeature Windows-Identity-Foundation
+```
+
+### Modify Visual Studio 2015 to add Microsoft Office Developer Tools
+
+1. **Control Panel > Programs > Programs and Features**
+2. Double-click **Microsoft Visual Studio Enterprise 2015**.
+3. Click **Modify**.
+
+Ugh...Microsoft Office Developer Tools does not appear to be installed when you subsequently check the installed features of Visual Studio 2015 through Control Panel. (Punt)
 
 ## # Install reference assemblies
 
-### Build failure
-
-**Debug | Any CPU**\
- 130 error(s), 2 warning(s)
-
-- \$/foobar/Dev/Lab1/Source/TechnologyToolbox.Foobar.sln - 130 error(s), 2 warning(s), View Log File
-  -  DefaultRoleDefinitionPermissions.cs (1): The type or namespace name 'SharePoint' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?)
-  -  DefaultSiteGroupPermissions.cs (1): The type or namespace name 'SharePoint' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?)
-  -  Diagnostics\\DiagnosticsService.cs (3): The type or namespace name 'SharePoint' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?)
-  -  Diagnostics\\DiagnosticsService.cs (18): The type or namespace name 'SPDiagnosticsServiceBase' could not be found (are you missing a using directive or an assembly reference?)
-  -  Diagnostics\\SPLogger.cs (3): The type or namespace name 'SharePoint' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?)
-  -  C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\Microsoft.Common.targets (1605): Could not resolve this reference. Could not locate the assembly "Microsoft.SharePoint". Check to make sure the assembly exists on disk. If this reference is required by your code, you may get compilation errors.
-  -  C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\Microsoft.Common.targets (1605): Could not resolve this reference. Could not locate the assembly "Microsoft.SharePoint.Security". Check to make sure the assembly exists on disk. If this reference is required by your code, you may get compilation errors.
-
-A large number of error or warning messages were logged, so only some of them appear above. To see all error and warning messages logged in this completed build, click View Log File.
-
 ```PowerShell
 robocopy `
-    '\\iceman\Public\Reference Assemblies' `
+    '\\ICEMAN\Public\Reference Assemblies' `
     'C:\Program Files\Reference Assemblies' /E
 
 & 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v4\AssemblyFoldersEx - x64.reg'
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EB/1F1A4F8F0CEED610298D317AA578BFCE2D2FC7EB.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6C/902A6F7E87FE80BE063AE9BCAB23370FFA39AC6C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1D/200DE2DB31296592F13A3BAFCC365F04E7AB721D.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/015FE6C9EB4A879F2DD482B9CC976A5C0718C9C6.png)
+
+```PowerShell
+& 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v5\AssemblyFoldersEx - x64.reg'
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/44/2CA7474E335103FFC798B5E4DC2557A18C302944.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F2/8549DDC36653E1D36BBE2C9DEAE28FD64EDE40F2.png)
+
+```PowerShell
+cls
+```
+
+## # Install MSBuild Community Tasks
+
+```PowerShell
+& "\\ICEMAN\Public\Download\MSBuild.Community.Tasks.v1.4.0.88.msi"
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/6B8A6E40EB4FF5A78BC3285E72578034D993A54D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/25/F4B41E98225C97F0D9AFEE853C3FB8243977BB25.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/5F1A49D61487A8F729B533398F4E47DA63708055.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/75/81C760FC93EAE1409CF58DF2D5B0BD96A5DFE575.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/B1B0EA42F79F7341CD17D5EA0A1B237C7F7CBC46.png)
+
+**TODO:**
 
 ## Modify build definition to specify VisualStudioVersion
 
@@ -255,88 +443,6 @@ robocopy `
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/D5/D88B46693D7A711EEABBB4C519823FC254CC10D5.png)
 
-## # [BEAST] Increase the size of VHD
-
-```PowerShell
-$vmName = "DAZZLER"
-
-Stop-VM $vmName
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
-
-Resize-VHD -Path $vhdPath -SizeBytes 45GB
-
-Start-VM $vmName
-```
-
-## # Expand C: drive
-
-```PowerShell
-$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
-Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
-```
-
-## Install Visual Studio 2013 with Update 4
-
-### Build failure
-
-**Other Errors and Warnings**
-
-- 2 error(s), 0 warning(s)
-  - TF900547: The directory containing the assemblies for the Visual Studio Test Runner is not valid ''.
-  - TF900547: The directory containing the assemblies for the Visual Studio Test Runner is not valid ''.
-
-### Reference
-
-In TFS 2012>>Build Definition, we can set VS 2010(MSTest) as Test runner.\
-But in TFS 2013 Preview version>>Build Definition, it seems we can’t change the Test runner, and it set to VS 2013 Test Runner by default.
-
-Pasted from <[http://social.msdn.microsoft.com/Forums/vstudio/en-US/fa5b1406-d8bb-4555-a4ab-4f9fd1690b8e/tf900547-the-directory-containing-the-assemblies-for-the-visual-studio-test-runner-is-not-valid?forum=tfsbuild](http://social.msdn.microsoft.com/Forums/vstudio/en-US/fa5b1406-d8bb-4555-a4ab-4f9fd1690b8e/tf900547-the-directory-containing-the-assemblies-for-the-visual-studio-test-runner-is-not-valid?forum=tfsbuild)>
-
-Mount the Visual Studio 2013 installation image and open **vs_ultimate.exe**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2A/CBF47F07155C951308F9BE9191234C6A2EC4AB2A.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C7/855E57C189851F88D70F5C397C1F362E66D6E9C7.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AB/3CC7ECE2DD5475F5B2D7B8653F3D428690E46DAB.png)
-
-Ensure the default optional features are selected to install:
-
-- **Blend for Visual Studio**
-- **LightSwitch**
-- **Microsoft Foundation Classes for C++**
-- **Microsoft Office Developer Tools**
-- **Microsoft SQL Server Data Tools**
-- **Microsoft Web Developer Tools**
-- **Silverlight Development Kit**
-
-Click **INSTALL**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/7A00A0B01B8316C6B43F5F44CDDB12147111854F.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5A/C60C85EF5AE731F27CB4C642C6DAC99A9B41CF5A.png)
-
-```PowerShell
-cls
-```
-
-## # Install MSBuild Community Tasks
-
-```PowerShell
-& "\\iceman\Public\Download\MSBuild.Community.Tasks.v1.4.0.42.msi"
-```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8C/74D0E9BE47C2CCE7FEBD063B5BC495958CC5208C.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/EBBE6EA4A8596BA3E94342E8FEC94011E03A3E9D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/50/5B346604E05233AC260F36E8E7BABCEC26183E50.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/3FF5052E3C065A984BDB50169B8C88DD178BD19D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/90/A98FBB838C23E5D21B8E41DBC1900723C6D9AB90.png)
-
 ### Build failure
 
 **Default Configuration and Platform**\
@@ -347,56 +453,6 @@ cls
 
 1. Edit **IncrementAssemblyVersion.proj** and change **\$(VS110COMNTOOLS)** to **\$(VS120COMNTOOLS)** on line 12.
 2. Restart the computer to ensure the environment variable is set as expected (after installing Visual Studio).
-
-## # Increase the size of VHD
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/45/56C102833B54558B03F13DFAAE03C3E03288F245.png)
-
-```PowerShell
-$vmName = "DAZZLER"
-
-Stop-VM $vmName
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
-
-Resize-VHD -Path $vhdPath -SizeBytes 34GB
-
-Start-VM $vmName
-```
-
-## # Expand C: drive
-
-```PowerShell
-$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
-Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
-```
-
-## Resolve SCOM alerts due to disk fragmentation
-
-### Alert Name
-
-Logical Disk Fragmentation Level is high
-
-### Alert Description
-
-The disk C: (C:) on computer DAZZLER.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 12%. Defragmentation recommended: true.
-
-### Resolution
-
-##### # Copy Toolbox content
-
-```PowerShell
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
-```
-
-##### # Create scheduled task to optimize drives
-
-```PowerShell
-[string] $xml = Get-Content `
-  'C:\NotBackedUp\Public\Toolbox\Scheduled Tasks\Optimize Drives.xml'
-
-Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
-```
 
 ## Resolve SCOM alerts due to TFS app pool timeout
 
@@ -454,28 +510,6 @@ In the **Advanced Settings** window, notice **Shutdown Time Limit (seconds)** is
 
 Change **Shutdown Time Limit (seconds)** to **300** and then click **OK**.
 
-## # Increase the size of "DAZZLER" VHD
-
-```PowerShell
-$vmName = "DAZZLER"
-
-Stop-VM $vmName
-
-Resize-VHD `
-    ("C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-        + $vmName + ".vhdx") `
-    -SizeBytes 36GB
-
-Start-VM $vmName
-```
-
-## # Expand C: drive
-
-```PowerShell
-$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 1)
-Resize-Partition -DiskNumber 0 -PartitionNumber 1 -Size $size.SizeMax
-```
-
 ## # Install reference assemblies for building SharePoint 2013 projects
 
 ### Build failure
@@ -495,54 +529,70 @@ robocopy '\\iceman\Public\Reference Assemblies' 'C:\Program Files\Reference Asse
 & "C:\Program Files\Reference Assemblies\Microsoft\SharePoint v5\AssemblyFoldersEx - x64.reg"
 ```
 
-## Install Visual Studio 2013 Update 4
-
-### Build failure
-
-**Debug | Any CPU**\
-5 error(s), 0 warning(s)
-
-- \$/Securitas ClientPortal/Dev/Lab2/Code/SecuritasClientPortal.sln - 5 error(s), 0 warning(s), View Log File
-- C:\\Builds\\6\\Securitas ClientPortal\\CI - Lab2\\Sources\\Code\\Portal\\Web\\PortalWeb\\Securitas.Portal.Web.csproj (1306): The imported project "C:\\Program Files (x86)\\MSBuild\\Microsoft\\VisualStudio\\v11.0\\SharePointTools\\Microsoft.VisualStudio.SharePoint.targets" was not found. Confirm that the path in the `<Import>` declaration is correct, and that the file exists on disk.
-- C:\\Builds\\6\\Securitas ClientPortal\\CI - Lab2\\Sources\\Code\\Portal\\Workflows\\Securitas.Portal.Workflows.csproj (231): The imported project "C:\\Program Files (x86)\\MSBuild\\Microsoft\\VisualStudio\\v11.0\\SharePointTools\\Microsoft.VisualStudio.SharePoint.targets" was not found. Confirm that the path in the `<Import>` declaration is correct, and that the file exists on disk.
-- ...
-
-Ugh...VS 2013 Update 4 said it needed 5 GB of free space -- and DAZZLER had over 6 GB -- but it still ran out of space!
-
-## # Select "High performance" power scheme
-
 ```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
+cls
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
+## # Enter a product key and activate Windows
 
 ```PowerShell
-$computer = 'DAZZLER'
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+slmgr /ipk {product key}
 ```
 
----
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+```Console
+cls
+```
+
+## # Install SCOM agent
+
+```PowerShell
+$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=JUBILEE `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+## # Approve manual agent install in Operations Manager
+
+**TODO:**
+
+## Resolve SCOM alerts due to disk fragmentation
+
+### Alert Name
+
+Logical Disk Fragmentation Level is high
+
+### Alert Description
+
+The disk C: (C:) on computer DAZZLER.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 15%. Defragmentation recommended: true.
+
+### Resolution
+
+#### # Copy Toolbox content
+
+```PowerShell
+robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+```
+
+#### # Create scheduled task to optimize drives
+
+```PowerShell
+[string] $xml = Get-Content `
+  'C:\NotBackedUp\Public\Toolbox\Scheduled Tasks\Optimize Drives.xml'
+
+Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
+```
