@@ -215,6 +215,44 @@ Enable-WindowsOptionalFeature -FeatureName NetFx3 -Source $sourcePath -Online
 
 ## Install Microsoft Visual Studio 2015 Enterprise
 
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/CB8D2970754D88629E3E6D51F1E4BDCAB8A0FD4D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/FECD5CD3DB25CEF8B7E376A92F71B45AC6C4EC93.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/6AB2199E908EAA655850B6D365791212FCDD3130.png)
+
+Select the following features:
+
+- Windows and Web Development
+  - **Microsoft Office Developer Tools**
+  - **Microsoft Web Developer Tools**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/65B2F28CB988A0CF60367E1CCF3606394A8CDFCA.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4B/7F1B8CBAB3901BD011BBE30EE4C900CEC7D40D4B.png)
+
+## # Install reference assemblies
+
+```PowerShell
+robocopy `
+    '\\ICEMAN\Public\Reference Assemblies' `
+    'C:\Program Files\Reference Assemblies' /E
+
+& 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v4\AssemblyFoldersEx - x64.reg'
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/DE96621F16BC51A75B6410BE1B94F33F9B8A0F62.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/06DBAE68F16F7F83442A5F1916BFBEFEFC0DD15E.png)
+
+```PowerShell
+& 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v5\AssemblyFoldersEx - x64.reg'
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/E9FD2601E62121DA76E1227B4436C7ED8F069CAE.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/9A7DF5FF756E44DAC0D8F600AA2D457598370EBB.png)
+
 ## # Configure symbol path for debugging
 
 ```PowerShell
@@ -261,7 +299,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -EnvironmentVariableTarget Machine
 ```
 
-## # Install Node.js
+## # Install and configure Node.js
+
+### # Install Node.js
 
 ```PowerShell
 & \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
