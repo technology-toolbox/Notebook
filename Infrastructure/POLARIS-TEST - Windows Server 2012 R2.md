@@ -125,22 +125,6 @@ New-NetFirewallRule `
     -Action Allow
 ```
 
-```PowerShell
-cls
-```
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
 ## Configure VM storage
 
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
@@ -685,22 +669,43 @@ mkdir D:\Shares\Backups\HAVOK
 
 ---
 
-**HAVOK**
+**HAVOK (connect SQL Server Management Studio from FOOBAR8)**
 
 ### -- Backup SharePoint databases
 
 ```SQL
-BACKUP DATABASE [WSS_Content_ttweb]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_ttweb.bak'
+BACKUP DATABASE [ManagedMetadataService]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\ManagedMetadataService.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'WSS_Content_ttweb-Full Database Backup'
+    , NAME = N'ManagedMetadataService-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [WSS_Content_Team1]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_Team1.bak'
+BACKUP DATABASE [SecureStoreService]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\SecureStoreService.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'WSS_Content_Team1-Full Database Backup'
+    , NAME = N'SecureStoreService-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
+
+BACKUP DATABASE [UserProfileService_Profile]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Profile.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'UserProfileService_Profile-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
+
+BACKUP DATABASE [UserProfileService_Social]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Social.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'UserProfileService_Social-Full Database Backup'
+    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
+    , COPY_ONLY
+
+BACKUP DATABASE [UserProfileService_Sync]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Sync.bak'
+WITH NOFORMAT, NOINIT
+    , NAME = N'UserProfileService_Sync-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
@@ -711,45 +716,22 @@ WITH NOFORMAT, NOINIT
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [ManagedMetadataService]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\ManagedMetadataService.bak'
+BACKUP DATABASE [WSS_Content_Team1]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_Team1.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'ManagedMetadataService-Full Database Backup'
+    , NAME = N'WSS_Content_Team1-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [ProfileDB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\ProfileDB.bak'
+BACKUP DATABASE [WSS_Content_ttweb]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_ttweb.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'ProfileDB-Full Database Backup'
-    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
-    , COPY_ONLY
-
-BACKUP DATABASE [SocialDB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\SocialDB.bak'
-WITH NOFORMAT, NOINIT
-    , NAME = N'SocialDB-Full Database Backup'
-    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
-    , COPY_ONLY
-
-BACKUP DATABASE [SyncDB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\SyncDB.bak'
-WITH NOFORMAT, NOINIT
-    , NAME = N'SyncDB-Full Database Backup'
-    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
-    , COPY_ONLY
-
-BACKUP DATABASE [Secure_Store_Service_DB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\Secure_Store_Service_DB.bak'
-WITH NOFORMAT, NOINIT
-    , NAME = N'Secure_Store_Service_DB-Full Database Backup'
+    , NAME = N'WSS_Content_ttweb-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 ```
 
 ---
-
-**TODO:**
 
 ```PowerShell
 cls
@@ -844,13 +826,15 @@ Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
 
 ---
 
-**HAVOK-TEST**
+**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
 
 #### -- Configure permissions on stored procedures in SharePoint_Config database
 
 ```SQL
 USE [Sharepoint_Config]
 GO
+GRANT EXECUTE ON [dbo].[proc_GetTimerRunningJobs] TO [WSS_Content_Application_Pools]
+GRANT EXECUTE ON [dbo].[proc_GetTimerJobLastRunTime] TO [WSS_Content_Application_Pools]
 GRANT EXECUTE ON [dbo].[proc_putObjectTVP] TO [WSS_Content_Application_Pools]
 GRANT EXECUTE ON [dbo].[proc_putObject] TO [WSS_Content_Application_Pools]
 GRANT EXECUTE ON [dbo].[proc_putDependency] TO [WSS_Content_Application_Pools]
@@ -860,6 +844,9 @@ GO
 ---
 
 ##### References
+
+**Search account got - Insufficient sql database permissions for user. EXECUTE permission was denied on the object proc_Gettimerrunningjobs**\
+From <[https://social.technet.microsoft.com/Forums/en-US/a0d08e98-1fd6-42cf-b738-6ba3df082210/search-account-got-insufficient-sql-database-permissions-for-user-execute-permission-was-denied?forum=sharepointadmin](https://social.technet.microsoft.com/Forums/en-US/a0d08e98-1fd6-42cf-b738-6ba3df082210/search-account-got-insufficient-sql-database-permissions-for-user-execute-permission-was-denied?forum=sharepointadmin)>
 
 **Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ‘proc_putObjectTVP’, database ‘SharePoint_Config’**\
 From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html](http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html)>
@@ -887,7 +874,7 @@ cls
 
 ---
 
-**HAVOK-TEST**
+**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
 
 #### -- Restore service application database from production
 
@@ -895,10 +882,9 @@ cls
 RESTORE DATABASE [ManagedMetadataService]
     FROM DISK = N'\\ICEMAN\Backups\HAVOK\ManagedMetadataService.bak'
     WITH FILE = 1
-    , MOVE N'ManagedMetadataService' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\ManagedMetadataService.mdf'
-    , MOVE N'ManagedMetadataService_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\ManagedMetadataService_log.LDF'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'ManagedMetadataService' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\ManagedMetadataService.mdf'
+    , MOVE N'ManagedMetadataService_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\ManagedMetadataService_log.LDF'
+    , NOUNLOAD, STATS = 5
 ```
 
 ---
@@ -921,34 +907,31 @@ cls
 
 ---
 
-**HAVOK-TEST**
+**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
 
 #### -- Restore service application databases from production
 
 ```SQL
 RESTORE DATABASE [UserProfileService_Profile]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\ProfileDB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Profile.bak'
     WITH FILE = 1
-    , MOVE N'ProfileDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\UserProfileService_Profile.mdf'
-    , MOVE N'ProfileDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\UserProfileService_Profile_log.LDF'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'ProfileDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Profile.mdf'
+    , MOVE N'ProfileDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Profile_log.LDF'
+    , NOUNLOAD, STATS = 5
 
 RESTORE DATABASE [UserProfileService_Social]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SocialDB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Social.bak'
     WITH FILE = 1
-    , MOVE N'SocialDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\UserProfileService_Social.mdf'
-    , MOVE N'SocialDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\UserProfileService_Social_log.LDF'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'SocialDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Social.mdf'
+    , MOVE N'SocialDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Social_log.LDF'
+    , NOUNLOAD, STATS = 5
 
 RESTORE DATABASE [UserProfileService_Sync]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SyncDB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Sync.bak'
     WITH FILE = 1
-    , MOVE N'SyncDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\UserProfileService_Sync.mdf'
-    , MOVE N'SyncDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\UserProfileService_Sync_log.LDF'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'SyncDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Sync.mdf'
+    , MOVE N'SyncDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Sync_log.LDF'
+    , NOUNLOAD, STATS = 5
 ```
 
 ---
@@ -971,18 +954,17 @@ cls
 
 ---
 
-**HAVOK-TEST**
+**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
 
 #### -- Restore service application database from production
 
 ```SQL
 RESTORE DATABASE [SecureStoreService]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\Secure_Store_Service_DB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SecureStoreService.bak'
     WITH FILE = 1
-    , MOVE N'Secure_Store_Service_DB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\SecureStoreService.mdf'
-    , MOVE N'Secure_Store_Service_DB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\SecureStoreService_log.ldf'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'Secure_Store_Service_DB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\SecureStoreService.mdf'
+    , MOVE N'Secure_Store_Service_DB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\SecureStoreService_log.ldf'
+    , NOUNLOAD, STATS = 5
 
 GO
 ```
@@ -1073,7 +1055,7 @@ New-SPWebApplication `
 
 ---
 
-**HAVOK-TEST**
+**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
 
 ### -- Restore content database from production
 
@@ -1081,10 +1063,9 @@ New-SPWebApplication `
 RESTORE DATABASE [WSS_Content_ttweb]
     FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_ttweb.bak'
     WITH FILE = 1
-    , MOVE N'WSS_Content_ttweb' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_ttweb.mdf'
-    , MOVE N'WSS_Content_ttweb_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_ttweb_log.LDF'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'WSS_Content_ttweb' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\WSS_Content_ttweb.mdf'
+    , MOVE N'WSS_Content_ttweb_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\WSS_Content_ttweb_log.LDF'
+    , NOUNLOAD, STATS = 5
 ```
 
 ---
@@ -1145,7 +1126,7 @@ New-SPWebApplication `
 
 ---
 
-**HAVOK-TEST**
+**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
 
 ### -- Restore content database from production
 
@@ -1153,8 +1134,8 @@ New-SPWebApplication `
 RESTORE DATABASE [WSS_Content_Team1]
     FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_Team1.bak'
     WITH FILE = 1
-    , MOVE N'WSS_Content_Team1' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_Team1.mdf'
-    , MOVE N'WSS_Content_Team1_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_Team1_log.LDF'
+    , MOVE N'WSS_Content_Team1' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\WSS_Content_Team1.mdf'
+    , MOVE N'WSS_Content_Team1_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\WSS_Content_Team1_log.LDF'
     , NOUNLOAD
     , STATS = 5
 ```
@@ -1212,7 +1193,7 @@ New-SPWebApplication `
 
 ---
 
-**HAVOK-TEST**
+**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
 
 ### -- Restore content database from production
 
@@ -1220,8 +1201,8 @@ New-SPWebApplication `
 RESTORE DATABASE [WSS_Content_MySites]
     FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_MySites.bak'
     WITH FILE = 1
-    , MOVE N'WSS_Content_MySites' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_MySites.mdf'
-    , MOVE N'WSS_Content_MySites_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_MySites_log.LDF'
+    , MOVE N'WSS_Content_MySites' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\WSS_Content_MySites.mdf'
+    , MOVE N'WSS_Content_MySites_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\WSS_Content_MySites_log.LDF'
     , NOUNLOAD
     , STATS = 5
 ```
@@ -1269,33 +1250,99 @@ Set-SPProfileServiceApplication `
 
 ---
 
-**BEAST**
+**FOOBAR8**
 
 ## # Delete VM checkpoint - "Before SharePoint Server 2013 configuration"
 
 ```PowerShell
-$vmName = "POLARIS-TEST"
+$vmHost = 'BEAST'
+$vmName = 'POLARIS-TEST'
 
-Stop-VM $vmName
+Stop-VM -ComputerName $vmHost -VMName $vmName
 
-Remove-VMSnapshot -VMName $vmName -Name "Before SharePoint Server 2013 configuration"
+Remove-VMSnapshot `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Name 'Before SharePoint Server 2013 configuration'
 
-while (Get-VM $vmName | Where Status -eq "Merging disks") {
+while (Get-VM -ComputerName $vmHost -VMName $vmName |
+    Where Status -eq "Merging disks") {
     Write-Host "." -NoNewline
     Start-Sleep -Seconds 5
 }
 
 Write-Host
 
-Start-VM $vmName
+Start-VM -ComputerName $vmHost -VMName $vmName
 ```
 
 ---
 
+```PowerShell
+cls
+```
+
+## # Install SharePoint Cumulative Update
+
+### # Copy patch to local disk
+
+```PowerShell
+robocopy '\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4727.1001 - SharePoint 2013 June 2015 CU' C:\NotBackedUp\Temp
+```
+
+### # Install patch
+
+```PowerShell
+Push-Location C:\NotBackedUp\Temp
+
+.\Install.ps1
+```
+
+When prompted to pause the Search Service Application or leave it running, specify to pause it.
+
+```PowerShell
+Pop-Location
+```
+
+### # Remove patch files from local disk
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\Install.ps1
+Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3054866-fullfile-x64-glb.exe
+```
+
+### # Upgrade SharePoint
+
+```PowerShell
+PSCONFIG.EXE -cmd upgrade -inplace b2b -wait
+```
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+```Console
+cls
+```
+
 ## # Install SCOM agent
 
 ```PowerShell
-$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
     + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
 
 $imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
@@ -1310,3 +1357,32 @@ msiexec.exe /i $msiPath `
 ```
 
 ## # Approve manual agent install in Operations Manager
+
+**TODO:**
+
+## Resolve SCOM alerts due to disk fragmentation
+
+### Alert Name
+
+Logical Disk Fragmentation Level is high
+
+### Alert Description
+
+The disk C: (C:) on computer CYCLOPS.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 15%. Defragmentation recommended: true.
+
+### Resolution
+
+#### # Copy Toolbox content
+
+```PowerShell
+robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+```
+
+#### # Create scheduled task to optimize drives
+
+```PowerShell
+[string] $xml = Get-Content `
+  'C:\NotBackedUp\Public\Toolbox\Scheduled Tasks\Optimize Drives.xml'
+
+Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
+```
