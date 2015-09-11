@@ -135,7 +135,7 @@ slmgr /ato
 cls
 ```
 
-## # Delete C:\\Windows\\SoftwareDistribution folder (528 MB)
+## # Delete C:\\Windows\\SoftwareDistribution folder (999 MB)
 
 ```PowerShell
 Stop-Service wuauserv
@@ -161,8 +161,8 @@ Windows 7 Ultimate (x64)\
 Microsoft Office Professional Plus 2013 (x86)\
 Adobe Reader 8.3.1\
 Google Chrome\
-Mozilla Firefox 36.0\
-Mozilla Thunderbird 31.3.0\
+Mozilla Firefox 40.0.2\
+Mozilla Thunderbird 38.2.0\
 Remote Server Administration Tools for Windows 7 SP1\
 Microsoft Security Essentials\
 Activate Microsoft Office\
