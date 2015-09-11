@@ -148,22 +148,6 @@ New-NetFirewallRule `
 cls
 ```
 
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-```Console
-cls
-```
-
 ## # Add SCOM Administrators domain group to local Administrators group
 
 ```PowerShell
@@ -601,68 +585,6 @@ Disable-NetFirewallRule -Name "SCOM 2012 Installation - UDP"
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/40/1108A7087A63B2F799619CDE7F7B07AAF168E140.png)
 
-## # Install SMTP relay for System Center Operations Manager
-
-```PowerShell
-cls
-```
-
-### # Install IIS dependencies for SMTP Server
-
-```PowerShell
-Install-WindowsFeature `
-    Web-ODBC-Logging, `
-    Web-Mgmt-Console, `
-    Web-Lgcy-Mgmt-Console, `
-    Web-Metabase `
-    -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS' `
-    -Restart
-```
-
-```PowerShell
-cls
-```
-
-### # Install SMTP Server
-
-```PowerShell
-Install-WindowsFeature `
-    Smtp-Server `
-    -IncludeManagementTools `
-    -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS' `
-    -Restart
-```
-
-### Configure SMTP Server
-
-1. Open **Server Manager**, select **Tools**, and then select **Internet Information Services (IIS) 6.0 Manager**.
-2. Expand the current server, right-click the **SMTP Virtual Server**, and then click **Properties**.
-3. In the **SMTP Virtual Server Properties** window:
-   1. On the **Access** tab:
-      1. In the **Connection control **section, click **Connection...**
-      2. In the **Connection **window:
-         1. Select the **Only the list below** option.
-         2. Click **Add...**
-         3. In the **Computer** window:
-            1. Ensure the **Single computer** option is selected.
-            2. In the **IP address **box, type **127.0.0.1**.
-            3. Click **OK**.
-         4. Click **OK**.
-      3. In the **Relay restrictions **section, click **Relay...**
-      4. In the **Relay Restrictions **window:
-         1. Select the **Only the list below** option.
-         2. Click **Add...**
-         3. In the **Computer** window:
-            1. Ensure the **Single computer** option is selected.
-            2. In the **IP address **box, type **127.0.0.1**.
-            3. Click **OK**.
-         4. Click **OK**.
-   2. Click **OK**.
-4. Expand the **SMTP Virtual Server** node, right-click **Domains**, point to **New**, and select **Domain...**
-5. In the **New SMTP Domain Wizard**:
-   1. On the welcome page, ensure the **Remote** option is selected, and click **Next**.
-   2. On the **Domain Name** page, in the **Name** box, type **technologytoolbox.com**, and click **Finish**.
-
 ## Create SMTP Channel
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/BA/38B9E25E6660CD5F5F60EC28E23FCD694D75EABA.png)
@@ -673,11 +595,11 @@ Install-WindowsFeature `
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/1B/7F86DFDA7287D581B56138123702FACF62BC211B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/D31DAC9E1BEE30BFC7060B010A8917D64EBE08EF.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CD/C9E0B568308CB0D97FBD3E19FA3CCFF4B30D53CD.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/32BA3C89EFF14E55892728BA8A7101C23503E039.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/07/E809E6B52DA77F7CF229750667098EB0AA60CE07.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/22/ECCB260F0CE32376E509148ED80DE493140D2C22.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/9587201F01DEDE63CC509E3BBDD52B447A1F3E6A.png)
 
 Click **Finish** to accept the defaults.
 
@@ -960,6 +882,20 @@ In the **Agent Properties** window, on the **Security** tab, select **Allow this
 ```PowerShell
 setspn -A MSOMSdkSvc/JUBILEE JUBILEE
 setspn -A MSOMSdkSvc/JUBILEE.corp.technologytoolbox.com JUBILEE
+
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
 ```
 
 **TODO:**
@@ -972,7 +908,7 @@ Logical Disk Fragmentation Level is high
 
 ### Alert Description
 
-The disk C: (C:) on computer JUBILEE.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 13%. Defragmentation recommended: true.
+The disk C: (C:) on computer JUBILEE.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 15%. Defragmentation recommended: true.
 
 ### Resolution
 
