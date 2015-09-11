@@ -559,7 +559,7 @@ cls
 & 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Configure DCOM Permissions.ps1'
 ```
 
-### Reference
+#### Reference
 
 **Event ID 10016, KB 920783, and the WSS_WPG Group**\
 Pasted from <[http://www.technologytoolbox.com/blog/jjameson/archive/2009/10/17/event-id-10016-kb-920783-and-the-wss-wpg-group.aspx](http://www.technologytoolbox.com/blog/jjameson/archive/2009/10/17/event-id-10016-kb-920783-and-the-wss-wpg-group.aspx)>
@@ -1357,6 +1357,39 @@ msiexec.exe /i $msiPath `
 ```
 
 ## # Approve manual agent install in Operations Manager
+
+```PowerShell
+cls
+```
+
+## # Configure registry permissions to avoid errors with SharePoint timer jobs
+
+```PowerShell
+$identity = "$env:COMPUTERNAME\WSS_WPG"
+$registryPath = 'HKLM:SOFTWARE\Microsoft\Office Server\15.0'
+
+$acl = Get-Acl $registryPath
+$rule = New-Object System.Security.AccessControl.RegistryAccessRule(
+    $identity,
+    'ReadKey',
+    'ContainerInherit, ObjectInherit',
+    'None',
+    'Allow')
+
+$acl.SetAccessRule($rule)
+Set-Acl -Path $registryPath -AclObject $acl
+```
+
+### Reference
+
+Source: Microsoft-SharePoint Products-SharePoint Foundation\
+Event ID: 6398\
+Event Category: 12\
+User: TECHTOOLBOX\\s-sharepoint-test\
+Computer: POLARIS-TEST.corp.technologytoolbox.com\
+Event Description: The Execute method of job definition Microsoft.SharePoint.Publishing.Internal.PersistedNavigationTermSetSyncJobDefinition (ID ...) threw an exception. More information is included below.
+
+Requested registry access is not allowed.
 
 **TODO:**
 

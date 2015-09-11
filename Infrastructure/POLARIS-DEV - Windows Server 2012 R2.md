@@ -1606,3 +1606,36 @@ Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3054866-fullfile-x64-glb.exe
 ```PowerShell
 PSCONFIG.EXE -cmd upgrade -inplace b2b -wait
 ```
+
+```PowerShell
+cls
+```
+
+## # Configure registry permissions to avoid errors with SharePoint timer jobs
+
+```PowerShell
+$identity = "$env:COMPUTERNAME\WSS_WPG"
+$registryPath = 'HKLM:SOFTWARE\Microsoft\Office Server\15.0'
+
+$acl = Get-Acl $registryPath
+$rule = New-Object System.Security.AccessControl.RegistryAccessRule(
+    $identity,
+    'ReadKey',
+    'ContainerInherit, ObjectInherit',
+    'None',
+    'Allow')
+
+$acl.SetAccessRule($rule)
+Set-Acl -Path $registryPath -AclObject $acl
+```
+
+#### Reference
+
+Source: Microsoft-SharePoint Products-SharePoint Foundation\
+Event ID: 6398\
+Event Category: 12\
+User: TECHTOOLBOX\\s-sharepoint-dev\
+Computer: POLARIS-DEV.corp.technologytoolbox.com\
+Event Description: The Execute method of job definition Microsoft.SharePoint.Publishing.Internal.PersistedNavigationTermSetSyncJobDefinition (ID ...) threw an exception. More information is included below.
+
+Requested registry access is not allowed.
