@@ -186,6 +186,27 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
+```Console
+cls
+```
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Enable firewall rules for inbound "ping" requests (required for POSHPAIG)
+
+```PowerShell
+$profile = Get-NetFirewallProfile "Domain"
+
+Get-NetFirewallRule -AssociatedNetFirewallProfile $profile |
+    Where-Object { $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv4-In)" `
+        -or $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv6-In)" } |
+    Enable-NetFirewallRule
+```
+
 ## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ---

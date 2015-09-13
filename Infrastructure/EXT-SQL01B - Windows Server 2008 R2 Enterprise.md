@@ -373,6 +373,16 @@ powercfg.exe /S SCHEME_MIN
 powercfg.exe /L
 ```
 
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
 ## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell

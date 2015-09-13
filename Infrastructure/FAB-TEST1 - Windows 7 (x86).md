@@ -3,7 +3,47 @@
 Tuesday, May 12, 2015
 6:28 PM
 
-Baseline
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Enable firewall rules for inbound "ping" requests (required for POSHPAIG)
+
+```PowerShell
+# Note: Enable-NetFirewallRule is not available on Windows 7
+
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv4-In)" `
+    profile="domain" new enable=yes
+
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv6-In)" `
+    profile="domain" new enable=yes
+```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+# Note: New-NetFirewallRule is not available on Windows 7
+
+netsh advfirewall firewall add rule `
+    name="Remote Windows Update (Dynamic RPC)" `
+    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
+    program="%windir%\system32\dllhost.exe" `
+    dir=in `
+    protocol=TCP `
+    localport=RPC `
+    profile=Domain `
+    action=Allow
+```
+
+## Baseline
 
 Windows 7\
 Microsoft Office Professional Plus 2010\
