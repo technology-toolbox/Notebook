@@ -1,7 +1,7 @@
-﻿# DAZZLER (2015-09-09) - Windows Server 2012 R2 Standard
+﻿# DAZZLER - Windows Server 2012 R2 Standard
 
-Wednesday, September 9, 2015
-4:53 AM
+Monday, September 14, 2015
+9:23 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -322,6 +322,14 @@ cls
 
 ## # Install Visual Studio 2015
 
+**Note:** Windows Identity Foundation is a prerequisite for installing the Microsoft Office Developer Tools feature in Visual Studio 2015.
+
+### # Install Windows Identity Foundation 3.5
+
+```PowerShell
+Install-WindowsFeature Windows-Identity-Foundation
+```
+
 ---
 
 **FOOBAR8**
@@ -367,25 +375,7 @@ Select the following features:
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/2B/FA482E8FD5C26A618DAE0445EC9BF7B7C5F2172B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/64CCDFB28B91F862315258358F6AA7F3260A836A.png)
-
-From log file:
-
-[0504:0554][2015-09-09T14:53:01]i000: MUX:  ExecuteError: Package (WindowsIdentityExtensions_x64) failed: Error Message Id: 0 ErrorMessage: Installation of Microsoft Identity Extensions requires Windows Identity Foundation v1.0 to be installed
-
-### # Install Windows Identity Foundation 3.5
-
-```PowerShell
-Install-WindowsFeature Windows-Identity-Foundation
-```
-
-### Modify Visual Studio 2015 to add Microsoft Office Developer Tools
-
-1. **Control Panel > Programs > Programs and Features**
-2. Double-click **Microsoft Visual Studio Enterprise 2015**.
-3. Click **Modify**.
-
-Ugh...Microsoft Office Developer Tools does not appear to be installed when you subsequently check the installed features of Visual Studio 2015 through Control Panel. (Punt)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/B88BC8416B3FF3FFACACF45FD5FB4BC306EE0437.png)
 
 ## # Install reference assemblies
 
@@ -429,105 +419,255 @@ cls
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/B1B0EA42F79F7341CD17D5EA0A1B237C7F7CBC46.png)
 
-**TODO:**
-
-## Modify build definition to specify VisualStudioVersion
-
-### Build failure
-
-**Debug | Any CPU**\
- 1 error(s), 0 warning(s)
-
-- \$/foobar/Dev/Lab1/Source/TechnologyToolbox.Foobar.sln - 1 error(s), 0 warning(s), View Log File
-  - C:\\Builds\\5\\foobar\\CI - Dev - Lab1\\Sources\\Source\\Web\\TechnologyToolbox.Foobar.Web.csproj (121): The imported project "C:\\Program Files (x86)\\MSBuild\\Microsoft\\VisualStudio\\v11.0\\SharePointTools\\Microsoft.VisualStudio.SharePoint.targets" was not found. Confirm that the path in the `<Import>` declaration is correct, and that the file exists on disk.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D5/D88B46693D7A711EEABBB4C519823FC254CC10D5.png)
-
-### Build failure
-
-**Default Configuration and Platform**\
-1 error(s), 0 warning(s)
-
-- \$/foobar/Main/Source/IncrementAssemblyVersion.proj - 1 error(s), 0 warning(s), View Log File
-  - C:\\Builds\\5\\foobar\\Automated Build - Main\\Sources\\Source\\IncrementAssemblyVersion.proj (19): The command ""..\\IDE\\tf.exe" checkout AssemblyVersionInfo.txt AssemblyVersionInfo.cs" exited with code 3.
-
-1. Edit **IncrementAssemblyVersion.proj** and change **\$(VS110COMNTOOLS)** to **\$(VS120COMNTOOLS)** on line 12.
-2. Restart the computer to ensure the environment variable is set as expected (after installing Visual Studio).
-
-## Resolve SCOM alerts due to TFS app pool timeout
-
-### Alert Name
-
-Application Pool worker process is unresponsive
-
-### Alert Description
-
-_A process serving application pool 'Microsoft Team Foundation Server Message Queue Application Pool' exceeded time limits during shut down. The process id was '396'._
-
-### Investigation
-
 ```PowerShell
-# Convert alert timestamp to UTC
-
-(Get-Date "4/20/2014 11:53:06PM").ToUniversalTime()
-
-Monday, April 21, 2014 5:53:06 AM
+cls
 ```
 
-From IIS log file:
+## # Install Python (dependency for many node.js packages)
+
+### # Install Python (using default options)
+
+```PowerShell
+& "\\ICEMAN\Products\Python\python-2.7.10.amd64.msi"
+```
+
+### # Add Python folders to PATH environment variable
+
+```PowerShell
+Set-ExecutionPolicy RemoteSigned -Force
+
+$pythonPathFolders = 'C:\Python27\', 'C:\Python27\Scripts'
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    -Folders $pythonPathFolders `
+    -EnvironmentVariableTarget Machine
+```
+
+```PowerShell
+cls
+```
+
+## # Install Git (required by npm to download packages from GitHub)
+
+### # Install Git (using default options)
+
+```PowerShell
+& "\\ICEMAN\Products\Git\Git-1.9.5-preview20150319.exe"
+```
+
+### # Add Git folder to PATH environment variable
+
+```PowerShell
+$gitPathFolder = 'C:\Program Files (x86)\Git\cmd'
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    -Folders $gitPathFolder `
+    -EnvironmentVariableTarget Machine
+```
+
+```PowerShell
+cls
+```
+
+## # Install and configure Node.js
+
+### # Install Node.js
+
+```PowerShell
+& \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
+```
+
+> **Important**
+>
+> Restart PowerShell for change to PATH environment variable to take effect.
+
+### # Change NPM file locations to avoid issues with redirected folders
+
+```PowerShell
+notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
+```
+
+In Notepad, change:
+
+```Text
+    prefix=${APPDATA}\npm
+```
+
+...to:
+
+```Text
+    ;prefix=${APPDATA}\npm
+    prefix=${LOCALAPPDATA}\npm
+    cache=${LOCALAPPDATA}\npm-cache
+```
+
+#### Reference
+
+**npm on windows, install with -g flag should go into appdata/local rather than current appdata/roaming?**\
+From <[https://github.com/npm/npm/issues/4564](https://github.com/npm/npm/issues/4564)>
+
+**`npm install -g bower` goes into infinite loop on windows with %appdata% being a UNC path**\
+From <[https://github.com/npm/npm/issues/8814](https://github.com/npm/npm/issues/8814)>
+
+### # Change NPM "global" locations to shared location for all users
+
+```PowerShell
+mkdir "$env:ALLUSERSPROFILE\npm-cache"
+
+mkdir "$env:ALLUSERSPROFILE\npm\node_modules"
+
+npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
+
+npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    -Folders "$env:ALLUSERSPROFILE\npm" `
+    -EnvironmentVariableTarget Machine
+```
+
+#### Reference
+
+**How to use npm with node.exe?**\
+http://stackoverflow.com/a/9366416
+
+### # Configure NPM to use HTTP instead of HTTPS
+
+```PowerShell
+npm config --global set registry http://registry.npmjs.org/
+```
+
+#### Reference
+
+**npm not working - "read ECONNRESET"**\
+From <[http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset](http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset)>
+
+```PowerShell
+cls
+```
+
+## # Install global NPM packages
+
+### # Install Grunt CLI
+
+```PowerShell
+npm install --global grunt-cli
+```
+
+### # Install Gulp
+
+```PowerShell
+npm install --global gulp
+```
+
+### # Install Bower
+
+```PowerShell
+npm install --global bower
+```
+
+## # Install rimraf
+
+```PowerShell
+npm install --global rimraf
+```
+
+```PowerShell
+cls
+```
+
+## # Configure NPM for TFS Build service account
+
+---
 
 ```Console
-2014-04-21 05:49:16 192.168.10.14 POST /tfs/queue/DefaultCollection/Services/v4.0/MessageQueueService2.svc - 8080 TECHTOOLBOX\svc-build 192.168.10.18 Team+Foundation+(TFSBuildServiceHost.exe,+12.0.21005.1,+Other,+SKU:18) - 202 0 0 300031
+runas /USER:TECHTOOLBOX\s-tfs-build PowerShell.exe
 ```
 
-300031 / 1000 / 60 = 5.0005
-
-So, the request from DAZZLER is timing out after 5 minutes.
-
-```C#
-// Microsoft.TeamFoundation.Framework.Server.TeamFoundationMessageQueueService
-private void LoadSettings(TeamFoundationRequestContext requestContext)
-{
-...
-    try
-    {
-        RegistryEntryCollection registryEntryCollection = service.ReadEntriesFallThru(requestContext.Elevate(), "/Service/MessageQueue/Settings/...");
-
-        timeSpan = registryEntryCollection["IdleTimeout"].GetValue<TimeSpan>(TimeSpan.FromMinutes(5.0));
-
-...
-```
-
-### Resolution
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C4/F8FF9323E8A1A1455F4BA9DCBEFB6CFE6E4CF6C4.png)
-
-Right-click **Microsoft Team Foundation Server Message Queue Application Pool** and then click **Advanced Settings...**
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/D16A01C0FA824D40AD813DFBBE27DC39BE2F610E.png)
-
-In the **Advanced Settings** window, notice **Shutdown Time Limit (seconds)** is set to the default value of **90**.
-
-Change **Shutdown Time Limit (seconds)** to **300** and then click **OK**.
-
-## # Install reference assemblies for building SharePoint 2013 projects
-
-### Build failure
-
-**Debug | Any CPU**\
-444 error(s), 5 warning(s)
-
-- \$/Securitas ClientPortal/Dev/Lab2/Code/SecuritasClientPortal.sln - 444 error(s), 5 warning(s), View Log File
-- DefaultRoleDefinitionPermissions.cs (1): The type or namespace name 'SharePoint' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?)
-- SharePoint\\SharePointPublishingHelper.cs (2328): The type or namespace name 'PublishingPage' could not be found (are you missing a using directive or an assembly reference?)
-- SharePoint\\SharePointPublishingHelper.cs (2288): The type or namespace name 'PublishingPage' could not be found (are you missing a using directive or an assembly reference?)
-- ...
+### # Set NPM "global" locations to shared location for all users
 
 ```PowerShell
-robocopy '\\iceman\Public\Reference Assemblies' 'C:\Program Files\Reference Assemblies' /E
+npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
 
-& "C:\Program Files\Reference Assemblies\Microsoft\SharePoint v5\AssemblyFoldersEx - x64.reg"
+npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
 ```
+
+### # Set NPM "local" locations to local AppData folder
+
+```PowerShell
+npm config set prefix "$env:LOCALAPPDATA\npm"
+
+npm config set cache "$env:LOCALAPPDATA\npm-cache"
+```
+
+### # Configure NPM to use HTTP instead of HTTPS
+
+```PowerShell
+npm config --global set registry http://registry.npmjs.org/
+```
+
+---
+
+## # Set build controller on all build definitions
+
+---
+
+**WIN8-DEV1**
+
+```PowerShell
+[string] $TfsUrl = "http://cyclops:8080/tfs"
+[string] $NewBuildController = "DAZZLER - Controller"
+
+$ErrorActionPreference = "Stop"
+
+Add-Type -Path "C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\ReferenceAssemblies\v2.0\Microsoft.TeamFoundation.Common.dll"
+
+Add-Type -Path "C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\ReferenceAssemblies\v2.0\Microsoft.TeamFoundation.Client.dll"
+
+Add-Type -Path "C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\ReferenceAssemblies\v2.0\Microsoft.TeamFoundation.Build.Client.dll"
+
+$tfsUri = New-Object System.Uri $TfsUrl
+$tpc = New-Object Microsoft.TeamFoundation.Client.TfsTeamProjectCollection $tfsUri
+
+$buildServerType = [Microsoft.TeamFoundation.Build.Client.IBuildServer]
+
+$buildClient = $tpc.GetService($buildServerType)
+$controller = $buildClient.GetBuildController($NewBuildController)
+
+$versionControlType =
+    [Microsoft.TeamFoundation.VersionControl.Client.VersionControlServer]
+
+$versionControlServer = $tpc.GetService($versionControlType)
+
+$teamProjects = $versionControlServer.GetAllTeamProjects($true)
+
+$teamProjects | ForEach-Object {
+    $teamProject = $_.Name
+
+    Write-Verbose "Processing team project ($teamProject)..."
+
+    $buildDefinitions = $buildClient.QueryBuildDefinitions($teamProject)
+    $buildDefinitions | ForEach-Object {
+        $buildDefinitionName = $_.Name
+
+        Write-Verbose "Processing build definition ($buildDefinitionName)..."
+        Write-Verbose "Build controller: $($_.BuildController.Name)"
+
+        if ($_.BuildController.Uri -ne $controller.Uri) {
+            Write-Host ("Setting build definition ($buildDefinitionName) to" `
+                + " use new build controller ($NewBuildController)...")
+
+            $_.BuildController = $controller
+            $_.Save()
+        }
+        else {
+            Write-Verbose ("Build definition ($buildDefinitionName) is already" `
+                + " using the specified build controller ($NewBuildController).")
+        }
+    }
+}
+```
+
+---
 
 ```PowerShell
 cls
@@ -567,32 +707,3 @@ msiexec.exe /i $msiPath `
 ```
 
 ## # Approve manual agent install in Operations Manager
-
-**TODO:**
-
-## Resolve SCOM alerts due to disk fragmentation
-
-### Alert Name
-
-Logical Disk Fragmentation Level is high
-
-### Alert Description
-
-The disk C: (C:) on computer DAZZLER.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 15%. Defragmentation recommended: true.
-
-### Resolution
-
-#### # Copy Toolbox content
-
-```PowerShell
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
-```
-
-#### # Create scheduled task to optimize drives
-
-```PowerShell
-[string] $xml = Get-Content `
-  'C:\NotBackedUp\Public\Toolbox\Scheduled Tasks\Optimize Drives.xml'
-
-Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
-```
