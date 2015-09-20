@@ -62,10 +62,15 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-## Disable proxy auto-detect
+```PowerShell
+cls
+```
+
+## # Disable proxy auto-detect
+
+### # Disable 'Automatically detect proxy settings' in Internet Explorer
 
 ```PowerShell
-# Disable 'Automatically detect proxy settings' in Internet Explorer.
 function Disable-AutomaticallyDetectProxySettings {
     # Read connection settings from Internet Explorer.
     $regKeyPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Connections\"
@@ -231,6 +236,30 @@ Select the following features:
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/4B/7F1B8CBAB3901BD011BBE30EE4C900CEC7D40D4B.png)
 
+## Install Chutzpah Test Adapter
+
+1. Open Visual Studio.
+2. In the **Tools** menu, click **Extensions and Updates...**
+3. In the **Extensions and Updates** dialog window:
+   1. Select the **Online** pane.
+   2. In the search box, type **Chutzpah**.
+   3. In the list of items, select **Chutzpah Test Adapter for the Test Explorer**, and click **Download**.
+   4. Review the license terms, and click **Install**.
+   5. Wait for the extension to be installled.
+   6. Click **Restart Now**.
+
+## Install Chutzpah Test Runner
+
+1. Open Visual Studio.
+2. In the **Tools** menu, click **Extensions and Updates...**
+3. In the **Extensions and Updates** dialog window:
+   1. Select the **Online** pane.
+   2. In the search box, type **Chutzpah**.
+   3. In the list of items, select **Chutzpah Test Runner Context Menu Extension**, and click **Download**.
+   4. Review the license terms, and click **Install**.
+   5. Wait for the extension to be installled.
+   6. Click **Restart Now**.
+
 ## # Install reference assemblies
 
 ```PowerShell
@@ -299,6 +328,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -EnvironmentVariableTarget Machine
 ```
 
+```PowerShell
+cls
+```
+
 ## # Install and configure Node.js
 
 ### # Install Node.js
@@ -331,7 +364,7 @@ In Notepad, change:
     cache=${LOCALAPPDATA}\npm-cache
 ```
 
-### Reference
+#### Reference
 
 **npm on windows, install with -g flag should go into appdata/local rather than current appdata/roaming?**\
 From <[https://github.com/npm/npm/issues/4564](https://github.com/npm/npm/issues/4564)>
@@ -360,54 +393,104 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
 **How to use npm with node.exe?**\
 http://stackoverflow.com/a/9366416
 
-## Install Yeoman
+### # Configure NPM to use HTTP instead of HTTPS
+
+```PowerShell
+npm config --global set registry http://registry.npmjs.org/
+```
+
+#### Reference
+
+**npm not working - "read ECONNRESET"**\
+From <[http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset](http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset)>
+
+```PowerShell
+cls
+```
+
+## # Install Yeoman and other global NPM packages
 
 ### Reference
 
 **Install the Yeoman toolset**\
 From <[http://yeoman.io/codelab/setup.html](http://yeoman.io/codelab/setup.html)>
 
-```PowerShell
-cls
-```
-
 ### # Install Grunt CLI
 
 ```PowerShell
-npm install -g grunt-cli
+npm install --global grunt-cli
 ```
 
 ### # Install Gulp
 
 ```PowerShell
-npm install -g gulp
+npm install --global gulp
 ```
 
 ### # Install Bower
 
 ```PowerShell
-npm install -g bower
+npm install --global bower
+```
+
+### # Install Karma CLI
+
+```PowerShell
+npm install --global karma-cli
 ```
 
 ### # Install Yeoman
 
 ```PowerShell
-npm install -g yo
+npm install --global yo
 ```
 
-## # Install rimraf
+### # Install Yeoman generators
 
 ```PowerShell
-npm install -g rimraf
+npm install --global generator-karma
+
+npm install --global generator-angular
 ```
 
-## # Install AngularJS generator
+### # Install rimraf
 
 ```PowerShell
-npm install -g generator-karma
-
-npm install -g generator-angular
+npm install --global rimraf
 ```
+
+```PowerShell
+cls
+```
+
+## # Configure NPM for TECHTOOLBOX\\jjameson account
+
+---
+
+```Console
+runas /USER:TECHTOOLBOX\jjameson PowerShell.exe
+```
+
+### # Set NPM "global" locations to shared location for all users
+
+```PowerShell
+npm config --global set prefix "$env:LOCALAPPDATA\npm"
+
+npm config --global set cache "$env:LOCALAPPDATA\npm-cache"
+```
+
+### # Configure NPM to use HTTP instead of HTTPS
+
+```PowerShell
+npm config --global set registry http://registry.npmjs.org/
+```
+
+---
+
+### Reference
+
+**npm not working - "read ECONNRESET"**\
+From <[http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset](http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset)>
 
 ## # Install ASP.NET ViewState Helper 2.0.1
 
@@ -475,17 +558,6 @@ From <[http://superuser.com/questions/530379/hyper-v-wont-enable-in-windows-8-pr
 Click **Change Sharing Options**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/39D600ED528C73CAE3772FDA8A9E263E29CBF094.png)
-
-## Configure NPM to use HTTP instead of HTTPS
-
-```Console
-npm config set registry http://registry.npmjs.org/
-```
-
-### Reference
-
-**npm not working - "read ECONNRESET"**\
-From <[http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset](http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset)>
 
 ## # Configure credential helper for Git
 
