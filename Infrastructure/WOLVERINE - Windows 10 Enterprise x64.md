@@ -315,13 +315,13 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
 ### # Install Git (using default options)
 
 ```PowerShell
-& "\\ICEMAN\Products\Git\Git-1.9.5-preview20150319.exe"
+& \\ICEMAN\Products\Git\Git-2.5.3-64-bit.exe
 ```
 
 ### # Add Git folder to PATH environment variable
 
 ```PowerShell
-$gitPathFolder = 'C:\Program Files (x86)\Git\cmd'
+$gitPathFolder = 'C:\Program Files\Git\cmd'
 
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -Folders $gitPathFolder `
@@ -337,7 +337,9 @@ cls
 ### # Install Node.js
 
 ```PowerShell
-& \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
+# & \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
+
+& \\ICEMAN\Products\node.js\node-v4.1.1-x64.msi
 ```
 
 > **Important**
@@ -345,6 +347,16 @@ cls
 > Restart PowerShell for change to PATH environment variable to take effect.
 
 ### # Change NPM file locations to avoid issues with redirected folders
+
+#### Reference
+
+**npm on windows, install with -g flag should go into appdata/local rather than current appdata/roaming?**\
+From <[https://github.com/npm/npm/issues/4564](https://github.com/npm/npm/issues/4564)>
+
+**`npm install -g bower` goes into infinite loop on windows with %appdata% being a UNC path**\
+From <[https://github.com/npm/npm/issues/8814](https://github.com/npm/npm/issues/8814)>
+
+#### # Configure installed version of npm to avoid issues with redirected folders
 
 ```PowerShell
 notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
@@ -364,13 +376,25 @@ In Notepad, change:
     cache=${LOCALAPPDATA}\npm-cache
 ```
 
-#### Reference
+#### # Configure Visual Studio version of npm to avoid issues with redirected folders
 
-**npm on windows, install with -g flag should go into appdata/local rather than current appdata/roaming?**\
-From <[https://github.com/npm/npm/issues/4564](https://github.com/npm/npm/issues/4564)>
+```PowerShell
+& "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd" config set -g cache '${LOCALAPPDATA}\npm-cache'
 
-**`npm install -g bower` goes into infinite loop on windows with %appdata% being a UNC path**\
-From <[https://github.com/npm/npm/issues/8814](https://github.com/npm/npm/issues/8814)>
+notepad "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\etc\npmrc"
+```
+
+In Notepad, change:
+
+```Text
+    cache = C:\Users\foo\AppData\Local\npm-cache
+```
+
+...to:
+
+```Text
+    cache = ${LOCALAPPDATA}\npm-cache
+```
 
 ### # Change NPM "global" locations to shared location for all users
 
@@ -393,22 +417,11 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
 **How to use npm with node.exe?**\
 http://stackoverflow.com/a/9366416
 
-### # Configure NPM to use HTTP instead of HTTPS
-
-```PowerShell
-npm config --global set registry http://registry.npmjs.org/
-```
-
-#### Reference
-
-**npm not working - "read ECONNRESET"**\
-From <[http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset](http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset)>
-
 ```PowerShell
 cls
 ```
 
-## # Install Yeoman and other global NPM packages
+## # Install global NPM packages
 
 ### Reference
 
@@ -459,38 +472,19 @@ npm install --global generator-angular
 npm install --global rimraf
 ```
 
-```PowerShell
-cls
-```
-
-## # Configure NPM for TECHTOOLBOX\\jjameson account
+## # Configure npm locations for TECHTOOLBOX\\jjameson account
 
 ---
 
-```Console
-runas /USER:TECHTOOLBOX\jjameson PowerShell.exe
-```
-
-### # Set NPM "global" locations to shared location for all users
+**runas /USER:TECHTOOLBOX\\jjameson PowerShell.exe**
 
 ```PowerShell
-npm config --global set prefix "$env:LOCALAPPDATA\npm"
+npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
 
-npm config --global set cache "$env:LOCALAPPDATA\npm-cache"
-```
-
-### # Configure NPM to use HTTP instead of HTTPS
-
-```PowerShell
-npm config --global set registry http://registry.npmjs.org/
+npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
 ```
 
 ---
-
-### Reference
-
-**npm not working - "read ECONNRESET"**\
-From <[http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset](http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset)>
 
 ## # Install ASP.NET ViewState Helper 2.0.1
 
