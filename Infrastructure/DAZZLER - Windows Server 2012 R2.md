@@ -452,13 +452,13 @@ cls
 ### # Install Git (using default options)
 
 ```PowerShell
-& "\\ICEMAN\Products\Git\Git-1.9.5-preview20150319.exe"
+& \\ICEMAN\Products\Git\Git-2.5.3-64-bit.exe
 ```
 
 ### # Add Git folder to PATH environment variable
 
 ```PowerShell
-$gitPathFolder = 'C:\Program Files (x86)\Git\cmd'
+$gitPathFolder = 'C:\Program Files\Git\cmd'
 
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -Folders $gitPathFolder `
@@ -474,7 +474,9 @@ cls
 ### # Install Node.js
 
 ```PowerShell
-& \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
+# & \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
+
+& \\ICEMAN\Products\node.js\node-v4.1.1-x64.msi
 ```
 
 > **Important**
@@ -707,3 +709,31 @@ msiexec.exe /i $msiPath `
 ```
 
 ## # Approve manual agent install in Operations Manager
+
+## Configure DCOM permissions for TFS Build
+
+### Issue
+
+Log Name:      System\
+Source:        Microsoft-Windows-DistributedCOM\
+Date:          9/14/2015 11:27:39 AM\
+Event ID:      10016\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          TECHTOOLBOX\\s-tfs-build\
+Computer:      DAZZLER.corp.technologytoolbox.com\
+Description:\
+The machine-default permission settings do not grant Local Activation permission for the COM Server application with CLSID\
+{3EEF301F-B596-4C0B-BD92-013BEAFCE793}\
+ and APPID\
+{3EEF301F-B596-4C0B-BD92-013BEAFCE793}\
+ to the user TECHTOOLBOX\\s-tfs-build SID (S-1-5-21-3914637029-2275272621-3670275343-10684) from address LocalHost (Using LRPC) running in the application container Unavailable SID (Unavailable). This security permission can be modified using the Component Services administrative tool.
+
+### Resolution
+
+Using the steps in **[KB 2000474](KB 2000474) Workaround 1**, add **Local Launch** and **Local Activate** permissions on **{3EEF301F-B596-4C0B-BD92-013BEAFCE793}** (Desktop Undo Manager) to **TECHTOOLBOX\\s-tfs-build**.
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\TFS\Scripts\Configure DCOM Permissions.ps1'
+```
