@@ -362,7 +362,7 @@ stsadm -o setapppassword -password {Key}
 #### REM Specify the credentials for accessing the trusted forest
 
 ```Console
-stsadm -o setproperty -pn peoplepicker-searchadforests -pv "domain:extranet.technologytoolbox.com,EXTRANET\svc-web-sec-2010-dev,{password};domain:corp.technologytoolbox.com,TECHTOOLBOX\svc-web-sec-2010-dev,{password}" -url http://client-local.securitasinc.com
+stsadm -o setproperty -pn peoplepicker-searchadforests -pv "domain:extranet.technologytoolbox.com,EXTRANET\svc-web-sec-2010-dev,{password};domain:corp.fabrikam.com,FABRIKAM\svc-web-sec-2010-dev,{password};domain:corp.technologytoolbox.com,TECHTOOLBOX\svc-web-sec-2010-dev,{password}" -url http://client-local.securitasinc.com
 ```
 
 #### Modify the permissions on the registry key where the encrypted credentials are stored
@@ -718,7 +718,7 @@ iisreset
 #### REM Specify the credentials for accessing the trusted forest
 
 ```Console
-stsadm -o setproperty -pn peoplepicker-searchadforests -pv "domain:extranet.technologytoolbox.com,EXTRANET\svc-web-securitasdev,{password};domain:corp.technologytoolbox.com,TECHTOOLBOX\svc-web-securitasdev,{password}" -url http://cloud-local.securitasinc.com
+stsadm -o setproperty -pn peoplepicker-searchadforests -pv "domain:extranet.technologytoolbox.com,EXTRANET\svc-web-securitasdev,{password};domain:corp.fabrikam.com,FABRIKAM\svc-web-securitasdev,{password};domain:corp.technologytoolbox.com,TECHTOOLBOX\svc-web-securitasdev,{password}" -url http://cloud-local.securitasinc.com
 ```
 
 ```Console
@@ -981,6 +981,32 @@ Resize-VHD `
 
 ### # Extend C: partition
 
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+# Note: New-NetFirewallRule is not available on Windows Server 2008 R2
+
+netsh advfirewall firewall add rule `
+    name="Remote Windows Update (Dynamic RPC)" `
+    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
+    program="%windir%\system32\dllhost.exe" `
+    dir=in `
+    protocol=TCP `
+    localport=RPC `
+    profile=Domain `
+    action=Allow
+```
+
 ## Snapshot VM - "Baseline Client Portal 3.0.633.0 / Cloud Portal 1.0.104.0"
 
 **TODO:**
@@ -1006,4 +1032,14 @@ $rule = New-Object System.Security.AccessControl.RegistryAccessRule(
 
 $acl.SetAccessRule($rule)
 Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
+```
+
+## REM Configure People Picker for FABRIKAM
+
+### REM Configure the People Picker to support searches across one-way trust
+
+#### REM Specify the credentials for accessing the trusted forest
+
+```Console
+stsadm -o setproperty -pn peoplepicker-searchadforests -pv "domain:extranet.technologytoolbox.com,EXTRANET\svc-web-securitasdev,{password};domain:corp.fabrikam.com,FABRIKAM\svc-web-securitasdev,{password};domain:corp.technologytoolbox.com,TECHTOOLBOX\svc-web-securitasdev,{password}" -url http://cloud-local.securitasinc.com
 ```
