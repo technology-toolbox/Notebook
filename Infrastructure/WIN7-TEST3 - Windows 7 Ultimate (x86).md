@@ -1,7 +1,7 @@
 ﻿# WIN7-TEST3 - Windows 7 Ultimate (x86)
 
-Monday, August 17, 2015
-5:57 PM
+Monday, October 19, 2015
+5:00 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,7 +9,7 @@ Monday, August 17, 2015
 
 ---
 
-**WOLVERINE**
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
 
 ### # Create virtual machine (WIN7-TEST3)
 
@@ -32,7 +32,7 @@ Set-VMMemory `
     -MinimumBytes 256MB `
     -MaximumBytes 4GB
 
-#Set-VMDvdDrive -VMName $vmName -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
+Set-VMDvdDrive -VMName $vmName -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
 
 Start-VM $vmName
 ```
@@ -59,6 +59,32 @@ Start-VM $vmName
 cls
 ```
 
+## # Rename local Administrator account and set password
+
+```PowerShell
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword('{password}')
+
+logoff
+```
+
+---
+
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+
+## # Remove disk from virtual CD/DVD drive
+
+```PowerShell
+Set-VMDvdDrive -VMName WIN7-TEST3 -Path $null
+```
+
+---
+
+```PowerShell
+cls
+```
+
 ## # Change drive letter for DVD-ROM
 
 ```PowerShell
@@ -73,15 +99,43 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
+## # Enable PowerShell remoting
+
 ```PowerShell
-cls
+Enable-PSRemoting -Confirm:$false
 ```
 
-## # Set password for local Administrator account
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-$adminUser = [ADSI] "WinNT://./Administrator,User"
-$adminUser.SetPassword("{password}")
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv4-In)" profile=domain `
+    new enable=yes
+
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv6-In)" profile=domain `
+    new enable=yes
+
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (SMB-In)" profile=domain `
+    new enable=yes
+
+netsh advfirewall firewall add rule `
+    name="Remote Windows Update (Dynamic RPC)" `
+    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
+    program="%windir%\system32\dllhost.exe" `
+    dir=in `
+    protocol=TCP `
+    localport=RPC `
+    profile=Domain `
+    action=Allow
+```
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+netsh advfirewall firewall set rule `
+    name="Remote Windows Update (Dynamic RPC)" new enable=no
 ```
 
 ```PowerShell
@@ -116,6 +170,22 @@ cls
 & "\\ICEMAN\Products\Microsoft\Security Essentials\Windows 7 (x86)\MSEInstall.exe"
 ```
 
+## Install updates using Windows Update
+
+**Note:** Repeat until there are no updates available for the computer.
+
+```PowerShell
+cls
+```
+
+## # Delete C:\\Windows\\SoftwareDistribution folder (1.02 GB)
+
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```
+
 ```PowerShell
 cls
 ```
@@ -137,22 +207,6 @@ slmgr /ato
 1. Start Word 2013
 2. Enter product key
 
-## Install updates using Windows Update
-
-**Note:** Repeat until there are no updates available for the computer.
-
-```PowerShell
-cls
-```
-
-## # Delete C:\\Windows\\SoftwareDistribution folder (607 MB)
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-```
-
 ```PowerShell
 cls
 ```
@@ -162,8 +216,6 @@ cls
 ```PowerShell
 Stop-Computer
 ```
-
-## Remove disk from virtual CD/DVD drive
 
 ## Snapshot VM - "Baseline"
 
@@ -175,4 +227,5 @@ Mozilla Firefox 36.0\
 Mozilla Thunderbird 31.3.0\
 Remote Server Administration Tools for Windows 7 SP1\
 Microsoft Money 2008 Biz Sunset\
-Microsoft Security Essentials
+Microsoft Security Essentials\
+Internet Explorer 11

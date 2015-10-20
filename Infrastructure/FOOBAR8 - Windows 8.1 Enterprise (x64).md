@@ -1,7 +1,7 @@
 ﻿# FOOBAR8 - Windows 8.1 Enterprise (x64)
 
-Sunday, June 22, 2014
-8:22 PM
+Tuesday, October 20, 2015
+6:23 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -10,15 +10,18 @@ Sunday, June 22, 2014
 ## Create VM
 
 - Processors: **2**
-- Startup memory: **768 MB**
-- Maximum memory: **4096 MB**
-- VHD size: **28 GB**
+- Startup memory: **2 GB**
+- Minimum memory: **512 MB**
+- Maximum memory: **4 GB**
+- VHD size: **32 GB**
+- VHD File name:** FOOBAR8**
 - Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
 
 ## Install custom Windows 8.1 image
 
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows 8.1 Enterprise (x64)** and click **Next**.
-- On the **Computer Details** step, in the **Computer name** box, type **WIN8-TEST1** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **FOOBAR8** and click **Next**.
 - On the Applications step:
   - Select the following items:
     - Adobe
@@ -26,9 +29,25 @@ Sunday, June 22, 2014
     - Google
       - **Chrome**
     - Mozilla
-      - **Firefox 36.0**
-      - **Thunderbird 31.3.0**
+      - **Firefox 40.0.2**
+      - **Thunderbird 38.2.0**
   - Click **Next**.
+
+```PowerShell
+cls
+```
+
+## # Rename local Administrator account and set password
+
+```PowerShell
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword('{password}')
+
+Logoff
+```
+
+## Remove disk from virtual CD/DVD drive
 
 ```PowerShell
 cls
@@ -48,15 +67,38 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
+## # Enable PowerShell remoting
+
 ```PowerShell
-cls
+Enable-PSRemoting -Confirm:$false
 ```
 
-## # Set password for local Administrator account
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-$adminUser = [ADSI] "WinNT://./Administrator,User"
-$adminUser.SetPassword("{password}")
+Get-NetFirewallRule |
+  Where-Object { `
+    $_.Profile -eq 'Domain' `
+      -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
+  Enable-NetFirewallRule
+
+New-NetFirewallRule `
+  -Name 'Remote Windows Update (Dynamic RPC)' `
+  -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+  -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+  -Group 'Technology Toolbox (Custom)' `
+  -Program '%windir%\system32\dllhost.exe' `
+  -Direction Inbound `
+  -Protocol TCP `
+  -LocalPort RPC `
+  -Profile Domain `
+  -Action Allow
+```
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+Disable-NetFirewallRule -DisplayName 'Remote Windows Update (Dynamic RPC)'
 ```
 
 ```PowerShell
@@ -153,6 +195,14 @@ Restart-Computer
 ## # Install Systems Center 2012 R2 management tools
 
 ### # Install prerequisites for Operations console
+
+```PowerShell
+net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+```
+
+```PowerShell
+cls
+```
 
 #### # Microsoft System CLR Types for SQL Server 2012
 
@@ -305,11 +355,17 @@ Start-Process `
     -Wait
 
 Dismount-DiskImage -ImagePath $imagePath
+
+Logoff
 ```
+
+#### Login as FOOBAR8\\foo
 
 ### Install Virtual Machine Manager console
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/29/11C45DCF357EF83E15D23091430EFBA9AA3A8629.png)
+
+#### Login as TECHTOOLBOX\\setup-systemcenter
 
 ```PowerShell
 cls
@@ -328,37 +384,11 @@ Start-Process `
     -Wait
 
 Dismount-DiskImage -ImagePath $imagePath
+
+logoff
 ```
 
-## Fix issue with VMM console
-
-### Issue
-
-When you open the VMM console, you receive the following error message:
-
-Could not update managed code add-in pipeline due to the following error:
-
-The required folder "C:\\Program Files\\Microsoft System Center 2012\\Virtual Machine Manager\\bin\\AddInPipeline\\HostSideAdapters" does not exist.
-
-### Reference
-
-**Description of Update Rollup 1 for System Center 2012 Service Pack 1**\
-From <[https://support.microsoft.com/en-us/kb/2785682](https://support.microsoft.com/en-us/kb/2785682)>
-
-### Resolution
-
-To resolve the issue, follow these steps:
-
-1. Locate the following folder:
-
-**C:\\Program Files\\Microsoft System Center 2012\\Virtual Machine Manager\\bin**
-2. Right-click the **AddInPipeline** folder, and then click **Properties**.
-3. On the **Security** tab, click **Advanced**, and then click **Continue**.
-4. Select the **BUILTIN** group, and then click **Edit**.
-5. Click the **Select a principal** link, type **Authenticated Users**, and then click **OK**.
-6. Click **OK** to close each dialog box that is associated with the properties.
-
-#### Login as FOOBAR8\\Administrator
+#### Login as FOOBAR8\\foo
 
 ```PowerShell
 cls
@@ -387,21 +417,37 @@ slmgr /ato
 
 ## # Clean up the WinSxS folder
 
-```PowerShell
+### Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3E/F55B6285943F4CA1F694F800FC1E61B0790A503E.png)
+
+```Console
 Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
 ```
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/7C68B3C48495673281F3BA202A88A38AD037CEF4.png)
 
 ```PowerShell
 cls
 ```
 
-## # Delete C:\\Windows\\SoftwareDistribution folder (1.8 GB)
+## # Delete C:\\Windows\\SoftwareDistribution folder (966 MB)
+
+### # Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/7C68B3C48495673281F3BA202A88A38AD037CEF4.png)
 
 ```PowerShell
 Stop-Service wuauserv
 
 Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/4089BD8DDBFF616D38267E7777D06CF87447008D.png)
 
 ```PowerShell
 cls
@@ -413,16 +459,14 @@ cls
 Stop-Computer
 ```
 
-## Remove disk from virtual CD/DVD drive
-
 ## Checkpoint VM - "Baseline"
 
 Windows 8.1 Enterprise (x64)\
 Microsoft Office Professional Plus 2013 (x86)\
 Adobe Reader 8.3.1\
 Google Chrome\
-Mozilla Firefox 36.0\
-Mozilla Thunderbird 31.3.0\
+Mozilla Firefox 40.0.2\
+Mozilla Thunderbird 38.2.0\
 Remote Server Administration Tools for Windows 8.1\
 Hyper-V Management Tools enabled\
 SQL Server 2014 Management Tools - Complete\
@@ -430,4 +474,34 @@ System Center 2012 R2 Operations Manager - Operations console\
 System Center 2012 R2 Data Protection Manager Central Console\
 System Center 2012 R2 Virtual Machine Manager console
 
-#CLUSTER-INVARIANT#:{f20313d2-b509-4d6d-a0d8-fe0a01f821c3}
+#CLUSTER-INVARIANT#:{c72ae743-8085-4879-9881-dac34a31ac8b}
+
+**TODO:**
+
+## Fix issue with VMM console
+
+### Issue
+
+When you open the VMM console, you receive the following error message:
+
+Could not update managed code add-in pipeline due to the following error:
+
+The required folder "C:\\Program Files\\Microsoft System Center 2012\\Virtual Machine Manager\\bin\\AddInPipeline\\HostSideAdapters" does not exist.
+
+### Reference
+
+**Description of Update Rollup 1 for System Center 2012 Service Pack 1**\
+From <[https://support.microsoft.com/en-us/kb/2785682](https://support.microsoft.com/en-us/kb/2785682)>
+
+### Resolution
+
+To resolve the issue, follow these steps:
+
+1. Locate the following folder:
+
+**C:\\Program Files\\Microsoft System Center 2012 R2\\Virtual Machine Manager\\bin**
+2. Right-click the **AddInPipeline** folder, and then click **Properties**.
+3. On the **Security** tab, click **Advanced**, and then click **Continue**.
+4. Select the **BUILTIN** group, and then click **Edit**.
+5. Click the **Select a principal** link, type **Authenticated Users**, and then click **OK**.
+6. Click **OK** to close each dialog box that is associated with the properties.

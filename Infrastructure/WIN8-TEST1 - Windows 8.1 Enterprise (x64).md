@@ -1,29 +1,43 @@
 ﻿# WIN8-TEST1 - Windows 8.1 Enterprise (x64)
 
-Monday, April 20, 2015
-3:47 PM
+Monday, October 19, 2015
+8:29 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Create VM
+---
 
-- Processors: **2**
-- Memory: **2048 MB**
-- VDI size: **25 GB**
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
 
-## Configure VM settings
+### # Create virtual machine (WIN8-TEST1)
 
-- General
-  - Advanced
-    - Shared Clipboard:** Bidirectional**
-- System
-  - Processor
-    - Enable PAE/NX: **Yes (checked)**
-- Network
-  - Adapter 1
-    - Attached to:** Bridged adapter**
+```PowerShell
+$vmName = "WIN8-TEST1"
+
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
+New-VM `
+    -Name $vmName `
+    -Path C:\NotBackedUp\VMs `
+    -NewVHDPath $vhdPath `
+    -NewVHDSizeBytes 25GB `
+    -MemoryStartupBytes 2GB `
+    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+
+Set-VMMemory `
+    -VMName $vmName `
+    -DynamicMemoryEnabled $true `
+    -MinimumBytes 256MB `
+    -MaximumBytes 4GB
+
+Set-VMDvdDrive -VMName $vmName -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
+
+Start-VM $vmName
+```
+
+---
 
 ## Install custom Windows 8.1 image
 
@@ -37,11 +51,35 @@ Monday, April 20, 2015
     - Google
       - **Chrome**
     - Mozilla
-      - **Firefox 36.0**
-      - **Thunderbird 31.3.0**
+      - **Firefox 40.0.2**
+      - **Thunderbird 38.2.0**
   - Click **Next**.
 
-## Install VirtualBox Guest Additions
+```PowerShell
+cls
+```
+
+## # Rename local Administrator account and set password
+
+```PowerShell
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword('{password}')
+
+logoff
+```
+
+---
+
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+
+## # Remove disk from virtual CD/DVD drive
+
+```PowerShell
+Set-VMDvdDrive -VMName WIN8-TEST1 -Path $null
+```
+
+---
 
 ```PowerShell
 cls
@@ -61,15 +99,38 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
+## # Enable PowerShell remoting
+
 ```PowerShell
-cls
+Enable-PSRemoting -Confirm:$false
 ```
 
-## # Set password for local Administrator account
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-$adminUser = [ADSI] "WinNT://./Administrator,User"
-$adminUser.SetPassword("{password}")
+Get-NetFirewallRule |
+  Where-Object { `
+    $_.Profile -eq 'Domain' `
+      -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
+  Enable-NetFirewallRule
+
+New-NetFirewallRule `
+  -Name 'Remote Windows Update (Dynamic RPC)' `
+  -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+  -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+  -Group 'Technology Toolbox (Custom)' `
+  -Program '%windir%\system32\dllhost.exe' `
+  -Direction Inbound `
+  -Protocol TCP `
+  -LocalPort RPC `
+  -Profile Domain `
+  -Action Allow
+```
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+Disable-NetFirewallRule -DisplayName 'Remote Windows Update (Dynamic RPC)'
 ```
 
 ```PowerShell
@@ -146,7 +207,7 @@ slmgr /ato
 cls
 ```
 
-## # Delete C:\\Windows\\SoftwareDistribution folder (1.8 GB)
+## # Delete C:\\Windows\\SoftwareDistribution folder (257 MB)
 
 ```PowerShell
 Stop-Service wuauserv
@@ -163,70 +224,6 @@ cls
 ```PowerShell
 Stop-Computer
 ```
-
-## Remove disk from virtual CD/DVD drive
-
-## # Enable PowerShell remoting
-
-```PowerShell
-Enable-PSRemoting -Confirm:$false
-```
-
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
-
-```PowerShell
-$computer = 'WIN8-TEST1'
-
-$command = "Get-NetFirewallRule |
-    Where-Object { `$_.Profile -eq 'Domain' ``
-        -and `$_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
-    Enable-NetFirewallRule"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-```
-
----
-
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
-
-```PowerShell
-$computer = 'WIN8-TEST1'
-
-$command = "Disable-NetFirewallRule ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)'"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-```
-
----
 
 ## Snapshot VM - "Baseline"
 
