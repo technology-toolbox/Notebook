@@ -12,7 +12,7 @@ Add-AzureAccount
 
 Get-AzureVM -ServiceName fab-adfs | Start-AzureVM
 
-Get-AzureVM -ServiceName fabrikam-extranet | Start-AzureVM
+Get-AzureVM -ServiceName fab-ex | Start-AzureVM
 
 Get-AzureVM -ServiceName fab-wap | Start-AzureVM
 
@@ -26,7 +26,7 @@ Add-AzureAccount
 
 Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-adfs | Start-AzureVM }
 
-Start-Job -ScriptBlock { Get-AzureVM -ServiceName fabrikam-extranet | Start-AzureVM }
+Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-ex | Start-AzureVM }
 
 Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-wap | Start-AzureVM }
 
@@ -40,7 +40,7 @@ Add-AzureAccount
 
 Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-adfs | Stop-AzureVM -Force }
 
-Start-Job -ScriptBlock { Get-AzureVM -ServiceName fabrikam-extranet | Stop-AzureVM -Force }
+Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-ex | Stop-AzureVM -Force }
 
 Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-wap | Stop-AzureVM -Force }
 
