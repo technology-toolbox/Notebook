@@ -1391,6 +1391,76 @@ Event Description: The Execute method of job definition Microsoft.SharePoint.Pub
 
 Requested registry access is not allowed.
 
+```PowerShell
+cls
+```
+
+## # Install SharePoint Cumulative Update
+
+### # Copy patch to local disk
+
+```PowerShell
+robocopy "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4763.1000 - SharePoint 2013 October 2015 CU" C:\NotBackedUp\Temp
+```
+
+### # Install patch
+
+```PowerShell
+Push-Location C:\NotBackedUp\Temp
+
+.\Install.ps1
+
+Pop-Location
+```
+
+### # Remove patch files from local disk
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\Install.ps1
+Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3085492-fullfile-x64-glb.exe
+```
+
+### # Upgrade SharePoint
+
+```PowerShell
+PSCONFIG.EXE -cmd upgrade -inplace b2b -wait
+```
+
+```PowerShell
+cls
+```
+
+## # Configure registry permissions to avoid errors with SharePoint timer jobs
+
+```PowerShell
+$identity = "$env:COMPUTERNAME\WSS_WPG"
+$registryPath = 'HKLM:SOFTWARE\Microsoft\Office Server\15.0'
+
+$acl = Get-Acl $registryPath
+$rule = New-Object System.Security.AccessControl.RegistryAccessRule(
+    $identity,
+    'ReadKey',
+    'ContainerInherit, ObjectInherit',
+    'None',
+    'Allow')
+
+$acl.SetAccessRule($rule)
+Set-Acl -Path $registryPath -AclObject $acl
+```
+
+### Reference
+
+Source: Microsoft-SharePoint Products-SharePoint Foundation\
+Event ID: 6398\
+Event Category: 12\
+User: TECHTOOLBOX\\s-sharepoint-test\
+Computer: POLARIS-TEST.corp.technologytoolbox.com\
+Event Description: The Execute method of job definition Microsoft.SharePoint.Publishing.Internal.PersistedNavigationTermSetSyncJobDefinition (ID ...) threw an exception. More information is included below.
+
+Requested registry access is not allowed.
+
 **TODO:**
 
 ## Resolve SCOM alerts due to disk fragmentation

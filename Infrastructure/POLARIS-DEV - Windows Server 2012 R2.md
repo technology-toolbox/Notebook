@@ -1,7 +1,7 @@
 ﻿# POLARIS-DEV - Windows Server 2012 R2 Standard
 
-Tuesday, June 16, 2015
-7:00 AM
+Wednesday, October 28, 2015
+4:30 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -32,8 +32,7 @@ Tuesday, June 16, 2015
     - Google
       - **Chrome**
     - Mozilla
-      - **Firefox 36.0**
-      - **Thunderbird 31.3.0**
+      - **Firefox 40.0.2**
   - Click **Next**.
 
 ```PowerShell
@@ -43,11 +42,42 @@ cls
 ## # Rename local Administrator account and set password
 
 ```PowerShell
-$adminUser = [ADSI] "WinNT://./Administrator,User"
-$adminUser.Rename("foo")
-$adminUser.SetPassword("{password}")
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword($plainPassword)
 
 logoff
+```
+
+---
+
+**FOOBAR8**
+
+## # Remove disk from virtual CD/DVD drive
+
+```PowerShell
+Set-VMDvdDrive -ComputerName FORGE -VMName POLARIS-DEV -Path $null
+```
+
+---
+
+## # Change drive letter for DVD-ROM
+
+```PowerShell
+$cdrom = Get-WmiObject -Class Win32_CDROMDrive
+$driveLetter = $cdrom.Drive
+
+$volumeId = mountvol $driveLetter /L
+$volumeId = $volumeId.Trim()
+
+mountvol $driveLetter /D
+
+mountvol X: $volumeId
 ```
 
 ```PowerShell
@@ -62,20 +92,6 @@ powercfg.exe /L
 powercfg.exe /S SCHEME_MIN
 
 powercfg.exe /L
-```
-
-## # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
 ```
 
 ```PowerShell
@@ -104,48 +120,101 @@ Set-NetAdapterAdvancedProperty `
 ping ICEMAN -f -l 8900
 ```
 
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+Get-NetFirewallRule |
+  Where-Object { `
+    $_.Profile -eq 'Domain' `
+      -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
+  Enable-NetFirewallRule
+
+New-NetFirewallRule `
+  -Name 'Remote Windows Update (Dynamic RPC)' `
+  -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+  -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+  -Group 'Technology Toolbox (Custom)' `
+  -Program '%windir%\system32\dllhost.exe' `
+  -Direction Inbound `
+  -Protocol TCP `
+  -LocalPort RPC `
+  -Profile Domain `
+  -Action Allow
+```
+
 ## Configure VM storage
 
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 50 GB       | 4K                   | OSDisk       |
-| 1    | D:           | 5 GB        | 64K                  | Data01       |
-| 2    | L:           | 1 GB        | 64K                  | Log01        |
-| 3    | T:           | 1 GB        | 64K                  | Temp01       |
-| 4    | Z:           | 10 GB       | 4K                   | Backup01     |
+| Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
+| 0    | C:           | 50 GB       | Dynamic  | 4K                   | OSDisk       |
+| 1    | D:           | 5 GB        | Fixed    | 64K                  | Data01       |
+| 2    | L:           | 1 GB        | Fixed    | 64K                  | Log01        |
+| 3    | T:           | 1 GB        | Fixed    | 64K                  | Temp01       |
+| 4    | Z:           | 10 GB       | Dynamic  | 4K                   | Backup01     |
 
 ---
 
-**FORGE**
+**FOOBAR8**
 
 ### # Create Data01, Log01, Temp01, and Backup01 VHDs
 
 ```PowerShell
+$vmHost = "FORGE"
 $vmName = "POLARIS-DEV"
 
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
     + "_Data01.vhdx"
 
-New-VHD -Path $vhdPath -SizeBytes 5GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 5GB -Fixed
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ControllerType SCSI `
+    -Path $vhdPath
 
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
     + "_Log01.vhdx"
 
-New-VHD -Path $vhdPath -SizeBytes 1GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 1GB -Fixed
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ControllerType SCSI `
+    -Path $vhdPath
 
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
     + "_Temp01.vhdx"
 
-New-VHD -Path $vhdPath -SizeBytes 1GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 1GB -Fixed
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ControllerType SCSI `
+    -Path $vhdPath
 
 $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
     + "_Backup01.vhdx"
 
-New-VHD -Path $vhdPath -SizeBytes 10GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 10GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ControllerType SCSI `
+    -Path $vhdPath
 ```
 
 ---
@@ -284,31 +353,34 @@ User:          N/A\
 Computer:      POLARIS-DEV.corp.technologytoolbox.com\
 Description:\
 sqlservr (1472) An attempt to open the file "C:\\Windows\\system32\\LogFiles\\Sum\\Api.chk" for read / write access failed with system error 5 (0x00000005): "Access is denied. ".  The open file operation will fail with error -1032 (0xfffffbf8).\
-Event Xml:\
-<Event xmlns="[http://schemas.microsoft.com/win/2004/08/events/event](http://schemas.microsoft.com/win/2004/08/events/event)">\
-  `<System>`\
-    `<Provider Name="ESENT" />`\
-    `<EventID Qualifiers="0">`490`</EventID>`\
-    `<Level>`2`</Level>`\
-    `<Task>`1`</Task>`\
-    `<Keywords>`0x80000000000000`</Keywords>`\
-    `<TimeCreated SystemTime="2014-01-14T19:04:33.000000000Z" />`\
-    `<EventRecordID>`2181`</EventRecordID>`\
-    `<Channel>`Application`</Channel>`\
-    `<Computer>`POLARIS-DEV.corp.technologytoolbox.com`</Computer>`\
-    `<Security />`\
-  `</System>`\
-  `<EventData>`\
-    `<Data>`sqlservr`</Data>`\
-    `<Data>`1472`</Data>`\
-    `<Data>`\
-    `</Data>`\
-    `<Data>`C:\\Windows\\system32\\LogFiles\\Sum\\Api.chk`</Data>`\
-    `<Data>`-1032 (0xfffffbf8)`</Data>`\
-    `<Data>`5 (0x00000005)`</Data>`\
-    `<Data>`Access is denied. `</Data>`\
-  `</EventData>`\
-`</Event>`
+Event Xml:
+
+```XML
+<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+  <System>
+    <Provider Name="ESENT" />
+    <EventID Qualifiers="0">490</EventID>
+    <Level>2</Level>
+    <Task>1</Task>
+    <Keywords>0x80000000000000</Keywords>
+    <TimeCreated SystemTime="2014-01-14T19:04:33.000000000Z" />
+    <EventRecordID>2181</EventRecordID>
+    <Channel>Application</Channel>
+    <Computer>POLARIS-DEV.corp.technologytoolbox.com</Computer>
+    <Security />
+  </System>
+  <EventData>
+    <Data>sqlservr</Data>
+    <Data>1472</Data>
+    <Data>
+    </Data>
+    <Data>C:\Windows\system32\LogFiles\Sum\Api.chk</Data>
+    <Data>-1032 (0xfffffbf8)</Data>
+    <Data>5 (0x00000005)</Data>
+    <Data>Access is denied. </Data>
+  </EventData>
+</Event>
+```
 
 ---
 
@@ -317,7 +389,7 @@ Event Xml:\
 **Error 1032 messages in the Application log in Windows Server 2012**\
 Pasted from <[http://support.microsoft.com/kb/2811566](http://support.microsoft.com/kb/2811566)>
 
-## DEV - Change databases to Simple recovery model
+## -- DEV - Change databases to Simple recovery model
 
 ```SQL
 IF OBJECT_ID('tempdb..#CommandQueue') IS NOT NULL DROP TABLE #CommandQueue
@@ -372,7 +444,7 @@ END
 **Using the Simple Recovery Model for SharePoint Development Environments**\
 Pasted from <[http://www.technologytoolbox.com/blog/jjameson/archive/2011/03/19/using-the-simple-recovery-model-for-sharepoint-development-environments.aspx](http://www.technologytoolbox.com/blog/jjameson/archive/2011/03/19/using-the-simple-recovery-model-for-sharepoint-development-environments.aspx)>
 
-## DEV - Constrain maximum memory for SQL Server
+## -- DEV - Constrain maximum memory for SQL Server
 
 ### -- Set maximum memory for SQL Server to 1 GB
 
@@ -387,7 +459,7 @@ EXEC sys.sp_configure N'show advanced options', N'0'  RECONFIGURE WITH OVERRIDE
 GO
 ```
 
-## DEV - Configure TempDB data files
+## -- DEV - Configure TempDB data files
 
 ```SQL
 ALTER DATABASE [tempdb]
@@ -447,7 +519,7 @@ SELECT @sqlStatement =
 EXEC sp_executesql @sqlStatement;
 ```
 
-## Configure "Max Degree of Parallelism" for SharePoint
+## -- Configure "Max Degree of Parallelism" for SharePoint
 
 ### -- Set Max Degree of Parallelism to 1
 
@@ -462,41 +534,24 @@ EXEC sys.sp_configure N'show advanced options', N'0'  RECONFIGURE WITH OVERRIDE
 GO
 ```
 
-## # Install SCOM agent
-
-```PowerShell
-$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-## # Approve manual agent install in Operations Manager
-
 ---
 
-**FORGE**
+**FOOBAR8**
 
 ## # Checkpoint VM - "Baseline SharePoint Server 2013 configuration"
 
 ```PowerShell
+$vmHost = "FORGE"
 $vmName = "POLARIS-DEV"
 
-Stop-VM $vmName
+Stop-VM -ComputerName $vmHost -VMName $vmName
 
 Checkpoint-VM `
+    -ComputerName $vmHost `
     -Name $vmName `
     -SnapshotName "Baseline SharePoint Server 2013 configuration"
 
-Start-VM $vmName
+Start-VM -ComputerName $vmHost -VMName $vmName
 ```
 
 ---
@@ -505,7 +560,7 @@ Start-VM $vmName
 
 ---
 
-**XAVIER1**
+**FOOBAR8**
 
 ### # Create the SharePoint farm service account (DEV)
 
@@ -628,48 +683,13 @@ New-ADUser `
 cls
 ```
 
-## # Install SharePoint Cumulative Update
+## # Configure SharePoint Server 2013
 
-### # Copy patch to local disk
-
-```PowerShell
-robocopy "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4701.1001 - SharePoint 2013 March 2015 CU" C:\NotBackedUp\Temp
-```
-
-### # Install patch
-
-```PowerShell
-Push-Location C:\NotBackedUp\Temp
-
-.\Install.ps1
-
-Pop-Location
-```
-
-### # Remove patch files from local disk
-
-```PowerShell
-Remove-Item C:\NotBackedUp\Temp\Install.ps1
-Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
-Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
-Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb2956166-fullfile-x64-glb.exe
-```
-
-```PowerShell
-cls
-```
-
-## # Mirror Toolbox content
+### # Mirror Toolbox content
 
 ```PowerShell
 robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
 ```
-
-```PowerShell
-cls
-```
-
-## # Configure SharePoint Server 2013
 
 ```PowerShell
 cls
@@ -697,7 +717,7 @@ When prompted for the **Passphrase**, type a passphrase that meets the following
   - Numerals (from 0 through 9)
   - Nonalphabetic characters (such as !, \$, #, %)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/08/CE9B8AE88F483FA608DB164C29CC5F51EA594608.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/964C96CC4F564F80C7C7B64829E05FF0879D6512.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/FDA1888FC8EA7331AE366E4121596AEDE00F0BA2.png)
 
@@ -723,6 +743,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -EnvironmentVariableTarget "Machine"
 ```
 
+> **Important**
+>
+> Restart PowerShell for environment variable change to take effect.
+
 ```PowerShell
 cls
 ```
@@ -730,6 +754,8 @@ cls
 ### # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
+cd C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts
+
 & '.\Configure DCOM Permissions.ps1'
 ```
 
@@ -742,9 +768,44 @@ Pasted from <[http://www.technologytoolbox.com/blog/jjameson/archive/2009/10/17/
 cls
 ```
 
+## # Configure registry permissions to avoid errors with SharePoint timer jobs
+
+```PowerShell
+$identity = "$env:COMPUTERNAME\WSS_WPG"
+$registryPath = 'HKLM:SOFTWARE\Microsoft\Office Server\15.0'
+
+$acl = Get-Acl $registryPath
+$rule = New-Object System.Security.AccessControl.RegistryAccessRule(
+    $identity,
+    'ReadKey',
+    'ContainerInherit, ObjectInherit',
+    'None',
+    'Allow')
+
+$acl.SetAccessRule($rule)
+Set-Acl -Path $registryPath -AclObject $acl
+```
+
+#### Reference
+
+Source: Microsoft-SharePoint Products-SharePoint Foundation\
+Event ID: 6398\
+Event Category: 12\
+User: TECHTOOLBOX\\s-sharepoint-dev\
+Computer: POLARIS-DEV.corp.technologytoolbox.com\
+Event Description: The Execute method of job definition Microsoft.SharePoint.Publishing.Internal.PersistedNavigationTermSetSyncJobDefinition (ID ...) threw an exception. More information is included below.
+
+Requested registry access is not allowed.
+
+```PowerShell
+cls
+```
+
 ### # Configure diagnostic logging
 
 ```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell
+
 Set-SPDiagnosticConfig -DaysToKeepLogs 3
 
 Set-SPDiagnosticConfig -LogDiskSpaceUsageGB 1 -LogMaxDiskSpaceUsageEnabled:$true
@@ -756,6 +817,12 @@ Set-SPDiagnosticConfig -LogDiskSpaceUsageGB 1 -LogMaxDiskSpaceUsageEnabled:$true
 Set-SPUsageService -LoggingEnabled 1
 
 New-SPUsageApplication
+```
+
+**# HACK:** Wait a few seconds for the Usage and Health Data service app to finish initializing (to avoid conflict when changing retention period)
+
+```PowerShell
+Start-Sleep -Seconds 10
 ```
 
 ### # Change retention period for Usage and Health Data Collection service application
@@ -807,7 +874,9 @@ cls
 
 ---
 
-**ICEMAN**
+```PowerShell
+Enter-PSSession ICEMAN
+```
 
 ### # Create share and configure permissions for SharePoint backups
 
@@ -817,6 +886,8 @@ mkdir "D:\Shares\Backups\SharePoint - POLARIS-DEV"
 icacls "D:\Shares\Backups\SharePoint - POLARIS-DEV" /grant "TECHTOOLBOX\s-sharepoint-dev:(OI)(CI)(F)"
 
 icacls "D:\Shares\Backups\SharePoint - POLARIS-DEV" /grant "TECHTOOLBOX\POLARIS-DEV`$:(OI)(CI)(F)"
+
+Exit-PSSession
 ```
 
 ---
@@ -833,19 +904,17 @@ Backup-SPFarm `
     -BackupMethod Full
 ```
 
-## Backup production SharePoint databases
+```PowerShell
+cls
+```
 
----
-
-**ICEMAN**
+## # Backup production SharePoint databases
 
 ### # Create share for production backups
 
 ```PowerShell
-mkdir D:\Shares\Backups\HAVOK
+mkdir \\ICEMAN\Backups\HAVOK
 ```
-
----
 
 ---
 
@@ -854,8 +923,6 @@ mkdir D:\Shares\Backups\HAVOK
 ### -- Backup SharePoint databases
 
 ```SQL
--- Backup SharePoint databases
-
 BACKUP DATABASE [WSS_Content_ttweb]
 TO DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_ttweb.bak'
 WITH NOFORMAT, NOINIT
@@ -937,6 +1004,8 @@ $cacheService.ProcessIdentity.Update()
 $cacheService.ProcessIdentity.Deploy()
 ```
 
+**# Note:** Expect about a 7.5 minute delay for the Deploy() operation to complete.
+
 ### # DEV - Constrain the Distributed Cache
 
 ```PowerShell
@@ -950,6 +1019,8 @@ cls
 ### # Configure the State Service
 
 ```PowerShell
+cd C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts
+
 & '.\Configure State Service.ps1'
 ```
 
@@ -983,6 +1054,51 @@ When prompted for the credentials for the default content access account:
 1. In the **User name** box, type **TECHTOOLBOX\\s-index-dev**.
 2. In the **Password** box, type the password for the service account.
 
+**Note:** Expect the Search Service Application configuration to take about 5.5. minutes.
+
+```PowerShell
+cls
+```
+
+## # Install SharePoint Cumulative Update
+
+**# HACK:** This must be done after configuring the Search Service Application (or else an "access denied" error occurs due to the permissions on **C:\\Program Files\\Microsoft Office Servers\\15.0\\Bin\\languageresources.txt**)
+
+### # Copy patch to local disk
+
+```PowerShell
+robocopy "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4763.1000 - SharePoint 2013 October 2015 CU" C:\NotBackedUp\Temp
+```
+
+### # Install patch
+
+```PowerShell
+Push-Location C:\NotBackedUp\Temp
+
+.\Install.ps1
+
+Pop-Location
+```
+
+### # Remove patch files from local disk
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\Install.ps1
+Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3085492-fullfile-x64-glb.exe
+```
+
+### # Upgrade SharePoint
+
+```PowerShell
+PSCONFIG.EXE -cmd upgrade -inplace b2b -wait
+```
+
+> **Important**
+>
+> Restart PowerShell for the upgraded SharePoint snap-in to be loaded.
+
 ```PowerShell
 cls
 ```
@@ -1008,6 +1124,8 @@ cls
 #### # Configure the Managed Metadata Service
 
 ```PowerShell
+cd C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts
+
 & '.\Configure Managed Metadata Service.ps1'
 ```
 
@@ -1141,7 +1259,11 @@ cls
 
 ```PowerShell
 $appPoolCredential = Get-Credential "TECHTOOLBOX\s-web-intranet-dev"
+```
 
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/E41717DE0ABA51E9A18489CF55E181D8BF52E93C.png)
+
+```PowerShell
 $appPoolAccount = New-SPManagedAccount -Credential $appPoolCredential
 
 $authProvider = New-SPAuthenticationProvider
@@ -1154,8 +1276,6 @@ New-SPWebApplication `
     -HostHeader "ttweb-dev" `
     -Port 80
 ```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/E41717DE0ABA51E9A18489CF55E181D8BF52E93C.png)
 
 ### -- Restore content database from production
 
@@ -1199,15 +1319,15 @@ cls
 
 ## # Restore Web application - http://team-dev
 
-```PowerShell
-cls
-```
-
 ### # Create Web application
 
 ```PowerShell
 $appPoolCredential = Get-Credential "TECHTOOLBOX\s-web-my-team-dev"
+```
 
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/1835B3BB4604787F6622E49778F8CB747DFF825C.png)
+
+```PowerShell
 $appPoolAccount = New-SPManagedAccount -Credential $appPoolCredential
 
 $authProvider = New-SPAuthenticationProvider
@@ -1220,8 +1340,6 @@ New-SPWebApplication `
     -HostHeader "team-dev" `
     -Port 80
 ```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/1835B3BB4604787F6622E49778F8CB747DFF825C.png)
 
 ### -- Restore content database from production
 
@@ -1264,10 +1382,6 @@ cls
 ```
 
 ## # Restore Web application - http://my-dev
-
-```PowerShell
-cls
-```
 
 ### # Create Web application
 
@@ -1402,30 +1516,49 @@ Get-SPEnterpriseSearchServiceApplication |
     % { $_.StartFullCrawl() }
 ```
 
----
-
-**FORGE**
+```PowerShell
+cls
+```
 
 ## # Delete VM checkpoint - "Baseline SharePoint Server 2013 configuration"
 
+---
+
+```PowerShell
+Enter-PSSession FORGE
+```
+
 ```PowerShell
 $vmName = "POLARIS-DEV"
+$snapshotName = "Baseline SharePoint Server 2013 configuration"
 
-Stop-VM $vmName
+Remove-VMSnapshot -VMName $vmName -Name $snapshotName
 
-Remove-VMSnapshot -VMName $vmName -Name "Baseline SharePoint Server 2013 configuration"
+# Wait a few seconds for merge to start
+Start-Sleep -Seconds 5
+
+# Wait for merge to complete on virtual machine
 
 while (Get-VM $vmName | Where Status -eq "Merging disks") {
-    Write-Host "." -NoNewline
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 10
 }
 
-Write-Host
-
-Start-VM $vmName
+Exit-PSSession
 ```
 
 ---
+
+```PowerShell
+cls
+```
+
+### # Backup farm
+
+```PowerShell
+Backup-SPFarm `
+    -Directory "\\ICEMAN\Backups\SharePoint - POLARIS-DEV" `
+    -BackupMethod Full
+```
 
 ```PowerShell
 cls
@@ -1443,199 +1576,23 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
+## # Install SCOM agent
 
 ```PowerShell
-$computer = 'POLARIS-DEV'
+$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
 
-$command = "New-NetFirewallRule ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
 
-$scriptBlock = [scriptblock]::Create($command)
+$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
 
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=JUBILEE `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
 ```
 
----
+## # Approve manual agent install in Operations Manager
 
-## Move Package Cache to separate VHD
-
-### Reference
-
-**How to relocate the Package Cache**\
-From <[http://blogs.msdn.com/b/heaths/archive/2014/02/11/how-to-relocate-the-package-cache.aspx](http://blogs.msdn.com/b/heaths/archive/2014/02/11/how-to-relocate-the-package-cache.aspx)>
-
-Refer to comment from "Kazi" (23 Aug 2014 8:15 AM)
-
-Here is my 24 GB solution using a small SSD C: drive and 2TB traditional D: drive without mounting VHD drives. No problem so far on my computer, but USE AT YOU OWN RISK.:
-
-1. MoveDirectory.cmd
-
-robocopy "C:%~1" "D:\\- C -%~1" /e /j /copyall /dcopy:dat /sl /ndl /move\
-mklink /J "C:%~1" "D:\\- C -%~1"
-
-2. MoveDirectories.cmd
-
-call MoveDirectory.cmd "\\Program Files\\Microsoft SQL Server\\100\\Setup Bootstrap"\
-call MoveDirectory.cmd "\\Program Files\\Microsoft SQL Server\\110\\Setup Bootstrap"\
-call MoveDirectory.cmd "\\Program Files\\Microsoft SQL Server\\120\\Setup Bootstrap"\
-call MoveDirectory.cmd "\\Program Files (x86)\\Microsoft SQL Server\\100\\Setup Bootstrap"\
-call MoveDirectory.cmd "\\Program Files (x86)\\Microsoft SQL Server\\110\\Setup Bootstrap"\
-call MoveDirectory.cmd "\\Program Files (x86)\\Microsoft SQL Server\\120\\Setup Bootstrap"\
-call MoveDirectory.cmd "\\ProgramData\\Package Cache"\
-call MoveDirectory.cmd "\\Windows\\Installer"
-
-ps.: Save the two batch files, and run the second one in Admin level Command Prompt.
-
-From <[http://blogs.msdn.com/b/heaths/archive/2014/02/11/how-to-relocate-the-package-cache.aspx](http://blogs.msdn.com/b/heaths/archive/2014/02/11/how-to-relocate-the-package-cache.aspx)>
-
----
-
-**FOOBAR8**
-
-### # Add disk to virtual machine
-
-```PowerShell
-$vmHost = "FORGE"
-$vmName = "POLARIS-DEV"
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-    + $vmName + "_PackageCache01.vhdx"
-
-New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 20GB
-Add-VMHardDiskDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Path $vhdPath `
-    -ControllerType SCSI
-```
-
----
-
-```PowerShell
-cls
-```
-
-### # Initialize disks and format volumes
-
-#### # Format Data01 drive
-
-```PowerShell
-Get-Disk 5 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -UseMaximumSize -DriveLetter P |
-    Format-Volume `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "PackageCache01" `
-        -Confirm:$false
-```
-
-### Create script to move cache folders
-
-```Console
-cd C:\NotBackedUp\Temp
-
-notepad MoveCacheFolder.cmd
-```
-
-Copy/paste the following commands into Notepad:
-
-```Console
-    robocopy "C:%~1" "P:\- C -%~1" /e /j /copyall /dcopy:dat /sl /ndl /move
-
-    mklink /J "C:%~1" "P:\- C -%~1"
-```
-
-### Move Package Cache folders
-
-Open a Command Prompt using the **Run as administrator** option.
-
-```Console
-call MoveCacheFolder.cmd "\Program Files\Microsoft SQL Server\120\Setup Bootstrap"
-
-call MoveCacheFolder.cmd "\ProgramData\Package Cache"
-
-call MoveCacheFolder.cmd "\Windows\Installer"
-```
-
-```Console
-cls
-```
-
-## # Install SharePoint Cumulative Update
-
-### # Copy patch to local disk
-
-```PowerShell
-robocopy '\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4727.1001 - SharePoint 2013 June 2015 CU' C:\NotBackedUp\Temp
-```
-
-### # Install patch
-
-```PowerShell
-Push-Location C:\NotBackedUp\Temp
-
-.\Install.ps1
-
-Pop-Location
-```
-
-### # Remove patch files from local disk
-
-```PowerShell
-Remove-Item C:\NotBackedUp\Temp\Install.ps1
-Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
-Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
-Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3054866-fullfile-x64-glb.exe
-```
-
-### # Upgrade SharePoint
-
-```PowerShell
-PSCONFIG.EXE -cmd upgrade -inplace b2b -wait
-```
-
-```PowerShell
-cls
-```
-
-## # Configure registry permissions to avoid errors with SharePoint timer jobs
-
-```PowerShell
-$identity = "$env:COMPUTERNAME\WSS_WPG"
-$registryPath = 'HKLM:SOFTWARE\Microsoft\Office Server\15.0'
-
-$acl = Get-Acl $registryPath
-$rule = New-Object System.Security.AccessControl.RegistryAccessRule(
-    $identity,
-    'ReadKey',
-    'ContainerInherit, ObjectInherit',
-    'None',
-    'Allow')
-
-$acl.SetAccessRule($rule)
-Set-Acl -Path $registryPath -AclObject $acl
-```
-
-#### Reference
-
-Source: Microsoft-SharePoint Products-SharePoint Foundation\
-Event ID: 6398\
-Event Category: 12\
-User: TECHTOOLBOX\\s-sharepoint-dev\
-Computer: POLARIS-DEV.corp.technologytoolbox.com\
-Event Description: The Execute method of job definition Microsoft.SharePoint.Publishing.Internal.PersistedNavigationTermSetSyncJobDefinition (ID ...) threw an exception. More information is included below.
-
-Requested registry access is not allowed.
+**TODO:**
