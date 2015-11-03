@@ -1,4 +1,4 @@
-﻿# FOOBAR8 - Windows 8.1 Enterprise (x64)
+﻿# FOOBAR10 - Windows 10 Enterprise (x64) LTSB
 
 Tuesday, October 20, 2015
 6:23 AM
@@ -13,41 +13,15 @@ Tuesday, October 20, 2015
 - Startup memory: **2 GB**
 - Minimum memory: **512 MB**
 - Maximum memory: **4 GB**
-- VHD size: **32 GB**
-- VHD File name:** FOOBAR8**
-- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+- VHD size: 50** GB**
+- VHD File name:** FOOBAR10**
+- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\Windows 10\\en_windows_10_enterprise_2015_ltsb_x64_dvd_6848446.iso](\\ICEMAN\Products\Microsoft\Windows 10\en_windows_10_enterprise_2015_ltsb_x64_dvd_6848446.iso)**
 
-## Install custom Windows 8.1 image
-
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
-- On the **Task Sequence** step, select **Windows 8.1 Enterprise (x64)** and click **Next**.
-- On the **Computer Details** step, in the **Computer name** box, type **FOOBAR8** and click **Next**.
-- On the Applications step:
-  - Select the following items:
-    - Adobe
-      - **Adobe Reader 8.3.1**
-    - Google
-      - **Chrome**
-    - Mozilla
-      - **Firefox 40.0.2**
-      - **Thunderbird 38.2.0**
-  - Click **Next**.
+## # Set time zone
 
 ```PowerShell
-cls
+tzutil /s "Mountain Standard Time"
 ```
-
-## # Rename local Administrator account and set password
-
-```PowerShell
-$adminUser = [ADSI] 'WinNT://./Administrator,User'
-$adminUser.Rename('foo')
-$adminUser.SetPassword('{password}')
-
-Logoff
-```
-
-## Remove disk from virtual CD/DVD drive
 
 ```PowerShell
 cls
@@ -105,13 +79,15 @@ Disable-NetFirewallRule -DisplayName 'Remote Windows Update (Dynamic RPC)'
 cls
 ```
 
-## # Install Remote Server Administration Tools for Windows 8.1
+## # Install Remote Server Administration Tools for Windows 10
 
 ```PowerShell
 net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
 
-& '\\ICEMAN\Public\Download\Microsoft\Remote Server Administration Tools for Windows 8.1\Windows8.1-KB2693643-x64.msu'
+& "\\ICEMAN\Public\Download\Microsoft\Remote Server Administration Tools for Windows 10\WindowsTH-KB2693643-x64.msu"
 ```
+
+**Note:** When prompted to restart the computer, click **Restart now**.
 
 ```PowerShell
 cls
@@ -150,9 +126,26 @@ Enable-NetFirewallRule -DisplayGroup "Remote Volume Management"
 cls
 ```
 
+## # Install Microsoft .NET Framework 3.5
+
+```PowerShell
+Enable-WindowsOptionalFeature `
+    -Online `
+    -FeatureName NetFx3 `
+    -All `
+    -LimitAccess `
+    -Source X:\sources\sxs
+```
+
+```PowerShell
+cls
+```
+
 ## # Install Microsoft Report Viewer 2008 (for WSUS console)
 
 ```PowerShell
+net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+
 $installerPath = '\\ICEMAN\Public\Download\Microsoft\Report Viewer 2008 SP1' `
     + '\ReportViewer.exe'
 
@@ -356,10 +349,10 @@ Start-Process `
 
 Dismount-DiskImage -ImagePath $imagePath
 
-Logoff
+logoff
 ```
 
-#### Login as FOOBAR8\\foo
+#### Login as FOOBAR10\\foo
 
 ### Install Virtual Machine Manager console
 
@@ -388,7 +381,169 @@ Dismount-DiskImage -ImagePath $imagePath
 logoff
 ```
 
-#### Login as FOOBAR8\\foo
+#### Login as FOOBAR10\\foo
+
+```PowerShell
+cls
+```
+
+## # Install Visual Studio 2015
+
+**Note:** Windows Identity Foundation is a prerequisite for installing the Microsoft Office Developer Tools feature in Visual Studio 2015.
+
+### # Install Windows Identity Foundation 3.5
+
+```PowerShell
+Enable-WindowsOptionalFeature -Online -FeatureName Windows-Identity-Foundation
+```
+
+---
+
+**FOOBAR8**
+
+### # Insert the Visual Studio 2015 installation media
+
+```PowerShell
+$vmHost = 'STORM'
+$vmName = 'FOOBAR10'
+
+$isoPath = '\\ICEMAN\Products\Microsoft\Visual Studio 2015\en_visual_studio_enterprise_2015_x86_x64_dvd_6850497.iso'
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Launch Visual Studio 2015 setup
+
+```PowerShell
+& X:\vs_enterprise.exe
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/CB8D2970754D88629E3E6D51F1E4BDCAB8A0FD4D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/FECD5CD3DB25CEF8B7E376A92F71B45AC6C4EC93.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/6AB2199E908EAA655850B6D365791212FCDD3130.png)
+
+Select the following features:
+
+- Windows and Web Development
+  - **Microsoft Office Developer Tools**
+  - **Microsoft Web Developer Tools**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/65B2F28CB988A0CF60367E1CCF3606394A8CDFCA.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4B/7F1B8CBAB3901BD011BBE30EE4C900CEC7D40D4B.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2B/FA482E8FD5C26A618DAE0445EC9BF7B7C5F2172B.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/B88BC8416B3FF3FFACACF45FD5FB4BC306EE0437.png)
+
+## Install Microsoft Office 2016
+
+## Install updates using Windows Update
+
+**Note:** Repeat until there are no updates available for the computer.
+
+## # Clean up the WinSxS folder
+
+### Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/63/B89E8811E7DED1D9A0AC642C5445364502A77363.png)
+
+```Console
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+```
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/54143530574ED72F553DA0623F6D01F856F2FE1C.png)
+
+```PowerShell
+cls
+```
+
+## # Delete C:\\Windows\\SoftwareDistribution folder (1.6 GB)
+
+### # Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/54143530574ED72F553DA0623F6D01F856F2FE1C.png)
+
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D8/BC704F355BDA6DEFCC7A88A2AC933E27788C53D8.png)
+
+```PowerShell
+cls
+```
+
+## # Install Adobe Reader 8.3.1
+
+```PowerShell
+net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+
+& "\\ICEMAN\Products\Adobe\AdbeRdr830_en_US.msi"
+
+& "\\ICEMAN\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
+```
+
+```PowerShell
+cls
+```
+
+## # Install Google Chrome
+
+```PowerShell
+& "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup64.exe"
+
+Cls
+```
+
+## # Install Mozilla Firefox
+
+```PowerShell
+& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 40.0.2.exe" -ms
+```
+
+```PowerShell
+cls
+```
+
+## # Shutdown VM
+
+```PowerShell
+Stop-Computer
+```
+
+## Checkpoint VM - "Baseline"
+
+Windows 10 Enterprise (x64) LTSB\
+Visual Studio 2015\
+Microsoft Office Professional Plus 2016 (x86)\
+Adobe Reader 8.3.1\
+Google Chrome\
+Mozilla Firefox 40.0.2\
+Remote Server Administration Tools for Windows 10\
+Hyper-V Management Tools enabled\
+SQL Server 2014 Management Tools - Complete\
+System Center 2012 R2 Operations Manager - Operations console\
+System Center 2012 R2 Data Protection Manager Central Console\
+System Center 2012 R2 Virtual Machine Manager console
+
+#CLUSTER-INVARIANT#:{75b301bd-e052-43cc-aec4-048d0e4c273e}
+
+**TODO:**
 
 ```PowerShell
 cls
@@ -408,75 +563,8 @@ slmgr /ato
 
 ## Activate Microsoft Office
 
-1. Start Word 2013
+1. Start Word 2016
 2. Enter product key
-
-## Install updates using Windows Update
-
-**Note:** Repeat until there are no updates available for the computer.
-
-## # Clean up the WinSxS folder
-
-### Before
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3E/F55B6285943F4CA1F694F800FC1E61B0790A503E.png)
-
-```Console
-Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
-```
-
-### After
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/7C68B3C48495673281F3BA202A88A38AD037CEF4.png)
-
-```PowerShell
-cls
-```
-
-## # Delete C:\\Windows\\SoftwareDistribution folder (966 MB)
-
-### # Before
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/7C68B3C48495673281F3BA202A88A38AD037CEF4.png)
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-```
-
-### After
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/4089BD8DDBFF616D38267E7777D06CF87447008D.png)
-
-```PowerShell
-cls
-```
-
-## # Shutdown VM
-
-```PowerShell
-Stop-Computer
-```
-
-## Checkpoint VM - "Baseline"
-
-Windows 8.1 Enterprise (x64)\
-Microsoft Office Professional Plus 2013 (x86)\
-Adobe Reader 8.3.1\
-Google Chrome\
-Mozilla Firefox 40.0.2\
-Mozilla Thunderbird 38.2.0\
-Remote Server Administration Tools for Windows 8.1\
-Hyper-V Management Tools enabled\
-SQL Server 2014 Management Tools - Complete\
-System Center 2012 R2 Operations Manager - Operations console\
-System Center 2012 R2 Data Protection Manager Central Console\
-System Center 2012 R2 Virtual Machine Manager console
-
-#CLUSTER-INVARIANT#:{c72ae743-8085-4879-9881-dac34a31ac8b}
-
-**TODO:**
 
 ## Fix issue with VMM console
 
