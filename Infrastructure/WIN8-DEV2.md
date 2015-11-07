@@ -138,15 +138,94 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -EnvironmentVariableTarget Machine
 ```
 
-## # Install Node.js
+```PowerShell
+cls
+```
+
+## # Install and configure Node.js
+
+### # Install Node.js
 
 ```PowerShell
-& \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
+& \\ICEMAN\Products\node.js\node-v0.12.7-x64.msi
 ```
 
 > **Important**
 >
 > Restart PowerShell for change to PATH environment variable to take effect.
+
+### # Change NPM file locations to avoid issues with redirected folders
+
+#### Reference
+
+**npm on windows, install with -g flag should go into appdata/local rather than current appdata/roaming?**\
+From <[https://github.com/npm/npm/issues/4564](https://github.com/npm/npm/issues/4564)>
+
+**`npm install -g bower` goes into infinite loop on windows with %appdata% being a UNC path**\
+From <[https://github.com/npm/npm/issues/8814](https://github.com/npm/npm/issues/8814)>
+
+#### # Configure installed version of npm to avoid issues with redirected folders
+
+```PowerShell
+notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
+```
+
+In Notepad, change:
+
+```Text
+    prefix=${APPDATA}\npm
+```
+
+...to:
+
+```Text
+    ;prefix=${APPDATA}\npm
+    prefix=${LOCALAPPDATA}\npm
+    cache=${LOCALAPPDATA}\npm-cache
+```
+
+#### # Configure Visual Studio version of npm to avoid issues with redirected folders
+
+```PowerShell
+& "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd" config set -g cache '${LOCALAPPDATA}\npm-cache'
+
+notepad "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\etc\npmrc"
+```
+
+In Notepad, change:
+
+```Text
+    cache = C:\Users\foo\AppData\Local\npm-cache
+```
+
+...to:
+
+```Text
+    cache = ${LOCALAPPDATA}\npm-cache
+```
+
+### # Change NPM "global" locations to shared location for all users
+
+```PowerShell
+mkdir "$env:ALLUSERSPROFILE\npm-cache"
+
+mkdir "$env:ALLUSERSPROFILE\npm\node_modules"
+
+npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
+
+npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    -Folders "$env:ALLUSERSPROFILE\npm" `
+    -EnvironmentVariableTarget Machine
+
+& "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd" config set -g cache "$env:ALLUSERSPROFILE\npm-cache"
+```
+
+#### Reference
+
+**How to use npm with node.exe?**\
+http://stackoverflow.com/a/9366416
 
 ```PowerShell
 cls
@@ -227,7 +306,7 @@ $command = "Get-NetFirewallRule |
         -and `$_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
     Enable-NetFirewallRule"
 
-$scriptBlock = [scriptblock]::Create($command)
+$scriptBlock = [ScriptBlock]::Create($command)
 
 Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 
@@ -281,5 +360,73 @@ Microsoft Visual Studio 2015\
 Python 2.7.10
 Git 1.9.5\
 Node.js v0.12.5
+
+## Configure NPM to use HTTP instead of HTTPS
+
+### Reference
+
+**npm not working - "read ECONNRESET"**\
+From <[http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset](http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset)>
+
+```Console
+npm config set registry http://registry.npmjs.org/
+```
+
+```Console
+cls
+```
+
+## # Install global NPM packages
+
+### Reference
+
+**Install the Yeoman toolset**\
+From <[http://yeoman.io/codelab/setup.html](http://yeoman.io/codelab/setup.html)>
+
+### # Install Grunt CLI
+
+```PowerShell
+npm install --global grunt-cli
+```
+
+### # Install Gulp
+
+```PowerShell
+npm install --global gulp
+```
+
+### # Install Bower
+
+```PowerShell
+npm install --global bower
+```
+
+### # Install Karma CLI
+
+```PowerShell
+npm install --global karma-cli
+```
+
+### # Install Yeoman
+
+```PowerShell
+npm install --global yo
+```
+
+### # Install Yeoman generators
+
+```PowerShell
+npm install --global generator-karma
+
+npm install --global generator-angular
+```
+
+### # Install rimraf
+
+```PowerShell
+npm install --global rimraf
+```
+
+**TODO:**
 
 ## Install Web Essentials 2015
