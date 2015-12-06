@@ -818,7 +818,7 @@ New-ItemProperty `
 
 $acl = Get-Acl HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag
 $rule = New-Object System.Security.AccessControl.RegistryAccessRule(
-    $serviceAccount, "FullControl", "Allow")
+    $serviceAccount, "FullControl", "ContainerInherit", "None", "Allow")
 
 $acl.SetAccessRule($rule)
 Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl

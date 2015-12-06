@@ -1060,6 +1060,29 @@ When prompted for the credentials for the default content access account:
 cls
 ```
 
+#### # Configure VSS permissions for SharePoint Search
+
+```PowerShell
+$serviceAccount = "TECHTOOLBOX\s-spserviceapp-dev"
+
+New-ItemProperty `
+    -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\VssAccessControl `
+    -Name $serviceAccount `
+    -PropertyType DWord `
+    -Value 1 | Out-Null
+
+$acl = Get-Acl HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag
+$rule = New-Object System.Security.AccessControl.RegistryAccessRule(
+    $serviceAccount, "FullControl", "ContainerInherit", "None", "Allow")
+
+$acl.SetAccessRule($rule)
+Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
+```
+
+```PowerShell
+cls
+```
+
 ## # Install SharePoint Cumulative Update
 
 **# HACK:** This must be done after configuring the Search Service Application (or else an "access denied" error occurs due to the permissions on **C:\\Program Files\\Microsoft Office Servers\\15.0\\Bin\\languageresources.txt**)
