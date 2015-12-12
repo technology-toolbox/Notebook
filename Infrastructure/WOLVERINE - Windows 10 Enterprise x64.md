@@ -1,7 +1,7 @@
-﻿# WOLVERINE - Windows 10 Enterprise x64
+﻿# WOLVERINE (2015-12-12) - Windows 10 Enterprise x64
 
-Friday, July 31, 2015
-3:00 PM
+Saturday, December 12, 2015
+4:41 AM
 
 ## Install Windows 10 Enterprise (x64)
 
@@ -40,27 +40,42 @@ tzutil /s "Mountain Standard Time"
 reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize /t REG_DWORD /d 0 /f
 ```
 
-## # Copy Toolbox content
-
 ```PowerShell
-net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
-
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+cls
 ```
 
-## # Change drive letter for DVD-ROM
+### # Configure network settings
+
+#### # Rename network connections
 
 ```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
+Get-NetAdapter -Physical | select Name, InterfaceDescription
 
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
+Get-NetAdapter `
+    -Name "Ethernet" |
+    Rename-NetAdapter -NewName "Production"
 ```
+
+#### # Configure "Production" network adapter
+
+```PowerShell
+$interfaceAlias = "Production"
+```
+
+##### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty `
+    -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
+
+ping ICEMAN -f -l 8900
+```
+
+Note: Trying to ping ICEMAN or the iSCSI network adapter on ICEMAN with a 9000 byte packet from FORGE resulted in an error (suggesting that jumbo frames were not configured). It also worked with 8970 bytes.
 
 ```PowerShell
 cls
@@ -107,55 +122,140 @@ Disable-AutomaticallyDetectProxySettings
 **Disable-AutomaticallyDetectSettings.ps1**\
 From <[https://gist.github.com/ReubenBond/1387620](https://gist.github.com/ReubenBond/1387620)>
 
+```PowerShell
+cls
+```
+
+## # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
+```
+
+## # Copy Toolbox content
+
+```PowerShell
+net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+
+robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+```
+
+```PowerShell
+cls
+```
+
+## # Change drive letter for DVD-ROM
+
+```PowerShell
+$cdrom = Get-WmiObject -Class Win32_CDROMDrive
+$driveLetter = $cdrom.Drive
+
+$volumeId = mountvol $driveLetter /L
+$volumeId = $volumeId.Trim()
+
+mountvol $driveLetter /D
+
+mountvol X: $volumeId
+```
+
+```PowerShell
+cls
+```
+
 ## # Download PowerShell help files
 
 ```PowerShell
 Update-Help
 ```
 
-## Install Microsoft Office Professional Plus 2013 with Service Pack 1
+## # Enable PowerShell remoting
 
-## Install Microsoft SharePoint Designer 2013 with Service Pack 1
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
 
-## Install Microsoft Visio Professional 2013 with Service Pack 1
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+Set-ExecutionPolicy RemoteSigned -Scope Process
+
+C:\\NotBackedUp\\Public\\Toolbox\\PowerShell\\Enable-RemoteWindowsUpdate.ps1 -Verbose\
+C:\\NotBackedUp\\Public\\Toolbox\\PowerShell\\Disable-RemoteWindowsUpdate.ps1  -Verbose
+
+```PowerShell
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (DCOM-In)' `
+    -DisplayName 'Remote Windows Update (DCOM-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 135 `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (SMB-In)' `
+    -DisplayName 'Remote Windows Update (SMB-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 445 `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (WMI-In)' `
+    -DisplayName 'Remote Windows Update (WMI-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Program "$env:windir\system32\svchost.exe" `
+    -Service winmgmt `
+    -Direction Inbound `
+    -Protocol TCP `
+    -Profile Domain `
+    -Action Allow
+
+Get-NetFirewallRule |
+  Where-Object { `
+    $_.Profile -eq 'Domain' `
+      -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
+  Enable-NetFirewallRule
+```
+
+## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+Disable-NetFirewallRule -Group 'Remote Windows Update'
+```
 
 ```PowerShell
 cls
 ```
 
-## # Install Adobe Reader 8.3
+## # Install Microsoft Money
+
+net use \\\\ICEMAN\\Products /USER:TECHTOOLBOX\\jjameson
 
 ```PowerShell
-& "\\iceman\Products\Adobe\AdbeRdr830_en_US.msi"
-
-& "\\iceman\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
+& "\\ICEMAN\Products\Microsoft\Money 2008\USMoneyBizSunset.exe"
 ```
-
-```PowerShell
-cls
-```
-
-## # Install Mozilla Firefox 39.0
-
-```PowerShell
-& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 39.0.exe" -ms
-```
-
-```PowerShell
-cls
-```
-
-## # Install Google Chrome
-
-```PowerShell
-& "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup64.exe"
-```
-
-## Install FileZilla 3.12.0.2
-
-## Install Paint.NET 4.0.3
-
-## Install Microsoft Money
 
 > **Important**
 >
@@ -184,7 +284,7 @@ From <[https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices
 
 ### Patch Money DLL to avoid crash when importing transactions
 
-1. Open DLL in hex editor:"C:\\Program Files (x86)\\Microsoft Money Plus\\MNYCoreFiles\\mnyob99.dll"
+1. Open DLL in hex editor:
 2. Make the following changes:
 
     File offset **003FACE8**: Change **85** to **8D**\
@@ -197,34 +297,65 @@ From <[https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices
 **Microsoft Money crashes during import of account transactions or when changing a payee of a downloaded transaction**\
 From <[http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx](http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx)>
 
-## Install Oracle VM VirtualBox
+## Install Microsoft Office Professional Plus 2016
+
+## Install Microsoft Visio Professional 2016
+
+```PowerShell
+cls
+```
+
+## # Install Microsoft InfoPath 2013
+
+```PowerShell
+& "\\ICEMAN\Products\Microsoft\Office 2013\infopath_4753-1001_x86_en-us.exe"
+```
+
+```PowerShell
+cls
+```
+
+## # Install Adobe Reader 8.3
+
+```PowerShell
+& "\\ICEMAN\Products\Adobe\AdbeRdr830_en_US.msi"
+
+& "\\ICEMAN\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
+```
+
+```PowerShell
+cls
+```
+
+## # Install Mozilla Firefox
+
+```PowerShell
+& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 46.0.1.exe" -ms
+```
+
+```PowerShell
+cls
+```
+
+## # Install Google Chrome
+
+```PowerShell
+& "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup64.exe"
+```
+
+## Install FileZilla 3.18.0
+
+## Install Paint.NET 4.0.9
 
 ## Install Microsoft Expression Studio 4
 
-## Install Microsoft SQL Server 2014
+## Install Microsoft Visual Studio 2015 Enterprise with Update 2
 
-#### # Install .NET Framework 3.5
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/ACDA391F5D951BCC223707F0D0AF2DF01F6ED49A.png)
 
-```PowerShell
-$sourcePath = "X:\sources\sxs"
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/3D184DB58FB449B09BA3A8C96808BE56AFE0AC69.png)
 
-Enable-WindowsOptionalFeature -FeatureName NetFx3 -Source $sourcePath -Online
-```
-
-### Install SQL Server
-
-- Change Startup Type on all services to Manual
-- Add TECHTOOLBOX\\SQL Server Admins (DEV) to the list of SQL Server administrators
-- Set Data root directory to "C:\\NotBackedUp\\Microsoft SQL Server"
-- For Distributed Replay Client, change paths to "C:\\NotBackedUp\\Microsoft SQL Server\\..."
-
-## Install Microsoft Visual Studio 2015 Enterprise
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/CB8D2970754D88629E3E6D51F1E4BDCAB8A0FD4D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/FECD5CD3DB25CEF8B7E376A92F71B45AC6C4EC93.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/6AB2199E908EAA655850B6D365791212FCDD3130.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BD/7DA9EE2C35C29A126B4BAA3835DB28DC7EF69ABD.png)
 
 Select the following features:
 
@@ -232,9 +363,9 @@ Select the following features:
   - **Microsoft Office Developer Tools**
   - **Microsoft Web Developer Tools**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/65B2F28CB988A0CF60367E1CCF3606394A8CDFCA.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/83/92B19D856F2778744C00F8799038082A88EB9D83.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4B/7F1B8CBAB3901BD011BBE30EE4C900CEC7D40D4B.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EC/7BEC5B0BCF7DD4693FB012016FFC95B9ADFC9FEC.png)
 
 ## Install Chutzpah Test Adapter
 
@@ -245,7 +376,7 @@ Select the following features:
    2. In the search box, type **Chutzpah**.
    3. In the list of items, select **Chutzpah Test Adapter for the Test Explorer**, and click **Download**.
    4. Review the license terms, and click **Install**.
-   5. Wait for the extension to be installled.
+   5. Wait for the extension to be installed.
    6. Click **Restart Now**.
 
 ## Install Chutzpah Test Runner
@@ -260,11 +391,26 @@ Select the following features:
    5. Wait for the extension to be installled.
    6. Click **Restart Now**.
 
+### Install Microsoft Azure SDK 2.9.1
+
+Reference:
+
+Announcing the Visual Studio Azure Tools and SDK 2.9\
+[https://azure.microsoft.com/en-us/blog/announcing-visual-studio-azure-tools-and-sdk-2-9/](https://azure.microsoft.com/en-us/blog/announcing-visual-studio-azure-tools-and-sdk-2-9/)
+
+### Install Microsoft Office Developer Tools Update 2 for Visual Studio 2015
+
+```PowerShell
+cls
+```
+
 ## # Install reference assemblies
 
 ```PowerShell
+net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+
 robocopy `
-    '\\ICEMAN\Public\Reference Assemblies' `
+    '\\ICEMAN\Builds\Reference Assemblies' `
     'C:\Program Files\Reference Assemblies' /E
 
 & 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v4\AssemblyFoldersEx - x64.reg'
@@ -282,10 +428,19 @@ robocopy `
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/9A7DF5FF756E44DAC0D8F600AA2D457598370EBB.png)
 
+```PowerShell
+cls
+```
+
 ## # Configure symbol path for debugging
 
 ```PowerShell
-setx _NT_SYMBOL_PATH SRV*C:\NotBackedUp\Public\Symbols*\\ICEMAN\Public\Symbols*http://msdl.microsoft.com/download/symbols /M
+$symbolPath = "SRV*C:\NotBackedUp\Public\Symbols*\\ICEMAN\Public\Symbols*http://msdl.microsoft.com/download/symbols"
+[Environment]::SetEnvironmentVariable("_NT_SYMBOL_PATH", $symbolPath, "Machine")
+```
+
+```PowerShell
+cls
 ```
 
 ## # Install Python (dependency for many node.js packages)
@@ -295,7 +450,7 @@ setx _NT_SYMBOL_PATH SRV*C:\NotBackedUp\Public\Symbols*\\ICEMAN\Public\Symbols*h
 ```PowerShell
 net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
 
-& "\\ICEMAN\Products\Python\python-2.7.10.amd64.msi"
+& "\\ICEMAN\Products\Python\python-2.7.11.amd64.msi"
 ```
 
 ### # Add Python folders to PATH environment variable
@@ -310,12 +465,16 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -EnvironmentVariableTarget Machine
 ```
 
+```PowerShell
+cls
+```
+
 ## # Install Git (required by npm to download packages from GitHub)
 
 ### # Install Git (using default options)
 
 ```PowerShell
-& \\ICEMAN\Products\Git\Git-2.5.3-64-bit.exe
+& \\ICEMAN\Products\Git\Git-2.8.3-64-bit.exe
 ```
 
 ### # Add Git folder to PATH environment variable
@@ -339,7 +498,7 @@ cls
 ```PowerShell
 # & \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
 
-& \\ICEMAN\Products\node.js\node-v4.1.1-x64.msi
+& \\ICEMAN\Products\node.js\node-v4.4.5-x64.msi
 ```
 
 > **Important**
@@ -396,6 +555,10 @@ In Notepad, change:
     cache = ${LOCALAPPDATA}\npm-cache
 ```
 
+```Console
+cls
+```
+
 ### # Change NPM "global" locations to shared location for all users
 
 ```PowerShell
@@ -410,6 +573,8 @@ npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -Folders "$env:ALLUSERSPROFILE\npm" `
     -EnvironmentVariableTarget Machine
+
+& "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd" config set -g cache "$env:ALLUSERSPROFILE\npm-cache"
 ```
 
 #### Reference
@@ -428,10 +593,18 @@ cls
 **Install the Yeoman toolset**\
 From <[http://yeoman.io/codelab/setup.html](http://yeoman.io/codelab/setup.html)>
 
+```PowerShell
+cls
+```
+
 ### # Install Grunt CLI
 
 ```PowerShell
 npm install --global grunt-cli
+```
+
+```PowerShell
+cls
 ```
 
 ### # Install Gulp
@@ -440,10 +613,18 @@ npm install --global grunt-cli
 npm install --global gulp
 ```
 
+```PowerShell
+cls
+```
+
 ### # Install Bower
 
 ```PowerShell
 npm install --global bower
+```
+
+```PowerShell
+cls
 ```
 
 ### # Install Karma CLI
@@ -452,10 +633,18 @@ npm install --global bower
 npm install --global karma-cli
 ```
 
+```PowerShell
+cls
+```
+
 ### # Install Yeoman
 
 ```PowerShell
 npm install --global yo
+```
+
+```PowerShell
+cls
 ```
 
 ### # Install Yeoman generators
@@ -466,13 +655,17 @@ npm install --global generator-karma
 npm install --global generator-angular
 ```
 
+```PowerShell
+cls
+```
+
 ### # Install rimraf
 
 ```PowerShell
 npm install --global rimraf
 ```
 
-## # Configure npm locations for TECHTOOLBOX\\jjameson account
+## TODO: # Configure npm locations for TECHTOOLBOX\\jjameson account
 
 ---
 
@@ -482,19 +675,113 @@ npm install --global rimraf
 npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
 
 npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
+
+& "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd" config set cache '${LOCALAPPDATA}\npm-cache'
 ```
 
 ---
 
-## # Install ASP.NET ViewState Helper 2.0.1
+## TODO: "Upgrade NPM" version in Visual Studio 2015
+
+### Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/16ED937A4EC8A4D914E16BDF0D7F6EC115CC2965.png)
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/FD14463E819276232A1137CA4609DAE9E4FDB99F.png)
+
+### Reference
+
+**Upgrading NPM in Visual Studio 2015**\
+From <[http://jameschambers.com/2015/09/upgrading-npm-in-visual-studio-2015/](http://jameschambers.com/2015/09/upgrading-npm-in-visual-studio-2015/)>
+
+## Install GitHub Desktop
+
+[https://desktop.github.com/](https://desktop.github.com/)
+
+```PowerShell
+cls
+```
 
 ## # Install Microsoft Message Analyzer
 
+```PowerShell
+& "\\ICEMAN\Products\Microsoft\Message Analyzer 1.4\MessageAnalyzer64.msi"
+```
+
+```PowerShell
+cls
+```
+
 ## # Install Microsoft Log Parser 2.2
+
+```PowerShell
+& "\\ICEMAN\Public\Download\Microsoft\LogParser 2.2\LogParser.msi"
+```
+
+```PowerShell
+cls
+```
+
+## # Install Remote Desktop Connection Manager
+
+& "\\\\ICEMAN\\Products\\Microsoft\\Remote Desktop Connection Manager\\rdcman.msi"
 
 ## # Install Fiddler
 
-## Install Remote Desktop Connection Manager
+## Install software for HP Photosmart 6515
+
+[http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793](http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793)
+
+## Share printer
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/01/2EDCC101189FC9A8E4E5FD9205D12E8EB82B2F01.png)
+
+Click **Change Sharing Options**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/39D600ED528C73CAE3772FDA8A9E263E29CBF094.png)
+
+## Install and configure Hyper-V
+
+### Enable Hyper-V
+
+```PowerShell
+cls
+```
+
+### # Configure VM storage
+
+```PowerShell
+mkdir D:\NotBackedUp\VMs
+
+Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
+```
+
+```PowerShell
+cls
+```
+
+### # Create virtual switches
+
+```PowerShell
+New-VMSwitch `
+    -Name "Production" `
+    -NetAdapterName "Production" `
+    -AllowManagementOS $true
+```
+
+### # Enable jumbo frames on virtual switches
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty `
+    -Name "vEthernet (Production)" `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
+
+ping ICEMAN -f -l 8900
+```
 
 ```PowerShell
 cls
@@ -520,7 +807,7 @@ slmgr /ato
 cls
 ```
 
-## # Delete C:\\Windows\\SoftwareDistribution folder (3.5 GB)
+## # Delete C:\\Windows\\SoftwareDistribution folder (4.7 GB)
 
 ```PowerShell
 Stop-Service wuauserv
@@ -530,28 +817,9 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 
 ## Disk Cleanup
 
-## Enable Hyper-V
+## Install Microsoft SQL Server 2016
 
-**Note:** Even after enabling Intel Virtualization Technology and DEP in BIOS (and rebooting/restarting numerous times), Windows 10 would not allow the Hyper-V role to be enabled.
-
-Here's what finally did the trick:
-
-```Console
-bcdedit /set hypervisorlaunchtype auto
-```
-
-### Reference
-
-**Hyper-V won't enable in Windows 8 Pro: "Virtualization support is disabled in the firmware"**\
-From <[http://superuser.com/questions/530379/hyper-v-wont-enable-in-windows-8-pro-virtualization-support-is-disabled-in-th](http://superuser.com/questions/530379/hyper-v-wont-enable-in-windows-8-pro-virtualization-support-is-disabled-in-th)>
-
-## Share printer
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/01/2EDCC101189FC9A8E4E5FD9205D12E8EB82B2F01.png)
-
-Click **Change Sharing Options**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/39D600ED528C73CAE3772FDA8A9E263E29CBF094.png)
+## Install Microsoft SQL Server Management Studio
 
 ## # Configure credential helper for Git
 
@@ -566,48 +834,31 @@ git config --global user.email "jeremy_jameson@live.com"
 git config --global user.name "Jeremy Jameson"
 ```
 
-## Install GitHub Desktop
+## Install Android SDK (for debugging Chrome on Samsung Galaxy)
 
-[https://desktop.github.com/](https://desktop.github.com/)
+### Reference
 
-## # Install Microsoft Azure PowerShell
+[http://stackoverflow.com/a/24410867](http://stackoverflow.com/a/24410867)
 
-```PowerShell
-& \\iceman\Products\Microsoft\Azure\azure-powershell.0.9.6.msi
-```
+### Install Samsung USB driver
 
-## # Enable PowerShell remoting
+### Install Java SE Development Kit 8u66
 
-```PowerShell
-Enable-PSRemoting -Confirm:$false
-```
+[http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### Install Android "SDK Tools Only"
 
-```PowerShell
-Get-NetFirewallRule |
-    Where-Object { $_.Profile -eq 'Domain' `
-        -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
-    Enable-NetFirewallRule
+[http://developer.android.com/sdk/index.html#Other](http://developer.android.com/sdk/index.html#Other)
 
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (Dynamic RPC)' `
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Technology Toolbox (Custom)' `
-    -Program '%windir%\system32\dllhost.exe' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort RPC `
-    -Profile Domain `
-    -Action Allow
-```
+### Install Android SDK Platform-tools
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/75601D9C9EF795A16D815FE580D6571F20B23C1E.png)
 
-```PowerShell
-Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
-```
+### Detect devices
+
+cd C:\\Program Files (x86)\\Android\\android-sdk\\platform-tools
+
+adb.exe devices
 
 ## TODO: Other stuff that may need to be done
 
@@ -619,6 +870,8 @@ Sandcastle Documentation Compiler Tools\
 Sandcastle Help File Builder
 
 MSBuild Community Tasks
+
+## # Install ASP.NET ViewState Helper 2.0.1
 
 ## Install Inkscape 0.48
 
