@@ -1007,6 +1007,13 @@ netsh advfirewall firewall add rule `
     action=Allow
 ```
 
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+netsh advfirewall firewall set rule `
+    name="Remote Windows Update (Dynamic RPC)" new enable=no
+```
+
 ## Snapshot VM - "Baseline Client Portal 3.0.633.0 / Cloud Portal 1.0.104.0"
 
 **TODO:**
