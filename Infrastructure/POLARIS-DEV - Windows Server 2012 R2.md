@@ -1618,4 +1618,23 @@ msiexec.exe /i $msiPath `
 
 ## # Approve manual agent install in Operations Manager
 
+## -- Configure permissions on stored procedures in SharePoint_Config database
+
+```SQL
+USE [Sharepoint_Config]
+GO
+GRANT EXECUTE ON [dbo].[proc_putObjectTVP] TO [WSS_Content_Application_Pools]
+GRANT EXECUTE ON [dbo].[proc_putObject] TO [WSS_Content_Application_Pools]
+GRANT EXECUTE ON [dbo].[proc_putDependency] TO [WSS_Content_Application_Pools]
+GO
+```
+
+##### References
+
+**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ‘proc_putObjectTVP’, database ‘SharePoint_Config’**\
+From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html](http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html)>
+
+**EXECUTE permission was denied on the object 'proc_putObjectTVP'**\
+From <[https://social.technet.microsoft.com/Forums/office/en-US/88c2c219-e1b0-4ed2-807a-267dba1a2c0b/execute-permission-was-denied-on-the-object-procputobjecttvp?forum=sharepointadmin](https://social.technet.microsoft.com/Forums/office/en-US/88c2c219-e1b0-4ed2-807a-267dba1a2c0b/execute-permission-was-denied-on-the-object-procputobjecttvp?forum=sharepointadmin)>
+
 **TODO:**
