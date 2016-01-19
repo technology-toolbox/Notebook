@@ -16,6 +16,8 @@ Get-AzureVM -ServiceName fab-ex | Start-AzureVM
 
 Get-AzureVM -ServiceName fab-wap | Start-AzureVM
 
+Get-AzureVM -ServiceName ext-foobar5 | Start-AzureVM
+
 Get-AzureVM -ServiceName ext-foobar6 | Start-AzureVM
 ```
 
@@ -30,6 +32,8 @@ Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-ex | Start-AzureVM }
 
 Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-wap | Start-AzureVM }
 
+Start-Job -ScriptBlock { Get-AzureVM -ServiceName ext-foobar5 | Start-AzureVM }
+
 Start-Job -ScriptBlock { Get-AzureVM -ServiceName ext-foobar6 | Start-AzureVM }
 ```
 
@@ -43,6 +47,8 @@ Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-adfs | Stop-AzureVM -Force
 Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-ex | Stop-AzureVM -Force }
 
 Start-Job -ScriptBlock { Get-AzureVM -ServiceName fab-wap | Stop-AzureVM -Force }
+
+Start-Job -ScriptBlock { Get-AzureVM -ServiceName ext-foobar5 | Stop-AzureVM -Force }
 
 Start-Job -ScriptBlock { Get-AzureVM -ServiceName ext-foobar6 | Stop-AzureVM -Force }
 ```
