@@ -1,7 +1,7 @@
 ﻿# FORGE - Windows Server 2012 R2 Standard
 
-Monday, October 20, 2014
-4:33 PM
+Monday, January 25, 2016
+2:54 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,16 +9,63 @@ Monday, October 20, 2014
 
 ## Install Windows Server 2012 R2
 
-## Set time zone
+## Configure static IPv4 address
 
 ```Console
 sconfig
 ```
 
-## Rename the server and join domain
+Interface Description: **Realtek PCIe GBE Family Controller**\
+IP Address: **192.168.10.105**\
+Subnet Mask: **255.255.255.0**\
+Default Gateway: **192.168.10.1**\
+Primary DNS Server: **192.168.10.103**\
+Secondary DNS Server: **192.168.10.104**
+
+## Rename computer
 
 ```Console
 sconfig
+```
+
+## Join domain
+
+```Console
+sconfig
+```
+
+## Move computer to "Hyper-V Servers" OU
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+$computerName = "FORGE"
+$targetPath = ("OU=Hyper-V Servers,OU=Servers,OU=Resources,OU=IT" `
+    + ",DC=corp,DC=technologytoolbox,DC=com")
+
+Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+```
+
+---
+
+```Console
+PowerShell
+```
+
+```Console
+cls
+```
+
+## # Set time zone
+
+```PowerShell
+tzutil /s "Mountain Standard Time"
+```
+
+```PowerShell
+cls
 ```
 
 ## # Download PowerShell help files
@@ -27,9 +74,21 @@ sconfig
 Update-Help
 ```
 
-## # Change drive letter for DVD-ROM
+```PowerShell
+cls
+```
 
-### # To change the drive letter for the DVD-ROM using PowerShell
+## # Copy Toolbox content
+
+```PowerShell
+robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+```
+
+```PowerShell
+cls
+```
+
+## # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -43,86 +102,102 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-### Reference
+```PowerShell
+cls
+```
 
-**Change CD ROM Drive Letter in Newly Built VM's to Z:\\ Drive**\
-Pasted from <[http://www.vinithmenon.com/2012/10/change-cd-rom-drive-letter-in-newly.html](http://www.vinithmenon.com/2012/10/change-cd-rom-drive-letter-in-newly.html)>
+## # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
+```
+
+```PowerShell
+cls
+```
 
 ## # Rename network connections
 
 ```PowerShell
-Get-NetAdapter -Physical
-
 Get-NetAdapter -InterfaceDescription "Intel(R) Ethernet Connection I217-V" |
-    Rename-NetAdapter -NewName "LAN 1 - 192.168.10.x"
+    Rename-NetAdapter -NewName "Production"
 
 Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
-    Rename-NetAdapter -NewName "LAN 2 - 192.168.10.x"
+    Rename-NetAdapter -NewName "Storage"
+
+Get-NetAdapter -Physical
 ```
 
-## # Configure static IPv4 address
-
 ```PowerShell
-$ipAddress = "192.168.10.105"
-
-New-NetIPAddress `
-    -InterfaceAlias "LAN 1 - 192.168.10.x" `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-
-Set-DNSClientServerAddress `
-    -InterfaceAlias "LAN 1 - 192.168.10.x" `
-    -ServerAddresses 192.168.10.103,192.168.10.104
+cls
 ```
 
 ## # Configure static IPv6 address
 
 ```PowerShell
-$ipAddress = "2601:1:8200:6000::105"
+$ipAddress = "2601:282:4201:e500::105"
 
 New-NetIPAddress `
-    -InterfaceAlias "LAN 1 - 192.168.10.x" `
+    -InterfaceAlias "Production" `
     -IPAddress $ipAddress `
     -PrefixLength 64
 
 Set-DNSClientServerAddress `
-    -InterfaceAlias "LAN 1 - 192.168.10.x" `
-    -ServerAddresses 2601:1:8200:6000::103,2601:1:8200:6000::104
+    -InterfaceAlias "Production" `
+    -ServerAddresses 2601:282:4201:e500::103,2601:282:4201:e500::104
 ```
 
-## # Configure VM network adapter
+```PowerShell
+cls
+```
+
+## # Configure iSCSI network adapter
 
 ```PowerShell
-Disable-NetAdapterBinding `
-    -Name "LAN 2 - 192.168.10.x" `
+$ipAddress = "10.1.10.105"
+
+New-NetIPAddress `
+    -InterfaceAlias "Storage" `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+
+Disable-NetAdapterBinding -Name "Storage" `
     -DisplayName "Client for Microsoft Networks"
 
-Disable-NetAdapterBinding `
-    -Name "LAN 2 - 192.168.10.x" `
+Disable-NetAdapterBinding -Name "Storage" `
     -DisplayName "File and Printer Sharing for Microsoft Networks"
 
-Disable-NetAdapterBinding `
-    -Name "LAN 2 - 192.168.10.x" `
+Disable-NetAdapterBinding -Name "Storage" `
     -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
 
-Disable-NetAdapterBinding `
-    -Name "LAN 2 - 192.168.10.x" `
+Disable-NetAdapterBinding -Name "Storage" `
     -DisplayName "Link-Layer Topology Discovery Responder"
 
-$adapter = Get-WmiObject `
-    -Class "Win32_NetworkAdapter" `
-    -Filter "NetConnectionId = 'LAN 2 - 192.168.10.x'"
+$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+    -Filter "NetConnectionId = 'Storage'"
 
-$adapterConfig = Get-WmiObject `
-    -Class "Win32_NetworkAdapterConfiguration" `
+$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
     -Filter "Index= '$($adapter.DeviceID)'"
+```
 
-# Do not register this connection in DNS
+### # Do not register this connection in DNS
+
+```PowerShell
 $adapterConfig.SetDynamicDNSRegistration($false)
+```
 
-# Disable NetBIOS over TCP/IP
+### # Disable NetBIOS over TCP/IP
+
+```PowerShell
 $adapterConfig.SetTcpipNetbios(2)
+```
+
+```PowerShell
+cls
 ```
 
 ## # Enable jumbo frames
@@ -130,23 +205,57 @@ $adapterConfig.SetTcpipNetbios(2)
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty `
-    -Name "LAN 1 - 192.168.10.x" `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
+Set-NetAdapterAdvancedProperty -Name "Production" `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-Set-NetAdapterAdvancedProperty `
-    -Name "LAN 2 - 192.168.10.x" `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
+Set-NetAdapterAdvancedProperty -Name "Storage" `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
 
 ping ICEMAN -f -l 8900
 ping 10.1.10.106 -f -l 8900
 ```
 
+Note: Trying to ping ICEMAN or the iSCSI network adapter on ICEMAN with a 9000 byte packet from BEAST resulted in an error (suggesting that jumbo frames were not configured). It also worked with 8970 bytes.
+
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Technology Toolbox (Custom)' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+```
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
+```
+
 ## Enable Virtualization in BIOS
 
 Intel Virtualization Technology: **Enabled**
+
+```PowerShell
+cls
+```
 
 ## # Add Hyper-V role
 
@@ -157,13 +266,26 @@ Install-WindowsFeature `
     -Restart
 ```
 
+```PowerShell
+cls
+```
+
 ## # Create virtual switches
 
 ```PowerShell
 New-VMSwitch `
-    -Name "Virtual LAN 2 - 192.168.10.x" `
-    -NetAdapterName "LAN 2 - 192.168.10.x" `
+    -Name "Production" `
+    -NetAdapterName "Production" `
     -AllowManagementOS $true
+
+New-VMSwitch `
+    -Name "Storage" `
+    -NetAdapterName "Storage" `
+    -AllowManagementOS $true
+```
+
+```PowerShell
+cls
 ```
 
 ## # Enable jumbo frames on virtual switches
@@ -172,28 +294,34 @@ New-VMSwitch `
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 Set-NetAdapterAdvancedProperty `
-    -Name "vEthernet (Virtual LAN 2 - 192.168.10.x)" `
+    -Name "vEthernet (Production)" `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
+
+Set-NetAdapterAdvancedProperty `
+    -Name "vEthernet (Storage)" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
 ping ICEMAN -f -l 8900
 ping 10.1.10.106 -f -l 8900
 ```
 
-## # Modify "guest" virtual switch to disallow management OS
-
 ```PowerShell
-Get-VMSwitch "Virtual LAN 2 - 192.168.10.x" |
-    Set-VMSwitch -AllowManagementOS $false
+cls
 ```
 
 ## # Configure default folder to store VMs
 
 ```PowerShell
 mkdir C:\NotBackedUp\VMs
+
 Set-VMHost -VirtualMachinePath C:\NotBackedUp\VMs
 ```
 
-## # Install SCOM agent
+```PowerShell
+cls
+```
+
+### # Install SCOM agent
 
 ```PowerShell
 $imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
@@ -210,7 +338,15 @@ msiexec.exe /i $msiPath `
     ACTIONS_USE_COMPUTER_ACCOUNT=1
 ```
 
-## # Install DPM 2012 R2 agent
+### # Approve manual agent install in Operations Manager
+
+```PowerShell
+cls
+```
+
+## # Install and configure Data Protection Manager
+
+### # Install DPM 2012 R2 agent
 
 ```PowerShell
 $imagePath = "\\iceman\Products\Microsoft\System Center 2012 R2\" `
@@ -233,12 +369,12 @@ Confirm the agent installation completed successfully and the following firewall
 - Exception for RemoteAdmin service
 - Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
 
-### Reference
+#### Reference
 
 **Installing Protection Agents Manually**\
 Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
 
-## Attach DPM agent
+### Attach DPM agent
 
 On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the following commands:
 
@@ -248,13 +384,8 @@ $productionServer = "FORGE"
 .\Attach-ProductionServer.ps1 `
     -DPMServerName JUGGERNAUT `
     -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
+    -Domain TECHTOOLBOX `-UserName jjameson-admin
 ```
-
-## Add computer to DPM Protection Group
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/AD5931EFE42E2CD38A5F621934B1F19D76EE1F55.png)
 
 ## # Configure Live Migration (without Failover Clustering)
 
@@ -263,15 +394,9 @@ $productionServer = "FORGE"
 ```PowerShell
 Enable-VMMigration
 
-Add-VMMigrationNetwork 192.168.10.105
+Add-VMMigrationNetwork 192.168.10.101
 
 Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
-```
-
-### # Add computer to "Hyper-V Servers" group
-
-```PowerShell
-Add-ADGroupMember "Hyper-V Servers" -Members "FORGE$"
 ```
 
 ### Reference
@@ -279,58 +404,6 @@ Add-ADGroupMember "Hyper-V Servers" -Members "FORGE$"
 **Configure Live Migration and Migrating Virtual Machines without Failover Clustering**\
 Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://technet.microsoft.com/en-us/library/jj134199.aspx)>
 
-## Restart the server
+## Fix issue with jumbo packets on Realtek network adapter
 
-## Add server to Virtual Machine Manager
-
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-## # Update static IPv6 address
-
-```PowerShell
-netsh int ipv6 delete address "LAN 1 - 192.168.10.x" 2601:1:8200:6000::105
-
-netsh int ipv6 delete dns "LAN 1 - 192.168.10.x" 2601:1:8200:6000::103
-netsh int ipv6 delete dns "LAN 1 - 192.168.10.x" 2601:1:8200:6000::104
-
-netsh int ipv6 add address "LAN 1 - 192.168.10.x" 2601:282:4201:e500::105
-
-netsh int ipv6 add dns "LAN 1 - 192.168.10.x" 2601:282:4201:e500::103
-netsh int ipv6 add dns "LAN 1 - 192.168.10.x" 2601:282:4201:e500::104
-```
-
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
-
-```PowerShell
-$computer = 'FORGE'
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-```
-
----
+NETSH INTERFACE IP SET SUBINTERFACE "LAN 1 - 192.168.10.x" MTU=9000 STORE=PERSISTENT
