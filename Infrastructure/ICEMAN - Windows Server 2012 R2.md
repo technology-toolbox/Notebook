@@ -677,3 +677,15 @@ Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
 
 ---
+
+## # Create file share (\\\\ICEMAN\\Archive)
+
+```PowerShell
+New-Item -ItemType Directory -Path D:\Shares\Archive
+
+New-SmbShare `
+  -Name Archive `
+  -Path D:\Shares\Archive `
+  -CachingMode None `
+  -ChangeAccess Everyone
+```
