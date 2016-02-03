@@ -301,6 +301,13 @@ ping ICEMAN -f -l 8900
 ping 10.1.10.106 -f -l 8900
 ```
 
+## Configure storage
+
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | C:           | 119 GB      | 4K                   |              |
+| 1    | D:           | 477 GB      | 4K                   | Data01       |
+
 ```PowerShell
 cls
 ```
@@ -308,14 +315,59 @@ cls
 ## # Configure default folder to store VMs
 
 ```PowerShell
-mkdir C:\NotBackedUp\VMs
+mkdir D:\NotBackedUp\VMs
 
-Set-VMHost -VirtualMachinePath C:\NotBackedUp\VMs
+Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
 ```
+
+## Configure Live Migration (without Failover Clustering)
+
+### Configure constrained delegation in Active Directory
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/E9A44C534EBF2F82D4B589C8ADA77606660D633C.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/AD77A31B7028F9A29019A98041708C4476B8219A.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/A8AD54C8C867D0C401D142BA636275E4BF2A38F8.png)
+
+Click Add...
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/18818661BC0C359C33EE49E6F3341FAAF867998D.png)
+
+Click Users or Computers...
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/8C4D5407890ED0A5291966F89368D6967C2B76D9.png)
+
+Click OK.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C3/C8723FDA8328DE8756E01D9D50B4036435F276C3.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/D1A6D847BA13DB0490AD482B992ED18E64F5B57E.png)
+
+Click OK.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/BA474ABE58D25D0AEA7E9D1D2C3CFB4627C4C1AF.png)
+
+### # Configure the server for live migration
+
+```PowerShell
+Enable-VMMigration
+
+Add-VMMigrationNetwork 192.168.10.101
+
+Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
+```
+
+### Reference
+
+**Configure Live Migration and Migrating Virtual Machines without Failover Clustering**\
+Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://technet.microsoft.com/en-us/library/jj134199.aspx)>
 
 ```PowerShell
 cls
 ```
+
+## # Install and configure System Center Operations Manager
 
 ### # Install SCOM agent
 
@@ -375,7 +427,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the following commands:
 
 ```PowerShell
-$productionServer = "FORGE"
+$productionServer = "BEAST"
 
 .\Attach-ProductionServer.ps1 `
     -DPMServerName JUGGERNAUT `
@@ -383,23 +435,22 @@ $productionServer = "FORGE"
     -Domain TECHTOOLBOX `-UserName jjameson-admin
 ```
 
-## # Configure Live Migration (without Failover Clustering)
-
-### # Configure the server for live migration
-
 ```PowerShell
-Enable-VMMigration
-
-Add-VMMigrationNetwork 192.168.10.101
-
-Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
+cls
 ```
 
-### Reference
+## # Clean up the WinSxS folder
 
-**Configure Live Migration and Migrating Virtual Machines without Failover Clustering**\
-Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://technet.microsoft.com/en-us/library/jj134199.aspx)>
+```PowerShell
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+```
 
-## Fix issue with jumbo packets on Realtek network adapter
+## # Clean up Windows Update files
 
-NETSH INTERFACE IP SET SUBINTERFACE "LAN 1 - 192.168.10.x" MTU=9000 STORE=PERSISTENT
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```
+
+**TODO:**

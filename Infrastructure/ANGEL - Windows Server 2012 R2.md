@@ -309,7 +309,7 @@ ping 10.1.10.106 -f -l 8900
 
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 119 GB      | 4K                   | OSDisk       |
+| 0    | C:           | 119 GB      | 4K                   |              |
 | 1    | D:           | 477 GB      | 4K                   | Data01       |
 
 ```PowerShell
@@ -323,6 +323,49 @@ mkdir D:\NotBackedUp\VMs
 
 Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
 ```
+
+## Configure Live Migration (without Failover Clustering)
+
+### Configure constrained delegation in Active Directory
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/D3EC4C2C5F12EB526565EAE8D4580A9D7E3C755C.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/037C5A725AE3D3662EF852D262A15DFFD8EE283F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/0DE0367750156A9F3D9AEA75678C5F900F143C1C.png)
+
+Click Add...
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/18818661BC0C359C33EE49E6F3341FAAF867998D.png)
+
+Click Users or Computers...
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/4F1C5C01B85E16F2B3B7492F185F705F911D057C.png)
+
+Click OK.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8F/465D67CC0249DDDBFA2BEE019FEE6F4D8C98C18F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B4/DC763B77707277FB7C22421AB8B2C93257EFF5B4.png)
+
+Click OK.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D0/12B1553B39D8AA5F324180076E0D98EBA5466DD0.png)
+
+### # Configure the server for live migration
+
+```PowerShell
+Enable-VMMigration
+
+Add-VMMigrationNetwork 192.168.10.107
+
+Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
+```
+
+### Reference
+
+**Configure Live Migration and Migrating Virtual Machines without Failover Clustering**\
+Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://technet.microsoft.com/en-us/library/jj134199.aspx)>
 
 ```PowerShell
 cls
@@ -394,23 +437,22 @@ $productionServer = "ANGEL"
     -Domain TECHTOOLBOX `-UserName jjameson-admin
 ```
 
-## # Configure Live Migration (without Failover Clustering)
-
-### # Configure the server for live migration
-
 ```PowerShell
-Enable-VMMigration
-
-Add-VMMigrationNetwork 192.168.10.101
-
-Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
+cls
 ```
 
-### Reference
+## # Clean up the WinSxS folder
 
-**Configure Live Migration and Migrating Virtual Machines without Failover Clustering**\
-Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://technet.microsoft.com/en-us/library/jj134199.aspx)>
+```PowerShell
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+```
 
-## Fix issue with jumbo packets on Realtek network adapter
+## # Clean up Windows Update files
 
-NETSH INTERFACE IP SET SUBINTERFACE "LAN 1 - 192.168.10.x" MTU=9000 STORE=PERSISTENT
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```
+
+**TODO:**

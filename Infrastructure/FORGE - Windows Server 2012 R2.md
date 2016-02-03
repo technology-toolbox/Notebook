@@ -321,6 +321,27 @@ Set-VMHost -VirtualMachinePath C:\NotBackedUp\VMs
 cls
 ```
 
+## # Configure Live Migration (without Failover Clustering)
+
+### # Configure the server for live migration
+
+```PowerShell
+Enable-VMMigration
+
+Add-VMMigrationNetwork 192.168.10.105
+
+Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
+```
+
+### Reference
+
+**Configure Live Migration and Migrating Virtual Machines without Failover Clustering**\
+Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://technet.microsoft.com/en-us/library/jj134199.aspx)>
+
+```PowerShell
+cls
+```
+
 ### # Install SCOM agent
 
 ```PowerShell
@@ -387,23 +408,22 @@ $productionServer = "FORGE"
     -Domain TECHTOOLBOX `-UserName jjameson-admin
 ```
 
-## # Configure Live Migration (without Failover Clustering)
-
-### # Configure the server for live migration
-
 ```PowerShell
-Enable-VMMigration
-
-Add-VMMigrationNetwork 192.168.10.101
-
-Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
+cls
 ```
 
-### Reference
+## # Clean up the WinSxS folder
 
-**Configure Live Migration and Migrating Virtual Machines without Failover Clustering**\
-Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://technet.microsoft.com/en-us/library/jj134199.aspx)>
+```PowerShell
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+```
 
-## Fix issue with jumbo packets on Realtek network adapter
+## # Clean up Windows Update files
 
-NETSH INTERFACE IP SET SUBINTERFACE "LAN 1 - 192.168.10.x" MTU=9000 STORE=PERSISTENT
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```
+
+**TODO:**
