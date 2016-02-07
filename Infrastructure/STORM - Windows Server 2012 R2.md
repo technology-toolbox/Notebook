@@ -303,6 +303,12 @@ Install-WindowsFeature `
     -Restart
 ```
 
+## # Download PowerShell help files (for Hyper-V cmdlets)
+
+```PowerShell
+Update-Help
+```
+
 ```PowerShell
 cls
 ```
@@ -358,10 +364,172 @@ Get-VMSwitch "Storage" |
 
 ## Configure storage
 
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 119 GB      | 4K                   |              |
-| 1    | D:           | 477 GB      | 4K                   | Data01       |
+### Physical disks
+
+<table>
+<tr>
+<td valign='top'>
+<p>Disk</p>
+</td>
+<td valign='top'>
+<p>Description</p>
+</td>
+<td valign='top'>
+<p>Capacity</p>
+</td>
+<td valign='top'>
+<p>Drive Letter</p>
+</td>
+<td valign='top'>
+<p>Volume Size</p>
+</td>
+<td valign='top'>
+<p>Allocation Unit Size</p>
+</td>
+<td valign='top'>
+<p>Volume Label</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>0</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 840 PRO Series<br />
+Serial number: *********03944B</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>1</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 840 Series<br />
+Serial number: *********01728J</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>2</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 850 PRO 128GB<br />
+Serial number: *********03705D</p>
+</td>
+<td valign='top'>
+<p>128 GB</p>
+</td>
+<td valign='top'>
+<p>C:</p>
+</td>
+<td valign='top'>
+<p>119 GB</p>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>3</p>
+</td>
+<td valign='top'>
+<p>Model: ST2000DM001-1CH164<br />
+Serial number: *****VCX</p>
+</td>
+<td valign='top'>
+<p>2 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>4</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung ST2000DM001-1CH164<br />
+Serial number: *****LEV</p>
+</td>
+<td valign='top'>
+<p>2 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+</table>
+
+```PowerShell
+Get-PhysicalDisk | select DeviceId, Model, SerialNumber | sort DeviceId
+```
+
+### Storage pools
+
+<table>
+<tr>
+<td valign='top'>
+<p>Name</p>
+</td>
+<td valign='top'>
+<p>Physical disks</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Pool 1</p>
+</td>
+<td valign='top'>
+<p>PhysicalDisk0<br />
+PhysicalDisk1<br />
+PhysicalDisk3<br />
+PhysicalDisk4</p>
+</td>
+</tr>
+</table>
+
+### Virtual disks
+
+| Name   | Layout | Provisioning | Capacity | SSD Tier | HDD Tier | Volume | Volume Label | Write-Back Cache |
+| ------ | ------ | ------------ | -------- | -------- | -------- | ------ | ------------ | ---------------- |
+| Data01 | Mirror | Fixed        | 125 GB   | 125 GB   |          | D:     | Data01       |                  |
+| Data02 | Mirror | Fixed        | 700 GB   | 200 GB   | 500 GB   | E:     | Data02       | 5 GB             |
+| Data03 | Simple | Fixed        | 200 GB   |          | 200 GB   | F:     | Data03       | 1 GB             |
 
 ```PowerShell
 cls
@@ -414,24 +582,26 @@ $ssdTier = Get-StorageTier -FriendlyName "SSD Tier"
 Get-StoragePool "Pool 1" |
     New-VirtualDisk `
         -FriendlyName "Data01" `
-        -ResiliencySettingName Simple `
-        -StorageTiers $ssdTier `
-        -StorageTierSizes 200GB
-
-Get-StoragePool "Pool 1" |
-    New-VirtualDisk `
-        -FriendlyName "Data02" `
         -ResiliencySettingName Mirror `
-        -Size 250GB
+        -StorageTiers $ssdTier `
+        -StorageTierSizes 125GB
 
 $hddTier = Get-StorageTier -FriendlyName "HDD Tier"
 
 Get-StoragePool "Pool 1" |
     New-VirtualDisk `
+        -FriendlyName "Data02" `
+        -ResiliencySettingName Mirror `
+        -StorageTiers $ssdTier,$hddTier `
+        -StorageTierSizes 200GB,500GB `
+        -WriteCacheSize 5GB
+
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
         -FriendlyName "Data03" `
         -ResiliencySettingName Simple `
-        -StorageTiers $ssdTier,$hddTier `
-        -StorageTierSizes 50GB,450GB `
+        -StorageTiers $hddTier `
+        -StorageTierSizes 200GB `
         -WriteCacheSize 1GB
 ```
 
@@ -498,23 +668,57 @@ Initialize-Volume `
     -Confirm:$false
 ```
 
+```PowerShell
+cls
+```
+
+### # Configure "Storage Tiers Optimization" scheduled task to append to log file
+
+```PowerShell
+New-Item -ItemType Directory -Path C:\NotBackedUp\Temp
+
+$logFile = "C:\NotBackedUp\Temp\Storage-Tiers-Optimization.log"
+
+$taskPath = "\Microsoft\Windows\Storage Tiers Management\"
+$taskName = "Storage Tiers Optimization"
+
+$task = Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName
+
+$task.Actions[0].Execute = "%windir%\system32\cmd.exe"
+
+$task.Actions[0].Arguments = `
+    "/C `"%windir%\system32\defrag.exe -c -h -g -# >> $logFile`""
+
+Set-ScheduledTask $task
+```
+
+> **Important**
+>
+> Simply appending ">> {log file}" (as described in the "To change the Storage Tiers Optimization task to save a report (Task Scheduler)" section of the [TechNet article](TechNet article)) did not work. Specifically, when running the task, the log file was not created and the task immediately finished without reporting any error.\
+> Changing the **Program/script** (i.e. the action's **Execute** property) to launch "%windir%\\system32\\defrag.exe" using "%windir%\\system32\\cmd.exe" resolved the issue.
+
+#### Reference
+
+**Save a report when Storage Tiers Optimization runs**\
+From <[https://technet.microsoft.com/en-us/library/dn789160.aspx](https://technet.microsoft.com/en-us/library/dn789160.aspx)>
+
 ## Benchmark storage performance
 
 ### Benchmark C: (SSD - Samsung 850 Pro 128GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/B606B67B026D8CFC3CFADA0F2791B30802694739.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/EA8C629095523D0CF0C88B9D6AEB08B729772D0C.png)
 
-### Benchmark D: (Simple SSD storage space - Samsung 840 Pro 512GB)
+### Benchmark D: (Mirror SSD storage space - 2x Samsung 840 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/22/F2D2381DC3B7ED9E32BBB5CD1A2DA3CB87635C22.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/C62D094E8D808DA8A6A4C19DF9A9BCB296B1ACBB.png)
 
-### Benchmark E: (Mirrored HDD storage space - Seagate )
+### Benchmark E: (Mirror SSD/HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/34/38BE664281D6E0FFFFBEE1DFC7C7B5B7341CB534.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/1A62DB4634FC7C53E954710813F8F2638633037E.png)
 
-### Benchmark F: (Simple tiered storage space)
+### Benchmark F: (Simple HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E4/B90290B52D1FEB585D5EF4DC0F94C5F2D0B283E4.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BA/C9D0DDA5BF5CCD896D6C225DF7BDE878A40CA9BA.png)
 
 ```PowerShell
 cls
@@ -593,14 +797,113 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 
 ## Migrate virtual machines to STORM
 
+---
+
+**FOOBAR**
+
+### # Note: BANSHEE was already shutdown
+
 ```PowerShell
+Move-VM `
+    -ComputerName ROGUE `
+    -Name BANSHEE `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath F:\NotBackedUp\VMs\BANSHEE
+```
+
+```PowerShell
+cls
+```
+
+### # Note: Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName ROGUE -Name EXT-DC01
+
+Move-VM `
+    -ComputerName ROGUE `
+    -Name EXT-DC01 `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath F:\NotBackedUp\VMs\EXT-DC01
+
+Start-VM -ComputerName STORM -Name EXT-DC01
+```
+
+```PowerShell
+cls
+```
+
+### # Note: Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName ROGUE -Name EXT-SQL01A
+
+Move-VM `
+    -ComputerName ROGUE `
+    -Name EXT-SQL01A `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath F:\NotBackedUp\VMs\EXT-SQL01A
+
+Start-VM -ComputerName STORM -Name EXT-SQL01A
+```
+
+```PowerShell
+cls
+```
+
+### # Note: Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName ROGUE -Name FAB-DC01
+
 Move-VM `
     -ComputerName ROGUE `
     -Name FAB-DC01 `
     -DestinationHost STORM `
     -IncludeStorage `
     -DestinationStoragePath F:\NotBackedUp\VMs\FAB-DC01
+
+Start-VM -ComputerName STORM -Name FAB-DC01
 ```
+
+```PowerShell
+cls
+```
+
+### # Note: FOOBAR was already shutdown
+
+```PowerShell
+Move-VM `
+    -ComputerName ROGUE `
+    -Name FOOBAR `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath F:\NotBackedUp\VMs\FOOBAR
+```
+
+```PowerShell
+cls
+```
+
+### # Note: Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName ROGUE -Name XAVIER1
+
+Move-VM `
+    -ComputerName ROGUE `
+    -Name XAVIER1 `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath F:\NotBackedUp\VMs\XAVIER1
+
+Start-VM -ComputerName STORM -Name XAVIER1
+```
+
+---
 
 ```PowerShell
 cls
@@ -666,12 +969,28 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the following commands:
 
 ```PowerShell
-$productionServer = "ANGEL"
+$productionServer = "STORM"
 
 .\Attach-ProductionServer.ps1 `
     -DPMServerName JUGGERNAUT `
     -PSName $productionServer `
     -Domain TECHTOOLBOX `-UserName jjameson-admin
+```
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
 ```
 
 **TODO:**

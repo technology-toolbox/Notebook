@@ -303,21 +303,383 @@ ping 10.1.10.106 -f -l 8900
 
 ## Configure storage
 
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 119 GB      | 4K                   |              |
-| 1    | D:           | 477 GB      | 4K                   | Data01       |
+### Physical disks
+
+<table>
+<tr>
+<td valign='top'>
+<p>Disk</p>
+</td>
+<td valign='top'>
+<p>Description</p>
+</td>
+<td valign='top'>
+<p>Capacity</p>
+</td>
+<td valign='top'>
+<p>Drive Letter</p>
+</td>
+<td valign='top'>
+<p>Volume Size</p>
+</td>
+<td valign='top'>
+<p>Allocation Unit Size</p>
+</td>
+<td valign='top'>
+<p>Volume Label</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>0</p>
+</td>
+<td valign='top'>
+<p>Model: WDC WD1001FALS-00Y6A0<br />
+Serial number: WD-******234344</p>
+</td>
+<td valign='top'>
+<p>1 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>1</p>
+</td>
+<td valign='top'>
+<p>Model: WDC WD1002FAEX-00Y9A0<br />
+Serial number: WD-******786376</p>
+</td>
+<td valign='top'>
+<p>1 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>2</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 850 PRO 128GB<br />
+Serial number: *********03848M</p>
+</td>
+<td valign='top'>
+<p>128 GB</p>
+</td>
+<td valign='top'>
+<p>C:</p>
+</td>
+<td valign='top'>
+<p>119 GB</p>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>3</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 850 PRO 512GB<br />
+Serial number: *********01139V</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>4</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 850 PRO 512GB<br />
+Serial number: *********01138P</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+</table>
+
+```PowerShell
+Get-PhysicalDisk | select DeviceId, Model, SerialNumber | sort DeviceId
+```
+
+### Storage pools
+
+<table>
+<tr>
+<td valign='top'>
+<p>Name</p>
+</td>
+<td valign='top'>
+<p>Physical disks</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Pool 1</p>
+</td>
+<td valign='top'>
+<p>PhysicalDisk0<br />
+PhysicalDisk1<br />
+PhysicalDisk3<br />
+PhysicalDisk4</p>
+</td>
+</tr>
+</table>
+
+### Virtual disks
+
+| Name   | Layout | Provisioning | Capacity | SSD Tier | HDD Tier | Volume | Volume Label | Write-Back Cache |
+| ------ | ------ | ------------ | -------- | -------- | -------- | ------ | ------------ | ---------------- |
+| Data01 | Mirror | Fixed        | 125 GB   | 125 GB   |          | D:     | Data01       |                  |
+| Data02 | Mirror | Fixed        | 700 GB   | 200 GB   | 500 GB   | E:     | Data02       | 5 GB             |
+| Data03 | Simple | Fixed        | 200 GB   |          | 200 GB   | F:     | Data03       | 1 GB             |
 
 ```PowerShell
 cls
 ```
 
-## # Configure default folder to store VMs
+### # Create storage pool
+
+```PowerShell
+$storageSubSystemUniqueId = Get-StorageSubSystem `
+    -FriendlyName "Storage Spaces on BEAST" | select -ExpandProperty UniqueId
+
+New-StoragePool `
+    -FriendlyName "Pool 1" `
+    -StorageSubSystemUniqueId $storageSubSystemUniqueId `
+    -PhysicalDisks (Get-PhysicalDisk -CanPool $true)
+```
+
+### # Check media type configuration
+
+```PowerShell
+Get-StoragePool "Pool 1" |
+    Get-PhysicalDisk |
+    Sort Size |
+    ft FriendlyName, Size, MediaType, HealthStatus, OperationalStatus -AutoSize
+```
+
+### # Set media type on HDD drives
+
+```PowerShell
+Get-StoragePool "Pool 1" |
+    Get-PhysicalDisk |
+    ? { $_.MediaType -eq 'UnSpecified' } |
+    Set-PhysicalDisk -MediaType HDD
+```
+
+```PowerShell
+cls
+```
+
+### # Create storage tiers
+
+```PowerShell
+Get-StoragePool "Pool 1" |
+    New-StorageTier -FriendlyName "SSD Tier" -MediaType SSD
+
+Get-StoragePool "Pool 1" |
+    New-StorageTier -FriendlyName "HDD Tier" -MediaType HDD
+```
+
+```PowerShell
+cls
+```
+
+### # Create storage spaces
+
+```PowerShell
+$ssdTier = Get-StorageTier -FriendlyName "SSD Tier"
+
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
+        -FriendlyName "Data01" `
+        -ResiliencySettingName Mirror `
+        -StorageTiers $ssdTier `
+        -StorageTierSizes 125GB
+
+$hddTier = Get-StorageTier -FriendlyName "HDD Tier"
+
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
+        -FriendlyName "Data02" `
+        -ResiliencySettingName Mirror `
+        -StorageTiers $ssdTier,$hddTier `
+        -StorageTierSizes 200GB,500GB `
+        -WriteCacheSize 5GB
+
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
+        -FriendlyName "Data03" `
+        -ResiliencySettingName Simple `
+        -StorageTiers $hddTier `
+        -StorageTierSizes 200GB `
+        -WriteCacheSize 1GB
+```
+
+```PowerShell
+cls
+```
+
+### # Create partitions and volumes
+
+#### # Create volume "D" on Data01
+
+```PowerShell
+Get-VirtualDisk "Data01" | Get-Disk | Set-Disk -IsReadOnly 0
+
+Get-VirtualDisk "Data01"| Get-Disk | Set-Disk -IsOffline 0
+
+Get-VirtualDisk "Data01"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+
+Get-VirtualDisk "Data01"| Get-Disk |
+    New-Partition -DriveLetter "D" -UseMaximumSize
+
+Initialize-Volume `
+    -DriveLetter "D" `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Data01" `
+    -Confirm:$false
+```
+
+#### # Create volume "E" on Data02
+
+```PowerShell
+Get-VirtualDisk "Data02" | Get-Disk | Set-Disk -IsReadOnly 0
+
+Get-VirtualDisk "Data02"| Get-Disk | Set-Disk -IsOffline 0
+
+Get-VirtualDisk "Data02"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+
+Get-VirtualDisk "Data02"| Get-Disk |
+    New-Partition -DriveLetter "E" -UseMaximumSize
+
+Initialize-Volume `
+    -DriveLetter "E" `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Data02" `
+    -Confirm:$false
+```
+
+#### # Create volume "F" on Data03
+
+```PowerShell
+Get-VirtualDisk "Data03" | Get-Disk | Set-Disk -IsReadOnly 0
+
+Get-VirtualDisk "Data03"| Get-Disk | Set-Disk -IsOffline 0
+
+Get-VirtualDisk "Data03"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+
+Get-VirtualDisk "Data03"| Get-Disk |
+    New-Partition -DriveLetter "F" -UseMaximumSize
+
+Initialize-Volume `
+    -DriveLetter "F" `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Data03" `
+    -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+### # Configure "Storage Tiers Optimization" scheduled task to append to log file
+
+```PowerShell
+New-Item -ItemType Directory -Path C:\NotBackedUp\Temp
+
+$logFile = "C:\NotBackedUp\Temp\Storage-Tiers-Optimization.log"
+
+$taskPath = "\Microsoft\Windows\Storage Tiers Management\"
+$taskName = "Storage Tiers Optimization"
+
+$task = Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName
+
+$task.Actions[0].Execute = "%windir%\system32\cmd.exe"
+
+$task.Actions[0].Arguments = `
+    "/C `"%windir%\system32\defrag.exe -c -h -g -# >> $logFile`""
+
+Set-ScheduledTask $task
+```
+
+> **Important**
+>
+> Simply appending ">> {log file}" (as described in the "To change the Storage Tiers Optimization task to save a report (Task Scheduler)" section of the [TechNet article](TechNet article)) did not work. Specifically, when running the task, the log file was not created and the task immediately finished without reporting any error.\
+> Changing the **Program/script** (i.e. the action's **Execute** property) to launch "%windir%\\system32\\defrag.exe" using "%windir%\\system32\\cmd.exe" resolved the issue.
+
+#### Reference
+
+**Save a report when Storage Tiers Optimization runs**\
+From <[https://technet.microsoft.com/en-us/library/dn789160.aspx](https://technet.microsoft.com/en-us/library/dn789160.aspx)>
+
+## Benchmark storage performance
+
+### Benchmark C: (SSD - Samsung 850 Pro 128GB)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0B/6BB9B0DD6AEEBAFB164687BBE2CCB1758D657B0B.png)
+
+### Benchmark D: (Mirror SSD storage space - 2x Samsung 850 Pro 512GB)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/E9B61883FBDCEC86AECCF6E3929F3B4819B6167E.png)
+
+### Benchmark E: (Mirror SSD/HDD storage space)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D2/155079652545841BA61131793D45DF8EA64903D2.png)
+
+### Benchmark F: (Simple HDD storage space)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/77/0062D8E9B43A59AF1250F05BA0C9948154721377.png)
+
+```PowerShell
+cls
+```
+
+## # Configure VM storage
 
 ```PowerShell
 mkdir D:\NotBackedUp\VMs
+mkdir E:\NotBackedUp\VMs
+mkdir F:\NotBackedUp\VMs
 
-Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
+Set-VMHost -VirtualMachinePath E:\NotBackedUp\VMs
 ```
 
 ## Configure Live Migration (without Failover Clustering)
@@ -451,6 +813,22 @@ Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
 Stop-Service wuauserv
 
 Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
 ```
 
 **TODO:**
