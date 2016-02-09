@@ -909,6 +909,92 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
+```Console
+cls
+```
+
+## # Create certificate for Operations Manager
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+Browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/E1C0B3394D66FDD4EFF3526988DBB6DB9E3F6A69.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/90/547D95347817B2234831FD83D18EAF902CF71090.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/1CFBDA58D3759000F269C9D125A53B77AF6D543B.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/0D54CA9C3A20EDF4911740A8F0762F8B4062B9AE.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/70/ECAB263CB018BF954568E434EB5A82C7C2C91470.png)
+
+Click **Yes**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/C576FBC7CF995BEE04DA7AF3B2C5DC6B7966885F.png)
+
+```PowerShell
+cls
+```
+
+### # Import the certificate into the certificate store
+
+```PowerShell
+CertReq -Accept C:\Users\jjameson-admin\Downloads\certnew.cer
+```
+
+```PowerShell
+cls
+```
+
+### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$imagePath = `
+    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$certImportToolPath = $imageDriveLetter + ':\SupportTools\AMD64'
+
+cd "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName JUBILEE.corp.technologytoolbox.com
+```
+
+## Configure EXTRANET domain controllers and SQL Server cluster nodes
+
+### Alerts
+
+Alert: Agent proxy not enabled\
+Source: JUBILEE.corp.technologytoolbox.com\
+Path: JUBILEE.corp.technologytoolbox.com\
+Last modified by: System\
+Last modified time: 2/8/2016 10:27:35 AM Alert description: The agent was not able to submit data on behalf of another computer because agent proxy is not enabled. Details:Health service ( EXT-SQL01A.extranet.technologytoolbox.co ) should not generate data about this managed type ( Microsoft.Windows.Computer ) object Id ( CEF925A5-0CDC-15AC-886D-A61105C36BBF ).
+
+Alert: Agent proxy not enabled\
+Source: JUBILEE.corp.technologytoolbox.com\
+Path: JUBILEE.corp.technologytoolbox.com\
+Last modified by: System\
+Last modified time: 2/8/2016 10:47:34 AM Alert description: The agent was not able to submit data on behalf of another computer because agent proxy is not enabled. Details:Health service ( EXT-SQL01B.extranet.technologytoolbox.co ) should not generate data about this managed type ( Microsoft.Windows.Cluster ) object Id ( 2D122F4A-A345-D515-5C73-C7D685346AB3 ).
+
+### Resolution
+
+1. Start the SCOM System Center Operations Console.
+2. Select the **Administration** pane.
+3. Select **Device Management -> Agent Managed**.
+4. Right-click **EXT-DC01.extranet.technologytoolbox.com** and click **Properties**.
+5. In the **Agent Properties** window, on the **Security** tab, select **Allow this agent to act as a proxy and discover managed objects on other computers** and then click **OK**.
+6. Repeat the previous steps for the following servers:
+   - **EXT-DC02.extranet.technologytoolbox.com**
+   - **EXT-DC03.extranet.technologytoolbox.com**
+   - **EXT-SQL01A.extranet.technologytoolbox.com**
+   - **EXT-SQL01B.extranet.technologytoolbox.com**
+
 **TODO:**
 
 ## Resolve SCOM alerts due to disk fragmentation

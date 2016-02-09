@@ -617,3 +617,113 @@ netsh advfirewall firewall add rule `
     profile=Domain `
     action=Allow
 ```
+
+```PowerShell
+cls
+```
+
+## # Install and configure System Center Operations Manager
+
+### # Create certificate for Operations Manager
+
+#### # Create request for Operations Manager certificate
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+#### Submit certificate request to the Certification Authority
+
+**To submit the certificate request to an enterprise CA:**
+
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+Remove-Item $certFile
+```
+
+```PowerShell
+cls
+```
+
+### # Install SCOM agent
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+### # Mount the Operations Manager installation media
+
+```PowerShell
+$imagePath = `
+    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+Set-VMDvdDrive -ComputerName STORM -VMName EXT-SQL01A -Path $imagePath
+```
+
+---
+
+```PowerShell
+$msiPath = 'X:\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+```PowerShell
+cls
+```
+
+### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = 'X:\SupportTools\AMD64'
+
+Push-Location "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName $hostName
+
+Pop-Location
+```
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+### # Remove the Operations Manager installation media
+
+```PowerShell
+Set-VMDvdDrive -ComputerName STORM -VMName EXT-SQL01A -Path $null
+```
+
+---
+
+### # Approve manual agent install in Operations Manager

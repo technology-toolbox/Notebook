@@ -337,3 +337,179 @@ powercfg.exe /S SCHEME_MIN
 
 powercfg.exe /L
 ```
+
+```PowerShell
+cls
+```
+
+## # Install and configure System Center Operations Manager
+
+### # Create certificate for Operations Manager
+
+#### Download Certification Authority certificate chain
+
+1. Start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Download a CA certificate, certificate chain, or CRL**.
+3. On the **Download a CA Certificate, Certificate Chain, or CRL **page, click **Download CA certificate chain** and save the certificate chain to a file share ([\\\\iceman.corp.technologytoolbox.com\\Temp\\certnew.p7b](\\iceman.corp.technologytoolbox.com\Temp\certnew.p7b)).
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate chain into the certificate store
+
+---
+
+**FOOBAR8**
+
+### # Download root CA and issuing CA certificates
+
+```PowerShell
+$rootCertFile = "Technology Toolbox Root Certificate Authority.crt"
+
+$source = "http://pki.technologytoolbox.com/certs/" + $rootCertFile
+
+$destination = "\\iceman.corp.technologytoolbox.com\Temp\" + $rootCertFile
+
+Invoke-WebRequest $source -OutFile $destination
+
+$issuingCaCertFile = "Technology Toolbox Issuing Certificate Authority 01.crt"
+
+$source = "http://pki.technologytoolbox.com/certs/" + $issuingCaCertFile
+
+$destination = "\\iceman.corp.technologytoolbox.com\Temp\" + $issuingCaCertFile
+
+Invoke-WebRequest $source -OutFile $destination
+```
+
+---
+
+```PowerShell
+$rootCert = "\\iceman.corp.technologytoolbox.com\Temp\Technology Toolbox Root Certificate Authority.crt"
+
+CertUtil.exe -addstore Root $rootCert
+
+
+$issuingCaCertFile = "\\iceman.corp.technologytoolbox.com\Temp\Technology Toolbox Issuing Certificate Authority 01.crt"
+
+CertUtil.exe -addstore Root $rootCert
+```
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate chain into the certificate store
+
+```PowerShell
+$certChainFile = "\\iceman.corp.technologytoolbox.com\Temp\certnew.p7b"
+
+CertReq.exe -Accept -machine $certChainFile
+
+Remove-Item $certFile
+```
+
+#### # Create request for Operations Manager certificate
+
+```PowerShell
+net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1" |
+    Out-File \\iceman.corp.technologytoolbox.com\Temp\cert-req.txt
+```
+
+#### Submit certificate request to the Certification Authority
+
+**To submit the certificate request to an enterprise CA:**
+
+1. Start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page click **Download certificate** and save the certificate to a file share ([\\\\iceman.corp.technologytoolbox.com\\Temp\\certnew.cer](\\iceman.corp.technologytoolbox.com\Temp\certnew.cer)).
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "\\iceman.corp.technologytoolbox.com\Temp\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+Remove-Item $certFile
+```
+
+```PowerShell
+cls
+```
+
+### # Install SCOM agent
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+#### # Mount the Operations Manager installation media
+
+```PowerShell
+$imagePath = `
+    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+Set-VMDvdDrive -ComputerName BEAST -VMName EXT-RRAS1 -Path $imagePath
+```
+
+---
+
+```PowerShell
+$msiPath = 'X:\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+```PowerShell
+cls
+```
+
+### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = 'X:\SupportTools\AMD64'
+
+Push-Location "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName $hostName
+
+Pop-Location
+```
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+### # Remove the Operations Manager installation media
+
+```PowerShell
+Set-VMDvdDrive -ComputerName BEAST -VMName EXT-RRAS1 -Path $null
+```
+
+---
+
+### # Approve manual agent install in Operations Manager
