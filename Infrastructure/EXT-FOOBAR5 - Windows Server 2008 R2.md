@@ -9,26 +9,14 @@ Friday, May 15, 2015
 
 ## Deploy and configure the server infrastructure
 
-### Install Windows Server 2008
+### Install Windows Server 2008 R2
+
+---
+
+**WOLVERINE**
 
 ```PowerShell
 $VerbosePreference = "Continue"
-```
-
-```PowerShell
-cls
-```
-
-#### # Create Azure storage account
-
-```PowerShell
-$storageAccount = "techtoolboxdev"
-$location = "West US"
-
-New-AzureStorageAccount `
-    -StorageAccountName $storageAccount `
-    -Location $location `
-    -Type Standard_LRS ` # Replication: Locally Redundant
 ```
 
 ```PowerShell
@@ -43,7 +31,7 @@ Get-AzureVMImage |
     select Label, ImageName
 ```
 
-##### # Use latest OS image
+#### # Use latest OS image
 
 ```PowerShell
 $imageName = `
@@ -59,14 +47,16 @@ cls
 ```PowerShell
 $localAdminCred = Get-Credential `
     -UserName Administrator `
-    -Message "Type the user name and password for the local Administrator account."
+    -Message "Type the user name and "word for the local Administrator account."
 
 $domainCred = Get-Credential `
     -UserName jjameson-admin `
     -Message "Type the user name and password for joining the domain."
 
-$cloudService = "techtoolbox-dev"
+$storageAccount = "techtoolboxdev"
+$location = "West US"
 $vmName = "EXT-FOOBAR5"
+$cloudService = $vmName
 $instanceSize = "Standard_D2"
 $vhdPath = "https://$storageAccount.blob.core.windows.net/vhds/$vmName"
 $localAdminUserName = $localAdminCred.UserName
@@ -139,6 +129,8 @@ New-AzureVM `
     -VMs $vmConfig
 ```
 
+---
+
 #### Configure ACLs on endpoints
 
 ##### PowerShell endpoint
@@ -153,10 +145,14 @@ New-AzureVM `
 | --------- | ------------------ | ---------- | ----------------- |
 | 0         | Technology Toolbox | Permit     | 50.246.207.160/30 |
 
-```PowerShell
-cls
+---
 
-$vm = Get-AzureVM -ServiceName techtoolbox-dev -Name EXT-FOOBAR5
+**WOLVERINE**
+
+```PowerShell
+$vmName = "EXT-FOOBAR5"
+
+$vm = Get-AzureVM -ServiceName $vmName -Name $vmName
 
 $endpointNames = "PowerShell", "RemoteDesktop"
 
@@ -181,6 +177,8 @@ $endpointNames |
 
     }
 ```
+
+---
 
 #### Rename network connection
 
@@ -475,7 +473,7 @@ cls
 cls
 ```
 
-## # Create and configure the Web application
+## # Create and configure the Web application"
 
 ### # Restore content database from EXT-FOOBAR2
 
