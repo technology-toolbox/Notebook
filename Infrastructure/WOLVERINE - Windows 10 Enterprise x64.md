@@ -1,4 +1,4 @@
-﻿# WOLVERINE (2015-12-12) - Windows 10 Enterprise x64
+﻿# WOLVERINE - Windows 10 Enterprise x64
 
 Saturday, December 12, 2015
 4:41 AM
@@ -44,38 +44,58 @@ reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize 
 cls
 ```
 
-### # Configure network settings
-
-#### # Rename network connections
+## # Select "High performance" power scheme
 
 ```PowerShell
-Get-NetAdapter -Physical | select Name, InterfaceDescription
+powercfg.exe /L
 
-Get-NetAdapter `
-    -Name "Ethernet" |
-    Rename-NetAdapter -NewName "Production"
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
 ```
 
-#### # Configure "Production" network adapter
+## # Copy Toolbox content
 
 ```PowerShell
-$interfaceAlias = "Production"
+net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+
+robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 ```
 
-##### # Enable jumbo frames
+```PowerShell
+cls
+```
+
+## # Change drive letter for DVD-ROM
+
+```PowerShell
+$cdrom = Get-WmiObject -Class Win32_CDROMDrive
+$driveLetter = $cdrom.Drive
+
+$volumeId = mountvol $driveLetter /L
+$volumeId = $volumeId.Trim()
+
+mountvol $driveLetter /D
+
+mountvol X: $volumeId
+```
+
+```PowerShell
+cls
+```
+
+## # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
+    -Name "Ethernet 2" `
     -DisplayName "Jumbo Packet" `
     -RegistryValue 9014
 
 ping ICEMAN -f -l 8900
 ```
-
-Note: Trying to ping ICEMAN or the iSCSI network adapter on ICEMAN with a 9000 byte packet from FORGE resulted in an error (suggesting that jumbo frames were not configured). It also worked with 8970 bytes.
 
 ```PowerShell
 cls
@@ -126,46 +146,6 @@ From <[https://gist.github.com/ReubenBond/1387620](https://gist.github.com/Reube
 cls
 ```
 
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-## # Copy Toolbox content
-
-```PowerShell
-net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
-
-robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
-```
-
-```PowerShell
-cls
-```
-
-## # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-```PowerShell
-cls
-```
-
 ## # Download PowerShell help files
 
 ```PowerShell
@@ -180,69 +160,29 @@ Enable-PSRemoting -Confirm:$false
 
 ## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
-Set-ExecutionPolicy RemoteSigned -Scope Process
-
-C:\\NotBackedUp\\Public\\Toolbox\\PowerShell\\Enable-RemoteWindowsUpdate.ps1 -Verbose\
-C:\\NotBackedUp\\Public\\Toolbox\\PowerShell\\Disable-RemoteWindowsUpdate.ps1  -Verbose
-
 ```PowerShell
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (DCOM-In)' `
-    -DisplayName 'Remote Windows Update (DCOM-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort 135 `
-    -Profile Domain `
-    -Action Allow
+Get-NetFirewallRule |
+    Where-Object { $_.Profile -eq 'Domain' `
+        -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
+    Enable-NetFirewallRule
 
 New-NetFirewallRule `
     -Name 'Remote Windows Update (Dynamic RPC)' `
     -DisplayName 'Remote Windows Update (Dynamic RPC)' `
     -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
+    -Group 'Technology Toolbox (Custom)' `
     -Program '%windir%\system32\dllhost.exe' `
     -Direction Inbound `
     -Protocol TCP `
     -LocalPort RPC `
     -Profile Domain `
     -Action Allow
-
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (SMB-In)' `
-    -DisplayName 'Remote Windows Update (SMB-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort 445 `
-    -Profile Domain `
-    -Action Allow
-
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (WMI-In)' `
-    -DisplayName 'Remote Windows Update (WMI-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Program "$env:windir\system32\svchost.exe" `
-    -Service winmgmt `
-    -Direction Inbound `
-    -Protocol TCP `
-    -Profile Domain `
-    -Action Allow
-
-Get-NetFirewallRule |
-  Where-Object { `
-    $_.Profile -eq 'Domain' `
-      -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
-  Enable-NetFirewallRule
 ```
 
-## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Disable-NetFirewallRule -Group 'Remote Windows Update'
+Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
 ```
 
 ```PowerShell
@@ -250,8 +190,6 @@ cls
 ```
 
 ## # Install Microsoft Money
-
-net use \\\\ICEMAN\\Products /USER:TECHTOOLBOX\\jjameson
 
 ```PowerShell
 & "\\ICEMAN\Products\Microsoft\Money 2008\USMoneyBizSunset.exe"
@@ -305,16 +243,6 @@ From <[http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx](htt
 cls
 ```
 
-## # Install Microsoft InfoPath 2013
-
-```PowerShell
-& "\\ICEMAN\Products\Microsoft\Office 2013\infopath_4753-1001_x86_en-us.exe"
-```
-
-```PowerShell
-cls
-```
-
 ## # Install Adobe Reader 8.3
 
 ```PowerShell
@@ -327,10 +255,10 @@ cls
 cls
 ```
 
-## # Install Mozilla Firefox
+## # Install Mozilla Firefox 42.0
 
 ```PowerShell
-& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 46.0.1.exe" -ms
+& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 42.0.exe" -ms
 ```
 
 ```PowerShell
@@ -343,13 +271,37 @@ cls
 & "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup64.exe"
 ```
 
-## Install FileZilla 3.18.0
+## Install FileZilla 3.14.1
 
-## Install Paint.NET 4.0.9
+## Install Paint.NET 4.0.6
 
 ## Install Microsoft Expression Studio 4
 
-## Install Microsoft Visual Studio 2015 Enterprise with Update 2
+## Install Microsoft SQL Server 2014
+
+#### # Install .NET Framework 3.5
+
+```PowerShell
+$sourcePath = "G:\sources\sxs"
+
+Enable-WindowsOptionalFeature -FeatureName NetFx3 -Source $sourcePath -Online
+```
+
+#### # Create folders for Distributed Replay Client
+
+mkdir "C:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\WorkingDir"\
+mkdir "C:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\ResultDir"
+
+### Install SQL Server
+
+- Select all features
+- Change Startup Type on all services to Manual except SQL Server Browser (leave Disabled)
+- Add TECHTOOLBOX\\SQL Server Admins (DEV) to the list of SQL Server administrators
+- Set Data root directory to "C:\\NotBackedUp\\Microsoft SQL Server"
+- On **Reporting Service Configuration** step, for **Reporting Services Native Mode**, select **Install only**.
+- For Distributed Replay Client, change paths to "C:\\NotBackedUp\\Microsoft SQL Server\\..."
+
+## Install Microsoft Visual Studio 2015 Enterprise with Update 1
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/ACDA391F5D951BCC223707F0D0AF2DF01F6ED49A.png)
 
@@ -390,15 +342,6 @@ Select the following features:
    4. Review the license terms, and click **Install**.
    5. Wait for the extension to be installled.
    6. Click **Restart Now**.
-
-### Install Microsoft Azure SDK 2.9.1
-
-Reference:
-
-Announcing the Visual Studio Azure Tools and SDK 2.9\
-[https://azure.microsoft.com/en-us/blog/announcing-visual-studio-azure-tools-and-sdk-2-9/](https://azure.microsoft.com/en-us/blog/announcing-visual-studio-azure-tools-and-sdk-2-9/)
-
-### Install Microsoft Office Developer Tools Update 2 for Visual Studio 2015
 
 ```PowerShell
 cls
@@ -450,7 +393,7 @@ cls
 ```PowerShell
 net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
 
-& "\\ICEMAN\Products\Python\python-2.7.11.amd64.msi"
+& "\\ICEMAN\Products\Python\python-2.7.10.amd64.msi"
 ```
 
 ### # Add Python folders to PATH environment variable
@@ -474,7 +417,7 @@ cls
 ### # Install Git (using default options)
 
 ```PowerShell
-& \\ICEMAN\Products\Git\Git-2.8.3-64-bit.exe
+& \\ICEMAN\Products\Git\Git-2.5.3-64-bit.exe
 ```
 
 ### # Add Git folder to PATH environment variable
@@ -498,7 +441,7 @@ cls
 ```PowerShell
 # & \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
 
-& \\ICEMAN\Products\node.js\node-v4.4.5-x64.msi
+& \\ICEMAN\Products\node.js\node-v4.1.1-x64.msi
 ```
 
 > **Important**
@@ -665,7 +608,7 @@ cls
 npm install --global rimraf
 ```
 
-## TODO: # Configure npm locations for TECHTOOLBOX\\jjameson account
+## # Configure npm locations for TECHTOOLBOX\\jjameson account
 
 ---
 
@@ -681,7 +624,7 @@ npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
 
 ---
 
-## TODO: "Upgrade NPM" version in Visual Studio 2015
+## "Upgrade NPM" version in Visual Studio 2015
 
 ### Before
 
@@ -704,10 +647,20 @@ From <[http://jameschambers.com/2015/09/upgrading-npm-in-visual-studio-2015/](ht
 cls
 ```
 
+## # Install Microsoft Azure PowerShell
+
+```PowerShell
+& "\\ICEMAN\Products\Microsoft\Azure\azure-powershell.1.0.1.msi"
+```
+
+```PowerShell
+cls
+```
+
 ## # Install Microsoft Message Analyzer
 
 ```PowerShell
-& "\\ICEMAN\Products\Microsoft\Message Analyzer 1.4\MessageAnalyzer64.msi"
+& "\\ICEMAN\Products\Microsoft\Message Analyzer 1.3\MessageAnalyzer64.msi"
 ```
 
 ```PowerShell
@@ -726,7 +679,7 @@ cls
 
 ## # Install Remote Desktop Connection Manager
 
-& "\\\\ICEMAN\\Products\\Microsoft\\Remote Desktop Connection Manager\\rdcman.msi"
+& "C:\\Users\\foo\\Downloads\\Remote Desktop Connection Manager 2.2\\RDCMan.msi"
 
 ## # Install Fiddler
 
@@ -742,46 +695,7 @@ Click **Change Sharing Options**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/39D600ED528C73CAE3772FDA8A9E263E29CBF094.png)
 
-## Install and configure Hyper-V
-
-### Enable Hyper-V
-
-```PowerShell
-cls
-```
-
-### # Configure VM storage
-
-```PowerShell
-mkdir D:\NotBackedUp\VMs
-
-Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
-```
-
-```PowerShell
-cls
-```
-
-### # Create virtual switches
-
-```PowerShell
-New-VMSwitch `
-    -Name "Production" `
-    -NetAdapterName "Production" `
-    -AllowManagementOS $true
-```
-
-### # Enable jumbo frames on virtual switches
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name "vEthernet (Production)" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
-
-ping ICEMAN -f -l 8900
-```
+## Enable Hyper-V
 
 ```PowerShell
 cls
@@ -816,10 +730,6 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
 
 ## Disk Cleanup
-
-## Install Microsoft SQL Server 2016
-
-## Install Microsoft SQL Server Management Studio
 
 ## # Configure credential helper for Git
 
