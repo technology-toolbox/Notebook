@@ -126,10 +126,13 @@ cls
 Get-NetAdapter -Physical
 
 Get-NetAdapter -InterfaceDescription "Realtek PCIe GBE Family Controller" |
-    Rename-NetAdapter -NewName "Production"
+    Rename-NetAdapter -NewName "Management"
 
 Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
     Rename-NetAdapter -NewName "Storage"
+
+Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Production"
 ```
 
 ```PowerShell
@@ -142,12 +145,12 @@ cls
 $ipAddress = "2601:282:4201:e500::107"
 
 New-NetIPAddress `
-    -InterfaceAlias "Production" `
+    -InterfaceAlias "Management" `
     -IPAddress $ipAddress `
     -PrefixLength 64
 
 Set-DNSClientServerAddress `
-    -InterfaceAlias "Production" `
+    -InterfaceAlias "Management" `
     -ServerAddresses 2601:282:4201:e500::103,2601:282:4201:e500::104
 ```
 
@@ -155,7 +158,45 @@ Set-DNSClientServerAddress `
 cls
 ```
 
-## # Configure iSCSI network adapter
+## # Configure "Production" network adapter
+
+```PowerShell
+Disable-NetAdapterBinding -Name "Storage" `
+    -DisplayName "Client for Microsoft Networks"
+
+Disable-NetAdapterBinding -Name "Storage" `
+    -DisplayName "File and Printer Sharing for Microsoft Networks"
+
+Disable-NetAdapterBinding -Name "Storage" `
+    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
+
+Disable-NetAdapterBinding -Name "Storage" `
+    -DisplayName "Link-Layer Topology Discovery Responder"
+
+$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+    -Filter "NetConnectionId = 'Storage'"
+
+$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+```
+
+### # Do not register this connection in DNS
+
+```PowerShell
+$adapterConfig.SetDynamicDNSRegistration($false)
+```
+
+### # Disable NetBIOS over TCP/IP
+
+```PowerShell
+$adapterConfig.SetTcpipNetbios(2)
+```
+
+```PowerShell
+cls
+```
+
+## # Configure "Storage" network adapter
 
 ```PowerShell
 $ipAddress = "10.1.10.107"
@@ -205,8 +246,11 @@ cls
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name "Production" `
+Set-NetAdapterAdvancedProperty -Name "Management" `
     -DisplayName "Jumbo Frame" -RegistryValue 9216
+
+Set-NetAdapterAdvancedProperty -Name "Production" `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
 
 Set-NetAdapterAdvancedProperty -Name "Storage" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
