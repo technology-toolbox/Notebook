@@ -1092,3 +1092,31 @@ cls
 ```PowerShell
 Set-DPMGlobalProperty -DPMServerName JUGGERNAUT -KnownVMMServers MOONSTAR
 ```
+
+## # Expand Z: (Backup01) drive
+
+---
+
+**FOOBAR8**
+
+### # Expand VHD
+
+```PowerShell
+$vmHost = "ICEMAN"
+$vmName = "JUGGERNAUT"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + "_Backup01.vhdx") `
+    -SizeBytes 20GB
+```
+
+---
+
+### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 4 -PartitionNumber 1)
+Resize-Partition -DiskNumber 4 -PartitionNumber 1 -Size $size.SizeMax
+```
