@@ -15,19 +15,19 @@ Tuesday, December 15, 2015
 
 ```PowerShell
 $vmHost = "WOLVERINE"
-
 $vmName = "EXT-FOOBAR7"
+$vmPath = "D:\NotBackedUp\VMs"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
+    -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 50GB `
     -MemoryStartupBytes 8GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+    -SwitchName "Production"
 
 Set-VM `
     -ComputerName $vmHost `
@@ -189,10 +189,11 @@ cls
 #### # Create Data01, Log01, Temp01, and Backup01 VHDs
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "WOLVERINE"
 $vmName = "EXT-FOOBAR7"
+$vmPath = "D:\NotBackedUp\VMs"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
     + "_Data01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 2GB -Fixed
@@ -202,7 +203,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
     + "_Log01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 1GB -Fixed
@@ -212,7 +213,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
     + "_Temp01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 1GB -Fixed
@@ -222,7 +223,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
     + "_Backup01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 10GB
@@ -379,7 +380,7 @@ cls
 
 Add-PSSnapin Microsoft.SharePoint.PowerShell
 
-$smtpServer = "smtp.technologytoolbox.com"
+$smtpServer = "smtp-test.technologytoolbox.com"
 $fromAddress = "svc-sharepoint-dev@technologytoolbox.com"
 $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
@@ -1233,6 +1234,14 @@ Get-SPWebApplication | ForEach-Object {
 }
 ```
 
+## -- Replace PNKUS Branch Manager logins
+
+```Console
+UPDATE [SecuritasPortal].[Customer].[BranchManagerAssociatedUsers]
+SET BranchManagerUserName = 'TECHTOOLBOX\jjameson'
+WHERE BranchManagerUserName = 'PNKUS\jjameson'
+```
+
 ## Snapshot VM - "Baseline Client Portal 3.0.645.0 / Cloud Portal 1.0.106.0"
 
 **TODO:**
@@ -1241,7 +1250,7 @@ Get-SPWebApplication | ForEach-Object {
 cls
 ```
 
-#### # Configure VSS permissions for SharePoint Search
+## # Configure VSS permissions for SharePoint Search
 
 ```PowerShell
 $serviceAccount = "EXTRANET\svc-spserviceapp-dev"

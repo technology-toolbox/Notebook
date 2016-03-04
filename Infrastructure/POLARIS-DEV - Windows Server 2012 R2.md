@@ -851,7 +851,7 @@ cls
 ```PowerShell
 Add-PSSnapin Microsoft.SharePoint.PowerShell
 
-$smtpServer = "smtp.technologytoolbox.com"
+$smtpServer = "smtp-test.technologytoolbox.com"
 $fromAddress = "s-sharepoint-dev@technologytoolbox.com"
 $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
