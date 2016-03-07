@@ -301,6 +301,8 @@ The permissions must be modified on each Web server in order to allow the servic
 16. Using **Failover Cluster Manager**, bring **Cluster Disk 3** online
 17. Using **Disk Management**, extend volume to 25GB.
 18. Start SQL Server
+19. Disable Customer Experience Improvement Program on Central Administration Web application
+20. Disable SharePoint Timer job: CEIP Data Collection
 
 **Note:**\
 At this point, users can select users and groups from the listed forests and domains from any front-end Web server in the farm.
@@ -404,7 +406,7 @@ $webApp.GrantAccessToProcessIdentity("EXTRANET\svc-spserviceapp")
 
 ```Console
 pushd ..\..\Tools\TestConsole\bin\Release
-Fabrikam.Demo.Tools.TestConsole.exe http://extranet.fabrikam.com
+.\Fabrikam.Demo.Tools.TestConsole.exe http://extranet.fabrikam.com
 popd
 ```
 
@@ -460,7 +462,7 @@ robocopy \\iceman\Builds\Securitas\ClientPortal\3.0.591.0 C:\NotBackedUp\Builds\
 ```PowerShell
 [Environment]::SetEnvironmentVariable(
     "SECURITAS_CLIENT_PORTAL_URL",
-    "http://client-dev.securitasinc.com",
+    "http://client-test.securitasinc.com",
     "Machine")
 ```
 
@@ -474,7 +476,7 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\3.0.591.0\DeploymentFiles\Script
 
 When prompted for the credentials for the Web application service account:
 
-1. In the **User name** box, type **EXTRANET\\svc-web-sec-2010-dev**.
+1. In the **User name** box, type **EXTRANET\\svc-web-sec-2010**.
 2. In the **Password** box, type the corresponding password for the service account.
 3. Click **OK**.
 
@@ -505,13 +507,13 @@ iisreset
 **Specify the credentials for accessing the trusted forest**
 
 ```Console
-stsadm -o setproperty -pn peoplepicker-searchadforests -pv "domain:extranet.technologytoolbox.com,EXTRANET\svc-web-fabrikam,{password};domain:corp.fabrikam.com,FABRIKAM\svc-web-fabrikam,{password};domain:corp.technologytoolbox.com,TECHTOOLBOX\svc-web-fabrikam,{password}" -url http://client-dev.securitasinc.com
+stsadm -o setproperty -pn peoplepicker-searchadforests -pv "domain:extranet.technologytoolbox.com,EXTRANET\svc-web-sec-2010,{password};domain:corp.fabrikam.com,FABRIKAM\svc-web-sec-2010,{password};domain:corp.technologytoolbox.com,TECHTOOLBOX\svc-web-sec-2010,{password}" -url http://client-test.securitasinc.com
 ```
 
 **Enable disk-based caching for the Web application**
 
 ```Console
-notepad C:\inetpub\wwwroot\wss\VirtualDirectories\client-dev.securitasinc.com80\web.config
+notepad C:\inetpub\wwwroot\wss\VirtualDirectories\client-test.securitasinc.com80\web.config
 
     <BlobCache location="..." path="..." maxSize="1" enabled="true" />
 ```
@@ -630,10 +632,10 @@ netsh interface set interface name="Local Area Connection" newname="LAN 1 - 192.
 netsh interface set interface name="Local Area Connection 2" newname="iSCSI 1 - 10.1.10.x"
 ```
 
-**# Configure static IP address**
+**# Configure static IPv4 address**
 
 ```PowerShell
-$ipAddress = "192.168.10.206"
+$ipAddress = "192.168.10.215"
 
 # Note: New-NetIPAddress is not available on Windows Server 2008 R2
 
@@ -646,10 +648,26 @@ netsh interface ipv4 set dnsserver name="LAN 1 - 192.168.10.x" source=static add
 netsh interface ipv4 add dnsserver name="LAN 1 - 192.168.10.x" address=192.168.10.210
 ```
 
+**# Configure static IPv6 address**
+
+```PowerShell
+$ipAddress = "2601:282:4201:e500::215"
+
+# Note: New-NetIPAddress is not available on Windows Server 2008 R2
+
+netsh interface ipv6 set address interface="LAN 1 - 192.168.10.x" address=$ipAddress store=persistent
+
+# Note: Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+
+netsh interface ipv6 set dnsserver name="LAN 1 - 192.168.10.x" source=static address=2601:282:4201:e500::209
+
+netsh interface ipv6 add dnsserver name="LAN 1 - 192.168.10.x" address=2601:282:4201:e500::210
+```
+
 **# Configure iSCSI network adapter**
 
 ```PowerShell
-$ipAddress = "10.1.10.206"
+$ipAddress = "10.1.10.215"
 
 # Note: New-NetIPAddress is not available on Windows Server 2008 R2
 
@@ -1218,21 +1236,21 @@ cls
 
 ### Alert
 
-_Source: VSS_\
-_Event ID: 8193_\
-_Event Category: 0_\
-_User: N/A_\
-_Computer: EXT-APP01A.extranet.technologytoolbox.com_\
-_Event Description: Volume Shadow Copy Service error: Unexpected error calling routine RegOpenKeyExW(-2147483646,SYSTEM\\CurrentControlSet\\Services\\VSS\\Diag,...). hr = 0x80070005, Access is denied._\
-_._
+Source: VSS\
+Event ID: 8193\
+Event Category: 0\
+User: N/A\
+Computer: EXT-APP01A.extranet.technologytoolbox.com\
+Event Description: Volume Shadow Copy Service error: Unexpected error calling routine RegOpenKeyExW(-2147483646,SYSTEM\\CurrentControlSet\\Services\\VSS\\Diag,...). hr = 0x80070005, Access is denied.\
+.
 
-_Operation:_\
-_Initializing Writer_
+Operation:\
+Initializing Writer
 
-_Context:_\
-_Writer Class Id: {0ff1ce14-0201-0000-0000-000000000000}_\
-_Writer Name: OSearch14 VSS Writer_\
-_Writer Instance ID: {ebc9810a-18ae-4f9e-ad6f-f3802faf1dd8}_
+Context:\
+Writer Class Id: {0ff1ce14-0201-0000-0000-000000000000}\
+Writer Name: OSearch14 VSS Writer\
+Writer Instance ID: {ebc9810a-18ae-4f9e-ad6f-f3802faf1dd8}
 
 ### Solution
 
@@ -1261,12 +1279,12 @@ cls
 
 ### Alert
 
-_Source: WinMgmt_\
-_Event ID: 10_\
-_Event Category: 0_\
-_User: N/A_\
-_Computer: EXT-APP01A.extranet.technologytoolbox.com_\
-_Event Description: Event filter with query "SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA "Win32_Processor" AND TargetInstance.LoadPercentage > 99" could not be reactivated in namespace "//./root/CIMV2" because of error 0x80041003. Events cannot be delivered through this filter until the problem is corrected._
+Source: WinMgmt\
+Event ID: 10\
+Event Category: 0\
+User: N/A\
+Computer: EXT-APP01A.extranet.technologytoolbox.com\
+Event Description: Event filter with query "SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA "Win32_Processor" AND TargetInstance.LoadPercentage > 99" could not be reactivated in namespace "//./root/CIMV2" because of error 0x80041003. Events cannot be delivered through this filter until the problem is corrected.
 
 ### Reference
 
@@ -1314,3 +1332,806 @@ Next
 ```
 
 ---
+
+## Resolve permissions issue with SharePoint tracing
+
+### Alert
+
+_Source: Microsoft-SharePoint Products-SharePoint Foundation_\
+_Event ID: 2163_\
+_Event Category: 88_\
+_User: NT AUTHORITY\\LOCAL SERVICE_\
+_Computer: EXT-WEB01B.extranet.technologytoolbox.com_\
+_Event Description: Tracing Service failed to create the trace log file at location specified in SOFTWARE\\Microsoft\\Shared Tools\\Web Server Extensions\\14.0\\WSS\\LogDir. Error 0x0: The operation completed successfully. . Traces will be written to the following directory: C:\\Windows\\SERVIC~2\\LOCALS~1\\AppData\\Local\\Temp\\._
+
+### Solution
+
+```PowerShell
+icacls "L:\Program Files\Microsoft Office Servers\14.0\Logs" `
+    /grant "NT AUTHORITY\LOCAL SERVICE:(OI)(CI)(F)"
+```
+
+## Restore SecuritasConnect from PROD
+
+> **Important**
+>
+> Rebuild SecuritasConnect when logged in as **EXTRANET\\jjameson-admin** (*not* **TECHTOOLBOX\\jjameson-admin**).
+
+```PowerShell
+cls
+```
+
+### # Delete the Web application
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\3.0.647.0\DeploymentFiles\Scripts
+
+& '.\Delete Web Application.ps1'
+```
+
+```PowerShell
+cls
+```
+
+### # Create the Web application
+
+```PowerShell
+& '.\Create Web Application.ps1'
+```
+
+When prompted for the credentials for the Web application service account:
+
+1. In the **User name** box, type **EXTRANET\\svc-web-sec-2010**.
+2. In the **Password** box, type the corresponding password for the service account.
+3. Click **OK**.
+
+```PowerShell
+cls
+```
+
+### # Restore WSS_Content_SecuritasPortal from PROD backup
+
+#### # Detach content database from Web application
+
+```PowerShell
+Get-SPContentDatabase -WebApplication http://client-test.securitasinc.com |
+    Remove-SPContentDatabase
+```
+
+#### Restore database in SQL Server
+
+---
+
+**SQL Server Management Studio - EXT-SQL01**
+
+```Console
+RESTORE DATABASE [WSS_Content_SecuritasPortal]
+FROM
+    DISK = N'Z:\MSSQL10_50.MSSQLSERVER\MSSQL\Backup\Full\WSS_Content_SecuritasPortal_backup_2016_02_28_010003_2653990.bak'
+WITH
+    FILE = 1,
+    MOVE N'WSS_Content_SecuritasPortal'
+    TO N'D:\MSSQL10_50.MSSQLSERVER\MSSQL\DATA\WSS_Content_SecuritasPortal.mdf',
+    MOVE N'WSS_Content_SecuritasPortal_log'
+    TO N'L:\MSSQL10_50.MSSQLSERVER\MSSQL\Data\WSS_Content_SecuritasPortal_1.LDF',
+    NOUNLOAD,
+    STATS = 10
+
+GO
+```
+
+-- Expect the previous operation to complete in approximately 19 minutes.
+
+```SQL
+USE [WSS_Content_SecuritasPortal]
+GO
+CREATE USER [EXTRANET\SharePoint Admins] FOR LOGIN [EXTRANET\SharePoint Admins]
+GO
+EXEC sp_addrolemember N'db_owner', N'EXTRANET\SharePoint Admins'
+GO
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Test content database against Web application
+
+```PowerShell
+Test-SPContentDatabase `
+    -Name WSS_Content_SecuritasPortal `
+    -WebApplication http://client-test.securitasinc.com
+```
+
+```PowerShell
+cls
+```
+
+#### # Attach content database to Web application
+
+```PowerShell
+Mount-SPContentDatabase `
+    -Name WSS_Content_SecuritasPortal `
+    -WebApplication http://client-test.securitasinc.com `
+    -MaxSiteCount 6000
+```
+
+```PowerShell
+cls
+```
+
+### # Configure machine key for Web application
+
+```PowerShell
+& '.\Configure Machine Key.ps1'
+```
+
+### # Configure object cache user accounts
+
+```PowerShell
+& '.\Configure Object Cache User Accounts.ps1'
+
+iisreset
+```
+
+```PowerShell
+cls
+```
+
+### REM Configure the People Picker to support searches across one-way trust
+
+#### REM Specify the credentials for accessing the trusted forest
+
+```Console
+stsadm -o setproperty -pn peoplepicker-searchadforests -pv "domain:extranet.technologytoolbox.com,EXTRANET\svc-web-sec-2010,{password};domain:corp.fabrikam.com,FABRIKAM\svc-web-sec-2010,{password};domain:corp.technologytoolbox.com,TECHTOOLBOX\svc-web-sec-2010,{password}" -url http://client-test.securitasinc.com
+```
+
+```Console
+cls
+```
+
+### # Enable disk-based caching for the Web application
+
+```PowerShell
+notepad C:\inetpub\wwwroot\wss\VirtualDirectories\client-test.securitasinc.com80\web.config
+
+    <BlobCache location="..." path="..." maxSize="1" enabled="true" />
+
+notepad \\EXT-WEB01A\C$\inetpub\wwwroot\wss\VirtualDirectories\client-test.securitasinc.com80\web.config
+
+notepad \\EXT-WEB01B\C$\inetpub\wwwroot\wss\VirtualDirectories\client-test.securitasinc.com80\web.config
+```
+
+### Configure Web application policy for SharePoint administrators group
+
+> **Important**
+>
+> This step must be completed before activating the features to avoid an error (0x80070005 - access denied) when activating the **Securitas.Portal.Web_ClaimsAuthenticationConfiguration** feature.
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$groupName = "EXTRANET\SharePoint Admins"
+
+$principal = New-SPClaimsPrincipal -Identity $groupName `
+    -IdentityType WindowsSecurityGroupName
+
+$claim = "c:0+.w|" + $principal.Value.ToLower()
+
+$webApp = Get-SPWebApplication http://client-test.securitasinc.com
+
+$policyRole = $webApp.PolicyRoles.GetSpecialRole(
+    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
+
+$policy = $webApp.Policies.Add($claim, $groupName)
+$policy.PolicyRoleBindings.Add($policyRole)
+
+$webApp.Update()
+```
+
+```PowerShell
+cls
+```
+
+### # Apply Web.config transformations (by redeploying features)
+
+```PowerShell
+& '.\Deactivate Features.ps1'
+
+& '.\Retract Solutions.ps1'
+
+& '.\Deploy Solutions.ps1'
+```
+
+> **Important**
+>
+> Use Central Administration to verify the solutions were deployed successfully.
+
+```PowerShell
+& '.\Activate Features.ps1'
+```
+
+### Configure SSL
+
+#### Configure SSL bindings
+
+#### Configure AAM
+
+```PowerShell
+cls
+```
+
+### # Configure C&C landing site
+
+```PowerShell
+$site = Get-SPSite "http://client-test.securitasinc.com/sites/cc"
+$group = $site.RootWeb.SiteGroups["Collaboration & Community Visitors"]
+$group.AddUser(
+    "c:0-.f|securitassqlroleprovider|branch managers",
+    $null,
+    "Branch Managers",
+    $null)
+
+$claim = New-SPClaimsPrincipal -Identity "Branch Managers" `
+    -IdentityType WindowsSecurityGroupName
+
+$branchManagersUser = $site.RootWeb.EnsureUser($claim.ToEncodedString())
+$group.AddUser($branchManagersUser)
+$site.Dispose()
+```
+
+```PowerShell
+cls
+```
+
+### # Replace PROD application settings with UAT counterparts
+
+```PowerShell
+net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
+
+copy \\ICEMAN\Archive\Clients\Securitas\AppSettings-UAT_2015-12-16.csv `
+    C:\NotBackedUp\Temp
+
+Import-Csv C:\NotBackedUp\Temp\AppSettings-UAT_2015-12-16.csv |
+    ForEach-Object {
+        .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force
+    }
+```
+
+```PowerShell
+cls
+```
+
+### # Restore SecuritasPortal backup from PROD
+
+#### # Stop SharePoint services
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Stop SharePoint Services.cmd'
+```
+
+#### Restore database in SQL Server
+
+---
+
+**SQL Server Management Studio - EXT-SQL01**
+
+```Console
+RESTORE DATABASE [SecuritasPortal]
+FROM
+    DISK = N'Z:\MSSQL10_50.MSSQLSERVER\MSSQL\Backup\Full\SecuritasPortal_backup_2016_02_28_010003_2653990.bak'
+WITH
+    FILE = 1,
+    MOVE N'SecuritasPortal' TO N'D:\MSSQL10_50.MSSQLSERVER\MSSQL\DATA\SecuritasPortal.mdf',
+    MOVE N'SecuritasPortal_log' TO N'L:\MSSQL10_50.MSSQLSERVER\MSSQL\Data\SecuritasPortal.LDF',
+    NOUNLOAD,
+    REPLACE,
+    STATS = 10
+
+GO
+```
+
+##### -- Replace service accounts
+
+```SQL
+USE [SecuritasPortal]
+GO
+
+CREATE USER [EXTRANET\svc-sharepoint] FOR LOGIN [EXTRANET\svc-sharepoint]
+
+EXEC sp_addrolemember N'aspnet_Membership_BasicAccess', N'EXTRANET\svc-sharepoint'
+
+EXEC sp_addrolemember N'aspnet_Membership_ReportingAccess', N'EXTRANET\svc-sharepoint'
+
+EXEC sp_addrolemember N'aspnet_Roles_BasicAccess', N'EXTRANET\svc-sharepoint'
+
+EXEC sp_addrolemember N'aspnet_Roles_ReportingAccess', N'EXTRANET\svc-sharepoint'
+
+CREATE USER [EXTRANET\svc-web-sec-2010]
+FOR LOGIN [EXTRANET\svc-web-sec-2010]
+
+EXEC sp_addrolemember N'aspnet_Membership_FullAccess', N'EXTRANET\svc-web-sec-2010'
+
+EXEC sp_addrolemember N'aspnet_Profile_BasicAccess', N'EXTRANET\svc-web-sec-2010'
+
+EXEC sp_addrolemember N'aspnet_Roles_BasicAccess', N'EXTRANET\svc-web-sec-2010'
+
+EXEC sp_addrolemember N'aspnet_Roles_ReportingAccess', N'EXTRANET\svc-web-sec-2010'
+
+EXEC sp_addrolemember N'Customer_Reader', N'EXTRANET\svc-web-sec-2010'
+
+DROP USER [SEC\svc-sharepoint-2010]
+DROP USER [SEC\svc-web-securitas]
+DROP USER [SEC\svc-web-securitas-20]
+
+GO
+
+CREATE USER [EXTRANET\EXT-APP01A$]
+FOR LOGIN [EXTRANET\EXT-APP01A$]
+
+EXEC sp_addrolemember N'Employee_FullAccess', N'EXTRANET\EXT-APP01A$'
+
+CREATE USER [EXTRANET\EXT-WEB01A$]
+FOR LOGIN [EXTRANET\EXT-WEB01A$]
+
+EXEC sp_addrolemember N'Employee_FullAccess', N'EXTRANET\EXT-WEB01A$'
+
+CREATE USER [EXTRANET\EXT-WEB01B$]
+FOR LOGIN [EXTRANET\EXT-WEB01B$]
+
+EXEC sp_addrolemember N'Employee_FullAccess', N'EXTRANET\EXT-WEB01B$'
+
+DROP USER [SEC\258521-VM4$]
+DROP USER [SEC\424642-SP$]
+DROP USER [SEC\424646-SP$]
+
+GO
+```
+
+##### -- Replace domain in BranchManagerAssociatedUsers
+
+```INI
+UPDATE
+    [Customer].[BranchManagerAssociatedUsers]
+SET
+    BranchManagerUserName = REPLACE(BranchManagerUserName, 'PNKUS', 'TECHTOOLBOX')
+WHERE
+    BranchManagerUserName LIKE 'PNKUS\%'
+```
+
+##### -- Replace domain in Employee.PortalUsers
+
+```INI
+UPDATE
+    [Employee].[PortalUsers]
+SET
+    UserName = REPLACE(UserName, 'PNKUS', 'TECHTOOLBOX')
+WHERE
+    UserName LIKE 'PNKUS\%'
+```
+
+##### -- Add associated users for TECHTOOLBOX\\smasters
+
+```SQL
+INSERT INTO
+    [Customer].[BranchManagerAssociatedUsers]
+SELECT
+    'TECHTOOLBOX\smasters'
+    , AssociatedUserName
+FROM
+    [Customer].[BranchManagerAssociatedUsers]
+WHERE
+    BranchManagerUserName = 'TECHTOOLBOX\jjameson'
+
+INSERT INTO	[Customer].[BranchManagerAssociatedUsers]
+VALUES ('TECHTOOLBOX\smasters', 'David.Reeder')
+
+INSERT INTO	[Customer].[BranchManagerAssociatedUsers]
+VALUES ('TECHTOOLBOX\smasters', 'rhu-demo')
+
+INSERT INTO	[Customer].[BranchManagerAssociatedUsers]
+VALUES ('TECHTOOLBOX\smasters', 'test-TtCanada')
+
+GO
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Start SharePoint services
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Start SharePoint Services.cmd'
+```
+
+> **Important**
+>
+> Rebuild Cloud Portal when logged in as **EXTRANET\\jjameson-admin** (*not* **TECHTOOLBOX\\jjameson-admin**).
+
+```PowerShell
+cls
+```
+
+## # Restore Cloud Portal from PROD
+
+### # Delete the Web application
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\CloudPortal\1.0.6.0\DeploymentFiles\Scripts
+
+& '.\Delete Web Application.ps1'
+```
+
+```PowerShell
+cls
+```
+
+### # Create the Web application
+
+```PowerShell
+& '.\Create Web Application.ps1'
+```
+
+When prompted for the credentials for the Web application service account:
+
+1. In the **User name** box, type **EXTRANET\\svc-web-securitas**.
+2. In the **Password** box, type the corresponding password for the service account.
+3. Click **OK**.
+
+```PowerShell
+cls
+```
+
+### # Restore WSS_Content_CloudPortal from PROD backup
+
+#### # Detach content database from Web application
+
+```PowerShell
+Get-SPContentDatabase -WebApplication http://cloud-test.securitasinc.com |
+    Remove-SPContentDatabase
+```
+
+#### Restore database in SQL Server
+
+---
+
+**SQL Server Management Studio - EXT-SQL01**
+
+```Console
+RESTORE DATABASE [WSS_Content_CloudPortal]
+FROM
+    DISK = N'Z:\MSSQL10_50.MSSQLSERVER\MSSQL\Backup\Full\WSS_Content_CloudPortal_backup_2016_02_28_010003_3746039.bak'
+WITH
+    FILE = 1,
+    MOVE N'WSS_Content_CloudPortal'
+    TO N'D:\MSSQL10_50.MSSQLSERVER\MSSQL\DATA\WSS_Content_CloudPortal.mdf',
+    MOVE N'WSS_Content_CloudPortal_log'
+    TO N'L:\MSSQL10_50.MSSQLSERVER\MSSQL\Data\WSS_Content_CloudPortal_1.LDF',
+    NOUNLOAD,
+    STATS = 10
+
+GO
+```
+
+-- Expect the previous operation to complete in approximately 46 minutes.
+
+```SQL
+USE [WSS_Content_CloudPortal]
+GO
+CREATE USER [EXTRANET\SharePoint Admins] FOR LOGIN [EXTRANET\SharePoint Admins]
+GO
+EXEC sp_addrolemember N'db_owner', N'EXTRANET\SharePoint Admins'
+GO
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Test content database against Web application
+
+```PowerShell
+Test-SPContentDatabase `
+    -Name WSS_Content_CloudPortal `
+    -WebApplication http://cloud-test.securitasinc.com
+```
+
+```PowerShell
+cls
+```
+
+#### # Attach content database to Web application
+
+```PowerShell
+Mount-SPContentDatabase `
+    -Name WSS_Content_CloudPortal `
+    -WebApplication http://cloud-test.securitasinc.com
+```
+
+### # Configure object cache user accounts
+
+```PowerShell
+& '.\Configure Object Cache User Accounts.ps1'
+
+iisreset
+```
+
+```PowerShell
+cls
+```
+
+### REM Configure the People Picker to support searches across one-way trust
+
+#### REM Specify the credentials for accessing the trusted forest
+
+```Console
+stsadm -o setproperty -pn peoplepicker-searchadforests -pv "domain:extranet.technologytoolbox.com,EXTRANET\svc-web-securitas,{password};domain:corp.fabrikam.com,FABRIKAM\svc-web-securitas,{password};domain:corp.technologytoolbox.com,TECHTOOLBOX\svc-web-securitas,{password}" -url http://cloud-test.securitasinc.com
+```
+
+```Console
+cls
+```
+
+### # Enable disk-based caching for the Web application
+
+```PowerShell
+notepad C:\inetpub\wwwroot\wss\VirtualDirectories\cloud-test.securitasinc.com80\web.config
+B
+    <BlobCache location="..." path="..." maxSize="1" enabled="true" />
+
+notepad \\EXT-WEB01A\C$\inetpub\wwwroot\wss\VirtualDirectories\cloud-test.securitasinc.com80\web.config
+
+notepad \\EXT-WEB01B\C$\inetpub\wwwroot\wss\VirtualDirectories\cloud-test.securitasinc.com80\web.config
+```
+
+```PowerShell
+cls
+```
+
+### # Apply Web.config transformations (by redeploying features)
+
+```PowerShell
+& '.\Deactivate Features.ps1'
+
+& '.\Retract Solutions.ps1'
+
+& '.\Deploy Solutions.ps1'
+```
+
+> **Important**
+>
+> Use Central Administration to verify the solutions were deployed successfully.
+
+```PowerShell
+& '.\Activate Features.ps1'
+```
+
+### Add SecuritasPortal connection string to Web.config files
+
+### Configure SSL
+
+#### Configure SSL bindings
+
+#### Configure AAM
+
+```PowerShell
+cls
+```
+
+### # Grant FABRIKAM and TECHTOOLBOX users permissions on Cloud Portal site
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$web = Get-SPWeb http://cloud-test.securitasinc.com/
+
+$group = $web.Groups["Cloud Portal Visitors"]
+
+$claim = New-SPClaimsPrincipal `
+    -Identity "FABRIKAM\Domain Users" `
+    -IdentityType WindowsSecurityGroupName
+
+$user = $web.EnsureUser($claim.ToEncodedString())
+$group.AddUser($user)
+
+$claim = New-SPClaimsPrincipal `
+    -Identity "TECHTOOLBOX\Domain Users" `
+    -IdentityType WindowsSecurityGroupName
+
+$user = $web.EnsureUser($claim.ToEncodedString())
+$group.AddUser($user)
+```
+
+```PowerShell
+cls
+```
+
+### # Grant FABRIKAM and TECHTOOLBOX users permissions on Employee Portal SharePoint site
+
+```PowerShell
+$web = Get-SPWeb http://cloud-test.securitasinc.com/sites/Employee-Portal
+
+$group = $web.Groups["Viewers"]
+
+$claim = New-SPClaimsPrincipal `
+    -Identity "FABRIKAM\Domain Users" `
+    -IdentityType WindowsSecurityGroupName
+
+$user = $web.EnsureUser($claim.ToEncodedString())
+$group.AddUser($user)
+
+$claim = New-SPClaimsPrincipal `
+    -Identity "TECHTOOLBOX\Domain Users" `
+    -IdentityType WindowsSecurityGroupName
+
+$user = $web.EnsureUser($claim.ToEncodedString())
+$group.AddUser($user)
+```
+
+```PowerShell
+cls
+```
+
+### # Grant FABRIKAM and TECHTOOLBOX users permissions to upload profile pictures
+
+```PowerShell
+$web = Get-SPWeb http://cloud-test.securitasinc.com/sites/Employee-Portal/Profiles
+
+$contributeRole = $web.RoleDefinitions['Contribute']
+
+$list = $web.Lists['Profile Pictures']
+
+@('FABRIKAM', 'TECHTOOLBOX') |
+    ForEach-Object {
+        $domainUsers = $web.EnsureUser($_ + '\Domain Users')
+
+        $assignment = New-Object Microsoft.SharePoint.SPRoleAssignment(
+            $domainUsers)
+
+        $assignment.RoleDefinitionBindings.Add($contributeRole)
+        $list.RoleAssignments.Add($assignment)
+    }
+```
+
+```PowerShell
+cls
+```
+
+### # Configure Web application policy for SharePoint administrators group
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$groupName = "EXTRANET\SharePoint Admins"
+
+$principal = New-SPClaimsPrincipal -Identity $groupName `
+    -IdentityType WindowsSecurityGroupName
+
+$claim = "c:0+.w|" + $principal.Value.ToLower()
+
+$webApp = Get-SPWebApplication http://cloud-test.securitasinc.com
+
+$policyRole = $webApp.PolicyRoles.GetSpecialRole(
+    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
+
+$policy = $webApp.Policies.Add($claim, $groupName)
+$policy.PolicyRoleBindings.Add($policyRole)
+
+$webApp.Update()
+```
+
+## Extend SecuritasConnect and Cloud Portal web applications (for Employee Portal)
+
+### Extend web applications to Intranet zone
+
+```PowerShell
+$ErrorActionPreference = "Stop"
+
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+Function ExtendWebAppToIntranetZone(
+    [string] $DefaultUrl,
+    [string] $IntranetUrl)
+{
+    $webApp = Get-SPWebApplication -Identity $DefaultUrl -Debug:$false
+
+    Write-Host ("Extending Web application ($DefaultUrl) to Intranet zone" `
+        + " ($IntranetUrl)...")
+
+    $hostHeader = $IntranetUrl.Substring("https://".Length)
+
+    $webAppName = "SharePoint - " + $hostHeader + "443"
+
+    $windowsAuthProvider = New-SPAuthenticationProvider -Debug:$false
+
+    $webApp | New-SPWebApplicationExtension `
+        -Name $webAppName `
+        -Zone Intranet `
+        -AuthenticationProvider $windowsAuthProvider `
+        -HostHeader $hostHeader `
+        -Port 443 `
+        -SecureSocketsLayer
+}
+
+ExtendWebAppToIntranetZone `
+    -DefaultUrl "http://client-test.securitasinc.com" `
+    -IntranetUrl "https://client2-test.securitasinc.com"
+
+ExtendWebAppToIntranetZone `
+    -DefaultUrl "http://cloud-test.securitasinc.com" `
+    -IntranetUrl "https://cloud2-test.securitasinc.com"
+```
+
+```PowerShell
+cls
+```
+
+### # Add SecuritasPortal connection string to Cloud Portal configuration file
+
+```PowerShell
+cd C:\inetpub\wwwroot\wss\VirtualDirectories
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    .\cloud-test.securitasinc.com80\web.config `
+    .\cloud2-test.securitasinc.com443\web.config
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    .\cloud-test.securitasinc.com80\web.config `
+    \\EXT-WEB01A\C$\inetpub\wwwroot\wss\VirtualDirectories\cloud2-test.securitasinc.com443\web.config
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    .\cloud-test.securitasinc.com80\web.config `
+    \\EXT-WEB01B\C$\inetpub\wwwroot\wss\VirtualDirectories\cloud2-test.securitasinc.com443\web.config
+```
+
+```PowerShell
+cls
+```
+
+### # Enable disk-based caching for the "intranet" websites
+
+```PowerShell
+cd C:\inetpub\wwwroot\wss\VirtualDirectories
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    .\cloud-test.securitasinc.com80\web.config `
+    .\cloud2-test.securitasinc.com443\web.config
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    .\cloud-test.securitasinc.com80\web.config `
+    \\EXT-WEB01A\C$\inetpub\wwwroot\wss\VirtualDirectories\cloud2-test.securitasinc.com443\web.config
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    .\cloud-test.securitasinc.com80\web.config `
+    \\EXT-WEB01B\C$\inetpub\wwwroot\wss\VirtualDirectories\cloud2-test.securitasinc.com443\web.config
+```
+
+```PowerShell
+cls
+```
+
+## # Resolve alerts due to SharePoint Customer Experience Improvement Program
+
+### Alert
+
+Source: Microsoft-SharePoint Products-SharePoint Foundation\
+Event ID: 6398\
+Event Category: 12\
+User: EXTRANET\\svc-sharepoint\
+Computer: EXT-APP01A.extranet.technologytoolbox.com\
+Event Description: The Execute method of job definition Microsoft.SharePoint.Administration.SPSqmTimerJobDefinition (ID e55191c4-a899-4a24-9bf0-18d31c26525d) threw an exception. More information is included below.
+
+Data is Null. This method or property cannot be called on Null values.
+
+### Reference
+
+[http://adithyareddy.blog.com/2011/09/22/spadmineventid6398/](http://adithyareddy.blog.com/2011/09/22/spadmineventid6398/)
+
+### Solution
