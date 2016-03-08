@@ -390,3 +390,126 @@ Set-VMDvdDrive -ComputerName ANGEL -VMName EXT-WEB01B -Path $null
 ---
 
 ### # Approve manual agent install in Operations Manager
+
+```PowerShell
+cls
+```
+
+## # Configure VSS permissions for SharePoint Search
+
+### Alert
+
+_Source: VSS_\
+_Event ID: 8193_\
+_Event Category: 0_\
+_User: N/A_\
+_Computer: EXT-WEB01B.extranet.technologytoolbox.com_\
+_Event Description: Volume Shadow Copy Service error: Unexpected error calling routine RegOpenKeyExW(-2147483646,SYSTEM\\CurrentControlSet\\Services\\VSS\\Diag,...). hr = 0x80070005, Access is denied._\
+_._
+
+_Operation:_\
+_Initializing Writer_
+
+_Context:_\
+_Writer Class Id: {0ff1ce14-0201-0000-0000-000000000000}_\
+_Writer Name: OSearch14 VSS Writer_\
+_Writer Instance ID: {ebc9810a-18ae-4f9e-ad6f-f3802faf1dd8}_
+
+### Solution
+
+```PowerShell
+$serviceAccount = "EXTRANET\svc-sharepoint"
+
+New-ItemProperty `
+    -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\VssAccessControl `
+    -Name $serviceAccount `
+    -PropertyType DWord `
+    -Value 1 | Out-Null
+
+$acl = Get-Acl HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag
+$rule = New-Object System.Security.AccessControl.RegistryAccessRule(
+    $serviceAccount, "FullControl", "ContainerInherit", "None", "Allow")
+
+$acl.SetAccessRule($rule)
+Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
+```
+
+```PowerShell
+cls
+```
+
+## # Resolve WMI error after every reboot
+
+### Alert
+
+_Source: WinMgmt_\
+_Event ID: 10_\
+_Event Category: 0_\
+_User: N/A_\
+_Computer: EXT-WEB01B.extranet.technologytoolbox.com_\
+_Event Description: Event filter with query "SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA "Win32_Processor" AND TargetInstance.LoadPercentage > 99" could not be reactivated in namespace "//./root/CIMV2" because of error 0x80041003. Events cannot be delivered through this filter until the problem is corrected._
+
+### Reference
+
+**Event ID 10 is logged in the Application log after you install Service Pack 1 for Windows 7 or Windows Server 2008 R2**\
+From <[https://support.microsoft.com/en-us/kb/2545227](https://support.microsoft.com/en-us/kb/2545227)>
+
+### Solution
+
+---
+
+**VBScript**
+
+```PowerShell
+strComputer = "."
+
+Set objWMIService = GetObject("winmgmts:" _
+  & "{impersonationLevel=impersonate}!\\" _
+  & strComputer & "\root\subscription")
+
+Set obj1 = objWMIService.ExecQuery("select * from __eventfilter where name='BVTFilter' and query='SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA ""Win32_Processor"" AND TargetInstance.LoadPercentage > 99'")
+
+For Each obj1elem in obj1
+  set obj2set = obj1elem.Associators_("__FilterToConsumerBinding")
+  set obj3set = obj1elem.References_("__FilterToConsumerBinding")
+
+  For each obj2 in obj2set
+    WScript.echo "Deleting the object"
+    WScript.echo obj2.GetObjectText_
+
+    obj2.Delete_
+  Next
+
+  For each obj3 in obj3set
+    WScript.echo "Deleting the object"
+    WScript.echo obj3.GetObjectText_
+
+    obj3.Delete_
+  Next
+
+  WScript.echo "Deleting the object"
+  WScript.echo obj1elem.GetObjectText_
+
+  obj1elem.Delete_
+Next
+```
+
+---
+
+## Resolve permissions issue with SharePoint tracing
+
+### Alert
+
+_Source: Microsoft-SharePoint Products-SharePoint Foundation_\
+_Event ID: 2163_\
+_Event Category: 88_\
+_User: NT AUTHORITY\\LOCAL SERVICE_\
+_Computer: EXT-WEB01B.extranet.technologytoolbox.com_\
+_Event Description: Tracing Service failed to create the trace log file at location specified in SOFTWARE\\Microsoft\\Shared Tools\\Web Server Extensions\\14.0\\WSS\\LogDir. Error 0x0: The operation completed successfully. . Traces will be written to the following directory: C:\\Windows\\SERVIC~2\\LOCALS~1\\AppData\\Local\\Temp\\._
+
+### Solution
+
+```PowerShell
+icacls "L:\Program Files\Microsoft Office Servers\14.0\Logs" `
+    /grant "NT AUTHORITY\LOCAL SERVICE:(OI)(CI)(F)"
+```
