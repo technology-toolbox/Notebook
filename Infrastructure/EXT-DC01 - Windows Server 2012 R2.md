@@ -647,3 +647,18 @@ Pop-Location
 ```
 
 ### # Approve manual agent install in Operations Manager
+
+## Resolve issue with resolving smtp-test.technologytoolbox.com
+
+### Alert
+
+Source: Microsoft-SharePoint Products-SharePoint Foundation\
+Event ID: 6856\
+Event Category: 4\
+User: EXTRANET\\svc-sharepoint\
+Computer: EXT-APP01A.extranet.technologytoolbox.com\
+Event Description: Cannot resolve name of SMTP host smtp-test.technologytoolbox.com.
+
+### Solution
+
+Add conditional forwarder for **technologytoolbox.com** (**XAVIER1**, **XAVIER2**)
