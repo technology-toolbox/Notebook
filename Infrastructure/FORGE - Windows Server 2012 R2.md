@@ -1,4 +1,4 @@
-﻿# FORGE - Windows Server 2012 R2 Standard
+﻿# FORGE (new) - Windows Server 2012 R2 Standard
 
 Monday, January 25, 2016
 2:54 PM
@@ -9,40 +9,84 @@ Monday, January 25, 2016
 
 ## Install Windows Server 2012 R2
 
-## Configure static IPv4 address
+## Enable Intel I217-V network adapter
+
+### Issue
+
+After installing Windows Server 2012 R2, the built-in Intel I217-V network adapter on the ASUS P8Z77-V motherboard was not recognized.
+
+### Solution
+
+To enable the Intel I217-V network adapter in Windows Server 2012:
+
+1. To be able to modify the drivers, temporarily disable driver integrity checks and enable test signing by running the following commands:
+2. Reboot the server.
+3. Download the network drivers from the Intel website:\
+   **Network Adapter Driver for Windows Server 2012 R2**\
+   [https://downloadcenter.intel.com/download/23073/Network-Adapter-Driver-for-Windows-Server-2012-R2](https://downloadcenter.intel.com/download/23073/Network-Adapter-Driver-for-Windows-Server-2012-R2)-
+4. Use WinZip to extract the contents of the download (PROWin64.exe) to a temporary folder on a USB thumb drive (e.g. \\NotBackedUp\\Temp\\Drivers\\LAN).
+5. Copy the driver files to a temporary location on the server:
+6. Open the **e1d64x64.inf** file in Notepad:
+7. In the **[ControlFlags]** section delete the following three lines:
+8. In the **[Intel.NTamd64.6.3.1]** section, select and copy the three **%E153BNC** lines.
+9. Paste the copied lines into the **[Intel.NTamd64.6.3]** section below the **%E153ANC** lines.
+10. Save the file.
+11. Install the network adapter driver:
+12. Enable driver integrity checks and disable test signing by running the following commands:
+13. Reboot the server.
+
+```Console
+    bcdedit -set loadoptions DISABLE_INTEGRITY_CHECKS
+bcdedit -set TESTSIGNING ON
+```
+
+```Console
+     
+robocopy E:\NotBackedUp\Temp\Drivers\LAN C:\NotBackedUp\Temp\Drivers\LAN /E
+```
+
+```Console
+     
+Notepad.exe C:\NotBackedUp\Temp\Drivers\LAN\PRO1000\Winx64\NDIS64\e1d64x64.inf
+```
+
+```Text
+    ExcludeFromSelect = \
+        PCI\VEN_8086&DEV_153A,\
+        PCI\VEN_8086&DEV_153B
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\LAN\PRO1000\Winx64\NDIS64\e1d64x64.inf
+```
+
+When prompted with **Windows can't verify the publisher of this driver software**, click **Install this driver software anyway**.
+
+```Console
+    bcdedit -set loadoptions ENABLE_INTEGRITY_CHECKS
+bcdedit -set TESTSIGNING OFF
+```
+
+### Reference
+
+**Enable the Intel 82579V NIC in Windows Server 2012**
+[http://www.ivobeerens.nl/2012/08/08/enable-the-intel-82579v-nic-in-windows-server-2012/](http://www.ivobeerens.nl/2012/08/08/enable-the-intel-82579v-nic-in-windows-server-2012/)
+
+## Join domain (corp.technologytoolbox.com) and rename computer (TEMP)
 
 ```Console
 sconfig
 ```
 
-Interface Description: **Realtek PCIe GBE Family Controller**\
-IP Address: **192.168.10.105**\
-Subnet Mask: **255.255.255.0**\
-Default Gateway: **192.168.10.1**\
-Primary DNS Server: **192.168.10.103**\
-Secondary DNS Server: **192.168.10.104**
-
-## Rename computer
-
-```Console
-sconfig
-```
-
-## Join domain
-
-```Console
-sconfig
-```
-
-## Move computer to "Hyper-V Servers" OU
+## Move computer to "Servers" OU
 
 ---
 
 **FOOBAR8**
 
 ```PowerShell
-$computerName = "FORGE"
-$targetPath = ("OU=Hyper-V Servers,OU=Servers,OU=Resources,OU=IT" `
+$computerName = "TEMP"
+$targetPath = ("OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
@@ -62,10 +106,6 @@ cls
 
 ```PowerShell
 tzutil /s "Mountain Standard Time"
-```
-
-```PowerShell
-cls
 ```
 
 ## # Download PowerShell help files
@@ -123,42 +163,103 @@ cls
 ## # Rename network connections
 
 ```PowerShell
-Get-NetAdapter -InterfaceDescription "Intel(R) Ethernet Connection I217-V" |
+Get-NetAdapter -Physical | select InterfaceDescription
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
+    Rename-NetAdapter -NewName "Management"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
     Rename-NetAdapter -NewName "Production"
 
 Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
     Rename-NetAdapter -NewName "Storage"
-
-Get-NetAdapter -Physical
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Configure static IPv6 address
+## # Configure "Management" network adapter
+
+### # Configure static IPv4 address
 
 ```PowerShell
-$ipAddress = "2601:282:4201:e500::105"
+$ipAddress = "192.168.10.108"
 
 New-NetIPAddress `
-    -InterfaceAlias "Production" `
+    -InterfaceAlias "Management" `
+    -IPAddress $ipAddress `
+    -PrefixLength 24 `
+    -DefaultGateway 192.168.10.1
+
+Set-DNSClientServerAddress `
+    -InterfaceAlias "Management" `
+    -ServerAddresses 192.168.10.104,192.168.10.103
+```
+
+### # Configure static IPv6 address
+
+```PowerShell
+$ipAddress = "2601:282:4201:e500::108"
+
+New-NetIPAddress `
+    -InterfaceAlias "Management" `
     -IPAddress $ipAddress `
     -PrefixLength 64
 
 Set-DNSClientServerAddress `
-    -InterfaceAlias "Production" `
-    -ServerAddresses 2601:282:4201:e500::103,2601:282:4201:e500::104
+    -InterfaceAlias "Management" `
+    -ServerAddresses 2601:282:4201:e500::104,2601:282:4201:e500::103
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Configure iSCSI network adapter
+## # Configure "Management" network adapter
 
 ```PowerShell
-$ipAddress = "10.1.10.105"
+Disable-NetAdapterBinding -Name "Production" `
+    -DisplayName "Client for Microsoft Networks"
+
+Disable-NetAdapterBinding -Name "Production" `
+    -DisplayName "File and Printer Sharing for Microsoft Networks"
+
+Disable-NetAdapterBinding -Name "Production" `
+    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
+
+Disable-NetAdapterBinding -Name "Production" `
+    -DisplayName "Link-Layer Topology Discovery Responder"
+
+$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+    -Filter "NetConnectionId = 'Production'"
+
+$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+```
+
+### # Do not register this connection in DNS
+
+```PowerShell
+$adapterConfig.SetDynamicDNSRegistration($false)
+```
+
+### # Disable NetBIOS over TCP/IP
+
+```PowerShell
+$adapterConfig.SetTcpipNetbios(2)
+```
+
+```PowerShell
+cls
+```
+
+## # Configure "Storage" network adapter
+
+```PowerShell
+$ipAddress = "10.1.10.108"
 
 New-NetIPAddress `
     -InterfaceAlias "Storage" `
@@ -204,6 +305,9 @@ cls
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty -Name "Management" `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
 
 Set-NetAdapterAdvancedProperty -Name "Production" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
@@ -266,6 +370,12 @@ Install-WindowsFeature `
     -Restart
 ```
 
+## # Download PowerShell help files (for Hyper-V cmdlets)
+
+```PowerShell
+Update-Help
+```
+
 ```PowerShell
 cls
 ```
@@ -309,38 +419,564 @@ ping 10.1.10.106 -f -l 8900
 cls
 ```
 
-## # Configure default folder to store VMs
+## # Modify "Production" and "Storage" virtual switches to disallow management OS
 
 ```PowerShell
-mkdir C:\NotBackedUp\VMs
+Get-VMSwitch "Production" |
+    Set-VMSwitch -AllowManagementOS $false
 
-Set-VMHost -VirtualMachinePath C:\NotBackedUp\VMs
+Get-VMSwitch "Storage" |
+    Set-VMSwitch -AllowManagementOS $false
+```
+
+## Configure storage
+
+### Physical disks
+
+<table>
+<tr>
+<td valign='top'>
+<p>Disk</p>
+</td>
+<td valign='top'>
+<p>Description</p>
+</td>
+<td valign='top'>
+<p>Capacity</p>
+</td>
+<td valign='top'>
+<p>Drive Letter</p>
+</td>
+<td valign='top'>
+<p>Volume Size</p>
+</td>
+<td valign='top'>
+<p>Allocation Unit Size</p>
+</td>
+<td valign='top'>
+<p>Volume Label</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>0</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 840 PRO Series<br />
+Serial number: *********03944B</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>1</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 840 Series<br />
+Serial number: *********01728J</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>2</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 850 PRO 128GB<br />
+Serial number: *********03705D</p>
+</td>
+<td valign='top'>
+<p>128 GB</p>
+</td>
+<td valign='top'>
+<p>C:</p>
+</td>
+<td valign='top'>
+<p>119 GB</p>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>3</p>
+</td>
+<td valign='top'>
+<p>Model: Seagate ST1000NM0033-9ZM173<br />
+Serial number: *****4YL</p>
+</td>
+<td valign='top'>
+<p>1 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>4</p>
+</td>
+<td valign='top'>
+<p>Model: Seagate ST1000NM0033-9ZM173<br />
+Serial number: *****EMV</p>
+</td>
+<td valign='top'>
+<p>1 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+</table>
+
+```PowerShell
+Get-PhysicalDisk | select DeviceId, Model, SerialNumber | sort DeviceId
+```
+
+### Storage pools
+
+<table>
+<tr>
+<td valign='top'>
+<p>Name</p>
+</td>
+<td valign='top'>
+<p>Physical disks</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Pool 1</p>
+</td>
+<td valign='top'>
+<p>PhysicalDisk0<br />
+PhysicalDisk1<br />
+PhysicalDisk3<br />
+PhysicalDisk4</p>
+</td>
+</tr>
+</table>
+
+### Virtual disks
+
+| Name   | Layout | Provisioning | Capacity | SSD Tier | HDD Tier | Volume | Volume Label | Write-Back Cache |
+| ------ | ------ | ------------ | -------- | -------- | -------- | ------ | ------------ | ---------------- |
+| Data01 | Mirror | Fixed        | 125 GB   | 125 GB   |          | D:     | Data01       |                  |
+| Data02 | Mirror | Fixed        | 700 GB   | 200 GB   | 500 GB   | E:     | Data02       | 5 GB             |
+| Data03 | Simple | Fixed        | 200 GB   |          | 200 GB   | F:     | Data03       | 1 GB             |
+
+```PowerShell
+cls
+```
+
+### # Create storage pool
+
+```PowerShell
+$storageSubSystemUniqueId = Get-StorageSubSystem `
+    -FriendlyName "Storage Spaces on STORM" | select -ExpandProperty UniqueId
+
+New-StoragePool `
+    -FriendlyName "Pool 1" `
+    -StorageSubSystemUniqueId $storageSubSystemUniqueId `
+    -PhysicalDisks (Get-PhysicalDisk -CanPool $true)
+```
+
+### # Check media type configuration
+
+```PowerShell
+Get-StoragePool "Pool 1" |
+    Get-PhysicalDisk |
+    Sort Size |
+    ft FriendlyName, Size, MediaType, HealthStatus, OperationalStatus -AutoSize
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Configure Live Migration (without Failover Clustering)
-
-### # Configure the server for live migration
+### # Create storage tiers
 
 ```PowerShell
-Enable-VMMigration
+Get-StoragePool "Pool 1" |
+    New-StorageTier -FriendlyName "SSD Tier" -MediaType SSD
 
-Add-VMMigrationNetwork 192.168.10.105
-
-Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
+Get-StoragePool "Pool 1" |
+    New-StorageTier -FriendlyName "HDD Tier" -MediaType HDD
 ```
+
+```PowerShell
+cls
+```
+
+### # Create storage spaces
+
+```PowerShell
+$ssdTier = Get-StorageTier -FriendlyName "SSD Tier"
+
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
+        -FriendlyName "Data01" `
+        -ResiliencySettingName Mirror `
+        -StorageTiers $ssdTier `
+        -StorageTierSizes 125GB
+
+$hddTier = Get-StorageTier -FriendlyName "HDD Tier"
+
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
+        -FriendlyName "Data02" `
+        -ResiliencySettingName Mirror `
+        -StorageTiers $ssdTier,$hddTier `
+        -StorageTierSizes 200GB,500GB `
+        -WriteCacheSize 5GB
+
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
+        -FriendlyName "Data03" `
+        -ResiliencySettingName Simple `
+        -StorageTiers $hddTier `
+        -StorageTierSizes 200GB `
+        -WriteCacheSize 1GB
+```
+
+```PowerShell
+cls
+```
+
+### # Create partitions and volumes
+
+#### # Create volume "D" on Data01
+
+```PowerShell
+Get-VirtualDisk "Data01" | Get-Disk | Set-Disk -IsReadOnly 0
+
+Get-VirtualDisk "Data01"| Get-Disk | Set-Disk -IsOffline 0
+
+Get-VirtualDisk "Data01"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+
+Get-VirtualDisk "Data01"| Get-Disk |
+    New-Partition -DriveLetter "D" -UseMaximumSize
+
+Initialize-Volume `
+    -DriveLetter "D" `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Data01" `
+    -Confirm:$false
+```
+
+#### # Create volume "E" on Data02
+
+```PowerShell
+Get-VirtualDisk "Data02" | Get-Disk | Set-Disk -IsReadOnly 0
+
+Get-VirtualDisk "Data02"| Get-Disk | Set-Disk -IsOffline 0
+
+Get-VirtualDisk "Data02"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+
+Get-VirtualDisk "Data02"| Get-Disk |
+    New-Partition -DriveLetter "E" -UseMaximumSize
+
+Initialize-Volume `
+    -DriveLetter "E" `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Data02" `
+    -Confirm:$false
+```
+
+#### # Create volume "F" on Data03
+
+```PowerShell
+Get-VirtualDisk "Data03" | Get-Disk | Set-Disk -IsReadOnly 0
+
+Get-VirtualDisk "Data03"| Get-Disk | Set-Disk -IsOffline 0
+
+Get-VirtualDisk "Data03"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+
+Get-VirtualDisk "Data03"| Get-Disk |
+    New-Partition -DriveLetter "F" -UseMaximumSize
+
+Initialize-Volume `
+    -DriveLetter "F" `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Data03" `
+    -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+### # Configure "Storage Tiers Optimization" scheduled task to append to log file
+
+```PowerShell
+New-Item -ItemType Directory -Path C:\NotBackedUp\Temp
+
+$logFile = "C:\NotBackedUp\Temp\Storage-Tiers-Optimization.log"
+
+$taskPath = "\Microsoft\Windows\Storage Tiers Management\"
+$taskName = "Storage Tiers Optimization"
+
+$task = Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName
+
+$task.Actions[0].Execute = "%windir%\system32\cmd.exe"
+
+$task.Actions[0].Arguments = `
+    "/C `"%windir%\system32\defrag.exe -c -h -g -# >> $logFile`""
+
+Set-ScheduledTask $task
+```
+
+> **Important**
+>
+> Simply appending ">> {log file}" (as described in the "To change the Storage Tiers Optimization task to save a report (Task Scheduler)" section of the [TechNet article](TechNet article)) did not work. Specifically, when running the task, the log file was not created and the task immediately finished without reporting any error.\
+> Changing the **Program/script** (i.e. the action's **Execute** property) to launch "%windir%\\system32\\defrag.exe" using "%windir%\\system32\\cmd.exe" resolved the issue.
+
+#### Reference
+
+**Save a report when Storage Tiers Optimization runs**\
+From <[https://technet.microsoft.com/en-us/library/dn789160.aspx](https://technet.microsoft.com/en-us/library/dn789160.aspx)>
+
+## Benchmark storage performance
+
+### Benchmark C: (SSD - Samsung 850 Pro 128GB)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/EA8C629095523D0CF0C88B9D6AEB08B729772D0C.png)
+
+### Benchmark D: (Mirror SSD storage space - 2x Samsung 840 512GB)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/FA049D8B5BD2DE10A5174B037923D27E07AF0C3C.png)
+
+### Benchmark E: (Mirror SSD/HDD storage space)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/BFEFC0258A705B18A95939C9EB07CCB1A8075D5F.png)
+
+### Benchmark F: (Simple HDD storage space)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/D4BE461147A604A22BD43FE4B4DDAF2597417688.png)
+
+```PowerShell
+cls
+```
+
+## # Configure VM storage
+
+```PowerShell
+mkdir D:\NotBackedUp\VMs
+mkdir E:\NotBackedUp\VMs
+mkdir F:\NotBackedUp\VMs
+
+Set-VMHost -VirtualMachinePath E:\NotBackedUp\VMs
+```
+
+## Configure Live Migration (without Failover Clustering)
 
 ### Reference
 
 **Configure Live Migration and Migrating Virtual Machines without Failover Clustering**\
 Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://technet.microsoft.com/en-us/library/jj134199.aspx)>
 
+### Configure constrained delegation in Active Directory
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/AD85D8814AE85E1B2E8FC6544B7F10881939535E.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C0/7D57372A9F2C4599B1E8C9C68FED9A6D2D6DD1C0.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/97/A795AEE3AF6234B0FCCDB35A944B7B9C9D7ACA97.png)
+
+Click Add...
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/18818661BC0C359C33EE49E6F3341FAAF867998D.png)
+
+Click Users or Computers...
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/8654E4EB4BCDED7D97C922ACD01D131EE50A9FA9.png)
+
+Click OK.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/014B30411E0CCCA9773E8A8F094CB221AAEEC465.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B2/8ADDCBFE162FE1FEC1348BD0F8E59018BA685DB2.png)
+
+Click OK.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/5C396AC2F25DB666ABDBBA361383898FBAD04F7F.png)
+
+### # Configure the server for live migration
+
+```PowerShell
+Enable-VMMigration
+
+Add-VMMigrationNetwork 192.168.10.108
+
+Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
+```
+
 ```PowerShell
 cls
 ```
+
+## # Clean up the WinSxS folder
+
+```PowerShell
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+```
+
+## # Clean up Windows Update files
+
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```
+
+## Migrate virtual machines to STORM
+
+---
+
+**FOOBAR**
+
+### # Note: BANSHEE was already shutdown
+
+```PowerShell
+Move-VM `
+    -ComputerName ROGUE `
+    -Name BANSHEE `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath E:\NotBackedUp\VMs\BANSHEE
+```
+
+```PowerShell
+cls
+```
+
+### # Note: Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName ROGUE -Name EXT-DC01
+
+Move-VM `
+    -ComputerName ROGUE `
+    -Name EXT-DC01 `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath E:\NotBackedUp\VMs\EXT-DC01
+
+Start-VM -ComputerName STORM -Name EXT-DC01
+```
+
+```PowerShell
+cls
+```
+
+### # Note: Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName ROGUE -Name EXT-SQL01A
+
+Move-VM `
+    -ComputerName ROGUE `
+    -Name EXT-SQL01A `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath E:\NotBackedUp\VMs\EXT-SQL01A
+
+Start-VM -ComputerName STORM -Name EXT-SQL01A
+```
+
+```PowerShell
+cls
+```
+
+### # Note: Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName ROGUE -Name FAB-DC01
+
+Move-VM `
+    -ComputerName ROGUE `
+    -Name FAB-DC01 `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath E:\NotBackedUp\VMs\FAB-DC01
+
+Start-VM -ComputerName STORM -Name FAB-DC01
+```
+
+```PowerShell
+cls
+```
+
+### # Note: FOOBAR was already shutdown
+
+```PowerShell
+Move-VM `
+    -ComputerName ROGUE `
+    -Name FOOBAR `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath E:\NotBackedUp\VMs\FOOBAR
+```
+
+```PowerShell
+cls
+```
+
+### # Note: Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName ROGUE -Name XAVIER1
+
+Move-VM `
+    -ComputerName ROGUE `
+    -Name XAVIER1 `
+    -DestinationHost STORM `
+    -IncludeStorage `
+    -DestinationStoragePath E:\NotBackedUp\VMs\XAVIER1
+
+Start-VM -ComputerName STORM -Name XAVIER1
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Install and configure System Center Operations Manager monitoring agent
 
 ### # Install SCOM agent
 
@@ -400,7 +1036,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the following commands:
 
 ```PowerShell
-$productionServer = "FORGE"
+$productionServer = "STORM"
 
 .\Attach-ProductionServer.ps1 `
     -DPMServerName JUGGERNAUT `
@@ -412,18 +1048,16 @@ $productionServer = "FORGE"
 cls
 ```
 
-## # Clean up the WinSxS folder
+## # Enter a product key and activate Windows
 
 ```PowerShell
-Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+slmgr /ipk {product key}
 ```
 
-## # Clean up Windows Update files
+**Note:** When notified that the product key was set successfully, click **OK**.
 
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```Console
+slmgr /ato
 ```
 
 **TODO:**
