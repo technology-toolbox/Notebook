@@ -1,4 +1,4 @@
-﻿# STORM - Windows Server 2012 R2 Standard
+﻿# ICEMAN (new) - Windows Server 2012 R2 Standard
 
 Monday, January 25, 2016
 2:54 PM
@@ -9,21 +9,84 @@ Monday, January 25, 2016
 
 ## Install Windows Server 2012 R2
 
-## Rename computer and join domain
+## Enable Intel I217-V network adapter
+
+### Issue
+
+After installing Windows Server 2012 R2, the built-in Intel I217-V network adapter on the ASUS P8Z77-V motherboard was not recognized.
+
+### Solution
+
+To enable the Intel I217-V network adapter in Windows Server 2012:
+
+1. To be able to modify the drivers, temporarily disable driver integrity checks and enable test signing by running the following commands:
+2. Reboot the server.
+3. Download the network drivers from the Intel website:\
+   **Network Adapter Driver for Windows Server 2012 R2**\
+   [https://downloadcenter.intel.com/download/23073/Network-Adapter-Driver-for-Windows-Server-2012-R2](https://downloadcenter.intel.com/download/23073/Network-Adapter-Driver-for-Windows-Server-2012-R2)-
+4. Use WinZip to extract the contents of the download (PROWin64.exe) to a temporary folder on a USB thumb drive (e.g. \\NotBackedUp\\Temp\\Drivers\\LAN).
+5. Copy the driver files to a temporary location on the server:
+6. Open the **e1d64x64.inf** file in Notepad:
+7. In the **[ControlFlags]** section delete the following three lines:
+8. In the **[Intel.NTamd64.6.3.1]** section, select and copy the three **%E153BNC** lines.
+9. Paste the copied lines into the **[Intel.NTamd64.6.3]** section below the **%E153ANC** lines.
+10. Save the file.
+11. Install the network adapter driver:
+12. Enable driver integrity checks and disable test signing by running the following commands:
+13. Reboot the server.
+
+```Console
+    bcdedit -set loadoptions DISABLE_INTEGRITY_CHECKS
+bcdedit -set TESTSIGNING ON
+```
+
+```Console
+     
+robocopy E:\NotBackedUp\Temp\Drivers\LAN C:\NotBackedUp\Temp\Drivers\LAN /E
+```
+
+```Console
+     
+Notepad.exe C:\NotBackedUp\Temp\Drivers\LAN\PRO1000\Winx64\NDIS64\e1d64x64.inf
+```
+
+```Text
+    ExcludeFromSelect = \
+        PCI\VEN_8086&DEV_153A,\
+        PCI\VEN_8086&DEV_153B
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\LAN\PRO1000\Winx64\NDIS64\e1d64x64.inf
+```
+
+When prompted with **Windows can't verify the publisher of this driver software**, click **Install this driver software anyway**.
+
+```Console
+    bcdedit -set loadoptions ENABLE_INTEGRITY_CHECKS
+bcdedit -set TESTSIGNING OFF
+```
+
+### Reference
+
+**Enable the Intel 82579V NIC in Windows Server 2012**
+[http://www.ivobeerens.nl/2012/08/08/enable-the-intel-82579v-nic-in-windows-server-2012/](http://www.ivobeerens.nl/2012/08/08/enable-the-intel-82579v-nic-in-windows-server-2012/)
+
+## Join domain (corp.technologytoolbox.com) and rename computer (TEMP)
 
 ```Console
 sconfig
 ```
 
-## Move computer to "Hyper-V Servers" OU
+## Move computer to "Servers" OU
 
 ---
 
 **FOOBAR8**
 
 ```PowerShell
-$computerName = "STORM"
-$targetPath = ("OU=Hyper-V Servers,OU=Servers,OU=Resources,OU=IT" `
+$computerName = "TEMP"
+$targetPath = ("OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
@@ -31,7 +94,11 @@ Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 
 ---
 
-```PowerShell
+```Console
+PowerShell
+```
+
+```Console
 cls
 ```
 
@@ -458,11 +525,11 @@ Serial number: *********03705D</p>
 <p>3</p>
 </td>
 <td valign='top'>
-<p>Model: ST2000DM001-1CH164<br />
-Serial number: *****VCX</p>
+<p>Model: Seagate ST1000NM0033-9ZM173<br />
+Serial number: *****4YL</p>
 </td>
 <td valign='top'>
-<p>2 TB</p>
+<p>1 TB</p>
 </td>
 <td valign='top'>
 </td>
@@ -478,11 +545,11 @@ Serial number: *****VCX</p>
 <p>4</p>
 </td>
 <td valign='top'>
-<p>Model: Samsung ST2000DM001-1CH164<br />
-Serial number: *****LEV</p>
+<p>Model: Seagate ST1000NM0033-9ZM173<br />
+Serial number: *****EMV</p>
 </td>
 <td valign='top'>
-<p>2 TB</p>
+<p>1 TB</p>
 </td>
 <td valign='top'>
 </td>
@@ -710,15 +777,15 @@ From <[https://technet.microsoft.com/en-us/library/dn789160.aspx](https://techne
 
 ### Benchmark D: (Mirror SSD storage space - 2x Samsung 840 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/C62D094E8D808DA8A6A4C19DF9A9BCB296B1ACBB.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/FA049D8B5BD2DE10A5174B037923D27E07AF0C3C.png)
 
 ### Benchmark E: (Mirror SSD/HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/1A62DB4634FC7C53E954710813F8F2638633037E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/BFEFC0258A705B18A95939C9EB07CCB1A8075D5F.png)
 
 ### Benchmark F: (Simple HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BA/C9D0DDA5BF5CCD896D6C225DF7BDE878A40CA9BA.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/D4BE461147A604A22BD43FE4B4DDAF2597417688.png)
 
 ```PowerShell
 cls
@@ -809,7 +876,7 @@ Move-VM `
     -Name BANSHEE `
     -DestinationHost STORM `
     -IncludeStorage `
-    -DestinationStoragePath F:\NotBackedUp\VMs\BANSHEE
+    -DestinationStoragePath E:\NotBackedUp\VMs\BANSHEE
 ```
 
 ```PowerShell
@@ -826,7 +893,7 @@ Move-VM `
     -Name EXT-DC01 `
     -DestinationHost STORM `
     -IncludeStorage `
-    -DestinationStoragePath F:\NotBackedUp\VMs\EXT-DC01
+    -DestinationStoragePath E:\NotBackedUp\VMs\EXT-DC01
 
 Start-VM -ComputerName STORM -Name EXT-DC01
 ```
@@ -845,7 +912,7 @@ Move-VM `
     -Name EXT-SQL01A `
     -DestinationHost STORM `
     -IncludeStorage `
-    -DestinationStoragePath F:\NotBackedUp\VMs\EXT-SQL01A
+    -DestinationStoragePath E:\NotBackedUp\VMs\EXT-SQL01A
 
 Start-VM -ComputerName STORM -Name EXT-SQL01A
 ```
@@ -864,7 +931,7 @@ Move-VM `
     -Name FAB-DC01 `
     -DestinationHost STORM `
     -IncludeStorage `
-    -DestinationStoragePath F:\NotBackedUp\VMs\FAB-DC01
+    -DestinationStoragePath E:\NotBackedUp\VMs\FAB-DC01
 
 Start-VM -ComputerName STORM -Name FAB-DC01
 ```
@@ -881,7 +948,7 @@ Move-VM `
     -Name FOOBAR `
     -DestinationHost STORM `
     -IncludeStorage `
-    -DestinationStoragePath F:\NotBackedUp\VMs\FOOBAR
+    -DestinationStoragePath E:\NotBackedUp\VMs\FOOBAR
 ```
 
 ```PowerShell
@@ -898,7 +965,7 @@ Move-VM `
     -Name XAVIER1 `
     -DestinationHost STORM `
     -IncludeStorage `
-    -DestinationStoragePath F:\NotBackedUp\VMs\XAVIER1
+    -DestinationStoragePath E:\NotBackedUp\VMs\XAVIER1
 
 Start-VM -ComputerName STORM -Name XAVIER1
 ```
