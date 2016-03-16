@@ -1,4 +1,4 @@
-﻿# ICEMAN - Windows Server 2012 R2 Standard
+﻿# ANGEL (originally ICEMAN) - Windows Server 2012 R2 Standard
 
 Sunday, December 29, 2013
 2:11 PM
@@ -671,7 +671,7 @@ $command = "New-NetFirewallRule ``
     -Profile Domain ``
     -Action Allow"
 
-$scriptBlock = [scriptblock]::Create($command)
+$scriptBlock = [ScriptBlock]::Create($command)
 
 Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
@@ -688,4 +688,154 @@ New-SmbShare `
   -Path D:\Shares\Archive `
   -CachingMode None `
   -ChangeAccess Everyone
+```
+
+```PowerShell
+cls
+```
+
+## # Rename network connections
+
+```PowerShell
+Get-NetAdapter -Physical | select InterfaceDescription
+
+Get-NetAdapter `
+    -InterfaceDescription "Realtek PCIe GBE Family Controller" |
+    Rename-NetAdapter -NewName "Management"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+    Rename-NetAdapter -NewName "Storage"
+
+Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Production"
+```
+
+```PowerShell
+cls
+```
+
+## # Enable SMB Multichannel
+
+### # Modify "Production" virtual switch to allow management OS
+
+```PowerShell
+Get-VMSwitch "Production" |
+    Set-VMSwitch -AllowManagementOS $true
+```
+
+```PowerShell
+cls
+```
+
+## # Change IP addresses and rename server (before renaming TEMP to ICEMAN)
+
+### # Change static IPv4 addresses for "Management" and "Storage" network adapters
+
+```PowerShell
+sconfig
+```
+
+> **Note**
+>
+> New "Management" IP address: **192.168.10.199**\
+> New "Storage" IP address: **10.1.10.199**
+
+### # Change static IPv6 address for "Management" network adapter
+
+```PowerShell
+$oldIpAddress = "2601:282:4201:e500::106"
+$newIpAddress = "2601:282:4201:e500::199"
+$ifIndex = Get-NetAdapter -InterfaceAlias "Management" |
+    Select -ExpandProperty InterfaceIndex
+
+New-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $newIpAddress
+
+Remove-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $oldIpAddress
+```
+
+```PowerShell
+cls
+```
+
+### # Rename server
+
+```PowerShell
+sconfig
+```
+
+> **Note**
+>
+> New server name: **ICEMAN-OLD**
+
+```PowerShell
+Restart-Server
+```
+
+## # Change IP addresses and rename server (after renaming TEMP to ICEMAN)
+
+### # Change static IPv4 addresses for "Management" and "Storage" network adapters
+
+```PowerShell
+sconfig
+```
+
+> **Note**
+>
+> New "Management" IP address: **192.168.10.107**\
+> New "Storage" IP address: **10.1.10.107**
+
+```PowerShell
+cls
+```
+
+### # Change static IPv6 address for "Management" network adapter
+
+```PowerShell
+$oldIpAddress = "2601:282:4201:e500::199"
+$newIpAddress = "2601:282:4201:e500::107"
+$ifIndex = Get-NetAdapter -InterfaceAlias "Management" |
+    Select -ExpandProperty InterfaceIndex
+
+New-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $newIpAddress
+
+Remove-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $oldIpAddress
+```
+
+```PowerShell
+cls
+```
+
+### # Rename server
+
+```PowerShell
+sconfig
+```
+
+> **Note**
+>
+> New server name: **ANGEL**
+
+```PowerShell
+Restart-Server
+```
+
+## # Remove iSCSI Target feature
+
+```PowerShell
+Uninstall-WindowsFeature FS-iSCSITarget-Server -IncludeManagementTools
+```
+
+## # Remove DHCP feature
+
+```PowerShell
+Uninstall-WindowsFeature DHCP -IncludeManagementTools -Restart
 ```
