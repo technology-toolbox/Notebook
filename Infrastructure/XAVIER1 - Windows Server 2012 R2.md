@@ -509,3 +509,29 @@ Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
 
 ---
+
+## Resolve issue with Get-SmbDelegation cmdlet
+
+### Issue
+
+```Text
+PS C:\Windows\system32> Get-SmbDelegation -SmbServer ICEMAN
+CheckDelegationPrerequisites : SMB Delegation cmdlets require the Active Directory forest to be in Windows Server 2012 forest functional level.
+At C:\windows\system32\windowspowershell\v1.0\Modules\SmbShare\SmbScriptModule.psm1:72 char:14
++     $check = CheckDelegationPrerequisites
++              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
+    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,CheckDelegationPrerequisites
+```
+
+### Solution
+
+#### Raise domain functional level
+
+Current domain functional level: **Windows Server 2008 R2**\
+New domain functional level:  **Windows Server 2012**
+
+#### Raise forest functional level
+
+Current forest functional level: **Windows Server 2008 R2**\
+New forest functional level:  **Windows Server 2012**
