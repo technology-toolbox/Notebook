@@ -1,7 +1,7 @@
 ﻿# WIN7-TEST2 - Windows 7 Ultimate (x64)
 
-Monday, October 19, 2015
-5:00 AM
+Monday, March 21, 2016
+7:23 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,32 +9,39 @@ Monday, October 19, 2015
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
-### # Create virtual machine (WIN7-TEST2)
+### # Create virtual machine
 
 ```PowerShell
+$vmHost = "STORM"
 $vmName = "WIN7-TEST2"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
+    -ComputerName $vmHost `
     -Name $vmName `
     -Path C:\NotBackedUp\VMs `
     -NewVHDPath $vhdPath `
-    -NewVHDSizeBytes 25GB `
+    -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+    -SwitchName "Production"
 
-Set-VMMemory `
+Set-VM `
+    -ComputerName $vmHost `
     -VMName $vmName `
-    -DynamicMemoryEnabled $true `
-    -MinimumBytes 256MB `
-    -MaximumBytes 4GB
+    -ProcessorCount 2 `
+    -DynamicMemory `
+    -MemoryMinimumBytes 512MB `
+    -MemoryMaximumBytes 4GB
 
-Set-VMDvdDrive -VMName $vmName -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
+Set-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
 
-Start-VM $vmName
+Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
@@ -51,8 +58,8 @@ Start-VM $vmName
     - Google
       - **Chrome**
     - Mozilla
-      - **Firefox 40.0.2**
-      - **Thunderbird 38.2.0**
+      - **Firefox 45.0.1**
+      - **Thunderbird 38.7.0**
   - Click **Next**.
 
 ```PowerShell
@@ -62,24 +69,42 @@ cls
 ## # Rename local Administrator account and set password
 
 ```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted, type the password for the local Administrator account.
+
+```PowerShell
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
 $adminUser = [ADSI] 'WinNT://./Administrator,User'
 $adminUser.Rename('foo')
-$adminUser.SetPassword('{password}')
+$adminUser.SetPassword($plainPassword)
 
 logoff
 ```
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ## # Remove disk from virtual CD/DVD drive
 
 ```PowerShell
-Set-VMDvdDrive -VMName WIN7-TEST2 -Path $null
+$vmHost = "STORM"
+$vmName = "WIN7-TEST2"
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 ```
 
 ---
+
+## Login as WIN7-TEST2\\foo
 
 ```PowerShell
 cls
@@ -150,6 +175,13 @@ net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
 & '\\ICEMAN\Public\Download\Microsoft\Remote Server Administration Tools for Windows 7 SP1\Windows6.1-KB958830-x64-RefreshPkg.msu'
 ```
 
+## Enable feature to add "netdom" command-line tool
+
+- **Remote Server Administration Tools**
+  - **AD DS and AD LDA Tools**
+    - **AD DS Tools**
+      - **AD DS Snap-ins and Command-line Tools**
+
 ```PowerShell
 cls
 ```
@@ -162,13 +194,15 @@ cls
 
 ## Install updates using Windows Update
 
-**Note:** Repeat until there are no updates available for the computer.
+> **Note**
+>
+> Repeat until there are no updates available for the computer.
 
 ```PowerShell
 cls
 ```
 
-## # Delete C:\\Windows\\SoftwareDistribution folder (1.02 GB)
+## # Delete C:\\Windows\\SoftwareDistribution folder
 
 ```PowerShell
 Stop-Service wuauserv
@@ -186,18 +220,15 @@ cls
 slmgr /ipk {product key}
 ```
 
-**Note:** When notified that the product key was set successfully, click **OK**.
+> **Note**
+>
+> When notified that the product key was set successfully, click **OK**.
 
 ```Console
 slmgr /ato
 ```
 
-## Activate Microsoft Office
-
-1. Start Word 2013
-2. Enter product key
-
-```PowerShell
+```Console
 cls
 ```
 
@@ -213,9 +244,15 @@ Windows 7 Ultimate (x64)\
 Microsoft Office Professional Plus 2013 (x86)\
 Adobe Reader 8.3.1\
 Google Chrome\
-Mozilla Firefox 40.0.2\
-Mozilla Thunderbird 38.2.0\
+Mozilla Firefox 45.0.1\
+Mozilla Thunderbird 38.7.0\
 Remote Server Administration Tools for Windows 7 SP1\
 Microsoft Security Essentials\
-Activate Microsoft Office\
 Internet Explorer 10
+
+**TODO:**
+
+## Activate Microsoft Office
+
+1. Start Word 2013
+2. Enter product key
