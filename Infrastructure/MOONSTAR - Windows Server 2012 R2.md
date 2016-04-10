@@ -391,3 +391,96 @@ Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
 
 ---
+
+## Configure file shares in VMM
+
+---
+
+**FOOBAR8**
+
+### # Create "VMM - Management" service account
+
+```PowerShell
+$displayName = "Service account for Virtual Machine Manager - Management"
+$defaultUserName = "s-vmm-management"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+```PowerShell
+cls
+```
+
+### # Add "VMM - Management" service account to Administrators group on Hyper-V servers
+
+```PowerShell
+$command = "net localgroup Administrators TECHTOOLBOX\s-vmm-management /ADD"
+
+$scriptBlock = [scriptblock]::Create($command)
+
+Get-SCVMHost |
+    ForEach-Object {
+        Invoke-Command -ComputerName $_.ComputerName -ScriptBlock $scriptBlock
+    }
+```
+
+```PowerShell
+cls
+```
+
+### # Create Run As Account in VMM
+
+```PowerShell
+$cred = Get-Credential -Message $displayName -UserName "TECHTOOLBOX\s-vmm-management"
+
+New-SCRunAsAccount -Credential $cred -Name $displayName
+```
+
+```PowerShell
+cls
+```
+
+### # Set Host Access Account on Hyper-V hosts
+
+```PowerShell
+$hostManagementAccount = Get-SCRunAsAccount -Name $displayName
+
+Get-SCVMHost |
+    ForEach-Object {
+        Set-SCVMHost -VMHost $_ -VMHostManagementCredential $hostManagementAccount
+    }
+```
+
+```PowerShell
+cls
+```
+
+### # Add files shares to Hyper-V hosts
+
+```PowerShell
+@("VM-Storage-Gold", "VM-Storage-Silver", "VM-Storage-Bronze") |
+    ForEach-Object {
+        $fileShare = Get-SCStorageFileShare -Name $_
+
+        Get-SCVMHost |
+            ForEach-Object {
+                Register-SCStorageFileShare -StorageFileShare $fileShare -VMHost $_
+            }
+    }
+```
+
+---
