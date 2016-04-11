@@ -839,3 +839,20 @@ Uninstall-WindowsFeature FS-iSCSITarget-Server -IncludeManagementTools
 ```PowerShell
 Uninstall-WindowsFeature DHCP -IncludeManagementTools -Restart
 ```
+
+## # Configure NIC teaming
+
+```PowerShell
+Get-NetAdapter -Physical
+
+Get-NetIPAddress | select InterfaceIndex, InterfaceAlias, IPAddress | sort InterfaceIndex
+```
+
+### # Disconnect virtual switches from network adapters
+
+```PowerShell
+Get-VMSwitch | Set-VMSwitch -AllowManagementOS:$false
+
+Get-VMSwitch | Set-VMSwitch -SwitchType Private
+```
+

@@ -1060,4 +1060,296 @@ Move-VMStorage `
 
 ---
 
+## # Configure NIC teaming
+
+```PowerShell
+Get-NetAdapter -Physical
+
+Get-NetIPAddress | select InterfaceIndex, InterfaceAlias, IPAddress | sort InterfaceIndex
+```
+
+```PowerShell
+cls
+```
+
+### # Rename network connections
+
+```PowerShell
+Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+    Rename-NetAdapter -NewName "Ethernet"
+
+Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Ethernet 2"
+
+Get-NetAdapter -InterfaceDescription "Realtek PCIe GBE Family Controller" |
+    Rename-NetAdapter -NewName "Storage"
+```
+
+```PowerShell
+cls
+```
+
+### # Configure "Ethernet" network adapter
+
+```PowerShell
+$interfaceAlias = "Ethernet"
+```
+
+#### # Remove static IP addresses
+
+```PowerShell
+Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
+```
+
+#### # Enable DHCP
+
+```PowerShell
+@("IPv4", "IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Disabled")
+    {
+        # Remove existing gateway
+        If (($interface | Get-NetIPConfiguration).Ipv4DefaultGateway)
+        {
+            $interface | Remove-NetRoute -Confirm:$false
+        }
+
+        # Enable DHCP
+        $interface | Set-NetIPInterface -DHCP Enabled
+
+        # Configure the  DNS Servers automatically
+        $interface | Set-DnsClientServerAddress -ResetServerAddresses
+    }
+}
+
+ipconfig /renew
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure network adapter properties
+
+```PowerShell
+Enable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "Client for Microsoft Networks"
+
+Enable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "File and Printer Sharing for Microsoft Networks"
+
+Enable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
+
+Enable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "Link-Layer Topology Discovery Responder"
+
+$adapter = Get-WmiObject `
+    -Class "Win32_NetworkAdapter" `
+    -Filter ("NetConnectionId = '" + $interfaceAlias + "'")
+
+$adapterConfig = Get-WmiObject `
+    -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+
+# Register this connection in DNS
+$adapterConfig.SetDynamicDNSRegistration($true)
+
+# Use NetBIOS setting from the DHCP server
+$adapterConfig.SetTcpipNetbios(0)
+```
+
+```PowerShell
+cls
+```
+
+### # Configure "Ethernet 2" network adapter
+
+```PowerShell
+$interfaceAlias = "Ethernet 2"
+```
+
+#### # Remove static IP addresses
+
+```PowerShell
+Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
+```
+
+#### # Enable DHCP
+
+```PowerShell
+@("IPv4", "IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Disabled")
+    {
+        # Remove existing gateway
+        If (($interface | Get-NetIPConfiguration).Ipv4DefaultGateway)
+        {
+            $interface | Remove-NetRoute -Confirm:$false
+        }
+
+        # Enable DHCP
+        $interface | Set-NetIPInterface -DHCP Enabled
+
+        # Configure the  DNS Servers automatically
+        $interface | Set-DnsClientServerAddress -ResetServerAddresses
+    }
+}
+
+ipconfig /renew
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure network adapter properties
+
+```PowerShell
+Enable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "Client for Microsoft Networks"
+
+Enable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "File and Printer Sharing for Microsoft Networks"
+
+Enable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
+
+Enable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "Link-Layer Topology Discovery Responder"
+
+$adapter = Get-WmiObject `
+    -Class "Win32_NetworkAdapter" `
+    -Filter ("NetConnectionId = '" + $interfaceAlias + "'")
+
+$adapterConfig = Get-WmiObject `
+    -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+
+# Register this connection in DNS
+$adapterConfig.SetDynamicDNSRegistration($true)
+
+# Use NetBIOS setting from the DHCP server
+$adapterConfig.SetTcpipNetbios(0)
+```
+
+```PowerShell
+cls
+```
+
+### # Configure "Storage" network adapter
+
+```PowerShell
+$interfaceAlias = "Storage"
+```
+
+#### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "10.1.10.106"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+```
+
+#### # Configure network adapter properties
+
+```PowerShell
+Disable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "Client for Microsoft Networks"
+
+Disable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "File and Printer Sharing for Microsoft Networks"
+
+Disable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
+
+Disable-NetAdapterBinding `
+    -Name $interfaceAlias `
+    -DisplayName "Link-Layer Topology Discovery Responder"
+
+$adapter = Get-WmiObject `
+    -Class "Win32_NetworkAdapter" `
+    -Filter ("NetConnectionId = '" + $interfaceAlias + "'")
+
+$adapterConfig = Get-WmiObject `
+    -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+
+# Do not register this connection in DNS
+$adapterConfig.SetDynamicDNSRegistration($false)
+
+# Disable NetBIOS over TCP/IP
+$adapterConfig.SetTcpipNetbios(2)
+```
+
+```PowerShell
+cls
+```
+
+### # Create and configure NIC team
+
+#### # Create NIC team
+
+```PowerShell
+$interfaceAlias = "Production"
+
+New-NetLbfoTeam -Name $interfaceAlias -TeamMembers "Ethernet", "Ethernet 2"
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "192.168.10.106"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24 `
+    -DefaultGateway 192.168.10.1
+
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.103,192.168.10.104
+```
+
+#### # Configure static IPv6 address
+
+```PowerShell
+$ipAddress = "2601:282:4201:e500::106"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress
+
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 2601:282:4201:e500::103, 2601:282:4201:e500::104
+```
+
 **TODO:**
