@@ -1066,12 +1066,9 @@ Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
     If ($interface.Dhcp -eq "Disabled")
     {
         # Remove existing gateway
-        If (($interface | Get-NetIPConfiguration).Ipv4DefaultGateway)
-        {
-            $interface | Remove-NetRoute -Confirm:$false
-        }
+        $ipConfig = $interface | Get-NetIPConfiguration
 
-        If (($interface | Get-NetIPConfiguration).Ipv6DefaultGateway)
+        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
         {
             $interface | Remove-NetRoute -Confirm:$false
         }
@@ -1347,6 +1344,68 @@ Set-NetAdapterAdvancedProperty `
 
 ping ICEMAN -f -l 8900
 ping 10.1.10.106 -f -l 8900
+```
+
+## Swap "Production" Team NIC
+
+> **Note**
+>
+> Port statistics on Netgear GS724T show a high number of **Packets received with Errors** on port **g15** (i.e. **Intel 82579LM**) -- so disconnect the motherboard network adapter and replace it with an Intel Gigabit CT Desktop Adapter.
+
+```PowerShell
+Get-NetAdapter -Physical
+```
+
+### # Rename network connections
+
+```PowerShell
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
+        Rename-NetAdapter -NewName "Questionable NIC"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+        Rename-NetAdapter -NewName "Ethernet 2"
+```
+
+```PowerShell
+cls
+```
+
+### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty -Name "Ethernet 2" `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
+```
+
+```PowerShell
+cls
+```
+
+### # Replace NIC team member
+
+#### # Remove "bad" NIC
+
+```PowerShell
+$interfaceAlias = "Production"
+
+Get-NetLbfoTeam -Name $interfaceAlias |
+    Get-NetLbfoTeamMember |
+    ? { $_.Name -eq "Questionable NIC" } |
+    Remove-NetLbfoTeamMember
+```
+
+```PowerShell
+cls
+```
+
+#### # Add replacement NIC to team
+
+```PowerShell
+Add-NetLbfoTeamMember -Name "Ethernet 2" -Team $interfaceAlias
 ```
 
 **TODO:**

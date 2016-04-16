@@ -1113,7 +1113,9 @@ Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
     If ($interface.Dhcp -eq "Disabled")
     {
         # Remove existing gateway
-        If (($interface | Get-NetIPConfiguration).Ipv4DefaultGateway)
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
         {
             $interface | Remove-NetRoute -Confirm:$false
         }
@@ -1350,6 +1352,17 @@ New-NetIPAddress `
 Set-DNSClientServerAddress `
     -InterfaceAlias $interfaceAlias `
     -ServerAddresses 2601:282:4201:e500::103, 2601:282:4201:e500::104
+```
+
+```PowerShell
+cls
+```
+
+#### # Validate network connections
+
+```PowerShell
+ping ANGEL -f -l 8900
+ping 10.1.10.107 -f -l 8900
 ```
 
 **TODO:**
