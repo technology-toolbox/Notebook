@@ -3,55 +3,208 @@
 Friday, January 31, 2014
 9:01 AM
 
-```Console
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
 
-## # Create virtual machine
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+### # Create virtual machine
 
 ```PowerShell
+$vmHost = "STORM"
 $vmName = "EXT-WEB01B"
 
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
 New-VM `
+    -ComputerName $vmHost `
     -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
+    -Path E:\NotBackedUp\VMs `
+    -NewVHDPath $vhdPath `
+    -NewVHDSizeBytes 40GB `
     -MemoryStartupBytes 4GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+    -SwitchName "Production"
 
-Set-VMProcessor -VMName $vmName -Count 4
+Set-VM `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ProcessorCount 4
 
-$sysPrepedImage = "\\ICEMAN\VHD Library\WS2008-R2-STD.vhdx"
+Set-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
 
-mkdir "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
-
-Copy-Item $sysPrepedImage $vhdPath
-
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
-
-Start-VM $vmName
+Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
-## # Rename the server and join domain
+---
+
+## Install custom Windows Server 2008 R2 image
+
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- On the **Task Sequence** step, select **Windows Server 2008 R2** and click **Next**.
+- On the **Computer Details** step:
+  - In the **Computer name** box, type **EXT-WEB01B**.
+  - Select **Join a workgroup**.
+  - In the **Workgroup **box, type **WORKGROUP**.
+  - Click **Next**.
+- On the **Applications** step:
+  - Select the following items:
+    - Adobe
+      - **Adobe Reader 8.3.1**
+    - Google
+      - **Chrome**
+  - Click **Next**.
 
 ```PowerShell
-# Note: Rename-Computer is not available on Windows Server 2008 R2
-netdom renamecomputer $env:COMPUTERNAME /newname:EXT-WEB01B /reboot
+cls
+```
 
-# Note: "-Restart" parameter is not available on Windows Server 2008 R2
-# Note: "-Credential" parameter must be specified to avoid error
+## # Rename local Administrator account and set password
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted, type the password for the local Administrator account.
+
+```PowerShell
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword($plainPassword)
+
+logoff
+```
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+## # Remove disk from virtual CD/DVD drive
+
+```PowerShell
+$vmHost = "STORM"
+$vmName = "EXT-WEB01B"
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+---
+
+## Login as EXT-WEB01B\\foo
+
+## # Rename network connection
+
+# **Note:** Get-NetAdapter is not available on Windows Server 2008 R2
+
+```Console
+netsh interface show interface
+
+netsh interface set interface name="Local Area Connection" newname="Production"
+```
+
+```Console
+cls
+```
+
+## # Configure "Production" network adapter
+
+```PowerShell
+$interfaceAlias = "Production"
+```
+
+### # Configure IPv4 DNS servers
+
+# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv4 set dnsserver name=$interfaceAlias source=static address=192.168.10.209
+
+netsh interface ipv4 add dnsserver name=$interfaceAlias address=192.168.10.210
+```
+
+### # Configure IPv6 DNS servers
+
+# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=2601:282:4201:e500::209
+
+netsh interface ipv6 add dnsserver name=$interfaceAlias address=2601:282:4201:e500::210
+```
+
+## Enable jumbo frames
+
+**Note:** Get-NetAdapterAdvancedProperty is not available on Windows Server 2008 R2
+
+1. Open **Network and Sharing Center**.
+2. In the **Network and Sharing Center **window, click **Production**.
+3. In the **Production Status** window, click **Properties**.
+4. In the **Production Properties** window, on the **Networking** tab, click **Configure**.
+5. In the **Microsoft Virtual Machine Bus Network Adapter Properties** window:
+   1. On the **Advanced **tab:
+      1. In the **Property** list, select **Jumbo Packet**.
+      2. In the **Value** dropdown, select **9014 Bytes**.
+   2. Click **OK**.
+6. Repeat the previous steps for the **Storage** network adapter.
+
+```Console
+netsh interface ipv4 show interface
+
+Idx     Met         MTU          State                Name
+---  ----------  ----------  ------------  ---------------------------
+  1          50  4294967295  connected     Loopback Pseudo-Interface 1
+ 11           5        9000  connected     Production
+
+ping ICEMAN -f -l 8900
+```
+
+```Console
+cls
+```
+
+## # Join domain
+
+# **Note:**\
+# "-Restart" parameter is not available on Windows Server 2008 R2\
+# "-Credential" parameter must be specified to avoid error
+
+```PowerShell
 Add-Computer `
-    -DomainName extranet.technologytoolbox.com `-Credential EXTRANET\jjameson-admin
+    -DomainName extranet.technologytoolbox.com `
+    -Credential EXTRANET\jjameson-admin
 
 Restart-Computer
 ```
 
-## # Change drive letter for DVD-ROM
+## Login as EXTRANET\\jjameson-admin
 
-### # To change the drive letter for the DVD-ROM using PowerShell
+```PowerShell
+cls
+```
+
+## # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
+```
+
+## # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -65,10 +218,64 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-## # Reset WSUS configuration
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
 
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\WSUS\Reset WSUS for SysPrep Image.cmd'
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv4-In)" profile=any `
+    new enable=yes
+
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv6-In)" profile=any `
+    new enable=yes
+
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (SMB-In)" profile=any new enable=yes
+
+netsh advfirewall firewall add rule `
+    name="Remote Windows Update (Dynamic RPC)" `
+    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
+    program="%windir%\system32\dllhost.exe" `
+    dir=in `
+    protocol=TCP `
+    localport=RPC `
+    profile=domain `
+    action=Allow
+```
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+netsh advfirewall firewall set rule `
+    name="Remote Windows Update (Dynamic RPC)" new enable=no
+```
+
+**TODO:**
+
+**TODO:**
+
+## # Change drive letter for DVD-ROM
+
+```PowerShell
+$cdrom = Get-WmiObject -Class Win32_CDROMDrive
+$driveLetter = $cdrom.Drive
+
+$volumeId = mountvol $driveLetter /L
+$volumeId = $volumeId.Trim()
+
+mountvol $driveLetter /D
+
+mountvol X: $volumeId
 ```
 
 ## # Add disks for SharePoint storage (Data01 and Log01)
@@ -399,21 +606,21 @@ cls
 
 ### Alert
 
-_Source: VSS_\
-_Event ID: 8193_\
-_Event Category: 0_\
-_User: N/A_\
-_Computer: EXT-WEB01B.extranet.technologytoolbox.com_\
-_Event Description: Volume Shadow Copy Service error: Unexpected error calling routine RegOpenKeyExW(-2147483646,SYSTEM\\CurrentControlSet\\Services\\VSS\\Diag,...). hr = 0x80070005, Access is denied._\
-_._
+Source: VSS\
+Event ID: 8193\
+Event Category: 0\
+User: N/A\
+Computer: EXT-WEB01B.extranet.technologytoolbox.com\
+Event Description: Volume Shadow Copy Service error: Unexpected error calling routine RegOpenKeyExW(-2147483646,SYSTEM\\CurrentControlSet\\Services\\VSS\\Diag,...). hr = 0x80070005, Access is denied.\
+.
 
-_Operation:_\
-_Initializing Writer_
+Operation:\
+Initializing Writer
 
-_Context:_\
-_Writer Class Id: {0ff1ce14-0201-0000-0000-000000000000}_\
-_Writer Name: OSearch14 VSS Writer_\
-_Writer Instance ID: {ebc9810a-18ae-4f9e-ad6f-f3802faf1dd8}_
+Context:\
+Writer Class Id: {0ff1ce14-0201-0000-0000-000000000000}\
+Writer Name: OSearch14 VSS Writer\
+Writer Instance ID: {ebc9810a-18ae-4f9e-ad6f-f3802faf1dd8}
 
 ### Solution
 

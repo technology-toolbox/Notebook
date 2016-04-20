@@ -1,52 +1,307 @@
 ﻿# EXT-APP01A - Windows Server 2008 R2 Standard
 
-Friday, January 31, 2014
-9:01 AM
+Sunday, April 17, 2016
+5:16 AM
 
-```Console
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
 
-## # Create virtual machine
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+### # Create virtual machine
 
 ```PowerShell
+$vmHost = "BEAST"
 $vmName = "EXT-APP01A"
 
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
 New-VM `
+    -ComputerName $vmHost `
     -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
+    -Path E:\NotBackedUp\VMs `
+    -NewVHDPath $vhdPath `
+    -NewVHDSizeBytes 40GB `
     -MemoryStartupBytes 4GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+    -SwitchName "Production"
 
-Set-VMProcessor -VMName $vmName -Count 4
+Set-VM `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ProcessorCount 4
 
-$sysPrepedImage = "\\ICEMAN\VHD Library\WS2008-R2-STD.vhdx"
+Set-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
 
-mkdir "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
+# Add network adapter for iSCSI (Storage)
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+Add-VMNetworkAdapter `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -SwitchName "Storage"
 
-Copy-Item $sysPrepedImage $vhdPath
-
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
-
-Start-VM $vmName
+Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
-## # Rename the server and join domain
+---
+
+## Install custom Windows Server 2008 R2 image
+
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- On the **Task Sequence** step, select **Windows Server 2008 R2** and click **Next**.
+- On the **Computer Details** step:
+  - In the **Computer name** box, type **EXT-APP01A**.
+  - Select **Join a workgroup**.
+  - In the **Workgroup **box, type **WORKGROUP**.
+  - Click **Next**.
+- On the **Applications** step:
+  - Select the following items:
+    - Adobe
+      - **Adobe Reader 8.3.1**
+    - Google
+      - **Chrome**
+  - Click **Next**.
 
 ```PowerShell
-# Note: Rename-Computer is not available on Windows Server 2008 R2
-netdom renamecomputer $env:COMPUTERNAME /newname:EXT-APP01A /reboot
+cls
+```
 
-# Note: "-Restart" parameter is not available on Windows Server 2008 R2
-# Note: "-Credential" parameter must be specified to avoid error
+## # Rename local Administrator account and set password
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted, type the password for the local Administrator account.
+
+```PowerShell
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword($plainPassword)
+
+logoff
+```
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+## # Remove disk from virtual CD/DVD drive
+
+```PowerShell
+$vmHost = "BEAST"
+$vmName = "EXT-APP01A"
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+---
+
+## Login as EXT-APP01A\\foo
+
+## # Rename network connections
+
+# **Note:** Get-NetAdapter is not available on Windows Server 2008 R2
+
+```Console
+netsh interface show interface
+
+netsh interface set interface name="Local Area Connection" newname="Production"
+
+netsh interface set interface name="Local Area Connection 2" newname="Storage"
+```
+
+```Console
+cls
+```
+
+## # Configure "Production" network adapter
+
+```PowerShell
+$interfaceAlias = "Production"
+```
+
+### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "192.168.10.215"
+```
+
+# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv4 set address name=$interfaceAlias source=static address=$ipAddress mask=255.255.255.0 gateway=192.168.10.1
+```
+
+# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv4 set dnsserver name=$interfaceAlias source=static address=192.168.10.209
+
+netsh interface ipv4 add dnsserver name=$interfaceAlias address=192.168.10.210
+```
+
+### # Configure static IPv6 address
+
+```PowerShell
+$ipAddress = "2601:282:4201:e500::215"
+```
+
+# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv6 set address interface=$interfaceAlias address=$ipAddress store=persistent
+```
+
+# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=2601:282:4201:e500::209
+
+netsh interface ipv6 add dnsserver name=$interfaceAlias address=2601:282:4201:e500::210
+```
+
+```Console
+cls
+```
+
+## # Configure "Storage" network adapter
+
+```PowerShell
+$interfaceAlias = "Storage"
+```
+
+### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "10.1.10.215"
+```
+
+# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv4 set address name=$interfaceAlias source=static address=$ipAddress mask=255.255.255.0
+```
+
+### # Disable features on iSCSI network adapter
+
+# **Note:** Disable-NetAdapterBinding is not available on Windows Server 2008 R2
+
+```PowerShell
+# Disable "Client for Microsoft Networks"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_msclient
+
+# Disable "File and Printer Sharing for Microsoft Networks"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_server
+
+# Disable "Link-Layer Topology Discovery Mapper I/O Driver"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_lltdio
+
+# Disable "Link-Layer Topology Discovery Responder"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_rspndr
+
+$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+    -Filter "NetConnectionId = '$interfaceAlias'"
+
+$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+
+# Do not register this connection in DNS
+$adapterConfig.SetDynamicDNSRegistration($false)
+
+# Disable NetBIOS over TCP/IP
+$adapterConfig.SetTcpipNetbios(2)
+```
+
+## Enable jumbo frames
+
+**Note:** Get-NetAdapterAdvancedProperty is not available on Windows Server 2008 R2
+
+1. Open **Network and Sharing Center**.
+2. In the **Network and Sharing Center **window, click **Production**.
+3. In the **Production Status** window, click **Properties**.
+4. In the **Production Properties** window, on the **Networking** tab, click **Configure**.
+5. In the **Microsoft Virtual Machine Bus Network Adapter Properties** window:
+   1. On the **Advanced **tab:
+      1. In the **Property** list, select **Jumbo Packet**.
+      2. In the **Value** dropdown, select **9014 Bytes**.
+   2. Click **OK**.
+6. Repeat the previous steps for the **Storage** network adapter.
+7. Click the **Start** menu, type **regedit**, and then click **regedit.exe**. If prompted by **User Account Control **to allow the program to make changes to this computer, click **Yes**.
+8. In the **Registry Editor** window, find the following key:
+
+**HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Shared Tools\\Web Server Extensions\\14.0\\Secure**
+9. Right-click on the **HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Shared Tools\\Web Server Extensions\\14.0\\Secure** key and then click **Permissions**.
+10. In the **Permissions for Secure** dialog box, click **Add...**
+11. In the **Select Users, Computers, Service Accounts, or Groups** dialog box:
+    1. Type **WSS_WPG**.
+    2. Click **Locations...**
+    3. In the **Locations** dialog box, click the name of the local computer and then click **OK**.
+    4. Click **Check Names** to verify the group name.
+    5. Click **OK**.
+12. In the **Permissions for WSS_WPG** section, select the **Allow** checkbox for the **Read** permission.
+13. Click **OK**.
+14. Repeat the steps above on each Web server in the farm.
+15. Create domain local group: **EXTRANET\\SharePoint Admins**
+16. Add the following members to **EXTRANET\\SharePoint Admins**:
+17. Add **EXTRANET\\SharePoint Admins **to SharePoint **Farm Administrators** group
+18. [EXT-SQL01A] Create SQL Server login for **EXTRANET\\SharePoint Admins **group and add it to the **SharePoint_Shell_Access** role in **SharePoint_Config** database.
+19. Stop SQL Server
+20. Using **Failover Cluster Manager**, take **Cluster Disk 3** offline
+21. Extend iSCSI virtual disk
+22. Using **Failover Cluster Manager**, bring **Cluster Disk 3** online
+23. Using **Disk Management**, extend volume to 25GB.
+24. Start SQL Server
+25. Disable Customer Experience Improvement Program on Central Administration Web application
+26. Disable SharePoint Timer job: CEIP Data Collection
+
+```Console
+netsh interface ipv4 show interface
+
+Idx     Met         MTU          State                Name
+---  ----------  ----------  ------------  ---------------------------
+  1          50  4294967295  connected     Loopback Pseudo-Interface 1
+ 11           5        9000  connected     Production
+ 13           5        9000  connected     Storage
+
+ping ICEMAN -f -l 8900
+ping 10.1.10.106 -f -l 8900
+```
+
+```Console
+cls
+```
+
+## # Join domain
+
+# **Note:**\
+# "-Restart" parameter is not available on Windows Server 2008 R2\
+# "-Credential" parameter must be specified to avoid error
+
+```PowerShell
 Add-Computer `
-    -DomainName extranet.technologytoolbox.com `-Credential EXTRANET\jjameson-admin
+    -DomainName extranet.technologytoolbox.com `
+    -Credential EXTRANET\jjameson-admin
 
 Restart-Computer
+```
+
+## Login as EXTRANET\\jjameson-admin
+
+```PowerShell
+cls
 ```
 
 ## # Change drive letter for DVD-ROM
@@ -63,11 +318,110 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-## # Reset WSUS configuration
+## # Enable PowerShell remoting
 
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\WSUS\Reset WSUS for SysPrep Image.cmd'
+Enable-PSRemoting -Confirm:$false
 ```
+
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv4-In)" profile=any `
+    new enable=yes
+
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv6-In)" profile=any `
+    new enable=yes
+
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (SMB-In)" profile=any new enable=yes
+
+netsh advfirewall firewall add rule `
+    name="Remote Windows Update (Dynamic RPC)" `
+    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
+    program="%windir%\system32\dllhost.exe" `
+    dir=in `
+    protocol=TCP `
+    localport=RPC `
+    profile=domain `
+    action=Allow
+```
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+netsh advfirewall firewall set rule `
+    name="Remote Windows Update (Dynamic RPC)" new enable=no
+```
+
+```PowerShell
+cls
+```
+
+## # Configure network binding order
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /o ms_tcpip
+...
+Protocols:
+
+{D7DBFF6D-F51F-4C94-BF35-9CFEBEBA7578}
+"ms_tcpip"
+"Internet Protocol Version 4 (TCP/IPv4)":
+   enabled:   Storage
+   enabled:   Production
+
+cleaning up...finished (0)
+
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /++ "Production" ms_tcpip
+...
+acquiring write lock...success
+
+
+Protocols:
+
+{D7DBFF6D-F51F-4C94-BF35-9CFEBEBA7578}
+"ms_tcpip"
+"Internet Protocol Version 4 (TCP/IPv4)":
+   enabled:   Storage
+   enabled:   Production
+
+moving 'Production' to the top
+
+   enabled:   Production
+   enabled:   Storage
+
+'Production' found
+
+cleaning up...releasing write lock...success
+finished (0)
+```
+
+## Enable iSCSI Initiator
+
+**Start** -> **iSCSI Initiator**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/3F6DE64EBF1E201BDD47D798802EEBB2C9A72CDF.png)
+
+Click **Yes**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5B/38F75FA3835C75B20A80D63314FE3463D9B3095B.png)
+
+On the **Discovery** tab, click **Discover Portal...**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/997A95199AEF4EA39C096740C00C6E13D59C4884.png)
+
+In the **Discover Target Portal** window:
+
+1. In the **IP address or DNS name** box, type **10.1.10.106**.
+2. Ensure **Port** is set to the default (**3260**).
+3. Click **OK**.
+
+**TODO:**
+
+**TODO:**
 
 ## # Add disks for SharePoint storage (Data01 and Log01)
 
@@ -275,34 +629,6 @@ The default permissions on the registry key where the encrypted credentials are 
 The permissions must be modified on each Web server in order to allow the service account for the Web application to read the encrypted credentials.
 
 #### To modify the permissions on the registry key where the encrypted credentials are stored
-
-1. Click the **Start** menu, type **regedit**, and then click **regedit.exe**. If prompted by **User Account Control **to allow the program to make changes to this computer, click **Yes**.
-2. In the **Registry Editor** window, find the following key:
-
-**HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Shared Tools\\Web Server Extensions\\14.0\\Secure**
-3. Right-click on the **HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Shared Tools\\Web Server Extensions\\14.0\\Secure** key and then click **Permissions**.
-4. In the **Permissions for Secure** dialog box, click **Add...**
-5. In the **Select Users, Computers, Service Accounts, or Groups** dialog box:
-   1. Type **WSS_WPG**.
-   2. Click **Locations...**
-   3. In the **Locations** dialog box, click the name of the local computer and then click **OK**.
-   4. Click **Check Names** to verify the group name.
-   5. Click **OK**.
-6. In the **Permissions for WSS_WPG** section, select the **Allow** checkbox for the **Read** permission.
-7. Click **OK**.
-8. Repeat the steps above on each Web server in the farm.
-9. Create domain local group: **EXTRANET\\SharePoint Admins**
-10. Add the following members to **EXTRANET\\SharePoint Admins**:
-11. Add **EXTRANET\\SharePoint Admins **to SharePoint **Farm Administrators** group
-12. [EXT-SQL01A] Create SQL Server login for **EXTRANET\\SharePoint Admins **group and add it to the **SharePoint_Shell_Access** role in **SharePoint_Config** database.
-13. Stop SQL Server
-14. Using **Failover Cluster Manager**, take **Cluster Disk 3** offline
-15. Extend iSCSI virtual disk
-16. Using **Failover Cluster Manager**, bring **Cluster Disk 3** online
-17. Using **Disk Management**, extend volume to 25GB.
-18. Start SQL Server
-19. Disable Customer Experience Improvement Program on Central Administration Web application
-20. Disable SharePoint Timer job: CEIP Data Collection
 
 **Note:**\
 At this point, users can select users and groups from the listed forests and domains from any front-end Web server in the farm.
@@ -1407,7 +1733,7 @@ Get-SPContentDatabase -WebApplication http://client-test.securitasinc.com |
 ```Console
 RESTORE DATABASE [WSS_Content_SecuritasPortal]
 FROM
-    DISK = N'Z:\MSSQL10_50.MSSQLSERVER\MSSQL\Backup\Full\WSS_Content_SecuritasPortal_backup_2016_02_28_010003_2653990.bak'
+    DISK = N'Z:\MSSQL10_50.MSSQLSERVER\MSSQL\Backup\Full\WSS_Content_SecuritasPortal_backup_2016_04_10_010003_6500898.bak'
 WITH
     FILE = 1,
     MOVE N'WSS_Content_SecuritasPortal'

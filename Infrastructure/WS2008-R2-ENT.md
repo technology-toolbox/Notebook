@@ -1,13 +1,13 @@
-﻿# WS2008-R2-STD
+﻿# WS2008-R2-ENT
 
-Tuesday, July 29, 2014
-11:09 AM
+Monday, April 18, 2016
+8:16 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Install Windows Server 2008 R2 Standard Edition with Service Pack 1
+## Install Windows Server 2008 R2 Enterprise Edition with Service Pack 1
 
 ## # Remove disk from virtual CD/DVD drive
 
@@ -22,6 +22,10 @@ Source:
 
 **Ejecting CDs with PowerShell on remote computer**\
 [http://www.purgar.net/ejecting-cds-with-powershell-on-remote-computer/](http://www.purgar.net/ejecting-cds-with-powershell-on-remote-computer/)
+
+```PowerShell
+cls
+```
 
 ## # Set time zone
 
@@ -38,8 +42,6 @@ reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize 
 ```
 
 ## # Change drive letter for DVD-ROM
-
-### # To change the drive letter for the DVD-ROM using PowerShell
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -61,6 +63,10 @@ net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
 robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 ```
 
+```PowerShell
+cls
+```
+
 ## # Create Temp folder
 
 ```PowerShell
@@ -71,7 +77,12 @@ mkdir C:\NotBackedUp\Temp
 
 - C:\\NotBackedUp
 - C:\\NotBackedUp\\Public
+- C:\\NotBackedUp\\Public\\Toolbox
 - C:\\NotBackedUp\\Temp
+
+```PowerShell
+cls
+```
 
 ## # Configure WSUS
 
@@ -89,22 +100,19 @@ Restart-Service wuauserv
 
 Note: Windows Update window abruptly disappears (presumably to install a new version of Windows Update). Start Windows Update a second time.
 
-- 165 important updates available
-- ~515 MB
-- Approximate time: 1 hour 9 minutes (11:10 AM - 12:19 AM)
+- 203 important updates available
+- 773.3 MB - 786.3 MB
+- Approximate time: 1 hour 37 minutes (8:28 AM - 10:05 AM)
+
+**TODO:**
 
 ## Install patches using Windows Update (round 2)
 
-- 1 important update available
-- Approximate time: 1 minute
+- 10 important updates available
+- 45.2 MB
+- Approximate time: ~2 minutes
 
-## Install patches using Windows Update (round 3)
-
-- 13 important updates available
-- ~36 MB
-- Approximate time: 2 minutes
-
-## # Delete C:\\Windows\\SoftwareDistribution folder (894 MB)
+## # Delete C:\\Windows\\SoftwareDistribution folder
 
 ```PowerShell
 net stop wuauserv
@@ -115,7 +123,7 @@ Restart-Computer
 
 ## Check for updates using Windows Update (after removing patches folder)
 
-- **Most recent check for updates: Never -> Most recent check for updates: Today at 12:36 PM**
+- **Most recent check for updates: Never -> Most recent check for updates: Today at 10:13 AM**
 - C:\\Windows\\SoftwareDistribution folder is now 348 MB
 
 ## # Reset WSUS
@@ -142,10 +150,10 @@ When prompted to **Press any key to continue . . .**, press CTRL+C to terminate 
 Stop-Computer
 ```
 
-## [STORM] Copy VM before running SysPrep (to avoid issues with running SysPrep multiple times)
+## [WOLVERINE] Copy VM before running SysPrep (to avoid issues with running SysPrep multiple times)
 
 ```Console
-robocopy C:\NotBackedUp\VMs\WS2008-R2-STD "D:\Shares\VM Library\WS2008-R2-STD" /E /MIR
+robocopy C:\NotBackedUp\VMs\WS2008-R2-ENT "F:\NotBackedUp\VMs\WS2008-R2-ENT" /E /MIR
 ```
 
 ## SysPrep VM
@@ -153,14 +161,14 @@ robocopy C:\NotBackedUp\VMs\WS2008-R2-STD "D:\Shares\VM Library\WS2008-R2-STD" /
 - Generalize
 - Shutdown
 
-## [STORM] Copy VHD to VM Library
+## [WOLVERINE] Copy VHD to VM Library
 
 ```Console
-copy "C:\NotBackedUp\VMs\WS2008-R2-STD\Virtual Hard Disks\WS2008-R2-STD.vhdx" \\iceman\VM-Library\VHDs
+copy "C:\NotBackedUp\VMs\WS2008-R2-ENT\Virtual Hard Disks\WS2008-R2-ENT.vhdx" \\iceman\VM-Library\VHDs
 ```
 
-## [STORM] Restore VHD copied before SysPrep
+## [WOLVERINE] Restore VHD copied before SysPrep
 
 ```Console
-copy "D:\Shares\VM Library\WS2008-R2-STD\Virtual Hard Disks\WS2008-R2-STD.vhdx" "C:\NotBackedUp\VMs\WS2008-R2-STD\Virtual Hard Disks"
+copy "F:\NotBackedUp\VMs\WS2008-R2-ENT\Virtual Hard Disks\WS2008-R2-ENT.vhdx" "C:\NotBackedUp\VMs\WS2008-R2-ENT\Virtual Hard Disks"
 ```

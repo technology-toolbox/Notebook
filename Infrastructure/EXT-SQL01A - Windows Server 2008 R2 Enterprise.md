@@ -1,52 +1,288 @@
 ﻿# EXT-SQL01A - Windows Server 2008 R2 Enterprise
 
-Friday, January 31, 2014
-9:01 AM
+Sunday, April 17, 2016
+5:27 AM
 
-```Console
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
 
-## # Create virtual machine
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+### # Create virtual machine
 
 ```PowerShell
+$vmHost = "STORM"
 $vmName = "EXT-SQL01A"
 
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
 New-VM `
+    -ComputerName $vmHost `
     -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
+    -Path E:\NotBackedUp\VMs `
     -MemoryStartupBytes 4GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+    -SwitchName "Production"
 
-Set-VMProcessor -VMName $vmName -Count 4
+Set-VM `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ProcessorCount 4
 
-$sysPrepedImage = "\\ICEMAN\VHD Library\WS2008-R2-ENT.vhdx"
+$sysPrepedImage = "\\ICEMAN\VM-Library\VHDs\WS2008-R2-ENT.vhdx"
 
-mkdir "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
+mkdir "\\$vmHost\E$\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+Copy-Item $sysPrepedImage $vhdPath.Replace('E:', "\\$vmHost\E`$")
 
-Copy-Item $sysPrepedImage $vhdPath
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath
 
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
+# Add network adapter for iSCSI (Storage)
 
-Start-VM $vmName
+Add-VMNetworkAdapter `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -SwitchName "Storage"
+
+Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
-## # Rename the server and join domain
+---
 
 ```PowerShell
-# Note: Rename-Computer is not available on Windows Server 2008 R2
+cls
+```
+
+## # Rename local Administrator account
+
+```PowerShell
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+
+logoff
+```
+
+## Login as EXT-SQL01A\\foo
+
+## # Rename network connections
+
+# **Note:** Get-NetAdapter is not available on Windows Server 2008 R2
+
+```Console
+netsh interface show interface
+
+netsh interface set interface name="Local Area Connection" newname="Production"
+
+netsh interface set interface name="Local Area Connection 2" newname="Storage"
+```
+
+```Console
+cls
+```
+
+## # Configure "Production" network adapter
+
+```PowerShell
+$interfaceAlias = "Production"
+```
+
+### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "192.168.10.211"
+```
+
+# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv4 set address name=$interfaceAlias source=static address=$ipAddress mask=255.255.255.0 gateway=192.168.10.1
+```
+
+# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv4 set dnsserver name=$interfaceAlias source=static address=192.168.10.209
+
+netsh interface ipv4 add dnsserver name=$interfaceAlias address=192.168.10.210
+```
+
+### # Configure static IPv6 address
+
+```PowerShell
+$ipAddress = "2601:282:4201:e500::211"
+```
+
+# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv6 set address interface=$interfaceAlias address=$ipAddress store=persistent
+```
+
+# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=2601:282:4201:e500::209
+
+netsh interface ipv6 add dnsserver name=$interfaceAlias address=2601:282:4201:e500::210
+```
+
+```Console
+cls
+```
+
+## # Configure "Storage" network adapter
+
+```PowerShell
+$interfaceAlias = "Storage"
+```
+
+### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "10.1.10.211"
+```
+
+# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv4 set address name=$interfaceAlias source=static address=$ipAddress mask=255.255.255.0
+```
+
+### # Disable features on iSCSI network adapter
+
+# **Note:** Disable-NetAdapterBinding is not available on Windows Server 2008 R2
+
+```PowerShell
+# Disable "Client for Microsoft Networks"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_msclient
+
+# Disable "File and Printer Sharing for Microsoft Networks"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_server
+
+# Disable "Link-Layer Topology Discovery Mapper I/O Driver"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_lltdio
+
+# Disable "Link-Layer Topology Discovery Responder"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_rspndr
+
+$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+    -Filter "NetConnectionId = '$interfaceAlias'"
+
+$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+
+# Do not register this connection in DNS
+$adapterConfig.SetDynamicDNSRegistration($false)
+
+# Disable NetBIOS over TCP/IP
+$adapterConfig.SetTcpipNetbios(2)
+```
+
+## Enable jumbo frames
+
+**Note:** Get-NetAdapterAdvancedProperty is not available on Windows Server 2008 R2
+
+1. Open **Network and Sharing Center**.
+2. In the **Network and Sharing Center **window, click **Production**.
+3. In the **Production Status** window, click **Properties**.
+4. In the **Production Properties** window, on the **Networking** tab, click **Configure**.
+5. In the **Microsoft Virtual Machine Bus Network Adapter Properties** window:
+   1. On the **Advanced **tab:
+      1. In the **Property** list, select **Jumbo Packet**.
+      2. In the **Value** dropdown, select **9014 Bytes**.
+   2. Click **OK**.
+6. Repeat the previous steps for the **Storage** network adapter.
+7. Open Task Scheduler.
+8. Click **Import Task...**
+9. In the **Open** dialog:
+   1. In the **File name** box, type **C:\\NotBackedUp\\Public\\Toolbox\\PowerShell\\Remove Old Database Backups.xml**.
+   2. Click **Open**.
+10. In the **Create Task **dialog, click **OK**.
+
+```Console
+netsh interface ipv4 show interface
+
+Idx     Met         MTU          State                Name
+---  ----------  ----------  ------------  ---------------------------
+  1          50  4294967295  connected     Loopback Pseudo-Interface 1
+ 11           5        9000  connected     Production
+ 13           5        9000  connected     Storage
+
+ping ICEMAN -f -l 8900
+ping 10.1.10.106 -f -l 8900
+```
+
+```Console
+cls
+```
+
+## # Rename computer
+
+# **Note:** Rename-Computer is not available on Windows Server 2008 R2
+
+```PowerShell
 netdom renamecomputer $env:COMPUTERNAME /newname:EXT-SQL01A /reboot
+```
 
-# Note: "-Restart" parameter is not available on Windows Server 2008 R2
-# Note: "-Credential" parameter must be specified to avoid error
+> **Important**
+>
+> Wait for the computer to restart.
+
+## # Join domain
+
+# **Note:**\
+# "-Restart" parameter is not available on Windows Server 2008 R2\
+# "-Credential" parameter must be specified to avoid error
+
+```PowerShell
 Add-Computer `
-    -DomainName extranet.technologytoolbox.com `-Credential EXTRANET\jjameson-admin
+    -DomainName extranet.technologytoolbox.com `
+    -Credential EXTRANET\jjameson-admin
+```
 
+> **Note**
+>
+> When prompted, type the password for the domain account.
+
+```PowerShell
 Restart-Computer
+```
+
+## Move computer to "SQL Servers" OU
+
+---
+
+**EXT-DC01**
+
+```PowerShell
+$computerName = "EXT-SQL01A"
+$targetPath = ("OU=SQL Servers,OU=Servers,OU=Resources,OU=IT" `
+    + ",DC=extranet,DC=technologytoolbox,DC=com")
+
+Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+```
+
+---
+
+## Login as EXTRANET\\jjameson-admin
+
+```PowerShell
+cls
+```
+
+## # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
 ```
 
 ## # Change drive letter for DVD-ROM
@@ -63,136 +299,98 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-## # Reset WSUS configuration
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
 
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\WSUS\Reset WSUS for SysPrep Image.cmd'
+Enable-PSRemoting -Confirm:$false
 ```
 
-## Add network adapter (Virtual iSCSI 1 - 10.1.10.x)
-
-## # Rename network connections
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-# Note: Get-NetAdapter is not available on Windows Server 2008 R2
-netsh interface show interface
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv4-In)" profile=any `
+    new enable=yes
 
-netsh interface set interface name="Local Area Connection" newname="LAN 1 - 192.168.10.x"
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv6-In)" profile=any `
+    new enable=yes
 
-netsh interface set interface name="Local Area Connection 2" newname="iSCSI 1 - 10.1.10.x"
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (SMB-In)" profile=any new enable=yes
+
+netsh advfirewall firewall add rule `
+    name="Remote Windows Update (Dynamic RPC)" `
+    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
+    program="%windir%\system32\dllhost.exe" `
+    dir=in `
+    protocol=TCP `
+    localport=RPC `
+    profile=domain `
+    action=Allow
 ```
 
-## # Configure static IP address
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-$ipAddress = "192.168.10.202"
-
-# Note: New-NetIPAddress is not available on Windows Server 2008 R2
-
-netsh interface ipv4 set address name="LAN 1 - 192.168.10.x" source=static address=$ipAddress mask=255.255.255.0 gateway=192.168.10.1
-
-# Note: Set-DNSClientServerAddress is not available on Windows Server 2008 R2
-
-netsh interface ipv4 set dnsserver name="LAN 1 - 192.168.10.x" source=static address=192.168.10.209
-
-netsh interface ipv4 add dnsserver name="LAN 1 - 192.168.10.x" address=192.168.10.210
+netsh advfirewall firewall set rule `
+    name="Remote Windows Update (Dynamic RPC)" new enable=no
 ```
-
-## # Configure iSCSI network adapter
 
 ```PowerShell
-$ipAddress = "10.1.10.202"
-
-# Note: New-NetIPAddress is not available on Windows Server 2008 R2
-
-netsh interface ipv4 set address name = "iSCSI 1 - 10.1.10.x" source=static address=$ipAddress mask=255.255.255.0
-
-# Note: Disable-NetAdapterBinding is not available on Windows Server 2008 R2
-
-# Disable "Client for Microsoft Networks"
-C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d "iSCSI 1 - 10.1.10.x" ms_msclient
-
-# Disable "File and Printer Sharing for Microsoft Networks"
-C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d "iSCSI 1 - 10.1.10.x" ms_server
-
-# Disable "Link-Layer Topology Discovery Mapper I/O Driver"
-C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d "iSCSI 1 - 10.1.10.x" ms_lltdio
-
-# Disable "Link-Layer Topology Discovery Responder"
-C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d "iSCSI 1 - 10.1.10.x" ms_rspndr
-
-$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
-    -Filter "NetConnectionId = 'iSCSI 1 - 10.1.10.x'"
-
-$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
-    -Filter "Index= '$($adapter.DeviceID)'"
-
-# Do not register this connection in DNS
-$adapterConfig.SetDynamicDNSRegistration($false)
-
-# Disable NetBIOS over TCP/IP
-$adapterConfig.SetTcpipNetbios(2)
+cls
 ```
 
-## # Enable jumbo frames
+## # Configure network binding order
 
 ```PowerShell
-# Note: Get-NetAdapterAdvancedProperty is not available on Windows Server 2008 R2
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /o ms_tcpip
+...
+Protocols:
 
-netsh interface ipv4 show interface
+{D7DBFF6D-F51F-4C94-BF35-9CFEBEBA7578}
+"ms_tcpip"
+"Internet Protocol Version 4 (TCP/IPv4)":
+   enabled:   Storage
+   enabled:   Production
 
-Idx     Met         MTU          State                Name
----  ----------  ----------  ------------  ---------------------------
-  1          50  4294967295  connected     Loopback Pseudo-Interface 1
- 11           5        1500  connected     LAN 1 - 192.168.10.x
- 18           5        1500  connected     iSCSI 1 - 10.1.10.x
+cleaning up...finished (0)
+
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /++ "Production" ms_tcpip
+...
+acquiring write lock...success
 
 
-netsh interface ipv4 set subinterface "LAN 1 - 192.168.10.x" mtu=9014 store=persistent
+Protocols:
 
-netsh interface ipv4 set subinterface "iSCSI 1 - 10.1.10.x" mtu=9014 store=persistent
+{D7DBFF6D-F51F-4C94-BF35-9CFEBEBA7578}
+"ms_tcpip"
+"Internet Protocol Version 4 (TCP/IPv4)":
+   enabled:   Storage
+   enabled:   Production
+
+moving 'Production' to the top
+
+   enabled:   Production
+   enabled:   Storage
+
+'Production' found
+
+cleaning up...releasing write lock...success
+finished (0)
 ```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C0/DE4A8BB73A26DFE80036F03F4C7DABC72A37BBC0.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AC/359C0F95AA7D36CDE70BDC5DD886BD1EE3ADB2AC.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F6/9E68B6EBF97963F60D76C8E4980983801510FEF6.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7A/FE8CEE531A1335FD9A2FB2CC259BDBFCC42C687A.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/AE20D522971A50AF377C36A3584DBB9B28BC42CE.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/A13511971496E3BFE5274A0A30715A4DF1D8DFC5.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/32/FC81C1D498BB7CEA8FAFD470A203A291B45DA132.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/AF8913DC9C0420A9AF7CBA3AC1DD8863096B8ADB.png)
-
-```Console
-ping ICEMAN -f -l 8900
-ping 10.1.10.106 -f -l 8900
-```
-
-## Configure network binding order
-
-In the **Network Connections** window, press F10 to view the menu.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/1D564C0C36FAD89CB2968F7D66FB11629AB57FA9.png)
-
-On the **Advanced** menu, click **Advanced Settings...**
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0D/E5027155CEEC2E17E4C82CD44D5F1027AE1B520D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/00/02EFAC1CA528D1624046A17ADF9E73611DE58300.png)
 
 ## Enable iSCSI Initiator
 
-Start -> iSCSI Initiator
+**Start** -> **iSCSI Initiator**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/3F6DE64EBF1E201BDD47D798802EEBB2C9A72CDF.png)
 
-Click Yes.
+Click **Yes**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/5B/38F75FA3835C75B20A80D63314FE3463D9B3095B.png)
 
@@ -206,14 +404,15 @@ In the **Discover Target Portal** window:
 2. Ensure **Port** is set to the default (**3260**).
 3. Click **OK**.
 
-## Create iSCSI virtual disks - ICEMAN
+## Create iSCSI virtual disks
 
-| EXT-SQL01-Quorum.vhdx   | 512 MB | Dynamically expanding |
-| ----------------------- | ------ | --------------------- |
-| EXT-SQL01-Data01.vhdx   | 100 GB | Fixed size            |
-| EXT-SQL01-Log01.vhdx    | 10 GB  | Fixed size            |
-| EXT-SQL01-Temp01.vhdx   | 4 GB   | Fixed size            |
-| EXT-SQL01-Backup01.vhdx | 200 GB | Dynamically expanding |
+| **Server** | **Name**           | **Volume** | **Path**                                       | **Size** | **Type**              |
+| ---------- | ------------------ | ---------- | ---------------------------------------------- | -------- | --------------------- |
+| ICEMAN     | EXT-SQL01-Quorum   | E:         | E:\\iSCSIVirtualDisks\\EXT-SQL01-Quorum.vhdx   | 512 MB   | Dynamically expanding |
+| ICEMAN     | EXT-SQL01-Data01   | E:         | E:\\iSCSIVirtualDisks\\EXT-SQL01-Data01.vhdx   | 150 GB   | Fixed size            |
+| ICEMAN     | EXT-SQL01-Log01    | E:         | E:\\iSCSIVirtualDisks\\EXT-SQL01-Log01.vhdx    | 25 GB    | Fixed size            |
+| ICEMAN     | EXT-SQL01-Temp01   | E:         | E:\\iSCSIVirtualDisks\\EXT-SQL01-Temp01.vhdx   | 4 GB     | Fixed size            |
+| ICEMAN     | EXT-SQL01-Backup01 | E:         | E:\\iSCSIVirtualDisks\\EXT-SQL01-Backup01.vhdx | 400 GB   | Dynamically expanding |
 
 ## Discover iSCSI target
 
@@ -346,6 +545,8 @@ Click **Create the cluster now using the validated nodes...**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/45083D27C0F58C4946DE010A99EB6803410E683F.png)
 
+Fix binding order and run SQL Server Setup again.
+
 ```Console
 C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /o ms_tcpip
 ...
@@ -355,12 +556,12 @@ Protocols:
 "ms_tcpip"
 "Internet Protocol Version 4 (TCP/IPv4)":
    enabled:   Local Area Connection* 9
-   enabled:   LAN 1 - 192.168.10.x
-   enabled:   iSCSI 1 - 10.1.10.x
+   enabled:   Production
+   enabled:   Storage
 
 cleaning up...finished (0)
 
-C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /++ "LAN 1 - 192.168.10.x" ms_tcpip
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /++ "Production" ms_tcpip
 ...
 acquiring write lock...success
 
@@ -371,16 +572,16 @@ Protocols:
 "ms_tcpip"
 "Internet Protocol Version 4 (TCP/IPv4)":
    enabled:   Local Area Connection* 9
-   enabled:   LAN 1 - 192.168.10.x
-   enabled:   iSCSI 1 - 10.1.10.x
+   enabled:   Production
+   enabled:   Storage
 
-moving 'LAN 1 - 192.168.10.x' to the top
+moving 'Production' to the top
 
-   enabled:   LAN 1 - 192.168.10.x
+   enabled:   Production
    enabled:   Local Area Connection* 9
-   enabled:   iSCSI 1 - 10.1.10.x
+   enabled:   Storage
 
-'LAN 1 - 192.168.10.x' found
+'Production' found
 
 cleaning up...releasing write lock...success
 finished (0)
@@ -395,7 +596,7 @@ From Detail.txt:
 2014-02-01 08:47:00 Slp:   NetworkBindingFacet:   Network: 'iSCSI 1 - 10.1.10.x' Device: '\\Device\\{15F2221D-8DBC-499C-9A43-9CC4BA20CAA9}' Domain: '' Adapter Id: '{15F2221D-8DBC-499C-9A43-9CC4BA20CAA9}'\
 2014-02-01 08:47:00 Slp: IsDomainInCorrectBindOrder: The top network interface 'LAN 1 - 192.168.10.x' is bound to domain 'extranet.technologytoolbox.com' and the current domain is 'CORP.TECHNOLOGYTOOLBOX.COM'.
 
-Login as EXTRANET\\jjameson-admin and run SQL Server Setup again.
+Restart SQL Server setup.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/6C/DFD89F35828006CF77C4BCAB95EC6832F843866C.png)
 
@@ -424,12 +625,14 @@ On the **Cluster Resource Group** page, ensure **SQL Server cluster resource gro
 
 On the **Cluster Disk Selection **page, select all of the available cluster disks (**Cluster Disk 2**, **Cluster Disk 3**, **Cluster Disk 4**, and **Cluster Disk 5**).
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/05/F577C35AAAF93DA01D3EB1D22B30F77A9363CF05.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/36/67F72027648299B0F68E2AE87FC934E1F85A5236.png)
 
 On the **Cluster Network Configuration** page:
 
-1. Clear the checkbox in the **DHCP** column.
-2. In the **Address** column, type the IP address (**192.168.10.205**)corresponding to the SQL Server cluster name.
+1. In the **IPv4** row:
+   1. Clear the checkbox in the **DHCP** column.
+   2. In the **Address** column, type the IP address (**192.168.10.205**) corresponding to the SQL Server cluster name.
+2. In the **IPv6** row, clear the checkbox to prevent IPv6 from being used for the cluster network.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/C58149F179EDD10BA67A6AC5E03AB55BEBED824D.png)
 
@@ -437,17 +640,13 @@ On the **Cluster Network Configuration** page:
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/9B/09CAC25426C11B6DEDDA722B81130E627BE38D9B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/51/8000E4F56D3AF1D4FB436E9FBAEE3B3EE1D27551.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/72/22F845557E0A095E75E2CFD6A271B3F312AE0C72.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/92/C22D5A001F3DC907D34CAD97370677307088EA92.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/18/CBA8AFAC0A7493F6BD668F3D016EDD356CD78718.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/064442D34444A6C584E3FCE7B9A3B78315FE9ADA.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/089D56FD79DF2D4F68D7C4CD57F6B6CDF5F4E7CA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/96/DF5AF1C10DD9ACF892FB6AB9CEF67162246CBA96.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/63/EEC723A19FFF03BB84CD5E16E9FD10C56408A363.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/AA358F545BEAEB5E50C46B89FF43D67695F39530.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/07/589984854AA7DCE7B652336A2494E073CEDDC707.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/5CE6820A04DD494D8C11F0624C83510EE5817969.png)
 
@@ -455,7 +654,7 @@ On the **Cluster Network Configuration** page:
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/92/891EF81D2D651820480819886CBED1D3A59EFD92.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AA/C36EC40B6DF629FF89D8BAE735C4BAB7C6B1ADAA.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/361209BF9D3E52E83E937B7FDF4E31FD40043091.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/D6/8140E264B00C0542EB1D1F72F3E0E09C0AF6F7D6.png)
 
@@ -463,7 +662,7 @@ On the **Cluster Network Configuration** page:
 
 ## Add node to SQL Server failover cluster - EXT-SQL01B
 
-## Install SQL Server 2008 R2 Service Pack 2
+## Install SQL Server 2008 R2 Service Pack 3
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/51F97F9682528CBEECC6FC68E17134DD988A2E71.png)
 
@@ -475,21 +674,21 @@ In the **Possible Owners** list, clear the checkbox for the passive node (**EXT-
 
 Install service pack on EXT-SQL01B.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/59/79DA325A973D8EA7C7BAF37AEAEB6D98AB558659.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/4BA7A05164145C4ECC3CF501D83B559E0C26D1DD.png)
 
 UAC, click **Yes**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/8BA03141715CEAE4E1953CEE28705B7602ABE927.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/48/810D807FC363531FA3EB129D6CFCA49F2D0D7948.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/00/BC3718372B89E146567D65D279149E873B509D00.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/19/8FF2BFD7F337D56388A0681D02881B5064934D19.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/51/FB827BA569ECE9B74C7168BF3AEE0924DFB94351.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/40/A097E11B4A027FC22196B8614B1C946CB56F9C40.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D2/933DEB0E55B0B9AA863F2800ABF6D644F44B29D2.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/233D7B030E24C173D4861AA0DCE300B49431129A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/81/BC4E99F781AACDDFB8692F29A55FAFA2F145F781.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/50598949BF657AF427F770EE6981D71D1E36932F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B3/14944C0EA4E9CF94120EEDA1C1F1DB516F31A7B3.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/D66DFD1B39F191703B9E557519CF7CFC29ADA112.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/87/E5DE0103903B7F3797C9D20C0C2319DE8441B587.png)
 
@@ -511,11 +710,15 @@ Wait for the **Status** column to show **Online** for all of the resources.
 
 Repeat the process to update the other cluster node (EXT-SQL01A). After the upgrade is complete, move  SQL Server back to EXT-SQL01A.
 
+```PowerShell
+cls
+```
+
 ## # Configure firewall rule for SQL Server
 
-```PowerShell
-# Note: New-NetFirewallRule is not available on Windows Server 2008 R2
+# **Note:** New-NetFirewallRule is not available on Windows Server 2008 R2
 
+```PowerShell
 netsh advfirewall firewall add rule `
     name="SQL Server Database Engine" `
     dir=in `
@@ -524,21 +727,92 @@ netsh advfirewall firewall add rule `
     localport=1433
 ```
 
-## Create backup maintenance plans
+```PowerShell
+cls
+```
 
-- Full Backup of All Databases
-- Transaction Log Backup of All Databases
-- Differential Backup of All Databases
+## # Create backup maintenance plans
 
-**Note:** Change owner of corresponding jobs to **sa** (to avoid errors when jobs are owned by **TECHTOOLBOX\\jjameson-admin**).
+### # Create folders for database backups
 
-## # Change PowerShell execution policy
+```PowerShell
+mkdir Z:\MSSQL10_50.MSSQLSERVER\MSSQL\Backup\Full
+
+mkdir 'Z:\MSSQL10_50.MSSQLSERVER\MSSQL\Backup\Transaction Log'
+
+mkdir Z:\MSSQL10_50.MSSQLSERVER\MSSQL\Backup\Differential
+```
+
+### Create maintenance plans
+
+<table>
+<thead>
+<th>
+<p><strong>Name</strong></p>
+</th>
+<th>
+<p><strong>Frequency</strong></p>
+</th>
+<th>
+<p><strong>Daily Frequency</strong></p>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Full Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Weekly</strong><br />
+Recurs every: <strong>1</strong> week on</p>
+<ul>
+<li><strong>Sunday</strong></li>
+</ul>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>12:00:00 AM</strong></p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Transaction Log Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Daily</strong><br />
+Recurs every: <strong>1</strong> day</p>
+</td>
+<td valign='top'>
+<p>Occurs every: <strong>1 hour</strong><br />
+Starting at:<strong> 12:55:00 AM</strong><br />
+Ending at:<strong> 11:59:59 PM</strong></p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Differential Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Daily</strong><br />
+Recurs every: <strong>1</strong> day</p>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>11:30:00 PM</strong></p>
+</td>
+</tr>
+</table>
+
+```PowerShell
+cls
+```
+
+## # Create scheduled task to delete old database backups
+
+### # Change PowerShell execution policy
 
 ```PowerShell
 Set-ExecutionPolicy RemoteSigned -Force
 ```
 
-## Create scheduled task to delete old database backups
+### Import scheduled task
 
 ## Configure DCOM permissions for SSIS
 
@@ -549,74 +823,6 @@ The application-specific permission settings do not grant Local Launch permissio
  to the user EXTRANET\\svc-sql-agent SID (S-1-5-21-224930944-1780242101-1199596236-1107) from address LocalHost (Using LRPC). This security permission can be modified using the Component Services administrative tool.
 
 Using the steps in **[KB 2000474](KB 2000474) Workaround 1**, add **Local Launch** permissions on **MsDtsServer100** to **EXTRANET\\svc-sql-agent**.
-
-## Issue: Expired sessions are not being deleted from the ASP.NET Session State database (Central Administion > Review problems and solutions)
-
-### Details from SQL Server job history
-
-Date		9/15/2014 7:25:00 AM\
-Log		Job History (SessionState_Job_DeleteExpiredSessions)
-
-Step ID		0\
-Server		EXT-SQL01\
-Job Name		SessionState_Job_DeleteExpiredSessions\
-Step Name		(Job outcome)\
-Duration		00:00:00\
-Sql Severity		0\
-Sql Message ID		0\
-Operator Emailed\
-Operator Net sent\
-Operator Paged\
-Retries Attempted		0
-
-Message\
-The job failed.  Unable to determine if the owner (TECHTOOLBOX\\jjameson-admin) of job SessionState_Job_DeleteExpiredSessions has server access (reason: Could not obtain information about Windows NT group/user 'TECHTOOLBOX\\jjameson-admin', error code 0x5. [SQLSTATE 42000] (Error 15404)).
-
-### Resolution
-
-```SQL
-USE [msdb]
-GO
-EXEC msdb.dbo.sp_update_job @job_id=N'62c052aa-a3cd-444f-a781-ae79eca6359e',
-    @owner_login_name=N'EXTRANET\svc-sharepoint'
-GO
-```
-
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-```PowerShell
-cls
-```
-
-## # Enable PowerShell remoting
-
-```PowerShell
-Enable-PSRemoting -Confirm:$false
-```
-
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-# Note: New-NetFirewallRule is not available on Windows Server 2008 R2
-
-netsh advfirewall firewall add rule `
-    name="Remote Windows Update (Dynamic RPC)" `
-    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
-    program="%windir%\system32\dllhost.exe" `
-    dir=in `
-    protocol=TCP `
-    localport=RPC `
-    profile=Domain `
-    action=Allow
-```
 
 ```PowerShell
 cls
@@ -789,3 +995,49 @@ Next
 ```
 
 ---
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+**TODO:**
+
+## Issue: Expired sessions are not being deleted from the ASP.NET Session State database (Central Administion > Review problems and solutions)
+
+### Details from SQL Server job history
+
+Date		9/15/2014 7:25:00 AM\
+Log		Job History (SessionState_Job_DeleteExpiredSessions)
+
+Step ID		0\
+Server		EXT-SQL01\
+Job Name		SessionState_Job_DeleteExpiredSessions\
+Step Name		(Job outcome)\
+Duration		00:00:00\
+Sql Severity		0\
+Sql Message ID		0\
+Operator Emailed\
+Operator Net sent\
+Operator Paged\
+Retries Attempted		0
+
+Message\
+The job failed.  Unable to determine if the owner (TECHTOOLBOX\\jjameson-admin) of job SessionState_Job_DeleteExpiredSessions has server access (reason: Could not obtain information about Windows NT group/user 'TECHTOOLBOX\\jjameson-admin', error code 0x5. [SQLSTATE 42000] (Error 15404)).
+
+### Resolution
+
+```SQL
+USE [msdb]
+GO
+EXEC msdb.dbo.sp_update_job @job_id=N'62c052aa-a3cd-444f-a781-ae79eca6359e',
+    @owner_login_name=N'EXTRANET\svc-sharepoint'
+GO
+```

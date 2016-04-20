@@ -1,52 +1,288 @@
 ﻿# EXT-SQL01B - Windows Server 2008 R2 Enterprise
 
-Friday, January 31, 2014
-9:01 AM
+Sunday, April 17, 2016
+12:16 PM
 
-```Console
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
 
-## # Create virtual machine
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+### # Create virtual machine
 
 ```PowerShell
+$vmHost = "BEAST"
 $vmName = "EXT-SQL01B"
 
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
 New-VM `
+    -ComputerName $vmHost `
     -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
+    -Path E:\NotBackedUp\VMs `
     -MemoryStartupBytes 4GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+    -SwitchName "Production"
 
-Set-VMProcessor -VMName $vmName -Count 4
+Set-VM `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ProcessorCount 4
 
-$sysPrepedImage = "\\ICEMAN\VHD Library\WS2008-R2-ENT.vhdx"
+$sysPrepedImage = "\\ICEMAN\VM-Library\VHDs\WS2008-R2-ENT.vhdx"
 
-mkdir "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
+mkdir "\\$vmHost\E$\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+Copy-Item $sysPrepedImage $vhdPath.Replace('E:', "\\$vmHost\E`$")
 
-Copy-Item $sysPrepedImage $vhdPath
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath
 
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
+# Add network adapter for iSCSI (Storage)
 
-Start-VM $vmName
+Add-VMNetworkAdapter `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -SwitchName "Storage"
+
+Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
-## # Rename the server and join domain
+---
 
 ```PowerShell
-# Note: Rename-Computer is not available on Windows Server 2008 R2
+cls
+```
+
+## # Rename local Administrator account
+
+```PowerShell
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+
+logoff
+```
+
+## Login as EXT-SQL01B\\foo
+
+## # Rename network connections
+
+# **Note:** Get-NetAdapter is not available on Windows Server 2008 R2
+
+```Console
+netsh interface show interface
+
+netsh interface set interface name="Local Area Connection" newname="Production"
+
+netsh interface set interface name="Local Area Connection 2" newname="Storage"
+```
+
+```Console
+cls
+```
+
+## # Configure "Production" network adapter
+
+```PowerShell
+$interfaceAlias = "Production"
+```
+
+### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "192.168.10.212"
+```
+
+# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv4 set address name=$interfaceAlias source=static address=$ipAddress mask=255.255.255.0 gateway=192.168.10.1
+```
+
+# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv4 set dnsserver name=$interfaceAlias source=static address=192.168.10.209
+
+netsh interface ipv4 add dnsserver name=$interfaceAlias address=192.168.10.210
+```
+
+### # Configure static IPv6 address
+
+```PowerShell
+$ipAddress = "2601:282:4201:e500::212"
+```
+
+# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv6 set address interface=$interfaceAlias address=$ipAddress store=persistent
+```
+
+# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=2601:282:4201:e500::209
+
+netsh interface ipv6 add dnsserver name=$interfaceAlias address=2601:282:4201:e500::210
+```
+
+```Console
+cls
+```
+
+## # Configure "Storage" network adapter
+
+```PowerShell
+$interfaceAlias = "Storage"
+```
+
+### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "10.1.10.212"
+```
+
+# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv4 set address name=$interfaceAlias source=static address=$ipAddress mask=255.255.255.0
+```
+
+### # Disable features on iSCSI network adapter
+
+# **Note:** Disable-NetAdapterBinding is not available on Windows Server 2008 R2
+
+```PowerShell
+# Disable "Client for Microsoft Networks"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_msclient
+
+# Disable "File and Printer Sharing for Microsoft Networks"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_server
+
+# Disable "Link-Layer Topology Discovery Mapper I/O Driver"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_lltdio
+
+# Disable "Link-Layer Topology Discovery Responder"
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_rspndr
+
+$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+    -Filter "NetConnectionId = '$interfaceAlias'"
+
+$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+
+# Do not register this connection in DNS
+$adapterConfig.SetDynamicDNSRegistration($false)
+
+# Disable NetBIOS over TCP/IP
+$adapterConfig.SetTcpipNetbios(2)
+```
+
+## Enable jumbo frames
+
+**Note:** Get-NetAdapterAdvancedProperty is not available on Windows Server 2008 R2
+
+1. Open **Network and Sharing Center**.
+2. In the **Network and Sharing Center **window, click **Production**.
+3. In the **Production Status** window, click **Properties**.
+4. In the **Production Properties** window, on the **Networking** tab, click **Configure**.
+5. In the **Microsoft Virtual Machine Bus Network Adapter Properties** window:
+   1. On the **Advanced **tab:
+      1. In the **Property** list, select **Jumbo Packet**.
+      2. In the **Value** dropdown, select **9014 Bytes**.
+   2. Click **OK**.
+6. Repeat the previous steps for the **Storage** network adapter.
+7. Open Task Scheduler.
+8. Click **Import Task...**
+9. In the **Open** dialog:
+   1. In the **File name** box, type **C:\\NotBackedUp\\Public\\Toolbox\\PowerShell\\Remove Old Database Backups.xml**.
+   2. Click **Open**.
+10. In the **Create Task **dialog, click **OK**.
+
+```Console
+netsh interface ipv4 show interface
+
+Idx     Met         MTU          State                Name
+---  ----------  ----------  ------------  ---------------------------
+  1          50  4294967295  connected     Loopback Pseudo-Interface 1
+ 11           5        9000  connected     Production
+ 13           5        9000  connected     Storage
+
+ping ICEMAN -f -l 8900
+ping 10.1.10.106 -f -l 8900
+```
+
+```Console
+cls
+```
+
+## # Rename computer
+
+# **Note:** Rename-Computer is not available on Windows Server 2008 R2
+
+```PowerShell
 netdom renamecomputer $env:COMPUTERNAME /newname:EXT-SQL01B /reboot
+```
 
-# Note: "-Restart" parameter is not available on Windows Server 2008 R2
-# Note: "-Credential" parameter must be specified to avoid error
+> **Important**
+>
+> Wait for the computer to restart.
+
+## # Join domain
+
+# **Note:**\
+# "-Restart" parameter is not available on Windows Server 2008 R2\
+# "-Credential" parameter must be specified to avoid error
+
+```PowerShell
 Add-Computer `
-    -DomainName extranet.technologytoolbox.com `-Credential EXTRANET\jjameson-admin
+    -DomainName extranet.technologytoolbox.com `
+    -Credential EXTRANET\jjameson-admin
+```
 
+> **Note**
+>
+> When prompted, type the password for the domain account.
+
+```PowerShell
 Restart-Computer
+```
+
+## Move computer to "SQL Servers" OU
+
+---
+
+**EXT-DC01**
+
+```PowerShell
+$computerName = "EXT-SQL01B"
+$targetPath = ("OU=SQL Servers,OU=Servers,OU=Resources,OU=IT" `
+    + ",DC=extranet,DC=technologytoolbox,DC=com")
+
+Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+```
+
+---
+
+## Login as EXTRANET\\jjameson-admin
+
+```PowerShell
+cls
+```
+
+## # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
 ```
 
 ## # Change drive letter for DVD-ROM
@@ -63,136 +299,98 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-## # Reset WSUS configuration
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
 
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\WSUS\Reset WSUS for SysPrep Image.cmd'
+Enable-PSRemoting -Confirm:$false
 ```
 
-## Add network adapter (Virtual iSCSI 1 - 10.1.10.x)
-
-## # Rename network connections
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-# Note: Get-NetAdapter is not available on Windows Server 2008 R2
-netsh interface show interface
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv4-In)" profile=any `
+    new enable=yes
 
-netsh interface set interface name="Local Area Connection" newname="LAN 1 - 192.168.10.x"
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (Echo Request - ICMPv6-In)" profile=any `
+    new enable=yes
 
-netsh interface set interface name="Local Area Connection 2" newname="iSCSI 1 - 10.1.10.x"
+netsh advfirewall firewall set rule `
+    name="File and Printer Sharing (SMB-In)" profile=any new enable=yes
+
+netsh advfirewall firewall add rule `
+    name="Remote Windows Update (Dynamic RPC)" `
+    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
+    program="%windir%\system32\dllhost.exe" `
+    dir=in `
+    protocol=TCP `
+    localport=RPC `
+    profile=domain `
+    action=Allow
 ```
 
-## # Configure static IP address
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-$ipAddress = "192.168.10.203"
-
-# Note: New-NetIPAddress is not available on Windows Server 2008 R2
-
-netsh interface ipv4 set address name="LAN 1 - 192.168.10.x" source=static address=$ipAddress mask=255.255.255.0 gateway=192.168.10.1
-
-# Note: Set-DNSClientServerAddress is not available on Windows Server 2008 R2
-
-netsh interface ipv4 set dnsserver name="LAN 1 - 192.168.10.x" source=static address=192.168.10.209
-
-netsh interface ipv4 add dnsserver name="LAN 1 - 192.168.10.x" address=192.168.10.210
+netsh advfirewall firewall set rule `
+    name="Remote Windows Update (Dynamic RPC)" new enable=no
 ```
-
-## # Configure iSCSI network adapter
 
 ```PowerShell
-$ipAddress = "10.1.10.203"
-
-# Note: New-NetIPAddress is not available on Windows Server 2008 R2
-
-netsh interface ipv4 set address name = "iSCSI 1 - 10.1.10.x" source=static address=$ipAddress mask=255.255.255.0
-
-# Note: Disable-NetAdapterBinding is not available on Windows Server 2008 R2
-
-# Disable "Client for Microsoft Networks"
-C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d "iSCSI 1 - 10.1.10.x" ms_msclient
-
-# Disable "File and Printer Sharing for Microsoft Networks"
-C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d "iSCSI 1 - 10.1.10.x" ms_server
-
-# Disable "Link-Layer Topology Discovery Mapper I/O Driver"
-C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d "iSCSI 1 - 10.1.10.x" ms_lltdio
-
-# Disable "Link-Layer Topology Discovery Responder"
-C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d "iSCSI 1 - 10.1.10.x" ms_rspndr
-
-$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
-    -Filter "NetConnectionId = 'iSCSI 1 - 10.1.10.x'"
-
-$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
-    -Filter "Index= '$($adapter.DeviceID)'"
-
-# Do not register this connection in DNS
-$adapterConfig.SetDynamicDNSRegistration($false)
-
-# Disable NetBIOS over TCP/IP
-$adapterConfig.SetTcpipNetbios(2)
+cls
 ```
 
-## # Enable jumbo frames
+## # Configure network binding order
 
 ```PowerShell
-# Note: Get-NetAdapterAdvancedProperty is not available on Windows Server 2008 R2
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /o ms_tcpip
+...
+Protocols:
 
-netsh interface ipv4 show interface
+{D7DBFF6D-F51F-4C94-BF35-9CFEBEBA7578}
+"ms_tcpip"
+"Internet Protocol Version 4 (TCP/IPv4)":
+   enabled:   Storage
+   enabled:   Production
 
-Idx     Met         MTU          State                Name
----  ----------  ----------  ------------  ---------------------------
-  1          50  4294967295  connected     Loopback Pseudo-Interface 1
- 11           5        1500  connected     LAN 1 - 192.168.10.x
- 18           5        1500  connected     iSCSI 1 - 10.1.10.x
+cleaning up...finished (0)
+
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /++ "Production" ms_tcpip
+...
+acquiring write lock...success
 
 
-netsh interface ipv4 set subinterface "LAN 1 - 192.168.10.x" mtu=9014 store=persistent
+Protocols:
 
-netsh interface ipv4 set subinterface "iSCSI 1 - 10.1.10.x" mtu=9014 store=persistent
+{D7DBFF6D-F51F-4C94-BF35-9CFEBEBA7578}
+"ms_tcpip"
+"Internet Protocol Version 4 (TCP/IPv4)":
+   enabled:   Storage
+   enabled:   Production
+
+moving 'Production' to the top
+
+   enabled:   Production
+   enabled:   Storage
+
+'Production' found
+
+cleaning up...releasing write lock...success
+finished (0)
 ```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C0/DE4A8BB73A26DFE80036F03F4C7DABC72A37BBC0.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AC/359C0F95AA7D36CDE70BDC5DD886BD1EE3ADB2AC.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F6/9E68B6EBF97963F60D76C8E4980983801510FEF6.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7A/FE8CEE531A1335FD9A2FB2CC259BDBFCC42C687A.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/AE20D522971A50AF377C36A3584DBB9B28BC42CE.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/A13511971496E3BFE5274A0A30715A4DF1D8DFC5.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/32/FC81C1D498BB7CEA8FAFD470A203A291B45DA132.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/AF8913DC9C0420A9AF7CBA3AC1DD8863096B8ADB.png)
-
-```Console
-ping ICEMAN -f -l 8900
-ping 10.1.10.106 -f -l 8900
-```
-
-## Configure network binding order
-
-In the **Network Connections** window, press F10 to view the menu.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/1D564C0C36FAD89CB2968F7D66FB11629AB57FA9.png)
-
-On the **Advanced** menu, click **Advanced Settings...**
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0D/E5027155CEEC2E17E4C82CD44D5F1027AE1B520D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/00/02EFAC1CA528D1624046A17ADF9E73611DE58300.png)
 
 ## Enable iSCSI Initiator
 
-Start -> iSCSI Initiator
+**Start** -> **iSCSI Initiator**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/3F6DE64EBF1E201BDD47D798802EEBB2C9A72CDF.png)
 
-Click Yes.
+Click **Yes**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/5B/38F75FA3835C75B20A80D63314FE3463D9B3095B.png)
 
@@ -271,9 +469,10 @@ On the **Volumes and Devices** tab, click **Auto Configure**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/51DD07BE7BC72545A180AB4C478F03AEA613E26A.png)
 
+Fix binding order:
+
 ```Console
 C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /o ms_tcpip
-
 ...
 Protocols:
 
@@ -281,12 +480,12 @@ Protocols:
 "ms_tcpip"
 "Internet Protocol Version 4 (TCP/IPv4)":
    enabled:   Local Area Connection* 9
-   enabled:   LAN 1 - 192.168.10.x
-   enabled:   iSCSI 1 - 10.1.10.x
+   enabled:   Production
+   enabled:   Storage
 
 cleaning up...finished (0)
 
-C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /++ "LAN 1 - 192.168.10.x" ms_tcpip
+C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe /++ "Production" ms_tcpip
 ...
 acquiring write lock...success
 
@@ -297,16 +496,16 @@ Protocols:
 "ms_tcpip"
 "Internet Protocol Version 4 (TCP/IPv4)":
    enabled:   Local Area Connection* 9
-   enabled:   LAN 1 - 192.168.10.x
-   enabled:   iSCSI 1 - 10.1.10.x
+   enabled:   Production
+   enabled:   Storage
 
-moving 'LAN 1 - 192.168.10.x' to the top
+moving 'Production' to the top
 
-   enabled:   LAN 1 - 192.168.10.x
+   enabled:   Production
    enabled:   Local Area Connection* 9
-   enabled:   iSCSI 1 - 10.1.10.x
+   enabled:   Storage
 
-'LAN 1 - 192.168.10.x' found
+'Production' found
 
 cleaning up...releasing write lock...success
 finished (0)
@@ -332,11 +531,15 @@ Click **Re-run**.
 
 ## Install SQL Server 2008 R2 Service Pack 2
 
+```Console
+Cls
+```
+
 ## # Configure firewall rule for SQL Server
 
-```PowerShell
-# Note: New-NetFirewallRule is not available on Windows Server 2008 R2
+# **Note:** New-NetFirewallRule is not available on Windows Server 2008 R2
 
+```PowerShell
 netsh advfirewall firewall add rule `
     name="SQL Server Database Engine" `
     dir=in `
@@ -345,13 +548,19 @@ netsh advfirewall firewall add rule `
     localport=1433
 ```
 
-## # Change PowerShell execution policy
+```PowerShell
+cls
+```
+
+## # Create scheduled task to delete old database backups
+
+### # Change PowerShell execution policy
 
 ```PowerShell
 Set-ExecutionPolicy RemoteSigned -Force
 ```
 
-## Create scheduled task to delete old database backups
+### Import scheduled task
 
 ## Configure DCOM permissions for SSIS
 
@@ -362,42 +571,6 @@ The application-specific permission settings do not grant Local Launch permissio
  to the user EXTRANET\\svc-sql-agent SID (S-1-5-21-224930944-1780242101-1199596236-1107) from address LocalHost (Using LRPC). This security permission can be modified using the Component Services administrative tool.
 
 Using the steps in **[KB 2000474](KB 2000474) Workaround 1**, add **Local Launch** permissions on **MsDtsServer100** to **EXTRANET\\svc-sql-agent**.
-
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-```PowerShell
-cls
-```
-
-## # Enable PowerShell remoting
-
-```PowerShell
-Enable-PSRemoting -Confirm:$false
-```
-
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-# Note: New-NetFirewallRule is not available on Windows Server 2008 R2
-
-netsh advfirewall firewall add rule `
-    name="Remote Windows Update (Dynamic RPC)" `
-    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
-    program="%windir%\system32\dllhost.exe" `
-    dir=in `
-    protocol=TCP `
-    localport=RPC `
-    profile=Domain `
-    action=Allow
-```
 
 ```PowerShell
 cls
@@ -459,7 +632,7 @@ $imagePath = `
     '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
     + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
 
-Set-VMDvdDrive -ComputerName ANGEL -VMName EXT-SQL01B -Path $imagePath
+Set-VMDvdDrive -ComputerName BEAST -VMName EXT-SQL01B -Path $imagePath
 ```
 
 ---
@@ -502,7 +675,7 @@ cls
 ### # Remove the Operations Manager installation media
 
 ```PowerShell
-Set-VMDvdDrive -ComputerName ANGEL -VMName EXT-SQL01B -Path $null
+Set-VMDvdDrive -ComputerName BEAST -VMName EXT-SQL01B -Path $null
 ```
 
 ---
@@ -517,12 +690,12 @@ cls
 
 ### Alert
 
-_Source: WinMgmt_\
-_Event ID: 10_\
-_Event Category: 0_\
-_User: N/A_\
-_Computer: EXT-SQL01B.extranet.technologytoolbox.com_\
-_Event Description: Event filter with query "SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA "Win32_Processor" AND TargetInstance.LoadPercentage > 99" could not be reactivated in namespace "//./root/CIMV2" because of error 0x80041003. Events cannot be delivered through this filter until the problem is corrected._
+Source: WinMgmt\
+Event ID: 10\
+Event Category: 0\
+User: N/A\
+Computer: EXT-SQL01B.extranet.technologytoolbox.com\
+Event Description: Event filter with query "SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA "Win32_Processor" AND TargetInstance.LoadPercentage > 99" could not be reactivated in namespace "//./root/CIMV2" because of error 0x80041003. Events cannot be delivered through this filter until the problem is corrected.
 
 ### Reference
 
@@ -570,3 +743,17 @@ Next
 ```
 
 ---
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+**TODO:**
