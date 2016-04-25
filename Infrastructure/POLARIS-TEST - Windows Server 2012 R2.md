@@ -1461,6 +1461,48 @@ Event Description: The Execute method of job definition Microsoft.SharePoint.Pub
 
 Requested registry access is not allowed.
 
+```PowerShell
+cls
+```
+
+## # Install and configure Office Web Apps
+
+##### # Create the binding between SharePoint 2013 and Office Web Apps Server
+
+```PowerShell
+New-SPWOPIBinding -ServerName wac.fabrikam.com
+```
+
+```PowerShell
+cls
+```
+
+##### # View the WOPI zone of SharePoint 2013
+
+```PowerShell
+Get-SPWOPIZone
+```
+
+##### # Change the WOPI zone if necessary
+
+```PowerShell
+Set-SPWOPIZone -zone "external-https"
+```
+
+### Configure name resolution for Office Web Apps
+
+---
+
+**EXT-WAC02A**
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.6 `
+    -Hostnames POLARIS-TEST, my-test, team-test, ttweb-test
+```
+
+---
+
 **TODO:**
 
 ## Resolve SCOM alerts due to disk fragmentation

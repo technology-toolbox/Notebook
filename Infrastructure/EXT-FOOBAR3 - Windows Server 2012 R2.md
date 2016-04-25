@@ -257,7 +257,7 @@ New-ADUser `
 ### # Create service account for SecuritasConnect web app
 
 ```PowerShell
-$displayName = "Service account for SecuritasConnect web app (DEV)"
+$displayName = "Service account for SecuritasConnect Web application (DEV)"
 $defaultUserName = "s-web-client-dev"
 
 $cred = Get-Credential -Message $displayName -UserName $defaultUserName
@@ -771,6 +771,20 @@ Set-SPTimerJob "job-delete-job-history" -Schedule "Daily between 12:00:00 and 13
 cls
 ```
 
+## # Install and configure Office Web Apps
+
+#### # Configure the SharePoint 2013 farm to use Office Web Apps
+
+```PowerShell
+New-SPWOPIBinding -ServerName wac.fabrikam.com
+
+Set-SPWOPIZone -zone "external-https"
+```
+
+```PowerShell
+cls
+```
+
 ## # Configure SharePoint services and service applications
 
 ### # Change the service account for the Distributed Cache
@@ -1088,8 +1102,6 @@ Set-SPEnterpriseSearchCrawlContentSource `
     -CrawlScheduleStartDateTime "6:00 AM"
 ```
 
-## TODO: Install and configure Office Web Apps
-
 ```PowerShell
 cls
 ```
@@ -1242,10 +1254,6 @@ $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
 stsadm -o setapppassword -password $plainPassword
 ```
 
-```PowerShell
-cls
-```
-
 #### # Specify the credentials for accessing the trusted forest
 
 ```PowerShell
@@ -1257,6 +1265,7 @@ $peoplePickerCredentials = $cred1, $cred2
 
 & '.\Configure People Picker Forests.ps1' `
     -ServiceCredentials $peoplePickerCredentials `
+    -Confirm:$false `
     -Verbose
 ```
 
@@ -1286,6 +1295,8 @@ Set-Acl -Path $regPath -AclObject $acl
 {TODO: bunch o' stuff skipped here}
 
 ### Configure My Site settings in User Profile service application
+
+[http://client-local.securitasinc.com/sites/my](http://client-local.securitasinc.com/sites/my)
 
 ## Deploy the SecuritasConnect solution
 
@@ -1410,10 +1421,6 @@ cls
 ```PowerShell
 Start-Process `
     "http://client-local.securitasinc.com/_layouts/15/ManageFeatures.aspx"
-```
-
-```PowerShell
-cls
 ```
 
 ### # Import template site content
@@ -1560,6 +1567,21 @@ cls
 
 {End skipped sections}
 
+## Configure name resolution for Office Web Apps
+
+---
+
+**EXT-WAC02A**
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.217 `
+    -Hostnames EXT-FOOBAR3, client-local.securitasinc.com, `
+        cloud-local.securitasinc.com
+```
+
+---
+
 ```PowerShell
 cls
 ```
@@ -1591,13 +1613,13 @@ $webApp.Update()
 
 ---
 
-**FORGE**
+**FOOBAR8**
 
 ### # Delete VM checkpoint - "6.5 Copy SecuritasConnect build to SharePoint server"
 
 ```PowerShell
 $vmHost = "STORM"
-$vmName = "POLARIS-DEV"
+$vmName = "EXT-FOOBAR3"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
 
@@ -1709,11 +1731,32 @@ Start-Process `
     "http://client-local.securitasinc.com/_layouts/15/ManageFeatures.aspx"
 ```
 
+### # Grant Branch Managers permissions to the C&C landing site
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$site = Get-SPSite "http://client-local.securitasinc.com/sites/cc"
+$group = $site.RootWeb.SiteGroups["Collaboration & Community Visitors"]
+$group.AddUser(
+    "c:0-.f|securitassqlroleprovider|branch managers",
+    $null,
+    "Branch Managers",
+    $null)
+
+$claim = New-SPClaimsPrincipal -Identity "Branch Managers" `
+    -IdentityType WindowsSecurityGroupName
+
+$branchManagersUser = $site.RootWeb.EnsureUser($claim.ToEncodedString())
+$group.AddUser($branchManagersUser)
+$site.Dispose()
+```
+
 ```PowerShell
 cls
 ```
 
-### # Remove object cache user accounts
+## # Remove object cache user accounts
 
 ```PowerShell
 $webApp = Get-SPWebApplication http://client-local.securitasinc.com

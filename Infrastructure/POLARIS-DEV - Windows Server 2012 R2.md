@@ -1637,4 +1637,46 @@ From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event
 **EXECUTE permission was denied on the object 'proc_putObjectTVP'**\
 From <[https://social.technet.microsoft.com/Forums/office/en-US/88c2c219-e1b0-4ed2-807a-267dba1a2c0b/execute-permission-was-denied-on-the-object-procputobjecttvp?forum=sharepointadmin](https://social.technet.microsoft.com/Forums/office/en-US/88c2c219-e1b0-4ed2-807a-267dba1a2c0b/execute-permission-was-denied-on-the-object-procputobjecttvp?forum=sharepointadmin)>
 
+```PowerShell
+cls
+```
+
+## # Install and configure Office Web Apps
+
+##### # Create the binding between SharePoint 2013 and Office Web Apps Server
+
+```PowerShell
+New-SPWOPIBinding -ServerName wac.fabrikam.com
+```
+
+```PowerShell
+cls
+```
+
+##### # View the WOPI zone of SharePoint 2013
+
+```PowerShell
+Get-SPWOPIZone
+```
+
+##### # Change the WOPI zone if necessary
+
+```PowerShell
+Set-SPWOPIZone -zone "external-https"
+```
+
+### Configure name resolution for Office Web Apps
+
+---
+
+**EXT-WAC02A**
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.217 `
+    -Hostnames POLARIS-DEV, my-dev, team-dev, ttweb-dev
+```
+
+---
+
 **TODO:**
