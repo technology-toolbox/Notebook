@@ -15,20 +15,14 @@ Saturday, January 30, 2016
 sconfig
 ```
 
-Interface Description: **Realtek PCIe GBE Family Controller**\
+Interface Description: **Intel(R) I210 Gigabit Network Connection**\
 IP Address: **192.168.10.101**\
 Subnet Mask: **255.255.255.0**\
 Default Gateway: **192.168.10.1**\
 Primary DNS Server: **192.168.10.103**\
 Secondary DNS Server: **192.168.10.104**
 
-## Rename computer
-
-```Console
-sconfig
-```
-
-## Join domain
+## Join domain and rename computer
 
 ```Console
 sconfig
@@ -830,5 +824,85 @@ slmgr /ipk {product key}
 ```Console
 slmgr /ato
 ```
+
+## Poor write performance on mirrored Samsung 850 SSDs
+
+### Before
+
+#### BEAST
+
+- C: (128 GB Samsung 850 SSD) - Write Transfer Rate 27,000 - 476,000 MB/s
+- D: (2x 512 GB Samsung 850 SSDs) - Write Transfer Rate 200 - 209,000 MB/s
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/13/2815E2C89342511750F81704256C9103786C5813.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/AA392A1B9D02D8C42A2DD588D5AED6378678D8E2.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/7430280DD491F23732D5F8E0658B11B7BC105C21.png)
+
+#### STORM (for comparison)
+
+- C: (128 GB Samsung 850 SSD) - Write Transfer Rate 29,000 - 475,000 MB/s
+- D: (2x 512 GB Samsung 840 SSDs) - Write Transfer Rate 11,000 - 155,000 MB/s
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/5F016E2CE7959A13764661F53F7FA50CAB4FC8B9.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/92/E85DBFF5ED3F4E88CA202F1E7A016EF74635D492.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/FCF2AE9EFC523E15210AF594B30E390CE352FD93.png)
+
+### Update AHCI drivers
+
+1. Download the latest AHCI drivers from the Intel website:\
+   **Intel® RSTe AHCI & SCU Software RAID driver for Windows**\
+   From <[https://downloadcenter.intel.com/download/25393/Intel-RSTe-AHCI-SCU-Software-RAID-driver-for-Windows-](https://downloadcenter.intel.com/download/25393/Intel-RSTe-AHCI-SCU-Software-RAID-driver-for-Windows-)>
+2. Extract the drivers and copy the files to a temporary location on the server:
+3. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA AHCI Controller (PCI\\VEN_8086&DEV_8D02&...)**:
+4. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA AHCI Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+5. Restart the server.
+
+```Console
+    robocopy "C:\NotBackedUp\Temp\Drivers\Intel\RSTe AHCI & SCU Software RAID driver for Windows\Drivers\x64\Win8_10_2K8R2_2K12\AHCI" '\\BEAST\C$\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI' /E
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI\iaAHCI.inf
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI\iaAHCIB.inf
+```
+
+### After
+
+#### BEAST
+
+- C: (128 GB Samsung 850 SSD) - Write Transfer Rate 46,000 - 476,000 MB/s
+- D: (2x 512 GB Samsung 850 SSDs) - Write Transfer Rate 200 - 209,000 MB/s
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1F/CB6B49C5DD99A0FFD035DB8F5249FBB515ADA61F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/D7AB59E2302364312BED56884C383F61AF8DAA65.png)
+
+### Summary
+
+| Transfer Size [KB] | Before  | (Microsoft driver) | After   | (Intel driver) | %     | Change |
+| ------------------ | ------- | ------------------ | ------- | -------------- | ----- | ------ |
+|                    | Write   | Read               | Write   | Read           | Write | Read   |
+| 0.5                | 198     | 8,320              | 19,359  | 10,163         | 9,677 | 22     |
+| 1                  | 424     | 12,298             | 41,984  | 22,415         | 9,802 | 82     |
+| 2                  | 886     | 29,329             | 74,926  | 44,943         | 8,357 | 53     |
+| 4                  | 2,021   | 67,108             | 179,400 | 83,887         | 8,777 | 25     |
+| 8                  | 2,995   | 128,548            | 256,745 | 192,168        | 8,472 | 49     |
+| 16                 | 4,641   | 227,721            | 332,309 | 281,999        | 7,060 | 24     |
+| 32                 | 7,820   | 413,863            | 349,308 | 475,576        | 4,367 | 15     |
+| 64                 | 15,240  | 574,532            | 316,007 | 531,313        | 1,974 | -8     |
+| 128                | 29,454  | 693,454            | 285,500 | 713,437        | 869   | 3      |
+| 256                | 53,173  | 901,876            | 333,138 | 849,602        | 527   | -6     |
+| 512                | 107,589 | 1,055,274          | 357,913 | 977,313        | 233   | -7     |
+| 1024               | 153,684 | 1,061,256          | 357,913 | 1,004,122      | 133   | -5     |
+| 2048               | 189,483 | 1,107,622          | 359,511 | 1,020,182      | 90    | -8     |
+| 4096               | 201,452 | 1,089,117          | 387,166 | 967,916        | 92    | -11    |
+| 8192               | 209,306 | 1,102,271          | 375,434 | 982,080        | 79    | -11    |
 
 **TODO:**
