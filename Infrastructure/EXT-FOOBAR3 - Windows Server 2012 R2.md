@@ -323,6 +323,29 @@ New-ADUser `
     -PasswordNeverExpires:$true
 ```
 
+### # Create service account for Cloud Portal web app
+
+```PowerShell
+$displayName = "Service account for Cloud Portal Web application (DEV)"
+$defaultUserName = "s-web-cloud-dev"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@extranet.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=Development,DC=extranet,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
 ---
 
 ## Configure VM storage
@@ -1649,6 +1672,307 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
+
+**TODO:**
+
+## Create and configure the Cloud Portal Web application
+
+### Copy Cloud Portal build to SharePoint server
+
+---
+
+**Developer Command Prompt for VS2013 - Run as administrator**
+
+```Console
+tf get C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2 /recursive /force
+tf get "$/Securitas CloudPortal/Main/Code/Securitas.Portal.ruleset" /force
+```
+
+---
+
+### # Create the Web application
+
+```PowerShell
+cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+
+& '.\Create Web Application.ps1' -Verbose
+```
+
+> **Note**
+>
+> When prompted for the service account, specify **EXTRANET\\s-web-cloud-dev**.\
+> Expect the previous operation to complete in approximately 2 minutes.
+
+```PowerShell
+cls
+```
+
+### # Restore content database or create initial site collections
+
+#### # Create initial site collections
+
+```PowerShell
+& '.\Create Site Collections.ps1' -Verbose
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 1 minute.
+
+```PowerShell
+cls
+```
+
+### # Configure object cache user accounts
+
+```PowerShell
+& '.\Configure Object Cache User Accounts.ps1' -Verbose
+
+Iisreset
+```
+
+```PowerShell
+cls
+```
+
+### # Configure the People Picker to support searches across one-way trust
+
+#### # Specify the credentials for accessing the trusted forest
+
+```PowerShell
+$cred1 = Get-Credential "EXTRANET\s-web-cloud-dev"
+
+$cred2 = Get-Credential "TECHTOOLBOX\svc-sp-ups"
+
+$cred3 = Get-Credential "FABRIKAM\s-sp-ups"
+
+$peoplePickerCredentials = $cred1, $cred2, $cred3
+
+& '.\Configure People Picker Forests.ps1' `
+    -ServiceCredentials $peoplePickerCredentials `
+    -Confirm:$false `
+    -Verbose
+```
+
+### Expand content database files
+
+(skipped)
+
+### DEV - Map Web application to loopback address in Hosts file
+
+(skipped)
+
+### Allow specific host names mapped to 127.0.0.1
+
+(skipped)
+
+### Configure SSL on the Internet zone
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Enable anonymous access to the site
+
+```PowerShell
+& '.\Enable Anonymous Access.ps1'
+```
+
+### TODO: # Configure claims-based authentication
+
+#### # Add Web.config modifications for claims-based authentication
+
+```PowerShell
+Push-Location C:\inetpub\wwwroot\wss\VirtualDirectories\cloud-local.securitasinc.com80
+
+Copy-Item Web.config "Web - Copy.config"
+
+# Notepad Web.config
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    'C:\NotBackedUp\Temp\web - cloud-local.securitasinc.com.config' `
+    .\web.config
+```
+
+**{copy/paste Web.config entries from browser -- to avoid issue when copy/pasting from OneNote}**
+
+```PowerShell
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Validate claims authentication configuration
+
+```PowerShell
+Start-Process "http://cloud-local.securitasinc.com"
+```
+
+### Enable disk-based caching for the Web application
+
+(skipped)
+
+### Configure SharePoint groups
+
+(skipped)
+
+## Deploy the Cloud Portal solution
+
+---
+
+**Developer Command Prompt for VS2013 - Run as administrator**
+
+### REM DEV - Build Visual Studio solution and package SharePoint projects
+
+```Console
+cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code
+msbuild Securitas.CloudPortal.sln /p:IsPackaging=true
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Configure logging
+
+```PowerShell
+cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+
+& '.\Add Event Log Sources.ps1' -Verbose
+```
+
+### # Install Cloud Portal solutions and activate the features
+
+```PowerShell
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+```
+
+> **Note**
+>
+> Expect the previous operations to complete in approximately 4.5 minutes.
+
+### Create a custom sign-in page
+
+### Configure redirect for single-site users
+
+#### Create the "User Sites" List
+
+#### Add items to the "User Sites" list
+
+#### Add redirect Web Part to Cloud Portal home page
+
+### Configure "Online Provisioning"
+
+#### Configure database permissions for "Online Provisioning"
+
+##### Add service account to Customer_Provisioner role
+
+##### Grant database permissions to Customer_Provisioner role
+
+#### Create and configure the "Online Provisioning" site
+
+### Configure Google Analytics on the Cloud Portal Web application
+
+## Create and configure C&C site collections
+
+```PowerShell
+cls
+```
+
+### # Create "Collaboration & Community" site collection
+
+```PowerShell
+& '.\Create Client Site Collection.ps1' "Fabrikam Shipping"
+```
+
+### Apply the "Securitas Client Site" template to the top-level site
+
+### Modify the site title, description, and logo
+
+### Update the C&C site home page
+
+### Create a team collaboration site (optional)
+
+### Create a blog site (optional)
+
+### Create a wiki site (optional)
+
+```PowerShell
+cls
+$sqlcmd = @"
+```
+
+#### -- Configure permissions for the SecuritasPortal database
+
+```Console
+USE [SecuritasPortal]
+GO
+
+CREATE USER [EXTRANET\s-sp-farm-dev] FOR LOGIN [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Membership_BasicAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Membership_ReportingAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+
+CREATE USER [EXTRANET\s-web-client-dev] FOR LOGIN [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Membership_FullAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Profile_BasicAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [Customer_Reader] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+```Console
+cls
+```
+
+## # Create and configure C&C site collections
+
+### # Create site collection for a Securitas client
+
+```PowerShell
+& '.\Create Client Site Collection.ps1' "ABC Company"
+```
+
+{Begin skipped sections}
+
+### Apply the "Securitas Client Site" template to the top-level site
+
+### Modify the site title, description, and logo
+
+### Update the client site home page
+
+### Create a blog site (optional)
+
+### Create a wiki site (optional)
+
+{End skipped sections}
 
 **TODO:**
 
