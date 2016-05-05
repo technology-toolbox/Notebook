@@ -795,6 +795,54 @@ $group.AddUser($branchManagersUser)
 $site.Dispose()
 ```
 
+```PowerShell
+cls
+```
+
+## # Create and configure C&C site collections
+
+### # Create site collection for a Securitas client
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\3.0.632.0\DeploymentFiles\Scripts
+
+& '.\Create Client Site Collection.ps1' "ABC Company"
+```
+
+```PowerShell
+cls
+```
+
+### # Apply the "Securitas Client Site" template to the top-level site
+
+```PowerShell
+Start-Process "http://client-local.securitasinc.com/sites/ABC-Company"
+```
+
+### Modify the site title, description, and logo
+
+(skipped)
+
+### Update the client site home page
+
+(also upload sample documents)
+
+### Create a blog site (optional)
+
+```PowerShell
+cls
+```
+
+### # Create a wiki site (optional)
+
+```PowerShell
+$siteUrl = "http://client-local.securitasinc.com/sites/ABC-Company"
+
+Enable-SPFeature "TaxonomyFieldAdded" -Url $siteUrl
+```
+
+(create site)
+
 ## Resolve issues with PowerPoint service application
 
 ### Issue 1: Service application proxy not added to default group
@@ -1965,5 +2013,163 @@ Get-SPSite http://client-local.securitasinc.com/Post-Orders/* -Limit ALL |
 ```
 
 ## Snapshot VM - "Baseline Client Portal 3.0.647.0 / Cloud Portal 1.0.106.0 / Employee Portal 1.0.25.0"
+
+```PowerShell
+cls
+```
+
+## # Upgrade SecuritasConnect to "v3.0 Sprint-23" release
+
+### # Remove previous versions of the SecuritasConnect WSPs
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\3.0.647.0\DeploymentFiles\Scripts
+
+& '.\Deactivate Features.ps1'
+
+& '.\Retract Solutions.ps1'
+
+& '.\Delete Solutions.ps1'
+```
+
+```PowerShell
+cls
+```
+
+### # Install new versions of the SecuritasConnect WSPs
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\3.0.648.0\DeploymentFiles\Scripts
+
+& '.\Add Solutions.ps1'
+
+& '.\Deploy Solutions.ps1'
+
+& '.\Activate Features.ps1'
+```
+
+### Configure Google Analytics on the SecuritasConnect Web application
+
+```PowerShell
+cls
+```
+
+## # Upgrade Cloud Portal to "v1.0 Sprint-18" release
+
+### # Remove previous versions of the Cloud Portal WSPs
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\CloudPortal\1.0.106.0\DeploymentFiles\Scripts
+
+& '.\Deactivate Features.ps1'
+
+& '.\Retract Solutions.ps1'
+
+& '.\Delete Solutions.ps1'
+```
+
+```PowerShell
+cls
+```
+
+### # Install new versions of the Cloud Portal WSPs
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\CloudPortal\1.0.111.0\DeploymentFiles\Scripts
+
+& '.\Add Solutions.ps1'
+
+& '.\Deploy Solutions.ps1'
+
+& '.\Activate Features.ps1'
+```
+
+### Configure Google Analytics on the Cloud Portal Web application
+
+```PowerShell
+cls
+```
+
+## # Upgrade Employee Portal to "v1.0 Sprint-03" release
+
+### # Backup Employee Portal Web.config file
+
+```PowerShell
+copy `
+    C:\inetpub\wwwroot\employee-local.securitasinc.com\Web.config `
+    "C:\NotBackedUp\Temp\Employee Portal - Web.config"
+```
+
+### # Deploy Employee Portal website on Central Administration server
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Debug\_PublishedWebsites\Web_Package
+
+attrib -r .\Web.SetParameters.xml
+
+Notepad .\Web.SetParameters.xml
+```
+
+Copy/paste the following:
+
+---
+
+**Web.SetParameters.xml**
+
+```XML
+<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter
+    name="IIS Web Application Name"
+    value="employee-local.securitasinc.com" />
+  <setParameter
+    name="SecuritasPortal-Web.config Connection String"
+    value="Server=EXT-FOOBAR; Database=SecuritasPortal; Integrated Security=true" />
+  <setParameter
+    name="SecuritasPortalDbContext-Web.config Connection String"
+    value="Data Source=EXT-FOOBAR; Initial Catalog=SecuritasPortal; Integrated Security=True; MultipleActiveResultSets=True;" />
+</parameters>
+```
+
+---
+
+```Console
+.\Web.deploy.cmd /y
+```
+
+```Console
+cls
+```
+
+### # Configure application settings and web service URLs
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    "C:\NotBackedUp\Temp\Employee Portal - web.config" `
+    C:\inetpub\wwwroot\employee-local.securitasinc.com\web.config
+```
+
+In the **GoogleAnalytics.TrackingId** application setting, type the Google Analytics tracking ID to use for the Employee Portal (UA-25949832-3).
+
+### Deploy Employee Portal website content to other web servers in the farm
+
+(skipped)
+
+## Snapshot VM - "Baseline Client Portal 3.0.648.0 / Cloud Portal 1.0.111.0 / Employee Portal 1.0.28.0"
+
+## Resolve issue with C&C site collections created in Office Web Apps cache database
+
+```PowerShell
+$db1 = Get-SPContentDatabase WSS_Content_CloudPortal
+
+$wacCacheDb = Get-SPContentDatabase OfficeWebAppsCache_CloudPortal
+
+$wacCacheDb | Get-SPSite | ? { $_.ServerRelativeUrl -ne '/sites/Office_Viewing_Service_Cache' } |
+    Move-SPSite -DestinationDatabase $db1 -Confirm:$false
+
+iisreset
+
+Set-SPContentDatabase -Identity OfficeWebAppsCache_CloudPortal -MaxSiteCount 1 -WarningSiteCount 0
+```
 
 **TODO:**
