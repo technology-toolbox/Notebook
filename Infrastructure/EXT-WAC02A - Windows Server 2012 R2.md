@@ -398,7 +398,7 @@ Set-VMDvdDrive -ComputerName STORM -VMName EXT-WAC02A -Path $null
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
 | 0    | C:           | 40 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 5 GB        | Dynamic  | 4K                   | Data01       |
+| 1    | D:           | 10 GB       | Dynamic  | 4K                   | Data01       |
 | 2    | L:           | 10 GB       | Dynamic  | 4K                   | Log01        |
 
 ---
@@ -414,7 +414,7 @@ $vmName = "EXT-WAC02A"
 $vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
     + "_Data01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 5GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 10GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
@@ -612,7 +612,7 @@ cls
 ```PowerShell
 New-OfficeWebAppsFarm `
     -CacheLocation "D:\Microsoft\OfficeWebApps\Working\d" `
-    -CacheSizeInGB 3 `
+    -CacheSizeInGB 5 `
     -CertificateName "OfficeWebApps Certificate" `
     -EditingEnabled `
     -ExternalUrl "https://wac.fabrikam.com" `
@@ -643,7 +643,39 @@ cls
 #### # Prevent unwanted hosts from connecting to Office Web Apps Server
 
 ```PowerShell
+New-OfficeWebAppsHost -Domain my-dev
+New-OfficeWebAppsHost -Domain my-test
+New-OfficeWebAppsHost -Domain my
+
+New-OfficeWebAppsHost -Domain team-dev
+New-OfficeWebAppsHost -Domain team-test
+New-OfficeWebAppsHost -Domain team
+
+New-OfficeWebAppsHost -Domain ttweb-dev
+New-OfficeWebAppsHost -Domain ttweb-test
+New-OfficeWebAppsHost -Domain ttweb
+
 New-OfficeWebAppsHost -Domain securitasinc.com
+```
+
+#### # Add hosts entries for name resolution
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.55 `
+    -Hostnames POLARIS-DEV, my-dev, team-dev, ttweb-dev
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.6 `
+    -Hostnames POLARIS-TEST, my-test, team-test, ttweb-test
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.37 `
+    -Hostnames POLARIS, my, team, ttweb
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.217 `
+    -Hostnames EXT-FOOBAR3, client-local.securitasinc.com
 ```
 
 #### Configure the host
@@ -672,6 +704,27 @@ Get-SPWOPIZone
 
 ```PowerShell
 Set-SPWOPIZone -zone "external-https"
+```
+
+---
+
+## Reduce memory (to free up memory for other VMs)
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+### # Set memory to 4 GB
+
+```PowerShell
+$vmHost = "STORM"
+$vmName = "EXT-WAC02A"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Set-VM -ComputerName $vmHost -Name $vmName -MemoryStartupBytes 4GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
