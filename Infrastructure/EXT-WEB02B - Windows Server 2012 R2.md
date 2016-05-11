@@ -832,3 +832,49 @@ notepad web.config
 ```PowerShell
 Pop-Location
 ```
+
+## Create and configure the Cloud Portal Web application
+
+### Configure SSL on the Internet zone
+
+#### Add an HTTPS binding to the site in IIS
+
+```PowerShell
+cls
+```
+
+### # Enable disk-based caching for the Web application
+
+```PowerShell
+Push-Location C:\inetpub\wwwroot\wss\VirtualDirectories\cloud-test.securitasinc.com80
+
+copy web.config "web - Copy.config"
+
+Notepad web.config
+```
+
+---
+
+**Web.config**
+
+```XML
+    <BlobCache
+      location="D:\BlobCache\14"
+      path="\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
+      maxSize="2"
+      enabled="true" />
+```
+
+---
+
+```PowerShell
+Pop-Location
+```
+
+### # Configure logging
+
+```PowerShell
+cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+
+& '.\Add Event Log Sources.ps1' -Verbose
+```
