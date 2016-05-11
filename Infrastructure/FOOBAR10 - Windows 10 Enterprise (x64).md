@@ -208,19 +208,23 @@ cls
 
 ```PowerShell
 net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+```
 
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
 robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 ```
 
-```PowerShell
+```Console
 cls
 ```
 
 ## # Install Remote Server Administration Tools for Windows 10
 
 ```PowerShell
-net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
-
 & "\\ICEMAN\Public\Download\Microsoft\Remote Server Administration Tools for Windows 10\WindowsTH-KB2693643-x64.msu"
 ```
 
@@ -284,7 +288,13 @@ cls
 
 ```PowerShell
 net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+```
 
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
 $installerPath = '\\ICEMAN\Public\Download\Microsoft\Report Viewer 2008 SP1' `
     + '\ReportViewer.exe'
 
@@ -333,6 +343,10 @@ Restart-Computer
 ```PowerShell
 net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
 ```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
 
 ```PowerShell
 cls
@@ -604,7 +618,13 @@ cls
 
 ```PowerShell
 net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+```
 
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
 & "\\ICEMAN\Products\Adobe\AdbeRdr830_en_US.msi"
 
 & "\\ICEMAN\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
@@ -707,7 +727,13 @@ cls
 
 ```PowerShell
 net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+```
 
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
 & "\\ICEMAN\Archive\Clients\Securitas\Check_Point_VPN_client\Securitas USA VPN E80.62 Build 452.msi"
 ```
 
@@ -727,7 +753,13 @@ net localgroup Administrators /add TECHTOOLBOX\svc-tfs
 
 ```PowerShell
 net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+```
 
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
 $imagePath = '\\ICEMAN\Products\Microsoft\Visual Studio 2010' `
     + '\en_visual_studio_team_explorer_2010_x86_dvd_509698.iso'
 
@@ -1001,6 +1033,28 @@ System.UnauthorizedAccessException: Access to the path 'C:\\Program Files (x86)\
 ```PowerShell
 icacls 'C:\Program Files (x86)\Microsoft Team Foundation Server Integration Tools' `
     /grant TECHTOOLBOX\svc-tfs:`(OI`)`(CI`)`(M`)
+```
+
+## Install dependencies for building SharePoint solutions
+
+### Install reference assemblies
+
+```Console
+net use \\ICEMAN\Builds /USER:PNKUS\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
+robocopy `
+    '\\ICEMAN\Builds\Reference Assemblies' `
+    'C:\Program Files\Reference Assemblies' /E
+
+& 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v4\AssemblyFoldersEx - x64.reg'
+
+& 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v5\AssemblyFoldersEx - x64.reg'
 ```
 
 **TODO:**
