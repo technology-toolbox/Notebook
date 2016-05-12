@@ -233,6 +233,12 @@ New-NetFirewallRule `
     -LocalPort RPC `
     -Profile Domain `
     -Action Allow
+
+Enable-NetFirewallRule `
+    -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)"
+
+Enable-NetFirewallRule `
+    -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
 ```
 
 ## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
@@ -369,6 +375,18 @@ Set-VMDvdDrive -ComputerName BEAST -VMName EXT-WEB02A -Path $null
 ---
 
 ### # Approve manual agent install in Operations Manager
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
 
 ## Configure VM storage
 

@@ -161,22 +161,39 @@ Enable-PSRemoting -Confirm:$false
 
 ```PowerShell
 New-NetFirewallRule `
+    -Name 'Remote Windows Update (DCOM-In)' `
+    -DisplayName 'Remote Windows Update (DCOM-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 135 `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
     -Name 'Remote Windows Update (Dynamic RPC)' `
     -DisplayName 'Remote Windows Update (Dynamic RPC)' `
     -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Technology Toolbox (Custom)' `
+    -Group 'Remote Windows Update' `
     -Program '%windir%\system32\dllhost.exe' `
     -Direction Inbound `
     -Protocol TCP `
     -LocalPort RPC `
     -Profile Domain `
     -Action Allow
+
+Enable-NetFirewallRule `
+    -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)"
+
+Enable-NetFirewallRule `
+    -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
+Disable-NetFirewallRule -Group 'Remote Windows Update'
 ```
 
 ## Create service accounts for SharePoint
@@ -1458,6 +1475,46 @@ Start-Process `
 
 ### Create users in the SecuritasPortal database
 
+declare @p12 uniqueidentifier\
+set @p12='5A7AA105-E6E5-4FA4-987B-9473B0218D8D'\
+exec dbo.aspnet_Membership_CreateUser @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@Password=N'gPMR23Dwxfb9l6tr/ZEbqniDFAM=',@PasswordSalt=N'L0n3JqA8UijqS+If66NxMw==',@Email=N'test-abc1@foobar.com',@PasswordQuestion=NULL,@PasswordAnswer=NULL,@IsApproved=1,@UniqueEmail=1,@PasswordFormat=1,@CurrentTimeUtc='2016-05-05 18:37:40',@UserId=@p12 output\
+select @p12\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Roles_GetAllRoles @ApplicationName=N'Securitas Portal'\
+go\
+exec sp_reset_connection\
+go\
+declare @p12 uniqueidentifier\
+set @p12='A11AA014-C7BB-4666-8C8D-2E06A283EFAA'\
+exec dbo.aspnet_Membership_CreateUser @ApplicationName=N'Securitas Portal',@UserName=N'test-lite1',@Password=N'OJKhTDAoFv9ZkJvdwWq4KhxkE6w=',@PasswordSalt=N'izDNv8bs5M4mpU4WApoPMg==',@Email=N'test-lite1@foobar.com',@PasswordQuestion=NULL,@PasswordAnswer=NULL,@IsApproved=1,@UniqueEmail=1,@PasswordFormat=1,@CurrentTimeUtc='2016-05-05 18:38:50',@UserId=@p12 output\
+select @p12\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Roles_GetAllRoles @ApplicationName=N'Securitas Portal'\
+go\
+exec sp_reset_connection\
+go\
+declare @p12 uniqueidentifier\
+set @p12='635B2CBE-477E-4BA1-93C3-521477316C0F'\
+exec dbo.aspnet_Membership_CreateUser @ApplicationName=N'Securitas Portal',@UserName=N'test-bm1',@Password=N'Vv20ry7PAwhbvZiXz5LI9R5fU+o=',@PasswordSalt=N'7s4DV9j94WjMZAZMljBoxA==',@Email=N'test-bm1@technologytoolbox.com',@PasswordQuestion=NULL,@PasswordAnswer=NULL,@IsApproved=1,@UniqueEmail=1,@PasswordFormat=1,@CurrentTimeUtc='2016-05-05 18:39:09',@UserId=@p12 output\
+select @p12\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_UsersInRoles_AddUsersToRoles @ApplicationName=N'Securitas Portal',@RoleNames=N'Branch Managers',@UserNames=N'test-bm1',@CurrentTimeUtc='2016-05-05 18:39:09.937'\
+go\
+exec dbo.aspnet_CheckSchemaVersion @Feature=N'Role Manager',@CompatibleSchemaVersion=N'1'\
+go\
+exec dbo.aspnet_Roles_GetAllRoles @ApplicationName=N'Securitas Portal'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_UsersInRoles_GetUsersInRoles @ApplicationName=N'Securitas Portal',@RoleName=N'Branch Managers'\
+go
+
 #### Create users for Securitas clients
 
 | **User Name** | **E-mail**            |
@@ -1563,6 +1620,10 @@ $site.Dispose()
 #### Configure the search settings for the C&C landing site
 
 {End skipped sections}
+
+### Configure Google Analytics on the SecuritasConnect Web application
+
+Tracking ID: **UA-25949832-4**
 
 ```PowerShell
 cls
@@ -1675,7 +1736,24 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 **TODO:**
 
-## Create and configure the Cloud Portal Web application
+```PowerShell
+cls
+```
+
+## # Create and configure the Cloud Portal Web application
+
+### # Set environment variables
+
+```PowerShell
+[Environment]::SetEnvironmentVariable(
+  "SECURITAS_CLOUD_PORTAL_URL",
+  "http://cloud-local.securitasinc.com",
+  "Machine")
+```
+
+> **Important**
+>
+> Restart PowerShell for environment variable to take effect.
 
 ### Copy Cloud Portal build to SharePoint server
 
@@ -1728,11 +1806,7 @@ cls
 ```PowerShell
 & '.\Configure Object Cache User Accounts.ps1' -Verbose
 
-Iisreset
-```
-
-```PowerShell
-cls
+iisreset
 ```
 
 ### # Configure the People Picker to support searches across one-way trust
@@ -1780,7 +1854,7 @@ cls
 & '.\Enable Anonymous Access.ps1'
 ```
 
-### TODO: # Configure claims-based authentication
+### # Configure claims-based authentication
 
 #### # Add Web.config modifications for claims-based authentication
 
@@ -1857,10 +1931,6 @@ cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
 & '.\Activate Features.ps1' -Verbose
 ```
 
-> **Note**
->
-> Expect the previous operations to complete in approximately 4.5 minutes.
-
 ### Create a custom sign-in page
 
 ### Configure redirect for single-site users
@@ -1873,21 +1943,33 @@ cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
 
 ### Configure "Online Provisioning"
 
+(skipped)
+
 #### Configure database permissions for "Online Provisioning"
+
+(skipped)
 
 ##### Add service account to Customer_Provisioner role
 
+(skipped)
+
 ##### Grant database permissions to Customer_Provisioner role
+
+(skipped)
 
 #### Create and configure the "Online Provisioning" site
 
+(skipped)
+
 ### Configure Google Analytics on the Cloud Portal Web application
 
-## Create and configure C&C site collections
+Tracking ID: **UA-25949832-5**
 
 ```PowerShell
 cls
 ```
+
+## # Create and configure C&C site collections
 
 ### # Create "Collaboration & Community" site collection
 
@@ -1906,6 +1988,8 @@ cls
 ### Create a blog site (optional)
 
 ### Create a wiki site (optional)
+
+**TODO:**
 
 ```PowerShell
 cls

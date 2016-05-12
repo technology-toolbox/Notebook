@@ -147,7 +147,7 @@ net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
 
 ## Install Fabrikam Fiber application
 
-## # Configure application pool for Fabrikam website
+### # Configure application pool for Fabrikam website
 
 ```PowerShell
 Import-Module WebAdministration
@@ -161,7 +161,7 @@ $appPool | Set-Item
 Set-ItemProperty -Path IIS:\Sites\Fabrikam -Name ApplicationPool -Value FabrikamAppPool
 ```
 
-## # Configure permissions on App_Data folder
+### # Configure permissions on App_Data folder
 
 ```PowerShell
 $appDataPath = (Get-Item IIS:\\Sites\Fabrikam).physicalPath + "App_Data"
@@ -196,43 +196,47 @@ cls
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Enable firewall rules for inbound "ping" requests (required for POSHPAIG)
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (DCOM-In)' `
+    -DisplayName 'Remote Windows Update (DCOM-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 135 `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+```
+
+#### # Enable firewall rules for inbound "ping" requests (required for POSHPAIG)
 
 ```PowerShell
 $profile = Get-NetFirewallProfile "Domain"
 
 Get-NetFirewallRule -AssociatedNetFirewallProfile $profile |
-    Where-Object { $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv4-In)" `
+    Where-Object {
+        $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv4-In)" `
         -or $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv6-In)" } |
     Enable-NetFirewallRule
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
+## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-$cred = Get-Credential FABRIKAM\jjameson-admin
-
-$computer = 'FAB-WEB01.corp.fabrikam.com'
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -Credential $cred -ScriptBlock $scriptBlock
+Disable-NetFirewallRule -Group 'Remote Windows Update'
 ```
-
----

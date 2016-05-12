@@ -131,32 +131,47 @@ Install-ADDSDomainController `
     -SysvolPath "C:\Windows\SYSVOL"
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-$cred = Get-Credential FABRIKAM\jjameson-admin
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (DCOM-In)' `
+    -DisplayName 'Remote Windows Update (DCOM-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 135 `
+    -Profile Domain `
+    -Action Allow
 
-$computer = 'FAB-DC02'
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -Credential $cred -ScriptBlock $scriptBlock
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
 ```
 
----
+#### # Enable firewall rules for inbound "ping" requests (required for POSHPAIG)
+
+```PowerShell
+$profile = Get-NetFirewallProfile "Domain"
+
+Get-NetFirewallRule -AssociatedNetFirewallProfile $profile |
+    Where-Object {
+        $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv4-In)" `
+        -or $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv6-In)" } |
+    Enable-NetFirewallRule
+```
+
+## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+Disable-NetFirewallRule -Group 'Remote Windows Update'
+```
