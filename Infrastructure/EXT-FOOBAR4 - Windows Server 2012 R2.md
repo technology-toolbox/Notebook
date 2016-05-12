@@ -190,6 +190,12 @@ New-NetFirewallRule `
     -LocalPort RPC `
     -Profile Domain `
     -Action Allow
+
+Enable-NetFirewallRule `
+    -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)"
+
+Enable-NetFirewallRule `
+    -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
 ```
 
 #### # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
@@ -1789,7 +1795,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-### Get latest version of Client Portal solution and build WSP packages
+### Get latest version of Client Portal solution
 
 ---
 
@@ -1798,8 +1804,6 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ```Console
 tf get C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2 /recursive /force
 tf get "$/Securitas ClientPortal/Main/Code/Securitas.Portal.ruleset" /force
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code
-msbuild SecuritasClientPortal.sln /p:IsPackaging=true
 ```
 
 ---
@@ -2439,6 +2443,20 @@ cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
 cls
 ```
 
+### # Install third-party SharePoint solutions
+
+```PowerShell
+robocopy `
+    '\\ICEMAN\Products\Boost Solutions' `
+    'C:\NotBackedUp\Temp\Boost Solutions' /E
+```
+
+Extract zip and start **Setup.exe**
+
+```PowerShell
+cls
+```
+
 ### # Restore content database or create initial site collections
 
 #### # Restore content database
@@ -2584,10 +2602,6 @@ $cred3 = Get-Credential "FABRIKAM\s-sp-ups"
     -Verbose
 ```
 
-### Expand content database files
-
-(skipped)
-
 ### DEV - Map Web application to loopback address in Hosts file
 
 (skipped)
@@ -2601,37 +2615,6 @@ $cred3 = Get-Credential "FABRIKAM\s-sp-ups"
 (skipped)
 
 ### Enable anonymous access to the site
-
-(skipped)
-
-```PowerShell
-cls
-```
-
-### # Configure claims-based authentication
-
-#### # Add Web.config modifications for claims-based authentication
-
-```PowerShell
-Push-Location C:\inetpub\wwwroot\wss\VirtualDirectories\cloud-local.securitasinc.com80
-
-Copy-Item Web.config "Web - Copy.config"
-
-#Notepad Web.config
-#copy .\web.config 'C:\NotBackedUp\Temp\web - cloud-local.securitasinc.com.config'
-
-C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
-    'C:\NotBackedUp\Temp\web - cloud-local.securitasinc.com.config' `
-    .\web.config
-```
-
-**{copy/paste Web.config entries from browser -- to avoid issue when copy/pasting from OneNote}**
-
-```PowerShell
-Pop-Location
-```
-
-#### Validate claims authentication configuration
 
 (skipped)
 
@@ -2660,43 +2643,36 @@ msbuild Securitas.CloudPortal.sln /p:IsPackaging=true
 
 ---
 
-```Console
+```PowerShell
 cls
 ```
 
-### TODO: # Configure the SecuritasPortal database
+### # Configure database permissions for "Online Provisioning"
 
 ```PowerShell
 $sqlcmd = @"
-```
-
-#### -- Configure permissions for the SecuritasPortal database
-
-```Console
 USE [SecuritasPortal]
 GO
 
-CREATE USER [EXTRANET\s-web-client-dev] FOR LOGIN [EXTRANET\s-web-client-dev]
+CREATE USER [EXTRANET\s-web-cloud-dev] FOR LOGIN [EXTRANET\s-web-cloud-dev]
 GO
-ALTER ROLE [aspnet_Membership_FullAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+ALTER ROLE [aspnet_Membership_FullAccess] ADD MEMBER [EXTRANET\s-web-cloud-dev]
 GO
-ALTER ROLE [aspnet_Profile_BasicAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+ALTER ROLE [aspnet_Profile_BasicAccess] ADD MEMBER [EXTRANET\s-web-cloud-dev]
 GO
-ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-web-cloud-dev]
 GO
-ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-web-cloud-dev]
 GO
-ALTER ROLE [Customer_Reader] ADD MEMBER [EXTRANET\s-web-client-dev]
+ALTER ROLE [Customer_Provisioner] ADD MEMBER [EXTRANET\s-web-cloud-dev]
+GO
+ALTER ROLE [Customer_Reader] ADD MEMBER [EXTRANET\s-web-cloud-dev]
 GO
 "@
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
 
 Set-Location C:
-```
-
-```Console
-cls
 ```
 
 ### # Configure logging
@@ -2748,12 +2724,12 @@ $webAppUrl = "http://cloud-local.securitasinc.com"
 cls
 ```
 
-### # Configure the search settings for the Cloud Portal
+### # Configure search settings for the Cloud Portal
 
 #### # Hide the Search navigation item on the Cloud Portal top-level site
 
 ```PowerShell
-Start-Process "http://client-local.securitasinc.com/sites/cc"
+Start-Process "http://cloud-local.securitasinc.com"
 ```
 
 ```PowerShell
@@ -2763,7 +2739,7 @@ cls
 #### # Configure the search settings for the Cloud Portal top-level site
 
 ```PowerShell
-Start-Process "http://client-local.securitasinc.com/sites/cc"
+Start-Process "http://cloud-local.securitasinc.com"
 ```
 
 ### Configure redirect for single-site users
