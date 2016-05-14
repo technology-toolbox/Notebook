@@ -444,3 +444,56 @@ Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
 
 ---
+
+## Issue: Windows Update (KB3159706) broke WSUS console
+
+### Issue
+
+WSUS clients started failing with error 0x8024401C
+
+Attempting to open WSUS console generated errors, which led to the discovery of the following errors in the event log:
+
+Log Name:      Application\
+Source:        Windows Server Update Services\
+Date:          5/13/2016 8:39:56 AM\
+Event ID:      507\
+Task Category: 1\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      COLOSSUS.corp.technologytoolbox.com\
+Description:\
+Update Services failed its initialization and stopped.
+
+Log Name:      System\
+Source:        Service Control Manager\
+Date:          5/13/2016 8:39:56 AM\
+Event ID:      7031\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      COLOSSUS.corp.technologytoolbox.com\
+Description:\
+The WSUS Service service terminated unexpectedly.  It has done this 1 time(s).  The following corrective action will be taken in 300000 milliseconds: Restart the service.
+
+### References
+
+**Update enables ESD decryption provision in WSUS in Windows Server 2012 and Windows Server 2012 R2**\
+From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
+
+**The long-term fix for KB3148812 issues**\
+From <[https://blogs.technet.microsoft.com/wsus/2016/05/05/the-long-term-fix-for-kb3148812-issues/](https://blogs.technet.microsoft.com/wsus/2016/05/05/the-long-term-fix-for-kb3148812-issues/)>
+
+### Solution
+
+Manual steps required to complete the installation of this update
+
+1. Open an elevated Command Prompt window, and then run the following command (case sensitive, assume "C" as the system volume):
+"C:\\Program Files\\Update Services\\Tools\\wsusutil.exe" postinstall /servicing
+2. Select **HTTP Activation **under **.NET Framework 4.5 Features** in the Server Manager Add Roles and Features wizard.
+3. Restart the WSUS service.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/06E6407CAFFDA2F33739002CABD4137317C46E7D.jpg)
+
+From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
