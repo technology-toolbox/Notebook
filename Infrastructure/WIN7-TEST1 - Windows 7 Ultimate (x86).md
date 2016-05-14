@@ -141,10 +141,6 @@ netsh advfirewall firewall set rule `
     name="File and Printer Sharing (Echo Request - ICMPv6-In)" profile=domain `
     new enable=yes
 
-netsh advfirewall firewall set rule `
-    name="File and Printer Sharing (SMB-In)" profile=domain `
-    new enable=yes
-
 netsh advfirewall firewall add rule `
     name="Remote Windows Update (Dynamic RPC)" `
     description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
@@ -154,6 +150,25 @@ netsh advfirewall firewall add rule `
     localport=RPC `
     profile=Domain `
     action=Allow
+
+netsh advfirewall firewall add rule `
+    name="Remote Windows Update (SMB-In)" `
+    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
+    dir=in `
+    protocol=TCP `
+    localport=445 `
+    profile=Domain `
+    action=Allow
+
+netsh advfirewall firewall add rule `
+    name="Remote Windows Update (WMI-In)" `
+    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
+    program="%windir%\system32\svchost.exe" `
+    service=winmgmt `
+    dir=in `
+    protocol=TCP `
+    profile=Domain `
+    action=Allow
 ```
 
 ## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
@@ -161,6 +176,12 @@ netsh advfirewall firewall add rule `
 ```PowerShell
 netsh advfirewall firewall set rule `
     name="Remote Windows Update (Dynamic RPC)" new enable=no
+
+netsh advfirewall firewall set rule `
+    name="Remote Windows Update (SMB-In)" new enable=no
+
+netsh advfirewall firewall set rule `
+    name="Remote Windows Update (WMI-In)" new enable=no
 ```
 
 ```PowerShell

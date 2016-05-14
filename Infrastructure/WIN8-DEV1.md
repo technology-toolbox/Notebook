@@ -205,61 +205,67 @@ Stop-Computer
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-$computer = 'WIN8-DEV1'
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (DCOM-In)' `
+    -DisplayName 'Remote Windows Update (DCOM-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 135 `
+    -Profile Domain `
+    -Action Allow
 
-$command = "Get-NetFirewallRule |
-    Where-Object { `$_.Profile -eq 'Domain' ``
-        -and `$_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
-    Enable-NetFirewallRule"
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
 
-$scriptBlock = [scriptblock]::Create($command)
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (SMB-In)' `
+    -DisplayName 'Remote Windows Update (SMB-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 445 `
+    -Profile Domain `
+    -Action Allow
 
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (WMI-In)' `
+    -DisplayName 'Remote Windows Update (WMI-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Program "$env:windir\system32\svchost.exe" `
+    -Service winmgmt `
+    -Direction Inbound `
+    -Protocol TCP `
+    -Profile Domain `
+    -Action Allow
 
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
+Enable-NetFirewallRule `
+    -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)"
 
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+Enable-NetFirewallRule `
+    -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
 ```
 
----
-
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
+## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-$computer = 'WIN8-DEV1'
-
-$command = "Disable-NetFirewallRule ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)'"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+Disable-NetFirewallRule -Group 'Remote Windows Update'
 ```
-
----
 
 ## Snapshot VM - "Baseline"
 
