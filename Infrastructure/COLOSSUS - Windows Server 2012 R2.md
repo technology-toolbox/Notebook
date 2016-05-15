@@ -497,3 +497,37 @@ Manual steps required to complete the installation of this update
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/06E6407CAFFDA2F33739002CABD4137317C46E7D.jpg)
 
 From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
+
+## Issue: Errors due to insufficient memory
+
+### Issue
+
+Log Name:      Application\
+Source:        System.ServiceModel 4.0.0.0\
+Date:          5/14/2016 5:49:18 AM\
+Event ID:      3\
+Task Category: WebHost\
+Level:         Error\
+Keywords:      Classic\
+User:          NETWORK SERVICE\
+Computer:      COLOSSUS.corp.technologytoolbox.com\
+Description:\
+WebHost failed to process a request.\
+ Sender Information: System.ServiceModel.ServiceHostingEnvironment+HostingManager/6044116\
+ Exception: System.ServiceModel.ServiceActivationException: The service '/ClientWebService/client.asmx' cannot be activated due to an exception during compilation.  The exception message is: Memory gates checking failed because the free memory (78831616 bytes) is less than 5% of total memory.  As a result, the service will not be available for incoming requests.  To resolve this, either reduce the load on the machine or adjust the value of minFreeMemoryPercentageToActivateService on the serviceHostingEnvironment config element.. ---> System.InsufficientMemoryException: Memory gates checking failed because the free memory (78831616 bytes) is less than 5% of total memory.  As a result, the service will not be available for incoming requests.  To resolve this, either reduce the load on the machine or adjust the value of minFreeMemoryPercentageToActivateService on the serviceHostingEnvironment config element.\
+   at System.ServiceModel.Activation.ServiceMemoryGates.Check(Int32 minFreeMemoryPercentage, Boolean throwOnLowMemory, UInt64& availableMemoryBytes)\
+   at System.ServiceModel.ServiceHostingEnvironment.HostingManager.CheckMemoryCloseIdleServices(EventTraceActivity eventTraceActivity)\
+   at System.ServiceModel.ServiceHostingEnvironment.HostingManager.EnsureServiceAvailable(String normalizedVirtualPath, EventTraceActivity eventTraceActivity)\
+   --- End of inner exception stack trace ---\
+   at System.ServiceModel.ServiceHostingEnvironment.HostingManager.EnsureServiceAvailable(String normalizedVirtualPath, EventTraceActivity eventTraceActivity)\
+   at System.ServiceModel.ServiceHostingEnvironment.EnsureServiceAvailableFast(String relativeVirtualPath, EventTraceActivity eventTraceActivity)\
+ Process Name: w3wp\
+ Process ID: 3668
+
+### Solution
+
+Change VM to use dynamic memory (and increase maximum RAM from 2 GB to 4 GB):
+
+- Startup RAM: **2 GB**
+- Minimum RAM: **512 MB**
+- Maximum RAM: **4 GB**
