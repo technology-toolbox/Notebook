@@ -223,14 +223,36 @@ Enable-PSRemoting -Confirm:$false
 
 ```PowerShell
 New-NetFirewallRule `
+    -Name 'Remote Windows Update (DCOM-In)' `
+    -DisplayName 'Remote Windows Update (DCOM-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 135 `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
     -Name 'Remote Windows Update (Dynamic RPC)' `
     -DisplayName 'Remote Windows Update (Dynamic RPC)' `
     -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Technology Toolbox (Custom)' `
+    -Group 'Remote Windows Update' `
     -Program '%windir%\system32\dllhost.exe' `
     -Direction Inbound `
     -Protocol TCP `
     -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (SMB-In)' `
+    -DisplayName 'Remote Windows Update (SMB-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 445 `
     -Profile Domain `
     -Action Allow
 
@@ -241,10 +263,10 @@ Enable-NetFirewallRule `
     -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
+Disable-NetFirewallRule -Group 'Remote Windows Update'
 ```
 
 ```PowerShell
@@ -702,6 +724,45 @@ $tcpProtocol.IsEnabled = $true
 $tcpProtocol.Alter()
 
 Restart-Service MSSQLSERVER
+```
+
+## Extend Data01 volume (D:) from 90 GB to 115 GB
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+Resize-VHD `
+    -ComputerName STORM `
+    -Path "D:\NotBackedUp\VMs\EXT-SQL02\Virtual Hard Disks\EXT-SQL02_Data01.vhdx" `
+    -SizeBytes 115GB
+```
+
+---
+
+```PowerShell
+Get-Partition -DriveLetter D
+
+
+   Disk Number: 1
+
+PartitionNumber  DriveLetter Offset                                        Size Type
+---------------  ----------- ------                                        ---- ----
+1                D           1048576                                      90 GB IFS
+
+
+$size = (Get-PartitionSupportedSize -DiskNumber 1 -PartitionNumber 1)
+Resize-Partition -DiskNumber 1 -PartitionNumber 1 -Size $size.SizeMax
+
+Get-Partition -DriveLetter D
+
+
+   Disk Number: 1
+
+PartitionNumber  DriveLetter Offset                                        Size Type
+---------------  ----------- ------                                        ---- ----
+1                D           1048576                                     115 GB IFS
 ```
 
 **TODO:**
