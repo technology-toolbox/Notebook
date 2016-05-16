@@ -799,7 +799,7 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 
 ---
 
-**FOOBAR**
+**FOOBAR8**
 
 ### # Note: BANSHEE was already shutdown
 
@@ -1406,6 +1406,72 @@ cls
 
 ```PowerShell
 Add-NetLbfoTeamMember -Name "Ethernet 2" -Team $interfaceAlias
+```
+
+## Extend volume (D: - Data01) from 125 GB to 150 GB
+
+This is necessary to increase the capacity for **Data01** volume on **EXT-SQL02**.
+
+### # Extend virtual disk
+
+```PowerShell
+Get-StorageTier -FriendlyName "Data01_SSD Tier" |
+    Format-Table FriendlyName, @{Label="Size [GB]";Expression={$_.Size / 1GB}}
+
+
+FriendlyName                                                          Size [GB]
+------------                                                          ---------
+Data01_SSD Tier                                                             125
+
+Resize-StorageTier -FriendlyName "Data01_SSD Tier" -Size 150GB
+
+Get-StorageTier -FriendlyName "Data01_SSD Tier" |
+    Format-Table FriendlyName, @{Label="Size [GB]";Expression={$_.Size / 1GB}}
+
+
+FriendlyName                                                          Size [GB]
+------------                                                          ---------
+Data01_SSD Tier                                                             150
+```
+
+### # Extend virtual disk
+
+```PowerShell
+Get-VirtualDisk Data01 | Get-Disk
+
+Number Friendly Name                            Operationa Total Size Partition
+                                                lStatus                Style
+------ -------------                            ---------- ---------- ---------
+6      Microsoft Storage Space Device           Online         125 GB GPT
+
+Get-VirtualDisk Data01 | Get-Disk | Update-Disk
+
+Number Friendly Name                            Operationa Total Size Partition
+                                                lStatus                Style
+------ -------------                            ---------- ---------- ---------
+6      Microsoft Storage Space Device           Online         150 GB GPT
+
+Get-VirtualDisk -FriendlyName Data01 | Get-Disk | Get-Partition
+
+
+   Disk Number: 6
+
+PartitionNumber  DriveLetter Offset                    Size Type
+---------------  ----------- ------                    ---- ----
+1                            17408                   128 MB Reserved
+2                D           135266304            124.87 GB Basic
+
+$size = (Get-PartitionSupportedSize -DiskNumber 6 -PartitionNumber 2)
+Resize-Partition -DiskNumber 6 -PartitionNumber 2 -Size $size.SizeMax
+
+Get-VirtualDisk -FriendlyName Data01 | Get-Disk | Get-Partition
+
+   Disk Number: 6
+
+PartitionNumber  DriveLetter Offset                    Size Type
+---------------  ----------- ------                    ---- ----
+1                            17408                   128 MB Reserved
+2                D           135266304            149.87 GB Basic
 ```
 
 **TODO:**
