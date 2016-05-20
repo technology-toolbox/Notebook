@@ -180,14 +180,36 @@ Enable-PSRemoting -Confirm:$false
 
 ```PowerShell
 New-NetFirewallRule `
+    -Name 'Remote Windows Update (DCOM-In)' `
+    -DisplayName 'Remote Windows Update (DCOM-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 135 `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
     -Name 'Remote Windows Update (Dynamic RPC)' `
     -DisplayName 'Remote Windows Update (Dynamic RPC)' `
     -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Technology Toolbox (Custom)' `
+    -Group 'Remote Windows Update' `
     -Program '%windir%\system32\dllhost.exe' `
     -Direction Inbound `
     -Protocol TCP `
     -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (SMB-In)' `
+    -DisplayName 'Remote Windows Update (SMB-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 445 `
     -Profile Domain `
     -Action Allow
 
@@ -198,10 +220,10 @@ Enable-NetFirewallRule `
     -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
 ```
 
-#### # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+#### # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
+Disable-NetFirewallRule -Group 'Remote Windows Update'
 ```
 
 ```PowerShell
@@ -896,7 +918,7 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$patch = "15.0.4701.1001 - SharePoint 2013 March 2015 CU"
+$patch = "15.0.4727.1000 - SharePoint 2013 June 2015 CU"
 
 robocopy `
     "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\$patch" `
@@ -961,10 +983,9 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ```Console
 mkdir C:\NotBackedUp\Securitas
-tf workfold /decloak "$/Securitas ClientPortal/Dev/Lab2"
-tf get C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2 /recursive /force
-tf get "$/Securitas ClientPortal/Main/Code/Securitas.Portal.ruleset" /force
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code
+tf workfold /decloak "$/Securitas ClientPortal/Main"
+tf get C:\NotBackedUp\Securitas\ClientPortal\Main /recursive /force
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code
 msbuild SecuritasClientPortal.sln /p:IsPackaging=true
 ```
 
@@ -977,7 +998,7 @@ cls
 ### # Create and configure the farm
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Create Farm.ps1' -CentralAdminAuthProvider NTLM -Verbose
 ```
@@ -1196,7 +1217,7 @@ Copy-Item `
 ### # Change the service account for the Distributed Cache
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Configure Distributed Cache.ps1' -Verbose
 ```
@@ -1455,7 +1476,7 @@ Start-Process $PSHOME\powershell.exe `
 **PowerShell -- running as EXTRANET\\s-sp-farm-dev**
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Configure User Profile Service.ps1' -Verbose
 ```
@@ -1748,7 +1769,7 @@ cls
 > Restart PowerShell for environment variables to take effect.
 
 ```Console
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 ```
 
 ```Console
@@ -1802,14 +1823,14 @@ Start-VM -ComputerName $vmHost -Name $vmName
 **Developer Command Prompt for VS2013 - Run as administrator**
 
 ```Console
-tf get C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2 /recursive /force
+tf get C:\NotBackedUp\Securitas\ClientPortal\Main /recursive /force
 tf get "$/Securitas ClientPortal/Main/Code/Securitas.Portal.ruleset" /force
 ```
 
 ---
 
 ```Console
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 ```
 
 ### # Create the Web application
@@ -1941,7 +1962,7 @@ cls
 ### # Configure machine key for Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Configure Machine Key.ps1' -Verbose
 ```
@@ -2030,7 +2051,7 @@ Set-Acl -Path $regPath -AclObject $acl
 ### REM DEV - Build Visual Studio solution and package SharePoint projects
 
 ```Console
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code
 msbuild SecuritasClientPortal.sln /p:IsPackaging=true
 ```
 
@@ -2115,7 +2136,7 @@ cls
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
@@ -2421,7 +2442,7 @@ cls
 **Developer Command Prompt for VS2013 - Run as administrator**
 
 ```Console
-tf get C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2 /recursive /force
+tf get C:\NotBackedUp\Securitas\CloudPortal\Main /recursive /force
 tf get "$/Securitas CloudPortal/Main/Code/Securitas.Portal.ruleset" /force
 ```
 
@@ -2430,7 +2451,7 @@ tf get "$/Securitas CloudPortal/Main/Code/Securitas.Portal.ruleset" /force
 ### # Create the Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\CloudPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -2574,7 +2595,7 @@ cls
 ### # Configure object cache user accounts
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\CloudPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Configure Object Cache User Accounts.ps1' -Verbose
 
@@ -2635,9 +2656,8 @@ $cred3 = Get-Credential "FABRIKAM\s-sp-ups"
 ### REM DEV - Build Visual Studio solution and package SharePoint projects
 
 ```Console
-tf get C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2 /recursive /force
-tf get "$/Securitas CloudPortal/Main/Code/Securitas.Portal.ruleset" /force
-cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code
+tf get C:\NotBackedUp\Securitas\CloudPortal\Main /recursive /force
+cd C:\NotBackedUp\Securitas\CloudPortal\Main\Code
 msbuild Securitas.CloudPortal.sln /p:IsPackaging=true
 ```
 
@@ -2678,7 +2698,7 @@ Set-Location C:
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\CloudPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
@@ -2859,7 +2879,7 @@ $cred2 = Get-Credential "TECHTOOLBOX\svc-sp-ups"
 
 $peoplePickerCredentials = $cred1, $cred2
 
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Deactivate Features.ps1'
 
@@ -2963,7 +2983,7 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
 ### # Configure machine key for Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Configure Machine Key.ps1' -Verbose
 ```
