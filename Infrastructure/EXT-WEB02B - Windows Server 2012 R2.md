@@ -114,10 +114,6 @@ Get-NetAdapter `
     Rename-NetAdapter -NewName "Production"
 ```
 
-```PowerShell
-cls
-```
-
 ### # Configure "Production" network adapter
 
 ```PowerShell
@@ -140,10 +136,6 @@ Set-DNSClientServerAddress `
     -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
 ```
 
-```PowerShell
-cls
-```
-
 #### # Enable jumbo frames
 
 ```PowerShell
@@ -161,10 +153,23 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
+### # Restart computer to avoid potential issue when joining domain
+
+```PowerShell
+Restart-Computer
+```
+
+```PowerShell
+cls
+```
+
 ## # Join domain
 
 ```PowerShell
-Add-Computer -DomainName extranet.technologytoolbox.com -Restart
+Add-Computer `
+    -DomainName extranet.technologytoolbox.com `
+    -Credential (Get-Credential EXTRANET\jjameson-admin) `
+    -Restart
 ```
 
 ## Move computer to "SharePoint Servers" OU
@@ -209,10 +214,6 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-```PowerShell
-cls
-```
-
 ## # Enable PowerShell remoting
 
 ```PowerShell
@@ -223,14 +224,36 @@ Enable-PSRemoting -Confirm:$false
 
 ```PowerShell
 New-NetFirewallRule `
+    -Name 'Remote Windows Update (DCOM-In)' `
+    -DisplayName 'Remote Windows Update (DCOM-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 135 `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
     -Name 'Remote Windows Update (Dynamic RPC)' `
     -DisplayName 'Remote Windows Update (Dynamic RPC)' `
     -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Technology Toolbox (Custom)' `
+    -Group 'Remote Windows Update' `
     -Program '%windir%\system32\dllhost.exe' `
     -Direction Inbound `
     -Protocol TCP `
     -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (SMB-In)' `
+    -DisplayName 'Remote Windows Update (SMB-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 445 `
     -Profile Domain `
     -Action Allow
 
@@ -241,151 +264,10 @@ Enable-NetFirewallRule `
     -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
-```
-
-```PowerShell
-cls
-```
-
-## # Install and configure System Center Operations Manager
-
-### # Create certificate for Operations Manager
-
-#### # Create request for Operations Manager certificate
-
-```PowerShell
-& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
-```
-
-#### # Submit certificate request to the Certification Authority
-
-##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
-
-```PowerShell
-$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
-
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$($adcsUrl.Host)")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
-
-Start-Process $adcsUrl.AbsoluteUri
-```
-
-**To submit the certificate request to an enterprise CA:**
-
-1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
-2. On the **Welcome** page, click **Request a certificate**.
-3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
-4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
-5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
-6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
-
-```PowerShell
-cls
-```
-
-#### # Import the certificate into the certificate store
-
-```PowerShell
-$certFile = "C:\Users\Administrator\Downloads\certnew.cer"
-
-CertReq.exe -Accept $certFile
-
-Remove-Item $certFile
-```
-
-```PowerShell
-cls
-```
-
-### # Install SCOM agent
-
----
-
-**FOOBAR8**
-
-```PowerShell
-cls
-```
-
-#### # Mount the Operations Manager installation media
-
-```PowerShell
-$imagePath = `
-    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-Set-VMDvdDrive -ComputerName STORM -VMName EXT-WEB02B -Path $imagePath
-```
-
----
-
-```PowerShell
-$msiPath = 'X:\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-```PowerShell
-cls
-```
-
-### # Import the certificate into Operations Manager using MOMCertImport
-
-```PowerShell
-$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
-
-$certImportToolPath = 'X:\SupportTools\AMD64'
-
-Push-Location "$certImportToolPath"
-
-.\MOMCertImport.exe /SubjectName $hostName
-
-Pop-Location
-```
-
----
-
-**FOOBAR8**
-
-```PowerShell
-cls
-```
-
-### # Remove the Operations Manager installation media
-
-```PowerShell
-Set-VMDvdDrive -ComputerName STORM -VMName EXT-WEB02B -Path $null
-```
-
----
-
-### # Approve manual agent install in Operations Manager
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
+Disable-NetFirewallRule -Group 'Remote Windows Update'
 ```
 
 ## Configure VM storage
@@ -573,10 +455,8 @@ robocopy $sourcePath $prereqPath /E
 >
 > Wait for the prerequisites to be installed.
 
-**TODO:**
-
 ```PowerShell
-Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1"
+Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 ```
 
 ```PowerShell
@@ -633,6 +513,8 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     ("C:\Program Files\Common Files\Microsoft Shared\web server extensions" `
         + "\15\BIN") `
     -EnvironmentVariableTarget "Machine"
+
+exit
 ```
 
 > **Important**
@@ -678,10 +560,6 @@ $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
     [Runtime.InteropServices.Marshal]::SecureStringToBSTR($appPassword))
 
 stsadm -o setapppassword -password $plainPassword
-```
-
-```PowerShell
-cls
 ```
 
 #### # Modify the permissions on the registry key where the encrypted credentials are stored
@@ -796,7 +674,7 @@ cls
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.XXX.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
@@ -895,4 +773,147 @@ Pop-Location
 cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
+```
+
+TODO:
+
+```PowerShell
+cls
+```
+
+## # Install and configure System Center Operations Manager
+
+### # Create certificate for Operations Manager
+
+#### # Create request for Operations Manager certificate
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+#### # Submit certificate request to the Certification Authority
+
+##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
+    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
+    + "\$($adcsUrl.Host)")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+**To submit the certificate request to an enterprise CA:**
+
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\Administrator\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+Remove-Item $certFile
+```
+
+```PowerShell
+cls
+```
+
+### # Install SCOM agent
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+#### # Mount the Operations Manager installation media
+
+```PowerShell
+$imagePath = `
+    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+Set-VMDvdDrive -ComputerName STORM -VMName EXT-WEB02B -Path $imagePath
+```
+
+---
+
+```PowerShell
+$msiPath = 'X:\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+```PowerShell
+cls
+```
+
+### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = 'X:\SupportTools\AMD64'
+
+Push-Location "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName $hostName
+
+Pop-Location
+```
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+### # Remove the Operations Manager installation media
+
+```PowerShell
+Set-VMDvdDrive -ComputerName STORM -VMName EXT-WEB02B -Path $null
+```
+
+---
+
+### # Approve manual agent install in Operations Manager
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
 ```

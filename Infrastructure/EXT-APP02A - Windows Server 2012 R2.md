@@ -114,10 +114,6 @@ Get-NetAdapter `
     Rename-NetAdapter -NewName "Production"
 ```
 
-```PowerShell
-cls
-```
-
 ### # Configure "Production" network adapter
 
 ```PowerShell
@@ -140,10 +136,6 @@ Set-DNSClientServerAddress `
     -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
 ```
 
-```PowerShell
-cls
-```
-
 #### # Enable jumbo frames
 
 ```PowerShell
@@ -161,10 +153,23 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
+### # Restart computer to avoid potential issue when joining domain
+
+```PowerShell
+Restart-Computer
+```
+
+```PowerShell
+cls
+```
+
 ## # Join domain
 
 ```PowerShell
-Add-Computer -DomainName extranet.technologytoolbox.com -Restart
+Add-Computer `
+    -DomainName extranet.technologytoolbox.com `
+    -Credential (Get-Credential EXTRANET\jjameson-admin) `
+    -Restart
 ```
 
 ## Move computer to "SharePoint Servers" OU
@@ -209,10 +214,6 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-```PowerShell
-cls
-```
-
 ## # Enable PowerShell remoting
 
 ```PowerShell
@@ -223,14 +224,36 @@ Enable-PSRemoting -Confirm:$false
 
 ```PowerShell
 New-NetFirewallRule `
+    -Name 'Remote Windows Update (DCOM-In)' `
+    -DisplayName 'Remote Windows Update (DCOM-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 135 `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
     -Name 'Remote Windows Update (Dynamic RPC)' `
     -DisplayName 'Remote Windows Update (Dynamic RPC)' `
     -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Technology Toolbox (Custom)' `
+    -Group 'Remote Windows Update' `
     -Program '%windir%\system32\dllhost.exe' `
     -Direction Inbound `
     -Protocol TCP `
     -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (SMB-In)' `
+    -DisplayName 'Remote Windows Update (SMB-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 445 `
     -Profile Domain `
     -Action Allow
 
@@ -241,151 +264,10 @@ Enable-NetFirewallRule `
     -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
-```
-
-```PowerShell
-cls
-```
-
-## # Install and configure System Center Operations Manager
-
-### # Create certificate for Operations Manager
-
-#### # Create request for Operations Manager certificate
-
-```PowerShell
-& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
-```
-
-#### # Submit certificate request to the Certification Authority
-
-##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
-
-```PowerShell
-$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
-
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$($adcsUrl.Host)")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
-
-Start-Process $adcsUrl.AbsoluteUri
-```
-
-**To submit the certificate request to an enterprise CA:**
-
-1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
-2. On the **Welcome** page, click **Request a certificate**.
-3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
-4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
-5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
-6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
-
-```PowerShell
-cls
-```
-
-#### # Import the certificate into the certificate store
-
-```PowerShell
-$certFile = "C:\Users\Administrator\Downloads\certnew.cer"
-
-CertReq.exe -Accept $certFile
-
-Remove-Item $certFile
-```
-
-```PowerShell
-cls
-```
-
-### # Install SCOM agent
-
----
-
-**FOOBAR8**
-
-```PowerShell
-cls
-```
-
-#### # Mount the Operations Manager installation media
-
-```PowerShell
-$imagePath = `
-    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-Set-VMDvdDrive -ComputerName BEAST -VMName EXT-APP02A -Path $imagePath
-```
-
----
-
-```PowerShell
-$msiPath = 'X:\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-```PowerShell
-cls
-```
-
-### # Import the certificate into Operations Manager using MOMCertImport
-
-```PowerShell
-$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
-
-$certImportToolPath = 'X:\SupportTools\AMD64'
-
-Push-Location "$certImportToolPath"
-
-.\MOMCertImport.exe /SubjectName $hostName
-
-Pop-Location
-```
-
----
-
-**FOOBAR8**
-
-```PowerShell
-cls
-```
-
-### # Remove the Operations Manager installation media
-
-```PowerShell
-Set-VMDvdDrive -ComputerName BEAST -VMName EXT-APP02A -Path $null
-```
-
----
-
-### # Approve manual agent install in Operations Manager
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
+Disable-NetFirewallRule -Group 'Remote Windows Update'
 ```
 
 ## Configure VM storage
@@ -736,7 +618,7 @@ robocopy $sourcePath $prereqPath /E
 > Wait for the prerequisites to be installed.
 
 ```PowerShell
-Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1"
+Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 ```
 
 ```PowerShell
@@ -793,6 +675,8 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     ("C:\Program Files\Common Files\Microsoft Shared\web server extensions" `
         + "\15\BIN") `
     -EnvironmentVariableTarget "Machine"
+
+exit
 ```
 
 > **Important**
@@ -887,11 +771,9 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Script
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-sp-farm**.\
-> Expect the previous operation to complete in approximately 4 minutes.
+> Expect the previous operation to complete in approximately 6 minutes.
 
 ### Add Web servers to the farm
-
-(skipped)
 
 ```PowerShell
 cls
@@ -981,7 +863,7 @@ Set-SPWOPIZone -zone "external-https"
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
-    -IPAddress 192.168.10.34 `
+    -IPAddress 192.168.10.59 `
     -Hostnames EXT-APP02A, client-test.securitasinc.com
 ```
 
@@ -1019,6 +901,107 @@ miiskmu.exe /e C:\Users\%USERNAME%\Desktop\miiskeys-1.bin ^
 ---
 
 #### Copy MIIS encryption key file to SharePoint 2013 server
+
+## Snapshot SharePoint farm
+
+---
+
+**FOOBAR8**
+
+### # Define list of VMs used in "EXT02" SharePoint farm
+
+```PowerShell
+$ext02Servers = @(
+    [PSCustomObject] @{ BootOrder = 1;
+        VMName = 'EXT-SQL02'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ BootOrder = 2;
+        VMName = 'EXT-APP02A'; VMHost = 'BEAST'; },
+    [PSCustomObject] @{ BootOrder = 3;
+        VMName = 'EXT-WEB02A'; VMHost = 'BEAST'; },
+    [PSCustomObject] @{ BootOrder = 4;
+        VMName = 'EXT-WEB02B'; VMHost = 'STORM'; })
+```
+
+### # Shutdown VMs
+
+```PowerShell
+$ext02Servers |
+    sort BootOrder -Descending |
+    ForEach-Object {
+        $vmHost = $_.VMHost
+        $vmName = $_.VMName
+
+        Write-Host "Stopping virtual machine ($vmName)..."
+        Stop-VM -ComputerName $vmHost -VMName $vmName
+    }
+```
+
+```PowerShell
+cls
+```
+
+### # Snapshot VMs
+
+```PowerShell
+$snapshotName = `
+    "Before - Configure SharePoint services and service applications"
+
+$ext02Servers |
+    ForEach-Object {
+        $vmHost = $_.VMHost
+        $vmName = $_.VMName
+
+        Checkpoint-VM `
+            -ComputerName $vmHost `
+            -Name $vmName `
+            -SnapshotName $snapshotName
+    }
+```
+
+```PowerShell
+cls
+```
+
+### # Start VMs
+
+```PowerShell
+$ext02Servers |
+    sort BootOrder |
+    ForEach-Object {
+        $vmHost = $_.VMHost
+        $vmName = $_.VMName
+
+        Write-Host "Starting virtual machine ($vmName)..."
+        Start-VM -ComputerName $vmHost -VMName $vmName
+
+        Write-Host "Waiting for virtual machine ($vmName) to start..."
+        Start-Sleep -Seconds 60
+    }
+```
+
+```PowerShell
+cls
+```
+
+### # Revert VMs to most recent checkpoint
+
+```PowerShell
+$ext02Servers |
+    sort BootOrder -Descending |
+    ForEach-Object {
+        $vmHost = $_.VMHost
+        $vmName = $_.VMName
+
+        Write-Host "Reverting virtual machine ($vmName)..."
+
+        Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
+            Sort-Object CreationTime |
+            Select-Object -Last 1 |
+            Restore-VMSnapshot -Confirm:$false
+    }
+```
+
+---
 
 ## # Configure SharePoint services and service applications
 
@@ -1128,9 +1111,9 @@ cls
 
 **EXT-SQL02 - SQL Server Management Studio**
 
-```Console
--- Restore profile database
+#### -- Restore profile database
 
+```Console
 DECLARE @backupFilePath VARCHAR(255) =
   'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\'
     + 'Profile DB New.bak'
@@ -1150,9 +1133,11 @@ RESTORE DATABASE UserProfileService_Profile
     MOVE 'Profile DB New_log' TO @logFilePath,
     NOUNLOAD,
     STATS = 5
+```
 
--- Restore synchronization database
+#### -- Restore synchronization database
 
+```Console
 SET @backupFilePath =
   'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\'
     + 'Sync DB New.bak'
@@ -1172,9 +1157,11 @@ RESTORE DATABASE UserProfileService_Sync
     MOVE 'Sync DB New_log' TO @logFilePath,
     NOUNLOAD,
     STATS = 5
+```
 
--- Restore social tagging database
+#### -- Restore social tagging database
 
+```Console
 SET @backupFilePath =
   'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\'
     + 'Social DB New.bak'
@@ -1195,6 +1182,30 @@ RESTORE DATABASE UserProfileService_Social
     NOUNLOAD,
     STATS = 5
 
+GO
+
+USE [UserProfileService_Profile]
+GO
+CREATE USER [EXTRANET\setup-sharepoint]
+FOR LOGIN [EXTRANET\setup-sharepoint]
+GO
+ALTER ROLE [db_owner] ADD MEMBER [EXTRANET\setup-sharepoint]
+GO
+
+USE [UserProfileService_Social]
+GO
+CREATE USER [EXTRANET\setup-sharepoint]
+FOR LOGIN [EXTRANET\setup-sharepoint]
+GO
+ALTER ROLE [db_owner] ADD MEMBER [EXTRANET\setup-sharepoint]
+GO
+
+USE [UserProfileService_Sync]
+GO
+CREATE USER [EXTRANET\setup-sharepoint]
+FOR LOGIN [EXTRANET\setup-sharepoint]
+GO
+ALTER ROLE [db_owner] ADD MEMBER [EXTRANET\setup-sharepoint]
 GO
 
 USE [UserProfileService_Profile]
@@ -1372,16 +1383,159 @@ Restart-Service SPTimerV4
 
 #### Configure synchronization connections and import data from Active Directory
 
+Delete **PNKCAN** and **PNKUS **connections.
+
+> **Note**
+>
+> An error occurs when deleting the **PNKUS** connection (due to a timeout after 5 minutes). However, the connection is eventually deleted as expected.
+
 ##### Create synchronization connections to Active Directory
 
-Error trying to delete PNKUS and PNKCAN connections:
+| **Connection Name** | **Forest Name**            | **Account Name**        |
+| ------------------- | -------------------------- | ----------------------- |
+| TECHTOOLBOX         | corp.technologytoolbox.com | TECHTOOLBOX\\svc-sp-ups |
+| FABRIKAM            | corp.fabrikam.com          | FABRIKAM\\s-sp-ups      |
 
-Microsoft.ResourceManagement.ResourceManagementException: Excetion from HRESULT: 0x80230613 ---> System.Runtime.InteropServices.COMException (0x80230613): Excetion from HRESULT: 0x80230613\
-   in MIISRCW.IMMSServer.DeleteMA(Guid& pguid, Int32& pfDirectoryRemoved)\
-   in Microsoft.ResourceManagement.SyncConfig.DeleteMA(Guid maGuid)\
-   in Microsoft.ResourceManagement.ActionProcessor.SyncConfigActionProcessor.Delete(Guid objectId, Guid cause)
+##### Start profile synchronization
 
-Workaround: Delete User Profile Service Application and recreate from scratch (without restoring databases from Production)
+Error running profile import job
+
+05/18/2016 09:41:51.64	OWSTIMER.EXE (0x0A38)	0x0AFC	SharePoint Foundation	Timer	ca2m	Unexpected	An internal error occurred while running a timer job: Value was either too large or too small for an Int16.    at System.Convert.ToInt16(Int32 value)     at Microsoft.SharePoint.Administration.SPTimerJobUsageMonitoredScope.OnDisposing()     at Microsoft.SharePoint.Utilities.SPMonitoredScope.Dispose(Boolean disposing)     at Microsoft.SharePoint.Administration.SPTimerJobInvokeInternal.Invoke(SPJobDefinition jd, Guid targetInstanceId, Boolean isTimerService, Int32& result)	3f8c7eb3-4e19-416f-94bb-2b119912b77c
+
+05/18/2016 09:41:51.64	OWSTIMER.EXE (0x0A38)	0x0AFC	SharePoint Foundation	Timer	6772	Critical	There was an internal error invoking the timer job '{0DC6F7F2-06E9-4F09-851C-727981951EA8}' for service '{2FA9FF8A-5B66-4D2E-9208-B760633B685F}'.	3f8c7eb3-4e19-416f-94bb-2b119912b77c
+
+05/18/2016 09:41:51.64	OWSTIMER.EXE (0x0A38)	0x0AFC	SharePoint Foundation	General	8e2s	Medium	Unknown SPRequest error occurred. More information: 0x80131516	3f8c7eb3-4e19-416f-94bb-2b119912b77c
+
+```C#
+namespace Microsoft.SharePoint.Administration
+{
+    internal sealed class SPTimerJobUsageMonitoredScope : SPMonitoredScope
+    {
+...
+        protected override void OnDisposing()
+        {
+...
+                    ISPScopedPerformanceMonitor monitor = base.GetMonitor<SPExecutionTimeCounter>();
+...
+                    this.m_UsageEntry.ServiceCallCount = System.Convert.ToInt16(monitor.Value, System.Globalization.CultureInfo.InvariantCulture);
+...
+        }
+    }
+}
+```
+
+...which causes profile synchronization to hang. I clicked on the **Stop** link, but that only results in **Profile Synchronization Status** changing from **Synchronizing** to **Stopping**).
+
+I attempted several solutions to stop the profile import job, including:
+
+1. Disabling/enabling the Synchronization Timer Job
+2. Stopping and starting the User Profile Synchronization service through Central Admin -- after adding the farm account to the local Administrators group -- and
+
+Nothing worked, so **PUNT!!!**
+
+#### Delete the User Profile Service Application (via Central Admin)
+
+```PowerShell
+cls
+```
+
+#### # Create the User Profile Service Application
+
+# Create User Profile Service Application as EXTRANET\\s-sp-farm:
+
+```PowerShell
+$farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
+```
+
+> **Note**
+>
+> When prompted for the service account credentials, type the password for the SharePoint farm service account.
+
+```PowerShell
+net localgroup Administrators /add $farmCredential.UserName
+
+Restart-Service SPTimerV4
+
+Start-Process $PSHOME\powershell.exe `
+    -Credential $farmCredential `
+    -ArgumentList "-Command Start-Process PowerShell.exe -Verb Runas" `
+    -Wait
+```
+
+---
+
+**PowerShell -- running as EXTRANET\\s-sp-farm**
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+
+& '.\Configure User Profile Service.ps1' -Verbose
+```
+
+> **Important**
+>
+> Wait for the service application to be configured.
+
+```Console
+exit
+```
+
+---
+
+```Console
+net localgroup Administrators /delete $farmCredential.UserName
+
+Restart-Service SPTimerV4
+```
+
+#### Disable social features
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Configure User Profile Synchronization (UPS)
+
+#### # Configure NETWORK SERVICE permissions
+
+```PowerShell
+$path = "$env:ProgramFiles\Microsoft Office Servers\15.0"
+icacls $path /grant "NETWORK SERVICE:(OI)(CI)(RX)"
+```
+
+#### # Temporarily add SharePoint farm account to local Administrators group
+
+```PowerShell
+net localgroup Administrators /add EXTRANET\s-sp-farm
+
+Restart-Service SPTimerV4
+```
+
+#### Start the User Profile Synchronization Service
+
+#### Wait for User Profile Synchronization Service to finish starting
+
+> **Important**
+>
+> Wait until the status of **User Profile Synchronization Service** shows **Started** before proceeding.
+
+```PowerShell
+cls
+```
+
+#### # Remove SharePoint farm account from local Administrators group
+
+```PowerShell
+net localgroup Administrators /delete EXTRANET\s-sp-farm
+
+Restart-Service SPTimerV4
+```
+
+#### Configure synchronization connections and import data from Active Directory
+
+##### Create synchronization connections to Active Directory
 
 | **Connection Name** | **Forest Name**            | **Account Name**        |
 | ------------------- | -------------------------- | ----------------------- |
@@ -1430,6 +1584,10 @@ At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Script
 ```
 
 #### Modify search topology
+
+```PowerShell
+cls
+```
 
 #### # Configure people search in SharePoint
 
@@ -1568,11 +1726,7 @@ cls
 >
 > Restart PowerShell for environment variables to take effect.
 
-```Console
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
-```
-
-```Console
+```PowerShell
 cls
 ```
 
@@ -1602,7 +1756,8 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Script
 
 > **Note**
 >
-> When prompted for the service account, specify **EXTRANET\\s-web-client**.
+> When prompted for the service account, specify **EXTRANET\\s-web-client**.\
+> Expect the previous operation to complete in approximately 1.5 minutes.
 
 ```PowerShell
 cls
@@ -2845,3 +3000,144 @@ Tracking ID: **UA-25899478-3**
 {End skipped sections}
 
 **TODO:**
+
+```PowerShell
+cls
+```
+
+## # Install and configure System Center Operations Manager
+
+### # Create certificate for Operations Manager
+
+#### # Create request for Operations Manager certificate
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+#### # Submit certificate request to the Certification Authority
+
+##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
+    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
+    + "\$($adcsUrl.Host)")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+**To submit the certificate request to an enterprise CA:**
+
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\Administrator\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+Remove-Item $certFile
+```
+
+```PowerShell
+cls
+```
+
+### # Install SCOM agent
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+#### # Mount the Operations Manager installation media
+
+```PowerShell
+$imagePath = `
+    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+Set-VMDvdDrive -ComputerName BEAST -VMName EXT-APP02A -Path $imagePath
+```
+
+---
+
+```PowerShell
+$msiPath = 'X:\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+```PowerShell
+cls
+```
+
+### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = 'X:\SupportTools\AMD64'
+
+Push-Location "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName $hostName
+
+Pop-Location
+```
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+### # Remove the Operations Manager installation media
+
+```PowerShell
+Set-VMDvdDrive -ComputerName BEAST -VMName EXT-APP02A -Path $null
+```
+
+---
+
+### # Approve manual agent install in Operations Manager
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
