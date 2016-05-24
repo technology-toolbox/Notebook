@@ -349,3 +349,5 @@ Get-NetFirewallRule -AssociatedNetFirewallProfile $profile |
 ```PowerShell
 Disable-NetFirewallRule -Group 'Remote Windows Update'
 ```
+
+## Install Microsoft Message Analyzer 1.4

@@ -671,3 +671,5 @@ Event Description: Cannot resolve name of SMTP host smtp-test.technologytoolbox.
 ### Solution
 
 Add conditional forwarder for **technologytoolbox.com** (**XAVIER1**, **XAVIER2**)
+
+## Install Microsoft Message Analyzer 1.4
