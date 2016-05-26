@@ -1,79 +1,219 @@
 ﻿# EXT-FOOBAR3 - Windows Server 2012 R2 Standard
 
-Sunday, February 08, 2015
-5:27 AM
+Wednesday, May 25, 2016
+4:49 AM
 
-```Console
+```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
 
-## # [FORGE] Create virtual machine (EXT-FOOBAR3)
+## Deploy and configure the server infrastructure
+
+### Install Windows Server 2012 R2
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+#### # Create virtual machine
 
 ```PowerShell
+$vmHost = "STORM"
 $vmName = "EXT-FOOBAR3"
 
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
 New-VM `
+    -ComputerName $vmHost `
     -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
-    -MemoryStartupBytes 8GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+    -Path E:\NotBackedUp\VMs `
+    -NewVHDPath $vhdPath `
+    -NewVHDSizeBytes 60GB `
+    -MemoryStartupBytes 10GB `
+    -SwitchName "Production"
 
-Set-VM -VMName $vmName -ProcessorCount 4
+Set-VM `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ProcessorCount 4
 
-New-Item -ItemType Directory "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
+Set-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
-
-$sysPrepedImage = "\\ICEMAN\VM-Library\VHDs\WS2012-R2-STD.vhdx"
-
-Copy-Item $sysPrepedImage $vhdPath
-
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
-
-Start-VM $vmName
+Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
-Configure server settings
+---
 
-On the **Settings** page:
+#### Install custom Windows Server 2012 R2 image
 
-1. Ensure the following default values are selected:
-   1. **Country or region: United States**
-   2. **App language: English (United States)**
-   3. **Keyboard layout: US**
-2. Click **Next**.
-3. Type the product key and then click **Next**.
-4. Review the software license terms and then click **I accept**.
-5. Type a password for the built-in administrator account and then click **Finish**.
-
-## # Rename the server and join domain
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
+- On the **Computer Details** step:
+  - In the **Computer name** box, type **EXT-FOOBAR3**.
+  - Select **Join a workgroup**.
+  - In the **Workgroup **box, type **WORKGROUP**.
+  - Click **Next**.
+- On the **Applications** step, ensure no items are selected and click **Next**.
 
 ```PowerShell
-Rename-Computer -NewName EXT-FOOBAR3 -Restart
+cls
 ```
 
-Wait for the VM to restart and then execute the following command to join the **EXTRANET** domain:
+#### # Copy latest Toolbox content
 
 ```PowerShell
-Add-Computer -DomainName extranet.technologytoolbox.com -Restart
+net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 ```
 
-## Login as TECHTOOLBOX\\jjameson
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
 
-## # Rename network connection
-
-```PowerShell
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "LAN 1 - 192.168.10.x"
+```Console
+robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
 ```
 
-## # Enable jumbo frames
+### # Rename local Administrator account and set password
 
 ```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted, type the password for the local Administrator account.
+
+```PowerShell
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword($plainPassword)
+
+logoff
+```
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Remove disk from virtual CD/DVD drive
+
+```PowerShell
+$vmHost = "STORM"
+$vmName = "EXT-FOOBAR3"
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+---
+
+### Login as EXT-FOOBAR3\\foo
+
+```PowerShell
+cls
+```
+
+### # Configure network settings
+
+#### # Rename network connections
+
+```PowerShell
+Get-NetAdapter -Physical | select Name, InterfaceDescription
+
+Get-NetAdapter `
+    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName "Production"
+```
+
+#### # Configure "Production" network adapter
+
+```PowerShell
+$interfaceAlias = "Production"
+```
+
+#### # Disable DHCP
+
+```PowerShell
+@("IPv4", "IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Enabled")
+    {
+        # Remove existing gateway
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        # Disable DHCP
+        $interface | Set-NetIPInterface -DHCP Disabled
+    }
+}
+```
+
+#### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "192.168.10.217"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24 `
+    -DefaultGateway 192.168.10.1
+```
+
+##### # Configure IPv4 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.209,192.168.10.210
+```
+
+#### # Configure static IPv6 address
+
+```PowerShell
+$ipAddress = "2601:282:4201:e500::217"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 64
+```
+
+##### # Configure IPv6 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
+```
+
+##### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
 Set-NetAdapterAdvancedProperty `
-    -Name "LAN 1 - 192.168.10.x" `
+    -Name $interfaceAlias `
     -DisplayName "Jumbo Packet" `
     -RegistryValue 9014
 
@@ -84,42 +224,36 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
-## # Configure static IPv4 address
+### # Join domain
 
 ```PowerShell
-$ipAddress = "192.168.10.217"
-
-New-NetIPAddress `
-    -InterfaceAlias "LAN 1 - 192.168.10.x" `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-
-Set-DNSClientServerAddress `
-    -InterfaceAlias "LAN 1 - 192.168.10.x" `
-    -ServerAddresses 192.168.10.209,192.168.10.210
+Add-Computer `
+    -DomainName extranet.technologytoolbox.com `
+    -Credential (Get-Credential EXTRANET\jjameson-admin) `
+    -Restart
 ```
 
-## # Configure static IPv6 address
+#### Move computer to "SharePoint Servers" OU
+
+---
+
+**EXT-DC01**
 
 ```PowerShell
-$ipAddress = "2601:1:8200:6000::217"
+$computerName = "EXT-FOOBAR3"
+$targetPath = ("OU=SharePoint Servers,OU=Servers,OU=Resources,OU=IT" `
+    + ",DC=extranet,DC=technologytoolbox,DC=com")
 
-New-NetIPAddress `
-    -InterfaceAlias "LAN 1 - 192.168.10.x" `
-    -IPAddress $ipAddress `
-    -PrefixLength 64
+Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 
-Set-DNSClientServerAddress `
-    -InterfaceAlias "LAN 1 - 192.168.10.x" `
-    -ServerAddresses 2601:1:8200:6000::209,2601:1:8200:6000::210
+Restart-Computer $computerName
 ```
 
-```PowerShell
-cls
-```
+---
 
-## # Select "High performance" power scheme
+### Login as EXTRANET\\setup-sharepoint-dev
+
+### # Select "High performance" power scheme
 
 ```PowerShell
 powercfg.exe /L
@@ -129,11 +263,7 @@ powercfg.exe /S SCHEME_MIN
 powercfg.exe /L
 ```
 
-```PowerShell
-cls
-```
-
-## # Change drive letter for DVD-ROM
+### # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -147,62 +277,167 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-```PowerShell
-cls
-```
-
-## # Enable PowerShell remoting
+### # Enable PowerShell remoting
 
 ```PowerShell
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (DCOM-In)' `
-    -DisplayName 'Remote Windows Update (DCOM-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort 135 `
-    -Profile Domain `
-    -Action Allow
-
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (Dynamic RPC)' `
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Program '%windir%\system32\dllhost.exe' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort RPC `
-    -Profile Domain `
-    -Action Allow
-
-Enable-NetFirewallRule `
-    -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)"
-
-Enable-NetFirewallRule `
-    -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
+C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
-## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Disable-NetFirewallRule -Group 'Remote Windows Update'
+C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
-## Create service accounts for SharePoint
+## DEV - Configure VM storage, processors, and memory
+
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | C:           | 50 GB       | 4K                   |              |
+| 1    | D:           | 3 GB        | 64K                  | Data01       |
+| 2    | L:           | 1 GB        | 64K                  | Log01        |
+| 3    | T:           | 1 GB        | 64K                  | Temp01       |
+| 4    | Z:           | 10 GB       | 4K                   | Backup01     |
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+### # Create Data01, Log01, Temp01, and Backup01 VHDs
+
+```PowerShell
+$vmHost = "STORM"
+$vmName = "EXT-FOOBAR3"
+
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+    + "_Data01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 3GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ControllerType SCSI `
+    -Path $vhdPath
+
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+    + "_Log01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 1GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ControllerType SCSI `
+    -Path $vhdPath
+
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+    + "_Temp01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 1GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ControllerType SCSI `
+    -Path $vhdPath
+
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+    + "_Backup01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 10GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -ControllerType SCSI `
+    -Path $vhdPath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Initialize disks and format volumes
+
+#### # Format Data01 drive
+
+```PowerShell
+Get-Disk 1 |
+    Initialize-Disk -PartitionStyle MBR -PassThru |
+    New-Partition -DriveLetter D -UseMaximumSize |
+    Format-Volume `
+        -AllocationUnitSize 64KB `
+        -FileSystem NTFS `
+        -NewFileSystemLabel "Data01" `
+        -Confirm:$false
+```
+
+#### # Format Log01 drive
+
+```PowerShell
+Get-Disk 2 |
+    Initialize-Disk -PartitionStyle MBR -PassThru |
+    New-Partition -DriveLetter L -UseMaximumSize |
+    Format-Volume `
+        -AllocationUnitSize 64KB `
+        -FileSystem NTFS `
+        -NewFileSystemLabel "Log01" `
+        -Confirm:$false
+```
+
+#### # Format Temp01 drive
+
+```PowerShell
+Get-Disk 3 |
+    Initialize-Disk -PartitionStyle MBR -PassThru |
+    New-Partition -DriveLetter T -UseMaximumSize |
+    Format-Volume `
+        -AllocationUnitSize 64KB `
+        -FileSystem NTFS `
+        -NewFileSystemLabel "Temp01" `
+        -Confirm:$false
+```
+
+#### # Format Backup01 drive
+
+```PowerShell
+Get-Disk 4 |
+    Initialize-Disk -PartitionStyle MBR -PassThru |
+    New-Partition -DriveLetter Z -UseMaximumSize |
+    Format-Volume `
+        -FileSystem NTFS `
+        -NewFileSystemLabel "Backup01" `
+        -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+### # Set MaxPatchCacheSize to 0 (Recommended)
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+```
+
+### Install latest service pack and updates
+
+### Create service accounts
 
 ---
 
 **EXT-DC01**
 
-### # Create service account for SharePoint 2013 farm (DEV)
+#### # Create service account for SharePoint 2013 farm (DEV)
 
 ```PowerShell
 $displayName = "Service account for SharePoint 2013 farm (DEV)"
@@ -225,7 +460,7 @@ New-ADUser `
     -PasswordNeverExpires:$true
 ```
 
-### # Create service account for SharePoint 2013 service applications (DEV)
+#### # Create service account for SharePoint 2013 service applications (DEV)
 
 ```PowerShell
 $displayName = "Service account for SharePoint 2013 service applications (DEV)"
@@ -248,7 +483,7 @@ New-ADUser `
     -PasswordNeverExpires:$true
 ```
 
-### # Create service account for indexing content (DEV)
+#### # Create service account for indexing content (DEV)
 
 ```PowerShell
 $displayName = "Service account for indexing content (DEV)"
@@ -271,7 +506,7 @@ New-ADUser `
     -PasswordNeverExpires:$true
 ```
 
-### # Create service account for SecuritasConnect web app
+#### # Create service account for SecuritasConnect web app
 
 ```PowerShell
 $displayName = "Service account for SecuritasConnect Web application (DEV)"
@@ -294,7 +529,7 @@ New-ADUser `
     -PasswordNeverExpires:$true
 ```
 
-### # Create service account for SharePoint 2013 "Portal Super User"
+#### # Create service account for SharePoint 2013 "Portal Super User"
 
 ```PowerShell
 $displayName = "Service account for SharePoint 2013 `"Portal Super User`" (DEV)"
@@ -317,7 +552,7 @@ New-ADUser `
     -PasswordNeverExpires:$true
 ```
 
-### # Create service account for SharePoint 2013 "Portal Super Reader"
+#### # Create service account for SharePoint 2013 "Portal Super Reader"
 
 ```PowerShell
 $displayName = "Service account for SharePoint 2013 `"Portal Super Reader`" (DEV)"
@@ -340,7 +575,7 @@ New-ADUser `
     -PasswordNeverExpires:$true
 ```
 
-### # Create service account for Cloud Portal web app
+#### # Create service account for Cloud Portal web app
 
 ```PowerShell
 $displayName = "Service account for Cloud Portal Web application (DEV)"
@@ -365,142 +600,228 @@ New-ADUser `
 
 ---
 
-## Configure VM storage
+### Create Active Directory container to track SharePoint 2013 installations
 
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 50 GB       | 4K                   |              |
-| 1    | D:           | 2 GB        | 64K                  | Data01       |
-| 2    | L:           | 1 GB        | 64K                  | Log01        |
-| 3    | T:           | 1 GB        | 64K                  | Temp01       |
-| 4    | Z:           | 10 GB       | 4K                   | Backup01     |
+(skipped)
 
-### # [FORGE] Expand primary VHD for virtual machine
+### Install SQL Server 2014
 
-```PowerShell
-$vmName = "EXT-FOOBAR3"
+---
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
-
-Resize-VHD -Path $vhdPath -SizeBytes 50GB
-```
-
-### # [FORGE] Create Data01, Log01, Temp01, and Backup01 VHDs
-
-```PowerShell
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Data01.vhdx"
-
-New-VHD -Path $vhdPath -SizeBytes 3GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Log01.vhdx"
-
-New-VHD -Path $vhdPath -SizeBytes 1GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Temp01.vhdx"
-
-New-VHD -Path $vhdPath -SizeBytes 1GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Backup01.vhdx"
-
-New-VHD -Path $vhdPath -SizeBytes 10GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
-```
-
-### # Expand C: partition
-
-```PowerShell
-$maxSize = (Get-PartitionSupportedSize -DriveLetter C).SizeMax
-
-Resize-Partition -DriveLetter C -Size $maxSize
-```
-
-### # Format Data01 drive
-
-```PowerShell
-Get-Disk 1 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter D -UseMaximumSize |
-    Format-Volume `
-        -AllocationUnitSize 64KB `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Data01" `
-        -Confirm:$false
-```
-
-### # Format Log01 drive
-
-```PowerShell
-Get-Disk 2 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter L -UseMaximumSize |
-    Format-Volume `
-        -AllocationUnitSize 64KB `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Log01" `
-        -Confirm:$false
-```
-
-### # Format Temp01 drive
-
-```PowerShell
-Get-Disk 3 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter T -UseMaximumSize |
-    Format-Volume `
-        -AllocationUnitSize 64KB `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Temp01" `
-        -Confirm:$false
-```
-
-### # Format Backup01 drive
-
-```PowerShell
-Get-Disk 4 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter Z -UseMaximumSize |
-    Format-Volume `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Backup01" `
-        -Confirm:$false
-```
-
-## Install Visual Studio 2013 with Update 4
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Install .NET Framework 3.5
+#### # Mount SQL Server 2014 installation media
 
 ```PowerShell
-# net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
-# $sourcePath = "\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS"
+$imagePath = "\\ICEMAN\Products\Microsoft\SQL Server 2014" `
+    + "\en_sql_server_2014_developer_edition_with_service_pack_1_x64_dvd_6668542.iso"
 
-$sourcePath = "X:\sources\sxs"
-
-Install-WindowsFeature NET-Framework-Core -Source $sourcePath
+Set-VMDvdDrive -ComputerName STORM -VMName EXT-FOOBAR3 -Path $imagePath
 ```
 
-## Install SQL Server 2014
+---
 
-...\
-Restart the server
+```PowerShell
+& X:\setup.exe
+```
 
-## DEV - Change databases to Simple recovery model
+---
+
+**SQL Server Management Studio**
+
+### -- DEV - Change databases to Simple recovery model
+
+```SQL
+IF OBJECT_ID('tempdb..#CommandQueue') IS NOT NULL DROP TABLE #CommandQueue
+
+CREATE TABLE #CommandQueue
+(
+    ID INT IDENTITY ( 1, 1 )
+    , SqlStatement VARCHAR(1000)
+)
+
+INSERT INTO #CommandQueue
+(
+    SqlStatement
+)
+SELECT
+    'ALTER DATABASE [' + name + '] SET RECOVERY SIMPLE'
+FROM
+    sys.databases
+WHERE
+    name NOT IN ( 'master', 'msdb', 'tempdb' )
+
+DECLARE @id INT
+
+SELECT @id = MIN(ID)
+FROM #CommandQueue
+
+WHILE @id IS NOT NULL
+BEGIN
+    DECLARE @sqlStatement VARCHAR(1000)
+
+    SELECT
+        @sqlStatement = SqlStatement
+    FROM
+        #CommandQueue
+    WHERE
+        ID = @id
+
+    PRINT 'Executing ''' + @sqlStatement + '''...'
+
+    EXEC (@sqlStatement)
+
+    DELETE FROM #CommandQueue
+    WHERE ID = @id
+
+    SELECT @id = MIN(ID)
+    FROM #CommandQueue
+END
+```
+
+---
+
+---
+
+**SQL Server Management Studio**
+
+### -- DEV - Constrain maximum memory for SQL Server
+
+```SQL
+EXEC sys.sp_configure N'show advanced options', N'1'
+RECONFIGURE WITH OVERRIDE
+GO
+EXEC sys.sp_configure N'max server memory (MB)', N'1024'
+RECONFIGURE WITH OVERRIDE
+GO
+EXEC sys.sp_configure N'show advanced options', N'0'
+RECONFIGURE WITH OVERRIDE
+GO
+```
+
+---
+
+---
+
+**SQL Server Management Studio**
+
+### -- Configure TempDB data and log files
+
+```SQL
+ALTER DATABASE [tempdb]
+  MODIFY FILE
+  (
+    NAME = N'tempdev'
+    , SIZE = 128MB
+    , FILEGROWTH = 10MB
+  );
+
+DECLARE @dataPath VARCHAR(300);
+
+SELECT
+  @dataPath = REPLACE([filename], '.mdf','')
+FROM
+  sysaltfiles s
+WHERE
+  name = 'tempdev';
+
+DECLARE @sqlStatement NVARCHAR(500);
+
+SELECT @sqlStatement =
+  N'ALTER DATABASE [tempdb]'
+    + 'ADD FILE'
+    + '('
+      + 'NAME = N''tempdev2'''
+      + ', FILENAME = ''' + @dataPath + '2.mdf'''
+      + ', SIZE = 128MB'
+      + ', FILEGROWTH = 10MB'
+    + ')';
+
+EXEC sp_executesql @sqlStatement;
+
+SELECT @sqlStatement =
+  N'ALTER DATABASE [tempdb]'
+    + 'ADD FILE'
+    + '('
+      + 'NAME = N''tempdev3'''
+      + ', FILENAME = ''' + @dataPath + '3.mdf'''
+      + ', SIZE = 128MB'
+      + ', FILEGROWTH = 10MB'
+    + ')';
+
+EXEC sp_executesql @sqlStatement;
+
+SELECT @sqlStatement =
+  N'ALTER DATABASE [tempdb]'
+    + 'ADD FILE'
+    + '('
+      + 'NAME = N''tempdev4'''
+      + ', FILENAME = ''' + @dataPath + '4.mdf'''
+      + ', SIZE = 128MB'
+      + ', FILEGROWTH = 10MB'
+    + ')';
+
+EXEC sp_executesql @sqlStatement;
+ALTER DATABASE [tempdb]
+  MODIFY FILE (
+    NAME = N'templog',
+    SIZE = 50MB,
+    FILEGROWTH = 10MB
+  )
+```
+
+---
+
+---
+
+**SQL Server Management Studio**
+
+### -- Configure "Max Degree of Parallelism" for SharePoint
+
+```SQL
+EXEC sys.sp_configure N'show advanced options', N'1'
+RECONFIGURE WITH OVERRIDE
+GO
+EXEC sys.sp_configure N'max degree of parallelism', N'1'
+RECONFIGURE WITH OVERRIDE
+GO
+EXEC sys.sp_configure N'show advanced options', N'0'
+RECONFIGURE WITH OVERRIDE
+GO
+```
+
+---
 
 ```PowerShell
 cls
 ```
 
-## # Install Prince on front-end Web servers
+### # Configure permissions on \\Windows\\System32\\LogFiles\\Sum files
+
+```PowerShell
+icacls C:\Windows\System32\LogFiles\Sum\Api.chk `
+    /grant "NT Service\MSSQLSERVER:(M)"
+
+icacls C:\Windows\System32\LogFiles\Sum\Api.log `
+    /grant "NT Service\MSSQLSERVER:(M)"
+
+icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb `
+    /grant "NT Service\MSSQLSERVER:(M)"
+```
+
+### # Install Prince on front-end Web servers
+
+```PowerShell
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
 
 ```PowerShell
 & "\\ICEMAN\Products\Prince\prince-7.1-setup.exe"
@@ -529,61 +850,167 @@ Copy-Item `
    3. Verify the license information and then click **Close**.
 3. Close the Prince application.
 
-## DEV - Install Microsoft Office 2013 with SP1
+### DEV - Install Microsoft Office 2016 (Recommended)
 
-## DEV - Install Microsoft SharePoint Designer 2013 with SP1
+---
 
-## DEV - Install Microsoft Visio 2013 with SP1
-
-## Install additional service packs and updates
-
-- 65 important updates available
-- ~1.8 GB
-- Approximate time: 23 minutes (2:56 PM - 3:19 PM) - Hyper-V on FORGE
-
-### # Delete C:\\Windows\\SoftwareDistribution folder (1.78 GB)
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-
-Restart-Computer
+cls
 ```
 
-### Check for updates using Windows Update (after removing patches folder)
-
-- **Most recent check for updates: Never -> Most recent check for updates: Today at 8:45 AM**
-- C:\\Windows\\SoftwareDistribution folder is now 43 MB
-
-## DEV - Install additional browsers and software
-
-## Install and configure SharePoint Server 2013
-
-**Note:** Insert the SharePoint 2013 installation media into the DVD drive for the SharePoint VM
-
-### # Install SharePoint 2013 prerequisites on the farm servers
+#### # Mount Office Professional Plus 2016 installation media
 
 ```PowerShell
-$preReqPath = `
-    "\\ICEMAN\Products\Microsoft\SharePoint 2013\PrerequisiteInstallerFiles_SP1"
+$imagePath = "\\ICEMAN\Products\Microsoft\Office 2016" `
+    + "\en_office_professional_plus_2016_x86_x64_dvd_6962141.iso"
 
-& X:\PrerequisiteInstaller.exe `
-    /SQLNCli:"$preReqPath\sqlncli.msi" `
-    /PowerShell:"$preReqPath\Windows6.1-KB2506143-x64.msu" `
-    /NETFX:"$preReqPath\dotNetFx45_Full_setup.exe" `
-    /IDFX:"$preReqPath\Windows6.1-KB974405-x64.msu" `
-    /Sync:"$preReqPath\Synchronization.msi" `
-    /AppFabric:"$preReqPath\WindowsServerAppFabricSetup_x64.exe" `
-    /IDFX11:"$preReqPath\MicrosoftIdentityExtensions-64.msi" `
-    /MSIPCClient:"$preReqPath\setup_msipc_x64.msi" `
-    /WCFDataServices:"$preReqPath\WcfDataServices.exe" `
-    /KB2671763:"$preReqPath\AppFabric1.1-RTM-KB2671763-x64-ENU.exe" `
-    /WCFDataServices56:"$preReqPath\WcfDataServices-5.6.exe"
+Set-VMDvdDrive -ComputerName STORM -VMName EXT-FOOBAR3 -Path $imagePath
+```
+
+---
+
+```Console
+X:
+.\setup.exe /AUTORUN
+```
+
+```Console
+cls
+```
+
+### # DEV - Install Microsoft SharePoint Designer 2013 (Recommended)
+
+```PowerShell
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+& "\\ICEMAN\Products\Microsoft\SharePoint Designer 2013\en_sharepoint_designer_2013_with_sp1_x86_3948134.exe"
+```
+
+### DEV - Install Microsoft Visio 2016 (Recommended)
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Mount Visio Professional 2016 installation media
+
+```PowerShell
+$imagePath = "\\ICEMAN\Products\Microsoft\Visio 2016" `
+    + "\en_visio_professional_2016_x86_x64_dvd_6962139.iso"
+
+Set-VMDvdDrive -ComputerName STORM -VMName EXT-FOOBAR3 -Path $imagePath
+```
+
+---
+
+```Console
+X:
+.\setup.exe /AUTORUN
+```
+
+```Console
+cls
+```
+
+### # DEV - Install additional browsers and software (Recommended)
+
+#### # Install Mozilla Firefox
+
+```PowerShell
+& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 46.0.1.exe"
 ```
 
 ```PowerShell
 cls
+```
+
+#### # Install Google Chrome
+
+```PowerShell
+& "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup.exe"
+```
+
+### Install additional service packs and updates
+
+## Install and configure SharePoint Server 2013
+
+### Download SharePoint 2013 prerequisites to a file share
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Install SharePoint 2013 prerequisites on the farm servers
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Insert the SharePoint 2013 installation media into the DVD drive for the SharePoint VM
+
+```PowerShell
+$imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
+    + "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
+
+Set-VMDvdDrive -ComputerName STORM -VMName EXT-FOOBAR3 -Path $imagePath
+```
+
+---
+
+```Console
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$sourcePath = `
+    "\\ICEMAN\Products\Microsoft\SharePoint 2013\PrerequisiteInstallerFiles_SP1"
+
+$prereqPath = "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1"
+
+robocopy $sourcePath $prereqPath /E
+
+& X:\PrerequisiteInstaller.exe `
+    /SQLNCli:"$prereqPath\sqlncli.msi" `
+    /PowerShell:"$prereqPath\Windows6.1-KB2506143-x64.msu" `
+    /NETFX:"$prereqPath\dotNetFx45_Full_setup.exe" `
+    /IDFX:"$prereqPath\Windows6.1-KB974405-x64.msu" `
+    /Sync:"$prereqPath\Synchronization.msi" `
+    /AppFabric:"$prereqPath\WindowsServerAppFabricSetup_x64.exe" `
+    /IDFX11:"$prereqPath\MicrosoftIdentityExtensions-64.msi" `
+    /MSIPCClient:"$prereqPath\setup_msipc_x64.msi" `
+    /WCFDataServices:"$prereqPath\WcfDataServices.exe" `
+    /KB2671763:"$prereqPath\AppFabric1.1-RTM-KB2671763-x64-ENU.exe" `
+    /WCFDataServices56:"$prereqPath\WcfDataServices-5.6.exe"
+```
+
+> **Important**
+>
+> Wait for the prerequisites to be installed.
+
+```PowerShell
+Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 ```
 
 ### # Install SharePoint Server 2013 on the farm servers
@@ -600,73 +1027,13 @@ cls
 
 ```PowerShell
 net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-
-$patch = "15.0.4701.1001 - SharePoint 2013 March 2015 CU"
-
-robocopy `
-    "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\$patch" `
-    "C:\NotBackedUp\Temp\$patch" `
-    /E
-
-& "C:\NotBackedUp\Temp\$patch\*.exe"
 ```
 
-> **Important**
+> **Note**
 >
-> Wait for the patch to be installed.
+> When prompted, type the password to connect to the file share.
 
 ```PowerShell
-Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
-```
-
-```PowerShell
-cls
-```
-
-### # Add the SharePoint bin folder to the PATH environment variable
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
-    ("C:\Program Files\Common Files\Microsoft Shared\web server extensions" `
-        + "\15\BIN") `
-    -EnvironmentVariableTarget "Machine"
-```
-
-> **Important**
->
-> Restart PowerShell for environment variable change to take effect.
-
----
-
-**FOOBAR8**
-
-### # Checkpoint VM
-
-```PowerShell
-$vmHost = "STORM"
-$vmName = "EXT-FOOBAR3"
-
-Stop-VM -ComputerName $vmHost -Name $vmName
-
-Checkpoint-VM `
-    -ComputerName $vmHost `
-    -Name $vmName `
-    -SnapshotName "6.5 Copy SecuritasConnect build to SharePoint server"
-
-Start-VM -ComputerName $vmHost -Name $vmName
-```
-
----
-
-```PowerShell
-cls
-```
-
-### # Install Cumulative Update for SharePoint Server 2013
-
-```PowerShell
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-
 $patch = "15.0.4727.1000 - SharePoint 2013 June 2015 CU"
 
 robocopy `
@@ -685,53 +1052,101 @@ robocopy `
 Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 ```
 
----
-
-**FOOBAR8**
-
-### # Checkpoint VM
+### # Add the SharePoint bin folder to the PATH environment variable
 
 ```PowerShell
-$vmHost = "STORM"
-$vmName = "EXT-FOOBAR3"
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    ("C:\Program Files\Common Files\Microsoft Shared\web server extensions" `
+        + "\15\BIN") `
+    -EnvironmentVariableTarget "Machine"
 
-Stop-VM -ComputerName $vmHost -Name $vmName
-
-Checkpoint-VM `
-    -ComputerName $vmHost `
-    -Name $vmName `
-    -SnapshotName "15.0.4727.1000 - SharePoint 2013 June 2015 CU"
-
-Start-VM -ComputerName $vmHost -Name $vmName
+exit
 ```
 
----
+> **Important**
+>
+> Restart PowerShell for environment variable change to take effect.
 
-### Copy SecuritasConnect build to SharePoint server
-
----
-
-**Developer Command Prompt for VS2013 - Run as administrator**
-
-```Console
-mkdir C:\NotBackedUp\Securitas
-tf workfold /decloak "$/Securitas ClientPortal/Dev/Lab2"
-tf get C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2 /recursive /force
-tf get "$/Securitas ClientPortal/Main/Code/Securitas.Portal.ruleset" /force
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code
-msbuild SecuritasClientPortal.sln /p:IsPackaging=true
-```
+### DEV - Install Visual Studio 2015 with Update 2
 
 ---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Create and configure the farm
+#### # Mount Visual Studio 2012 with Update 2 installation media
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+$imagePath = "\\ICEMAN\Products\Microsoft\Visual Studio 2015" `
+    + "\en_visual_studio_enterprise_2015_with_update_2_x86_x64_dvd_8510142.iso"
+
+Set-VMDvdDrive -ComputerName STORM -VMName EXT-FOOBAR3 -Path $imagePath
+```
+
+---
+
+```PowerShell
+& X:\vs_enterprise.exe
+```
+
+In the Visual Studio installation wizard:
+
+1. Select the **Custom** installation option and click **Next**.
+2. In the list of features, select the following items:
+3. **Microsoft Office Developer Tools**
+4. **Microsoft SQL Server Data Tools**
+5. **Microsoft Web Developer Tools**
+6. Click **Next**.
+7. Review the list of selected features and click **Install**.
+
+When prompted to restart the computer, click **Restart Now**.
+
+### DEV - Enter product key for Visual Studio
+
+1. Start Visual Studio.
+2. On the **Help** menu, click **Register Product**.
+3. In the **Sign in to Visual Studio** window, click **Unlock with a Product Key**.
+4. In the **Enter a product key** window, type the product key and click **Apply**.
+5. In the **Sign in to Visual Studio** window, click **Close**.
+
+### DEV - Install update for Office developer tools in Visual Studio
+
+**Note: **Microsoft Office Developer Tools Update 2 for Visual Studio 2015
+
+Add **[https://www.microsoft.com](https://www.microsoft.com)** to **Trusted sites** zone
+
+File: OfficeToolsForVS2015.3f.3fen.exe
+
+### TODO: DEV - Install Productivity Power Tools for Visual Studio
+
+### # Copy SecuritasConnect build to SharePoint server
+
+```PowerShell
+net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+robocopy `
+    "\\ICEMAN\Builds\Securitas\ClientPortal\4.0.661.0" `
+    "C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0" `
+    /E
+```
+
+### # Create and configure the farm
+
+> **Important**
+>
+> Login as **EXTRANET\\setup-sharepoint**
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
 
 & '.\Create Farm.ps1' -CentralAdminAuthProvider NTLM -Verbose
 ```
@@ -739,30 +1154,25 @@ cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-sp-farm-dev**.\
-> Expect the previous operation to complete in approximately 7 minutes.
+> Expect the previous operation to complete in approximately 5 minutes.
+
+### Add Web servers to the farm
+
+(skipped)
+
+### Add SharePoint Central Administration to the "Local intranet" zone
+
+(skipped -- since the "Create Farm.ps1" script configures this)
 
 ```PowerShell
 cls
 ```
 
-### # Add SharePoint Central Administration to the "Local intranet" zone
-
-```PowerShell
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$env:COMPUTERNAME")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name http -Value 1
-```
-
 ### # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+
 & '.\Configure DCOM Permissions.ps1' -Verbose
 ```
 
@@ -830,7 +1240,7 @@ cls
 ### # Change the service account for the Distributed Cache
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
 
 & '.\Configure Distributed Cache.ps1' -Verbose
 ```
@@ -854,10 +1264,6 @@ Update-SPDistributedCacheSize -CacheSizeInMB 150
 
 ```PowerShell
 & '.\Configure State Service.ps1' -Verbose
-```
-
-```PowerShell
-cls
 ```
 
 ### # Configure the SharePoint ASP.NET Session State service
@@ -892,67 +1298,13 @@ cls
 cls
 ```
 
-### # Create and configure the search service application
-
-```PowerShell
-& '.\Configure SharePoint Search.ps1' -Verbose
-```
-
-> **Note**
->
-> When prompted for the service account, specify **EXTRANET\\s-sp-crawler-dev**.\
-> Expect the previous operation to complete in approximately 6 minutes.
-
-```PowerShell
-cls
-```
-
-### # Configure the search crawl schedules
-
-```PowerShell
-$searchApp = Get-SPEnterpriseSearchServiceApplication `
-    -Identity "Search Service Application"
-
-$contentSource = Get-SPEnterpriseSearchCrawlContentSource `
-    -SearchApplication $searchApp `
-    -Identity "Local SharePoint sites"
-
-Set-SPEnterpriseSearchCrawlContentSource `
-    -Identity $contentSource `
-    -ScheduleType Full `
-    -WeeklyCrawlSchedule `
-    -CrawlScheduleStartDateTime "12:00 AM" `
-    -CrawlScheduleDaysOfWeek Sunday `
-    -CrawlScheduleRunEveryInterval 1
-
-Set-SPEnterpriseSearchCrawlContentSource `
-    -Identity $contentSource `
-    -ScheduleType Incremental `
-    -DailyCrawlSchedule `
-    -CrawlScheduleStartDateTime "4:00 AM" `
-    -CrawlScheduleRepeatInterval 60 `
-    -CrawlScheduleRepeatDuration 1080
-```
-
-### # DEV - Configure performance level for the search crawl component
-
-```PowerShell
-Set-SPEnterpriseSearchService -PerformanceLevel Reduced
-
-Restart-Service SPSearchHostController
-```
-
-```PowerShell
-cls
-```
-
 ### # Configure the User Profile Service Application
 
 #### # Create the User Profile Service Application
 
 ##### Issue
 
-Error starting UPS service (when User Profile Service Application is created by TECHTOOLBOX\\jjameson):
+Error starting UPS service (when User Profile Service Application is created by EXTRANET\\setup-sharepoint-dev):
 
 UserProfileApplication.SynchronizeMIIS: Failed to configure ILM, will attempt during next rerun. Exception: System.Data.SqlClient.SqlException (0x80131904): Specified collection 'StringSchemaCollection' cannot be dropped because it is used by object 'EXTRANET\\s-sp-farm-dev.GetObjectCurrent'.\
  at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)\
@@ -993,7 +1345,7 @@ Start-Process $PSHOME\powershell.exe `
 **PowerShell -- running as EXTRANET\\s-sp-farm-dev**
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
 
 & '.\Configure User Profile Service.ps1' -Verbose
 ```
@@ -1015,23 +1367,6 @@ Restart-Service SPTimerV4
 
 #### Disable social features
 
-#### Disable newsfeed
-
-##### Issue
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/3DE06A92091421CC8FFB13C7FD80B353E9DD0091.png)
-
-From ULS log:
-
-EditSection.ButtonOK_Click(): Microsoft.Office.Server.UserProfiles.CommitFailedException: Property update's Stored Procedure call returned an error. Error Code: 4. Errors removing properties: 1. Errors updating or creating properties: 0.\
- at Microsoft.Office.Server.UserProfiles.PropertyBase.Update(UserProfileApplicationProxy userProfileApplicationProxy, Guid partitionID, IEnumerable addPropertyList, IEnumerable updatePropertyList, IEnumerable removePropertyList)\
- at Microsoft.Office.Server.UserProfiles.PropertyBaseManager`1.Remove(T property)\
- at Microsoft.Office.Server.UserProfiles.ProfileSubtypePropertyManager.Remove(String propertyURI, String propertyName, String sectionName)\
- at Microsoft.Office.Server.UserProfiles.PropertyBaseManager`1.RemoveSectionByName(String sectionName)\
- at Microsoft.SharePoint.Portal.UserProfiles.AdminUI.EditSection._MakeTypeChangesToSection(CoreProperty section, ProfileTypeProperty sectionTypeProperty)\
- at Microsoft.SharePoint.Portal.UserProfiles.AdminUI.EditSection._CommitUpdatedSection()\
- at Microsoft.SharePoint.Portal.UserProfiles.AdminUI.EditSection.ButtonOK_Click(Object sender, EventArgs e).
-
 ```PowerShell
 cls
 ```
@@ -1050,7 +1385,7 @@ icacls $path /grant "NETWORK SERVICE:(OI)(CI)(RX)"
 ```PowerShell
 net localgroup Administrators /add EXTRANET\s-sp-farm-dev
 
-& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Restart SharePoint Services.cmd'
+Restart-Service SPTimerV4
 ```
 
 #### Start the User Profile Synchronization Service
@@ -1064,23 +1399,41 @@ cls
 ```PowerShell
 net localgroup Administrators /delete EXTRANET\s-sp-farm-dev
 
-& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Restart SharePoint Services.cmd'
+Restart-Service SPTimerV4
 ```
 
 #### Configure synchronization connections and import data from Active Directory
 
-| **Connection Name** | **Forest Name**            | **Account Name**            |
-| ------------------- | -------------------------- | --------------------------- |
-| TECHTOOLBOX         | corp.technologytoolbox.com | TECHTOOLBOX\\svc-sp-ups-dev |
-| FABRIKAM            | corp.fabrikam.com          | FABRIKAM\\s-sp-ups-dev      |
+| **Connection Name** | **Forest Name**            | **Account Name**        |
+| ------------------- | -------------------------- | ----------------------- |
+| TECHTOOLBOX         | corp.technologytoolbox.com | TECHTOOLBOX\\svc-sp-ups |
+| FABRIKAM            | corp.fabrikam.com          | FABRIKAM\\s-sp-ups      |
+
+### # Create and configure the search service application
+
+```PowerShell
+& '.\Configure SharePoint Search.ps1' -Verbose
+```
+
+> **Note**
+>
+> When prompted for the service account, specify **EXTRANET\\s-sp-crawler-dev**.\
+> Expect the previous operation to complete in approximately 6 minutes.
 
 ```PowerShell
 cls
 ```
 
-### # Configure people search in SharePoint
+#### # Configure people search in SharePoint
 
-#### # Grant permissions to default content access account
+```PowerShell
+$mySiteHostLocation = "http://client-local.securitasinc.com/sites/my"
+
+$searchApp = Get-SPEnterpriseSearchServiceApplication `
+    -Identity "Search Service Application"
+```
+
+##### # Grant permissions to default content access account
 
 ```PowerShell
 $content = New-Object `
@@ -1109,24 +1462,71 @@ Set-SPServiceApplicationSecurity `
     -Admin
 ```
 
-#### # Configure content source for crawling user profiles
+##### # Create content source for crawling user profiles
 
-##### # Create content source
+```PowerShell
+$mySiteHostUri = [System.Uri] $mySiteHostLocation
+
+If ($mySiteHostUri.Scheme -eq "http")
+{
+    $startAddress = "sps3://" + $mySiteHostUri.Authority
+}
+ElseIf ($mySiteHostUri.Scheme -eq "https")
+{
+    $startAddress = "sps3s://" + $mySiteHostUri.Authority
+}
+Else
+{
+    Throw "The specified scheme ($($mySiteHostUri.Scheme)) is not supported."
+}
+
+New-SPEnterpriseSearchCrawlContentSource `
+    -SearchApplication $searchapp `
+    -Type SharePoint `
+    -Name "User profiles" `
+    -StartAddresses $startAddress
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure the search crawl schedules
+
+##### # Configure crawl schedule for "Local SharePoint sites"
 
 ```PowerShell
 $searchApp = Get-SPEnterpriseSearchServiceApplication `
     -Identity "Search Service Application"
 
-$contentSource = New-SPEnterpriseSearchCrawlContentSource `
-    -SearchApplication $searchapp `
-    -Name "User profiles" `
-    -Type SharePoint `
-    -StartAddresses sps3://client-local.securitasinc.com
+$contentSource = Get-SPEnterpriseSearchCrawlContentSource `
+    -SearchApplication $searchApp `
+    -Identity "Local SharePoint sites"
+
+Set-SPEnterpriseSearchCrawlContentSource `
+    -Identity $contentSource `
+    -ScheduleType Full `
+    -WeeklyCrawlSchedule `
+    -CrawlScheduleStartDateTime "12:00 AM" `
+    -CrawlScheduleDaysOfWeek Sunday `
+    -CrawlScheduleRunEveryInterval 1
+
+Set-SPEnterpriseSearchCrawlContentSource `
+    -Identity $contentSource `
+    -ScheduleType Incremental `
+    -DailyCrawlSchedule `
+    -CrawlScheduleStartDateTime "4:00 AM" `
+    -CrawlScheduleRepeatInterval 60 `
+    -CrawlScheduleRepeatDuration 1080
 ```
 
-##### # Configure search crawl schedules
+##### # Configure crawl schedule for "User profiles"
 
 ```PowerShell
+$contentSource = Get-SPEnterpriseSearchCrawlContentSource `
+    -SearchApplication $searchApp `
+    -Identity "User profiles"
+
 Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
     -ScheduleType Full `
@@ -1140,6 +1540,14 @@ Set-SPEnterpriseSearchCrawlContentSource `
     -ScheduleType Incremental `
     -DailyCrawlSchedule `
     -CrawlScheduleStartDateTime "6:00 AM"
+```
+
+#### # DEV - Configure performance level for the search crawl component
+
+```PowerShell
+Set-SPEnterpriseSearchService -PerformanceLevel Reduced
+
+Restart-Service SPSearchHostController
 ```
 
 ```PowerShell
@@ -1160,17 +1568,15 @@ cls
   "SECURITAS_BUILD_CONFIGURATION",
   "Debug",
   "Machine")
+
+exit
 ```
 
 > **Important**
 >
 > Restart PowerShell for environment variables to take effect.
 
-```Console
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
-```
-
-```Console
+```PowerShell
 cls
 ```
 
@@ -1189,13 +1595,11 @@ If ((Test-Path $registryKey) -eq $false)
 Set-ItemProperty -Path $registryKey -Name http -Value 1
 ```
 
-### DEV - Snapshot VM
-
 ---
 
 **FOOBAR8**
 
-### # Checkpoint VM
+### # DEV - Snapshot VM
 
 ```PowerShell
 $vmHost = "STORM"
@@ -1213,25 +1617,10 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-### Get latest version of Client Portal solution and build WSP packages
-
----
-
-**Developer Command Prompt for VS2013 - Run as administrator**
-
-```Console
-tf get C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2 /recursive /force
-tf get "$/Securitas ClientPortal/Main/Code/Securitas.Portal.ruleset" /force
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code
-msbuild SecuritasClientPortal.sln /p:IsPackaging=true
-```
-
----
-
 ### # Create the Web application and initial site collections
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -1351,7 +1740,7 @@ cls
 ### REM DEV - Build Visual Studio solution and package SharePoint projects
 
 ```Console
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code
 msbuild SecuritasClientPortal.sln /p:IsPackaging=true
 ```
 
@@ -1364,7 +1753,7 @@ cls
 #### REM Create the SecuritasPortal database (or restore a backup)
 
 ```Console
-pushd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\BusinessModel\Database\Deployment
+pushd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\BusinessModel\Database\Deployment
 
 Install.cmd
 
@@ -1380,7 +1769,7 @@ $sqlcmd = @"
 
 #### -- Configure permissions for the SecuritasPortal database
 
-```Console
+```SQL
 USE [SecuritasPortal]
 GO
 
@@ -1414,14 +1803,10 @@ Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
 Set-Location C:
 ```
 
-```Console
-cls
-```
-
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
@@ -1429,10 +1814,52 @@ cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
 ### # Configure claims-based authentication
 
 ```PowerShell
-Notepad "C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\15\WebServices\SecurityToken\web.config"
+Push-Location "C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\15\WebServices\SecurityToken"
+
+copy .\web.config ".\web - Copy.config"
+
+notepad web.config
 ```
 
-**{copy/paste Web.config entries from browser -- to avoid issue when copy/pasting from OneNote}**
+---
+
+**Web.config**
+
+```XML
+  <connectionStrings>
+    <add
+      name="SecuritasPortal"
+      connectionString="Server=.;Database=SecuritasPortal;Integrated Security=true" />
+  </connectionStrings>
+
+  <system.web>
+    <membership>
+      <providers>
+        <add
+          name="SecuritasSqlMembershipProvider"
+          type="System.Web.Security.SqlMembershipProvider, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
+          applicationName="Securitas Portal"
+          connectionStringName="SecuritasPortal"
+          passwordFormat="Hashed" />
+      </providers>
+    </membership>
+    <roleManager>
+      <providers>
+        <add
+          name="SecuritasSqlRoleProvider"
+          type="System.Web.Security.SqlRoleProvider, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
+          applicationName="Securitas Portal"
+          connectionStringName="SecuritasPortal" />
+      </providers>
+    </roleManager>
+  </system.web>
+```
+
+---
+
+```PowerShell
+Pop-Location
+```
 
 ```PowerShell
 cls
@@ -1475,45 +1902,84 @@ Start-Process `
 
 ### Create users in the SecuritasPortal database
 
-declare @p12 uniqueidentifier\
-set @p12='5A7AA105-E6E5-4FA4-987B-9473B0218D8D'\
-exec dbo.aspnet_Membership_CreateUser @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@Password=N'gPMR23Dwxfb9l6tr/ZEbqniDFAM=',@PasswordSalt=N'L0n3JqA8UijqS+If66NxMw==',@Email=N'test-abc1@foobar.com',@PasswordQuestion=NULL,@PasswordAnswer=NULL,@IsApproved=1,@UniqueEmail=1,@PasswordFormat=1,@CurrentTimeUtc='2016-05-05 18:37:40',@UserId=@p12 output\
-select @p12\
-go\
-exec sp_reset_connection\
-go\
-exec dbo.aspnet_Roles_GetAllRoles @ApplicationName=N'Securitas Portal'\
-go\
-exec sp_reset_connection\
-go\
-declare @p12 uniqueidentifier\
-set @p12='A11AA014-C7BB-4666-8C8D-2E06A283EFAA'\
-exec dbo.aspnet_Membership_CreateUser @ApplicationName=N'Securitas Portal',@UserName=N'test-lite1',@Password=N'OJKhTDAoFv9ZkJvdwWq4KhxkE6w=',@PasswordSalt=N'izDNv8bs5M4mpU4WApoPMg==',@Email=N'test-lite1@foobar.com',@PasswordQuestion=NULL,@PasswordAnswer=NULL,@IsApproved=1,@UniqueEmail=1,@PasswordFormat=1,@CurrentTimeUtc='2016-05-05 18:38:50',@UserId=@p12 output\
-select @p12\
-go\
-exec sp_reset_connection\
-go\
-exec dbo.aspnet_Roles_GetAllRoles @ApplicationName=N'Securitas Portal'\
-go\
-exec sp_reset_connection\
-go\
-declare @p12 uniqueidentifier\
-set @p12='635B2CBE-477E-4BA1-93C3-521477316C0F'\
-exec dbo.aspnet_Membership_CreateUser @ApplicationName=N'Securitas Portal',@UserName=N'test-bm1',@Password=N'Vv20ry7PAwhbvZiXz5LI9R5fU+o=',@PasswordSalt=N'7s4DV9j94WjMZAZMljBoxA==',@Email=N'test-bm1@technologytoolbox.com',@PasswordQuestion=NULL,@PasswordAnswer=NULL,@IsApproved=1,@UniqueEmail=1,@PasswordFormat=1,@CurrentTimeUtc='2016-05-05 18:39:09',@UserId=@p12 output\
-select @p12\
-go\
-exec sp_reset_connection\
-go\
-exec dbo.aspnet_UsersInRoles_AddUsersToRoles @ApplicationName=N'Securitas Portal',@RoleNames=N'Branch Managers',@UserNames=N'test-bm1',@CurrentTimeUtc='2016-05-05 18:39:09.937'\
-go\
-exec dbo.aspnet_CheckSchemaVersion @Feature=N'Role Manager',@CompatibleSchemaVersion=N'1'\
-go\
-exec dbo.aspnet_Roles_GetAllRoles @ApplicationName=N'Securitas Portal'\
-go\
-exec sp_reset_connection\
-go\
-exec dbo.aspnet_UsersInRoles_GetUsersInRoles @ApplicationName=N'Securitas Portal',@RoleName=N'Branch Managers'\
-go
+```Console
+DECLARE @userId UNIQUEIDENTIFIER
+SET @userId = '5A7AA105-E6E5-4FA4-987B-9473B0218D8D'
+
+DECLARE @utcTimestamp DATETIME = GETUTCDATE()
+
+EXEC dbo.aspnet_Membership_CreateUser
+    @ApplicationName = N'Securitas Portal'
+    , @UserName = N'test-abc1'
+    , @Password = N'gPMR23Dwxfb9l6tr/ZEbqniDFAM = '
+    , @PasswordSalt = N'L0n3JqA8UijqS+If66NxMw =  = '
+    , @Email = N'test-abc1@foobar.com'
+    , @PasswordQuestion = NULL
+    , @PasswordAnswer = NULL
+    , @IsApproved = 1
+    , @UniqueEmail = 1
+    , @PasswordFormat = 1
+    , @CurrentTimeUtc = @utcTimestamp
+    , @UserId = @userId output
+
+GO
+
+DECLARE @userId UNIQUEIDENTIFIER
+SET @userId = 'A11AA014-C7BB-4666-8C8D-2E06A283EFAA'
+
+DECLARE @utcTimestamp DATETIME = GETUTCDATE()
+
+EXEC dbo.aspnet_Membership_CreateUser
+    @ApplicationName = N'Securitas Portal'
+    , @UserName = N'test-lite1'
+    , @Password = N'OJKhTDAoFv9ZkJvdwWq4KhxkE6w = '
+    , @PasswordSalt = N'izDNv8bs5M4mpU4WApoPMg =  = '
+    , @Email = N'test-lite1@foobar.com'
+    , @PasswordQuestion = NULL
+    , @PasswordAnswer = NULL
+    , @IsApproved = 1
+    , @UniqueEmail = 1
+    , @PasswordFormat = 1
+    , @CurrentTimeUtc = @utcTimestamp
+    , @UserId = @userId output
+
+GO
+
+DECLARE @userId UNIQUEIDENTIFIER
+SET @userId = '635B2CBE-477E-4BA1-93C3-521477316C0F'
+
+DECLARE @utcTimestamp DATETIME = GETUTCDATE()
+
+EXEC dbo.aspnet_Membership_CreateUser
+    @ApplicationName = N'Securitas Portal'
+    , @UserName = N'test-bm1'
+    , @Password = N'Vv20ry7PAwhbvZiXz5LI9R5fU+o = '
+    , @PasswordSalt = N'7s4DV9j94WjMZAZMljBoxA =  = '
+    , @Email = N'test-bm1@technologytoolbox.com'
+    , @PasswordQuestion = NULL
+    , @PasswordAnswer = NULL
+    , @IsApproved = 1
+    , @UniqueEmail = 1
+    , @PasswordFormat = 1
+    , @CurrentTimeUtc = @utcTimestamp
+    , @UserId = @userId output
+
+GO
+
+DECLARE @utcTimestamp DATETIME = GETUTCDATE()
+
+EXEC dbo.aspnet_UsersInRoles_AddUsersToRoles
+    @ApplicationName = N'Securitas Portal'
+    , @RoleNames = N'Branch Managers'
+    , @UserNames = N'test-bm1'
+    , @CurrentTimeUtc = @utcTimestamp
+
+GO
+EXEC dbo.aspnet_UsersInRoles_GetUsersInRoles
+    @ApplicationName = N'Securitas Portal'
+    , @RoleName = N'Branch Managers'
+GO
+```
 
 #### Create users for Securitas clients
 
@@ -1557,10 +2023,6 @@ Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
 Set-Location C:
 ```
 
-```PowerShell
-cls
-```
-
 ### # Configure trusted root authorities in SharePoint
 
 ```PowerShell
@@ -1570,6 +2032,64 @@ cls
 ### Configure application settings (e.g. Web service URLs)
 
 ### Configure the SSO credentials for a user
+
+exec dbo.aspnet_Membership_GetUserByName @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@UpdateLastActivity=0,@CurrentTimeUtc='2016-05-24 14:57:22.603'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Profile_GetProperties @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@CurrentTimeUtc='2016-05-24 14:57:22.603'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Profile_SetProperties @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@PropertyNames=N'SsoCredentials:B:0:515:',@PropertyValuesString=N'',@PropertyValuesBinary=0x0001000000FFFFFFFF01000000000000000C020000004953797374656D2C2056657273696F6E3D342E302E302E302C2043756C747572653D6E65757472616C2C205075626C69634B6579546F6B656E3D6237376135633536313933346530383905010000002F53797374656D2E436F6C6C656374696F6E732E5370656369616C697A65642E537472696E6744696374696F6E6172790100000008636F6E74656E7473031C53797374656D2E436F6C6C656374696F6E732E486173687461626C6502000000090300000004030000001C53797374656D2E436F6C6C656374696F6E732E486173687461626C65070000000A4C6F6164466163746F720756657273696F6E08436F6D70617265721048617368436F646550726F7669646572084861736853697A65044B6579730656616C756573000003030005050B081C53797374656D2E436F6C6C656374696F6E732E49436F6D70617265722453797374656D2E436F6C6C656374696F6E732E4948617368436F646550726F766964657208EC51383F010000000A0A0300000009040000000905000000100400000001000000060600000007636170737572651005000000010000000607000000484C7051626438336F3845507871634E7679506F2B444D706F6144655652646859697A366D5379706D7854495979746175766C4754494B393068784A634753754E634238687A413D3D0B,@IsUserAnonymous=0,@CurrentTimeUtc='2016-05-24 14:57:22.617'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Membership_GetUserByName @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@UpdateLastActivity=0,@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Profile_GetProperties @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Profile_SetProperties @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@PropertyNames=N'SsoCredentials:B:0:606:',@PropertyValuesString=N'',@PropertyValuesBinary=0x0001000000FFFFFFFF01000000000000000C020000004953797374656D2C2056657273696F6E3D342E302E302E302C2043756C747572653D6E65757472616C2C205075626C69634B6579546F6B656E3D6237376135633536313933346530383905010000002F53797374656D2E436F6C6C656374696F6E732E5370656369616C697A65642E537472696E6744696374696F6E6172790100000008636F6E74656E7473031C53797374656D2E436F6C6C656374696F6E732E486173687461626C6502000000090300000004030000001C53797374656D2E436F6C6C656374696F6E732E486173687461626C65070000000A4C6F6164466163746F720756657273696F6E08436F6D70617265721048617368436F646550726F7669646572084861736853697A65044B6579730656616C756573000003030005050B081C53797374656D2E436F6C6C656374696F6E732E49436F6D70617265722453797374656D2E436F6C6C656374696F6E732E4948617368436F646550726F766964657208EC51383F020000000A0A030000000904000000090500000010040000000200000006060000000763617073757265060700000007697665726966791005000000020000000608000000484C7051626438336F3845507871634E7679506F2B444D706F6144655652646859697A366D5379706D7854495979746175766C4754494B393068784A634753754E634238687A413D3D0609000000484C7051626438336F3845507871634E7679506F2B444D706F6144644C4446397864675933377363505175465635527157374A38773464436A76543578636F2B366951565752673D3D0B,@IsUserAnonymous=0,@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Membership_GetUserByName @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@UpdateLastActivity=0,@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Profile_GetProperties @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Profile_SetProperties @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@PropertyNames=N'SsoCredentials:B:0:740:',@PropertyValuesString=N'',@PropertyValuesBinary=0x0001000000FFFFFFFF01000000000000000C020000004953797374656D2C2056657273696F6E3D342E302E302E302C2043756C747572653D6E65757472616C2C205075626C69634B6579546F6B656E3D6237376135633536313933346530383905010000002F53797374656D2E436F6C6C656374696F6E732E5370656369616C697A65642E537472696E6744696374696F6E6172790100000008636F6E74656E7473031C53797374656D2E436F6C6C656374696F6E732E486173687461626C6502000000090300000004030000001C53797374656D2E436F6C6C656374696F6E732E486173687461626C65070000000A4C6F6164466163746F720756657273696F6E08436F6D70617265721048617368436F646550726F7669646572084861736853697A65044B6579730656616C756573000003030005050B081C53797374656D2E436F6C6C656374696F6E732E49436F6D70617265722453797374656D2E436F6C6C656374696F6E732E4948617368436F646550726F766964657208EC51383F040000000A0A070000000904000000090500000010040000000300000006060000000A706174726F6C6C69766506070000000769766572696679060800000007636170737572651005000000030000000609000000704C7051626438336F3845507871634E7679506F2B444D706F6144635731693155346D326C39333733482B624962336C6D5543545849786D4C3854616144752B71654A6F2F35627666414F526836544D6B564555415874376B5475696E7850523335514154734432424133777039655268060A000000484C7051626438336F3845507871634E7679506F2B444D706F6144644C4446397864675933377363505175465635527157374A38773464436A76543578636F2B366951565752673D3D060B000000484C7051626438336F3845507871634E7679506F2B444D706F6144655652646859697A366D5379706D7854495979746175766C4754494B393068784A634753754E634238687A413D3D0B,@IsUserAnonymous=0,@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Membership_GetUserByName @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@UpdateLastActivity=0,@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Profile_GetProperties @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Profile_SetProperties @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@PropertyNames=N'SsoCredentials:B:0:872:',@PropertyValuesString=N'',@PropertyValuesBinary=0x0001000000FFFFFFFF01000000000000000C020000004953797374656D2C2056657273696F6E3D342E302E302E302C2043756C747572653D6E65757472616C2C205075626C69634B6579546F6B656E3D6237376135633536313933346530383905010000002F53797374656D2E436F6C6C656374696F6E732E5370656369616C697A65642E537472696E6744696374696F6E6172790100000008636F6E74656E7473031C53797374656D2E436F6C6C656374696F6E732E486173687461626C6502000000090300000004030000001C53797374656D2E436F6C6C656374696F6E732E486173687461626C65070000000A4C6F6164466163746F720756657273696F6E08436F6D70617265721048617368436F646550726F7669646572084861736853697A65044B6579730656616C756573000003030005050B081C53797374656D2E436F6C6C656374696F6E732E49436F6D70617265722453797374656D2E436F6C6C656374696F6E732E4948617368436F646550726F766964657208EC51383F050000000A0A0700000009040000000905000000100400000004000000060600000008747261636B74696B0607000000076976657269667906080000000A706174726F6C6C69766506090000000763617073757265100500000004000000060A000000704C7051626438336F3845507871634E7679506F2B444D706F614465515247777A74713050516861666E4958394249585A75306C6445672F63717039466449487A6A556E4848716D6641315647786530305A6D3941504C314979616633344E6345724D4F48493232784474303850775974060B000000484C7051626438336F3845507871634E7679506F2B444D706F6144644C4446397864675933377363505175465635527157374A38773464436A76543578636F2B366951565752673D3D060C000000704C7051626438336F3845507871634E7679506F2B444D706F6144635731693155346D326C39333733482B624962336C6D5543545849786D4C3854616144752B71654A6F2F35627666414F526836544D6B564555415874376B5475696E7850523335514154734432424133777039655268060D000000484C7051626438336F3845507871634E7679506F2B444D706F6144655652646859697A366D5379706D7854495979746175766C4754494B393068784A634753754E634238687A413D3D0B,@IsUserAnonymous=0,@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Profile_GetProperties @ApplicationName=N'Securitas Portal',@UserName=N'test-abc1',@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go\
+exec dbo.aspnet_Profile_SetProperties @ApplicationName=N'Securitas\
+Portal',@UserName=N'test-abc1',@PropertyNames=N'FullName:S:0:0:SsoCredentials:B:0:872:SuppressedAnnouncements:B:872:424:',@PropertyValuesString=N'',@PropertyValuesBinary=0x0001000000FFFFFFFF01000000000000000C020000004953797374656D2C2056657273696F6E3D342E302E302E302C2043756C747572653D6E65757472616C2C205075626C69634B6579546F6B656E3D6237376135633536313933346530383905010000002F53797374656D2E436F6C6C656374696F6E732E5370656369616C697A65642E537472696E6744696374696F6E6172790100000008636F6E74656E7473031C53797374656D2E436F6C6C656374696F6E732E486173687461626C6502000000090300000004030000001C53797374656D2E436F6C6C656374696F6E732E486173687461626C65070000000A4C6F6164466163746F720756657273696F6E08436F6D70617265721048617368436F646550726F7669646572084861736853697A65044B6579730656616C756573000003030005050B081C53797374656D2E436F6C6C656374696F6E732E49436F6D70617265722453797374656D2E436F6C6C656374696F6E732E4948617368436F646550726F766964657208EC51383F050000000A0A0700000009040000000905000000100400000004000000060600000008747261636B74696B0607000000076976657269667906080000000A706174726F6C6C69766506090000000763617073757265100500000004000000060A000000704C7051626438336F3845507871634E7679506F2B444D706F614465515247777A74713050516861666E4958394249585A75306C6445672F63717039466449487A6A556E4848716D6641315647786530305A6D3941504C314979616633344E6345724D4F48493232784474303850775974060B000000484C7051626438336F3845507871634E7679506F2B444D706F6144644C4446397864675933377363505175465635527157374A38773464436A76543578636F2B366951565752673D3D060C000000704C7051626438336F3845507871634E7679506F2B444D706F6144635731693155346D326C39333733482B624962336C6D5543545849786D4C3854616144752B71654A6F2F35627666414F526836544D6B564555415874376B5475696E7850523335514154734432424133777039655268060D000000484C7051626438336F3845507871634E7679506F2B444D706F6144655652646859697A366D5379706D7854495979746175766C4754494B393068784A634753754E634238687A413D3D0B0001000000FFFFFFFF01000000000000000C020000004953797374656D2C2056657273696F6E3D342E302E302E302C2043756C747572653D6E65757472616C2C205075626C69634B6579546F6B656E3D6237376135633536313933346530383905010000002F53797374656D2E436F6C6C656374696F6E732E5370656369616C697A65642E537472696E6744696374696F6E6172790100000008636F6E74656E7473031C53797374656D2E436F6C6C656374696F6E732E486173687461626C6502000000090300000004030000001C53797374656D2E436F6C6C656374696F6E732E486173687461626C65070000000A4C6F6164466163746F720756657273696F6E08436F6D70617265721048617368436F646550726F7669646572084861736853697A65044B6579730656616C756573000003030005050B081C53797374656D2E436F6C6C656374696F6E732E49436F6D70617265722453797374656D2E436F6C6C656374696F6E732E4948617368436F646550726F766964657208EC51383F000000000A0A03000000090400000009050000001004000000000000001005000000000000000B,@IsUserAnonymous=0,@CurrentTimeUtc='2016-05-24 14:57:22.633'\
+go\
+exec sp_reset_connection\
+go
 
 Browse to the site and login as **test-abc1**.
 
@@ -1611,15 +2131,15 @@ $group.AddUser($branchManagersUser)
 $site.Dispose()
 ```
 
-{Begin skipped sections}
-
 #### Hide the Search navigation item on the C&C landing site
 
-[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)
+(skipped -- since **/sites/cc/Search** subsite does not exist in new SharePoint 2013 environments)
+
+**TODO:** Delete **Search** subsite in environments upgraded from SharePoint 2010
 
 #### Configure the search settings for the C&C landing site
 
-{End skipped sections}
+[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)
 
 ### Configure Google Analytics on the SecuritasConnect Web application
 
@@ -1638,6 +2158,8 @@ cls
 ```
 
 {Begin skipped sections}
+
+**TODO:** Resolve issues with custom site templates
 
 ### Apply the "Securitas Client Site" template to the top-level site
 
@@ -1734,8 +2256,6 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TODO:**
-
 ```PowerShell
 cls
 ```
@@ -1762,8 +2282,7 @@ cls
 **Developer Command Prompt for VS2013 - Run as administrator**
 
 ```Console
-tf get C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2 /recursive /force
-tf get "$/Securitas CloudPortal/Main/Code/Securitas.Portal.ruleset" /force
+tf get C:\NotBackedUp\Securitas\CloudPortal\Main /recursive /force
 ```
 
 ---
@@ -1771,7 +2290,7 @@ tf get "$/Securitas CloudPortal/Main/Code/Securitas.Portal.ruleset" /force
 ### # Create the Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\CloudPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -1780,6 +2299,8 @@ cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
 >
 > When prompted for the service account, specify **EXTRANET\\s-web-cloud-dev**.\
 > Expect the previous operation to complete in approximately 2 minutes.
+
+### Install third-party SharePoint solutions
 
 ```PowerShell
 cls
@@ -1828,10 +2349,6 @@ $peoplePickerCredentials = $cred1, $cred2, $cred3
     -Verbose
 ```
 
-### Expand content database files
-
-(skipped)
-
 ### DEV - Map Web application to loopback address in Hosts file
 
 (skipped)
@@ -1854,38 +2371,6 @@ cls
 & '.\Enable Anonymous Access.ps1'
 ```
 
-### # Configure claims-based authentication
-
-#### # Add Web.config modifications for claims-based authentication
-
-```PowerShell
-Push-Location C:\inetpub\wwwroot\wss\VirtualDirectories\cloud-local.securitasinc.com80
-
-Copy-Item Web.config "Web - Copy.config"
-
-# Notepad Web.config
-
-C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
-    'C:\NotBackedUp\Temp\web - cloud-local.securitasinc.com.config' `
-    .\web.config
-```
-
-**{copy/paste Web.config entries from browser -- to avoid issue when copy/pasting from OneNote}**
-
-```PowerShell
-Pop-Location
-```
-
-```PowerShell
-cls
-```
-
-#### # Validate claims authentication configuration
-
-```PowerShell
-Start-Process "http://cloud-local.securitasinc.com"
-```
-
 ### Enable disk-based caching for the Web application
 
 (skipped)
@@ -1903,7 +2388,7 @@ Start-Process "http://cloud-local.securitasinc.com"
 ### REM DEV - Build Visual Studio solution and package SharePoint projects
 
 ```Console
-cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code
+cd C:\NotBackedUp\Securitas\CloudPortal\Main\Code
 msbuild Securitas.CloudPortal.sln /p:IsPackaging=true
 ```
 
@@ -1913,12 +2398,49 @@ msbuild Securitas.CloudPortal.sln /p:IsPackaging=true
 cls
 ```
 
+### # Configure permissions for the SecuritasPortal database
+
+```PowerShell
+$sqlcmd = @"
+
+USE [SecuritasPortal]
+GO
+
+CREATE USER [EXTRANET\s-web-cloud-dev] FOR LOGIN [EXTRANET\s-web-cloud-dev]
+GO
+ALTER ROLE [aspnet_Membership_FullAccess] ADD MEMBER [EXTRANET\s-web-cloud-dev]
+GO
+ALTER ROLE [aspnet_Profile_BasicAccess] ADD MEMBER [EXTRANET\s-web-cloud-dev]
+GO
+ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-web-cloud-dev]
+GO
+ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-web-cloud-dev]
+GO
+ALTER ROLE [Customer_Provisioner] ADD MEMBER [EXTRANET\s-web-cloud-dev]
+GO
+ALTER ROLE [Customer_Reader] ADD MEMBER [EXTRANET\s-web-cloud-dev]
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\CloudPortal\Main\Code\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
+```
+
+### Upgrade main site collection
+
+(skipped)
+
+```PowerShell
+cls
 ```
 
 ### # Install Cloud Portal solutions and activate the features
@@ -1931,7 +2453,17 @@ cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
 & '.\Activate Features.ps1' -Verbose
 ```
 
-### Create a custom sign-in page
+### Create and configure the custom sign-in page
+
+#### Create the custom sign-in page
+
+#### Configure the custom sign-in page on the Web application
+
+### Configure search settings for the Cloud Portal
+
+#### Hide the Search navigation item on the top-level site
+
+#### Configure the search settings for the top-level site
 
 ### Configure redirect for single-site users
 
@@ -1941,23 +2473,7 @@ cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
 
 #### Add redirect Web Part to Cloud Portal home page
 
-### Configure "Online Provisioning"
-
-(skipped)
-
-#### Configure database permissions for "Online Provisioning"
-
-(skipped)
-
-##### Add service account to Customer_Provisioner role
-
-(skipped)
-
-##### Grant database permissions to Customer_Provisioner role
-
-(skipped)
-
-#### Create and configure the "Online Provisioning" site
+### Create and configure "Online Provisioning" site
 
 (skipped)
 
@@ -1979,7 +2495,11 @@ cls
 
 ### Apply the "Securitas Client Site" template to the top-level site
 
+[http://cloud-local.securitasinc.com/sites/Fabrikam-Shipping](http://cloud-local.securitasinc.com/sites/Fabrikam-Shipping)
+
 ### Modify the site title, description, and logo
+
+(skipped)
 
 ### Update the C&C site home page
 
@@ -1989,74 +2509,254 @@ cls
 
 ### Create a wiki site (optional)
 
-**TODO:**
+**TODO:** Fix bug where master page is not set to SecuritasCloud.master on Wiki site
+
+## Install Employee Portal
 
 ```PowerShell
 cls
-$sqlcmd = @"
 ```
 
-#### -- Configure permissions for the SecuritasPortal database
+## # Extend SecuritasConnect and Cloud Portal web applications
 
-```Console
-USE [SecuritasPortal]
-GO
+### # Extend web applications to Intranet zone
 
-CREATE USER [EXTRANET\s-sp-farm-dev] FOR LOGIN [EXTRANET\s-sp-farm-dev]
-GO
-ALTER ROLE [aspnet_Membership_BasicAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
-GO
-ALTER ROLE [aspnet_Membership_ReportingAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
-GO
-ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
-GO
-ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
-GO
+```PowerShell
+$ErrorActionPreference = "Stop"
 
-CREATE USER [EXTRANET\s-web-client-dev] FOR LOGIN [EXTRANET\s-web-client-dev]
-GO
-ALTER ROLE [aspnet_Membership_FullAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
-GO
-ALTER ROLE [aspnet_Profile_BasicAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
-GO
-ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
-GO
-ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
-GO
-ALTER ROLE [Customer_Reader] ADD MEMBER [EXTRANET\s-web-client-dev]
-GO
-"@
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
 
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+Function ExtendWebAppToIntranetZone(
+    [string] $DefaultUrl,
+    [string] $IntranetUrl)
+{
+    $webApp = Get-SPWebApplication -Identity $DefaultUrl -Debug:$false
 
-Set-Location C:
+    Write-Host ("Extending Web application ($DefaultUrl) to Intranet zone" `
+        + " ($IntranetUrl)...")
+
+    $hostHeader = $IntranetUrl.Substring("http://".Length)
+
+    $webAppName = "SharePoint - " + $hostHeader + "80"
+
+    $windowsAuthProvider = New-SPAuthenticationProvider -Debug:$false
+
+    $webApp | New-SPWebApplicationExtension `
+        -Name $webAppName `
+        -Zone Intranet `
+        -AuthenticationProvider $windowsAuthProvider `
+        -HostHeader $hostHeader `
+        -Port 80
+}
+
+ExtendWebAppToIntranetZone `
+    -DefaultUrl "http://client-local.securitasinc.com" `
+    -IntranetUrl "http://client2-local.securitasinc.com"
+
+ExtendWebAppToIntranetZone `
+    -DefaultUrl "http://cloud-local.securitasinc.com" `
+    -IntranetUrl "http://cloud2-local.securitasinc.com"
 ```
 
-```Console
+### Add SecuritasPortal connection string to Cloud Portal configuration file
+
+(skipped)
+
+**TODO:** Remove this section from the installation guide (since the bug has been fixed)
+
+### Enable disk-based caching for the "intranet" websites
+
+(skipped)
+
+```PowerShell
 cls
 ```
 
-## # Create and configure C&C site collections
-
-### # Create site collection for a Securitas client
+### # Map intranet URLs to loopback address in Hosts file
 
 ```PowerShell
-& '.\Create Client Site Collection.ps1' "ABC Company"
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    127.0.0.1 client2-local.securitasinc.com, cloud2-local.securitasinc.com
 ```
 
-{Begin skipped sections}
+### # Allow specific host names mapped to 127.0.0.1
 
-### Apply the "Securitas Client Site" template to the top-level site
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
+    client2-local.securitasinc.com, cloud2-local.securitasinc.com
+```
 
-### Modify the site title, description, and logo
+## Upgrade SecuritasConnect to "v3.0 Sprint-22" release
 
-### Update the client site home page
+(skipped)
 
-### Create a blog site (optional)
+**TODO:** Remove this section from the installation guide
 
-### Create a wiki site (optional)
+## Install Web Deploy 3.6
 
-{End skipped sections}
+### Download Web Platform Installer
+
+### Install Web Deploy
+
+```PowerShell
+cls
+```
+
+## # Install .NET Framework 4.5
+
+### # Download .NET Framework 4.5.2 installer
+
+```PowerShell
+Copy-Item `
+    ("\\ICEMAN\Products\Microsoft\.NET Framework 4.5\.NET Framework 4.5.2\" `
+        + "NDP452-KB2901907-x86-x64-AllOS-ENU.exe") `
+    C:\NotBackedUp\Temp
+```
+
+### # Install .NET Framework 4.5.2
+
+```PowerShell
+& C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
+```
+
+> **Important**
+>
+> When prompted, restart the computer to complete the installation.
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
+```
+
+### Install updates
+
+> **Important**
+>
+> When prompted, restart the computer to complete the process of installing the updates.
+
+### Restart computer (if not restarted since installing .NET Framework 4.5)
+
+(skipped -- since a restart was required when installing .NET Framework 4.5.2 and after installing updates)
+
+### Ensure ASP.NET v4.0 ISAPI filters are enabled
+
+(skipped -- since the ISAPI filters were already enabled)
+
+## Install Employee Portal
+
+### Copy Employee Portal build to SharePoint server
+
+---
+
+**Developer Command Prompt for VS2013 - Run as administrator**
+
+```Console
+tf get C:\NotBackedUp\Securitas\EmployeePortal\Main /recursive /force
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Add the Employee Portal URL to the "Local intranet" zone
+
+```PowerShell
+[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
+    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
+    + "\employee-local.securitasinc.com")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+Set-ItemProperty -Path $registryKey -Name http -Value 1
+```
+
+### # Create Employee Portal SharePoint site
+
+```PowerShell
+cd 'C:\NotBackedUp\Securitas\EmployeePortal\Main\Code\Deployment Files\Scripts'
+
+& '.\Configure Employee Portal SharePoint Site.ps1' `
+    -SupportedDomains TECHTOOLBOX, FABRIKAM `
+    -Confirm:$false `
+    -Verbose
+```
+
+```PowerShell
+cls
+```
+
+### # Create Employee Portal website
+
+#### # Create Employee Portal website on SharePoint Central Administration server
+
+```PowerShell
+& '.\Configure Employee Portal Website.ps1' `
+    -SiteName employee-local.securitasinc.com `
+    -Confirm:$false `
+    -Verbose
+```
+
+#### Configure SSL bindings on Employee Portal website
+
+(skipped)
+
+#### Create Employee Portal website on other web servers in the farm
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Deploy Employee Portal website
+
+#### # Deploy Employee Portal website on SharePoint Central Administration server
+
+```PowerShell
+attrib -r .\Web.SetParameters.xml
+
+Notepad .\Web.SetParameters.xml
+```
+
+---
+
+**Web.SetParameters.xml**
+
+```XML
+<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter
+    name="IIS Web Application Name"
+    value="employee-local.securitasinc.com" />
+  <setParameter
+    name="SecuritasPortal-Web.config Connection String"
+    value="Server=.; Database=SecuritasPortal; Integrated Security=true" />
+  <setParameter
+    name="SecuritasPortalDbContext-Web.config Connection String"
+    value="Data Source=.; Initial Catalog=SecuritasPortal;
+ Integrated Security=True; MultipleActiveResultSets=True;" />
+</parameters>
+```
+
+---
+
+#### Configure application settings and web service URLs
+
+#### Deploy Employee Portal website content to other web servers in the farm
+
+### Configure database logins and permissions for Employee Portal
+
+### Grant PNKCAN and PNKUS users permissions on Cloud Portal site
+
+### Replace absolute URLs in "User Sites" list
+
+### DEV - Install Visual Studio 2015 with Update 1
+
+### Install additional service packs and updates
 
 **TODO:**
 
@@ -2119,7 +2819,7 @@ cls
 ## # Rebuild SecuritasConnect web application
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\ClientPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Securitas\ClientPortal\Main\Code\DeploymentFiles\Scripts
 
 $cred1 = Get-Credential "EXTRANET\s-web-client-dev"
 
@@ -2174,4 +2874,16 @@ $webApp.Properties.Remove("portalsuperreaderaccount")
 $webApp.Update()
 
 iisreset
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
 ```
