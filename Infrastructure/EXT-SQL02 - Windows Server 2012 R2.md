@@ -7,11 +7,19 @@ Tuesday, April 19, 2016
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
+## Deploy and configure the server infrastructure
+
+### Install Windows Server 2012 R2
+
 ---
 
 **FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
-### # Create virtual machine
+```PowerShell
+cls
+```
+
+#### # Create virtual machine
 
 ```PowerShell
 $vmHost = "STORM"
@@ -43,7 +51,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-## Install custom Windows Server 2012 R2 image
+#### Install custom Windows Server 2012 R2 image
 
 - Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
@@ -58,7 +66,21 @@ Start-VM -ComputerName $vmHost -Name $vmName
 cls
 ```
 
-## # Rename local Administrator account and set password
+#### # Copy latest Toolbox content
+
+```PowerShell
+net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
+robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
+```
+
+### # Rename local Administrator account and set password
 
 ```PowerShell
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -81,30 +103,15 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-## # Remove disk from virtual CD/DVD drive
-
-```PowerShell
-$vmHost = "STORM"
-$vmName = "EXT-SQL02"
-
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
-```
-
----
-
-## Login as EXT-SQL02\\foo
+### Login as EXT-SQL02\\foo
 
 ```PowerShell
 cls
 ```
 
-## # Configure network settings
+### # Configure network settings
 
-### # Rename network connections
+#### # Rename network connections
 
 ```PowerShell
 Get-NetAdapter -Physical | select Name, InterfaceDescription
@@ -114,17 +121,13 @@ Get-NetAdapter `
     Rename-NetAdapter -NewName "Production"
 ```
 
-```PowerShell
-cls
-```
-
-### # Configure "Production" network adapter
+#### # Configure "Production" network adapter
 
 ```PowerShell
 $interfaceAlias = "Production"
 ```
 
-#### # Configure IPv4 DNS servers
+##### # Configure IPv4 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
@@ -132,7 +135,7 @@ Set-DNSClientServerAddress `
     -ServerAddresses 192.168.10.209,192.168.10.210
 ```
 
-#### # Configure IPv6 DNS servers
+##### # Configure IPv6 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
@@ -140,11 +143,7 @@ Set-DNSClientServerAddress `
     -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
 ```
 
-```PowerShell
-cls
-```
-
-#### # Enable jumbo frames
+##### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
@@ -161,13 +160,16 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
-## # Join domain
+### # Join domain
 
 ```PowerShell
-Add-Computer -DomainName extranet.technologytoolbox.com -Restart
+Add-Computer `
+    -DomainName extranet.technologytoolbox.com `
+    -Credential (Get-Credential EXTRANET\jjameson-admin) `
+    -Restart
 ```
 
-## Move computer to "SQL Servers" OU
+#### Move computer to "SQL Servers" OU
 
 ---
 
@@ -179,13 +181,15 @@ $targetPath = ("OU=SQL Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=extranet,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+
+Restart-Computer $computerName
 ```
 
 ---
 
-## Login as EXT-SQL02\\foo
+### Login as EXTRANET\\jjameson-admin
 
-## # Select "High performance" power scheme
+### # Select "High performance" power scheme
 
 ```PowerShell
 powercfg.exe /L
@@ -195,7 +199,7 @@ powercfg.exe /S SCHEME_MIN
 powercfg.exe /L
 ```
 
-## # Change drive letter for DVD-ROM
+### # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -209,83 +213,41 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-```PowerShell
-cls
-```
-
-## # Enable PowerShell remoting
+### # Enable PowerShell remoting
 
 ```PowerShell
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (DCOM-In)' `
-    -DisplayName 'Remote Windows Update (DCOM-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort 135 `
-    -Profile Domain `
-    -Action Allow
-
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (Dynamic RPC)' `
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Program '%windir%\system32\dllhost.exe' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort RPC `
-    -Profile Domain `
-    -Action Allow
-
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (SMB-In)' `
-    -DisplayName 'Remote Windows Update (SMB-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort 445 `
-    -Profile Domain `
-    -Action Allow
-
-Enable-NetFirewallRule `
-    -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)"
-
-Enable-NetFirewallRule `
-    -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
+C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
-## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Disable-NetFirewallRule -Group 'Remote Windows Update'
+C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Install and configure System Center Operations Manager
+### # Install and configure System Center Operations Manager
 
-### # Create certificate for Operations Manager
+#### # Create certificate for Operations Manager
 
-#### # Create request for Operations Manager certificate
+##### # Create request for Operations Manager certificate
 
 ```PowerShell
 & "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
 ```
 
-#### # Submit certificate request to the Certification Authority
+##### # Submit certificate request to the Certification Authority
 
-##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
 
 ```PowerShell
 $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
@@ -304,6 +266,10 @@ Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
 Start-Process $adcsUrl.AbsoluteUri
 ```
 
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
 **To submit the certificate request to an enterprise CA:**
 
 1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
@@ -317,21 +283,17 @@ Start-Process $adcsUrl.AbsoluteUri
 cls
 ```
 
-#### # Import the certificate into the certificate store
+##### # Import the certificate into the certificate store
 
 ```PowerShell
-$certFile = "C:\Users\Administrator\Downloads\certnew.cer"
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
 
 CertReq.exe -Accept $certFile
 
 Remove-Item $certFile
 ```
 
-```PowerShell
-cls
-```
-
-### # Install SCOM agent
+#### # Install SCOM agent
 
 ---
 
@@ -341,7 +303,7 @@ cls
 cls
 ```
 
-#### # Mount the Operations Manager installation media
+##### # Mount the Operations Manager installation media
 
 ```PowerShell
 $imagePath = `
@@ -366,7 +328,7 @@ msiexec.exe /i $msiPath `
 cls
 ```
 
-### # Import the certificate into Operations Manager using MOMCertImport
+#### # Import the certificate into Operations Manager using MOMCertImport
 
 ```PowerShell
 $hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
@@ -388,7 +350,7 @@ Pop-Location
 cls
 ```
 
-### # Remove the Operations Manager installation media
+#### # Remove the Operations Manager installation media
 
 ```PowerShell
 Set-VMDvdDrive -ComputerName STORM -VMName EXT-SQL02 -Path $null
@@ -396,15 +358,17 @@ Set-VMDvdDrive -ComputerName STORM -VMName EXT-SQL02 -Path $null
 
 ---
 
-### # Approve manual agent install in Operations Manager
+#### # Approve manual agent install in Operations Manager
 
-## # Enter a product key and activate Windows
+### # Enter a product key and activate Windows
 
 ```PowerShell
 slmgr /ipk {product key}
 ```
 
-**Note:** When notified that the product key was set successfully, click **OK**.
+> **Note**
+>
+> When notified that the product key was set successfully, click **OK**.
 
 ```Console
 slmgr /ato
@@ -423,6 +387,10 @@ slmgr /ato
 ---
 
 **FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
 
 ### # Create Data01, Log01, and Backup01 VHDs
 
@@ -528,10 +496,6 @@ Get-Disk 4 |
         -FileSystem NTFS `
         -NewFileSystemLabel "Backup01" `
         -Confirm:$false
-```
-
-```PowerShell
-cls
 ```
 
 ### # Set MaxPatchCacheSize to 0 (Recommended)
@@ -657,7 +621,6 @@ EXEC sys.sp_configure N'show advanced options', N'1'
 RECONFIGURE WITH OVERRIDE
 GO
 EXEC sys.sp_configure N'max degree of parallelism', N'1'
-GO
 RECONFIGURE WITH OVERRIDE
 GO
 EXEC sys.sp_configure N'show advanced options', N'0'
@@ -684,10 +647,6 @@ icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb `
     /grant "NT Service\MSSQLSERVER:(M)"
 ```
 
-```PowerShell
-cls
-```
-
 ### # Configure firewall rule for SQL Server
 
 ```PowerShell
@@ -701,10 +660,6 @@ New-NetFirewallRule `
     -LocalPort 1433 `
     -Profile Domain `
     -Action Allow
-```
-
-```PowerShell
-cls
 ```
 
 ### # Enable TCP/IP protocol for SharePoint 2013 connections (SQL Server 2008 drivers)
@@ -723,7 +678,13 @@ $tcpProtocol = $wmi.GetSmoObject($uri)
 $tcpProtocol.IsEnabled = $true
 $tcpProtocol.Alter()
 
+Stop-Service SQLSERVERAGENT
+
 Restart-Service MSSQLSERVER
+
+Start-Sleep -Seconds 15
+
+Start-Service SQLSERVERAGENT
 ```
 
 ## Extend Data01 volume (D:) from 90 GB to 115 GB
@@ -764,5 +725,141 @@ PartitionNumber  DriveLetter Offset                                        Size 
 ---------------  ----------- ------                                        ---- ----
 1                D           1048576                                     115 GB IFS
 ```
+
+## Expand backup volume
+
+> **Note**
+>
+> This process was performed after completing the SharePoint 2013 upgrade.
+
+### Move Backup01 VHD to ICEMAN
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2D/46330C9362DF59D31244DB17343DB02AD347DA2D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A4/ADCD983D2D2DE13DFD89F290C422657B60B56EA4.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/45/2ECA83F8FA9B7176D3C56DB206E24C52BE3AA945.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/E66D481A46AAF46A104498D1B05E485CF139B7F8.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D3/266B4D6C29727F78869BF395A29981B99307A4D3.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/50/031E8050C3B45BF87F9005878CB1BFC072D8AA50.png)
+
+[\\\\iceman.corp.technologytoolbox.com\\VM-Storage-Silver\\EXT-SQL02\\](\\iceman.corp.technologytoolbox.com\VM-Storage-Silver\EXT-SQL02\)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A7/6A447F908B86F86BB402798E18C66BD1804F24A7.png)
+
+### Expand Backup01 VHD
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/E834DBFBBE0CFCF7438E01135C6A14D7492F97E2.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/C54D0749E02FBEB34351F072EA790A96187DB1CE.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/48/743059D28409658B0C323C8845C9EA339EC9ED48.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D5/E57C24239D9F888F68A7EDF48E7DC4F44DB337D5.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/45FF1EB4EBB351B0F4B1C872A0B7D3DF96A78C2C.png)
+
+### # Expand Z: partition
+
+```PowerShell
+$maxSize = (Get-PartitionSupportedSize -DriveLetter Z).SizeMax
+
+Resize-Partition -DriveLetter Z -Size $maxSize
+```
+
+```PowerShell
+cls
+```
+
+## # Configure SQL Server backups
+
+### # Delete PROD backups
+
+```PowerShell
+Remove-Item "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full" -Recurse
+```
+
+### # Create folders for backups
+
+```PowerShell
+mkdir "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Differential"
+mkdir "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
+mkdir "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Transaction Log"
+```
+
+### Create maintenance plans
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A4/92EAB0ACBC0CFA9CE4DEDC7EC4E11178C6E4BEA4.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/6B2D0A94DA29FE8AE6BE575600EAAC81FC39453B.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/ED/68EC3AB26AEEC9F704CA15C22E2335A8DEC27AED.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0F/9D4735C00E9C5A69DF9513C8C2970FF05CD1E20F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/0840D973A0BE838AFA974EA8DD0C037A1AA002EF.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/9F33C9E1FCAEF021C023C2CBBF3A9FE0D6E45A94.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/47/F4B705FEB0DABFBEB96891879D18AB5A2B9AC947.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F7/D1F01DF32846332C9F50696D6218DF9195998EF7.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/F0F72922397B1B266B1C1C6864B8B766CD9B1E30.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/10/12FCA3503A84FD62BE38507210566B0949435E10.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FD/92974E28265DE92F42D0A7A2C240A4B2E0A6C0FD.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/68/348133783DF27FFC3442A97FF0D633E9F6E3E468.png)
+
+Click **Next**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/77/AA95227C0936FC4B3D3767EFD2A87740A7D2A877.png)
+
+Click Finish.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/D4E1C303E2A2B267DF7CF29BDAD4AC6871DAB7D4.png)
+
+Click Close.
+
+Execute maintenance plan to backup databases.
+
+Diff backups
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E6/5D0821A67E2699D0E7D61751FF92DEE479CD8EE6.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A5/910820131F02D93389562BE1629678A07E5D11A5.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/DE90D224862447B2AF95A5A43E0D566ED9982971.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/1A8EF1DB5B2FF306796C1F3BD0FE249D6895D9C5.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/E9DDBF6B6B3BDC73A9D9BF53CC94F043B066B4AE.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/87/F52787696AF303146E9A28C77604A432D42E0687.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A1/EFFC50003F55582EE106DB9D4B650478534817A1.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B0/F2D247EEC5EBC002CF6E30E269F22895EE044FB0.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/68/348133783DF27FFC3442A97FF0D633E9F6E3E468.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/66/199D5CF3E0D38BDCD201AFA56CCA7BDB46F50866.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/022C9A742A243162881FBA86EEA5D85466A9D9B6.png)
+
+Tran logs
+
+Transaction Log Backup of All Databases
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C4/50DBCFEA92E579D8141565980415B7BA2B3CC4C4.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/C9526CAB07B7C275D5B24E901D2CA5E623CBCEB1.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8B/67B61D66F6141F1B2E143AA4EE162A552013868B.png)
 
 **TODO:**

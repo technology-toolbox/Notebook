@@ -7,9 +7,17 @@ Tuesday, April 19, 2016
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
+## Deploy and configure the server infrastructure
+
+### Install Windows Server 2012 R2
+
 ---
 
 **FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
 
 ### # Create virtual machine
 
@@ -25,7 +33,7 @@ New-VM `
     -Path E:\NotBackedUp\VMs `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 45GB `
-    -MemoryStartupBytes 8GB `
+    -MemoryStartupBytes 16GB `
     -SwitchName "Production"
 
 Set-VM `
@@ -58,7 +66,21 @@ Start-VM -ComputerName $vmHost -Name $vmName
 cls
 ```
 
-## # Rename local Administrator account and set password
+#### # Copy latest Toolbox content
+
+```PowerShell
+net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
+robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
+```
+
+### # Rename local Administrator account and set password
 
 ```PowerShell
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -81,30 +103,15 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-## # Remove disk from virtual CD/DVD drive
-
-```PowerShell
-$vmHost = "BEAST"
-$vmName = "EXT-APP02A"
-
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
-```
-
----
-
-## Login as EXT-APP02A\\foo
+### Login as EXT-APP02A\\foo
 
 ```PowerShell
 cls
 ```
 
-## # Configure network settings
+### # Configure network settings
 
-### # Rename network connections
+#### # Rename network connections
 
 ```PowerShell
 Get-NetAdapter -Physical | select Name, InterfaceDescription
@@ -114,13 +121,13 @@ Get-NetAdapter `
     Rename-NetAdapter -NewName "Production"
 ```
 
-### # Configure "Production" network adapter
+#### # Configure "Production" network adapter
 
 ```PowerShell
 $interfaceAlias = "Production"
 ```
 
-#### # Configure IPv4 DNS servers
+##### # Configure IPv4 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
@@ -128,7 +135,7 @@ Set-DNSClientServerAddress `
     -ServerAddresses 192.168.10.209,192.168.10.210
 ```
 
-#### # Configure IPv6 DNS servers
+##### # Configure IPv6 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
@@ -136,7 +143,7 @@ Set-DNSClientServerAddress `
     -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
 ```
 
-#### # Enable jumbo frames
+##### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
@@ -153,17 +160,7 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
-### # Restart computer to avoid potential issue when joining domain
-
-```PowerShell
-Restart-Computer
-```
-
-```PowerShell
-cls
-```
-
-## # Join domain
+### # Join domain
 
 ```PowerShell
 Add-Computer `
@@ -172,7 +169,7 @@ Add-Computer `
     -Restart
 ```
 
-## Move computer to "SharePoint Servers" OU
+#### Move computer to "SharePoint Servers" OU
 
 ---
 
@@ -184,13 +181,15 @@ $targetPath = ("OU=SharePoint Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=extranet,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+
+Restart-Computer $computerName
 ```
 
 ---
 
-## Login as EXT-APP02A\\foo
+### Login as EXTRANET\\setup-sharepoint
 
-## # Select "High performance" power scheme
+### # Select "High performance" power scheme
 
 ```PowerShell
 powercfg.exe /L
@@ -200,7 +199,7 @@ powercfg.exe /S SCHEME_MIN
 powercfg.exe /L
 ```
 
-## # Change drive letter for DVD-ROM
+### # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -214,60 +213,165 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-## # Enable PowerShell remoting
+### # Enable PowerShell remoting
 
 ```PowerShell
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (DCOM-In)' `
-    -DisplayName 'Remote Windows Update (DCOM-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort 135 `
-    -Profile Domain `
-    -Action Allow
-
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (Dynamic RPC)' `
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Program '%windir%\system32\dllhost.exe' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort RPC `
-    -Profile Domain `
-    -Action Allow
-
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (SMB-In)' `
-    -DisplayName 'Remote Windows Update (SMB-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort 445 `
-    -Profile Domain `
-    -Action Allow
-
-Enable-NetFirewallRule `
-    -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)"
-
-Enable-NetFirewallRule `
-    -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
+C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
-## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Disable-NetFirewallRule -Group 'Remote Windows Update'
+C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbose
+```
+
+```PowerShell
+cls
+```
+
+### # Install and configure System Center Operations Manager
+
+#### # Create certificate for Operations Manager
+
+##### # Create request for Operations Manager certificate
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+##### # Submit certificate request to the Certification Authority
+
+###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
+    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
+    + "\$($adcsUrl.Host)")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
+**To submit the certificate request to an enterprise CA:**
+
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+##### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\setup-sharepoint\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+Remove-Item $certFile
+```
+
+#### # Install SCOM agent
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+##### # Mount the Operations Manager installation media
+
+```PowerShell
+$imagePath = `
+    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+Set-VMDvdDrive -ComputerName BEAST -VMName EXT-APP02A -Path $imagePath
+```
+
+---
+
+```PowerShell
+$msiPath = 'X:\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = 'X:\SupportTools\AMD64'
+
+Push-Location "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName $hostName
+
+Pop-Location
+```
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Remove the Operations Manager installation media
+
+```PowerShell
+Set-VMDvdDrive -ComputerName BEAST -VMName EXT-APP02A -Path $null
+```
+
+---
+
+#### # Approve manual agent install in Operations Manager
+
+### # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+> **Note**
+>
+> When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
 ```
 
 ## Configure VM storage
@@ -281,6 +385,10 @@ Disable-NetFirewallRule -Group 'Remote Windows Update'
 ---
 
 **FOOBAR8**
+
+```PowerShell
+cls
+```
 
 ### # Create Data01, Log01, and Backup01 VHDs
 
@@ -339,10 +447,6 @@ Get-Disk 2 |
         -FileSystem NTFS `
         -NewFileSystemLabel "Log01" `
         -Confirm:$false
-```
-
-```PowerShell
-cls
 ```
 
 ### # Set MaxPatchCacheSize to 0 (Recommended)
@@ -511,46 +615,7 @@ New-ADUser `
 
 ### Configure permissions on \\Windows\\System32\\LogFiles\\Sum files
 
-```PowerShell
-cls
-```
-
-### # Install Prince on front-end Web servers
-
-```PowerShell
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-& "\\ICEMAN\Products\Prince\prince-7.1-setup.exe"
-```
-
-> **Important**
->
-> Wait for the software to be installed.
-
-```PowerShell
-cls
-```
-
-#### # Configure Prince license
-
-```PowerShell
-Copy-Item `
-    \\ICEMAN\Products\Prince\Prince-license.dat `
-    'C:\Program Files (x86)\Prince\Engine\license\license.dat'
-```
-
-1. In the **Prince** window, click the **Help** menu and then click **License**.
-2. In the **Prince License** window:
-   1. Click **Open** and then locate the license file (**[\\\\ICEMAN\\Products\\Prince\\Prince-license.dat](\\ICEMAN\Products\Prince\Prince-license.dat)**).
-   2. Click **Accept** to save the license information.
-   3. Verify the license information and then click **Close**.
-3. Close the Prince application.
+### Install Prince on front-end Web servers
 
 ## Install and configure SharePoint Server 2013
 
@@ -621,15 +686,15 @@ robocopy $sourcePath $prereqPath /E
 Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 ```
 
-```PowerShell
-cls
-```
-
 ### # Install SharePoint Server 2013 on the farm servers
 
 ```PowerShell
 & X:\setup.exe
 ```
+
+> **Important**
+>
+> Wait for the installation to complete.
 
 ```PowerShell
 cls
@@ -664,10 +729,6 @@ robocopy `
 Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 ```
 
-```PowerShell
-cls
-```
-
 ### # Add the SharePoint bin folder to the PATH environment variable
 
 ```PowerShell
@@ -683,9 +744,9 @@ exit
 >
 > Restart PowerShell for environment variable change to take effect.
 
-### Copy SecuritasConnect build to SharePoint server
+### # Copy SecuritasConnect build to SharePoint server
 
-```Console
+```PowerShell
 net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 ```
 
@@ -756,11 +817,11 @@ GO
 
 #### Add setup account to SharePoint Admins domain group
 
-### # Create and configure the farm
-
 > **Important**
 >
 > Login as **EXTRANET\\setup-sharepoint**
+
+### # Create and configure the farm
 
 ```PowerShell
 cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
@@ -863,7 +924,7 @@ Set-SPWOPIZone -zone "external-https"
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
-    -IPAddress 192.168.10.59 `
+    -IPAddress 192.168.10.38 `
     -Hostnames EXT-APP02A, client-test.securitasinc.com
 ```
 
@@ -908,6 +969,10 @@ miiskmu.exe /e C:\Users\%USERNAME%\Desktop\miiskeys-1.bin ^
 
 **FOOBAR8**
 
+```PowerShell
+cls
+```
+
 ### # Define list of VMs used in "EXT02" SharePoint farm
 
 ```PowerShell
@@ -936,10 +1001,6 @@ $ext02Servers |
     }
 ```
 
-```PowerShell
-cls
-```
-
 ### # Snapshot VMs
 
 ```PowerShell
@@ -962,27 +1023,6 @@ $ext02Servers |
 cls
 ```
 
-### # Start VMs
-
-```PowerShell
-$ext02Servers |
-    sort BootOrder |
-    ForEach-Object {
-        $vmHost = $_.VMHost
-        $vmName = $_.VMName
-
-        Write-Host "Starting virtual machine ($vmName)..."
-        Start-VM -ComputerName $vmHost -VMName $vmName
-
-        Write-Host "Waiting for virtual machine ($vmName) to start..."
-        Start-Sleep -Seconds 60
-    }
-```
-
-```PowerShell
-cls
-```
-
 ### # Revert VMs to most recent checkpoint
 
 ```PowerShell
@@ -998,6 +1038,23 @@ $ext02Servers |
             Sort-Object CreationTime |
             Select-Object -Last 1 |
             Restore-VMSnapshot -Confirm:$false
+    }
+```
+
+### # Start VMs
+
+```PowerShell
+$ext02Servers |
+    sort BootOrder |
+    ForEach-Object {
+        $vmHost = $_.VMHost
+        $vmName = $_.VMName
+
+        Write-Host "Starting virtual machine ($vmName)..."
+        Start-VM -ComputerName $vmHost -VMName $vmName
+
+        Write-Host "Waiting for virtual machine ($vmName) to start..."
+        Start-Sleep -Seconds 60
     }
 ```
 
@@ -1099,10 +1156,6 @@ cls
 
 ```PowerShell
 & '.\Configure Managed Metadata Service.ps1' -Verbose
-```
-
-```PowerShell
-cls
 ```
 
 ### # Configure the User Profile Service Application
@@ -1290,7 +1343,7 @@ Restart-Service SPTimerV4
 
 #### Disable social features
 
-(skipped)
+(skipped -- since the database was restored from SharePoint 2010)
 
 ```PowerShell
 cls
@@ -1383,12 +1436,6 @@ Restart-Service SPTimerV4
 
 #### Configure synchronization connections and import data from Active Directory
 
-Delete **PNKCAN** and **PNKUS **connections.
-
-> **Note**
->
-> An error occurs when deleting the **PNKUS** connection (due to a timeout after 5 minutes). However, the connection is eventually deleted as expected.
-
 ##### Create synchronization connections to Active Directory
 
 | **Connection Name** | **Forest Name**            | **Account Name**        |
@@ -1396,153 +1443,17 @@ Delete **PNKCAN** and **PNKUS **connections.
 | TECHTOOLBOX         | corp.technologytoolbox.com | TECHTOOLBOX\\svc-sp-ups |
 | FABRIKAM            | corp.fabrikam.com          | FABRIKAM\\s-sp-ups      |
 
-##### Start profile synchronization
+**TODO:** Delete **PNKCAN** and **PNKUS **connections.
 
-Error running profile import job
-
-05/18/2016 09:41:51.64	OWSTIMER.EXE (0x0A38)	0x0AFC	SharePoint Foundation	Timer	ca2m	Unexpected	An internal error occurred while running a timer job: Value was either too large or too small for an Int16.    at System.Convert.ToInt16(Int32 value)     at Microsoft.SharePoint.Administration.SPTimerJobUsageMonitoredScope.OnDisposing()     at Microsoft.SharePoint.Utilities.SPMonitoredScope.Dispose(Boolean disposing)     at Microsoft.SharePoint.Administration.SPTimerJobInvokeInternal.Invoke(SPJobDefinition jd, Guid targetInstanceId, Boolean isTimerService, Int32& result)	3f8c7eb3-4e19-416f-94bb-2b119912b77c
-
-05/18/2016 09:41:51.64	OWSTIMER.EXE (0x0A38)	0x0AFC	SharePoint Foundation	Timer	6772	Critical	There was an internal error invoking the timer job '{0DC6F7F2-06E9-4F09-851C-727981951EA8}' for service '{2FA9FF8A-5B66-4D2E-9208-B760633B685F}'.	3f8c7eb3-4e19-416f-94bb-2b119912b77c
-
-05/18/2016 09:41:51.64	OWSTIMER.EXE (0x0A38)	0x0AFC	SharePoint Foundation	General	8e2s	Medium	Unknown SPRequest error occurred. More information: 0x80131516	3f8c7eb3-4e19-416f-94bb-2b119912b77c
-
-```C#
-namespace Microsoft.SharePoint.Administration
-{
-    internal sealed class SPTimerJobUsageMonitoredScope : SPMonitoredScope
-    {
-...
-        protected override void OnDisposing()
-        {
-...
-                    ISPScopedPerformanceMonitor monitor = base.GetMonitor<SPExecutionTimeCounter>();
-...
-                    this.m_UsageEntry.ServiceCallCount = System.Convert.ToInt16(monitor.Value, System.Globalization.CultureInfo.InvariantCulture);
-...
-        }
-    }
-}
-```
-
-...which causes profile synchronization to hang. I clicked on the **Stop** link, but that only results in **Profile Synchronization Status** changing from **Synchronizing** to **Stopping**).
-
-I attempted several solutions to stop the profile import job, including:
-
-1. Disabling/enabling the Synchronization Timer Job
-2. Stopping and starting the User Profile Synchronization service through Central Admin -- after adding the farm account to the local Administrators group -- and
-
-Nothing worked, so **PUNT!!!**
-
-#### Delete the User Profile Service Application (via Central Admin)
-
-```PowerShell
-cls
-```
-
-#### # Create the User Profile Service Application
-
-# Create User Profile Service Application as EXTRANET\\s-sp-farm:
-
-```PowerShell
-$farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
-```
-
-> **Note**
->
-> When prompted for the service account credentials, type the password for the SharePoint farm service account.
-
-```PowerShell
-net localgroup Administrators /add $farmCredential.UserName
-
-Restart-Service SPTimerV4
-
-Start-Process $PSHOME\powershell.exe `
-    -Credential $farmCredential `
-    -ArgumentList "-Command Start-Process PowerShell.exe -Verb Runas" `
-    -Wait
-```
-
----
-
-**PowerShell -- running as EXTRANET\\s-sp-farm**
-
-```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
-
-& '.\Configure User Profile Service.ps1' -Verbose
-```
-
-> **Important**
->
-> Wait for the service application to be configured.
-
-```Console
-exit
-```
-
----
-
-```Console
-net localgroup Administrators /delete $farmCredential.UserName
-
-Restart-Service SPTimerV4
-```
-
-#### Disable social features
-
-(skipped)
-
-```PowerShell
-cls
-```
-
-### # Configure User Profile Synchronization (UPS)
-
-#### # Configure NETWORK SERVICE permissions
-
-```PowerShell
-$path = "$env:ProgramFiles\Microsoft Office Servers\15.0"
-icacls $path /grant "NETWORK SERVICE:(OI)(CI)(RX)"
-```
-
-#### # Temporarily add SharePoint farm account to local Administrators group
-
-```PowerShell
-net localgroup Administrators /add EXTRANET\s-sp-farm
-
-Restart-Service SPTimerV4
-```
-
-#### Start the User Profile Synchronization Service
-
-#### Wait for User Profile Synchronization Service to finish starting
-
-> **Important**
->
-> Wait until the status of **User Profile Synchronization Service** shows **Started** before proceeding.
-
-```PowerShell
-cls
-```
-
-#### # Remove SharePoint farm account from local Administrators group
-
-```PowerShell
-net localgroup Administrators /delete EXTRANET\s-sp-farm
-
-Restart-Service SPTimerV4
-```
-
-#### Configure synchronization connections and import data from Active Directory
-
-##### Create synchronization connections to Active Directory
-
-| **Connection Name** | **Forest Name**            | **Account Name**        |
-| ------------------- | -------------------------- | ----------------------- |
-| TECHTOOLBOX         | corp.technologytoolbox.com | TECHTOOLBOX\\svc-sp-ups |
-| FABRIKAM            | corp.fabrikam.com          | FABRIKAM\\s-sp-ups      |
+[Issue configuring User Profile Synchronization in TEST](Issue configuring User Profile Synchronization in TEST)
 
 ##### Start profile synchronization
+
+Number of user profiles (before import): 11,776\
+Number of user profiles (after import): 12,268
+
+Start time: 2:47:20 PM\
+End time: 3:02:30 PM
 
 ```PowerShell
 cls
@@ -1559,7 +1470,7 @@ cls
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-sp-crawler**.\
-> Expect the previous operation to complete in approximately 5-6 minutes.
+> Expect the previous operation to complete in approximately 7 minutes.
 
 ```Text
 [2016-05-08 06:22:10] Configure SharePoint Search -
@@ -1583,7 +1494,20 @@ At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Script
     + FullyQualifiedErrorId : SPDuplicateObjectException,Microsoft.PowerShell.Commands.ForEachObjectCommand
 ```
 
-#### Modify search topology
+#### TODO: Modify search topology
+
+```PowerShell
+cls
+```
+
+#### # Pause Search Service Application
+
+# **TODO:** Add this step to the installation guide
+
+```PowerShell
+Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
+    Suspend-SPEnterpriseSearchServiceApplication
+```
 
 ```PowerShell
 cls
@@ -1630,7 +1554,7 @@ Set-SPServiceApplicationSecurity `
 ##### # Create content source for crawling user profiles
 
 ```PowerShell
-$mySiteHostUri = [Uri] $mySiteHostLocation
+$mySiteHostUri = [System.Uri] $mySiteHostLocation
 
 If ($mySiteHostUri.Scheme -eq "http")
 {
@@ -1650,10 +1574,6 @@ New-SPEnterpriseSearchCrawlContentSource `
     -Type SharePoint `
     -Name "User profiles" `
     -StartAddresses $startAddress
-```
-
-```PowerShell
-cls
 ```
 
 #### # Configure the search crawl schedules
@@ -1720,15 +1640,13 @@ cls
   "SECURITAS_CLIENT_PORTAL_URL",
   "http://client-test.securitasinc.com",
   "Machine")
+
+exit
 ```
 
 > **Important**
 >
 > Restart PowerShell for environment variables to take effect.
-
-```PowerShell
-cls
-```
 
 ### # Add the URL for the SecuritasConnect Web site to the "Local intranet" zone
 
@@ -1800,6 +1718,7 @@ RESTORE DATABASE WSS_Content_SecuritasPortal
 
 GO
 
+-- TODO: Add the following step to the install guide
 ALTER DATABASE [WSS_Content_SecuritasPortal]
 SET RECOVERY SIMPLE WITH NO_WAIT
 GO
@@ -1815,6 +1734,11 @@ GO
 ```
 
 ---
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 11 minutes.\
+> RESTORE DATABASE successfully processed 4262140 pages in 342.847 seconds (97.121 MB/sec).
 
 ```PowerShell
 cls
@@ -1844,6 +1768,10 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
 & '.\Deploy Solutions.ps1'
 ```
 
+> **Note**
+>
+> Expect the previous operation to complete in 10-11 minutes.
+
 ```PowerShell
 cls
 ```
@@ -1853,7 +1781,8 @@ cls
 ```PowerShell
 Test-SPContentDatabase `
     -Name WSS_Content_SecuritasPortal `
-    -WebApplication http://client-test.securitasinc.com
+    -WebApplication http://client-test.securitasinc.com |
+    Out-File C:\NotBackedUp\Temp\Test-SPContentDatabase-SecuritasConnect.txt
 ```
 
 ```PowerShell
@@ -1863,19 +1792,30 @@ cls
 ##### # Attach content database
 
 ```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
 Mount-SPContentDatabase `
     -Name WSS_Content_SecuritasPortal `
     -WebApplication http://client-test.securitasinc.com `
     -MaxSiteCount 6000
 
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+
 100.00% : SPContentDatabase Name=WSS_Content_SecuritasPortal
-Mount-SPContentDatabase : Upgrade completed with errors.  Review the upgrade log file located in L:\Microsoft Office Servers\15.0\Logs\Upgrade-20160508-155702-832.log.  The number of errors and warnings is listed at the end of the upgrade log file.
+Mount-SPContentDatabase : Upgrade completed with errors.  Review the upgrade log file located in L:\Microsoft Office Servers\15.0\Logs\Upgrade-20160519-094749-667.log.  The number of errors and warnings is listed at the end of the upgrade log file.
 At line:1 char:1
 + Mount-SPContentDatabase `
 + ~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : InvalidData: (Microsoft.Share...ContentDatabase:SPCmdletMountContentDatabase) [Mount-SPContentDatabase], SPUpgradeException
     + FullyQualifiedErrorId : Microsoft.SharePoint.PowerShell.SPCmdletMountContentDatabase
 ```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 2 hours 38 minutes.
+
+##### Change recovery model of content database from Simple to Full
 
 ---
 
@@ -1944,10 +1884,6 @@ $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
     [Runtime.InteropServices.Marshal]::SecureStringToBSTR($appPassword))
 
 stsadm -o setapppassword -password $plainPassword
-```
-
-```PowerShell
-cls
 ```
 
 #### # Specify the credentials for accessing the trusted forest
@@ -2258,7 +2194,65 @@ cls
 ```PowerShell
 & '.\Add Solutions.ps1' -Verbose
 
+Unable to find solution file (Securitas.Portal.Web.wsp)
+At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts\Add Solutions.ps1:109 char:13
++             Throw "Unable to find solution file ($filename)"
++             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Unable to find ...Portal.Web.wsp):String) [], RuntimeException
+    + FullyQualifiedErrorId : Unable to find solution file (Securitas.Portal.Web.wsp)
+
+
 & '.\Deploy Solutions.ps1' -Verbose
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 11-12 minutes.
+
+##### Issue
+
+```PowerShell
+Get-SPSolution securitas.portal.web.wsp
+
+Name                           SolutionId                           Deployed
+----                           ----------                           --------
+securitas.portal.web.wsp       b8a3f563-073d-4745-b758-8633fab7a512 False
+
+
+Get-SPSolution securitas.portal.web.wsp | select Deployed
+
+                                                                                                               Deployed
+                                                                                                               --------
+                                                                                                                  False
+
+
+Get-SPSolution securitas.portal.web.wsp | select LastOperationResult
+
+                                                                                                    LastOperationResult
+                                                                                                    -------------------
+                                                                                         DeploymentFailedFeatureInstall
+
+
+Get-SPSolution securitas.portal.web.wsp | select LastOperationDetails | fl
+
+
+LastOperationDetails : EXT-APP02A : http://client-test.securitasinc.com/ : The solution was successfully deployed.
+                       EXT-WEB02B : http://client-test.securitasinc.com/ : The solution was successfully deployed.
+                       EXT-APP02A : http://client-test.securitasinc.com/ : The solution was successfully deployed.
+                       EXT-WEB02B : http://client-test.securitasinc.com/ : The solution was successfully deployed.
+                       EXT-WEB02A : A feature with ID 14/c0465947-4bfc-42fe-9bc0-abaebc01b29c has already been
+                       installed in this farm.  Use the force attribute to explicitly re-install the feature.
+                       EXT-WEB02A : A feature with ID 14/c0465947-4bfc-42fe-9bc0-abaebc01b29c has already been
+                       installed in this farm.  Use the force attribute to explicitly re-install the feature.
+```
+
+##### Workaround
+
+```PowerShell
+& '.\Deploy Solutions.ps1' -Force -Verbose
+
+
+
 
 & '.\Activate Features.ps1' -Verbose
 ```
@@ -2293,9 +2287,11 @@ $policy = $webApp.Policies.Add($claim, $groupName)
 $policy.PolicyRoleBindings.Add($policyRole)
 
 $webApp.Update()
+
+& '.\Activate Features.ps1' -Verbose
 ```
 
-#### Activate the "Securitas - Application Settings" feature
+##### Activate the "Securitas - Application Settings" feature
 
 (skipped)
 
@@ -2340,10 +2336,6 @@ cls
 & '.\Configure Trusted Root Authorities.ps1'
 ```
 
-```PowerShell
-cls
-```
-
 ### # Configure application settings (e.g. Web service URLs)
 
 ```PowerShell
@@ -2356,7 +2348,9 @@ net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 Import-Csv "\\ICEMAN\Archive\Clients\Securitas\AppSettings-UAT_2016-04-19.csv" |
-    ForEach-Object {.\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force}
+    ForEach-Object {
+        .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
+    }
 ```
 
 ### Configure the SSO credentials for a user
@@ -2445,8 +2439,6 @@ $webAppUrl = "http://client-test.securitasinc.com"
 
         Write-Host "Upgrading site ($siteUrl)..."
 
-        Upgrade-SPSite $siteUrl -VersionUpgrade -Unthrottled
-
         Disable-SPFeature `
             -Identity Securitas.Portal.Web_SecuritasDefaultMasterPage `
             -Url $siteUrl `
@@ -2456,6 +2448,8 @@ $webAppUrl = "http://client-test.securitasinc.com"
             -Identity Securitas.Portal.Web_PublishingLayouts `
             -Url $siteUrl `
             -Confirm:$false
+
+        Upgrade-SPSite $siteUrl -VersionUpgrade -Unthrottled
 
         Enable-SPFeature `
             -Identity Securitas.Portal.Web_PublishingLayouts `
@@ -2493,6 +2487,127 @@ $policy.PolicyRoleBindings.Add($policyRole)
 
 $webApp.Update()
 ```
+
+```PowerShell
+cls
+```
+
+## # Add Branch Managers domain group to Post Orders template site
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$site = Get-SPSite "http://client-test.securitasinc.com/Template-Sites/Post-Orders-en-US"
+
+$group = $site.RootWeb.SiteGroups["Post Orders Template Site (en-US) Visitors"]
+
+$claim = New-SPClaimsPrincipal -Identity "Branch Managers" `
+    -IdentityType WindowsSecurityGroupName
+
+$branchManagersUser = $site.RootWeb.EnsureUser($claim.ToEncodedString())
+$group.AddUser($branchManagersUser)
+$site.Dispose()
+```
+
+```PowerShell
+cls
+```
+
+## # Replace site collection administrators
+
+```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
+Function ReplaceSiteCollectionAdministrators(
+    $site)
+{
+    Write-Host `
+        "Replacing site collection administrators on site ($($site.Url))..."
+
+    For ($i = 0; $i -lt $site.RootWeb.SiteAdministrators.Count; $i++)
+    {
+        $siteAdmin = $site.RootWeb.SiteAdministrators[$i]
+
+        Write-Debug "siteAdmin: $($siteAdmin.LoginName)"
+
+        If ($siteAdmin.DisplayName -eq "SEC\SharePoint Admins")
+        {
+            Write-Verbose "Removing administrator ($($siteAdmin.DisplayName))..."
+            $site.RootWeb.SiteAdministrators.Remove($i)
+            $i--;
+        }
+    }
+
+    Write-Debug `
+        "Adding SharePoint Admins on site ($($site.Url))..."
+
+    $user = $site.RootWeb.EnsureUser("EXTRANET\SharePoint Admins");
+    $user.IsSiteAdmin = $true;
+    $user.Update();
+}
+
+Get-SPSite -WebApplication http://client-test.securitasinc.com -Limit ALL |
+    ForEach-Object {
+        $site = $_
+
+        Write-Host `
+            "Processing site ($($site.Url))..."
+
+        ReplaceSiteCollectionAdministrators $site
+
+        $site.Dispose()
+    }
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 3-1/2 hours.
+
+```PowerShell
+cls
+```
+
+## # Add index to Personal Links list on /Branch-Management/Post-Orders site
+
+```PowerShell
+$web = Get-SPWeb http://client-test.securitasinc.com/Branch-Management/Post-Orders
+
+$list = $web.Lists["My Links"]
+
+$list.Fields["Created By"]
+
+$list.Fields["Created By"].Indexed = $true
+
+$list.Fields["Created By"].Update()
+```
+
+### Fix error with User Profile Service
+
+#### Issue
+
+System.Data.SqlClient.SqlException (0x80131904): The EXECUTE permission was denied on the object 'Admin_GetPartitionProperties', database 'UserProfileService_Profile', schema 'dbo'.
+
+or (previously:
+
+System.Data.SqlClient.SqlException: Cannot open database "UserProfileService_Profile" requested by the login. The login failed.  Login failed for user 'EXTRANET\\s-web-cloud'.
+
+#### # Workaround
+
+---
+
+**EXT-SQL02 - SQL Server Management Studio**
+
+```SQL
+USE [UserProfileService_Profile]
+GO
+ALTER ROLE [SPDataAccess] ADD MEMBER [EXTRANET\s-web-client]
+GO
+```
+
+---
 
 ## Installation prerequisites - Cloud Portal
 
@@ -2546,18 +2661,56 @@ cls
   "SECURITAS_CLOUD_PORTAL_URL",
   "http://cloud-test.securitasinc.com",
   "Machine")
+
+exit
 ```
 
 > **Important**
 >
 > Restart PowerShell for environment variable to take effect.
 
-### Copy Cloud Portal build to SharePoint server
+**TODO:** Add the following section to the install guide
+
+### # Add the URL for the Cloud Portal Web site to the "Local intranet" zone
+
+```PowerShell
+[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
+    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
+    + "\cloud-test.securitasinc.com")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+Set-ItemProperty -Path $registryKey -Name http -Value 1
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/15/CF90B0921D990480E78AB113EE8B1C2320D08B15.png)
+
+Screen clipping taken: 5/28/2016 8:47 AM
+
+### # Copy Cloud Portal build to SharePoint server
+
+```PowerShell
+net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+robocopy `
+    "\\ICEMAN\Builds\Securitas\CloudPortal\2.0.114.0" `
+    "C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0" `
+    /E
+```
 
 ### # Create the Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -2631,6 +2784,8 @@ RESTORE DATABASE WSS_Content_CloudPortal
 
 GO
 
+-- TODO: Add the following step to the install guide
+
 ALTER DATABASE [WSS_Content_CloudPortal]
 SET RECOVERY SIMPLE WITH NO_WAIT
 GO
@@ -2646,6 +2801,11 @@ GO
 ```
 
 ---
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 17 minutes.\
+> RESTORE DATABASE successfully processed 6524300 pages in 504.137 seconds (101.105 MB/sec).
 
 ```PowerShell
 cls
@@ -2684,7 +2844,8 @@ cls
 ```PowerShell
 Test-SPContentDatabase `
     -Name WSS_Content_CloudPortal `
-    -WebApplication http://cloud-test.securitasinc.com
+    -WebApplication http://cloud-test.securitasinc.com |
+    Out-File C:\NotBackedUp\Temp\Test-SPContentDatabase-CloudPortal.txt
 ```
 
 ```PowerShell
@@ -2694,10 +2855,27 @@ cls
 ##### # Attach content database
 
 ```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
 Mount-SPContentDatabase `
     -Name WSS_Content_CloudPortal `
     -WebApplication http://cloud-test.securitasinc.com
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+
+100.00% : SPContentDatabase Name=WSS_Content_CloudPortal
+Mount-SPContentDatabase : Upgrade completed with errors.  Review the upgrade log file located in L:\Microsoft Office Servers\15.0\Logs\Upgrade-20160528-075913-603.log.  The number of errors and warnings is listed at the end of the upgrade log file.
+At line:1 char:1
++ Mount-SPContentDatabase `
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidData: (Microsoft.Share...ContentDatabase:SPCmdletMountContentDatabase) [Mount-SPContentDatabase], SPUpgradeException
+    + FullyQualifiedErrorId : Microsoft.SharePoint.PowerShell.SPCmdletMountContentDatabase
 ```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 4 minutes.
 
 ```PowerShell
 cls
@@ -2724,7 +2902,7 @@ cls
 ### # Configure object cache user accounts
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
 
 & '.\Configure Object Cache User Accounts.ps1' -Verbose
 
@@ -2775,15 +2953,9 @@ cls
 
 #### Add an HTTPS binding to the site in IIS
 
-```PowerShell
-cls
-```
+### Enable anonymous access to the site
 
-### # Enable anonymous access to the site
-
-```PowerShell
-& '.\Enable Anonymous Access.ps1'
-```
+(skipped)
 
 ```PowerShell
 cls
@@ -2851,10 +3023,14 @@ GO
 
 ---
 
+```PowerShell
+cls
+```
+
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Securitas\CloudPortal\Dev\Lab2\Code\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
@@ -2880,6 +3056,14 @@ cls
 ```PowerShell
 & '.\Add Solutions.ps1' -Verbose
 
+Unable to find solution file (Securitas.CloudPortal.Web.wsp)
+At C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts\Add Solutions.ps1:109 char:13
++             Throw "Unable to find solution file ($filename)"
++             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Unable to find ...Portal.Web.wsp):String) [], RuntimeException
+    + FullyQualifiedErrorId : Unable to find solution file (Securitas.CloudPortal.Web.wsp)
+
+
 & '.\Deploy Solutions.ps1' -Verbose
 
 & '.\Activate Features.ps1' -Verbose
@@ -2897,19 +3081,15 @@ cls
 | -------------------- | ----------------------- | ----------------------- |
 | **Sign In Page URL** | **Custom Sign In Page** | **/Pages/Sign-In.aspx** |
 
-```PowerShell
-cls
+### Configure search settings for the Cloud Portal
+
+#### Hide the Search navigation item on the Cloud Portal top-level site
+
+```Text
+(skipped)
 ```
 
-### # Configure search settings for the Cloud Portal
-
-#### # Hide the Search navigation item on the Cloud Portal top-level site
-
-```PowerShell
-Start-Process "http://cloud-test.securitasinc.com"
-```
-
-```PowerShell
+```Console
 cls
 ```
 
@@ -2944,34 +3124,11 @@ $policy.PolicyRoleBindings.Add($policyRole)
 $webApp.Update()
 ```
 
-##### Issue
-
-```Text
-System.Data.SqlClient.SqlException: Cannot open database "UserProfileService_Profile" requested by the login. The login failed.  Login failed for user 'EXTRANET\s-web-cloud'.
-```
-
-##### # Workaround: Configure Web application policy for SharePoint administrators group
-
----
-
-**EXT-SQL02 - SQL Server Management Studio**
-
-```SQL
-USE [UserProfileService_Profile]
-GO
-CREATE USER [EXTRANET\s-web-cloud] FOR LOGIN [EXTRANET\s-web-cloud]
-GO
-ALTER ROLE [SPDataAccess] ADD MEMBER [EXTRANET\s-web-cloud]
-GO
-```
-
----
-
 ### Configure redirect for single-site users
 
 (skipped)
 
-### Create and configure "Online Provisioning" site
+### Configure "Online Provisioning"
 
 (skipped)
 
@@ -2999,145 +3156,95 @@ Tracking ID: **UA-25899478-3**
 
 {End skipped sections}
 
+```PowerShell
+cls
+```
+
+### # Upgrade Cloud Portal Sites
+
+```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
+Get-SPSite -WebApplication http://cloud-test.securitasinc.com -Limit ALL |
+    ? { $_.CompatibilityLevel -lt 15 } |
+    % {
+        $siteUrl = $_.Url
+
+        Write-Host "Upgrading site ($siteUrl)..."
+
+        Get-SPWeb -Site $siteUrl |
+            % {
+                $webUrl = $_.Url
+
+                Disable-SPFeature `
+                    -Identity Securitas.CloudPortal.Web_SecuritasDefaultMasterPage `
+                    -Url $webUrl `
+                    -Confirm:$false
+            }
+
+        Disable-SPFeature `
+            -Identity Securitas.CloudPortal.Web_PublishingLayouts `
+            -Url $siteUrl `
+            -Confirm:$false
+
+        Upgrade-SPSite $siteUrl -VersionUpgrade -Unthrottled
+
+        Enable-SPFeature `
+            -Identity Securitas.CloudPortal.Web_PublishingLayouts `
+            -Url $siteUrl
+
+        Get-SPWeb -Site $siteUrl |
+            % {
+                $webUrl = $_.Url
+
+                Enable-SPFeature `
+                    -Identity Securitas.CloudPortal.Web_CloudPortalBranding `
+                    -Url $webUrl
+            }
+    }
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 53 minutes.
+
+##### Issue
+
+System.Data.SqlClient.SqlException (0x80131904): The EXECUTE permission was denied on the object 'Admin_GetPartitionProperties', database 'UserProfileService_Profile', schema 'dbo'.
+
+or (previously:
+
+System.Data.SqlClient.SqlException: Cannot open database "UserProfileService_Profile" requested by the login. The login failed.  Login failed for user 'EXTRANET\\s-web-cloud'.
+
+##### # Workaround
+
+---
+
+**EXT-SQL02 - SQL Server Management Studio**
+
+```SQL
+USE [UserProfileService_Profile]
+GO
+ALTER ROLE [SPDataAccess] ADD MEMBER [EXTRANET\s-web-cloud]
+GO
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Resume Search Service Application
+
+# **TODO:** Add this step to the installation guide
+
+```PowerShell
+Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
+    Resume-SPEnterpriseSearchServiceApplication
+```
+
 **TODO:**
-
-```PowerShell
-cls
-```
-
-## # Install and configure System Center Operations Manager
-
-### # Create certificate for Operations Manager
-
-#### # Create request for Operations Manager certificate
-
-```PowerShell
-& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
-```
-
-#### # Submit certificate request to the Certification Authority
-
-##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
-
-```PowerShell
-$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
-
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$($adcsUrl.Host)")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
-
-Start-Process $adcsUrl.AbsoluteUri
-```
-
-**To submit the certificate request to an enterprise CA:**
-
-1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
-2. On the **Welcome** page, click **Request a certificate**.
-3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
-4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
-5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
-6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
-
-```PowerShell
-cls
-```
-
-#### # Import the certificate into the certificate store
-
-```PowerShell
-$certFile = "C:\Users\Administrator\Downloads\certnew.cer"
-
-CertReq.exe -Accept $certFile
-
-Remove-Item $certFile
-```
-
-```PowerShell
-cls
-```
-
-### # Install SCOM agent
-
----
-
-**FOOBAR8**
-
-```PowerShell
-cls
-```
-
-#### # Mount the Operations Manager installation media
-
-```PowerShell
-$imagePath = `
-    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-Set-VMDvdDrive -ComputerName BEAST -VMName EXT-APP02A -Path $imagePath
-```
-
----
-
-```PowerShell
-$msiPath = 'X:\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-```PowerShell
-cls
-```
-
-### # Import the certificate into Operations Manager using MOMCertImport
-
-```PowerShell
-$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
-
-$certImportToolPath = 'X:\SupportTools\AMD64'
-
-Push-Location "$certImportToolPath"
-
-.\MOMCertImport.exe /SubjectName $hostName
-
-Pop-Location
-```
-
----
-
-**FOOBAR8**
-
-```PowerShell
-cls
-```
-
-### # Remove the Operations Manager installation media
-
-```PowerShell
-Set-VMDvdDrive -ComputerName BEAST -VMName EXT-APP02A -Path $null
-```
-
----
-
-### # Approve manual agent install in Operations Manager
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
