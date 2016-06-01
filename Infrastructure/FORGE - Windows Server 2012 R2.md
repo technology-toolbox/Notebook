@@ -1,7 +1,7 @@
-﻿# FORGE (new) - Windows Server 2012 R2 Standard
+﻿# FORGE - Windows Server 2012 R2 Standard
 
-Monday, January 25, 2016
-2:54 PM
+Saturday, May 28, 2016
+10:39 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,84 +9,36 @@ Monday, January 25, 2016
 
 ## Install Windows Server 2012 R2
 
-## Enable Intel I217-V network adapter
-
-### Issue
-
-After installing Windows Server 2012 R2, the built-in Intel I217-V network adapter on the ASUS P8Z77-V motherboard was not recognized.
-
-### Solution
-
-To enable the Intel I217-V network adapter in Windows Server 2012:
-
-1. To be able to modify the drivers, temporarily disable driver integrity checks and enable test signing by running the following commands:
-2. Reboot the server.
-3. Download the network drivers from the Intel website:\
-   **Network Adapter Driver for Windows Server 2012 R2**\
-   [https://downloadcenter.intel.com/download/23073/Network-Adapter-Driver-for-Windows-Server-2012-R2](https://downloadcenter.intel.com/download/23073/Network-Adapter-Driver-for-Windows-Server-2012-R2)-
-4. Use WinZip to extract the contents of the download (PROWin64.exe) to a temporary folder on a USB thumb drive (e.g. \\NotBackedUp\\Temp\\Drivers\\LAN).
-5. Copy the driver files to a temporary location on the server:
-6. Open the **e1d64x64.inf** file in Notepad:
-7. In the **[ControlFlags]** section delete the following three lines:
-8. In the **[Intel.NTamd64.6.3.1]** section, select and copy the three **%E153BNC** lines.
-9. Paste the copied lines into the **[Intel.NTamd64.6.3]** section below the **%E153ANC** lines.
-10. Save the file.
-11. Install the network adapter driver:
-12. Enable driver integrity checks and disable test signing by running the following commands:
-13. Reboot the server.
-
 ```Console
-    bcdedit -set loadoptions DISABLE_INTEGRITY_CHECKS
-bcdedit -set TESTSIGNING ON
+PowerShell
 ```
 
-```Console
-     
-robocopy E:\NotBackedUp\Temp\Drivers\LAN C:\NotBackedUp\Temp\Drivers\LAN /E
+### # Rename local Administrator account
+
+```PowerShell
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+
+logoff
 ```
 
-```Console
-     
-Notepad.exe C:\NotBackedUp\Temp\Drivers\LAN\PRO1000\Winx64\NDIS64\e1d64x64.inf
-```
+### Login as FORGE\\foo
 
-```Text
-    ExcludeFromSelect = \
-        PCI\VEN_8086&DEV_153A,\
-        PCI\VEN_8086&DEV_153B
-```
-
-```Console
-    pnputil -i -a C:\NotBackedUp\Temp\Drivers\LAN\PRO1000\Winx64\NDIS64\e1d64x64.inf
-```
-
-When prompted with **Windows can't verify the publisher of this driver software**, click **Install this driver software anyway**.
-
-```Console
-    bcdedit -set loadoptions ENABLE_INTEGRITY_CHECKS
-bcdedit -set TESTSIGNING OFF
-```
-
-### Reference
-
-**Enable the Intel 82579V NIC in Windows Server 2012**
-[http://www.ivobeerens.nl/2012/08/08/enable-the-intel-82579v-nic-in-windows-server-2012/](http://www.ivobeerens.nl/2012/08/08/enable-the-intel-82579v-nic-in-windows-server-2012/)
-
-## Join domain (corp.technologytoolbox.com) and rename computer (TEMP)
+### Join domain and rename computer
 
 ```Console
 sconfig
 ```
 
-## Move computer to "Servers" OU
+### Move computer to "Hyper-V Servers" OU
 
 ---
 
 **FOOBAR8**
 
 ```PowerShell
-$computerName = "TEMP"
-$targetPath = ("OU=Servers,OU=Resources,OU=IT" `
+$computerName = "FORGE"
+$targetPath = ("OU=Hyper-V Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
@@ -114,158 +66,174 @@ tzutil /s "Mountain Standard Time"
 Update-Help
 ```
 
+### # Copy latest Toolbox content
+
 ```PowerShell
+net use \\ICEMAN\Public /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
+robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
+```
+
+```Console
 cls
 ```
 
-## # Copy Toolbox content
+### # Configure network settings
+
+#### # Rename network connections
 
 ```PowerShell
-robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
-```
-
-```PowerShell
-cls
-```
-
-## # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-```PowerShell
-cls
-```
-
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-```PowerShell
-cls
-```
-
-## # Rename network connections
-
-```PowerShell
-Get-NetAdapter -Physical | select InterfaceDescription
+Get-NetAdapter -Physical | select Name, InterfaceDescription
 
 Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
-    Rename-NetAdapter -NewName "Management"
-
-Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
+    -Name "Ethernet" |
     Rename-NetAdapter -NewName "Production"
 
-Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+Get-NetAdapter `
+    -Name "Ethernet 2" |
     Rename-NetAdapter -NewName "Storage"
 ```
 
+#### # Configure "Production" network adapter
+
 ```PowerShell
-cls
+$interfaceAlias = "Production"
 ```
 
-## # Configure "Management" network adapter
-
-### # Configure static IPv4 address
+##### # Disable DHCP
 
 ```PowerShell
-$ipAddress = "192.168.10.108"
+@("IPv4", "IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Enabled")
+    {
+        # Remove existing gateway
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        # Disable DHCP
+        $interface | Set-NetIPInterface -DHCP Disabled
+    }
+}
+```
+
+##### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "192.168.10.105"
 
 New-NetIPAddress `
-    -InterfaceAlias "Management" `
+    -InterfaceAlias $interfaceAlias `
     -IPAddress $ipAddress `
     -PrefixLength 24 `
     -DefaultGateway 192.168.10.1
-
-Set-DNSClientServerAddress `
-    -InterfaceAlias "Management" `
-    -ServerAddresses 192.168.10.104,192.168.10.103
 ```
 
-### # Configure static IPv6 address
+##### # Configure IPv4 DNS servers
 
 ```PowerShell
-$ipAddress = "2601:282:4201:e500::108"
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.103,192.168.10.104
+```
+
+##### # Configure static IPv6 address
+
+```PowerShell
+$ipAddress = "2601:282:4201:e500::105"
 
 New-NetIPAddress `
-    -InterfaceAlias "Management" `
+    -InterfaceAlias $interfaceAlias `
     -IPAddress $ipAddress `
     -PrefixLength 64
+```
 
+##### # Configure IPv6 DNS servers
+
+```PowerShell
 Set-DNSClientServerAddress `
-    -InterfaceAlias "Management" `
-    -ServerAddresses 2601:282:4201:e500::104,2601:282:4201:e500::103
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 2601:282:4201:e500::103,2601:282:4201:e500::104
+```
+
+##### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty `
+    -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
+
+ping ICEMAN -f -l 8900
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Configure "Management" network adapter
+#### # Configure "Storage" network adapter
 
 ```PowerShell
-Disable-NetAdapterBinding -Name "Production" `
-    -DisplayName "Client for Microsoft Networks"
-
-Disable-NetAdapterBinding -Name "Production" `
-    -DisplayName "File and Printer Sharing for Microsoft Networks"
-
-Disable-NetAdapterBinding -Name "Production" `
-    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
-
-Disable-NetAdapterBinding -Name "Production" `
-    -DisplayName "Link-Layer Topology Discovery Responder"
-
-$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
-    -Filter "NetConnectionId = 'Production'"
-
-$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
-    -Filter "Index= '$($adapter.DeviceID)'"
+$interfaceAlias = "Storage"
 ```
 
-### # Do not register this connection in DNS
+##### # Disable DHCP
 
 ```PowerShell
-$adapterConfig.SetDynamicDNSRegistration($false)
+@("IPv4", "IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Enabled")
+    {
+        # Remove existing gateway
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        # Disable DHCP
+        $interface | Set-NetIPInterface -DHCP Disabled
+    }
+}
 ```
 
-### # Disable NetBIOS over TCP/IP
+##### # Configure static IPv4 address
 
 ```PowerShell
-$adapterConfig.SetTcpipNetbios(2)
-```
-
-```PowerShell
-cls
-```
-
-## # Configure "Storage" network adapter
-
-```PowerShell
-$ipAddress = "10.1.10.108"
+$ipAddress = "10.1.10.105"
 
 New-NetIPAddress `
-    -InterfaceAlias "Storage" `
+    -InterfaceAlias $interfaceAlias `
     -IPAddress $ipAddress `
     -PrefixLength 24
+```
 
+##### # Disable unnecessary bindings on iSCSI interface
+
+```PowerShell
 Disable-NetAdapterBinding -Name "Storage" `
     -DisplayName "Client for Microsoft Networks"
 
@@ -285,79 +253,74 @@ $adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
     -Filter "Index= '$($adapter.DeviceID)'"
 ```
 
-### # Do not register this connection in DNS
+##### # Do not register this connection in DNS
 
 ```PowerShell
 $adapterConfig.SetDynamicDNSRegistration($false)
 ```
 
-### # Disable NetBIOS over TCP/IP
+##### # Disable NetBIOS over TCP/IP
 
 ```PowerShell
 $adapterConfig.SetTcpipNetbios(2)
 ```
 
-```PowerShell
-cls
-```
-
-## # Enable jumbo frames
+##### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name "Management" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
-
-Set-NetAdapterAdvancedProperty -Name "Production" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
-
-Set-NetAdapterAdvancedProperty -Name "Storage" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
+Set-NetAdapterAdvancedProperty `
+    -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
 
 ping ICEMAN -f -l 8900
-ping 10.1.10.106 -f -l 8900
 ```
 
-Note: Trying to ping ICEMAN or the iSCSI network adapter on ICEMAN with a 9000 byte packet from BEAST resulted in an error (suggesting that jumbo frames were not configured). It also worked with 8970 bytes.
+Note: Trying to ping ICEMAN or the iSCSI network adapter on ICEMAN with a 9000 byte packet from FORGE resulted in an error (suggesting that jumbo frames were not configured). It also worked with 8970 bytes.
 
 ```PowerShell
 cls
 ```
 
-## # Enable PowerShell remoting
+### # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
+```
+
+### # Enable PowerShell remoting
 
 ```PowerShell
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (Dynamic RPC)' `
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Technology Toolbox (Custom)' `
-    -Program '%windir%\system32\dllhost.exe' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort RPC `
-    -Profile Domain `
-    -Action Allow
+C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
+C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
 ## Enable Virtualization in BIOS
 
-Intel Virtualization Technology: **Enabled**
+Intel Virtualization Technology: **Enable**
 
-```PowerShell
+```Console
+PowerShell
+```
+
+```Console
 cls
 ```
 
@@ -368,12 +331,8 @@ Install-WindowsFeature `
     -Name Hyper-V `
     -IncludeManagementTools `
     -Restart
-```
 
-## # Download PowerShell help files (for Hyper-V cmdlets)
-
-```PowerShell
-Update-Help
+PowerShell
 ```
 
 ```PowerShell
@@ -415,20 +374,6 @@ ping ICEMAN -f -l 8900
 ping 10.1.10.106 -f -l 8900
 ```
 
-```PowerShell
-cls
-```
-
-## # Modify "Production" and "Storage" virtual switches to disallow management OS
-
-```PowerShell
-Get-VMSwitch "Production" |
-    Set-VMSwitch -AllowManagementOS $false
-
-Get-VMSwitch "Storage" |
-    Set-VMSwitch -AllowManagementOS $false
-```
-
 ## Configure storage
 
 ### Physical disks
@@ -462,11 +407,11 @@ Get-VMSwitch "Storage" |
 <p>0</p>
 </td>
 <td valign='top'>
-<p>Model: Samsung SSD 840 PRO Series<br />
-Serial number: *********03944B</p>
+<p>Model: WDC WD3000F9YZ-09N20L0<br />
+Serial number: WD-******357156</p>
 </td>
 <td valign='top'>
-<p>512 GB</p>
+<p>3 TB</p>
 </td>
 <td valign='top'>
 </td>
@@ -482,11 +427,11 @@ Serial number: *********03944B</p>
 <p>1</p>
 </td>
 <td valign='top'>
-<p>Model: Samsung SSD 840 Series<br />
-Serial number: *********01728J</p>
+<p>Model: WDC WD3000F9YZ-09N20L0<br />
+Serial number: WD-******FV469C</p>
 </td>
 <td valign='top'>
-<p>512 GB</p>
+<p>3 TB</p>
 </td>
 <td valign='top'>
 </td>
@@ -502,8 +447,48 @@ Serial number: *********01728J</p>
 <p>2</p>
 </td>
 <td valign='top'>
+<p>Model: ST2000DM001-1CH164<br />
+Serial number: *****LEV</p>
+</td>
+<td valign='top'>
+<p>2 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>3</p>
+</td>
+<td valign='top'>
+<p>Model: ST2000DM001-1CH164<br />
+Serial number: *****VCX</p>
+</td>
+<td valign='top'>
+<p>2 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>4</p>
+</td>
+<td valign='top'>
 <p>Model: Samsung SSD 850 PRO 128GB<br />
-Serial number: *********03705D</p>
+Serial number: *********03852K</p>
 </td>
 <td valign='top'>
 <p>128 GB</p>
@@ -522,14 +507,14 @@ Serial number: *********03705D</p>
 </tr>
 <tr>
 <td valign='top'>
-<p>3</p>
+<p>5</p>
 </td>
 <td valign='top'>
-<p>Model: Seagate ST1000NM0033-9ZM173<br />
-Serial number: *****4YL</p>
+<p>Model: Samsung SSD 850 PRO 512GB<br />
+Serial number: *********09894X</p>
 </td>
 <td valign='top'>
-<p>1 TB</p>
+<p>512 GB</p>
 </td>
 <td valign='top'>
 </td>
@@ -542,14 +527,54 @@ Serial number: *****4YL</p>
 </tr>
 <tr>
 <td valign='top'>
-<p>4</p>
+<p>6</p>
 </td>
 <td valign='top'>
-<p>Model: Seagate ST1000NM0033-9ZM173<br />
-Serial number: *****EMV</p>
+<p>Model: Samsung SSD 850 PRO 512GB<br />
+Serial number: *********12260P</p>
 </td>
 <td valign='top'>
-<p>1 TB</p>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>7</p>
+</td>
+<td valign='top'>
+<p>Model: ST2000NM0033-9ZM175<br />
+Serial number: *****34P</p>
+</td>
+<td valign='top'>
+<p>2 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>8</p>
+</td>
+<td valign='top'>
+<p>Model: ST2000NM0033-9ZM175<br />
+Serial number: *****0FT</p>
+</td>
+<td valign='top'>
+<p>2 TB</p>
 </td>
 <td valign='top'>
 </td>
@@ -563,7 +588,10 @@ Serial number: *****EMV</p>
 </table>
 
 ```PowerShell
-Get-PhysicalDisk | select DeviceId, Model, SerialNumber | sort DeviceId
+Get-PhysicalDisk |
+    sort DeviceId |
+    select DeviceId, Model, SerialNumber, Size |
+    ft -auto
 ```
 
 ### Storage pools
@@ -582,10 +610,10 @@ Get-PhysicalDisk | select DeviceId, Model, SerialNumber | sort DeviceId
 <p>Pool 1</p>
 </td>
 <td valign='top'>
-<p>PhysicalDisk0<br />
-PhysicalDisk1<br />
-PhysicalDisk3<br />
-PhysicalDisk4</p>
+<p>PhysicalDisk5<br />
+PhysicalDisk6<br />
+PhysicalDisk7<br />
+PhysicalDisk8</p>
 </td>
 </tr>
 </table>
@@ -606,7 +634,8 @@ cls
 
 ```PowerShell
 $storageSubSystemUniqueId = Get-StorageSubSystem `
-    -FriendlyName "Storage Spaces on STORM" | select -ExpandProperty UniqueId
+    -FriendlyName "Storage Spaces on $env:COMPUTERNAME" |
+    select -ExpandProperty UniqueId
 
 New-StoragePool `
     -FriendlyName "Pool 1" `
@@ -621,6 +650,15 @@ Get-StoragePool "Pool 1" |
     Get-PhysicalDisk |
     Sort Size |
     ft FriendlyName, Size, MediaType, HealthStatus, OperationalStatus -AutoSize
+```
+
+### # Set media type on HDD drives
+
+```PowerShell
+Get-StoragePool "Pool 1" |
+    Get-PhysicalDisk |
+    ? { $_.MediaType -eq 'UnSpecified' } |
+    Set-PhysicalDisk -MediaType HDD
 ```
 
 ```PowerShell
@@ -773,19 +811,19 @@ From <[https://technet.microsoft.com/en-us/library/dn789160.aspx](https://techne
 
 ### Benchmark C: (SSD - Samsung 850 Pro 128GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/EA8C629095523D0CF0C88B9D6AEB08B729772D0C.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0B/6BB9B0DD6AEEBAFB164687BBE2CCB1758D657B0B.png)
 
-### Benchmark D: (Mirror SSD storage space - 2x Samsung 840 512GB)
+### Benchmark D: (Mirror SSD storage space - 2x Samsung 850 Pro 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/FA049D8B5BD2DE10A5174B037923D27E07AF0C3C.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/E9B61883FBDCEC86AECCF6E3929F3B4819B6167E.png)
 
 ### Benchmark E: (Mirror SSD/HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/BFEFC0258A705B18A95939C9EB07CCB1A8075D5F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D2/155079652545841BA61131793D45DF8EA64903D2.png)
 
 ### Benchmark F: (Simple HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/D4BE461147A604A22BD43FE4B4DDAF2597417688.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/77/0062D8E9B43A59AF1250F05BA0C9948154721377.png)
 
 ```PowerShell
 cls
@@ -803,18 +841,13 @@ Set-VMHost -VirtualMachinePath E:\NotBackedUp\VMs
 
 ## Configure Live Migration (without Failover Clustering)
 
-### Reference
-
-**Configure Live Migration and Migrating Virtual Machines without Failover Clustering**\
-Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://technet.microsoft.com/en-us/library/jj134199.aspx)>
-
 ### Configure constrained delegation in Active Directory
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/AD85D8814AE85E1B2E8FC6544B7F10881939535E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/E9A44C534EBF2F82D4B589C8ADA77606660D633C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C0/7D57372A9F2C4599B1E8C9C68FED9A6D2D6DD1C0.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/AD77A31B7028F9A29019A98041708C4476B8219A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/97/A795AEE3AF6234B0FCCDB35A944B7B9C9D7ACA97.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/A8AD54C8C867D0C401D142BA636275E4BF2A38F8.png)
 
 Click Add...
 
@@ -822,161 +855,38 @@ Click Add...
 
 Click Users or Computers...
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/8654E4EB4BCDED7D97C922ACD01D131EE50A9FA9.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/8C4D5407890ED0A5291966F89368D6967C2B76D9.png)
 
 Click OK.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/014B30411E0CCCA9773E8A8F094CB221AAEEC465.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C3/C8723FDA8328DE8756E01D9D50B4036435F276C3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B2/8ADDCBFE162FE1FEC1348BD0F8E59018BA685DB2.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/D1A6D847BA13DB0490AD482B992ED18E64F5B57E.png)
 
 Click OK.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/5C396AC2F25DB666ABDBBA361383898FBAD04F7F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/BA474ABE58D25D0AEA7E9D1D2C3CFB4627C4C1AF.png)
 
 ### # Configure the server for live migration
 
 ```PowerShell
 Enable-VMMigration
 
-Add-VMMigrationNetwork 192.168.10.108
+Add-VMMigrationNetwork 192.168.10.101
 
 Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
 ```
 
-```PowerShell
-cls
-```
+### Reference
 
-## # Clean up the WinSxS folder
-
-```PowerShell
-Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
-```
-
-## # Clean up Windows Update files
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-```
-
-## Migrate virtual machines to STORM
-
----
-
-**FOOBAR**
-
-### # Note: BANSHEE was already shutdown
-
-```PowerShell
-Move-VM `
-    -ComputerName ROGUE `
-    -Name BANSHEE `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\BANSHEE
-```
+**Configure Live Migration and Migrating Virtual Machines without Failover Clustering**\
+Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://technet.microsoft.com/en-us/library/jj134199.aspx)>
 
 ```PowerShell
 cls
 ```
 
-### # Note: Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName ROGUE -Name EXT-DC01
-
-Move-VM `
-    -ComputerName ROGUE `
-    -Name EXT-DC01 `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\EXT-DC01
-
-Start-VM -ComputerName STORM -Name EXT-DC01
-```
-
-```PowerShell
-cls
-```
-
-### # Note: Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName ROGUE -Name EXT-SQL01A
-
-Move-VM `
-    -ComputerName ROGUE `
-    -Name EXT-SQL01A `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\EXT-SQL01A
-
-Start-VM -ComputerName STORM -Name EXT-SQL01A
-```
-
-```PowerShell
-cls
-```
-
-### # Note: Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName ROGUE -Name FAB-DC01
-
-Move-VM `
-    -ComputerName ROGUE `
-    -Name FAB-DC01 `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\FAB-DC01
-
-Start-VM -ComputerName STORM -Name FAB-DC01
-```
-
-```PowerShell
-cls
-```
-
-### # Note: FOOBAR was already shutdown
-
-```PowerShell
-Move-VM `
-    -ComputerName ROGUE `
-    -Name FOOBAR `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\FOOBAR
-```
-
-```PowerShell
-cls
-```
-
-### # Note: Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName ROGUE -Name XAVIER1
-
-Move-VM `
-    -ComputerName ROGUE `
-    -Name XAVIER1 `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\XAVIER1
-
-Start-VM -ComputerName STORM -Name XAVIER1
-```
-
----
-
-```PowerShell
-cls
-```
-
-## # Install and configure System Center Operations Manager monitoring agent
+## # Install and configure System Center Operations Manager
 
 ### # Install SCOM agent
 
@@ -1036,12 +946,30 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the following commands:
 
 ```PowerShell
-$productionServer = "STORM"
+$productionServer = "FORGE"
 
 .\Attach-ProductionServer.ps1 `
     -DPMServerName JUGGERNAUT `
     -PSName $productionServer `
     -Domain TECHTOOLBOX `-UserName jjameson-admin
+```
+
+```PowerShell
+cls
+```
+
+## # Clean up the WinSxS folder
+
+```PowerShell
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+```
+
+## # Clean up Windows Update files
+
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
 
 ```PowerShell
@@ -1059,5 +987,85 @@ slmgr /ipk {product key}
 ```Console
 slmgr /ato
 ```
+
+## Poor write performance on mirrored Samsung 850 SSDs
+
+### Before
+
+#### FORGE
+
+- C: (128 GB Samsung 850 SSD) - Write Transfer Rate 27,000 - 476,000 MB/s
+- D: (2x 512 GB Samsung 850 SSDs) - Write Transfer Rate 200 - 209,000 MB/s
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/13/2815E2C89342511750F81704256C9103786C5813.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/AA392A1B9D02D8C42A2DD588D5AED6378678D8E2.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/7430280DD491F23732D5F8E0658B11B7BC105C21.png)
+
+#### STORM (for comparison)
+
+- C: (128 GB Samsung 850 SSD) - Write Transfer Rate 29,000 - 475,000 MB/s
+- D: (2x 512 GB Samsung 840 SSDs) - Write Transfer Rate 11,000 - 155,000 MB/s
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/5F016E2CE7959A13764661F53F7FA50CAB4FC8B9.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/92/E85DBFF5ED3F4E88CA202F1E7A016EF74635D492.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/FCF2AE9EFC523E15210AF594B30E390CE352FD93.png)
+
+### Update AHCI drivers
+
+1. Download the latest AHCI drivers from the Intel website:\
+   **Intel® RSTe AHCI & SCU Software RAID driver for Windows**\
+   From <[https://downloadcenter.intel.com/download/25393/Intel-RSTe-AHCI-SCU-Software-RAID-driver-for-Windows-](https://downloadcenter.intel.com/download/25393/Intel-RSTe-AHCI-SCU-Software-RAID-driver-for-Windows-)>
+2. Extract the drivers and copy the files to a temporary location on the server:
+3. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA AHCI Controller (PCI\\VEN_8086&DEV_8D02&...)**:
+4. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA AHCI Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+5. Restart the server.
+
+```Console
+    robocopy "C:\NotBackedUp\Temp\Drivers\Intel\RSTe AHCI & SCU Software RAID driver for Windows\Drivers\x64\Win8_10_2K8R2_2K12\AHCI" '\\FORGE\C$\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI' /E
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI\iaAHCI.inf
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI\iaAHCIB.inf
+```
+
+### After
+
+#### FORGE
+
+- C: (128 GB Samsung 850 SSD) - Write Transfer Rate 46,000 - 476,000 MB/s
+- D: (2x 512 GB Samsung 850 SSDs) - Write Transfer Rate 200 - 209,000 MB/s
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1F/CB6B49C5DD99A0FFD035DB8F5249FBB515ADA61F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/D7AB59E2302364312BED56884C383F61AF8DAA65.png)
+
+### Summary
+
+| Transfer Size [KB] | Before  | (Microsoft driver) | After   | (Intel driver) | %     | Change |
+| ------------------ | ------- | ------------------ | ------- | -------------- | ----- | ------ |
+|                    | Write   | Read               | Write   | Read           | Write | Read   |
+| 0.5                | 198     | 8,320              | 19,359  | 10,163         | 9,677 | 22     |
+| 1                  | 424     | 12,298             | 41,984  | 22,415         | 9,802 | 82     |
+| 2                  | 886     | 29,329             | 74,926  | 44,943         | 8,357 | 53     |
+| 4                  | 2,021   | 67,108             | 179,400 | 83,887         | 8,777 | 25     |
+| 8                  | 2,995   | 128,548            | 256,745 | 192,168        | 8,472 | 49     |
+| 16                 | 4,641   | 227,721            | 332,309 | 281,999        | 7,060 | 24     |
+| 32                 | 7,820   | 413,863            | 349,308 | 475,576        | 4,367 | 15     |
+| 64                 | 15,240  | 574,532            | 316,007 | 531,313        | 1,974 | -8     |
+| 128                | 29,454  | 693,454            | 285,500 | 713,437        | 869   | 3      |
+| 256                | 53,173  | 901,876            | 333,138 | 849,602        | 527   | -6     |
+| 512                | 107,589 | 1,055,274          | 357,913 | 977,313        | 233   | -7     |
+| 1024               | 153,684 | 1,061,256          | 357,913 | 1,004,122      | 133   | -5     |
+| 2048               | 189,483 | 1,107,622          | 359,511 | 1,020,182      | 90    | -8     |
+| 4096               | 201,452 | 1,089,117          | 387,166 | 967,916        | 92    | -11    |
+| 8192               | 209,306 | 1,102,271          | 375,434 | 982,080        | 79    | -11    |
 
 **TODO:**
