@@ -1,7 +1,7 @@
-﻿# EXT-FOOBAR4 - Windows Server 2012 R2 Standard
+﻿# EXT-FOOBAR4 (2016-01-01) - Windows Server 2012 R2 Standard
 
-Wednesday, May 25, 2016
-4:37 AM
+Wednesday, June 1, 2016
+4:53 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -23,12 +23,13 @@ cls
 
 ```PowerShell
 $vmName = "EXT-FOOBAR4"
+$vmPath = "D:\NotBackedUp\VMs"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
+    -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 60GB `
     -MemoryStartupBytes 10GB `
@@ -58,10 +59,6 @@ Start-VM -Name $vmName
   - In the **Workgroup **box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
-
-```PowerShell
-cls
-```
 
 #### # Copy latest Toolbox content
 
@@ -99,36 +96,6 @@ $adminUser.SetPassword($plainPassword)
 
 logoff
 ```
-
----
-
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-### # Remove disk from virtual CD/DVD drive
-
-```PowerShell
-$vmName = "EXT-FOOBAR4"
-
-Set-VMDvdDrive -VMName $vmName -Path $null
-
-Set-VMDvdDrive : Failed to remove device 'Microsoft:Hyper-V:Virtual CD/DVD Disk': Access denied (0x80041003).
- Account does not have sufficient privilege to open attachment 'X:'. Error: 'General access denied error'.
-'EXT-FOOBAR4' failed to remove device 'Microsoft:Hyper-V:Virtual CD/DVD Disk': Access denied (0x80041003). (Virtual
-machine ID 0F85F370-FC73-4E1C-BD70-59B8B8A3849E)
-'EXT-FOOBAR4':  Account does not have sufficient privilege to open attachment 'X:'. Error: 'General access denied
-error' (0x80070005). (Virtual machine ID 0F85F370-FC73-4E1C-BD70-59B8B8A3849E)
-At line:1 char:1
-+ Set-VMDvdDrive -VMName $vmName -Path $null
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (:) [Set-VMDvdDrive], VirtualizationException
-    + FullyQualifiedErrorId : OperationFailed,Microsoft.HyperV.PowerShell.Commands.SetVMDvdDrive
-```
-
----
 
 ### Login as EXT-FOOBAR4\\foo
 
@@ -329,8 +296,9 @@ cls
 
 ```PowerShell
 $vmName = "EXT-FOOBAR4"
+$vmPath = "D:\NotBackedUp\VMs"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
     + "_Data01.vhdx"
 
 New-VHD -Path $vhdPath -SizeBytes 3GB
@@ -339,7 +307,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
     + "_Log01.vhdx"
 
 New-VHD -Path $vhdPath -SizeBytes 1GB
@@ -348,7 +316,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
     + "_Temp01.vhdx"
 
 New-VHD -Path $vhdPath -SizeBytes 1GB
@@ -357,7 +325,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
     + "_Backup01.vhdx"
 
 New-VHD -Path $vhdPath -SizeBytes 10GB
@@ -424,10 +392,6 @@ Get-Disk 4 |
         -FileSystem NTFS `
         -NewFileSystemLabel "Backup01" `
         -Confirm:$false
-```
-
-```PowerShell
-cls
 ```
 
 ### # Set MaxPatchCacheSize to 0 (Recommended)
@@ -818,7 +782,7 @@ cls
 #### # Install Google Chrome
 
 ```PowerShell
-& "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup.exe"
+& "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup64.exe"
 ```
 
 ### Install additional service packs and updates
@@ -1067,6 +1031,8 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     ("C:\Program Files\Common Files\Microsoft Shared\web server extensions" `
         + "\15\BIN") `
     -EnvironmentVariableTarget "Machine"
+
+exit
 ```
 
 > **Important**
@@ -1967,9 +1933,23 @@ cls
 ### # Add the URL for the SecuritasConnect Web site to the "Local intranet" zone
 
 ```PowerShell
+[Uri] $url = [Uri] "http://client-local.securitasinc.com"
+
+[string[]] $domainParts = $url.Host -split '\.'
+
+[string] $subdomain = $domainParts[0]
+[string] $domain = $domainParts[1..2] -join '.'
+
 [string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
     + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\client-local.securitasinc.com")
+    + "\$domain")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+[string] $registryKey = $registryKey + "\$subdomain"
 
 If ((Test-Path $registryKey) -eq $false)
 {
@@ -2014,7 +1994,8 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Script
 
 > **Note**
 >
-> When prompted for the service account, specify **EXTRANET\\s-web-client-dev**.
+> When prompted for the service account, specify **EXTRANET\\s-web-client-dev**.\
+> Expect the previous operation to complete in approximately 1 minute.
 
 ```PowerShell
 cls
@@ -2452,13 +2433,10 @@ cls
 ```PowerShell
 $webAppUrl = "http://client-local.securitasinc.com"
 
-@("/sites/A123-Systems",
-    "/sites/ABC-Company",
-    "/sites/DCM-Group",
-    "/sites/TE-Connectivity",
-    "/sites/Talha-Connect-Test") |
+Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
+    ? { $_.CompatibilityLevel -lt 15 } |
     ForEach-Object {
-        $siteUrl = $webAppUrl + $_
+        $siteUrl = $_.Url
 
         Write-Host "Upgrading site ($siteUrl)..."
 
@@ -2571,9 +2549,23 @@ exit
 ### # Add the URL for the Cloud Portal Web site to the "Local intranet" zone
 
 ```PowerShell
+[Uri] $url = [Uri] "http://cloud-local.securitasinc.com"
+
+[string[]] $domainParts = $url.Host -split '\.'
+
+[string] $subdomain = $domainParts[0]
+[string] $domain = $domainParts[1..2] -join '.'
+
 [string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
     + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\cloud-local.securitasinc.com")
+    + "\$domain")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+[string] $registryKey = $registryKey + "\$subdomain"
 
 If ((Test-Path $registryKey) -eq $false)
 {
@@ -2610,7 +2602,8 @@ cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
 
 > **Note**
 >
-> When prompted for the service account, specify **EXTRANET\\s-web-cloud-dev**.
+> When prompted for the service account, specify **EXTRANET\\s-web-cloud-dev**.\
+> Expect the previous operation to complete in approximately 1 minute.
 
 ```PowerShell
 cls
@@ -2829,6 +2822,10 @@ Set-Location C:
 Upgrade-SPSite http://cloud-local.securitasinc.com/ -VersionUpgrade -Unthrottled
 ```
 
+```PowerShell
+cls
+```
+
 ### # Install Cloud Portal solutions and activate the features
 
 #### # Deploy v2.0 solutions
@@ -2849,7 +2846,9 @@ Upgrade-SPSite http://cloud-local.securitasinc.com/ -VersionUpgrade -Unthrottled
 
 #### Configure the custom sign-in page on the Web application
 
-/Pages/Sign-In.aspx
+| Section              | Setting                 | Value                   |
+| -------------------- | ----------------------- | ----------------------- |
+| **Sign In Page URL** | **Custom Sign In Page** | **/Pages/Sign-In.aspx** |
 
 ```PowerShell
 cls
@@ -3100,9 +3099,23 @@ robocopy `
 ### # Add the Employee Portal URL to the "Local intranet" zone
 
 ```PowerShell
+[Uri] $url = [Uri] "http://employee-local.securitasinc.com"
+
+[string[]] $domainParts = $url.Host -split '\.'
+
+[string] $subdomain = $domainParts[0]
+[string] $domain = $domainParts[1..2] -join '.'
+
 [string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
     + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\employee-local.securitasinc.com")
+    + "\$domain")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+[string] $registryKey = $registryKey + "\$subdomain"
 
 If ((Test-Path $registryKey) -eq $false)
 {
@@ -3188,15 +3201,13 @@ cls
 Pop-Location
 ```
 
-```Console
-cls
-```
-
 #### # Configure application settings and web service URLs
 
 ```PowerShell
 Notepad C:\inetpub\wwwroot\employee-local.securitasinc.com\Web.config
 ```
+
+Set the value of the **GoogleAnalytics.TrackingId** application setting to **UA-25949832-3**.
 
 #### Deploy Employee Portal website content to other web servers in the farm
 
@@ -3226,16 +3237,33 @@ GO
 "@
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+```
 
+#### Issue
+
+```PowerShell
 Invoke-Sqlcmd : Cannot alter the role 'Employee_FullAccess', because it does not exist or you do not have permission.
 At line:1 char:1
 + Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : InvalidOperation: (:) [Invoke-Sqlcmd], SqlPowerShellSqlExecutionException
     + FullyQualifiedErrorId : SqlError,Microsoft.SqlServer.Management.PowerShell.GetScriptCommand
-
-Set-Location C:
 ```
+
+#### Workaround
+
+---
+
+**SQL Server Management Studio**
+
+```SQL
+USE [SecuritasPortal]
+GO
+EXEC sp_addrolemember N'Employee_FullAccess', N'IIS APPPOOL\employee-local.securitasinc.com'
+GO
+```
+
+---
 
 ### Grant PNKCAN and PNKUS users permissions on Cloud Portal site
 
@@ -3267,6 +3295,44 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
     employee-local.securitasinc.com
+```
+
+```PowerShell
+cls
+```
+
+## # Reset search index and perform full crawl
+
+```PowerShell
+$serviceApp = Get-SPEnterpriseSearchServiceApplication
+```
+
+### # Reset search index
+
+```PowerShell
+$serviceApp.Reset($false, $false)
+```
+
+### # Start full crawl
+
+```PowerShell
+$serviceApp |
+    Get-SPEnterpriseSearchCrawlContentSource |
+    % { $_.StartFullCrawl() }
+```
+
+> **Note**
+>
+> Expect the crawl to complete in approximately 5 minutes.
+
+```PowerShell
+cls
+```
+
+## # Prepare for snapshot
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Prepare for Snapshot.cmd'
 ```
 
 ---
@@ -3307,18 +3373,6 @@ cls
 ```PowerShell
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Suspend-SPEnterpriseSearchServiceApplication
-```
-
-```PowerShell
-cls
-```
-
-## # Start full crawl
-
-```PowerShell
-Get-SPEnterpriseSearchServiceApplication |
-    Get-SPEnterpriseSearchCrawlContentSource |
-    % { $_.StartFullCrawl() }
 ```
 
 ```PowerShell
