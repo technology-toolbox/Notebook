@@ -46,6 +46,18 @@ Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 
 ---
 
+### Add computer to "Hyper-V Servers" group
+
+---
+
+**FOOBAR8**
+
+```Console
+NET GROUP "Hyper-V Servers" FORGE$ /ADD /DOMAIN
+```
+
+---
+
 ```Console
 PowerShell
 ```
@@ -622,9 +634,9 @@ PhysicalDisk8</p>
 
 | Name   | Layout | Provisioning | Capacity | SSD Tier | HDD Tier | Volume | Volume Label | Write-Back Cache |
 | ------ | ------ | ------------ | -------- | -------- | -------- | ------ | ------------ | ---------------- |
-| Data01 | Mirror | Fixed        | 125 GB   | 125 GB   |          | D:     | Data01       |                  |
-| Data02 | Mirror | Fixed        | 700 GB   | 200 GB   | 500 GB   | E:     | Data02       | 5 GB             |
-| Data03 | Simple | Fixed        | 200 GB   |          | 200 GB   | F:     | Data03       | 1 GB             |
+| Data01 | Mirror | Fixed        | 200 GB   | 200 GB   |          | D:     | Data01       |                  |
+| Data02 | Mirror | Fixed        | 1.5 TB   | 250 GB   | 500 GB   | E:     | Data02       | 5 GB             |
+| Data03 | Simple | Fixed        | 650 GB   |          | 650 GB   | F:     | Data03       | 5 GB             |
 
 ```PowerShell
 cls
@@ -640,7 +652,7 @@ $storageSubSystemUniqueId = Get-StorageSubSystem `
 New-StoragePool `
     -FriendlyName "Pool 1" `
     -StorageSubSystemUniqueId $storageSubSystemUniqueId `
-    -PhysicalDisks (Get-PhysicalDisk -CanPool $true)
+    -PhysicalDisks (Get-PhysicalDisk | ? { $_.DeviceId -iin 5..8 })
 ```
 
 ### # Check media type configuration
@@ -650,15 +662,14 @@ Get-StoragePool "Pool 1" |
     Get-PhysicalDisk |
     Sort Size |
     ft FriendlyName, Size, MediaType, HealthStatus, OperationalStatus -AutoSize
-```
 
-### # Set media type on HDD drives
 
-```PowerShell
-Get-StoragePool "Pool 1" |
-    Get-PhysicalDisk |
-    ? { $_.MediaType -eq 'UnSpecified' } |
-    Set-PhysicalDisk -MediaType HDD
+FriendlyName           Size MediaType HealthStatus OperationalStatus
+------------           ---- --------- ------------ -----------------
+PhysicalDisk6  511369543680 SSD       Healthy      OK
+PhysicalDisk5  511369543680 SSD       Healthy      OK
+PhysicalDisk8 1999575711744 HDD       Healthy      OK
+PhysicalDisk7 1999575711744 HDD       Healthy      OK
 ```
 
 ```PowerShell
@@ -689,7 +700,7 @@ Get-StoragePool "Pool 1" |
         -FriendlyName "Data01" `
         -ResiliencySettingName Mirror `
         -StorageTiers $ssdTier `
-        -StorageTierSizes 125GB
+        -StorageTierSizes 200GB
 
 $hddTier = Get-StorageTier -FriendlyName "HDD Tier"
 
@@ -698,7 +709,7 @@ Get-StoragePool "Pool 1" |
         -FriendlyName "Data02" `
         -ResiliencySettingName Mirror `
         -StorageTiers $ssdTier,$hddTier `
-        -StorageTierSizes 200GB,500GB `
+        -StorageTierSizes 250GB,1.5TB `
         -WriteCacheSize 5GB
 
 Get-StoragePool "Pool 1" |
@@ -706,8 +717,8 @@ Get-StoragePool "Pool 1" |
         -FriendlyName "Data03" `
         -ResiliencySettingName Simple `
         -StorageTiers $hddTier `
-        -StorageTierSizes 200GB `
-        -WriteCacheSize 1GB
+        -StorageTierSizes 650GB `
+        -WriteCacheSize 5GB
 ```
 
 ```PowerShell
@@ -811,19 +822,19 @@ From <[https://technet.microsoft.com/en-us/library/dn789160.aspx](https://techne
 
 ### Benchmark C: (SSD - Samsung 850 Pro 128GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0B/6BB9B0DD6AEEBAFB164687BBE2CCB1758D657B0B.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/09/2139A99A874F080D3649FF2629EDBCEB4B439309.png)
 
 ### Benchmark D: (Mirror SSD storage space - 2x Samsung 850 Pro 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/E9B61883FBDCEC86AECCF6E3929F3B4819B6167E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/380A27301B357ACA9A64FF74BDC130A634C15BBC.png)
 
 ### Benchmark E: (Mirror SSD/HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D2/155079652545841BA61131793D45DF8EA64903D2.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B5/74C7C938BE5DBDFB34D4E664C408207D4A9758B5.png)
 
 ### Benchmark F: (Simple HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/77/0062D8E9B43A59AF1250F05BA0C9948154721377.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D8/F6B1771CC3C0E3F68B783F3AEB0B2416A61B6CD8.png)
 
 ```PowerShell
 cls
@@ -843,36 +854,36 @@ Set-VMHost -VirtualMachinePath E:\NotBackedUp\VMs
 
 ### Configure constrained delegation in Active Directory
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/E9A44C534EBF2F82D4B589C8ADA77606660D633C.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/5D8E0FB74ED83195D9A764D0052FFC709908CBCA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/AD77A31B7028F9A29019A98041708C4476B8219A.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EE/C5BD04E2DD994B86FBB5F82E33E1F4D5322C97EE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/A8AD54C8C867D0C401D142BA636275E4BF2A38F8.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4C/C66384DA0EA9F61E076D129B71950E264EEE034C.png)
 
 Click Add...
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/18818661BC0C359C33EE49E6F3341FAAF867998D.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/09A60E64FFA9B1ABD7006A7C1CDF2083DFB02388.png)
 
 Click Users or Computers...
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/8C4D5407890ED0A5291966F89368D6967C2B76D9.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7A/7DA66D99923685C633431E3AB319BC4E8644287A.png)
 
 Click OK.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C3/C8723FDA8328DE8756E01D9D50B4036435F276C3.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/2A84779089E829705EFB37716CD8300BF9DCB7F4.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/D1A6D847BA13DB0490AD482B992ED18E64F5B57E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/327FE0C0B5E51FCC3198147112E3E680209E7FDF.png)
 
 Click OK.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/BA474ABE58D25D0AEA7E9D1D2C3CFB4627C4C1AF.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/26/E3F43C2FDEE39B13731314080EE0DAC0B3EE2326.png)
 
 ### # Configure the server for live migration
 
 ```PowerShell
 Enable-VMMigration
 
-Add-VMMigrationNetwork 192.168.10.101
+Add-VMMigrationNetwork 192.168.10.105
 
 Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
 ```
@@ -951,8 +962,13 @@ $productionServer = "FORGE"
 .\Attach-ProductionServer.ps1 `
     -DPMServerName JUGGERNAUT `
     -PSName $productionServer `
-    -Domain TECHTOOLBOX `-UserName jjameson-admin
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
 ```
+
+### Install update for DPM agent
+
+## Add server to Virtual Machine Manager
 
 ```PowerShell
 cls
@@ -987,6 +1003,8 @@ slmgr /ipk {product key}
 ```Console
 slmgr /ato
 ```
+
+**TODO:**
 
 ## Poor write performance on mirrored Samsung 850 SSDs
 
@@ -1041,7 +1059,7 @@ slmgr /ato
 #### FORGE
 
 - C: (128 GB Samsung 850 SSD) - Write Transfer Rate 46,000 - 476,000 MB/s
-- D: (2x 512 GB Samsung 850 SSDs) - Write Transfer Rate 200 - 209,000 MB/s
+- D: (2x 512 GB Samsung 850 SSDs) - Write Transfer Rate 19,000 - 375,000 MB/s
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/1F/CB6B49C5DD99A0FFD035DB8F5249FBB515ADA61F.png)
 
