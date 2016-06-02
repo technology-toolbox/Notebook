@@ -1,7 +1,7 @@
 ﻿# EXT-SQL02 - Windows Server 2012 R2 Standard
 
-Tuesday, April 19, 2016
-10:14 AM
+Wednesday, June 1, 2016
+7:19 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -22,7 +22,7 @@ cls
 #### # Create virtual machine
 
 ```PowerShell
-$vmHost = "STORM"
+$vmHost = "FORGE"
 $vmName = "EXT-SQL02"
 
 $vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
@@ -310,7 +310,7 @@ $imagePath = `
     '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
     + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
 
-Set-VMDvdDrive -ComputerName STORM -VMName EXT-SQL02 -Path $imagePath
+Set-VMDvdDrive -ComputerName FORGE -VMName EXT-SQL02 -Path $imagePath
 ```
 
 ---
@@ -395,7 +395,7 @@ cls
 ### # Create Data01, Log01, and Backup01 VHDs
 
 ```PowerShell
-$vmHost = "STORM"
+$vmHost = "FORGE"
 $vmName = "EXT-SQL02"
 
 $vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
@@ -526,7 +526,7 @@ cls
 $imagePath = "\\ICEMAN\Products\Microsoft\SQL Server 2014" `
     + "\en_sql_server_2014_developer_edition_with_service_pack_1_x64_dvd_6668542.iso"
 
-Set-VMDvdDrive -ComputerName STORM -VMName EXT-SQL02 -Path $imagePath
+Set-VMDvdDrive -ComputerName FORGE -VMName EXT-SQL02 -Path $imagePath
 ```
 
 ---
@@ -687,7 +687,11 @@ Start-Sleep -Seconds 15
 Start-Service SQLSERVERAGENT
 ```
 
-## Extend Data01 volume (D:) from 90 GB to 115 GB
+## Extend Data01 volume (D:) from 90 GB to 100 GB
+
+> **Note**
+>
+> This process was performed after completing the SharePoint 2013 upgrade.
 
 ---
 
@@ -695,9 +699,9 @@ Start-Service SQLSERVERAGENT
 
 ```PowerShell
 Resize-VHD `
-    -ComputerName STORM `
+    -ComputerName FORGE `
     -Path "D:\NotBackedUp\VMs\EXT-SQL02\Virtual Hard Disks\EXT-SQL02_Data01.vhdx" `
-    -SizeBytes 115GB
+    -SizeBytes 100GB
 ```
 
 ---
@@ -723,14 +727,10 @@ Get-Partition -DriveLetter D
 
 PartitionNumber  DriveLetter Offset                                        Size Type
 ---------------  ----------- ------                                        ---- ----
-1                D           1048576                                     115 GB IFS
+1                D           1048576                                     100 GB IFS
 ```
 
 ## Expand backup volume
-
-> **Note**
->
-> This process was performed after completing the SharePoint 2013 upgrade.
 
 ### Move Backup01 VHD to ICEMAN
 
@@ -761,6 +761,10 @@ PartitionNumber  DriveLetter Offset                                        Size 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/D5/E57C24239D9F888F68A7EDF48E7DC4F44DB337D5.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/45FF1EB4EBB351B0F4B1C872A0B7D3DF96A78C2C.png)
+
+```PowerShell
+cls
+```
 
 ### # Expand Z: partition
 
@@ -861,5 +865,33 @@ Transaction Log Backup of All Databases
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/C9526CAB07B7C275D5B24E901D2CA5E623CBCEB1.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/8B/67B61D66F6141F1B2E143AA4EE162A552013868B.png)
+
+## Execute maintenance plan - Full Backup of All Databases
+
+Start 6/2/2016 8:46:36 PM\
+End 6/2/2016 9:06:18 PM
+
+Duration: 20 minutes
+
+### Network utilization
+
+#### ICEMAN
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/F73B1828336A853D8A19AE9442B01DC636D377BC.png)
+
+#### FORGE
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/83/C7EA41467D7EDE7354A56C648F4193B734B3D583.png)
+
+### Solution
+
+#### Move VHD back to DAS
+
+**E:\\NotBackedUp\\VMs\\EXT-SQL02\\Virtual Hard Disks\\EXT-SQL02_Backup01.vhdx**
+
+Start 6/3/2016 4:09:21 AM\
+End 6/3/2016 4:17:51 AM
+
+Duration: 8.5 minutes
 
 **TODO:**

@@ -1,7 +1,7 @@
 ﻿# EXT-APP02A - Windows Server 2012 R2 Standard
 
-Tuesday, April 19, 2016
-10:14 AM
+Wednesday, June 1, 2016
+7:19 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -24,16 +24,17 @@ cls
 ```PowerShell
 $vmHost = "BEAST"
 $vmName = "EXT-APP02A"
+$vmPath = "E:\NotBackedUp\VMs"
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
-    -Path E:\NotBackedUp\VMs `
+    -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 45GB `
-    -MemoryStartupBytes 16GB `
+    -MemoryStartupBytes 12GB `
     -SwitchName "Production"
 
 Set-VM `
@@ -61,10 +62,6 @@ Start-VM -ComputerName $vmHost -Name $vmName
   - In the **Workgroup **box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
-
-```PowerShell
-cls
-```
 
 #### # Copy latest Toolbox content
 
@@ -183,6 +180,14 @@ $targetPath = ("OU=SharePoint Servers,OU=Servers,OU=Resources,OU=IT" `
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 
 Restart-Computer $computerName
+
+Restart-Computer : Failed to restart the computer EXT-FOOBAR8 with the following error message: The RPC server is
+unavailable. (Exception from HRESULT: 0x800706BA).
+At line:1 char:1
++ Restart-Computer $computerName
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (EXT-FOOBAR8:String) [Restart-Computer], InvalidOperationException
+    + FullyQualifiedErrorId : RestartcomputerFailed,Microsoft.PowerShell.Commands.RestartComputerCommand
 ```
 
 ---
@@ -680,7 +685,7 @@ robocopy $sourcePath $prereqPath /E
 
 > **Important**
 >
-> Wait for the prerequisites to be installed.
+> Wait for the prerequisites to be installed. When prompted, restart the server to continue the installation.
 
 ```PowerShell
 Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
@@ -832,27 +837,16 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Script
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-sp-farm**.\
-> Expect the previous operation to complete in approximately 6 minutes.
+> Expect the previous operation to complete in approximately 5-1/2 minutes.
 
 ### Add Web servers to the farm
 
+### Add SharePoint Central Administration to the "Local intranet" zone
+
+(skipped -- since the "Create Farm.ps1" script configures this)
+
 ```PowerShell
 cls
-```
-
-### # Add SharePoint Central Administration to the "Local intranet" zone
-
-```PowerShell
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$env:COMPUTERNAME")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name http -Value 1
 ```
 
 ### # Grant permissions on DCOM applications for SharePoint
@@ -862,6 +856,22 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Script
 
 & '.\Configure DCOM Permissions.ps1' -Verbose
 ```
+
+#### Issue
+
+```Text
+Failed to enable privilege (SeTakeOwnershipPrivilege)
+At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts\Configure DCOM Permissions.ps1:127
+char:13
++             Throw "Failed to enable privilege (SeTakeOwnershipPrivilege)"
++             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Failed to enabl...rshipPrivilege):String) [], RuntimeException
+    + FullyQualifiedErrorId : Failed to enable privilege (SeTakeOwnershipPrivilege)
+```
+
+#### Workaround
+
+Ran the script again and the error did not occur.
 
 ```PowerShell
 cls
@@ -924,7 +934,7 @@ Set-SPWOPIZone -zone "external-https"
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
-    -IPAddress 192.168.10.38 `
+    -IPAddress 192.168.10.71 `
     -Hostnames EXT-APP02A, client-test.securitasinc.com
 ```
 
@@ -936,9 +946,88 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 (Download backup files from PROD)
 
-#### Copy the backup files to the SQL Server for the SharePoint 2013 farm
-
 [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups)
+
+---
+
+**EXT-SQL02**
+
+#### # Copy the backup files to the SQL Server for the SharePoint 2013 farm
+
+```PowerShell
+$destination = 'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full'
+
+mkdir $destination
+
+net use \\iceman.corp.technologytoolbox.com\Archive /USER:TECHTOOLBOX\jjameson
+
+robocopy `
+    \\iceman.corp.technologytoolbox.com\Archive\Clients\Securitas\Backups `
+    $destination `
+    *.bak
+
+$zipFile = `
+    "\\iceman.corp.technologytoolbox.com\Archive\Clients\Securitas\Backups\" `
+    + "WSS_Content_CloudPortal_backup_2016_05_15_010003_8391000.zip"
+
+Add-Type -assembly "System.Io.Compression.FileSystem"
+
+[Io.Compression.ZipFile]::ExtractToDirectory($zipFile, $destination)
+```
+
+##### Issue
+
+```Text
+Exception calling "ExtractToDirectory" with "2" argument(s): "The archive entry was compressed using an unsupported
+compression method."
+At line:1 char:1
++ [Io.Compression.ZipFile]::ExtractToDirectory($zipFile, $destination)
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
+    + FullyQualifiedErrorId : InvalidDataException
+```
+
+##### Workaround
+
+Unzip the files using Windows Explorer.
+
+```PowerShell
+cls
+```
+
+#### # Rename backup files
+
+```PowerShell
+ren `
+    ($destination + '\Profile DB New_backup_2016_05_15_010003_7610970.bak') `
+    'Profile DB New.bak'
+
+ren `
+    ($destination + '\SecuritasPortal_backup_2016_05_15_010003_7298958.bak') `
+    'SecuritasPortal.bak'
+
+ren `
+    ($destination + '\Securitas_CP_MMS_backup_2016_05_15_010003_7454964.bak') `
+    'Securitas_CP_MMS.bak'
+
+ren `
+    ($destination + '\Social DB New_backup_2016_05_15_010003_8078988.bak') `
+    'Social DB New.bak'
+
+ren `
+    ($destination + '\Sync DB New_backup_2016_05_15_010003_7610970.bak') `
+    'Sync DB New.bak'
+
+ren `
+    ($destination + '\WSS_Content_CloudPortal_backup_2016_05_15_010003_8391000.bak') `
+    'WSS_Content_CloudPortal.bak'
+
+ren `
+    ($destination + '\WSS_Content_SecuritasPortal_backup_2016_05_15_010003_7298958.bak') `
+    'WSS_Content_SecuritasPortal.bak'
+```
+
+---
 
 ### # Export the User Profile Synchronization encryption key
 
@@ -961,104 +1050,17 @@ miiskmu.exe /e C:\Users\%USERNAME%\Desktop\miiskeys-1.bin ^
 
 ---
 
-#### Copy MIIS encryption key file to SharePoint 2013 server
-
-## Snapshot SharePoint farm
-
----
-
-**FOOBAR8**
-
 ```PowerShell
 cls
 ```
 
-### # Define list of VMs used in "EXT02" SharePoint farm
+#### # Copy MIIS encryption key file to SharePoint 2013 server
 
 ```PowerShell
-$ext02Servers = @(
-    [PSCustomObject] @{ BootOrder = 1;
-        VMName = 'EXT-SQL02'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ BootOrder = 2;
-        VMName = 'EXT-APP02A'; VMHost = 'BEAST'; },
-    [PSCustomObject] @{ BootOrder = 3;
-        VMName = 'EXT-WEB02A'; VMHost = 'BEAST'; },
-    [PSCustomObject] @{ BootOrder = 4;
-        VMName = 'EXT-WEB02B'; VMHost = 'STORM'; })
+copy `
+    "\\ICEMAN\Archive\Clients\Securitas\Backups\miiskeys-1.bin" `
+    "C:\Users\setup-sharepoint\Desktop"
 ```
-
-### # Shutdown VMs
-
-```PowerShell
-$ext02Servers |
-    sort BootOrder -Descending |
-    ForEach-Object {
-        $vmHost = $_.VMHost
-        $vmName = $_.VMName
-
-        Write-Host "Stopping virtual machine ($vmName)..."
-        Stop-VM -ComputerName $vmHost -VMName $vmName
-    }
-```
-
-### # Snapshot VMs
-
-```PowerShell
-$snapshotName = `
-    "Before - Configure SharePoint services and service applications"
-
-$ext02Servers |
-    ForEach-Object {
-        $vmHost = $_.VMHost
-        $vmName = $_.VMName
-
-        Checkpoint-VM `
-            -ComputerName $vmHost `
-            -Name $vmName `
-            -SnapshotName $snapshotName
-    }
-```
-
-```PowerShell
-cls
-```
-
-### # Revert VMs to most recent checkpoint
-
-```PowerShell
-$ext02Servers |
-    sort BootOrder -Descending |
-    ForEach-Object {
-        $vmHost = $_.VMHost
-        $vmName = $_.VMName
-
-        Write-Host "Reverting virtual machine ($vmName)..."
-
-        Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
-            Sort-Object CreationTime |
-            Select-Object -Last 1 |
-            Restore-VMSnapshot -Confirm:$false
-    }
-```
-
-### # Start VMs
-
-```PowerShell
-$ext02Servers |
-    sort BootOrder |
-    ForEach-Object {
-        $vmHost = $_.VMHost
-        $vmName = $_.VMName
-
-        Write-Host "Starting virtual machine ($vmName)..."
-        Start-VM -ComputerName $vmHost -VMName $vmName
-
-        Write-Host "Waiting for virtual machine ($vmName) to start..."
-        Start-Sleep -Seconds 60
-    }
-```
-
----
 
 ## # Configure SharePoint services and service applications
 
@@ -1155,10 +1157,12 @@ cls
 #### # Create the Managed Metadata Service
 
 ```PowerShell
-& '.\Configure Managed Metadata Service.ps1' -Verbose
+& '.\Configure Managed Metadata Service.ps1' -Confirm:$false -Verbose
 ```
 
 ### # Configure the User Profile Service Application
+
+#### # Restore the database backup from the SharePoint 2010 User Profile Service Application
 
 ---
 
@@ -1452,8 +1456,15 @@ Restart-Service SPTimerV4
 Number of user profiles (before import): 11,776\
 Number of user profiles (after import): 12,268
 
-Start time: 2:47:20 PM\
-End time: 3:02:30 PM
+```PowerShell
+Start-Process `
+    ("C:\Program Files\Microsoft Office Servers\15.0\Synchronization Service" `
+        + "\UIShell\miisclient.exe") `
+    -Credential $farmCredential
+```
+
+Start time: 12:49:37 PM\
+End time: 1:03:03 PM
 
 ```PowerShell
 cls
@@ -1501,8 +1512,6 @@ cls
 ```
 
 #### # Pause Search Service Application
-
-# **TODO:** Add this step to the installation guide
 
 ```PowerShell
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
@@ -1651,10 +1660,23 @@ exit
 ### # Add the URL for the SecuritasConnect Web site to the "Local intranet" zone
 
 ```PowerShell
-[Uri] $uri = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
+[Uri] $url = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
+
+[string[]] $domainParts = $url.Host -split '\.'
+
+[string] $subdomain = $domainParts[0]
+[string] $domain = $domainParts[1..2] -join '.'
 
 [string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains\" + $uri.Host)
+    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
+    + "\$domain")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+[string] $registryKey = $registryKey + "\$subdomain"
 
 If ((Test-Path $registryKey) -eq $false)
 {
@@ -1675,7 +1697,7 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Script
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-web-client**.\
-> Expect the previous operation to complete in approximately 1.5 minutes.
+> Expect the previous operation to complete in approximately 1-1/2 minutes.
 
 ```PowerShell
 cls
@@ -1718,7 +1740,6 @@ RESTORE DATABASE WSS_Content_SecuritasPortal
 
 GO
 
--- TODO: Add the following step to the install guide
 ALTER DATABASE [WSS_Content_SecuritasPortal]
 SET RECOVERY SIMPLE WITH NO_WAIT
 GO
@@ -1737,8 +1758,8 @@ GO
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 11 minutes.\
-> RESTORE DATABASE successfully processed 4262140 pages in 342.847 seconds (97.121 MB/sec).
+> Expect the previous operation to complete in approximately 3-1/2 minutes.\
+> RESTORE DATABASE successfully processed 4262140 pages in 129.101 seconds (257.921 MB/sec).
 
 ```PowerShell
 cls
@@ -1781,7 +1802,7 @@ cls
 ```PowerShell
 Test-SPContentDatabase `
     -Name WSS_Content_SecuritasPortal `
-    -WebApplication http://client-test.securitasinc.com |
+    -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
     Out-File C:\NotBackedUp\Temp\Test-SPContentDatabase-SecuritasConnect.txt
 ```
 
@@ -1796,14 +1817,14 @@ $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
 Mount-SPContentDatabase `
     -Name WSS_Content_SecuritasPortal `
-    -WebApplication http://client-test.securitasinc.com `
+    -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL `
     -MaxSiteCount 6000
 
 $stopwatch.Stop()
 C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 100.00% : SPContentDatabase Name=WSS_Content_SecuritasPortal
-Mount-SPContentDatabase : Upgrade completed with errors.  Review the upgrade log file located in L:\Microsoft Office Servers\15.0\Logs\Upgrade-20160519-094749-667.log.  The number of errors and warnings is listed at the end of the upgrade log file.
+Mount-SPContentDatabase : Upgrade completed with errors.  Review the upgrade log file located in L:\Microsoft Office Servers\15.0\Logs\Upgrade-20160601-134534-959.log.  The number of errors and warnings is listed at the end of the upgrade log file.
 At line:1 char:1
 + Mount-SPContentDatabase `
 + ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1813,21 +1834,7 @@ At line:1 char:1
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 2 hours 38 minutes.
-
-##### Change recovery model of content database from Simple to Full
-
----
-
-**EXT-SQL02 - SQL Server Management Studio**
-
-```Console
-ALTER DATABASE [WSS_Content_SecuritasPortal]
-SET RECOVERY FULL WITH NO_WAIT
-GO
-```
-
----
+> Expect the previous operation to complete in approximately 2 hours 26 minutes.
 
 ```PowerShell
 cls
@@ -1945,10 +1952,6 @@ cls
     -Verbose
 ```
 
-```PowerShell
-cls
-```
-
 ### # Configure SSL on the Internet zone
 
 #### # Install SSL certificate
@@ -1987,7 +1990,8 @@ cls
 ### # Enable disk-based caching for the Web application
 
 ```PowerShell
-Push-Location C:\inetpub\wwwroot\wss\VirtualDirectories\client-test.securitasinc.com80
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + $env:SECURITAS_CLIENT_PORTAL_URL + "80")
 
 copy web.config "web - Copy.config"
 
@@ -2175,7 +2179,7 @@ cls
 ### # Upgrade core site collections
 
 ```PowerShell
-$webAppUrl = "http://client-test.securitasinc.com"
+$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
 
 @("/" , "/sites/cc", "/sites/my", "/sites/Search") |
     ForEach-Object {
@@ -2224,15 +2228,25 @@ Get-SPSolution securitas.portal.web.wsp | select Deployed
                                                                                                                Deployed
                                                                                                                --------
                                                                                                                   False
+```
 
+> **Note**
+>
+> The value of **Deployed** should be **True**.
 
+```PowerShell
 Get-SPSolution securitas.portal.web.wsp | select LastOperationResult
 
                                                                                                     LastOperationResult
                                                                                                     -------------------
                                                                                          DeploymentFailedFeatureInstall
+```
 
+> **Note**
+>
+> The value of **LastOperationResult** should be **DeploymentSucceeded**.
 
+```PowerShell
 Get-SPSolution securitas.portal.web.wsp | select LastOperationDetails | fl
 
 
@@ -2278,7 +2292,7 @@ $principal = New-SPClaimsPrincipal -Identity $groupName `
 
 $claim = $principal.ToEncodedString()
 
-$webApp = Get-SPWebApplication http://client-test.securitasinc.com
+$webApp = Get-SPWebApplication $env:SECURITAS_CLIENT_PORTAL_URL
 
 $policyRole = $webApp.PolicyRoles.GetSpecialRole(
     [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
@@ -2368,7 +2382,7 @@ cls
 ```PowerShell
 Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
 
-$site = Get-SPSite "http://client-test.securitasinc.com/sites/cc"
+$site = Get-SPSite "$env:SECURITAS_CLIENT_PORTAL_URL/sites/cc"
 $group = $site.RootWeb.SiteGroups["Collaboration & Community Visitors"]
 $group.AddUser(
     "c:0-.f|securitassqlroleprovider|branch managers",
@@ -2395,7 +2409,7 @@ cls
 #### # Configure the search settings for the C&C landing site
 
 ```PowerShell
-Start-Process "http://client-test.securitasinc.com/sites/cc"
+Start-Process "$env:SECURITAS_CLIENT_PORTAL_URL/sites/cc"
 ```
 
 ### Configure Google Analytics on the SecuritasConnect Web application
@@ -2427,15 +2441,12 @@ cls
 ### # Upgrade C&C site collections
 
 ```PowerShell
-$webAppUrl = "http://client-test.securitasinc.com"
+$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
 
-@("/sites/A123-Systems",
-    "/sites/ABC-Company",
-    "/sites/DCM-Group",
-    "/sites/TE-Connectivity",
-    "/sites/Talha-Connect-Test") |
+Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
+    ? { $_.CompatibilityLevel -lt 15 } |
     ForEach-Object {
-        $siteUrl = $webAppUrl + $_
+        $siteUrl = $_.Url
 
         Write-Host "Upgrading site ($siteUrl)..."
 
@@ -2459,34 +2470,36 @@ $webAppUrl = "http://client-test.securitasinc.com"
             -Identity Securitas.Portal.Web_SecuritasDefaultMasterPage `
             -Url $siteUrl
     }
+
+
+Upgrading site (http://client-test.securitasinc.com/sites/TE-Connectivity)...
+100.00% : SPSite Url=http://client-test.securitasinc.com/sites/TE-Connecti...
+Upgrading site (http://client-test.securitasinc.com/sites/Talha-Connect-Test)...
+100.00% : SPSite Url=http://client-test.securitasinc.com/sites/Talha-Conne...
+Upgrading site (http://client-test.securitasinc.com/sites/A123-Systems)...
+100.00% : SPSite Url=http://client-test.securitasinc.com/sites/A123-System...
+Upgrading site (http://client-test.securitasinc.com/sites/DCM-Group)...
+100.00% : SPSite Url=http://client-test.securitasinc.com/sites/DCM-Group
+Upgrading site (http://client-test.securitasinc.com/sites/Office_Viewing_Service_Cache)...
+100.00% : SPSite Url=http://client-test.securitasinc.com/sites/Office_View...
 ```
 
-```PowerShell
-cls
+## Shrink log file for content database
+
+**TODO:** Add this section to install guide
+
+---
+
+**EXT-SQL02 - SQL Server Management Studio**
+
+```SQL
+USE [WSS_Content_SecuritasPortal]
+GO
+DBCC SHRINKFILE (N'WSS_Content_SecuritasPortal_log' , 0, TRUNCATEONLY)
+GO
 ```
 
-## # Configure Web application policy for SharePoint administrators group
-
-```PowerShell
-Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
-
-$groupName = "EXTRANET\SharePoint Admins"
-
-$principal = New-SPClaimsPrincipal -Identity $groupName `
-    -IdentityType WindowsSecurityGroupName
-
-$claim = $principal.ToEncodedString()
-
-$webApp = Get-SPWebApplication http://client-test.securitasinc.com
-
-$policyRole = $webApp.PolicyRoles.GetSpecialRole(
-    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
-
-$policy = $webApp.Policies.Add($claim, $groupName)
-$policy.PolicyRoleBindings.Add($policyRole)
-
-$webApp.Update()
-```
+---
 
 ```PowerShell
 cls
@@ -2497,7 +2510,7 @@ cls
 ```PowerShell
 Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
 
-$site = Get-SPSite "http://client-test.securitasinc.com/Template-Sites/Post-Orders-en-US"
+$site = Get-SPSite "$env:SECURITAS_CLIENT_PORTAL_URL/Template-Sites/Post-Orders-en-US"
 
 $group = $site.RootWeb.SiteGroups["Post Orders Template Site (en-US) Visitors"]
 
@@ -2546,7 +2559,7 @@ Function ReplaceSiteCollectionAdministrators(
     $user.Update();
 }
 
-Get-SPSite -WebApplication http://client-test.securitasinc.com -Limit ALL |
+Get-SPSite -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL -Limit ALL |
     ForEach-Object {
         $site = $_
 
@@ -2564,7 +2577,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 3-1/2 hours.
+> Expect the previous operation to complete in approximately 3 hours 51 minutes.
 
 ```PowerShell
 cls
@@ -2573,7 +2586,7 @@ cls
 ## # Add index to Personal Links list on /Branch-Management/Post-Orders site
 
 ```PowerShell
-$web = Get-SPWeb http://client-test.securitasinc.com/Branch-Management/Post-Orders
+$web = Get-SPWeb "$env:SECURITAS_CLIENT_PORTAL_URL/Branch-Management/Post-Orders"
 
 $list = $web.Lists["My Links"]
 
@@ -2584,15 +2597,15 @@ $list.Fields["Created By"].Indexed = $true
 $list.Fields["Created By"].Update()
 ```
 
+This view cannot be displayed because it exceeds the list view threshold (5000 items) enforced by the administrator.
+
+From <[https://client-test.securitasinc.com/Branch-Management/Post-Orders/Lists/PersonalLinks/MyItems.aspx](https://client-test.securitasinc.com/Branch-Management/Post-Orders/Lists/PersonalLinks/MyItems.aspx)>
+
 ### Fix error with User Profile Service
 
 #### Issue
 
 System.Data.SqlClient.SqlException (0x80131904): The EXECUTE permission was denied on the object 'Admin_GetPartitionProperties', database 'UserProfileService_Profile', schema 'dbo'.
-
-or (previously:
-
-System.Data.SqlClient.SqlException: Cannot open database "UserProfileService_Profile" requested by the login. The login failed.  Login failed for user 'EXTRANET\\s-web-cloud'.
 
 #### # Workaround
 
@@ -2604,6 +2617,42 @@ System.Data.SqlClient.SqlException: Cannot open database "UserProfileService_Pro
 USE [UserProfileService_Profile]
 GO
 ALTER ROLE [SPDataAccess] ADD MEMBER [EXTRANET\s-web-client]
+GO
+```
+
+---
+
+### Shrink content database
+
+---
+
+**EXT-SQL02 - SQL Server Management Studio**
+
+```SQL
+USE [WSS_Content_SecuritasPortal]
+GO
+DBCC SHRINKFILE (N'WSS_Content_SecuritasPortal' , 0, TRUNCATEONLY)
+```
+
+---
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 6 minutes.
+
+Size before: 34 GB
+
+Size after: 25.4 GB
+
+### Change recovery model of content database from Simple to Full
+
+---
+
+**EXT-SQL02 - SQL Server Management Studio**
+
+```Console
+ALTER DATABASE [WSS_Content_SecuritasPortal]
+SET RECOVERY FULL WITH NO_WAIT
 GO
 ```
 
@@ -2674,9 +2723,23 @@ exit
 ### # Add the URL for the Cloud Portal Web site to the "Local intranet" zone
 
 ```PowerShell
+[Uri] $url = [Uri] $env:SECURITAS_CLOUD_PORTAL_URL
+
+[string[]] $domainParts = $url.Host -split '\.'
+
+[string] $subdomain = $domainParts[0]
+[string] $domain = $domainParts[1..2] -join '.'
+
 [string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
     + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\cloud-test.securitasinc.com")
+    + "\$domain")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+[string] $registryKey = $registryKey + "\$subdomain"
 
 If ((Test-Path $registryKey) -eq $false)
 {
@@ -2684,6 +2747,7 @@ If ((Test-Path $registryKey) -eq $false)
 }
 
 Set-ItemProperty -Path $registryKey -Name http -Value 1
+Set-ItemProperty -Path $registryKey -Name https -Value 1
 ```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/15/CF90B0921D990480E78AB113EE8B1C2320D08B15.png)
@@ -2717,7 +2781,8 @@ cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
 
 > **Note**
 >
-> When prompted for the service account, specify **EXTRANET\\s-web-cloud**.
+> When prompted for the service account, specify **EXTRANET\\s-web-cloud**.\
+> Expect the previous operation to complete in approximately 1-1/2 minutes.
 
 ```PowerShell
 cls
@@ -2740,6 +2805,10 @@ robocopy `
 ```
 
 Extract zip and start **Setup.exe**
+
+> **Note**
+>
+> Expect the installation of BoostSolutions List Collection to complete in approximately 12 minutes (since it appears to query Active Directory for each user that has ever accessed the web application).
 
 ```PowerShell
 cls
@@ -2804,8 +2873,8 @@ GO
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 17 minutes.\
-> RESTORE DATABASE successfully processed 6524300 pages in 504.137 seconds (101.105 MB/sec).
+> Expect the previous operation to complete in approximately 6-1/2 minutes.\
+> RESTORE DATABASE successfully processed 6524300 pages in 264.944 seconds (192.384 MB/sec).
 
 ```PowerShell
 cls
@@ -2844,7 +2913,7 @@ cls
 ```PowerShell
 Test-SPContentDatabase `
     -Name WSS_Content_CloudPortal `
-    -WebApplication http://cloud-test.securitasinc.com |
+    -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL |
     Out-File C:\NotBackedUp\Temp\Test-SPContentDatabase-CloudPortal.txt
 ```
 
@@ -2859,13 +2928,13 @@ $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
 Mount-SPContentDatabase `
     -Name WSS_Content_CloudPortal `
-    -WebApplication http://cloud-test.securitasinc.com
+    -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL
 
 $stopwatch.Stop()
 C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 100.00% : SPContentDatabase Name=WSS_Content_CloudPortal
-Mount-SPContentDatabase : Upgrade completed with errors.  Review the upgrade log file located in L:\Microsoft Office Servers\15.0\Logs\Upgrade-20160528-075913-603.log.  The number of errors and warnings is listed at the end of the upgrade log file.
+Mount-SPContentDatabase : Upgrade completed with errors.  Review the upgrade log file located in L:\Microsoft Office Servers\15.0\Logs\Upgrade-20160602-140344-21.log.  The number of errors and warnings is listed at the end of the upgrade log file.
 At line:1 char:1
 + Mount-SPContentDatabase `
 + ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2875,7 +2944,7 @@ At line:1 char:1
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 4 minutes.
+> Expect the previous operation to complete in approximately 3-1/2 minutes.
 
 ```PowerShell
 cls
@@ -2935,7 +3004,7 @@ cls
 ```PowerShell
 & C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
     -IPAddress 127.0.0.1 `
-    -Hostnames cloud-test.securitasinc.com `
+    -Hostnames $env:SECURITAS_CLOUD_PORTAL_URL `
     -Verbose
 ```
 
@@ -2943,7 +3012,7 @@ cls
 
 ```PowerShell
 & C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostNames.ps1 `
-    -HostNames cloud-test.securitasinc.com `
+    -HostNames $env:SECURITAS_CLOUD_PORTAL_URL `
     -Verbose
 ```
 
@@ -2964,7 +3033,8 @@ cls
 ### # Enable disk-based caching for the Web application
 
 ```PowerShell
-Push-Location C:\inetpub\wwwroot\wss\VirtualDirectories\cloud-test.securitasinc.com80
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + $env:SECURITAS_CLOUD_PORTAL_URL + "80")
 
 copy web.config "web - Copy.config"
 
@@ -3042,7 +3112,7 @@ cls
 ### # Upgrade main site collection
 
 ```PowerShell
-Upgrade-SPSite http://cloud-test.securitasinc.com/ -VersionUpgrade -Unthrottled
+Upgrade-SPSite $env:SECURITAS_CLOUD_PORTAL_URL -VersionUpgrade -Unthrottled
 ```
 
 ```PowerShell
@@ -3096,7 +3166,7 @@ cls
 #### # Configure the search settings for the Cloud Portal top-level site
 
 ```PowerShell
-Start-Process "http://cloud-test.securitasinc.com"
+Start-Process $env:SECURITAS_CLOUD_PORTAL_URL
 ```
 
 ##### Issue
@@ -3113,7 +3183,7 @@ $principal = New-SPClaimsPrincipal -Identity $groupName `
 
 $claim = $principal.ToEncodedString()
 
-$webApp = Get-SPWebApplication http://cloud-test.securitasinc.com
+$webApp = Get-SPWebApplication $env:SECURITAS_CLOUD_PORTAL_URL
 
 $policyRole = $webApp.PolicyRoles.GetSpecialRole(
     [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
@@ -3165,7 +3235,7 @@ cls
 ```PowerShell
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
-Get-SPSite -WebApplication http://cloud-test.securitasinc.com -Limit ALL |
+Get-SPSite -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL -Limit ALL |
     ? { $_.CompatibilityLevel -lt 15 } |
     % {
         $siteUrl = $_.Url
@@ -3209,15 +3279,11 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 53 minutes.
+> Expect the previous operation to complete in approximately 50 minutes.
 
 ##### Issue
 
 System.Data.SqlClient.SqlException (0x80131904): The EXECUTE permission was denied on the object 'Admin_GetPartitionProperties', database 'UserProfileService_Profile', schema 'dbo'.
-
-or (previously:
-
-System.Data.SqlClient.SqlException: Cannot open database "UserProfileService_Profile" requested by the login. The login failed.  Login failed for user 'EXTRANET\\s-web-cloud'.
 
 ##### # Workaround
 
@@ -3229,6 +3295,20 @@ System.Data.SqlClient.SqlException: Cannot open database "UserProfileService_Pro
 USE [UserProfileService_Profile]
 GO
 ALTER ROLE [SPDataAccess] ADD MEMBER [EXTRANET\s-web-cloud]
+GO
+```
+
+---
+
+### Change recovery model of content database from Simple to Full
+
+---
+
+**EXT-SQL02 - SQL Server Management Studio**
+
+```Console
+ALTER DATABASE [WSS_Content_CloudPortal]
+SET RECOVERY FULL WITH NO_WAIT
 GO
 ```
 
@@ -3246,5 +3326,401 @@ cls
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Resume-SPEnterpriseSearchServiceApplication
 ```
+
+**TODO:**
+
+```PowerShell
+cls
+```
+
+## # Install Employee Portal
+
+## # Extend SecuritasConnect and Cloud Portal web applications
+
+### # Extend web applications to Intranet zone
+
+```PowerShell
+$ErrorActionPreference = "Stop"
+
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+Function ExtendWebAppToIntranetZone(
+    [string] $DefaultUrl,
+    [string] $IntranetUrl)
+{
+    $webApp = Get-SPWebApplication -Identity $DefaultUrl -Debug:$false
+
+    Write-Host ("Extending Web application ($DefaultUrl) to Intranet zone" `
+        + " ($IntranetUrl)...")
+
+    $hostHeader = $IntranetUrl.Substring("http://".Length)
+
+    $webAppName = "SharePoint - " + $hostHeader + "443"
+
+    $windowsAuthProvider = New-SPAuthenticationProvider -Debug:$false
+
+    $webApp | New-SPWebApplicationExtension `
+        -Name $webAppName `
+        -Zone Intranet `
+        -AuthenticationProvider $windowsAuthProvider `
+        -HostHeader $hostHeader `
+        -Port 443 `
+}
+
+ExtendWebAppToIntranetZone `
+    -DefaultUrl "http://client-test.securitasinc.com" `
+    -IntranetUrl "https://client-test.securitasinc.com"
+
+ExtendWebAppToIntranetZone `
+    -DefaultUrl "http://cloud-test.securitasinc.com" `
+    -IntranetUrl "https://cloud2-test.securitasinc.com"
+```
+
+### Add SecuritasPortal connection string to Cloud Portal configuration file
+
+(skipped)
+
+**TODO:** Remove this section from the installation guide (since the bug has been fixed)
+
+### Enable disk-based caching for the "intranet" websites
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Map intranet URLs to loopback address in Hosts file
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    127.0.0.1 client2-local.securitasinc.com, cloud2-local.securitasinc.com
+```
+
+### # Allow specific host names mapped to 127.0.0.1
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
+    client2-local.securitasinc.com, cloud2-local.securitasinc.com
+```
+
+## Upgrade SecuritasConnect to "v3.0 Sprint-22" release
+
+(skipped)
+
+**TODO:** Remove this section from the installation guide
+
+## Install Web Deploy 3.6
+
+### Download Web Platform Installer
+
+### Install Web Deploy
+
+**TODO:** This was already installed at this point. Find out why (and remove from install guide if possible)
+
+```PowerShell
+cls
+```
+
+## # Install .NET Framework 4.5
+
+### # Download .NET Framework 4.5.2 installer
+
+```PowerShell
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+Copy-Item `
+    ("\\ICEMAN\Products\Microsoft\.NET Framework 4.5\.NET Framework 4.5.2\" `
+        + "NDP452-KB2901907-x86-x64-AllOS-ENU.exe") `
+    C:\NotBackedUp\Temp
+```
+
+### # Install .NET Framework 4.5.2
+
+```PowerShell
+& C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/00EEF0B1702AA3D8D0B31ED97CBDB43D9E94D37E.png)
+
+> **Important**
+>
+> When prompted, restart the computer to complete the installation.
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
+```
+
+### Install updates
+
+> **Important**
+>
+> When prompted, restart the computer to complete the process of installing the updates.
+
+### Restart computer (if not restarted since installing .NET Framework 4.5)
+
+(skipped -- since a restart was required after installing updates)
+
+### Ensure ASP.NET v4.0 ISAPI filters are enabled
+
+(skipped -- since the ISAPI filters were already enabled)
+
+```PowerShell
+cls
+```
+
+## # Install Employee Portal
+
+### # Copy Employee Portal build to SharePoint server
+
+```PowerShell
+net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+robocopy `
+    "\\ICEMAN\Builds\Securitas\EmployeePortal\1.0.28.0" `
+    "C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0" `
+    /E
+```
+
+### # Add the Employee Portal URL to the "Local intranet" zone
+
+```PowerShell
+[Uri] $url = [Uri] "http://employee-local.securitasinc.com"
+
+[string[]] $domainParts = $url.Host -split '\.'
+
+[string] $subdomain = $domainParts[0]
+[string] $domain = $domainParts[1..2] -join '.'
+
+[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
+    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
+    + "\$domain")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+[string] $registryKey = $registryKey + "\$subdomain"
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+Set-ItemProperty -Path $registryKey -Name http -Value 1
+```
+
+### Create Employee Portal SharePoint site
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Create Employee Portal website
+
+#### # Create Employee Portal website on SharePoint Central Administration server
+
+```PowerShell
+cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Deployment Files\Scripts'
+
+& '.\Configure Employee Portal Website.ps1' `
+    -SiteName employee-local.securitasinc.com `
+    -Confirm:$false `
+    -Verbose
+```
+
+#### Configure SSL bindings on Employee Portal website
+
+(skipped)
+
+#### Create Employee Portal website on other web servers in the farm
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Deploy Employee Portal website
+
+#### # Deploy Employee Portal website on SharePoint Central Administration server
+
+```PowerShell
+Push-Location C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Debug\_PublishedWebsites\Web_Package
+
+attrib -r .\Web.SetParameters.xml
+
+Notepad .\Web.SetParameters.xml
+```
+
+---
+
+**Web.SetParameters.xml**
+
+```XML
+<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter
+    name="IIS Web Application Name"
+    value="employee-local.securitasinc.com" />
+  <setParameter
+    name="SecuritasPortal-Web.config Connection String"
+    value="Server=.; Database=SecuritasPortal; Integrated Security=true" />
+  <setParameter
+    name="SecuritasPortalDbContext-Web.config Connection String"
+    value="Data Source=.; Initial Catalog=SecuritasPortal; Integrated Security=True; MultipleActiveResultSets=True;" />
+</parameters>
+```
+
+---
+
+```Console
+.\Web.deploy.cmd /y
+```
+
+```Console
+cls
+
+Pop-Location
+```
+
+#### # Configure application settings and web service URLs
+
+```PowerShell
+Notepad C:\inetpub\wwwroot\employee-local.securitasinc.com\Web.config
+```
+
+Set the value of the **GoogleAnalytics.TrackingId** application setting to **UA-25949832-3**.
+
+#### Deploy Employee Portal website content to other web servers in the farm
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Configure database logins and permissions for Employee Portal
+
+```PowerShell
+$sqlcmd = @"
+USE [master]
+GO
+CREATE LOGIN [IIS APPPOOL\employee-local.securitasinc.com]
+FROM WINDOWS
+WITH DEFAULT_DATABASE=[master]
+GO
+USE [SecuritasPortal]
+GO
+CREATE USER [IIS APPPOOL\employee-local.securitasinc.com]
+FOR LOGIN [IIS APPPOOL\employee-local.securitasinc.com]
+GO
+EXEC sp_addrolemember N'Employee_FullAccess', N'IIS APPPOOL\employee-local.securitasinc.com'
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+```
+
+#### Issue
+
+```PowerShell
+Invoke-Sqlcmd : Cannot alter the role 'Employee_FullAccess', because it does not exist or you do not have permission.
+At line:1 char:1
++ Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [Invoke-Sqlcmd], SqlPowerShellSqlExecutionException
+    + FullyQualifiedErrorId : SqlError,Microsoft.SqlServer.Management.PowerShell.GetScriptCommand
+```
+
+#### Workaround
+
+---
+
+**SQL Server Management Studio**
+
+```SQL
+USE [SecuritasPortal]
+GO
+EXEC sp_addrolemember N'Employee_FullAccess', N'IIS APPPOOL\employee-local.securitasinc.com'
+GO
+```
+
+---
+
+### Grant PNKCAN and PNKUS users permissions on Cloud Portal site
+
+(skipped)
+
+### Replace absolute URLs in "User Sites" list
+
+(skipped)
+
+### DEV - Install Visual Studio 2015 with Update 1
+
+(skipped)
+
+### Install additional service packs and updates
+
+```PowerShell
+cls
+```
+
+### # Map Employee Portal URL to loopback address in Hosts file
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    127.0.0.1 employee-local.securitasinc.com
+```
+
+### # Allow specific host names mapped to 127.0.0.1
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
+    employee-local.securitasinc.com
+```
+
+```PowerShell
+cls
+```
+
+## # Reset search index and perform full crawl
+
+```PowerShell
+$serviceApp = Get-SPEnterpriseSearchServiceApplication
+```
+
+### # Reset search index
+
+```PowerShell
+$serviceApp.Reset($false, $false)
+```
+
+### # Start full crawl
+
+```PowerShell
+$serviceApp |
+    Get-SPEnterpriseSearchCrawlContentSource |
+    % { $_.StartFullCrawl() }
+```
+
+> **Note**
+>
+> Expect the crawl to complete in approximately 5 minutes.
 
 **TODO:**

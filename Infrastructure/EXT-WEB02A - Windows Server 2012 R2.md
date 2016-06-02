@@ -1,7 +1,7 @@
 ﻿# EXT-WEB02A - Windows Server 2012 R2 Standard
 
-Tuesday, April 19, 2016
-10:14 AM
+Wednesday, June 1, 2016
+7:19 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -22,7 +22,7 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "BEAST"
+$vmHost = "FORGE"
 $vmName = "EXT-WEB02A"
 
 $vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
