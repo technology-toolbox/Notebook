@@ -513,3 +513,59 @@ Set-VMDvdDrive -ComputerName BEAST -VMName EXT-RRAS1 -Path $null
 ---
 
 ### # Approve manual agent install in Operations Manager
+
+## # Update network settings
+
+```PowerShell
+$interfaceAlias = "Production"
+```
+
+#### # Rename network connection
+
+```PowerShell
+Get-NetAdapter -Physical | select Name, InterfaceDescription
+
+Get-NetAdapter `
+    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
+```
+
+#### # Disable DHCP
+
+```PowerShell
+@("IPv4", "IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Enabled")
+    {
+        # Remove existing gateway
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        # Disable DHCP
+        $interface | Set-NetIPInterface -DHCP Disabled
+    }
+}
+```
+
+## # Update static IPv6 address
+
+```PowerShell
+$oldIpAddress = "2601:1:8200:6000::219"
+$newIpAddress = "2601:282:4201:e500::219"
+
+Remove-NetIPAddress -IPAddress $oldIpAddress -Confirm:$false
+
+New-NetIPAddress `
+    -InterfaceAlias "LAN 1 - 192.168.10.x" `
+    -IPAddress $newIpAddress `
+    -PrefixLength 64
+```
