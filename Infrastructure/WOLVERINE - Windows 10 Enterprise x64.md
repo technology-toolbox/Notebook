@@ -305,6 +305,16 @@ From <[http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx](htt
 cls
 ```
 
+## # Install Microsoft InfoPath 2013
+
+```PowerShell
+& "\\ICEMAN\Products\Microsoft\Office 2013\infopath_4753-1001_x86_en-us.exe"
+```
+
+```PowerShell
+cls
+```
+
 ## # Install Adobe Reader 8.3
 
 ```PowerShell
