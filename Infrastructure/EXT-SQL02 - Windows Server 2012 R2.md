@@ -894,4 +894,29 @@ End 6/3/2016 4:17:51 AM
 
 Duration: 8.5 minutes
 
+## Configure DCOM permissions for SQL Server
+
+### Issue
+
+Source: DCOM\
+Event ID: 10016\
+Event Category: 0\
+User: NT SERVICE\\SQLSERVERAGENT\
+Computer: EXT-SQL02.extranet.technologytoolbox.com\
+Event Description: The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID\
+{806835AE-FD04-4870-A1E8-D65535358293}\
+and APPID\
+{EE4171E6-C37E-4D04-AF4C-8617BC7D4914}\
+to the user NT SERVICE\\SQLSERVERAGENT SID (S-1-5-80-344959196-2060754871-2302487193-2804545603-1466107430) from address LocalHost (Using LRPC) running in the application container Unavailable SID (Unavailable). This security permission can be modified using the Component Services administrative tool.
+
+> **Note**
+>
+> **EE4171E6-C37E-4D04-AF4C-8617BC7D4914** is the ID for **Microsoft SQL Server Integration Services 12.0**.
+
+### Solution
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\SQL\Configure DCOM Permissions.ps1'
+```
+
 **TODO:**
