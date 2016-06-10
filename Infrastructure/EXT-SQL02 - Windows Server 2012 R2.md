@@ -894,6 +894,24 @@ End 6/3/2016 4:17:51 AM
 
 Duration: 8.5 minutes
 
+## Create scheduled task to delete old database backups
+
+1. Open Task Scheduler.
+2. Click **Import Task...**
+3. In the **Open** dialog:
+   1. In the **File name** box, type **C:\\NotBackedUp\\Public\\Toolbox\\PowerShell\\Remove Old Database Backups.xml**.
+   2. Click **Open**.
+4. In the **Create Task **dialog:
+   1. On the **Actions** tab, click **Edit...**
+   2. In the **Edit Action** dialog:
+      1. In the **Add arguments (optional)** box, type **Z:\\ 0**.
+      2. Click **OK**.
+   3. Click **OK**.
+
+> **Note**
+>
+> The first argument (**Z:\\**) specifies the backup path. The second argument (**0**) specifies the number of days to keep backup files for. Since the task is scheduled to run at 11:45 PM every Saturday -- 15 minutes before the SQL Server maintenance plan that performs a full backup of all databases -- this results in the deletion of all previous backups just before starting a full backup of all databases.
+
 ## Configure DCOM permissions for SQL Server
 
 ### Issue
