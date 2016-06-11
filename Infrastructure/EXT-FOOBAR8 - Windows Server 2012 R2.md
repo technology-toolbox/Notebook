@@ -2185,7 +2185,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 3 hours 46 minutes.
+> Expect the previous operation to complete in approximately 4 hours.
 
 ```PowerShell
 cls
@@ -2584,6 +2584,8 @@ cls
 ### # Upgrade C&C site collections
 
 ```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
 $webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
 
 Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
@@ -2613,7 +2615,14 @@ Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
             -Identity Securitas.Portal.Web_SecuritasDefaultMasterPage `
             -Url $siteUrl
     }
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 ```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 3 minutes.
 
 ### Configure Google Analytics on the SecuritasConnect Web application
 
@@ -2713,11 +2722,11 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 30 minutes.
+> Expect the previous operation to complete in approximately 1 hour 27 minutes.
 
 ### Defragment SharePoint databases
 
-Defragmentation took 29 minutes
+Defragmentation took 34 minutes
 
 ```PowerShell
 cls
@@ -2750,7 +2759,7 @@ $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 $sqlcmd = @"
 USE [WSS_Content_SecuritasPortal]
 GO
-DBCC SHRINKFILE (N'WSS_Content_SecuritasPortal' , 26000)
+DBCC SHRINKFILE (N'WSS_Content_SecuritasPortal')
 "@
 
 Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
@@ -2761,47 +2770,21 @@ $stopwatch.Stop()
 C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 ```
 
-#### Issue
-
-```PowerShell
-Invoke-Sqlcmd : Could not locate file 'WSS_Content_SecuritasPortal' for database 'master' in sys.database_files. The file either does not exist, or was dropped.
-At line:1 char:1
-+ Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidOperation: (:) [Invoke-Sqlcmd], SqlPowerShellSqlExecutionException
-    + FullyQualifiedErrorId : SqlError,Microsoft.SqlServer.Management.PowerShell.GetScriptCommand
-```
-
-#### Workaround
-
-Shrink database using SQL Server Management Studio
-
 > **Note**
 >
-> Expect the previous operation to complete in approximately 6 minutes.
+> Expect the previous operation to complete in approximately 55 minutes.
 
 Size before: 34 GB
 
-Size after: 25.4 GB
+Size after: 25.3 GB
 
-```PowerShell
-cls
-```
+### Change recovery model for content database to Full
 
-### # Change recovery model for content database to Full
-
-```PowerShell
-$sqlcmd = @"
-ALTER DATABASE [WSS_Content_SecuritasPortal]
-SET RECOVERY FULL WITH NO_WAIT
-"@
-
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
-```
+(skipped)
 
 ### Configure SQL Server backups
+
+(skipped)
 
 ### Resume Search Service Application and start a full crawl of all content sources
 
@@ -2825,81 +2808,13 @@ Set-Location C:
 
 {End skipped sections}
 
-```PowerShell
-cls
-```
-
-### # Upgrade C&C site collections
-
-```PowerShell
-$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
-
-Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
-    ? { $_.CompatibilityLevel -lt 15 } |
-    ForEach-Object {
-        $siteUrl = $_.Url
-
-        Write-Host "Upgrading site ($siteUrl)..."
-
-        Disable-SPFeature `
-            -Identity Securitas.Portal.Web_SecuritasDefaultMasterPage `
-            -Url $siteUrl `
-            -Confirm:$false
-
-        Disable-SPFeature `
-            -Identity Securitas.Portal.Web_PublishingLayouts `
-            -Url $siteUrl `
-            -Confirm:$false
-
-        Upgrade-SPSite $siteUrl -VersionUpgrade -Unthrottled
-
-        Enable-SPFeature `
-            -Identity Securitas.Portal.Web_PublishingLayouts `
-            -Url $siteUrl
-
-        Enable-SPFeature `
-            -Identity Securitas.Portal.Web_SecuritasDefaultMasterPage `
-            -Url $siteUrl
-    }
-```
-
 ## Backup Cloud Portal in SharePoint 2010 environment
 
----
+(Download backup files from PROD)
 
-**EXT-FOOBAR - SQL Server Management Studio**
+#### Copy the backup files to the SQL Server for the SharePoint 2013 farm
 
-```Console
-DECLARE @backupPath NVARCHAR(255) =
-    N'Z:\Microsoft SQL Server\MSSQL10_50.MSSQLSERVER\MSSQL\Backup'
-
-DECLARE @backupFilePath NVARCHAR(255)
-
--- Backup content database for Cloud Portal Web application
-
-SET @backupFilePath = @backupPath + N'\WSS_Content_CloudPortal.bak'
-
-BACKUP DATABASE [WSS_Content_CloudPortal]
-TO DISK = @backupFilePath
-WITH NOFORMAT, NOINIT
-    , NAME = N'WSS_Content_CloudPortal-Full Database Backup'
-    , SKIP, NOREWIND, NOUNLOAD, STATS = 10
-    , COPY_ONLY
-```
-
----
-
-```PowerShell
-cls
-```
-
-#### # Copy the backup files to the SQL Server for the SharePoint 2013 farm
-
-```PowerShell
-robocopy `
-    '\\EXT-FOOBAR\Z$\Microsoft SQL Server\MSSQL10_50.MSSQLSERVER\MSSQL\Backup' `
-    "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
-```
+[\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups)
 
 ## # Create and configure the Cloud Portal Web application
 
@@ -2923,7 +2838,7 @@ exit
 ### # Add the URL for the Cloud Portal Web site to the "Local intranet" zone
 
 ```PowerShell
-[Uri] $url = [Uri] "http://cloud-local.securitasinc.com"
+[Uri] $url = [Uri] $env:SECURITAS_CLOUD_PORTAL_URL
 
 [string[]] $domainParts = $url.Host -split '\.'
 
@@ -2977,7 +2892,7 @@ cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-web-cloud-dev**.\
-> Expect the previous operation to complete in approximately 1 minute.
+> Expect the previous operation to complete in approximately 1-2 minutes.
 
 ```PowerShell
 cls
@@ -2986,12 +2901,24 @@ cls
 ### # Install third-party SharePoint solutions
 
 ```PowerShell
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
 robocopy `
     '\\ICEMAN\Products\Boost Solutions' `
     'C:\NotBackedUp\Temp\Boost Solutions' /E
 ```
 
 Extract zip and start **Setup.exe**
+
+> **Note**
+>
+> Expect the installation of BoostSolutions List Collection to complete in approximately 18 minutes (since it appears to query Active Directory for each user that has ever accessed the web application when activating the features).
 
 ```PowerShell
 cls
@@ -3010,6 +2937,8 @@ Remove-SPContentDatabase WSS_Content_CloudPortal -Confirm:$false -Force
 ##### # Restore database backup
 
 ```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
   'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\'
@@ -3030,12 +2959,28 @@ RESTORE DATABASE WSS_Content_CloudPortal
     MOVE 'WSS_Content_CloudPortal_log' TO @logFilePath,
     NOUNLOAD,
     STATS = 5
+
+GO
+
+-- TODO: Add the following step to the install guide
+
+ALTER DATABASE [WSS_Content_CloudPortal]
+SET RECOVERY SIMPLE WITH NO_WAIT
+GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 ```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 19 minutes.\
+> RESTORE DATABASE successfully processed 6524300 pages in 1084.862 seconds (46.983 MB/sec).
 
 ##### # Install Cloud Portal v1.0 solution
 
@@ -3066,7 +3011,8 @@ cd C:\NotBackedUp\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
 ```PowerShell
 Test-SPContentDatabase `
     -Name WSS_Content_CloudPortal `
-    -WebApplication http://cloud-local.securitasinc.com
+    -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL |
+    Out-File C:\NotBackedUp\Temp\Test-SPContentDatabase-CloudPortal.txt
 ```
 
 ```PowerShell
@@ -3076,9 +3022,31 @@ cls
 ##### # Attach content database
 
 ```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
 Mount-SPContentDatabase `
     -Name WSS_Content_CloudPortal `
-    -WebApplication http://cloud-local.securitasinc.com
+    -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 4 minutes.
+
+```PowerShell
+Mount-SPContentDatabase : Upgrade completed with errors.  Review the upgrade log file located in C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\15\LOGS\Upgrade-20160610-172258-876.log.  The number of errors and warnings is listed at the end of the upgrade log file.
+At line:1 char:1
++ Mount-SPContentDatabase `
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidData: (Microsoft.Share...ContentDatabase:SPCmdletMountContentDatabase) [Mount-SPContentDatabase], SPUpgradeException
+    + FullyQualifiedErrorId : Microsoft.SharePoint.PowerShell.SPCmdletMountContentDatabase
+```
+
+```PowerShell
+cls
 ```
 
 ##### # Remove Cloud Portal v1.0 solution
@@ -3193,7 +3161,7 @@ Set-Location C:
 ### # Upgrade main site collection
 
 ```PowerShell
-Upgrade-SPSite http://cloud-local.securitasinc.com/ -VersionUpgrade -Unthrottled
+Upgrade-SPSite $env:SECURITAS_CLOUD_PORTAL_URL -VersionUpgrade -Unthrottled
 ```
 
 ```PowerShell
@@ -3228,13 +3196,34 @@ cls
 cls
 ```
 
-### # Configure search settings for the Cloud Portal
-
-#### # Hide the Search navigation item on the Cloud Portal top-level site
+## # Configure Web application policy for SharePoint administrators group
 
 ```PowerShell
-Start-Process "http://cloud-local.securitasinc.com"
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$groupName = "EXTRANET\SharePoint Admins (DEV)"
+
+$principal = New-SPClaimsPrincipal -Identity $groupName `
+    -IdentityType WindowsSecurityGroupName
+
+$claim = $principal.ToEncodedString()
+
+$webApp = Get-SPWebApplication $env:SECURITAS_CLOUD_PORTAL_URL
+
+$policyRole = $webApp.PolicyRoles.GetSpecialRole(
+    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
+
+$policy = $webApp.Policies.Add($claim, $groupName)
+$policy.PolicyRoleBindings.Add($policyRole)
+
+$webApp.Update()
 ```
+
+### Configure search settings for the Cloud Portal
+
+#### Hide the Search navigation item on the Cloud Portal top-level site
+
+(skipped)
 
 ```PowerShell
 cls
@@ -3243,7 +3232,7 @@ cls
 #### # Configure the search settings for the Cloud Portal top-level site
 
 ```PowerShell
-Start-Process "http://cloud-local.securitasinc.com"
+Start-Process $env:SECURITAS_CLOUD_PORTAL_URL
 ```
 
 ### Configure redirect for single-site users
@@ -3282,28 +3271,98 @@ Tracking ID: **UA-25949832-5**
 cls
 ```
 
-## # Configure Web application policy for SharePoint administrators group
+### # Upgrade Cloud Portal Sites
 
 ```PowerShell
-Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
-$groupName = "EXTRANET\SharePoint Admins (DEV)"
+Get-SPSite -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL -Limit ALL |
+    ? { $_.CompatibilityLevel -lt 15 } |
+    % {
+        $siteUrl = $_.Url
 
-$principal = New-SPClaimsPrincipal -Identity $groupName `
-    -IdentityType WindowsSecurityGroupName
+        Write-Host "Upgrading site ($siteUrl)..."
 
-$claim = $principal.ToEncodedString()
+        Get-SPWeb -Site $siteUrl |
+            % {
+                $webUrl = $_.Url
 
-$webApp = Get-SPWebApplication http://cloud-local.securitasinc.com
+                Disable-SPFeature `
+                    -Identity Securitas.CloudPortal.Web_SecuritasDefaultMasterPage `
+                    -Url $webUrl `
+                    -Confirm:$false
+            }
 
-$policyRole = $webApp.PolicyRoles.GetSpecialRole(
-    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
+        Disable-SPFeature `
+            -Identity Securitas.CloudPortal.Web_PublishingLayouts `
+            -Url $siteUrl `
+            -Confirm:$false
 
-$policy = $webApp.Policies.Add($claim, $groupName)
-$policy.PolicyRoleBindings.Add($policyRole)
+        Upgrade-SPSite $siteUrl -VersionUpgrade -Unthrottled
 
-$webApp.Update()
+        Enable-SPFeature `
+            -Identity Securitas.CloudPortal.Web_PublishingLayouts `
+            -Url $siteUrl
+
+        Get-SPWeb -Site $siteUrl |
+            % {
+                $webUrl = $_.Url
+
+                Enable-SPFeature `
+                    -Identity Securitas.CloudPortal.Web_CloudPortalBranding `
+                    -Url $webUrl
+            }
+    }
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 ```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 50 minutes.
+
+##### Issue
+
+System.Data.SqlClient.SqlException (0x80131904): The EXECUTE permission was denied on the object 'Admin_GetPartitionProperties', database 'UserProfileService_Profile', schema 'dbo'.
+
+```PowerShell
+cls
+```
+
+##### # Workaround
+
+```PowerShell
+$sqlcmd = @"
+USE [UserProfileService_Profile]
+GO
+ALTER ROLE [SPDataAccess] ADD MEMBER [EXTRANET\s-web-cloud-dev]
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+### Change recovery model of content database from Simple to Full
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Resume Search Service Application
+
+# **TODO:** Add this step to the installation guide
+
+```PowerShell
+Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
+    Resume-SPEnterpriseSearchServiceApplication
+```
+
+**TODO:**
 
 ```PowerShell
 cls
