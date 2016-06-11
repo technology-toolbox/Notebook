@@ -349,30 +349,6 @@ cls
 
 ## Install Microsoft Expression Studio 4
 
-## Install Microsoft SQL Server 2014
-
-#### # Install .NET Framework 3.5
-
-```PowerShell
-$sourcePath = "G:\sources\sxs"
-
-Enable-WindowsOptionalFeature -FeatureName NetFx3 -Source $sourcePath -Online
-```
-
-#### # Create folders for Distributed Replay Client
-
-mkdir "C:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\WorkingDir"\
-mkdir "C:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\ResultDir"
-
-### Install SQL Server
-
-- Select all features
-- Change Startup Type on all services to Manual except SQL Server Browser (leave Disabled)
-- Add TECHTOOLBOX\\SQL Server Admins (DEV) to the list of SQL Server administrators
-- Set Data root directory to "C:\\NotBackedUp\\Microsoft SQL Server"
-- On **Reporting Service Configuration** step, for **Reporting Services Native Mode**, select **Install only**.
-- For Distributed Replay Client, change paths to "C:\\NotBackedUp\\Microsoft SQL Server\\..."
-
 ## Install Microsoft Visual Studio 2015 Enterprise with Update 2
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/ACDA391F5D951BCC223707F0D0AF2DF01F6ED49A.png)
@@ -840,6 +816,10 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
 
 ## Disk Cleanup
+
+## Install Microsoft SQL Server 2016
+
+## Install Microsoft SQL Server Management Studio
 
 ## # Configure credential helper for Git
 
