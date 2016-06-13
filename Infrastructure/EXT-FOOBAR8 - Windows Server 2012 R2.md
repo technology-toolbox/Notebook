@@ -3362,6 +3362,52 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Resume-SPEnterpriseSearchServiceApplication
 ```
 
+| **Started**       | **Completed**     | **Duration** | **Successes** | **Warnings** | **Errors** | **Crawl Rate (dps)** | **Repository Latency (ms)** |
+| ----------------- | ----------------- | ------------ | ------------- | ------------ | ---------- | -------------------- | --------------------------- |
+| 6/10/2016 7:10 PM | 6/11/2016 8:17 AM | 13:07:36     | 388,940       | 22,647       | 175        | [8.7](8.7)           | [164](164)                  |
+
+From <[http://ext-foobar8:22812/_admin/search/CrawlLogCrawls.aspx?appid={85608e56-0f1e-439b-9ea1-ae3288bf6bff}&csid=1](http://ext-foobar8:22812/_admin/search/CrawlLogCrawls.aspx?appid={85608e56-0f1e-439b-9ea1-ae3288bf6bff}&csid=1)>
+
+## Resolve long crawl time
+
+### Issue
+
+Full crawl requires 13 hours to complete
+
+### Resolution
+
+#### # Reset performance level for the search crawl component
+
+```PowerShell
+Set-SPEnterpriseSearchService -PerformanceLevel Maximum
+```
+
+#### # Reset search index and perform full crawl
+
+```PowerShell
+$serviceApp = Get-SPEnterpriseSearchServiceApplication
+```
+
+##### # Reset search index
+
+```PowerShell
+$serviceApp.Reset($false, $false)
+```
+
+##### # Start full crawl
+
+```PowerShell
+$serviceApp |
+    Get-SPEnterpriseSearchCrawlContentSource |
+    % { $_.StartFullCrawl() }
+```
+
+| **Started**       | **Completed**     | **Duration** | **Successes** | **Warnings** | **Errors** | **Crawl Rate (dps)** | **Repository Latency (ms)** |
+| ----------------- | ----------------- | ------------ | ------------- | ------------ | ---------- | -------------------- | --------------------------- |
+| 6/12/2016 5:30 AM | 6/12/2016 9:07 AM | 03:37:27     | 383,710       | 22,647       | 155        | [31.1](31.1)         | [270](270)                  |
+
+From <[http://ext-foobar8:22812/_admin/search/CrawlLogCrawls.aspx?appid={85608e56-0f1e-439b-9ea1-ae3288bf6bff}&csid=1](http://ext-foobar8:22812/_admin/search/CrawlLogCrawls.aspx?appid={85608e56-0f1e-439b-9ea1-ae3288bf6bff}&csid=1)>
+
 **TODO:**
 
 ```PowerShell
@@ -3484,10 +3530,6 @@ Copy-Item `
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/00EEF0B1702AA3D8D0B31ED97CBDB43D9E94D37E.png)
 
-> **Important**
->
-> When prompted, restart the computer to complete the installation.
-
 ```PowerShell
 Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
 ```
@@ -3500,7 +3542,7 @@ Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
 
 ### Restart computer (if not restarted since installing .NET Framework 4.5)
 
-(skipped -- since a restart was required after installing updates)
+(skipped)
 
 ### Ensure ASP.NET v4.0 ISAPI filters are enabled
 
@@ -3670,33 +3712,9 @@ GO
 "@
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
 ```
-
-#### Issue
-
-```PowerShell
-Invoke-Sqlcmd : Cannot alter the role 'Employee_FullAccess', because it does not exist or you do not have permission.
-At line:1 char:1
-+ Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidOperation: (:) [Invoke-Sqlcmd], SqlPowerShellSqlExecutionException
-    + FullyQualifiedErrorId : SqlError,Microsoft.SqlServer.Management.PowerShell.GetScriptCommand
-```
-
-#### Workaround
-
----
-
-**SQL Server Management Studio**
-
-```SQL
-USE [SecuritasPortal]
-GO
-EXEC sp_addrolemember N'Employee_FullAccess', N'IIS APPPOOL\employee-local.securitasinc.com'
-GO
-```
-
----
 
 ### Grant PNKCAN and PNKUS users permissions on Cloud Portal site
 
@@ -3734,31 +3752,21 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 cls
 ```
 
-## # Reset search index and perform full crawl
+## # Enter a product key and activate Windows
 
 ```PowerShell
-$serviceApp = Get-SPEnterpriseSearchServiceApplication
-```
-
-### # Reset search index
-
-```PowerShell
-$serviceApp.Reset($false, $false)
-```
-
-### # Start full crawl
-
-```PowerShell
-$serviceApp |
-    Get-SPEnterpriseSearchCrawlContentSource |
-    % { $_.StartFullCrawl() }
+slmgr /ipk {product key}
 ```
 
 > **Note**
 >
-> Expect the crawl to complete in approximately 5 minutes.
+> When notified that the product key was set successfully, click **OK**.
 
-```PowerShell
+```Console
+slmgr /ato
+```
+
+```Console
 cls
 ```
 
@@ -3776,14 +3784,43 @@ cls
 cls
 ```
 
-### # Checkpoint VM
+### # Update VM snapshot
 
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-FOOBAR8"
-$snapshotName = "Baseline Client Portal 4.0.661.0 / Cloud Portal 2.0.114.0 / Employee Portal 1.0.28.0"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
+```
+
+#### # Delete previous VM snapshot
+
+```PowerShell
+Write-Host "Deleting snapshot..." -NoNewline
+
+Remove-VMSnapshot -ComputerName $vmHost -VMName $vmName
+
+Write-Host "Waiting a few seconds for merge to start..."
+Start-Sleep -Seconds 5
+
+while (Get-VM -ComputerName $vmHost -Name $vmName |
+    Where Status -eq "Merging disks") {
+    Write-Host "." -NoNewline
+    Start-Sleep -Seconds 5
+}
+
+Write-Host
+```
+
+```PowerShell
+cls
+```
+
+#### # Create new VM snapshot
+
+```PowerShell
+
+$snapshotName = "Baseline Client Portal 4.0.661.0 / Cloud Portal 2.0.114.0 / Employee Portal 1.0.28.0"
 
 Checkpoint-VM `
     -ComputerName $vmHost `

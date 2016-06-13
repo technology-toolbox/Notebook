@@ -1004,33 +1004,17 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
-**TODO:**
+## Issue - Long crawl time on EXT-FOOBAR8
 
-## Poor write performance on mirrored Samsung 850 SSDs
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/C3B1988AD83853BD7FEC3A8F9D5E16A99B9C4D39.png)
 
-### Before
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6C/BFAA1E405A0847583DC55CFE0216965C49CD326C.png)
 
-#### FORGE
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/5180F316624880B7CAB6FEFBE8930538F0AF9E4D.png)
 
-- C: (128 GB Samsung 850 SSD) - Write Transfer Rate 27,000 - 476,000 MB/s
-- D: (2x 512 GB Samsung 850 SSDs) - Write Transfer Rate 200 - 209,000 MB/s
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/13/2815E2C89342511750F81704256C9103786C5813.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/AA392A1B9D02D8C42A2DD588D5AED6378678D8E2.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/85ED49EFAF398E4F07615D95EBA3E66593F34B7E.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/7430280DD491F23732D5F8E0658B11B7BC105C21.png)
-
-#### STORM (for comparison)
-
-- C: (128 GB Samsung 850 SSD) - Write Transfer Rate 29,000 - 475,000 MB/s
-- D: (2x 512 GB Samsung 840 SSDs) - Write Transfer Rate 11,000 - 155,000 MB/s
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/5F016E2CE7959A13764661F53F7FA50CAB4FC8B9.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/92/E85DBFF5ED3F4E88CA202F1E7A016EF74635D492.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/FCF2AE9EFC523E15210AF594B30E390CE352FD93.png)
 
 ### Update AHCI drivers
 
@@ -1058,12 +1042,20 @@ slmgr /ato
 
 #### FORGE
 
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4E/DBEB8C795910836997C948AB56A56E73DA4CA94E.png)
+
 - C: (128 GB Samsung 850 SSD) - Write Transfer Rate 46,000 - 476,000 MB/s
 - D: (2x 512 GB Samsung 850 SSDs) - Write Transfer Rate 19,000 - 375,000 MB/s
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1F/CB6B49C5DD99A0FFD035DB8F5249FBB515ADA61F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/26/96ED6CE65F0489C8C213B8940D3B5770ED900C26.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/D7AB59E2302364312BED56884C383F61AF8DAA65.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/FFADDE8639C4BA41FAF000606C602A94F314069F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/8D10EEBC162AE5A80237D05AD03A3F76871A5138.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EC/A8773E48D2A8FA19DE30403151CED59D77DFB0EC.png)
+
+**TODO:**
 
 ### Summary
 
@@ -1085,5 +1077,3 @@ slmgr /ato
 | 2048               | 189,483 | 1,107,622          | 359,511 | 1,020,182      | 90    | -8     |
 | 4096               | 201,452 | 1,089,117          | 387,166 | 967,916        | 92    | -11    |
 | 8192               | 209,306 | 1,102,271          | 375,434 | 982,080        | 79    | -11    |
-
-**TODO:**
