@@ -310,7 +310,7 @@ $imagePath = `
     '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
     + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
 
-Set-VMDvdDrive -ComputerName BEAST -VMName EXT-WEB02A -Path $imagePath
+Set-VMDvdDrive -ComputerName FORGE -VMName EXT-WEB02A -Path $imagePath
 ```
 
 ---
@@ -393,7 +393,7 @@ cls
 ### # Create Data01, Log01, and Backup01 VHDs
 
 ```PowerShell
-$vmHost = "BEAST"
+$vmHost = "FORGE"
 $vmName = "EXT-WEB02A"
 
 $vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
@@ -520,7 +520,7 @@ cls
 $imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
     + "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
 
-Set-VMDvdDrive -ComputerName BEAST -VMName EXT-WEB02A -Path $imagePath
+Set-VMDvdDrive -ComputerName FORGE -VMName EXT-WEB02A -Path $imagePath
 ```
 
 ---
@@ -572,6 +572,14 @@ Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 > **Important**
 >
 > Wait for the installation to complete.
+
+#### Issue
+
+Error encountered during setup (presumably the ArpWrite bug)
+
+#### Workaround
+
+Ran the setup again (without changing anything) and it completed successfully.
 
 ```PowerShell
 cls
@@ -878,3 +886,102 @@ cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
+
+```PowerShell
+cls
+```
+
+## # Install Employee Portal
+
+## # Extend SecuritasConnect and Cloud Portal web applications
+
+### # Enable disk-based caching for the "intranet" websites
+
+```PowerShell
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + "cloud2-test.securitasinc.com443")
+
+Notepad web.config
+```
+
+---
+
+**Web.config**
+
+```XML
+    <BlobCache
+      location="D:\BlobCache\14"
+      path="\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
+      maxSize="2"
+      enabled="true" />
+```
+
+---
+
+```Console
+cls
+Pop-Location
+```
+
+### # Map intranet URLs to loopback address in Hosts file
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    127.0.0.1 client2-test.securitasinc.com, cloud2-test.securitasinc.com
+```
+
+### # Allow specific host names mapped to 127.0.0.1
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
+    client2-test.securitasinc.com, cloud2-test.securitasinc.com
+```
+
+## Install Web Deploy 3.6
+
+### Download Web Platform Installer
+
+### Install Web Deploy
+
+```PowerShell
+cls
+```
+
+## # Install .NET Framework 4.5
+
+### # Download .NET Framework 4.5.2 installer
+
+```PowerShell
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+Copy-Item `
+    ("\\ICEMAN\Products\Microsoft\.NET Framework 4.5\.NET Framework 4.5.2\" `
+        + "NDP452-KB2901907-x86-x64-AllOS-ENU.exe") `
+    C:\NotBackedUp\Temp
+```
+
+### # Install .NET Framework 4.5.2
+
+```PowerShell
+& C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
+```
+
+> **Important**
+>
+> When prompted, restart the computer to complete the installation.
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
+```
+
+### Install updates
+
+> **Important**
+>
+> When prompted, restart the computer to complete the process of installing the updates.

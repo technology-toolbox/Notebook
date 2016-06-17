@@ -3033,8 +3033,10 @@ cls
 ### # Enable disk-based caching for the Web application
 
 ```PowerShell
+$hostHeader = ([Uri] $env:SECURITAS_CLOUD_PORTAL_URL).Host
+
 Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
-    + $env:SECURITAS_CLOUD_PORTAL_URL + "80")
+    + $hostHeader + "80")
 
 copy web.config "web - Copy.config"
 
@@ -3314,20 +3316,11 @@ GO
 
 ---
 
-```PowerShell
-cls
-```
+### Resume Search Service Application
 
-### # Resume Search Service Application
+**TODO:** Add this step to the installation guide
 
-# **TODO:** Add this step to the installation guide
-
-```PowerShell
-Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
-    Resume-SPEnterpriseSearchServiceApplication
-```
-
-**TODO:**
+(skipped)
 
 ```PowerShell
 cls
@@ -3353,7 +3346,7 @@ Function ExtendWebAppToIntranetZone(
     Write-Host ("Extending Web application ($DefaultUrl) to Intranet zone" `
         + " ($IntranetUrl)...")
 
-    $hostHeader = $IntranetUrl.Substring("http://".Length)
+    $hostHeader = $IntranetUrl.Substring("https://".Length)
 
     $webAppName = "SharePoint - " + $hostHeader + "443"
 
@@ -3365,11 +3358,12 @@ Function ExtendWebAppToIntranetZone(
         -AuthenticationProvider $windowsAuthProvider `
         -HostHeader $hostHeader `
         -Port 443 `
+        -SecureSocketsLayer
 }
 
 ExtendWebAppToIntranetZone `
     -DefaultUrl "http://client-test.securitasinc.com" `
-    -IntranetUrl "https://client-test.securitasinc.com"
+    -IntranetUrl "https://client2-test.securitasinc.com"
 
 ExtendWebAppToIntranetZone `
     -DefaultUrl "http://cloud-test.securitasinc.com" `
@@ -3382,26 +3376,54 @@ ExtendWebAppToIntranetZone `
 
 **TODO:** Remove this section from the installation guide (since the bug has been fixed)
 
-### Enable disk-based caching for the "intranet" websites
-
-(skipped)
-
 ```PowerShell
 cls
+```
+
+### # Enable disk-based caching for the "intranet" websites
+
+```PowerShell
+$hostHeader = ([Uri] $env:SECURITAS_CLOUD_PORTAL_URL).Host.Replace(
+    "cloud-",
+    "cloud2-")
+
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + $hostHeader + "443")
+
+Notepad web.config
+```
+
+---
+
+**Web.config**
+
+```XML
+    <BlobCache
+      location="D:\BlobCache\14"
+      path="\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
+      maxSize="2"
+      enabled="true" />
+```
+
+---
+
+```Console
+cls
+Pop-Location
 ```
 
 ### # Map intranet URLs to loopback address in Hosts file
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
-    127.0.0.1 client2-local.securitasinc.com, cloud2-local.securitasinc.com
+    127.0.0.1 client2-test.securitasinc.com, cloud2-test.securitasinc.com
 ```
 
 ### # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
-    client2-local.securitasinc.com, cloud2-local.securitasinc.com
+    client2-test.securitasinc.com, cloud2-test.securitasinc.com
 ```
 
 ## Upgrade SecuritasConnect to "v3.0 Sprint-22" release
@@ -3415,8 +3437,6 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 ### Download Web Platform Installer
 
 ### Install Web Deploy
-
-**TODO:** This was already installed at this point. Find out why (and remove from install guide if possible)
 
 ```PowerShell
 cls
@@ -3446,8 +3466,6 @@ Copy-Item `
 ```PowerShell
 & C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
 ```
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/00EEF0B1702AA3D8D0B31ED97CBDB43D9E94D37E.png)
 
 > **Important**
 >
@@ -3497,7 +3515,7 @@ robocopy `
 ### # Add the Employee Portal URL to the "Local intranet" zone
 
 ```PowerShell
-[Uri] $url = [Uri] "http://employee-local.securitasinc.com"
+[Uri] $url = [Uri] "http://employee-test.securitasinc.com"
 
 [string[]] $domainParts = $url.Host -split '\.'
 
@@ -3521,6 +3539,7 @@ If ((Test-Path $registryKey) -eq $false)
 }
 
 Set-ItemProperty -Path $registryKey -Name http -Value 1
+Set-ItemProperty -Path $registryKey -Name https -Value 1
 ```
 
 ### Create Employee Portal SharePoint site
@@ -3539,20 +3558,36 @@ cls
 cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Deployment Files\Scripts'
 
 & '.\Configure Employee Portal Website.ps1' `
-    -SiteName employee-local.securitasinc.com `
+    -SiteName employee-test.securitasinc.com `
     -Confirm:$false `
     -Verbose
 ```
 
 #### Configure SSL bindings on Employee Portal website
 
-(skipped)
+#### REM Create Employee Portal website on other web servers in the farm
 
-#### Create Employee Portal website on other web servers in the farm
+```Console
+cd "C:\Program Files\IIS\Microsoft Web Deploy V3"
 
-(skipped)
+msdeploy.exe -verb:sync ^
+    -source:apppoolconfig="employee-test.securitasinc.com" ^
+    -dest:apppoolconfig="employee-test.securitasinc.com",computername=EXT-WEB02A
 
-```PowerShell
+msdeploy.exe -verb:sync ^
+    -source:apppoolconfig="employee-test.securitasinc.com" ^
+    -dest:apppoolconfig="employee-test.securitasinc.com",computername=EXT-WEB02B
+
+msdeploy.exe -verb:sync ^
+    -source:apphostconfig="employee-test.securitasinc.com" ^
+    -dest:apphostconfig="employee-test.securitasinc.com",computername=EXT-WEB02A
+
+msdeploy.exe -verb:sync ^
+    -source:apphostconfig="employee-test.securitasinc.com" ^
+    -dest:apphostconfig="employee-test.securitasinc.com",computername=EXT-WEB02B
+```
+
+```Console
 cls
 ```
 
@@ -3561,7 +3596,7 @@ cls
 #### # Deploy Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
-Push-Location C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Debug\_PublishedWebsites\Web_Package
+Push-Location C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Release\_PublishedWebsites\Web_Package
 
 attrib -r .\Web.SetParameters.xml
 
@@ -3577,13 +3612,13 @@ Notepad .\Web.SetParameters.xml
 <parameters>
   <setParameter
     name="IIS Web Application Name"
-    value="employee-local.securitasinc.com" />
+    value="employee-test.securitasinc.com" />
   <setParameter
     name="SecuritasPortal-Web.config Connection String"
-    value="Server=.; Database=SecuritasPortal; Integrated Security=true" />
+    value="Server=EXT-SQL02; Database=SecuritasPortal; Integrated Security=true" />
   <setParameter
     name="SecuritasPortalDbContext-Web.config Connection String"
-    value="Data Source=.; Initial Catalog=SecuritasPortal; Integrated Security=True; MultipleActiveResultSets=True;" />
+    value="Data Source=EXT-SQL02; Initial Catalog=SecuritasPortal; Integrated Security=True; MultipleActiveResultSets=True;" />
 </parameters>
 ```
 
@@ -3602,70 +3637,144 @@ Pop-Location
 #### # Configure application settings and web service URLs
 
 ```PowerShell
-Notepad C:\inetpub\wwwroot\employee-local.securitasinc.com\Web.config
+Notepad C:\inetpub\wwwroot\employee-test.securitasinc.com\Web.config
 ```
 
-Set the value of the **GoogleAnalytics.TrackingId** application setting to **UA-25949832-3**.
+- Set the value of the **GoogleAnalytics.TrackingId** application setting to **UA-25899478-4**.
+- Set the value of the **Environment** application setting to **Test**.
+- Set the value of the **SecuritasConnectUrl** application setting to **[https://client2-test.securitasinc.com](https://client2-test.securitasinc.com)**.
+- In the **`<errorMail>`** element, change the **smtpServer** attribute to **smtp-test.technologytoolbox.com**.
+- Replace all occurrences of **`<security mode="TransportCredentialOnly">`** with **`<security mode="Transport">`**.
+- Replace all occurrences of **[http://cloud2-local.securitasinc.com](http://cloud2-local.securitasinc.com)** with **[https://cloud2-test.securitasinc.com](https://cloud2-test.securitasinc.com)**.
 
-#### Deploy Employee Portal website content to other web servers in the farm
+```Console
+cls
+```
 
-(skipped)
+#### REM Deploy Employee Portal website content to other web servers in the farm
 
-```PowerShell
+```Console
+msdeploy.exe -verb:sync ^
+    -source:contentPath="C:\inetpub\wwwroot\employee-test.securitasinc.com" ^
+    -dest:contentPath="C:\inetpub\wwwroot\employee-test.securitasinc.com",computername=EXT-WEB02A
+
+msdeploy.exe -verb:sync ^
+    -source:contentPath="C:\inetpub\wwwroot\employee-test.securitasinc.com" ^
+    -dest:contentPath="C:\inetpub\wwwroot\employee-test.securitasinc.com",computername=EXT-WEB02B
+```
+
+```Console
 cls
 ```
 
 ### # Configure database logins and permissions for Employee Portal
 
-```PowerShell
-$sqlcmd = @"
+---
+
+**EXT-SQL02 - SQL Server Management Studio**
+
+```SQL
 USE [master]
 GO
-CREATE LOGIN [IIS APPPOOL\employee-local.securitasinc.com]
+CREATE LOGIN [EXTRANET\EXT-APP02A$]
+FROM WINDOWS
+WITH DEFAULT_DATABASE=[master]
+GO
+CREATE LOGIN [EXTRANET\EXT-WEB02A$]
+FROM WINDOWS
+WITH DEFAULT_DATABASE=[master]
+GO
+CREATE LOGIN [EXTRANET\EXT-WEB02B$]
 FROM WINDOWS
 WITH DEFAULT_DATABASE=[master]
 GO
 USE [SecuritasPortal]
 GO
-CREATE USER [IIS APPPOOL\employee-local.securitasinc.com]
-FOR LOGIN [IIS APPPOOL\employee-local.securitasinc.com]
+CREATE USER [EXTRANET\EXT-APP02A$]
+FOR LOGIN [EXTRANET\EXT-APP02A$]
 GO
-EXEC sp_addrolemember N'Employee_FullAccess', N'IIS APPPOOL\employee-local.securitasinc.com'
+EXEC sp_addrolemember N'Employee_FullAccess', N'EXTRANET\EXT-APP02A$'
 GO
-"@
-
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+CREATE USER [EXTRANET\EXT-WEB02A$]
+FOR LOGIN [EXTRANET\EXT-WEB02A$]
+GO
+EXEC sp_addrolemember N'Employee_FullAccess', N'EXTRANET\EXT-WEB02A$'
+GO
+CREATE USER [EXTRANET\EXT-WEB02B$]
+FOR LOGIN [EXTRANET\EXT-WEB02B$]
+GO
+EXEC sp_addrolemember N'Employee_FullAccess', N'EXTRANET\EXT-WEB02B$'
+GO
 ```
 
-#### Issue
+---
 
 ```PowerShell
-Invoke-Sqlcmd : Cannot alter the role 'Employee_FullAccess', because it does not exist or you do not have permission.
-At line:1 char:1
-+ Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidOperation: (:) [Invoke-Sqlcmd], SqlPowerShellSqlExecutionException
-    + FullyQualifiedErrorId : SqlError,Microsoft.SqlServer.Management.PowerShell.GetScriptCommand
+cls
 ```
 
-#### Workaround
+### # Grant PNKCAN and PNKUS users permissions on Cloud Portal site
 
----
+```PowerShell
+$ErrorActionPreference = "Stop"
 
-**SQL Server Management Studio**
-
-```SQL
-USE [SecuritasPortal]
-GO
-EXEC sp_addrolemember N'Employee_FullAccess', N'IIS APPPOOL\employee-local.securitasinc.com'
-GO
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
 ```
 
----
+\$supportedDomains = ("FABRIKAM", "TECHTOOLBOX")
 
-### Grant PNKCAN and PNKUS users permissions on Cloud Portal site
+```PowerShell
+$web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/"
 
-(skipped)
+$group = $web.Groups["Cloud Portal Visitors"]
+
+$supportedDomains |
+    ForEach-Object {
+        $claim = New-SPClaimsPrincipal `
+            -Identity "$_\Domain Users" `
+            -IdentityType WindowsSecurityGroupName
+
+        $user = $web.EnsureUser($claim.ToEncodedString())
+        $group.AddUser($user)
+    }
+
+$web.Dispose()
+
+$web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/sites/Employee-Portal"
+
+$group = $web.SiteGroups["Viewers"]
+
+$supportedDomains |
+    ForEach-Object {
+        $claim = New-SPClaimsPrincipal `
+            -Identity "$_\Domain Users" `
+            -IdentityType WindowsSecurityGroupName
+
+        $user = $web.EnsureUser($claim.ToEncodedString())
+        $group.AddUser($user)
+    }
+
+$web.Dispose()
+
+$web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/sites/Employee-Portal/Profiles"
+
+$list = $web.Lists["Profile Pictures"]
+
+$contributeRole = $web.RoleDefinitions['Contribute']
+
+$supportedDomains |
+    ForEach-Object {
+        $domainUsers = $web.EnsureUser($_ + '\Domain Users')
+
+        $assignment = New-Object Microsoft.SharePoint.SPRoleAssignment(
+            $domainUsers)
+
+        $assignment.RoleDefinitionBindings.Add($contributeRole)
+        $list.RoleAssignments.Add($assignment)
+    }
+
+$web.Dispose()
+```
 
 ### Replace absolute URLs in "User Sites" list
 
@@ -3685,14 +3794,27 @@ cls
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
-    127.0.0.1 employee-local.securitasinc.com
+    127.0.0.1 employee-test.securitasinc.com
 ```
 
 ### # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
-    employee-local.securitasinc.com
+    employee-test.securitasinc.com
+```
+
+```PowerShell
+cls
+```
+
+## # Resume Search Service Application
+
+# **TODO:** Add this step to the installation guide
+
+```PowerShell
+Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
+    Resume-SPEnterpriseSearchServiceApplication
 ```
 
 ```PowerShell
@@ -3721,6 +3843,6 @@ $serviceApp |
 
 > **Note**
 >
-> Expect the crawl to complete in approximately 5 minutes.
+> Expect the crawl to complete in approximately 4 hours 11 minutes.
 
 **TODO:**
