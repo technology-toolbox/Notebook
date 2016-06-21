@@ -855,7 +855,20 @@ Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://t
 
 ## Create protection group for Hyper-V
 
+Protection group name: **Hyper-V**\
+Retention range: **5 days**\
+Application recovery points:
+
+- Express Full Backup: **11:00 PM Everyday**
+
 ## Create protection group for critical files
+
+Protection group name: **Critical Files**\
+Retention range: **10 days**\
+Synchronization frequency: **Just before a recovery point**\
+File recovery points:
+
+- Recovery points for files: **7:00 AM, 12:00 PM, 5:00 PM Everyday**
 
 ```PowerShell
 cls
