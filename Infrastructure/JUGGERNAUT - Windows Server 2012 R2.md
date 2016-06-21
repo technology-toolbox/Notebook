@@ -1133,3 +1133,18 @@ Resize-VHD `
 $size = (Get-PartitionSupportedSize -DiskNumber 4 -PartitionNumber 1)
 Resize-Partition -DiskNumber 4 -PartitionNumber 1 -Size $size.SizeMax
 ```
+
+## Issue: Cannot connect to DPM Reporting from FOOBAR8
+
+### # Solution: Configure firewall rule for SQL Server Reporting Services
+
+```PowerShell
+New-NetFirewallRule `
+    -Name "SQL Server Reporting Services" `
+    -DisplayName "SQL Server Reporting Services" `
+    -Group 'Technology Toolbox (Custom)' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 80 `
+    -Action Allow
+```
