@@ -1148,3 +1148,9 @@ New-NetFirewallRule `
     -LocalPort 80 `
     -Action Allow
 ```
+
+## # Clean up WinSxS folder
+
+```PowerShell
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+```
