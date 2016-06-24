@@ -3832,4 +3832,55 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
+## Upgrade SecuritasConnect to build 4.0.663.0
+
+### # Copy SecuritasConnect build to SharePoint server
+
+```PowerShell
+net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+robocopy `
+    "\\ICEMAN\Builds\Securitas\ClientPortal\4.0.663.0" `
+    "C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.663.0" `
+    /E
+```
+
+```PowerShell
+cls
+```
+
+### # Remove old build
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+
+& '.\Deactivate Features.ps1' -Verbose
+
+& '.\Retract Solutions.ps1' -Verbose
+
+& '.\Delete Solutions.ps1' -Verbose
+```
+
+```PowerShell
+cls
+```
+
+### # Deploy new build
+
+```PowerShell
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.663.0\DeploymentFiles\Scripts
+
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+```
+
 **TODO:**
