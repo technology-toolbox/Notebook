@@ -937,4 +937,43 @@ to the user NT SERVICE\\SQLSERVERAGENT SID (S-1-5-80-344959196-2060754871-230248
 & 'C:\NotBackedUp\Public\Toolbox\SQL\Configure DCOM Permissions.ps1'
 ```
 
+## Extend Data01 volume (D:) from 90 GB to 100 GB
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+Resize-VHD `
+    -ComputerName FORGE `
+    -Path "D:\NotBackedUp\VMs\EXT-SQL02\Virtual Hard Disks\EXT-SQL02_Data01.vhdx" `
+    -SizeBytes 115GB
+```
+
+---
+
+```PowerShell
+Get-Partition -DriveLetter D
+
+
+   Disk Number: 1
+
+PartitionNumber  DriveLetter Offset                                        Size Type
+---------------  ----------- ------                                        ---- ----
+1                D           1048576                                     100 GB IFS
+
+
+$size = (Get-PartitionSupportedSize -DiskNumber 1 -PartitionNumber 1)
+Resize-Partition -DiskNumber 1 -PartitionNumber 1 -Size $size.SizeMax
+
+Get-Partition -DriveLetter D
+
+
+   Disk Number: 1
+
+PartitionNumber  DriveLetter Offset                                        Size Type
+---------------  ----------- ------                                        ---- ----
+1                D           1048576                                     115 GB IFS
+```
+
 **TODO:**
