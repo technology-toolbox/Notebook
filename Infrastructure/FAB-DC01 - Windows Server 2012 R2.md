@@ -351,3 +351,22 @@ Disable-NetFirewallRule -Group 'Remote Windows Update'
 ```
 
 ## Install Microsoft Message Analyzer 1.4
+
+## Resolve issue with MS16-072: Security update for Group Policy: June 14, 2016
+
+**MS16-072: Security update for Group Policy: June 14, 2016**\
+From <[https://support.microsoft.com/en-us/kb/3163622](https://support.microsoft.com/en-us/kb/3163622)>\
+\
+**MS16-072 - Known Issue - Use PowerShell to Check GPOs**\
+From <[https://blogs.technet.microsoft.com/poshchap/2016/06/16/ms16-072-known-issue-use-powershell-to-check-gpos/](https://blogs.technet.microsoft.com/poshchap/2016/06/16/ms16-072-known-issue-use-powershell-to-check-gpos/)>
+
+### Issue
+
+The following GPOs were detected by the PowerShell script:
+
+- **Folder Redirection Settings**
+- **Roaming User Profile Settings**
+
+### Solution
+
+Grant **Read** permission to **Domain Computers** on each of the GPOs listed above.
