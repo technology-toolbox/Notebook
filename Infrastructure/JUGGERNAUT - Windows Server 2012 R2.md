@@ -777,7 +777,7 @@ Repeat the previous step for **XAVIER2**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/EABDD9A4BA24BA197245967B561123E1976495B1.png)
 
-## Create protection group for SQL Server databases (TEST)
+## Create protection group - SQL Server Databases (TEST)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/7B/567D0E550D174A218C8DA8F7381DE572838AB27B.png)
 
@@ -823,7 +823,7 @@ GO
 **Protection agent jobs may fail for SQL Server 2012 databases**\
 Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://technet.microsoft.com/en-us/library/dn281948.aspx)>
 
-## Create protection group for SQL Server databases
+## Create protection group - SQL Server Databases
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/9BC59C1C391D5D48BCFA2EB51134E8E9BB6B5238.png)
 
@@ -853,15 +853,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://t
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/1A/F6C3A482DAE8C68EEAEA6F00E19449551506B71A.png)
 
-## Create protection group for Hyper-V
-
-Protection group name: **Hyper-V**\
-Retention range: **5 days**\
-Application recovery points:
-
-- Express Full Backup: **11:00 PM Everyday**
-
-## Create protection group for critical files
+## Create protection group - Critical Files
 
 Protection group name: **Critical Files**\
 Retention range: **10 days**\
@@ -869,6 +861,14 @@ Synchronization frequency: **Just before a recovery point**\
 File recovery points:
 
 - Recovery points for files: **7:00 AM, 12:00 PM, 5:00 PM Everyday**
+
+## Create protection group for Hyper-V
+
+Protection group name: **Hyper-V**\
+Retention range: **5 days**\
+Application recovery points:
+
+- Express Full Backup: **11:00 PM Everyday**
 
 ```PowerShell
 cls
@@ -1154,3 +1154,126 @@ New-NetFirewallRule `
 ```PowerShell
 Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
 ```
+
+## # Expand C: (OSDisk) drive
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5D/F8A57B596C9C1E8B5051E696CCFC997627D3CF5D.png)
+
+Screen clipping taken: 6/27/2016 1:31 PM
+
+---
+
+**FOOBAR8**
+
+### # Expand VHD
+
+```PowerShell
+$vmHost = "FORGE"
+$vmName = "JUGGERNAUT"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 34GB
+```
+
+#### Issue
+
+```PowerShell
+Resize-VHD : Failed to resize the virtual disk.
+The system failed to resize 'E:\NotBackedUp\VMs\JUGGERNAUT\Virtual Hard Disks\JUGGERNAUT.vhdx'.
+The operation is not supported.
+At line:1 char:1
++ Resize-VHD `
++ ~~~~~~~~~~~~
+    + CategoryInfo          : NotImplemented: (Microsoft.Hyper...l.VMStorageTask:VMStorageTask) [Resize-VHD], VirtualizationOperationFailedException
+    + FullyQualifiedErrorId : NotSupported,Microsoft.Vhd.PowerShell.ResizeVhdCommand
+```
+
+#### Workaround
+
+```PowerShell
+cls
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 34GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 1 -PartitionNumber 1)
+Resize-Partition -DiskNumber 1 -PartitionNumber 1 -Size $size.SizeMax
+```
+
+#### Issue
+
+```PowerShell
+Resize-Partition : Size Not Supported
+At line:1 char:1
++ Resize-Partition -DiskNumber 1 -PartitionNumber 1 -Size $size.SizeMax
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (StorageWMI:ROOT/Microsoft/.../MSFT_Partition) [Resize-Partition], CimException
+    + FullyQualifiedErrorId : StorageWMI 4097,Resize-Partition
+```
+
+#### Workaround
+
+Extend volume using **Disk Management** console.
+
+## Issue: Low disk space for backups
+
+---
+
+**FOOBAR8**
+
+### # Shutdown VM
+
+```PowerShell
+$vmName = "JUGGERNAUT"
+$oldVmHost = "FORGE"
+
+Stop-VM -ComputerName $oldVmHost -Name $vmName
+```
+
+### Remove pass-through disks
+
+```PowerShell
+cls
+```
+
+### # Move VM from FORGE to BEAST
+
+```PowerShell
+$newVmHost = "BEAST"
+
+Move-VM `
+    -ComputerName $oldVmHost `
+    -Name $vmName `
+    -DestinationHost $newVmHost `
+    -IncludeStorage `
+    -DestinationStoragePath E:\NotBackedUp\VMs\$vmHName
+```
+
+### Add pass-through disks
+
+```PowerShell
+cls
+```
+
+### # Start VM
+
+```PowerShell
+Start-VM -ComputerName $newVmHost -Name $vmName
+```
+
+---
