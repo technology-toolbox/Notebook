@@ -3883,4 +3883,68 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.663.0\DeploymentFiles\Script
 & '.\Activate Features.ps1' -Verbose
 ```
 
+### # Reset search index and perform full crawl
+
+```PowerShell
+$serviceApp = Get-SPEnterpriseSearchServiceApplication
+```
+
+##### # Reset search index
+
+```PowerShell
+$serviceApp.Reset($false, $false)
+```
+
+##### # Start full crawl
+
+```PowerShell
+$serviceApp |
+    Get-SPEnterpriseSearchCrawlContentSource |
+    % { $_.StartFullCrawl() }
+```
+
 **TODO:**
+
+```PowerShell
+cls
+```
+
+## # Install SharePoint Cumulative Update
+
+### # Copy patch to local disk
+
+```PowerShell
+$patch = "15.0.4833.1000 - SharePoint 2013 June 2016 CU"
+$patchPath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\$patch"
+
+robocopy  $patchPath C:\NotBackedUp\Temp
+```
+
+### # Install patch
+
+```PowerShell
+Push-Location C:\NotBackedUp\Temp
+
+.\Install.ps1
+
+Pop-Location
+```
+
+### # Remove patch files from local disk
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\Install.ps1
+Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
+Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3115174-fullfile-x64-glb.exe
+```
+
+### # Upgrade SharePoint
+
+```PowerShell
+PSCONFIG.EXE -cmd upgrade -inplace b2b -wait
+```
+
+> **Important**
+>
+> Restart PowerShell for the upgraded SharePoint snap-in to be loaded.
