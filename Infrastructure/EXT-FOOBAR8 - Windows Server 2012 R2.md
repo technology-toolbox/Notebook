@@ -9,6 +9,10 @@ Friday, June 3, 2016
 
 ## Deploy and configure the server infrastructure
 
+### Copy Windows Server installation files to a file share
+
+(skipped)
+
 ### Install Windows Server 2012 R2
 
 ---
@@ -39,8 +43,9 @@ New-VM `
 
 Set-VM `
     -ComputerName $vmHost `
-    -VMName $vmName `
-    -ProcessorCount 4
+    -Name $vmName `
+    -ProcessorCount 4 `
+    -StaticMemory
 
 Set-VMDvdDrive `
     -ComputerName $vmHost `
@@ -150,6 +155,10 @@ $interfaceAlias = "Production"
 }
 ```
 
+```PowerShell
+cls
+```
+
 #### # Configure static IPv4 address
 
 ```PowerShell
@@ -206,7 +215,9 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
-### # Join domain
+### # Join member server to domain
+
+#### # Add computer to domain
 
 ```PowerShell
 Add-Computer `
@@ -285,7 +296,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
 C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
-## Configure VM storage
+## DEV - Configure VM storage, processors, and memory
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
@@ -303,13 +314,14 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbos
 cls
 ```
 
-### # Create Data01, Log01, and Backup01 VHDs
+### # Create Data01, Log01, Temp01, and Backup01 VHDs
 
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-FOOBAR8"
+$vmPath = "E:\NotBackedUp\VMs\$vmName"
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
     + "_Data01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 150GB
@@ -319,7 +331,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
     + "_Log01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 25GB
@@ -329,7 +341,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
     + "_Temp01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 4GB
@@ -339,7 +351,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
     + "_Backup01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 400GB
@@ -441,7 +453,7 @@ cls
 $imagePath = "\\ICEMAN\Products\Microsoft\Visual Studio 2013" `
     + "\en_visual_studio_ultimate_2013_with_update_4_x86_dvd_5935075.iso"
 
-Set-VMDvdDrive -VMName EXT-FOOBAR8 -Path $imagePath
+Set-VMDvdDrive -ComputerName FORGE -VMName EXT-FOOBAR8 -Path $imagePath
 ```
 
 ---
@@ -938,7 +950,7 @@ Pasted from <[http://sharepoint.stackexchange.com/questions/68620/sharepoint-ser
 **How to enable Windows Installer logging**\
 From <[https://support.microsoft.com/en-us/kb/223300](https://support.microsoft.com/en-us/kb/223300)>
 
-"...steps you can use to gather a Windows Installer verbose log file.."\
+"...steps you can use to gather a Windows Installer verbose log file..."\
 Pasted from <[http://blogs.msdn.com/b/astebner/archive/2005/03/29/403575.aspx](http://blogs.msdn.com/b/astebner/archive/2005/03/29/403575.aspx)>
 
 ```PowerShell
@@ -1197,7 +1209,7 @@ robocopy `
 
 > **Important**
 >
-> Login as **EXTRANET\\setup-sharepoint**
+> Login as **EXTRANET\\setup-sharepoint-dev**
 
 ```PowerShell
 cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
@@ -1410,7 +1422,7 @@ cls
 #### # Copy MIIS encryption key file to SharePoint 2013 server
 
 ```PowerShell
-copy `
+Copy-Item `
     "\\ICEMAN\Archive\Clients\Securitas\Backups\miiskeys-1.bin" `
     "C:\Users\setup-sharepoint-dev\Desktop"
 ```
@@ -1588,7 +1600,11 @@ RESTORE DATABASE UserProfileService_Social
     STATS = 5
 
 GO
+```
 
+#### -- Add new SharePoint farm account to db_owner role in restored databases
+
+```SQL
 USE [UserProfileService_Profile]
 GO
 
@@ -1708,7 +1724,10 @@ cls
 # Import MIIS encryption key as EXTRANET\\s-sp-farm-dev:
 
 ```PowerShell
-$farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
+If ($farmCredential -eq $null)
+{
+    $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
+}
 ```
 
 > **Note**
@@ -1819,10 +1838,6 @@ cls
 ```PowerShell
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Suspend-SPEnterpriseSearchServiceApplication
-```
-
-```PowerShell
-cls
 ```
 
 #### # Configure people search in SharePoint
