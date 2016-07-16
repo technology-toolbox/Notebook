@@ -1,13 +1,17 @@
-﻿# EXT-FOOBAR4 (2016-01-01) - Windows Server 2012 R2 Standard
+﻿# EXT-FOOBAR4 - Windows Server 2012 R2 Standard
 
-Wednesday, June 1, 2016
-4:53 AM
+Friday, July 15, 2016
+8:38 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
 ## Deploy and configure the server infrastructure
+
+### Copy Windows Server installation files to a file share
+
+(skipped)
 
 ### Install Windows Server 2012 R2
 
@@ -74,7 +78,7 @@ net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
 ```
 
-### # Rename local Administrator account and set password
+#### # Rename local Administrator account and set password
 
 ```PowerShell
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -97,15 +101,15 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
-### Login as EXT-FOOBAR4\\foo
+#### Login as EXT-FOOBAR4\\foo
 
 ```PowerShell
 cls
 ```
 
-### # Configure network settings
+#### # Configure network settings
 
-#### # Rename network connections
+##### # Rename network connections
 
 ```PowerShell
 Get-NetAdapter -Physical | select Name, InterfaceDescription
@@ -115,13 +119,13 @@ Get-NetAdapter `
     Rename-NetAdapter -NewName "Production"
 ```
 
-#### # Configure "Production" network adapter
+##### # Configure "Production" network adapter
 
 ```PowerShell
 $interfaceAlias = "Production"
 ```
 
-#### # Disable DHCP
+###### # Disable DHCP
 
 ```PowerShell
 @("IPv4", "IPv6") | ForEach-Object {
@@ -147,7 +151,11 @@ $interfaceAlias = "Production"
 }
 ```
 
-#### # Configure static IPv4 address
+```PowerShell
+cls
+```
+
+###### # Configure static IPv4 address
 
 ```PowerShell
 $ipAddress = "192.168.10.218"
@@ -159,7 +167,7 @@ New-NetIPAddress `
     -DefaultGateway 192.168.10.1
 ```
 
-##### # Configure IPv4 DNS servers
+###### # Configure IPv4 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
@@ -167,7 +175,7 @@ Set-DNSClientServerAddress `
     -ServerAddresses 192.168.10.209,192.168.10.210
 ```
 
-#### # Configure static IPv6 address
+###### # Configure static IPv6 address
 
 ```PowerShell
 $ipAddress = "2601:282:4201:e500::218"
@@ -178,7 +186,7 @@ New-NetIPAddress `
     -PrefixLength 64
 ```
 
-##### # Configure IPv6 DNS servers
+###### # Configure IPv6 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
@@ -186,7 +194,7 @@ Set-DNSClientServerAddress `
     -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
 ```
 
-##### # Enable jumbo frames
+###### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
@@ -203,7 +211,9 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
-### # Join domain
+### # Join member server to domain
+
+#### # Add computer to domain
 
 ```PowerShell
 Add-Computer `
@@ -276,17 +286,17 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbos
 
 ## DEV - Configure VM storage, processors, and memory
 
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 50 GB       | 4K                   |              |
-| 1    | D:           | 3 GB        | 64K                  | Data01       |
-| 2    | L:           | 1 GB        | 64K                  | Log01        |
-| 3    | T:           | 1 GB        | 64K                  | Temp01       |
-| 4    | Z:           | 10 GB       | 4K                   | Backup01     |
+| Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
+| 0    | C:           | 50 GB       | Dynamic  | 4K                   | OSDisk       |
+| 1    | D:           | 3 GB        | Dynamic  | 64K                  | Data01       |
+| 2    | L:           | 1 GB        | Dynamic  | 64K                  | Log01        |
+| 3    | T:           | 1 GB        | Dynamic  | 64K                  | Temp01       |
+| 4    | Z:           | 10 GB       | Dynamic  | 4K                   | Backup01     |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE- Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -296,9 +306,9 @@ cls
 
 ```PowerShell
 $vmName = "EXT-FOOBAR4"
-$vmPath = "D:\NotBackedUp\VMs"
+$vmPath = "D:\NotBackedUp\VMs\$vmName"
 
-$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
     + "_Data01.vhdx"
 
 New-VHD -Path $vhdPath -SizeBytes 3GB
@@ -307,7 +317,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
     + "_Log01.vhdx"
 
 New-VHD -Path $vhdPath -SizeBytes 1GB
@@ -316,7 +326,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
     + "_Temp01.vhdx"
 
 New-VHD -Path $vhdPath -SizeBytes 1GB
@@ -325,7 +335,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
     + "_Backup01.vhdx"
 
 New-VHD -Path $vhdPath -SizeBytes 10GB
@@ -772,7 +782,7 @@ cls
 #### # Install Mozilla Firefox
 
 ```PowerShell
-& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 46.0.1.exe"
+& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 47.0.1.exe"
 ```
 
 ```PowerShell
@@ -783,6 +793,24 @@ cls
 
 ```PowerShell
 & "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup64.exe"
+```
+
+```PowerShell
+cls
+```
+
+#### # Install Adobe Reader
+
+```PowerShell
+& "\\ICEMAN\Products\Adobe\AdbeRdr830_en_US.msi"
+```
+
+> **Important**
+>
+> Wait for the software to be installed.
+
+```PowerShell
+& "\\ICEMAN\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
 ```
 
 ### Install additional service packs and updates
@@ -905,7 +933,7 @@ Pasted from <[http://sharepoint.stackexchange.com/questions/68620/sharepoint-ser
 **How to enable Windows Installer logging**\
 From <[https://support.microsoft.com/en-us/kb/223300](https://support.microsoft.com/en-us/kb/223300)>
 
-"...steps you can use to gather a Windows Installer verbose log file.."\
+"...steps you can use to gather a Windows Installer verbose log file..."\
 Pasted from <[http://blogs.msdn.com/b/astebner/archive/2005/03/29/403575.aspx](http://blogs.msdn.com/b/astebner/archive/2005/03/29/403575.aspx)>
 
 ```PowerShell
@@ -917,6 +945,10 @@ cls
 ```PowerShell
 & X:\setup.exe
 ```
+
+> **Important**
+>
+> Wait for the installation to complete.
 
 ```PowerShell
 cls
@@ -987,10 +1019,6 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-```PowerShell
-cls
-```
-
 ### # Install Cumulative Update for SharePoint Server 2013
 
 ```PowerShell
@@ -1002,7 +1030,7 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$patch = "15.0.4727.1000 - SharePoint 2013 June 2015 CU"
+$patch = "15.0.4833.1000 - SharePoint 2013 June 2016 CU"
 
 robocopy `
     "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\$patch" `
@@ -1039,7 +1067,7 @@ exit
 >
 > Restart PowerShell for environment variable change to take effect.
 
-### DEV - Install Visual Studio 2015 with Update 2
+### DEV - Install Visual Studio 2015 with Update 3
 
 ---
 
@@ -1049,11 +1077,11 @@ exit
 cls
 ```
 
-#### # Mount Visual Studio 2012 with Update 2 installation media
+#### # Mount Visual Studio 2015 with Update 3 installation media
 
 ```PowerShell
 $imagePath = "\\ICEMAN\Products\Microsoft\Visual Studio 2015" `
-    + "\en_visual_studio_enterprise_2015_with_update_2_x86_x64_dvd_8510142.iso"
+    + "\en_visual_studio_enterprise_2015_with_update_3_x86_x64_dvd_8923288.iso"
 
 Set-VMDvdDrive -VMName EXT-FOOBAR4 -Path $imagePath
 ```
@@ -1074,6 +1102,10 @@ In the Visual Studio installation wizard:
 6. Click **Next**.
 7. Review the list of selected features and click **Install**.
 
+> **Important**
+>
+> Wait for the installation to complete and restart the computer if prompted to do so.
+
 ### DEV - Enter product key for Visual Studio
 
 1. Start Visual Studio.
@@ -1089,6 +1121,18 @@ In the Visual Studio installation wizard:
 Add **[https://www.microsoft.com](https://www.microsoft.com)** to **Trusted sites** zone
 
 File: OfficeToolsForVS2015.3f.3fen.exe
+
+### DEV - Install update for SQL Server database projects in Visual Studio
+
+**Note: **Microsoft SQL Server Update for database tooling
+
+Add **[http://download.microsoft.com](http://download.microsoft.com)** to **Trusted sites** zone
+
+File: SSDTSetup.exe
+
+> **Important**
+>
+> Wait for the installation to complete and restart the computer if prompted to do so.
 
 ### TODO: DEV - Install Productivity Power Tools for Visual Studio
 
@@ -1155,8 +1199,8 @@ net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 robocopy `
-    "\\ICEMAN\Builds\Securitas\ClientPortal\4.0.661.0" `
-    "C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0" `
+    "\\ICEMAN\Builds\Securitas\ClientPortal\4.0.664.0" `
+    "C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0" `
     /E
 ```
 
@@ -1164,10 +1208,10 @@ robocopy `
 
 > **Important**
 >
-> Login as **EXTRANET\\setup-sharepoint**
+> Login as **EXTRANET\\setup-sharepoint-dev**
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Create Farm.ps1' -CentralAdminAuthProvider NTLM -Verbose
 ```
@@ -1176,10 +1220,6 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Script
 >
 > When prompted for the service account, specify **EXTRANET\\s-sp-farm-dev**.\
 > Expect the previous operation to complete in approximately 4 minutes.
-
-### Add Web servers to the farm
-
-(skipped)
 
 ### Add Web servers to the farm
 
@@ -1196,7 +1236,7 @@ cls
 ### # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Configure DCOM Permissions.ps1' -Verbose
 ```
@@ -1255,6 +1295,20 @@ New-SPWOPIBinding -ServerName wac.fabrikam.com
 
 Set-SPWOPIZone -zone "external-https"
 ```
+
+#### # Configure name resolution on Office Web Apps farm
+
+---
+
+**EXT-WAC02A**
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.218 `
+    -Hostnames EXT-FOOBAR4, client-local.securitasinc.com
+```
+
+---
 
 ## Backup SharePoint 2010 environment
 
@@ -1377,7 +1431,7 @@ cls
 ```PowerShell
 Copy-Item `
     "\\EXT-FOOBAR\C$\Users\jjameson\Desktop\miiskeys-1.bin" `
-    "C:\Users\setup-sharepoint-dev\Desktop\miiskeys-1.bin"
+    "C:\Users\setup-sharepoint-dev\Desktop"
 ```
 
 ## # Configure SharePoint services and service applications
@@ -1385,7 +1439,7 @@ Copy-Item `
 ### # Change the service account for the Distributed Cache
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Configure Distributed Cache.ps1' -Verbose
 ```
@@ -1636,7 +1690,7 @@ Start-Process $PSHOME\powershell.exe `
 **PowerShell -- running as EXTRANET\\s-sp-farm-dev**
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Configure User Profile Service.ps1' -Verbose
 ```
@@ -1697,8 +1751,17 @@ cls
 # Import MIIS encryption key as EXTRANET\\s-sp-farm-dev:
 
 ```PowerShell
-$farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
+If ($farmCredential -eq $null)
+{
+    $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
+}
+```
 
+> **Note**
+>
+> When prompted for the service account credentials, type the password for the SharePoint farm service account.
+
+```PowerShell
 Start-Process $PSHOME\powershell.exe `
     -Credential $farmCredential `
     -ArgumentList "-Command Start-Process cmd.exe -Verb Runas" `
@@ -1731,6 +1794,12 @@ exit
 ```
 
 ---
+
+#### Wait for User Profile Synchronization Service to finish starting
+
+> **Important**
+>
+> Wait until the status of **User Profile Synchronization Service** shows **Started** before proceeding.
 
 ```PowerShell
 cls
@@ -1776,6 +1845,13 @@ cls
 
 ```PowerShell
 cls
+```
+
+#### # Pause Search Service Application
+
+```PowerShell
+Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
+    Suspend-SPEnterpriseSearchServiceApplication
 ```
 
 #### # Configure people search in SharePoint
@@ -1855,19 +1931,7 @@ $contentSource = Get-SPEnterpriseSearchCrawlContentSource `
 
 Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
-    -ScheduleType Full `
-    -WeeklyCrawlSchedule `
-    -CrawlScheduleStartDateTime "12:00 AM" `
-    -CrawlScheduleDaysOfWeek Sunday `
-    -CrawlScheduleRunEveryInterval 1
-
-Set-SPEnterpriseSearchCrawlContentSource `
-    -Identity $contentSource `
-    -ScheduleType Incremental `
-    -DailyCrawlSchedule `
-    -CrawlScheduleStartDateTime "4:00 AM" `
-    -CrawlScheduleRepeatInterval 60 `
-    -CrawlScheduleRepeatDuration 1080
+    -EnableContinuousCrawls $true
 ```
 
 ##### # Configure crawl schedule for "User profiles"
@@ -1881,7 +1945,7 @@ Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
     -ScheduleType Full `
     -WeeklyCrawlSchedule `
-    -CrawlScheduleStartDateTime "12:00 AM" `
+    -CrawlScheduleStartDateTime "11:00 PM" `
     -CrawlScheduleDaysOfWeek Saturday `
     -CrawlScheduleRunEveryInterval 1
 
@@ -1889,7 +1953,7 @@ Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
     -ScheduleType Incremental `
     -DailyCrawlSchedule `
-    -CrawlScheduleStartDateTime "6:00 AM"
+    -CrawlScheduleStartDateTime "4:00 AM"
 ```
 
 #### # DEV - Configure performance level for the search crawl component
@@ -1926,14 +1990,10 @@ exit
 >
 > Restart PowerShell for environment variables to take effect.
 
-```PowerShell
-cls
-```
-
 ### # Add the URL for the SecuritasConnect Web site to the "Local intranet" zone
 
 ```PowerShell
-[Uri] $url = [Uri] "http://client-local.securitasinc.com"
+[Uri] $url = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
 
 [string[]] $domainParts = $url.Host -split '\.'
 
@@ -1965,6 +2025,10 @@ Set-ItemProperty -Path $registryKey -Name http -Value 1
 
 **FOOBAR8**
 
+```PowerShell
+cls
+```
+
 #### # Checkpoint VM
 
 ```PowerShell
@@ -1987,7 +2051,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ### # Create the Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -2032,11 +2096,21 @@ RESTORE DATABASE WSS_Content_SecuritasPortal
     MOVE 'WSS_Content_SecuritasPortal_log' TO @logFilePath,
     NOUNLOAD,
     STATS = 5
+
+GO
+
+ALTER DATABASE [WSS_Content_SecuritasPortal]
+SET RECOVERY SIMPLE WITH NO_WAIT
+GO
 "@
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
 
 Set-Location C:
+```
+
+```PowerShell
+cls
 ```
 
 ##### # Install SecuritasConnect v3.0 solution
@@ -2068,7 +2142,8 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
 ```PowerShell
 Test-SPContentDatabase `
     -Name WSS_Content_SecuritasPortal `
-    -WebApplication http://client-local.securitasinc.com
+    -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
+    Out-File C:\NotBackedUp\Temp\Test-SPContentDatabase-SecuritasConnect.txt
 ```
 
 ```PowerShell
@@ -2080,7 +2155,11 @@ cls
 ```PowerShell
 Mount-SPContentDatabase `
     -Name WSS_Content_SecuritasPortal `
-    -WebApplication http://client-local.securitasinc.com
+    -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL
+```
+
+```PowerShell
+cls
 ```
 
 ##### # Remove SecuritasConnect v3.0 solution
@@ -2100,7 +2179,7 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
 ### # Configure machine key for Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Configure Machine Key.ps1' -Verbose
 ```
@@ -2171,6 +2250,32 @@ Set-Acl -Path $regPath -AclObject $acl
 ```
 
 {TODO: bunch o' stuff skipped here}
+
+```PowerShell
+cls
+```
+
+### # Configure Web application policy for SharePoint administrators group
+
+```PowerShell
+$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+$adminsGroup = "EXTRANET\SharePoint Admins (DEV)"
+
+$principal = New-SPClaimsPrincipal -Identity $adminsGroup `
+    -IdentityType WindowsSecurityGroupName
+
+$claim = $principal.ToEncodedString()
+
+$webApp = Get-SPWebApplication $webAppUrl
+
+$policyRole = $webApp.PolicyRoles.GetSpecialRole(
+    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
+
+$policy = $webApp.Policies.Add($claim, $adminsGroup)
+$policy.PolicyRoleBindings.Add($policyRole)
+
+$webApp.Update()
+```
 
 ### Configure My Site settings in User Profile service application
 
@@ -2257,7 +2362,7 @@ Set-Location C:
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
@@ -2316,7 +2421,7 @@ Pop-Location
 ### # Upgrade core site collections
 
 ```PowerShell
-$webAppUrl = "http://client-local.securitasinc.com"
+$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
 
 @("/" , "/sites/cc", "/sites/my", "/sites/Search") |
     ForEach-Object {
@@ -2389,8 +2494,25 @@ cls
 #### # Hide the Search navigation item on the C&C landing site
 
 ```PowerShell
-Start-Process "http://client-local.securitasinc.com/sites/cc"
+Start-Process "$env:SECURITAS_CLIENT_PORTAL_URL/sites/cc"
 ```
+
+##### Issue
+
+Unable to hide the Search navigation item -- click **OK** but changes are not saved (no error reported).
+
+07/15/2016 13:15:32.08	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.08	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__GlobalNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.08	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.08	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__GlobalNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.08	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.08	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__GlobalNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.10	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__CurrentNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.10	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.10	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__CurrentNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.10	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.10	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__CurrentNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8\
+07/15/2016 13:15:32.10	w3wp.exe (0x19C8)	0x1638	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','1fb4b851-8b7a-466c-b5e9-25a2f8145e00;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	9122909d-6105-60fc-c36a-478fb3afe6e8
 
 ```PowerShell
 cls
@@ -2399,30 +2521,8 @@ cls
 #### # Configure the search settings for the C&C landing site
 
 ```PowerShell
-Start-Process "http://client-local.securitasinc.com/sites/cc"
+Start-Process "$env:SECURITAS_CLIENT_PORTAL_URL/sites/cc"
 ```
-
-### Configure Google Analytics on the SecuritasConnect Web application
-
-Tracking ID: **UA-25949832-4**
-
-{Begin skipped sections}
-
-## Create and configure C&C site collections
-
-### Create site collection for a Securitas client
-
-### Apply the "Securitas Client Site" template to the top-level site
-
-### Modify the site title, description, and logo
-
-### Update the client site home page
-
-### Create a blog site (optional)
-
-### Create a wiki site (optional)
-
-{End skipped sections}
 
 ```PowerShell
 cls
@@ -2431,7 +2531,9 @@ cls
 ### # Upgrade C&C site collections
 
 ```PowerShell
-$webAppUrl = "http://client-local.securitasinc.com"
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
+$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
 
 Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
     ? { $_.CompatibilityLevel -lt 15 } |
@@ -2460,34 +2562,87 @@ Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
             -Identity Securitas.Portal.Web_SecuritasDefaultMasterPage `
             -Url $siteUrl
     }
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 3 minutes.
+
+### Configure Google Analytics on the SecuritasConnect Web application
+
+Tracking ID: **UA-25949832-4**
+
+### Defragment SharePoint databases
+
+```PowerShell
+cls
+```
+
+### # Shrink log file for content database
+
+```PowerShell
+$sqlcmd = @"
+USE [WSS_Content_SecuritasPortal]
+GO
+DBCC SHRINKFILE (N'WSS_Content_SecuritasPortal_log' , 0, TRUNCATEONLY)
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Configure Web application policy for SharePoint administrators group
+### # Shrink content database
 
 ```PowerShell
-Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+$sqlcmd = @"
+USE [WSS_Content_SecuritasPortal]
+GO
+DBCC SHRINKFILE (N'WSS_Content_SecuritasPortal')
+"@
 
-$groupName = "EXTRANET\SharePoint Admins (DEV)"
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
-$principal = New-SPClaimsPrincipal -Identity $groupName `
-    -IdentityType WindowsSecurityGroupName
-
-$claim = $principal.ToEncodedString()
-
-$webApp = Get-SPWebApplication http://client-local.securitasinc.com
-
-$policyRole = $webApp.PolicyRoles.GetSpecialRole(
-    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
-
-$policy = $webApp.Policies.Add($claim, $groupName)
-$policy.PolicyRoleBindings.Add($policyRole)
-
-$webApp.Update()
+Set-Location C:
 ```
+
+### Change recovery model for content database to Full
+
+(skipped)
+
+### Configure SQL Server backups
+
+(skipped)
+
+### Resume Search Service Application and start a full crawl of all content sources
+
+(skipped)
+
+{Begin skipped sections}
+
+## Create and configure C&C site collections
+
+### Create site collection for a Securitas client
+
+### Apply the "Securitas Client Site" template to the top-level site
+
+### Modify the site title, description, and logo
+
+### Update the client site home page
+
+### Create a blog site (optional)
+
+### Create a wiki site (optional)
+
+{End skipped sections}
 
 ## Backup Cloud Portal in SharePoint 2010 environment
 
@@ -2549,7 +2704,7 @@ exit
 ### # Add the URL for the Cloud Portal Web site to the "Local intranet" zone
 
 ```PowerShell
-[Uri] $url = [Uri] "http://cloud-local.securitasinc.com"
+[Uri] $url = [Uri] $env:SECURITAS_CLOUD_PORTAL_URL
 
 [string[]] $domainParts = $url.Host -split '\.'
 
@@ -2587,15 +2742,15 @@ net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 robocopy `
-    "\\ICEMAN\Builds\Securitas\CloudPortal\2.0.114.0" `
-    "C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0" `
+    "\\ICEMAN\Builds\Securitas\CloudPortal\2.0.115.0" `
+    "C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.115.0" `
     /E
 ```
 
 ### # Create the Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.115.0\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -2612,12 +2767,20 @@ cls
 ### # Install third-party SharePoint solutions
 
 ```PowerShell
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
 robocopy `
     '\\ICEMAN\Products\Boost Solutions' `
     'C:\NotBackedUp\Temp\Boost Solutions' /E
 ```
 
-Extract zip and start **Setup.exe**
+Extract **ListCollectionSetup.zip** and start **Setup.exe**
 
 ```PowerShell
 cls
@@ -2656,6 +2819,14 @@ RESTORE DATABASE WSS_Content_CloudPortal
     MOVE 'WSS_Content_CloudPortal_log' TO @logFilePath,
     NOUNLOAD,
     STATS = 5
+
+GO
+
+-- TODO: Add the following step to the install guide
+
+ALTER DATABASE [WSS_Content_CloudPortal]
+SET RECOVERY SIMPLE WITH NO_WAIT
+GO
 "@
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
@@ -2692,7 +2863,8 @@ cd C:\NotBackedUp\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
 ```PowerShell
 Test-SPContentDatabase `
     -Name WSS_Content_CloudPortal `
-    -WebApplication http://cloud-local.securitasinc.com
+    -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL |
+    Out-File C:\NotBackedUp\Temp\Test-SPContentDatabase-CloudPortal.txt
 ```
 
 ```PowerShell
@@ -2704,7 +2876,11 @@ cls
 ```PowerShell
 Mount-SPContentDatabase `
     -Name WSS_Content_CloudPortal `
-    -WebApplication http://cloud-local.securitasinc.com
+    -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL
+```
+
+```PowerShell
+cls
 ```
 
 ##### # Remove Cloud Portal v1.0 solution
@@ -2724,7 +2900,7 @@ cd C:\NotBackedUp\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
 ### # Configure object cache user accounts
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.115.0\DeploymentFiles\Scripts
 
 & '.\Configure Object Cache User Accounts.ps1' -Verbose
 
@@ -2819,7 +2995,7 @@ Set-Location C:
 ### # Upgrade main site collection
 
 ```PowerShell
-Upgrade-SPSite http://cloud-local.securitasinc.com/ -VersionUpgrade -Unthrottled
+Upgrade-SPSite $env:SECURITAS_CLOUD_PORTAL_URL -VersionUpgrade -Unthrottled
 ```
 
 ```PowerShell
@@ -2854,13 +3030,57 @@ cls
 cls
 ```
 
+## # Configure Web application policy for SharePoint administrators group
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$groupName = "EXTRANET\SharePoint Admins (DEV)"
+
+$principal = New-SPClaimsPrincipal -Identity $groupName `
+    -IdentityType WindowsSecurityGroupName
+
+$claim = $principal.ToEncodedString()
+
+$webApp = Get-SPWebApplication $env:SECURITAS_CLOUD_PORTAL_URL
+
+$policyRole = $webApp.PolicyRoles.GetSpecialRole(
+    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
+
+$policy = $webApp.Policies.Add($claim, $groupName)
+$policy.PolicyRoleBindings.Add($policyRole)
+
+$webApp.Update()
+```
+
 ### # Configure search settings for the Cloud Portal
 
 #### # Hide the Search navigation item on the Cloud Portal top-level site
 
 ```PowerShell
-Start-Process "http://cloud-local.securitasinc.com"
+Start-Process $env:SECURITAS_CLOUD_PORTAL_URL
 ```
+
+##### Issue
+
+Unable to hide the Search navigation item -- click **OK** but changes are not saved (no error reported).
+
+07/15/2016 14:13:44.31	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.31	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__GlobalNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.32	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.32	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__GlobalNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.34	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.34	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__GlobalNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.35	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.35	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__GlobalNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.40	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__CurrentNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.40	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.42	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__CurrentNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.42	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.45	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__CurrentNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.45	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.46	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__CurrentNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb\
+07/15/2016 14:13:44.46	w3wp.exe (0x1EB0)	0x1178	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','9e19998e-0d20-46d5-98af-6c6dd6c92810;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	e525909d-d192-60fc-c36a-4345422289fb
 
 ```PowerShell
 cls
@@ -2869,7 +3089,7 @@ cls
 #### # Configure the search settings for the Cloud Portal top-level site
 
 ```PowerShell
-Start-Process "http://cloud-local.securitasinc.com"
+Start-Process $env:SECURITAS_CLOUD_PORTAL_URL
 ```
 
 ### Configure redirect for single-site users
@@ -2908,28 +3128,95 @@ Tracking ID: **UA-25949832-5**
 cls
 ```
 
-## # Configure Web application policy for SharePoint administrators group
+### # Upgrade Cloud Portal Sites
 
 ```PowerShell
-Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
-$groupName = "EXTRANET\SharePoint Admins (DEV)"
+Get-SPSite -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL -Limit ALL |
+    ? { $_.CompatibilityLevel -lt 15 } |
+    % {
+        $siteUrl = $_.Url
 
-$principal = New-SPClaimsPrincipal -Identity $groupName `
-    -IdentityType WindowsSecurityGroupName
+        Write-Host "Upgrading site ($siteUrl)..."
 
-$claim = $principal.ToEncodedString()
+        Get-SPWeb -Site $siteUrl |
+            % {
+                $webUrl = $_.Url
 
-$webApp = Get-SPWebApplication http://cloud-local.securitasinc.com
+                Disable-SPFeature `
+                    -Identity Securitas.CloudPortal.Web_SecuritasDefaultMasterPage `
+                    -Url $webUrl `
+                    -Confirm:$false
+            }
 
-$policyRole = $webApp.PolicyRoles.GetSpecialRole(
-    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
+        Disable-SPFeature `
+            -Identity Securitas.CloudPortal.Web_PublishingLayouts `
+            -Url $siteUrl `
+            -Confirm:$false
 
-$policy = $webApp.Policies.Add($claim, $groupName)
-$policy.PolicyRoleBindings.Add($policyRole)
+        Upgrade-SPSite $siteUrl -VersionUpgrade -Unthrottled
 
-$webApp.Update()
+        Enable-SPFeature `
+            -Identity Securitas.CloudPortal.Web_PublishingLayouts `
+            -Url $siteUrl
+
+        Get-SPWeb -Site $siteUrl |
+            % {
+                $webUrl = $_.Url
+
+                Enable-SPFeature `
+                    -Identity Securitas.CloudPortal.Web_CloudPortalBranding `
+                    -Url $webUrl
+            }
+    }
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 ```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 2 minutes.
+
+### Change recovery model of content database from Simple to Full
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Resume Search Service Application
+
+# **TODO:** Add this step to the installation guide
+
+```PowerShell
+$serviceApp = Get-SPEnterpriseSearchServiceApplication `
+    "Search Service Application"
+
+Resume-SPEnterpriseSearchServiceApplication $serviceApp
+```
+
+### # Start full crawl of user profiles
+
+```PowerShell
+$contentSource = Get-SPEnterpriseSearchCrawlContentSource `
+    -SearchApplication $serviceApp `
+    -Identity "User profiles"
+
+$contentSource.StartFullCrawl()
+```
+
+> **Note**
+>
+> Expect the crawl to complete in approximately 5 minutes.
+
+| **Started**       | **Completed**     | **Duration** | **Successes** | **Warnings** | **Errors** | **Crawl Rate (dps)** | **Repository Latency (ms)** |
+| ----------------- | ----------------- | ------------ | ------------- | ------------ | ---------- | -------------------- | --------------------------- |
+| 7/15/2016 2:22 PM | 7/15/2016 2:27 PM | 00:05:00     | 2,234         | 140          | 6          | [7.9](7.9)           | [325](325)                  |
+
+From <[http://ext-foobar4:22812/_admin/search/CrawlLogCrawls.aspx?appid={756661dc-8a93-4740-9fd0-2b971ae0580d}&csid=1](http://ext-foobar4:22812/_admin/search/CrawlLogCrawls.aspx?appid={756661dc-8a93-4740-9fd0-2b971ae0580d}&csid=1)>
 
 ```PowerShell
 cls
@@ -3301,35 +3588,17 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 cls
 ```
 
-## # Reset search index and perform full crawl
+## # Checkpoint VM
+
+### # Delete C:\\Windows\\SoftwareDistribution folder (2.24 GB)
 
 ```PowerShell
-$serviceApp = Get-SPEnterpriseSearchServiceApplication
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
 
-### # Reset search index
-
-```PowerShell
-$serviceApp.Reset($false, $false)
-```
-
-### # Start full crawl
-
-```PowerShell
-$serviceApp |
-    Get-SPEnterpriseSearchCrawlContentSource |
-    % { $_.StartFullCrawl() }
-```
-
-> **Note**
->
-> Expect the crawl to complete in approximately 5 minutes.
-
-```PowerShell
-cls
-```
-
-## # Prepare for snapshot
+### # Prepare for snapshot
 
 ```PowerShell
 & 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Prepare for Snapshot.cmd'
@@ -3343,12 +3612,18 @@ cls
 cls
 ```
 
+### # Remove media from DVD drive
+
+```PowerShell
+Set-VMDvdDrive -ComputerName WOLVERINE -VMName EXT-FOOBAR4 -Path $null
+```
+
 ### # Checkpoint VM
 
 ```PowerShell
 $vmHost = "WOLVERINE"
 $vmName = "EXT-FOOBAR4"
-$snapshotName = "Baseline Client Portal 4.0.661.0 / Cloud Portal 2.0.114.0 / Employee Portal 1.0.28.0"
+$snapshotName = "Baseline Client Portal 4.0.664.0 / Cloud Portal 2.0.115.0 / Employee Portal 1.0.28.0"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
 
@@ -3363,36 +3638,6 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ---
 
 **TODO:**
-
-```PowerShell
-cls
-```
-
-## # Pause Search Service Application
-
-```PowerShell
-Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
-    Suspend-SPEnterpriseSearchServiceApplication
-```
-
-```PowerShell
-cls
-```
-
-### # Delete C:\\Windows\\SoftwareDistribution folder (2.79 GB)
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-
-Restart-Computer
-```
-
-### Check for updates using Windows Update (after removing patches folder)
-
-- **Most recent check for updates: Never -> Most recent check for updates: Today at 7:08 PM**
-- C:\\Windows\\SoftwareDistribution folder is now 55 MB
 
 ```PowerShell
 cls
