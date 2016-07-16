@@ -520,7 +520,7 @@ Set-VMDvdDrive -ComputerName BEAST -VMName EXT-RRAS1 -Path $null
 $interfaceAlias = "Production"
 ```
 
-#### # Rename network connection
+### # Rename network connection
 
 ```PowerShell
 Get-NetAdapter -Physical | select Name, InterfaceDescription
@@ -530,7 +530,7 @@ Get-NetAdapter `
     Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-#### # Disable DHCP
+### # Disable DHCP
 
 ```PowerShell
 @("IPv4", "IPv6") | ForEach-Object {
@@ -556,7 +556,7 @@ Get-NetAdapter `
 }
 ```
 
-## # Update static IPv6 address
+### # Update static IPv6 address
 
 ```PowerShell
 $oldIpAddress = "2601:1:8200:6000::219"
@@ -565,7 +565,15 @@ $newIpAddress = "2601:282:4201:e500::219"
 Remove-NetIPAddress -IPAddress $oldIpAddress -Confirm:$false
 
 New-NetIPAddress `
-    -InterfaceAlias "LAN 1 - 192.168.10.x" `
+    -InterfaceAlias $interfaceAlias `
     -IPAddress $newIpAddress `
     -PrefixLength 64
+```
+
+### # Update IPv6 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
 ```
