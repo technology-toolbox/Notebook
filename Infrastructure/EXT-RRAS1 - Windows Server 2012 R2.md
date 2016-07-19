@@ -577,3 +577,120 @@ Set-DNSClientServerAddress `
     -InterfaceAlias $interfaceAlias `
     -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
 ```
+
+## # Recreate S2S VPN interface
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/368D1BF856D544BAB764530D68B45E246B4CA93F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5A/3C1FF964225D17A2B3251A5A64DBCEC7A8D3AB5A.png)
+
+```PowerShell
+Remove-VpnS2SInterface -Name "Azure VPN"
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FA/50368F1FB51E070F76778E0532373B330E90ECFA.png)
+
+```PowerShell
+Add-VpnS2SInterface `
+    -Name "Azure VPN" `
+    -Destination 40.112.208.55 `
+    -Protocol IKEv2 `
+    -AuthenticationMethod PSKOnly `
+    -ResponderAuthenticationMethod PSKOnly `
+    -NumberOfTries 3 `
+    -IPv4Subnet @("10.71.0.0/16:100") `
+    -SharedSecret {shared secret}
+
+Set-VpnServerIPsecConfiguration -EncryptionType MaximumEncryption
+
+Set-VpnS2SInterface -Name "Azure VPN" -InitiateConfigPayload $false -Force
+```
+
+### # Set S2S VPN connection to be persistent by editing the router.pbk file
+
+```PowerShell
+Function Invoke-WindowsApi(
+    [string] $dllName,
+    [Type] $returnType,
+    [string] $methodName,
+    [Type[]] $parameterTypes,
+    [Object[]] $parameters
+    )
+{
+  ## Begin to build the dynamic assembly
+  $domain = [AppDomain]::CurrentDomain
+  $name = New-Object Reflection.AssemblyName 'PInvokeAssembly'
+  $assembly = $domain.DefineDynamicAssembly($name, 'Run')
+  $module = $assembly.DefineDynamicModule('PInvokeModule')
+  $type = $module.DefineType('PInvokeType', "Public,BeforeFieldInit")
+
+  $inputParameters = @()
+
+  for($counter = 1; $counter -le $parameterTypes.Length; $counter++)
+  {
+     $inputParameters += $parameters[$counter - 1]
+  }
+
+  $method = $type.DefineMethod($methodName, 'Public,HideBySig,Static,PinvokeImpl',$returnType, $parameterTypes)
+
+  ## Apply the P/Invoke constructor
+  $ctor = [Runtime.InteropServices.DllImportAttribute].GetConstructor([string])
+  $attr = New-Object Reflection.Emit.CustomAttributeBuilder $ctor, $dllName
+  $method.SetCustomAttribute($attr)
+
+  ## Create the temporary type, and invoke the method.
+  $realType = $type.CreateType()
+
+  $ret = $realType.InvokeMember($methodName, 'Public,Static,InvokeMethod', $null, $null, $inputParameters)
+
+  return $ret
+}
+
+Function Set-PrivateProfileString(
+    $file,
+    $category,
+    $key,
+    $value)
+{
+  ## Prepare the parameter types and parameter values for the Invoke-WindowsApi script
+  $parameterTypes = [string], [string], [string], [string]
+  $parameters = [string] $category, [string] $key, [string] $value, [string] $file
+
+  ## Invoke the API
+  [void] (Invoke-WindowsApi "kernel32.dll" ([UInt32]) "WritePrivateProfileString" $parameterTypes $parameters)
+}
+
+Set-PrivateProfileString `
+    $env:windir\System32\ras\router.pbk `
+    "Azure VPN" `
+    "IdleDisconnectSeconds" `
+    "0"
+
+Set-PrivateProfileString `
+    $env:windir\System32\ras\router.pbk `
+    "Azure VPN" `
+    "RedialOnLinkFailure" `
+    "1"
+```
+
+```PowerShell
+cls
+```
+
+### # Restart the RRAS service
+
+```PowerShell
+Restart-Service RemoteAccess
+```
+
+```PowerShell
+cls
+```
+
+### # Connect Azure VPN
+
+```PowerShell
+Connect-VpnS2SInterface -Name "Azure VPN"
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/BFCE3E53A37ECD5B0EAB68FE5C1100CDF93774F5.png)
