@@ -716,10 +716,35 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$patch = "15.0.4727.1000 - SharePoint 2013 June 2015 CU"
+$patch = "15.0.4833.1000 - SharePoint 2013 June 2016 CU"
 
 robocopy `
     "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\$patch" `
+    "C:\NotBackedUp\Temp\$patch" `
+    /E
+
+& "C:\NotBackedUp\Temp\$patch\*.exe"
+```
+
+> **Important**
+>
+> Wait for the patch to be installed.
+
+```PowerShell
+Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
+```
+
+```PowerShell
+cls
+```
+
+### # Install Cumulative Update 7 for Microsoft AppFabric 1.1
+
+```PowerShell
+$patch = "Cumulative Update 7"
+
+robocopy `
+    "\\ICEMAN\Products\Microsoft\AppFabric 1.1\Patches\$patch" `
     "C:\NotBackedUp\Temp\$patch" `
     /E
 
@@ -761,8 +786,8 @@ net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 robocopy `
-    "\\ICEMAN\Builds\Securitas\ClientPortal\4.0.661.0" `
-    "C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0" `
+    "\\ICEMAN\Builds\Securitas\ClientPortal\4.0.664.0" `
+    "C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0" `
     /E
 ```
 
@@ -829,7 +854,7 @@ GO
 ### # Create and configure the farm
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Create Farm.ps1' -CentralAdminAuthProvider NTLM -DatabaseServer EXT-SQL02 -Verbose
 ```
@@ -852,7 +877,7 @@ cls
 ### # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Configure DCOM Permissions.ps1' -Verbose
 ```
@@ -861,7 +886,7 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Script
 
 ```Text
 Failed to enable privilege (SeTakeOwnershipPrivilege)
-At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts\Configure DCOM Permissions.ps1:127
+At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts\Configure DCOM Permissions.ps1:127
 char:13
 +             Throw "Failed to enable privilege (SeTakeOwnershipPrivilege)"
 +             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -965,31 +990,7 @@ robocopy `
     \\iceman.corp.technologytoolbox.com\Archive\Clients\Securitas\Backups `
     $destination `
     *.bak
-
-$zipFile = `
-    "\\iceman.corp.technologytoolbox.com\Archive\Clients\Securitas\Backups\" `
-    + "WSS_Content_CloudPortal_backup_2016_05_15_010003_8391000.zip"
-
-Add-Type -assembly "System.Io.Compression.FileSystem"
-
-[Io.Compression.ZipFile]::ExtractToDirectory($zipFile, $destination)
 ```
-
-##### Issue
-
-```Text
-Exception calling "ExtractToDirectory" with "2" argument(s): "The archive entry was compressed using an unsupported
-compression method."
-At line:1 char:1
-+ [Io.Compression.ZipFile]::ExtractToDirectory($zipFile, $destination)
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
-    + FullyQualifiedErrorId : InvalidDataException
-```
-
-##### Workaround
-
-Unzip the files using Windows Explorer.
 
 ```PowerShell
 cls
@@ -999,31 +1000,31 @@ cls
 
 ```PowerShell
 ren `
-    ($destination + '\Profile DB New_backup_2016_05_15_010003_7610970.bak') `
+    ($destination + '\Profile DB New_backup_2016_07_17_010009_3351668.bak') `
     'Profile DB New.bak'
 
 ren `
-    ($destination + '\SecuritasPortal_backup_2016_05_15_010003_7298958.bak') `
+    ($destination + '\SecuritasPortal_backup_2016_07_17_010009_3039614.bak') `
     'SecuritasPortal.bak'
 
 ren `
-    ($destination + '\Securitas_CP_MMS_backup_2016_05_15_010003_7454964.bak') `
+    ($destination + '\Securitas_CP_MMS_backup_2016_07_17_010009_3195641.bak') `
     'Securitas_CP_MMS.bak'
 
 ren `
-    ($destination + '\Social DB New_backup_2016_05_15_010003_8078988.bak') `
+    ($destination + '\Social DB New_backup_2016_07_17_010009_3663722.bak') `
     'Social DB New.bak'
 
 ren `
-    ($destination + '\Sync DB New_backup_2016_05_15_010003_7610970.bak') `
+    ($destination + '\Sync DB New_backup_2016_07_17_010009_3351668.bak') `
     'Sync DB New.bak'
 
 ren `
-    ($destination + '\WSS_Content_CloudPortal_backup_2016_05_15_010003_8391000.bak') `
+    ($destination + '\WSS_Content_CloudPortal_backup_2016_07_17_010009_3819749.bak') `
     'WSS_Content_CloudPortal.bak'
 
 ren `
-    ($destination + '\WSS_Content_SecuritasPortal_backup_2016_05_15_010003_7298958.bak') `
+    ($destination + '\WSS_Content_SecuritasPortal_backup_2016_07_17_010009_3039614.bak') `
     'WSS_Content_SecuritasPortal.bak'
 ```
 
@@ -1067,7 +1068,7 @@ copy `
 ### # Change the service account for the Distributed Cache
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Configure Distributed Cache.ps1' -Verbose
 ```
@@ -1324,7 +1325,7 @@ Start-Process $PSHOME\powershell.exe `
 **PowerShell -- running as EXTRANET\\s-sp-farm**
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Configure User Profile Service.ps1' -Verbose
 ```
@@ -1498,7 +1499,7 @@ Are you sure you want to perform this action?
 Performing the operation "Configure SharePoint Search.ps1" on target "EXT-APP02A".
 [Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "Y"):
 ForEach-Object : Exception calling "Deploy" with "0" argument(s): "An object of the type Microsoft.SharePoint.Administration.SPWindowsServiceCredentialDeploymentJobDefinition named "windows-service-credentials-SPSearchHostController" already exists under the parent Microsoft.Office.Server.Search.Administration.SearchRuntimeService named "SPSearchHostController".  Rename your object or delete the existing object."
-At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts\Configure SharePoint Search.ps1:337 char:13
+At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts\Configure SharePoint Search.ps1:337 char:13
 +             ForEach-Object {
 +             ~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (:) [ForEach-Object], MethodInvocationException
@@ -1689,7 +1690,7 @@ Set-ItemProperty -Path $registryKey -Name http -Value 1
 ### # Create the Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -1861,7 +1862,7 @@ cls
 ### # Configure machine key for Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Configure Machine Key.ps1' -Verbose
 ```
@@ -2117,7 +2118,7 @@ cls
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
@@ -2199,7 +2200,7 @@ cls
 & '.\Add Solutions.ps1' -Verbose
 
 Unable to find solution file (Securitas.Portal.Web.wsp)
-At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts\Add Solutions.ps1:109 char:13
+At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts\Add Solutions.ps1:109 char:13
 +             Throw "Unable to find solution file ($filename)"
 +             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : OperationStopped: (Unable to find ...Portal.Web.wsp):String) [], RuntimeException
@@ -2275,7 +2276,7 @@ LastOperationDetails : EXT-APP02A : http://client-test.securitasinc.com/ : The s
 
 ```PowerShell
 Enable-SPFeature : <nativehr>0x80070005</nativehr><nativestack></nativestack>Access denied.
-At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts\Activate Features.ps1:115 char:9
+At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts\Activate Features.ps1:115 char:9
 +         Enable-SPFeature `
 +         ~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : InvalidData: (Microsoft.Share...etEnableFeature:SPCmdletEnableFeature) [Enable-SPFeature], UnauthorizedAccessException

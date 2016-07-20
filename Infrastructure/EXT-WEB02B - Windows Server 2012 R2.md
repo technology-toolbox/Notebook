@@ -592,10 +592,35 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$patch = "15.0.4727.1000 - SharePoint 2013 June 2015 CU"
+$patch = "15.0.4833.1000 - SharePoint 2013 June 2016 CU"
 
 robocopy `
     "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\$patch" `
+    "C:\NotBackedUp\Temp\$patch" `
+    /E
+
+& "C:\NotBackedUp\Temp\$patch\*.exe"
+```
+
+> **Important**
+>
+> Wait for the patch to be installed.
+
+```PowerShell
+Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
+```
+
+```PowerShell
+cls
+```
+
+### # Install Cumulative Update 7 for Microsoft AppFabric 1.1
+
+```PowerShell
+$patch = "Cumulative Update 7"
+
+robocopy `
+    "\\ICEMAN\Products\Microsoft\AppFabric 1.1\Patches\$patch" `
     "C:\NotBackedUp\Temp\$patch" `
     /E
 
@@ -631,10 +656,10 @@ exit
 
 ```PowerShell
 robocopy `
-    \\EXT-APP02A\C$\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles `
-    C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles /E
+    \\EXT-APP02A\C$\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles `
+    C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles /E
 
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Configure DCOM Permissions.ps1' -Verbose
 ```
@@ -778,7 +803,7 @@ cls
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.661.0\DeploymentFiles\Scripts
+cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
