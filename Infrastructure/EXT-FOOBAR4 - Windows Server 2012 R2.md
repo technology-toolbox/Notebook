@@ -1,4 +1,4 @@
-﻿# EXT-FOOBAR4 - Windows Server 2012 R2 Standard
+﻿# EXT-FOOBAR4 (2016-07-15) - Windows Server 2012 R2 Standard
 
 Friday, July 15, 2016
 8:38 AM
@@ -1815,7 +1815,7 @@ Restart-Service SPTimerV4
 
 #### Configure synchronization connections and import data from Active Directory
 
-Verify the following connections are already configured (since database was restored from SharePoint 2010 environment).
+Verify the following connections are already configured (since the database was restored from a SharePoint 2010 environment).
 
 | **Connection Name** | **Forest Name**            | **Account Name**        |
 | ------------------- | -------------------------- | ----------------------- |
@@ -1856,16 +1856,12 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 #### # Configure people search in SharePoint
 
-```PowerShell
-$mySiteHostLocation = "http://client-local.securitasinc.com/sites/my"
-
-$searchApp = Get-SPEnterpriseSearchServiceApplication `
-    -Identity "Search Service Application"
-```
-
 ##### # Grant permissions to default content access account
 
 ```PowerShell
+$searchApp = Get-SPEnterpriseSearchServiceApplication `
+    -Identity "Search Service Application"
+
 $content = New-Object `
     -TypeName Microsoft.Office.Server.Search.Administration.Content `
     -ArgumentList $searchApp
@@ -1895,6 +1891,8 @@ Set-SPServiceApplicationSecurity `
 ##### # Create content source for crawling user profiles
 
 ```PowerShell
+$mySiteHostLocation = "http://client-local.securitasinc.com/sites/my"
+
 $mySiteHostUri = [System.Uri] $mySiteHostLocation
 
 If ($mySiteHostUri.Scheme -eq "http")
@@ -1910,6 +1908,9 @@ Else
     Throw "The specified scheme ($($mySiteHostUri.Scheme)) is not supported."
 }
 
+$searchApp = Get-SPEnterpriseSearchServiceApplication `
+    -Identity "Search Service Application"
+
 New-SPEnterpriseSearchCrawlContentSource `
     -SearchApplication $searchapp `
     -Type SharePoint `
@@ -1919,7 +1920,7 @@ New-SPEnterpriseSearchCrawlContentSource `
 
 #### # Configure the search crawl schedules
 
-##### # Configure crawl schedule for "Local SharePoint sites"
+##### # Enable continuous crawls for "Local SharePoint sites"
 
 ```PowerShell
 $searchApp = Get-SPEnterpriseSearchServiceApplication `
