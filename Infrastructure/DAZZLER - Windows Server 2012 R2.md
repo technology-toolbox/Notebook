@@ -737,3 +737,65 @@ Using the steps in **[KB 2000474](KB 2000474) Workaround 1**, add **Local Launch
 ```PowerShell
 & 'C:\NotBackedUp\Public\Toolbox\TFS\Scripts\Configure DCOM Permissions.ps1'
 ```
+
+## Issue - "npm ERR! code ECONNRESET" when building Employee Portal
+
+### Issue
+
+```Console
+"D:\Builds\14\Securitas EmployeePortal\CI - Main\src\Code\Web\node_modules\grunt-sass\node_modules\node-sass\vendor\win32-x64-46\binding.node" exists.
+ testing binary.
+Binary is fine; exiting.
+npm ERR! Windows_NT 6.3.9600
+npm ERR! argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install"
+npm ERR! node v4.1.1
+npm ERR! npm  v2.14.4
+npm ERR! code ECONNRESET
+npm ERR! errno ECONNRESET
+...
+```
+
+### References
+
+**npm ERR! Callback called more than once #10322**\
+From <[https://github.com/npm/npm/issues/10322](https://github.com/npm/npm/issues/10322)>
+
+**Seeing elevated network read ECONNRESET from AWS #12484**\
+From <[https://github.com/npm/npm/issues/12484](https://github.com/npm/npm/issues/12484)>
+
+**Seeing elevated network read ECONNRESET from AWS #10**\
+From <[https://github.com/npm/registry/issues/10](https://github.com/npm/registry/issues/10)>
+
+### Solution
+
+```PowerShell
+cls
+```
+
+#### # Upgrade Node.js
+
+##### # Install new version of Node.js
+
+```PowerShell
+& \\ICEMAN\Products\node.js\node-v4.4.7-x64.msi
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+##### # Configure NPM to use HTTPs instead of HTTP
+
+```PowerShell
+npm config --global set registry https://registry.npmjs.org/
+```
+
+##### # Clear NPM cache
+
+```PowerShell
+npm cache clear
+```
