@@ -1940,6 +1940,16 @@ $contentSource = Get-SPEnterpriseSearchCrawlContentSource `
 Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
     -EnableContinuousCrawls $true
+
+# TODO: Add the following to the install guide
+
+Set-SPEnterpriseSearchCrawlContentSource `
+    -Identity $contentSource `
+    -ScheduleType Incremental `
+    -DailyCrawlSchedule `
+    -CrawlScheduleStartDateTime "12:00 AM" `
+    -CrawlScheduleRepeatInterval 240 `
+    -CrawlScheduleRepeatDuration 1440
 ```
 
 ##### # Configure crawl schedule for "User profiles"

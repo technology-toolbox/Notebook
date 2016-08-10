@@ -1255,8 +1255,6 @@ Else
 
 (skipped -- since the "Create Farm.ps1" script configures this)
 
-**TODO**: Add the following to install guide
-
 ```PowerShell
 cls
 ```
@@ -1264,9 +1262,11 @@ cls
 ### # Configure PowerShell access for SharePoint administrators group
 
 ```PowerShell
+$adminsGroup = "EXTRANET\SharePoint Admins (DEV)"
+
 Get-SPDatabase |
     Where-Object {$_.WebApplication -like "SPAdministrationWebApplication"} |
-    Add-SPShellAdmin "EXTRANET\SharePoint Admins (DEV)"
+    Add-SPShellAdmin $adminsGroup
 ```
 
 ###
@@ -1479,8 +1479,6 @@ Restart-Service SPTimerV4
 
 #### Disable social features
 
-**TODO**: Add step to installation guide to remove permissions to create personal sites
-
 ```PowerShell
 cls
 ```
@@ -1624,9 +1622,6 @@ $searchApp = Get-SPEnterpriseSearchServiceApplication `
 ##### # Enable continuous crawls for "Local SharePoint sites"
 
 ```PowerShell
-$searchApp = Get-SPEnterpriseSearchServiceApplication `
-    -Identity "Search Service Application"
-
 $contentSource = Get-SPEnterpriseSearchCrawlContentSource `
     -SearchApplication $searchApp `
     -Identity "Local SharePoint sites"
@@ -1634,6 +1629,14 @@ $contentSource = Get-SPEnterpriseSearchCrawlContentSource `
 Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
     -EnableContinuousCrawls $true
+
+Set-SPEnterpriseSearchCrawlContentSource `
+    -Identity $contentSource `
+    -ScheduleType Incremental `
+    -DailyCrawlSchedule `
+    -CrawlScheduleStartDateTime "12:00 AM" `
+    -CrawlScheduleRepeatInterval 240 `
+    -CrawlScheduleRepeatDuration 1440
 ```
 
 ##### # Configure crawl schedule for "User profiles"
@@ -1852,7 +1855,7 @@ $acl.SetAccessRule($rule)
 Set-Acl -Path $regPath -AclObject $acl
 ```
 
-{TODO: bunch o' stuff skipped here}
+{bunch o' stuff skipped here}
 
 ```PowerShell
 cls
@@ -1902,6 +1905,33 @@ cls
 cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.670.0\BusinessModel\Database\Deployment
 
 .\Install.cmd
+
+TODO: Configure permissions for SharePoint farm account when database is created
+
+$sqlcmd = @"
+```
+
+#### -- Configure permissions for the SecuritasPortal database
+
+```SQL
+USE [SecuritasPortal]
+GO
+
+CREATE USER [EXTRANET\s-sp-farm-dev] FOR LOGIN [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Membership_BasicAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Membership_ReportingAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
 ```
 
 ### # Configure logging
