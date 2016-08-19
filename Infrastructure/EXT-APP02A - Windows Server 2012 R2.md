@@ -738,7 +738,9 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 cls
 ```
 
-### # Install Cumulative Update 7 for Microsoft AppFabric 1.1
+### # Install Cumulative Update for AppFabric 1.1
+
+#### # Download update
 
 ```PowerShell
 $patch = "Cumulative Update 7"
@@ -747,7 +749,11 @@ robocopy `
     "\\ICEMAN\Products\Microsoft\AppFabric 1.1\Patches\$patch" `
     "C:\NotBackedUp\Temp\$patch" `
     /E
+```
 
+#### # Install update
+
+```PowerShell
 & "C:\NotBackedUp\Temp\$patch\*.exe"
 ```
 
@@ -758,6 +764,25 @@ robocopy `
 ```PowerShell
 Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 ```
+
+#### # Enable nonblocking garbage collection for Distributed Cache Service
+
+```PowerShell
+notepad ($env:ProgramFiles `
+    + "\AppFabric 1.1 for Windows Server\DistributedCacheService.exe.config")
+```
+
+---
+
+**DistributedCacheService.exe.config**
+
+```XML
+  <appSettings>
+    <add key="backgroundGC" value="true"/>
+  </appSettings>
+```
+
+---
 
 ### # Add the SharePoint bin folder to the PATH environment variable
 
@@ -776,6 +801,26 @@ exit
 
 ### # Copy SecuritasConnect build to SharePoint server
 
+#### # Create file share for builds
+
+```PowerShell
+New-Item -ItemType Directory -Path C:\Shares\Builds
+
+New-SmbShare `
+  -Name Builds `
+  -Path C:\Shares\Builds `
+  -CachingMode None `
+  -ChangeAccess Everyone
+
+New-Item -ItemType Directory -Path C:\Shares\Builds\Securitas\ClientPortal
+```
+
+```PowerShell
+cls
+```
+
+#### # Copy build
+
 ```PowerShell
 net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 ```
@@ -786,8 +831,8 @@ net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 robocopy `
-    "\\ICEMAN\Builds\Securitas\ClientPortal\4.0.664.0" `
-    "C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0" `
+    "\\ICEMAN\Builds\Securitas\ClientPortal\4.0.673.0" `
+    "C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0" `
     /E
 ```
 
@@ -854,7 +899,7 @@ GO
 ### # Create and configure the farm
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
 
 & '.\Create Farm.ps1' -CentralAdminAuthProvider NTLM -DatabaseServer EXT-SQL02 -Verbose
 ```
@@ -874,10 +919,20 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Script
 cls
 ```
 
+### # Configure PowerShell access for SharePoint administrators group
+
+```PowerShell
+$adminsGroup = "EXTRANET\SharePoint Admins"
+
+Get-SPDatabase |
+    Where-Object {$_.WebApplication -like "SPAdministrationWebApplication"} |
+    Add-SPShellAdmin $adminsGroup
+```
+
 ### # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
 
 & '.\Configure DCOM Permissions.ps1' -Verbose
 ```
@@ -886,7 +941,7 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Script
 
 ```Text
 Failed to enable privilege (SeTakeOwnershipPrivilege)
-At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts\Configure DCOM Permissions.ps1:127
+At C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts\Configure DCOM Permissions.ps1:127
 char:13
 +             Throw "Failed to enable privilege (SeTakeOwnershipPrivilege)"
 +             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -969,9 +1024,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ### Backup databases in SharePoint 2010 environment
 
-(Download backup files from PROD)
-
-[\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups)
+(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups))
 
 ---
 
@@ -984,16 +1037,18 @@ $destination = 'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full'
 
 mkdir $destination
 
-net use \\iceman.corp.technologytoolbox.com\Archive /USER:TECHTOOLBOX\jjameson
-
-robocopy `
-    \\iceman.corp.technologytoolbox.com\Archive\Clients\Securitas\Backups `
-    $destination `
-    *.bak
+net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
 ```
 
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
 ```PowerShell
-cls
+robocopy `
+    \\ICEMAN\Archive\Clients\Securitas\Backups `
+    $destination `
+    *.bak
 ```
 
 #### # Rename backup files
@@ -1058,6 +1113,14 @@ cls
 #### # Copy MIIS encryption key file to SharePoint 2013 server
 
 ```PowerShell
+net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
 copy `
     "\\ICEMAN\Archive\Clients\Securitas\Backups\miiskeys-1.bin" `
     "C:\Users\setup-sharepoint\Desktop"
@@ -1068,7 +1131,7 @@ copy `
 ### # Change the service account for the Distributed Cache
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
 
 & '.\Configure Distributed Cache.ps1' -Verbose
 ```
@@ -1302,7 +1365,10 @@ cls
 # Create User Profile Service Application as EXTRANET\\s-sp-farm:
 
 ```PowerShell
-$farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
+If ($farmCredential -eq $null)
+{
+    $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
+}
 ```
 
 > **Note**
@@ -1325,9 +1391,9 @@ Start-Process $PSHOME\powershell.exe `
 **PowerShell -- running as EXTRANET\\s-sp-farm**
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
 
-& '.\Configure User Profile Service.ps1' -Verbose
+& '.\Configure User Profile Service.ps1' -Confirm:$false -Verbose
 ```
 
 > **Important**
@@ -1386,7 +1452,10 @@ cls
 # Import MIIS encryption key as EXTRANET\\s-sp-farm:
 
 ```PowerShell
-$farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
+If ($farmCredential -eq $null)
+{
+    $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
+}
 ```
 
 > **Note**
@@ -1454,8 +1523,8 @@ Restart-Service SPTimerV4
 
 ##### Start profile synchronization
 
-Number of user profiles (before import): 11,776\
-Number of user profiles (after import): 12,268
+Number of user profiles (before import): 12,237\
+Number of user profiles (after import): {TODO}
 
 ```PowerShell
 Start-Process `
@@ -1482,31 +1551,7 @@ cls
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-sp-crawler**.\
-> Expect the previous operation to complete in approximately 7 minutes.
-
-```Text
-[2016-05-08 06:22:10] Configure SharePoint Search -
-
-  Service application name: Search Service Application
-  Service application pool: SharePoint Service Applications
-  Default content access account: EXTRANET\s-sp-crawler
-  Index location: D:\Microsoft Office Servers\15.0\Data\Office Server\Search Index
-  Database server: EXT-SQL02
-  Database name: SearchService
-
-Confirm
-Are you sure you want to perform this action?
-Performing the operation "Configure SharePoint Search.ps1" on target "EXT-APP02A".
-[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "Y"):
-ForEach-Object : Exception calling "Deploy" with "0" argument(s): "An object of the type Microsoft.SharePoint.Administration.SPWindowsServiceCredentialDeploymentJobDefinition named "windows-service-credentials-SPSearchHostController" already exists under the parent Microsoft.Office.Server.Search.Administration.SearchRuntimeService named "SPSearchHostController".  Rename your object or delete the existing object."
-At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts\Configure SharePoint Search.ps1:337 char:13
-+             ForEach-Object {
-+             ~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (:) [ForEach-Object], MethodInvocationException
-    + FullyQualifiedErrorId : SPDuplicateObjectException,Microsoft.PowerShell.Commands.ForEachObjectCommand
-```
-
-#### TODO: Modify search topology
+> Expect the previous operation to complete in approximately 13 minutes.
 
 ```PowerShell
 cls
@@ -1519,22 +1564,14 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Suspend-SPEnterpriseSearchServiceApplication
 ```
 
-```PowerShell
-cls
-```
-
 #### # Configure people search in SharePoint
-
-```PowerShell
-$mySiteHostLocation = "http://client-test.securitasinc.com/sites/my"
-
-$searchApp = Get-SPEnterpriseSearchServiceApplication `
-    -Identity "Search Service Application"
-```
 
 ##### # Grant permissions to default content access account
 
 ```PowerShell
+$searchApp = Get-SPEnterpriseSearchServiceApplication `
+    -Identity "Search Service Application"
+
 $content = New-Object `
     -TypeName Microsoft.Office.Server.Search.Administration.Content `
     -ArgumentList $searchApp
@@ -1564,20 +1601,10 @@ Set-SPServiceApplicationSecurity `
 ##### # Create content source for crawling user profiles
 
 ```PowerShell
-$mySiteHostUri = [System.Uri] $mySiteHostLocation
+$startAddress = "sps3://client-test.securitasinc.com"
 
-If ($mySiteHostUri.Scheme -eq "http")
-{
-    $startAddress = "sps3://" + $mySiteHostUri.Authority
-}
-ElseIf ($mySiteHostUri.Scheme -eq "https")
-{
-    $startAddress = "sps3s://" + $mySiteHostUri.Authority
-}
-Else
-{
-    Throw "The specified scheme ($($mySiteHostUri.Scheme)) is not supported."
-}
+$searchApp = Get-SPEnterpriseSearchServiceApplication `
+    -Identity "Search Service Application"
 
 New-SPEnterpriseSearchCrawlContentSource `
     -SearchApplication $searchapp `
@@ -1586,11 +1613,14 @@ New-SPEnterpriseSearchCrawlContentSource `
     -StartAddresses $startAddress
 ```
 
-#### # Configure the search crawl schedules
-
-##### # Configure crawl schedule for "Local SharePoint sites"
+#### # Configure search crawl schedules
 
 ```PowerShell
+$searchApp = Get-SPEnterpriseSearchServiceApplication `
+    -Identity "Search Service Application"
+
+# Enable continuous crawls for "Local SharePoint sites"
+
 $searchApp = Get-SPEnterpriseSearchServiceApplication `
     -Identity "Search Service Application"
 
@@ -1600,24 +1630,10 @@ $contentSource = Get-SPEnterpriseSearchCrawlContentSource `
 
 Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
-    -ScheduleType Full `
-    -WeeklyCrawlSchedule `
-    -CrawlScheduleStartDateTime "12:00 AM" `
-    -CrawlScheduleDaysOfWeek Sunday `
-    -CrawlScheduleRunEveryInterval 1
+    -EnableContinuousCrawls $true
 
-Set-SPEnterpriseSearchCrawlContentSource `
-    -Identity $contentSource `
-    -ScheduleType Incremental `
-    -DailyCrawlSchedule `
-    -CrawlScheduleStartDateTime "4:00 AM" `
-    -CrawlScheduleRepeatInterval 60 `
-    -CrawlScheduleRepeatDuration 1080
-```
+# Configure crawl schedule for "User profiles"
 
-##### # Configure crawl schedule for "User profiles"
-
-```PowerShell
 $contentSource = Get-SPEnterpriseSearchCrawlContentSource `
     -SearchApplication $searchApp `
     -Identity "User profiles"
@@ -1626,7 +1642,7 @@ Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
     -ScheduleType Full `
     -WeeklyCrawlSchedule `
-    -CrawlScheduleStartDateTime "12:00 AM" `
+    -CrawlScheduleStartDateTime "11:00 PM" `
     -CrawlScheduleDaysOfWeek Saturday `
     -CrawlScheduleRunEveryInterval 1
 
@@ -1634,7 +1650,7 @@ Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
     -ScheduleType Incremental `
     -DailyCrawlSchedule `
-    -CrawlScheduleStartDateTime "6:00 AM"
+    -CrawlScheduleStartDateTime "4:00 AM"
 ```
 
 ```PowerShell
@@ -1690,7 +1706,7 @@ Set-ItemProperty -Path $registryKey -Name http -Value 1
 ### # Create the Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -1698,7 +1714,7 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Script
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-web-client**.\
-> Expect the previous operation to complete in approximately 1-1/2 minutes.
+> Expect the previous operation to complete in approximately 3 minutes.
 
 ```PowerShell
 cls
@@ -1759,8 +1775,8 @@ GO
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 3-1/2 minutes.\
-> RESTORE DATABASE successfully processed 4262140 pages in 129.101 seconds (257.921 MB/sec).
+> Expect the previous operation to complete in approximately 7-1/2 minutes.\
+> RESTORE DATABASE successfully processed 4327388 pages in 206.702 seconds (163.557 MB/sec).
 
 ```PowerShell
 cls
@@ -1781,9 +1797,9 @@ $build = "3.0.648.0"
 
 robocopy `
     \\ICEMAN\Builds\Securitas\ClientPortal\$build `
-    C:\NotBackedUp\Builds\Securitas\ClientPortal\$build /E
+    C:\Shares\Builds\Securitas\ClientPortal\$build /E
 
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
 
 & '.\Add Solutions.ps1'
 
@@ -1792,7 +1808,7 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
 
 > **Note**
 >
-> Expect the previous operation to complete in 10-11 minutes.
+> Expect the previous operation to complete in 11-1/2 minutes.
 
 ```PowerShell
 cls
@@ -1805,10 +1821,6 @@ Test-SPContentDatabase `
     -Name WSS_Content_SecuritasPortal `
     -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
     Out-File C:\NotBackedUp\Temp\Test-SPContentDatabase-SecuritasConnect.txt
-```
-
-```PowerShell
-cls
 ```
 
 ##### # Attach content database
@@ -1846,7 +1858,7 @@ cls
 ```PowerShell
 $build = "3.0.648.0"
 
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
 
 & '.\Deactivate Features.ps1'
 
@@ -1862,7 +1874,7 @@ cls
 ### # Configure machine key for Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
 
 & '.\Configure Machine Key.ps1' -Verbose
 ```
@@ -2118,7 +2130,7 @@ cls
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
@@ -2200,7 +2212,7 @@ cls
 & '.\Add Solutions.ps1' -Verbose
 
 Unable to find solution file (Securitas.Portal.Web.wsp)
-At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts\Add Solutions.ps1:109 char:13
+At C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts\Add Solutions.ps1:109 char:13
 +             Throw "Unable to find solution file ($filename)"
 +             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : OperationStopped: (Unable to find ...Portal.Web.wsp):String) [], RuntimeException
@@ -2276,7 +2288,7 @@ LastOperationDetails : EXT-APP02A : http://client-test.securitasinc.com/ : The s
 
 ```PowerShell
 Enable-SPFeature : <nativehr>0x80070005</nativehr><nativestack></nativestack>Access denied.
-At C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts\Activate Features.ps1:115 char:9
+At C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts\Activate Features.ps1:115 char:9
 +         Enable-SPFeature `
 +         ~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : InvalidData: (Microsoft.Share...etEnableFeature:SPCmdletEnableFeature) [Enable-SPFeature], UnauthorizedAccessException
@@ -2768,14 +2780,14 @@ net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 ```PowerShell
 robocopy `
     "\\ICEMAN\Builds\Securitas\CloudPortal\2.0.114.0" `
-    "C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0" `
+    "C:\Shares\Builds\Securitas\CloudPortal\2.0.114.0" `
     /E
 ```
 
 ### # Create the Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -2896,9 +2908,9 @@ $build = "1.0.111.0"
 
 robocopy `
     \\ICEMAN\Builds\Securitas\CloudPortal\$build `
-    C:\NotBackedUp\Builds\Securitas\CloudPortal\$build /E
+    C:\Shares\Builds\Securitas\CloudPortal\$build /E
 
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
 
 & '.\Add Solutions.ps1'
 
@@ -2956,7 +2968,7 @@ cls
 ```PowerShell
 $build = "1.0.111.0"
 
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
 
 & '.\Deactivate Features.ps1'
 
@@ -2972,7 +2984,7 @@ cls
 ### # Configure object cache user accounts
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
 
 & '.\Configure Object Cache User Accounts.ps1' -Verbose
 
@@ -3103,7 +3115,7 @@ cls
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
 
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
@@ -3130,7 +3142,7 @@ cls
 & '.\Add Solutions.ps1' -Verbose
 
 Unable to find solution file (Securitas.CloudPortal.Web.wsp)
-At C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts\Add Solutions.ps1:109 char:13
+At C:\Shares\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts\Add Solutions.ps1:109 char:13
 +             Throw "Unable to find solution file ($filename)"
 +             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : OperationStopped: (Unable to find ...Portal.Web.wsp):String) [], RuntimeException
@@ -3509,7 +3521,7 @@ net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 ```PowerShell
 robocopy `
     "\\ICEMAN\Builds\Securitas\EmployeePortal\1.0.28.0" `
-    "C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0" `
+    "C:\Shares\Builds\Securitas\EmployeePortal\1.0.28.0" `
     /E
 ```
 
@@ -3556,7 +3568,7 @@ cls
 #### # Create Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
-cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Deployment Files\Scripts'
+cd 'C:\Shares\Builds\Securitas\EmployeePortal\1.0.28.0\Deployment Files\Scripts'
 
 & '.\Configure Employee Portal Website.ps1' `
     -SiteName employee-test.securitasinc.com `
@@ -3597,7 +3609,7 @@ cls
 #### # Deploy Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
-Push-Location C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Release\_PublishedWebsites\Web_Package
+Push-Location C:\Shares\Builds\Securitas\EmployeePortal\1.0.28.0\Release\_PublishedWebsites\Web_Package
 
 attrib -r .\Web.SetParameters.xml
 

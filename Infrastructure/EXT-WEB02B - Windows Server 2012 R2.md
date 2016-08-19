@@ -614,7 +614,9 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 cls
 ```
 
-### # Install Cumulative Update 7 for Microsoft AppFabric 1.1
+### # Install Cumulative Update for AppFabric 1.1
+
+#### # Download update
 
 ```PowerShell
 $patch = "Cumulative Update 7"
@@ -623,7 +625,11 @@ robocopy `
     "\\ICEMAN\Products\Microsoft\AppFabric 1.1\Patches\$patch" `
     "C:\NotBackedUp\Temp\$patch" `
     /E
+```
 
+#### # Install update
+
+```PowerShell
 & "C:\NotBackedUp\Temp\$patch\*.exe"
 ```
 
@@ -634,6 +640,25 @@ robocopy `
 ```PowerShell
 Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 ```
+
+#### # Enable nonblocking garbage collection for Distributed Cache Service
+
+```PowerShell
+notepad ($env:ProgramFiles `
+    + "\AppFabric 1.1 for Windows Server\DistributedCacheService.exe.config")
+```
+
+---
+
+**DistributedCacheService.exe.config**
+
+```XML
+  <appSettings>
+    <add key="backgroundGC" value="true"/>
+  </appSettings>
+```
+
+---
 
 ### # Add the SharePoint bin folder to the PATH environment variable
 
@@ -655,13 +680,16 @@ exit
 ### # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
-robocopy `
-    \\EXT-APP02A\C$\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles `
-    C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles /E
+$tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
 
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.664.0\DeploymentFiles\Scripts
+$sourceScript = "\\EXT-APP02A\Builds\Securitas\ClientPortal\4.0.673.0" `
+    + "\DeploymentFiles\Scripts\Configure DCOM Permissions.ps1"
 
-& '.\Configure DCOM Permissions.ps1' -Verbose
+Get-Content $sourceScript | Out-File $tempScript
+
+& $tempScript -Verbose
+
+Remove-Item $tempScript
 ```
 
 ### Create and configure the search service application
