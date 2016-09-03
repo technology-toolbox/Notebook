@@ -1941,8 +1941,6 @@ Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
     -EnableContinuousCrawls $true
 
-# TODO: Add the following to the install guide
-
 Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
     -ScheduleType Incremental `
@@ -2695,6 +2693,131 @@ Size after: 29.7 GB
 ### Configure SQL Server backups
 
 (skipped)
+
+**TODO:**
+
+```PowerShell
+cls
+```
+
+### # Add content database and partition Post Orders site collections
+
+#### # Add content database
+
+```PowerShell
+$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+
+New-SPContentDatabase `
+    -Name WSS_Content_SecuritasPortal2 `
+    -WebApplication $webAppUrl
+```
+
+---
+
+**SQL Server Management Studio**
+
+#### -- Expand second content database files
+
+```SQL
+USE [master]
+GO
+ALTER DATABASE [WSS_Content_SecuritasPortal2]
+  MODIFY FILE(
+    NAME = N'WSS_Content_SecuritasPortal2'
+    , SIZE = 14336000KB
+    , FILEGROWTH = 512000KB)
+GO
+ALTER DATABASE [WSS_Content_SecuritasPortal2]
+MODIFY FILE(
+    NAME = N'WSS_Content_SecuritasPortal2_log'
+    , SIZE = 512000KB
+    , MAXSIZE = UNLIMITED
+    , FILEGROWTH = 128000KB)
+GO
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Partition Post Orders site collections
+
+```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
+$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+
+$row = 0
+
+Get-SPSite -Identity "$webAppUrl/Post-Orders/*" -Limit ALL |
+    Select-Object `
+        Url,
+        @{Name="Created";Expression={$_.RootWeb.Created}} |
+    Sort-Object Created |
+    ForEach-Object {
+        $row++
+
+        $contentDatabase = 1
+
+        If ($row % 2 -eq 0)
+        {
+            $contentDatabase = 2
+        }
+
+        New-Object `
+            -TypeName PSObject `
+            -Property @{
+                Url=$_.Url;
+                Created=$_.Created;
+                DesiredContentDatabase = $contentDatabase
+            }
+    } |
+    Export-Csv C:\NotBackedUp\Temp\Post-Orders.csv
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 30 minutes.
+
+```PowerShell
+cls
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
+Import-Csv C:\NotBackedUp\Temp\Post-Orders.csv |
+    Where-Object { $_.DesiredContentDatabase -eq 2 } |
+    ForEach-Object {
+        $siteUrl = $_.Url
+
+        Write-Host "Moving site ($siteUrl)..."
+
+        Move-SPSite `
+            -Identity $siteUrl `
+            -DestinationDatabase WSS_Content_SecuritasPortal2 `
+            -Confirm:$false
+    }
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 1 hour and 50 minutes.
+
+```PowerShell
+cls
+```
+
+#### # Reduce maximum number of site collections in initial content database
+
+```PowerShell
+Set-SPContentDatabase -Identity WSS_Content_SecuritasPortal -MaxSiteCount 5000
+```
 
 ### Resume Search Service Application and start a full crawl of all content sources
 
@@ -3509,19 +3632,74 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 >
 > Expect the crawl to complete in approximately 2-3 minutes.
 
+Upgrade SecuritasConnect and Cloud Portal
+
 ```PowerShell
 cls
 ```
 
-## # Checkpoint VM
+## # Upgrade SecuritasConnect
 
-### # Delete C:\\Windows\\SoftwareDistribution folder (2.24 GB)
+### # Copy build to SharePoint server
 
 ```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
+net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 ```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$build = "4.0.675.0"
+
+$sourcePath = "\\ICEMAN\Builds\Securitas\ClientPortal\$build"
+$destPath = "C:\NotBackedUp\Builds\Securitas\ClientPortal\$build"
+
+robocopy $sourcePath $destPath /E
+```
+
+### # Deploy build
+
+```PowerShell
+Push-Location C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
+
+& '.\Redeploy Features.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+## # Upgrade Cloud Portal
+
+### # Copy build to SharePoint server
+
+```PowerShell
+$build = "2.0.121.0"
+
+$sourcePath = "\\ICEMAN\Builds\Securitas\CloudPortal\$build"
+$destPath = "C:\NotBackedUp\Builds\Securitas\CloudPortal\$build"
+
+robocopy $sourcePath $destPath /E
+```
+
+### # Deploy build
+
+```PowerShell
+Push-Location C:\NotBackedUp\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
+
+& '.\Redeploy Features.ps1' -Verbose
+```
+
+```PowerShell
+cls
+Pop-Location
+```
+
+## # Checkpoint VM
 
 ### # Prepare for snapshot
 
@@ -3537,19 +3715,13 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 cls
 ```
 
-### # Remove media from DVD drive
-
-```PowerShell
-$vmName = "EXT-FOOBAR8"
-$vmHost = "FORGE"
-
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
-```
-
 ### # Checkpoint VM
 
 ```PowerShell
-$snapshotName = "Baseline Client Portal 4.0.673.0 / Cloud Portal 2.0.120.0 / Employee Portal 1.0.28.0"
+$vmHost = "WOLVERINE"
+$vmName = "EXT-FOOBAR4"
+
+$snapshotName = "Baseline Client Portal 4.0.674.0 / Cloud Portal 2.0.121.0 / Employee Portal 1.0.28.0"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
 
@@ -3562,3 +3734,148 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
+
+## # Add content database and partition Post Orders site collections
+
+```PowerShell
+asnp *SharePoint*
+```
+
+### # Add content database
+
+```PowerShell
+$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+
+New-SPContentDatabase `
+    -Name WSS_Content_SecuritasPortal2 `
+    -WebApplication $webAppUrl
+```
+
+### # Expand second content database files
+
+```PowerShell
+$sqlcmd = @"
+USE [master]
+GO
+ALTER DATABASE [WSS_Content_SecuritasPortal2]
+  MODIFY FILE(
+    NAME = N'WSS_Content_SecuritasPortal2'
+    , SIZE = 14336000KB
+    , FILEGROWTH = 512000KB)
+GO
+ALTER DATABASE [WSS_Content_SecuritasPortal2]
+MODIFY FILE(
+    NAME = N'WSS_Content_SecuritasPortal2_log'
+    , SIZE = 512000KB
+    , MAXSIZE = UNLIMITED
+    , FILEGROWTH = 128000KB)
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+### Backup second content database
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Partition Post Orders site collections
+
+#### # Pause Search Service Application
+
+```PowerShell
+Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
+    Suspend-SPEnterpriseSearchServiceApplication
+
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
+$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+
+$row = 0
+
+Get-SPSite -Identity "$webAppUrl/Post-Orders/*" -Limit ALL |
+    Select-Object `
+        Url,
+        @{Name="Created";Expression={$_.RootWeb.Created}} |
+    Sort-Object Created |
+    ForEach-Object {
+        $row++
+
+        $contentDatabase = 1
+
+        If ($row % 2 -eq 0)
+        {
+            $contentDatabase = 2
+        }
+
+        New-Object `
+            -TypeName PSObject `
+            -Property @{
+                Url=$_.Url;
+                Created=$_.Created;
+                DesiredContentDatabase = $contentDatabase
+            }
+    } |
+    Export-Csv C:\NotBackedUp\Temp\Post-Orders.csv
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 2-1/2 minutes.
+
+```PowerShell
+cls
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
+Import-Csv C:\NotBackedUp\Temp\Post-Orders.csv |
+    Where-Object { $_.DesiredContentDatabase -eq 2 } |
+    ForEach-Object {
+        $siteUrl = $_.Url
+
+        Write-Host "Moving site ($siteUrl)..."
+
+        Move-SPSite `
+            -Identity $siteUrl `
+            -DestinationDatabase WSS_Content_SecuritasPortal2 `
+            -Confirm:$false
+    }
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 48 minutes.
+
+> **Important**
+>
+> IIS must be restarted before the changes will take effect.
+
+Reset IIS on each SharePoint server in the farm.
+
+```PowerShell
+cls
+```
+
+### # Reduce maximum number of site collections in initial content database
+
+```PowerShell
+Set-SPContentDatabase -Identity WSS_Content_SecuritasPortal -MaxSiteCount 5000
+```
+
+### # Resume Search Service Application and start full crawl on all content sources
+
+```PowerShell
+Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
+    Resume-SPEnterpriseSearchServiceApplication
+```
