@@ -21,6 +21,22 @@ Get-AzureVM -ServiceName ext-foobar5 | Start-AzureVM
 Get-AzureVM -ServiceName ext-foobar6 | Start-AzureVM
 ```
 
+## # Stop VMs - sync
+
+```PowerShell
+Add-AzureAccount
+
+Get-AzureVM -ServiceName fab-adfs | Stop-AzureVM -Force
+
+Get-AzureVM -ServiceName fab-ex | Stop-AzureVM -Force
+
+Get-AzureVM -ServiceName fab-wap | Stop-AzureVM -Force
+
+Get-AzureVM -ServiceName ext-foobar5 | Stop-AzureVM -Force
+
+Get-AzureVM -ServiceName ext-foobar6 | Stop-AzureVM -Force
+```
+
 ## # Start VMs - async
 
 ```PowerShell
