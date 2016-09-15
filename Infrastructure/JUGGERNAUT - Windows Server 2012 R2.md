@@ -743,6 +743,12 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh758075.aspx](http://t
 
 ## Create protection group for domain controllers
 
+Protection group name: **Domain Controllers**\
+Retention range: **5 days**\
+Application recovery points:
+
+- Express Full Backup: **8:00 PM Everyday**
+
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/6C/D50A7E4B18D2699A59B49E264192A1CAB904C26C.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/EFF77FE2E5CA3B209B6E83F6D696FF3E3DEDCBA2.png)
@@ -777,7 +783,14 @@ Repeat the previous step for **XAVIER2**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/EABDD9A4BA24BA197245967B561123E1976495B1.png)
 
-## Create protection group - SQL Server Databases (TEST)
+## Create protection group for SQL Server databases (TEST)
+
+Protection group name: **SQL Server Databases (TEST)**\
+Retention range: **10 days**\
+Synchronization frequency: **Every 4 hours**\
+Application recovery points:
+
+- Express Full Backup: **7:00 PM Everyday**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/7B/567D0E550D174A218C8DA8F7381DE572838AB27B.png)
 
@@ -823,7 +836,14 @@ GO
 **Protection agent jobs may fail for SQL Server 2012 databases**\
 Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://technet.microsoft.com/en-us/library/dn281948.aspx)>
 
-## Create protection group - SQL Server Databases
+## Create protection group for SQL Server databases
+
+Protection group name: **SQL Server Databases**\
+Retention range: **10 days**\
+Synchronization frequency: **Every 15 minutes**\
+Application recovery points:
+
+- Express Full Backup: **6:00 PM Everyday**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/9BC59C1C391D5D48BCFA2EB51134E8E9BB6B5238.png)
 
@@ -853,7 +873,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://t
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/1A/F6C3A482DAE8C68EEAEA6F00E19449551506B71A.png)
 
-## Create protection group - Critical Files
+## Create protection group for critical files
 
 Protection group name: **Critical Files**\
 Retention range: **10 days**\
@@ -1211,24 +1231,9 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ### # Extend partition
 
 ```PowerShell
-$size = (Get-PartitionSupportedSize -DiskNumber 1 -PartitionNumber 1)
-Resize-Partition -DiskNumber 1 -PartitionNumber 1 -Size $size.SizeMax
+$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
+Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
 ```
-
-#### Issue
-
-```PowerShell
-Resize-Partition : Size Not Supported
-At line:1 char:1
-+ Resize-Partition -DiskNumber 1 -PartitionNumber 1 -Size $size.SizeMax
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (StorageWMI:ROOT/Microsoft/.../MSFT_Partition) [Resize-Partition], CimException
-    + FullyQualifiedErrorId : StorageWMI 4097,Resize-Partition
-```
-
-#### Workaround
-
-Extend volume using **Disk Management** console.
 
 ## Issue: Low disk space for backups
 
@@ -1277,3 +1282,63 @@ Start-VM -ComputerName $newVmHost -Name $vmName
 ```
 
 ---
+
+## # Expand C: (OSDisk) drive
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/73/956DE73E109F00E03F44F893407EFD98EE18C873.png)
+
+Screen clipping taken: 9/14/2016 5:00 PM
+
+---
+
+**FOOBAR8**
+
+### # Expand VHD
+
+```PowerShell
+$vmHost = "BEAST"
+$vmName = "JUGGERNAUT"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 36GB
+```
+
+#### Issue
+
+```PowerShell
+Resize-VHD : Failed to resize the virtual disk.
+The system failed to resize 'E:\NotBackedUp\VMs\JUGGERNAUT\Virtual Hard Disks\JUGGERNAUT.vhdx'.
+The operation is not supported.
+At line:1 char:1
++ Resize-VHD `
++ ~~~~~~~~~~~~
+    + CategoryInfo          : NotImplemented: (Microsoft.Hyper...l.VMStorageTask:VMStorageTask) [Resize-VHD], VirtualizationOperationFailedException
+    + FullyQualifiedErrorId : NotSupported,Microsoft.Vhd.PowerShell.ResizeVhdCommand
+```
+
+#### Workaround
+
+```PowerShell
+cls
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 36GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
+Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
+```
