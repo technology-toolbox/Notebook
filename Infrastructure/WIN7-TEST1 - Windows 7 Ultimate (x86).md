@@ -275,3 +275,5 @@ Mozilla Thunderbird 38.7.0\
 Remote Server Administration Tools for Windows 7 SP1\
 Microsoft Security Essentials\
 Internet Explorer 10
+
+## Expand C: drive to 27 GB
