@@ -544,7 +544,12 @@ Get-NetAdapter `
         # Remove existing gateway
         $ipConfig = $interface | Get-NetIPConfiguration
 
-        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
+        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+        ElseIf ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
         {
             $interface |
                 Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
@@ -694,3 +699,27 @@ Connect-VpnS2SInterface -Name "Azure VPN"
 ```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/BFCE3E53A37ECD5B0EAB68FE5C1100CDF93774F5.png)
+
+## Issue - IPv6 address range changed by Comcast
+
+### # Remove static IPv6 address
+
+```PowerShell
+$oldIpAddress = "2601:282:4201:e500::219"
+
+$ifIndex = Get-NetIPAddress $oldIpAddress |
+    Select -ExpandProperty InterfaceIndex
+
+Remove-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $oldIpAddress `
+    -Confirm:$false
+```
+
+### # Update IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceIndex $ifIndex `
+    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
+```

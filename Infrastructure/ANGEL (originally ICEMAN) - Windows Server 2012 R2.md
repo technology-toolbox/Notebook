@@ -897,9 +897,17 @@ Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
     If ($interface.Dhcp -eq "Disabled")
     {
         # Remove existing gateway
-        If (($interface | Get-NetIPConfiguration).Ipv4DefaultGateway)
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
         {
-            $interface | Remove-NetRoute -Confirm:$false
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+        ElseIf ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
         }
 
         # Enable DHCP
@@ -1100,8 +1108,6 @@ cls
 $interfaceAlias = "Production"
 
 New-NetLbfoTeam -Name $interfaceAlias -TeamMembers "Ethernet", "Ethernet 2"
-
-Set-NetLbfoTeam -Name $interfaceAlias -TeamingMode LACP
 ```
 
 ```PowerShell
@@ -1167,7 +1173,15 @@ Set-NetAdapterAdvancedProperty `
 Set-NetAdapterAdvancedProperty `
     -Name "vEthernet (Storage)" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
+```
 
+```PowerShell
+cls
+```
+
+#### # Validate network connections
+
+```PowerShell
 ping ICEMAN -f -l 8900
 ping 10.1.10.106 -f -l 8900
 ```

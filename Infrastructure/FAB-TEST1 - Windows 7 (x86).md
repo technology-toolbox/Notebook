@@ -54,3 +54,19 @@ Disk Cleanup
 #192.168.10.214	fab-foobar4 client-local.securitasinc.com cloud-local.securitasinc.com extranet-local.fabrikam.com\
 10.71.4.100	ext-foobar6 ext-foobar6.extranet.technologytoolbox.com client-local.securitasinc.com cloud-local.securitasinc.com media-local.securitasinc.com portal-local.securitasinc.com\
 #10.71.2.5	fs.fabrikam.com mail.fabrikam.com
+
+## Issue - IPv6 address range changed by Comcast
+
+### # Update IPv6 DNS servers
+
+```PowerShell
+$interfaceAlias = "Local Area Connection"
+```
+
+# **Note:** Set-DNSClientServerAddress is not available on Windows 7
+
+```Console
+netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=2603:300b:802:8900::201
+
+netsh interface ipv6 add dnsserver name=$interfaceAlias address=2603:300b:802:8900::202
+```

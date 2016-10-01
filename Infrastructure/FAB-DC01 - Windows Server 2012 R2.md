@@ -370,3 +370,31 @@ The following GPOs were detected by the PowerShell script:
 ### Solution
 
 Grant **Read** permission to **Domain Computers** on each of the GPOs listed above.
+
+## Issue - IPv6 address range changed by Comcast
+
+### # Update static IPv6 address
+
+```PowerShell
+$oldIpAddress = "2601:282:4201:e500::201"
+$newIpAddress = "2603:300b:802:8900::201"
+$ifIndex = Get-NetIPAddress $oldIpAddress |
+    Select -ExpandProperty InterfaceIndex
+
+New-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $newIpAddress
+
+Remove-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $oldIpAddress `
+    -Confirm:$false
+```
+
+### # Update IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceIndex $ifIndex `
+    -ServerAddresses 2603:300b:802:8900::202, ::1
+```

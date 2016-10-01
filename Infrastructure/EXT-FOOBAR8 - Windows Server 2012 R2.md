@@ -147,7 +147,12 @@ $interfaceAlias = "Production"
         # Remove existing gateway
         $ipConfig = $interface | Get-NetIPConfiguration
 
-        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
+        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+        ElseIf ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
         {
             $interface |
                 Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
@@ -3772,7 +3777,7 @@ MODIFY FILE(
 GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
 ```
@@ -3830,7 +3835,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 2-1/2 minutes.
+> Expect the previous operation to complete in approximately 10 minutes.
 
 ```PowerShell
 cls
@@ -3855,7 +3860,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 48 minutes.
+> Expect the previous operation to complete in approximately 1-1/2 hours.
 
 > **Important**
 >
@@ -3878,4 +3883,28 @@ Set-SPContentDatabase -Identity WSS_Content_SecuritasPortal -MaxSiteCount 5000
 ```PowerShell
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Resume-SPEnterpriseSearchServiceApplication
+```
+
+## Issue - IPv6 address range changed by Comcast
+
+### # Remove static IPv6 address
+
+```PowerShell
+$oldIpAddress = "2601:282:4201:e500::223"
+
+$ifIndex = Get-NetIPAddress $oldIpAddress |
+    Select -ExpandProperty InterfaceIndex
+
+Remove-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $oldIpAddress `
+    -Confirm:$false
+```
+
+### # Update IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceIndex $ifIndex `
+    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
 ```

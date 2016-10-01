@@ -336,3 +336,31 @@ cd "$certImportToolPath"
 ```
 
 ### # Approve manual agent install in Operations Manager
+
+## Issue - IPv6 address range changed by Comcast
+
+### # Update static IPv6 address
+
+```PowerShell
+$oldIpAddress = "2601:282:4201:e500::210"
+$newIpAddress = "2603:300b:802:8900::210"
+$ifIndex = Get-NetIPAddress $oldIpAddress |
+    Select -ExpandProperty InterfaceIndex
+
+New-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $newIpAddress
+
+Remove-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $oldIpAddress `
+    -Confirm:$false
+```
+
+### # Update IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceIndex $ifIndex `
+    -ServerAddresses 2603:300b:802:8900::209, ::1
+```

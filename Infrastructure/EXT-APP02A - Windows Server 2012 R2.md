@@ -1524,7 +1524,7 @@ Restart-Service SPTimerV4
 ##### Start profile synchronization
 
 Number of user profiles (before import): 12,237\
-Number of user profiles (after import): {TODO}
+Number of user profiles (after import): 12,729
 
 ```PowerShell
 Start-Process `
@@ -1533,8 +1533,8 @@ Start-Process `
     -Credential $farmCredential
 ```
 
-Start time: 12:49:37 PM\
-End time: 1:03:03 PM
+Start time: 8:57:34 AM\
+End time: 9:32:23 AM
 
 ```PowerShell
 cls
@@ -1847,7 +1847,7 @@ At line:1 char:1
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 2 hours 26 minutes.
+> Expect the previous operation to complete in approximately 3 hours 50 minutes.
 
 ```PowerShell
 cls
@@ -1944,10 +1944,6 @@ $acl.SetAccessRule($rule)
 Set-Acl -Path $regPath -AclObject $acl
 ```
 
-```PowerShell
-cls
-```
-
 ### # Map Web application to loopback address in Hosts file
 
 ```PowerShell
@@ -2003,8 +1999,9 @@ cls
 ### # Enable disk-based caching for the Web application
 
 ```PowerShell
-Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
-    + $env:SECURITAS_CLIENT_PORTAL_URL + "80")
+[Uri] $url = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
+
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" + $url.Host + "80")
 
 copy web.config "web - Copy.config"
 
@@ -2025,8 +2022,31 @@ Notepad web.config
 
 ---
 
-```PowerShell
+```Console
+cls
 Pop-Location
+```
+
+### # Configure Web application policy for SharePoint administrators
+
+```PowerShell
+$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+$adminsGroup = "EXTRANET\SharePoint Admins"
+
+$principal = New-SPClaimsPrincipal -Identity $adminsGroup `
+    -IdentityType WindowsSecurityGroupName
+
+$claim = $principal.ToEncodedString()
+
+$webApp = Get-SPWebApplication $webAppUrl
+
+$policyRole = $webApp.PolicyRoles.GetSpecialRole(
+    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
+
+$policy = $webApp.Policies.Add($claim, $adminsGroup)
+$policy.PolicyRoleBindings.Add($policyRole)
+
+$webApp.Update()
 ```
 
 ### Configure SharePoint groups
@@ -2035,7 +2055,7 @@ Pop-Location
 
 ### Configure My Site settings in User Profile service application
 
-[http://client-test.securitasinc.com/sites/my](http://client-test.securitasinc.com/sites/my)
+My Site Host location: **[http://client-test.securitasinc.com/sites/my](http://client-test.securitasinc.com/sites/my)**
 
 ```PowerShell
 cls
@@ -2211,14 +2231,6 @@ cls
 ```PowerShell
 & '.\Add Solutions.ps1' -Verbose
 
-Unable to find solution file (Securitas.Portal.Web.wsp)
-At C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts\Add Solutions.ps1:109 char:13
-+             Throw "Unable to find solution file ($filename)"
-+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : OperationStopped: (Unable to find ...Portal.Web.wsp):String) [], RuntimeException
-    + FullyQualifiedErrorId : Unable to find solution file (Securitas.Portal.Web.wsp)
-
-
 & '.\Deploy Solutions.ps1' -Verbose
 ```
 
@@ -2280,40 +2292,6 @@ LastOperationDetails : EXT-APP02A : http://client-test.securitasinc.com/ : The s
 
 
 
-
-& '.\Activate Features.ps1' -Verbose
-```
-
-##### Issue
-
-```PowerShell
-Enable-SPFeature : <nativehr>0x80070005</nativehr><nativestack></nativestack>Access denied.
-At C:\Shares\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts\Activate Features.ps1:115 char:9
-+         Enable-SPFeature `
-+         ~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidData: (Microsoft.Share...etEnableFeature:SPCmdletEnableFeature) [Enable-SPFeature], UnauthorizedAccessException
-    + FullyQualifiedErrorId : Microsoft.SharePoint.PowerShell.SPCmdletEnableFeature
-```
-
-##### # Workaround: Configure Web application policy for SharePoint administrators group
-
-```PowerShell
-$groupName = "EXTRANET\SharePoint Admins"
-
-$principal = New-SPClaimsPrincipal -Identity $groupName `
-    -IdentityType WindowsSecurityGroupName
-
-$claim = $principal.ToEncodedString()
-
-$webApp = Get-SPWebApplication $env:SECURITAS_CLIENT_PORTAL_URL
-
-$policyRole = $webApp.PolicyRoles.GetSpecialRole(
-    [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
-
-$policy = $webApp.Policies.Add($claim, $groupName)
-$policy.PolicyRoleBindings.Add($policyRole)
-
-$webApp.Update()
 
 & '.\Activate Features.ps1' -Verbose
 ```
@@ -3858,4 +3836,12 @@ $serviceApp |
 >
 > Expect the crawl to complete in approximately 4 hours 11 minutes.
 
-**TODO:**
+## Issue - IPv6 address range changed by Comcast
+
+### # Update IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceAlias Production `
+    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
+```

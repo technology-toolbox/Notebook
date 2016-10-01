@@ -147,7 +147,12 @@ $interfaceAlias = "Production"
         # Remove existing gateway
         $ipConfig = $interface | Get-NetIPConfiguration
 
-        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
+        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+        ElseIf ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
         {
             $interface |
                 Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
@@ -3021,3 +3026,56 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
+
+## Issue - IPv6 address range changed by Comcast
+
+### # Remove static IPv6 address
+
+```PowerShell
+Remove-NetIPAddress 2601:282:4201:e500::217 -Confirm:$false
+```
+
+### # Enable DHCP on IPv6 interface
+
+```PowerShell
+$interfaceAlias = "Production"
+
+@("IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Disabled")
+    {
+        # Remove existing gateway
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        If ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        # Enable DHCP
+        $interface | Set-NetIPInterface -DHCP Enabled
+
+        # Configure the  DNS Servers automatically
+        $interface | Set-DnsClientServerAddress -ResetServerAddresses
+    }
+}
+```
+
+### # Configure IPv4 DNS servers (since "ResetServerAddresses" removes IPv4 and IPv6)
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.209,192.168.10.210
+```

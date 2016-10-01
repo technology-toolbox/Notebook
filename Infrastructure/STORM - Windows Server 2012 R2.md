@@ -1068,9 +1068,15 @@ Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
         # Remove existing gateway
         $ipConfig = $interface | Get-NetIPConfiguration
 
-        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
+        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
         {
-            $interface | Remove-NetRoute -Confirm:$false
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+        ElseIf ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
         }
 
         # Enable DHCP
@@ -1474,4 +1480,37 @@ PartitionNumber  DriveLetter Offset                    Size Type
 2                D           135266304            149.87 GB Basic
 ```
 
-**TODO:**
+## Issue - IPv6 address range changed by Comcast
+
+### # Remove static IPv4 and IPv6 addresses
+
+```PowerShell
+Remove-NetIPAddress 2601:282:4201:e500::108 -Confirm:$false
+
+$interfaceAlias = "vEthernet (Production)"
+
+@("IPv4", "IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Disabled")
+    {
+        # Remove existing gateway
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        # Enable DHCP
+        $interface | Set-NetIPInterface -DHCP Enabled
+
+        # Configure the  DNS Servers automatically
+        $interface | Set-DnsClientServerAddress -ResetServerAddresses
+    }
+}
+```

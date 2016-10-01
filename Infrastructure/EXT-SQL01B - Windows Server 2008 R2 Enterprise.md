@@ -756,4 +756,28 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
-**TODO:**
+## Issue - IPv6 address range changed by Comcast
+
+### # Remove static IPv6 address
+
+```PowerShell
+$interfaceAlias = "Production"
+
+$ipAddress = "2601:282:4201:e500::212"
+```
+
+# **Note:** Remove-NetIPAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv6 delete address interface=$interfaceAlias address=$ipAddress store=persistent
+```
+
+### # Update IPv6 DNS servers
+
+# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+
+```Console
+netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=2603:300b:802:8900::209
+
+netsh interface ipv6 add dnsserver name=$interfaceAlias address=2603:300b:802:8900::210
+```

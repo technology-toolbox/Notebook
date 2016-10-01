@@ -1115,9 +1115,15 @@ Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
         # Remove existing gateway
         $ipConfig = $interface | Get-NetIPConfiguration
 
-        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
+        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
         {
-            $interface | Remove-NetRoute -Confirm:$false
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+        ElseIf ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
         }
 
         # Enable DHCP

@@ -175,3 +175,31 @@ Get-NetFirewallRule -AssociatedNetFirewallProfile $profile |
 ```PowerShell
 Disable-NetFirewallRule -Group 'Remote Windows Update'
 ```
+
+## Issue - IPv6 address range changed by Comcast
+
+### # Update static IPv6 address
+
+```PowerShell
+$oldIpAddress = "2601:282:4201:e500::202"
+$newIpAddress = "2603:300b:802:8900::202"
+$ifIndex = Get-NetIPAddress $oldIpAddress |
+    Select -ExpandProperty InterfaceIndex
+
+New-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $newIpAddress
+
+Remove-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $oldIpAddress `
+    -Confirm:$false
+```
+
+### # Update IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceIndex $ifIndex `
+    -ServerAddresses 2603:300b:802:8900::201, ::1
+```

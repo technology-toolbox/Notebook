@@ -1034,3 +1034,13 @@ Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
 > **Important**
 >
 > When prompted, restart the computer to complete the process of installing the updates.
+
+## Issue - IPv6 address range changed by Comcast
+
+### # Update IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceAlias Production `
+    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
+```
