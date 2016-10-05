@@ -1,23 +1,23 @@
 ﻿# WOLVERINE - Windows 10 Enterprise x64
 
-Saturday, December 12, 2015
+Tuesday, October 4, 2016
 4:41 AM
 
 ## Install Windows 10 Enterprise (x64)
 
-## # Rename computer
+### # Rename computer
 
 ```PowerShell
 Rename-Computer -NewName WOLVERINE -Restart
 ```
 
-## # Join domain
+### # Join domain
 
 ```PowerShell
 Add-Computer -DomainName corp.technologytoolbox.com -Restart
 ```
 
-## # Create default folders
+### # Create default folders
 
 > **Important**
 >
@@ -28,13 +28,13 @@ mkdir C:\NotBackedUp\Public
 mkdir C:\NotBackedUp\Temp
 ```
 
-## # Set time zone
+### # Set time zone
 
 ```PowerShell
 tzutil /s "Mountain Standard Time"
 ```
 
-## # Set MaxPatchCacheSize to 0
+### # Set MaxPatchCacheSize to 0
 
 ```PowerShell
 reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize /t REG_DWORD /d 0 /f
@@ -75,18 +75,18 @@ Set-NetAdapterAdvancedProperty `
 ping ICEMAN -f -l 8900
 ```
 
-Note: Trying to ping ICEMAN or the iSCSI network adapter on ICEMAN with a 9000 byte packet from FORGE resulted in an error (suggesting that jumbo frames were not configured). It also worked with 8970 bytes.
+> **Note**
+>
+> Trying to ping ICEMAN or the iSCSI network adapter on ICEMAN with a 9000 byte packet from FORGE resulted in an error (suggesting that jumbo frames were not configured). It also worked with 8970 bytes.
 
 ```PowerShell
 cls
 ```
 
-## # Disable proxy auto-detect
-
 ### # Disable 'Automatically detect proxy settings' in Internet Explorer
 
 ```PowerShell
-function Disable-AutomaticallyDetectProxySettings {
+Function Disable-AutomaticallyDetectProxySettings {
     # Read connection settings from Internet Explorer.
     $regKeyPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Connections\"
     $conSet = $(Get-ItemProperty $regKeyPath).DefaultConnectionSettings
@@ -117,7 +117,7 @@ function Disable-AutomaticallyDetectProxySettings {
 Disable-AutomaticallyDetectProxySettings
 ```
 
-### Reference
+#### Reference
 
 **Disable-AutomaticallyDetectSettings.ps1**\
 From <[https://gist.github.com/ReubenBond/1387620](https://gist.github.com/ReubenBond/1387620)>
@@ -126,7 +126,7 @@ From <[https://gist.github.com/ReubenBond/1387620](https://gist.github.com/Reube
 cls
 ```
 
-## # Select "High performance" power scheme
+### # Select "High performance" power scheme
 
 ```PowerShell
 powercfg.exe /L
@@ -136,19 +136,25 @@ powercfg.exe /S SCHEME_MIN
 powercfg.exe /L
 ```
 
-## # Copy Toolbox content
+### # Copy Toolbox content
 
 ```PowerShell
 net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+```
 
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
 robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 ```
 
-```PowerShell
+```Console
 cls
 ```
 
-## # Change drive letter for DVD-ROM
+### # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -166,83 +172,25 @@ mountvol X: $volumeId
 cls
 ```
 
-## # Download PowerShell help files
+### # Download PowerShell help files
 
 ```PowerShell
 Update-Help
 ```
 
-## # Enable PowerShell remoting
+### # Enable PowerShell remoting
 
 ```PowerShell
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
+```PowerShell
 Set-ExecutionPolicy RemoteSigned -Scope Process
 
-C:\\NotBackedUp\\Public\\Toolbox\\PowerShell\\Enable-RemoteWindowsUpdate.ps1 -Verbose\
-C:\\NotBackedUp\\Public\\Toolbox\\PowerShell\\Disable-RemoteWindowsUpdate.ps1  -Verbose
-
-```PowerShell
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (DCOM-In)' `
-    -DisplayName 'Remote Windows Update (DCOM-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort 135 `
-    -Profile Domain `
-    -Action Allow
-
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (Dynamic RPC)' `
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Program '%windir%\system32\dllhost.exe' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort RPC `
-    -Profile Domain `
-    -Action Allow
-
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (SMB-In)' `
-    -DisplayName 'Remote Windows Update (SMB-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort 445 `
-    -Profile Domain `
-    -Action Allow
-
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (WMI-In)' `
-    -DisplayName 'Remote Windows Update (WMI-In)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Remote Windows Update' `
-    -Program "$env:windir\system32\svchost.exe" `
-    -Service winmgmt `
-    -Direction Inbound `
-    -Protocol TCP `
-    -Profile Domain `
-    -Action Allow
-
-Get-NetFirewallRule |
-  Where-Object { `
-    $_.Profile -eq 'Domain' `
-      -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
-  Enable-NetFirewallRule
-```
-
-## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-Disable-NetFirewallRule -Group 'Remote Windows Update'
+C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
+C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1  -Verbose
 ```
 
 ```PowerShell
@@ -251,31 +199,28 @@ cls
 
 ## # Install Microsoft Money
 
-net use \\\\ICEMAN\\Products /USER:TECHTOOLBOX\\jjameson
+```PowerShell
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
 
 ```PowerShell
 & "\\ICEMAN\Products\Microsoft\Money 2008\USMoneyBizSunset.exe"
 ```
 
-> **Important**
->
-> Registry hack for MS Money on Windows 10:
->
-> ```INI
-> [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer]
-> "Version"="9.11.10240.0"
-> ```
-
-### Reference
-
-**Microsoft Money Sunset Version Stopped Working on Windows 10 with Edge, Asks for IE 6.0**\
-From <[http://answers.microsoft.com/en-us/insider/forum/insider_internet-insider_ie/microsoft-money-sunset-version-stopped-working-on/052c7b34-08d6-4017-a602-97e113063a33?auth=1](http://answers.microsoft.com/en-us/insider/forum/insider_internet-insider_ie/microsoft-money-sunset-version-stopped-working-on/052c7b34-08d6-4017-a602-97e113063a33?auth=1)>
-
 ### Create custom invoice template
 
 Folder - C:\\Users\\All Users\\Microsoft\\Money\\17.0\\Invoice
 
-Move "Technology Toolbox" invoice to top of list (2008Invoice.ntd) so it is selected by default
+Edit invoice listing (2008Invoice.ntd) to move "Technology Toolbox" invoice to top so it is selected by default
+
+```Console
+cd "C:\Users\All Users\Microsoft\Money\17.0\Invoice"
+notepad .\2008Invoice.ntd
+```
 
 #### Reference
 
@@ -299,6 +244,41 @@ From <[http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx](htt
 
 ## Install Microsoft Office Professional Plus 2016
 
+```PowerShell
+Function Ensure-MountedDiskImage
+{
+    [CmdletBinding()]
+    Param(
+        [Parameter(Position = 1, Mandatory = $true)]
+        [string] $ImagePath)
+
+    $imageDriveLetter = (Get-DiskImage -ImagePath $ImagePath|
+        Get-Volume).DriveLetter
+
+    If ($imageDriveLetter -eq $null)
+    {
+        Write-Verbose "Mounting disk image ($ImagePath)..."
+        $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
+            Get-Volume).DriveLetter
+    }
+
+    return $imageDriveLetter
+}
+
+$isoFilename = "en_office_professional_plus_2016_x86_x64_dvd_6962141.iso"
+
+$destFolder = "E:\NotBackedUp\Temp"
+
+mkdir $destFolder
+
+$sourcePath = "\\ICEMAN\Products\Microsoft\Office 2016" `
+    + "\$isoFilename"
+
+Copy $sourcePath $destFolder
+
+$imagePath = "$destFolder\$isoFilename"
+```
+
 ## Install Microsoft Visio Professional 2016
 
 ```PowerShell
@@ -315,11 +295,21 @@ cls
 cls
 ```
 
-## # Install Adobe Reader 8.3
+## # Install Adobe Reader
+
+### # Install Adobe Reader 8.3
 
 ```PowerShell
 & "\\ICEMAN\Products\Adobe\AdbeRdr830_en_US.msi"
+```
 
+> **Important**
+>
+> Wait for the installation to complete.
+
+### # Install update for Adobe Reader
+
+```PowerShell
 & "\\ICEMAN\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
 ```
 
@@ -330,7 +320,7 @@ cls
 ## # Install Mozilla Firefox
 
 ```PowerShell
-& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 46.0.1.exe" -ms
+& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 49.0.1.exe" -ms
 ```
 
 ```PowerShell
@@ -340,16 +330,59 @@ cls
 ## # Install Google Chrome
 
 ```PowerShell
-& "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup64.exe"
+& \\ICEMAN\Products\Google\Chrome\googlechromestandaloneenterprise64.msi
 ```
 
-## Install FileZilla 3.18.0
+```PowerShell
+cls
+```
 
-## Install Paint.NET 4.0.9
+## # Install FileZilla
+
+```PowerShell
+& \\ICEMAN\Products\FileZilla\FileZilla_3.22.1_win64-setup.exe
+```
+
+```PowerShell
+cls
+```
+
+## # Install Paint.NET
+
+```PowerShell
+& "\\ICEMAN\Products\Paint.NET\paint.net.4.0.12.install.zip"
+```
 
 ## Install Microsoft Expression Studio 4
 
-## Install Microsoft Visual Studio 2015 Enterprise with Update 2
+```PowerShell
+cls
+```
+
+## # Install Microsoft Visual Studio 2015 Enterprise with Update 2
+
+```PowerShell
+$sourcePath = "\\ICEMAN\Products\Microsoft\Visual Studio 2015"
+$destPath = "E:\NotBackedUp\Temp"
+$isoFilename = "en_visual_studio_enterprise_2015_with_update_3_x86_x64_dvd_8923288.iso"
+
+robocopy $sourcePath $destPath $isoFilename
+
+$imagePath = "$destPath\$isoFilename"
+
+$imageDriveLetter = Ensure-MountedDiskImage $imagePath
+
+If ((Get-Process -Name "vs_enterprise" -ErrorAction SilentlyContinue) -eq $null)
+{
+    $setupPath = $imageDriveLetter + ':\vs_enterprise.exe'
+
+    Write-Verbose "Starting setup..."
+
+    & $setupPath
+
+    Start-Sleep -Seconds 15
+}
+```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/ACDA391F5D951BCC223707F0D0AF2DF01F6ED49A.png)
 
@@ -367,36 +400,7 @@ Select the following features:
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/EC/7BEC5B0BCF7DD4693FB012016FFC95B9ADFC9FEC.png)
 
-## Install Chutzpah Test Adapter
-
-1. Open Visual Studio.
-2. In the **Tools** menu, click **Extensions and Updates...**
-3. In the **Extensions and Updates** dialog window:
-   1. Select the **Online** pane.
-   2. In the search box, type **Chutzpah**.
-   3. In the list of items, select **Chutzpah Test Adapter for the Test Explorer**, and click **Download**.
-   4. Review the license terms, and click **Install**.
-   5. Wait for the extension to be installed.
-   6. Click **Restart Now**.
-
-## Install Chutzpah Test Runner
-
-1. Open Visual Studio.
-2. In the **Tools** menu, click **Extensions and Updates...**
-3. In the **Extensions and Updates** dialog window:
-   1. Select the **Online** pane.
-   2. In the search box, type **Chutzpah**.
-   3. In the list of items, select **Chutzpah Test Runner Context Menu Extension**, and click **Download**.
-   4. Review the license terms, and click **Install**.
-   5. Wait for the extension to be installled.
-   6. Click **Restart Now**.
-
-### Install Microsoft Azure SDK 2.9.1
-
-Reference:
-
-Announcing the Visual Studio Azure Tools and SDK 2.9\
-[https://azure.microsoft.com/en-us/blog/announcing-visual-studio-azure-tools-and-sdk-2-9/](https://azure.microsoft.com/en-us/blog/announcing-visual-studio-azure-tools-and-sdk-2-9/)
+### Install Microsoft Azure SDK 2.9.5
 
 ### Install Microsoft Office Developer Tools Update 2 for Visual Studio 2015
 
@@ -404,16 +408,23 @@ Announcing the Visual Studio Azure Tools and SDK 2.9\
 cls
 ```
 
-## # Install reference assemblies
+### # Install reference assemblies
 
 ```PowerShell
 net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+```
 
-robocopy `
-    '\\ICEMAN\Builds\Reference Assemblies' `
-    'C:\Program Files\Reference Assemblies' /E
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
 
-& 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v4\AssemblyFoldersEx - x64.reg'
+```PowerShell
+$source = '\\ICEMAN\Builds\Reference Assemblies'
+$dest = 'C:\Program Files\Reference Assemblies'
+
+robocopy $source $dest /E
+
+& "$dest\Microsoft\SharePoint v4\AssemblyFoldersEx - x64.reg"
 ```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/DE96621F16BC51A75B6410BE1B94F33F9B8A0F62.png)
@@ -421,7 +432,7 @@ robocopy `
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/06DBAE68F16F7F83442A5F1916BFBEFEFC0DD15E.png)
 
 ```PowerShell
-& 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v5\AssemblyFoldersEx - x64.reg'
+& "$dest\Microsoft\SharePoint v5\AssemblyFoldersEx - x64.reg"
 ```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/E9FD2601E62121DA76E1227B4436C7ED8F069CAE.png)
@@ -432,7 +443,7 @@ robocopy `
 cls
 ```
 
-## # Configure symbol path for debugging
+### # Configure symbol path for debugging
 
 ```PowerShell
 $symbolPath = "SRV*C:\NotBackedUp\Public\Symbols*\\ICEMAN\Public\Symbols*http://msdl.microsoft.com/download/symbols"
@@ -449,7 +460,13 @@ cls
 
 ```PowerShell
 net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
+```
 
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
 & "\\ICEMAN\Products\Python\python-2.7.11.amd64.msi"
 ```
 
@@ -496,16 +513,14 @@ cls
 ### # Install Node.js
 
 ```PowerShell
-# & \\ICEMAN\Products\node.js\node-v0.12.5-x64.msi
-
-& \\ICEMAN\Products\node.js\node-v4.4.5-x64.msi
+& \\ICEMAN\Products\node.js\node-v4.4.7-x64.msi
 ```
 
 > **Important**
 >
 > Restart PowerShell for change to PATH environment variable to take effect.
 
-### # Change NPM file locations to avoid issues with redirected folders
+### Change NPM file locations to avoid issues with redirected folders
 
 #### Reference
 
@@ -540,8 +555,17 @@ In Notepad, change:
 ```PowerShell
 & "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd" config set -g cache '${LOCALAPPDATA}\npm-cache'
 
+& : The term 'C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\WebTools\External\npm.cmd' is not recognized as the name of a cmdlet, function, script file, or operable program. Checkthe spelling of the name, or if a path was included, verify that the path is correct and try again.At line:1 char:3+ & "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Ex ...+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    + CategoryInfo          : ObjectNotFound: (C:\Program File...xternal\npm.cmd:String) [], CommandNotFoundException    + FullyQualifiedErrorId : CommandNotFoundException
+
+
 notepad "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\etc\npmrc"
 ```
+
+##### Issue
+
+The system cannot find the path specified.
+
+**TODO:**
 
 In Notepad, change:
 
@@ -573,7 +597,11 @@ npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -Folders "$env:ALLUSERSPROFILE\npm" `
     -EnvironmentVariableTarget Machine
+```
 
+**TODO:**
+
+```PowerShell
 & "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd" config set -g cache "$env:ALLUSERSPROFILE\npm-cache"
 ```
 
@@ -582,11 +610,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
 **How to use npm with node.exe?**\
 http://stackoverflow.com/a/9366416
 
-```PowerShell
-cls
-```
-
-## # Install global NPM packages
+## Install global NPM packages
 
 ### Reference
 
@@ -696,9 +720,84 @@ npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
 **Upgrading NPM in Visual Studio 2015**\
 From <[http://jameschambers.com/2015/09/upgrading-npm-in-visual-studio-2015/](http://jameschambers.com/2015/09/upgrading-npm-in-visual-studio-2015/)>
 
+```PowerShell
+cls
+```
+
+## # Install Chocolatey
+
+```PowerShell
+iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex
+
+exit
+```
+
+> **Important**
+>
+> Restart PowerShell for environment changes to take effect.
+
+### Reference
+
+**Installing Chocolatey**\
+From <[https://chocolatey.org/install](https://chocolatey.org/install)>
+
+## # Install HTML Tidy
+
+```PowerShell
+choco install html-tidy
+```
+
 ## Install GitHub Desktop
 
 [https://desktop.github.com/](https://desktop.github.com/)
+
+## Install Microsoft SQL Server 2016
+
+```PowerShell
+$sourcePath = "\\ICEMAN\Products\Microsoft\SQL Server 2016"
+$destPath = "E:\NotBackedUp\Temp"
+$isoFilename = "en_sql_server_2016_developer_x64_dvd_8777069.iso"
+
+robocopy $sourcePath $destPath $isoFilename
+
+$imagePath = "$destPath\$isoFilename"
+
+$imageDriveLetter = Ensure-MountedDiskImage $imagePath
+
+If ((Get-Process -Name "setup" -ErrorAction SilentlyContinue) -eq $null)
+{
+    $setupPath = $imageDriveLetter + ':\setup.exe'
+
+    Write-Verbose "Starting setup..."
+
+    & $setupPath
+
+    Start-Sleep -Seconds 15
+}
+```
+
+On the **Server Configuration** page, for **SQL Server Database Engine**, change the **Startup Type** to **Manual**
+
+On the **Database Engine Configuration** page, on the **Data Directories** tab:
+
+- Change the **Data root directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\**
+- Change the **Backup directory** to **Z:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\MSSQL\\Backup**
+
+```PowerShell
+Dismount-DiskImage $imagePath
+```
+
+```PowerShell
+cls
+```
+
+## # Install Microsoft SQL Server Management Studio
+
+```PowerShell
+& '\\ICEMAN\Products\Microsoft\SQL Server 2016\SSMS-Setup-ENU.exe'
+```
+
+## Install Fiddler
 
 ```PowerShell
 cls
@@ -726,9 +825,9 @@ cls
 
 ## # Install Remote Desktop Connection Manager
 
-& "\\\\ICEMAN\\Products\\Microsoft\\Remote Desktop Connection Manager\\rdcman.msi"
-
-## # Install Fiddler
+```PowerShell
+& "\\ICEMAN\Products\Microsoft\Remote Desktop Connection Manager\rdcman.msi"
+```
 
 ## Install software for HP Photosmart 6515
 
@@ -807,7 +906,7 @@ slmgr /ato
 cls
 ```
 
-## # Delete C:\\Windows\\SoftwareDistribution folder (4.7 GB)
+### # Delete C:\\Windows\\SoftwareDistribution folder (4.7 GB)
 
 ```PowerShell
 Stop-Service wuauserv
@@ -816,10 +915,6 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
 
 ## Disk Cleanup
-
-## Install Microsoft SQL Server 2016
-
-## Install Microsoft SQL Server Management Studio
 
 ## # Configure credential helper for Git
 
@@ -834,50 +929,77 @@ git config --global user.email "jeremy_jameson@live.com"
 git config --global user.name "Jeremy Jameson"
 ```
 
-## Install Android SDK (for debugging Chrome on Samsung Galaxy)
+## TODO: Other stuff that may need to be done
 
-### Reference
+### Install Android SDK (for debugging Chrome on Samsung Galaxy)
+
+#### Reference
 
 [http://stackoverflow.com/a/24410867](http://stackoverflow.com/a/24410867)
 
-### Install Samsung USB driver
+#### Install Samsung USB driver
 
-### Install Java SE Development Kit 8u66
+#### Install Java SE Development Kit 8u66
 
 [http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
-### Install Android "SDK Tools Only"
+#### Install Android "SDK Tools Only"
 
 [http://developer.android.com/sdk/index.html#Other](http://developer.android.com/sdk/index.html#Other)
 
-### Install Android SDK Platform-tools
+#### Install Android SDK Platform-tools
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/75601D9C9EF795A16D815FE580D6571F20B23C1E.png)
 
-### Detect devices
+#### Detect devices
 
-cd C:\\Program Files (x86)\\Android\\android-sdk\\platform-tools
+```Console
+cd C:\Program Files (x86)\Android\android-sdk\platform-tools
 
 adb.exe devices
+```
 
-## TODO: Other stuff that may need to be done
+### Install Chutzpah Test Adapter
 
-Apple iTunes
+1. Open Visual Studio.
+2. In the **Tools** menu, click **Extensions and Updates...**
+3. In the **Extensions and Updates** dialog window:
+   1. Select the **Online** pane.
+   2. In the search box, type **Chutzpah**.
+   3. In the list of items, select **Chutzpah Test Adapter for the Test Explorer**, and click **Download**.
+   4. Review the license terms, and click **Install**.
+   5. Wait for the extension to be installed.
+   6. Click **Restart Now**.
 
-Virtual Account Numbers
+### Install Chutzpah Test Runner
 
-Sandcastle Documentation Compiler Tools\
-Sandcastle Help File Builder
+1. Open Visual Studio.
+2. In the **Tools** menu, click **Extensions and Updates...**
+3. In the **Extensions and Updates** dialog window:
+   1. Select the **Online** pane.
+   2. In the search box, type **Chutzpah**.
+   3. In the list of items, select **Chutzpah Test Runner Context Menu Extension**, and click **Download**.
+   4. Review the license terms, and click **Install**.
+   5. Wait for the extension to be installled.
+   6. Click **Restart Now**.
 
-MSBuild Community Tasks
+### Install Apple iTunes
 
-## # Install ASP.NET ViewState Helper 2.0.1
+### Install Sandcastle
 
-## Install Inkscape 0.48
+#### Sandcastle Documentation Compiler Tools
 
-## Install Web Essentials 2015
+#### Sandcastle Help File Builder
 
-## # Clone repository - Training
+### Install MSBuild Community Tasks
+
+### Install ASP.NET ViewState Helper 2.0.1
+
+### Install Inkscape 0.48
+
+### Install Web Essentials 2015
+
+### # Clone repository - Training
 
 ```PowerShell
 mkdir src\Repos
@@ -887,15 +1009,15 @@ cd src\Repos
 git clone https://techtoolbox.visualstudio.com/DefaultCollection/_git/Training
 ```
 
-## # Install ng-demos
+### # Install ng-demos
 
-### # Install package dependencies
+#### # Install package dependencies
 
 ```PowerShell
 npm install -g node-inspector
 ```
 
-### # Clone repo
+#### # Clone repo
 
 ```PowerShell
 cd Training
@@ -903,7 +1025,7 @@ cd Training
 git clone https://github.com/johnpapa/ng-demos.git
 ```
 
-### # Install packages
+#### # Install packages
 
 ```PowerShell
 cd ng-demos\modular
@@ -911,7 +1033,7 @@ cd ng-demos\modular
 npm install
 ```
 
-### # Run dev build
+#### # Run dev build
 
 ```PowerShell
 gulp serve-dev-debug
