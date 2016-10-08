@@ -1,11 +1,13 @@
 ﻿# EXT-WEB02A - Windows Server 2012 R2 Standard
 
-Wednesday, June 1, 2016
-7:19 AM
+Tuesday, October 4, 2016
+5:13 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
+
+Install SecuritasConnect v4.0
 
 ## Deploy and configure the server infrastructure
 
@@ -24,21 +26,22 @@ cls
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-WEB02A"
+$vmPath = "E:\NotBackedUp\VMs"
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
-    -Path E:\NotBackedUp\VMs `
+    -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 45GB `
-    -MemoryStartupBytes 8GB `
+    -MemoryStartupBytes 12GB `
     -SwitchName "Production"
 
 Set-VM `
     -ComputerName $vmHost `
-    -VMName $vmName `
+    -Name $vmName `
     -ProcessorCount 4
 
 Set-VMDvdDrive `
@@ -61,10 +64,6 @@ Start-VM -ComputerName $vmHost -Name $vmName
   - In the **Workgroup **box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
-
-```PowerShell
-cls
-```
 
 #### # Copy latest Toolbox content
 
@@ -160,7 +159,7 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
-### # Join domain
+### # Join member server to domain
 
 ```PowerShell
 Add-Computer `
@@ -188,6 +187,12 @@ Restart-Computer $computerName
 ---
 
 ### Login as EXTRANET\\setup-sharepoint
+
+### # Set MaxPatchCacheSize to 0 (Recommended)
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+```
 
 ### # Select "High performance" power scheme
 
@@ -245,23 +250,16 @@ cls
 & "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
 ```
 
-##### # Submit certificate request to the Certification Authority
+##### # Submit certificate request to Certification Authority
 
 ###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
 
 ```PowerShell
 $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
 
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$($adcsUrl.Host)")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns $adcsUrl.AbsoluteUri
 
 Start-Process $adcsUrl.AbsoluteUri
 ```
@@ -353,7 +351,7 @@ cls
 #### # Remove the Operations Manager installation media
 
 ```PowerShell
-Set-VMDvdDrive -ComputerName BEAST -VMName EXT-WEB02A -Path $null
+Set-VMDvdDrive -ComputerName FORGE -VMName EXT-WEB02A -Path $null
 ```
 
 ---
@@ -379,8 +377,8 @@ slmgr /ato
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
 | 0    | C:           | 45 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 20 GB       | Dynamic  | 4K                   | Data01       |
-| 2    | L:           | 10 GB       | Dynamic  | 4K                   | Log01        |
+| 1    | D:           | 40 GB       | Dynamic  | 4K                   | Data01       |
+| 2    | L:           | 20 GB       | Dynamic  | 4K                   | Log01        |
 
 ---
 
@@ -390,26 +388,27 @@ slmgr /ato
 cls
 ```
 
-### # Create Data01, Log01, and Backup01 VHDs
+### # Create Data01 and Log01 VHDs
 
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-WEB02A"
+$vmPath = "E:\NotBackedUp\VMs\$vmName"
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
     + "_Data01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 20GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 40GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
     + "_Log01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 10GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 20GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
@@ -449,19 +448,118 @@ Get-Disk 2 |
         -Confirm:$false
 ```
 
-### # Set MaxPatchCacheSize to 0 (Recommended)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
-```
-
 ### Install latest service pack and updates
+
+## Install and configure SharePoint Server 2013
+
+### Install SharePoint 2013 prerequisites on farm servers
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Install Prince on front-end Web servers
+#### # Mount SharePoint Server 2013 installation media
+
+```PowerShell
+$vmHost = "FORGE"
+$vmName = "EXT-WEB02A"
+$imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
+    + "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
+```
+
+---
+
+```Console
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$sourcePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013" `
+    + "\PrerequisiteInstallerFiles_SP1"
+
+$prereqPath = "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1"
+
+robocopy $sourcePath $prereqPath /E
+
+& X:\PrerequisiteInstaller.exe `
+    /SQLNCli:"$prereqPath\sqlncli.msi" `
+    /PowerShell:"$prereqPath\Windows6.1-KB2506143-x64.msu" `
+    /NETFX:"$prereqPath\dotNetFx45_Full_setup.exe" `
+    /IDFX:"$prereqPath\Windows6.1-KB974405-x64.msu" `
+    /Sync:"$prereqPath\Synchronization.msi" `
+    /AppFabric:"$prereqPath\WindowsServerAppFabricSetup_x64.exe" `
+    /IDFX11:"$prereqPath\MicrosoftIdentityExtensions-64.msi" `
+    /MSIPCClient:"$prereqPath\setup_msipc_x64.msi" `
+    /WCFDataServices:"$prereqPath\WcfDataServices.exe" `
+    /KB2671763:"$prereqPath\AppFabric1.1-RTM-KB2671763-x64-ENU.exe" `
+    /WCFDataServices56:"$prereqPath\WcfDataServices-5.6.exe"
+```
+
+> **Important**
+>
+> Wait for the prerequisites to be installed. When prompted, restart the server to continue the installation.
+
+```PowerShell
+Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
+```
+
+### # Install SharePoint Server 2013 on farm servers
+
+```PowerShell
+& X:\setup.exe
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Dismount SharePoint Server 2013 installation media
+
+```PowerShell
+$vmHost = "FORGE"
+$vmName = "EXT-WEB02A"
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+---
+
+### # Add SharePoint bin folder to PATH environment variable
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    ("C:\Program Files\Common Files\Microsoft Shared\web server extensions" `
+        + "\15\BIN") `
+    -EnvironmentVariableTarget "Machine"
+
+exit
+```
+
+> **Important**
+>
+> Restart PowerShell for environment variable change to take effect.
+
+### # Install Cumulative Update for SharePoint Server 2013
+
+#### # Download update
 
 ```PowerShell
 net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
@@ -470,6 +568,89 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 > **Note**
 >
 > When prompted, type the password to connect to the file share.
+
+```PowerShell
+$patch = "15.0.4833.1000 - SharePoint 2013 June 2016 CU"
+
+$sourcePath = ("\\ICEMAN\Products\Microsoft\SharePoint 2013" `
+    + "\Patches\$patch")
+
+$destPath = "C:\NotBackedUp\Temp\$patch"
+
+robocopy $sourcePath $destPath /E
+```
+
+#### # Install update
+
+```PowerShell
+& "$destPath\*.exe"
+```
+
+> **Important**
+>
+> Wait for the update to be installed.
+
+```Console
+cls
+Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
+```
+
+### # Install Cumulative Update for AppFabric 1.1
+
+#### # Download update
+
+```PowerShell
+$patch = "Cumulative Update 7"
+
+$sourcePath = ("\\ICEMAN\Products\Microsoft\AppFabric 1.1" `
+    + "\Patches\$patch")
+
+$destPath = "C:\NotBackedUp\Temp\$patch"
+
+robocopy $sourcePath $destPath /E
+```
+
+#### # Install update
+
+```PowerShell
+& "$destPath\*.exe"
+```
+
+> **Important**
+>
+> Wait for the update to be installed.
+
+```Console
+cls
+Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
+```
+
+#### # Enable nonblocking garbage collection for Distributed Cache Service
+
+```PowerShell
+Notepad ($env:ProgramFiles `
+    + "\AppFabric 1.1 for Windows Server\DistributedCacheService.exe.config")
+```
+
+---
+
+**DistributedCacheService.exe.config**
+
+```XML
+  <appSettings>
+    <add key="backgroundGC" value="true"/>
+  </appSettings>
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Install and configure additional software
+
+### # Install Prince on front-end Web servers
 
 ```PowerShell
 & "\\ICEMAN\Products\Prince\prince-7.1-setup.exe"
@@ -498,186 +679,11 @@ Copy-Item `
    3. Verify the license information and then click **Close**.
 3. Close the Prince application.
 
-## Install and configure SharePoint Server 2013
-
-```PowerShell
-cls
-```
-
-### # Install SharePoint 2013 prerequisites on the farm servers
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-#### # Insert the SharePoint 2013 installation media into the DVD drive for the SharePoint VM
-
-```PowerShell
-$imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
-    + "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
-
-Set-VMDvdDrive -ComputerName FORGE -VMName EXT-WEB02A -Path $imagePath
-```
-
----
-
-```Console
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$sourcePath = `
-    "\\ICEMAN\Products\Microsoft\SharePoint 2013\PrerequisiteInstallerFiles_SP1"
-
-$prereqPath = "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1"
-
-robocopy $sourcePath $prereqPath /E
-
-& X:\PrerequisiteInstaller.exe `
-    /SQLNCli:"$prereqPath\sqlncli.msi" `
-    /PowerShell:"$prereqPath\Windows6.1-KB2506143-x64.msu" `
-    /NETFX:"$prereqPath\dotNetFx45_Full_setup.exe" `
-    /IDFX:"$prereqPath\Windows6.1-KB974405-x64.msu" `
-    /Sync:"$prereqPath\Synchronization.msi" `
-    /AppFabric:"$prereqPath\WindowsServerAppFabricSetup_x64.exe" `
-    /IDFX11:"$prereqPath\MicrosoftIdentityExtensions-64.msi" `
-    /MSIPCClient:"$prereqPath\setup_msipc_x64.msi" `
-    /WCFDataServices:"$prereqPath\WcfDataServices.exe" `
-    /KB2671763:"$prereqPath\AppFabric1.1-RTM-KB2671763-x64-ENU.exe" `
-    /WCFDataServices56:"$prereqPath\WcfDataServices-5.6.exe"
-```
+### Install additional service packs and updates
 
 > **Important**
 >
-> Wait for the prerequisites to be installed.
-
-```PowerShell
-Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
-```
-
-### # Install SharePoint Server 2013 on the farm servers
-
-```PowerShell
-& X:\setup.exe
-```
-
-> **Important**
->
-> Wait for the installation to complete.
-
-#### Issue
-
-Error encountered during setup (presumably the ArpWrite bug)
-
-#### Workaround
-
-Ran the setup again (without changing anything) and it completed successfully.
-
-```PowerShell
-cls
-```
-
-### # Install Cumulative Update for SharePoint Server 2013
-
-```PowerShell
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$patch = "15.0.4833.1000 - SharePoint 2013 June 2016 CU"
-
-robocopy `
-    "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\$patch" `
-    "C:\NotBackedUp\Temp\$patch" `
-    /E
-
-& "C:\NotBackedUp\Temp\$patch\*.exe"
-```
-
-> **Important**
->
-> Wait for the patch to be installed.
-
-```PowerShell
-Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
-```
-
-```PowerShell
-cls
-```
-
-### # Install Cumulative Update for AppFabric 1.1
-
-#### # Download update
-
-```PowerShell
-$patch = "Cumulative Update 7"
-
-robocopy `
-    "\\ICEMAN\Products\Microsoft\AppFabric 1.1\Patches\$patch" `
-    "C:\NotBackedUp\Temp\$patch" `
-    /E
-```
-
-#### # Install update
-
-```PowerShell
-& "C:\NotBackedUp\Temp\$patch\*.exe"
-```
-
-> **Important**
->
-> Wait for the patch to be installed.
-
-```PowerShell
-Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
-```
-
-#### # Enable nonblocking garbage collection for Distributed Cache Service
-
-```PowerShell
-notepad ($env:ProgramFiles `
-    + "\AppFabric 1.1 for Windows Server\DistributedCacheService.exe.config")
-```
-
----
-
-**DistributedCacheService.exe.config**
-
-```XML
-  <appSettings>
-    <add key="backgroundGC" value="true"/>
-  </appSettings>
-```
-
----
-
-### # Add the SharePoint bin folder to the PATH environment variable
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
-    ("C:\Program Files\Common Files\Microsoft Shared\web server extensions" `
-        + "\15\BIN") `
-    -EnvironmentVariableTarget "Machine"
-
-exit
-```
-
-> **Important**
->
-> Restart PowerShell for environment variable change to take effect.
+> Wait for the updates to be installed and restart the server (if necessary).
 
 ### Add Web servers to the farm
 
@@ -686,7 +692,7 @@ exit
 ```PowerShell
 $tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
 
-$sourceScript = "\\EXT-APP02A\Builds\Securitas\ClientPortal\4.0.673.0" `
+$sourceScript = "\\EXT-APP02A\Builds\ClientPortal\4.0.675.0" `
     + "\DeploymentFiles\Scripts\Configure DCOM Permissions.ps1"
 
 Get-Content $sourceScript | Out-File $tempScript
@@ -696,17 +702,13 @@ Get-Content $sourceScript | Out-File $tempScript
 Remove-Item $tempScript
 ```
 
-### Create and configure the search service application
-
-#### Modify search topology
-
 ```PowerShell
 cls
 ```
 
-### # Configure the People Picker to support searches across one-way trust
+### # Configure People Picker to support searches across one-way trust
 
-#### # Set the application password used for encrypting credentials
+#### # Set application password used for encrypting credentials
 
 ```PowerShell
 $appPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
@@ -723,7 +725,7 @@ $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
 stsadm -o setapppassword -password $plainPassword
 ```
 
-#### # Modify the permissions on the registry key where the encrypted credentials are stored
+#### # Modify permissions on registry key where encrypted credentials are stored
 
 ```PowerShell
 $regPath = `
@@ -767,7 +769,7 @@ cls
 cls
 ```
 
-### # Configure SSL on the Internet zone
+### # Configure SSL on Internet zone
 
 #### # Install SSL certificate
 
@@ -794,37 +796,24 @@ Import-PfxCertificate `
     -Password $certPassword
 ```
 
-#### Add an HTTPS binding to the site in IIS
+#### Add HTTPS binding to site in IIS
 
 ```PowerShell
 cls
 ```
 
-### # Enable disk-based caching for the Web application
+### # Enable disk-based caching for Web application
 
 ```PowerShell
-Push-Location C:\inetpub\wwwroot\wss\VirtualDirectories\client-test.securitasinc.com80
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + "client-test.securitasinc.com80")
 
 copy web.config "web - Copy.config"
 
-Notepad web.config
-```
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    '\\EXT-APP02A\C$\inetpub\wwwroot\wss\VirtualDirectories\client-test.securitasinc.com80\web.config' `
+    .\web.config
 
----
-
-**Web.config**
-
-```XML
-    <BlobCache
-      location="D:\BlobCache\14"
-      path="\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
-      maxSize="10"
-      enabled="true" />
-```
-
----
-
-```PowerShell
 Pop-Location
 ```
 
@@ -835,9 +824,20 @@ cls
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.XXX.0\DeploymentFiles\Scripts
+$tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
 
-& '.\Add Event Log Sources.ps1' -Verbose
+$sourceScript = "\\EXT-APP02A\Builds\ClientPortal\4.0.675.0" `
+    + "\DeploymentFiles\Scripts\Add Event Log Sources.ps1"
+
+Get-Content $sourceScript | Out-File $tempScript
+
+& $tempScript -Verbose
+
+Remove-Item $tempScript
+```
+
+```PowerShell
+cls
 ```
 
 ### # Configure claims-based authentication
@@ -890,90 +890,227 @@ notepad web.config
 Pop-Location
 ```
 
-## Create and configure the Cloud Portal Web application
+## Create and configure media website
 
-### Configure SSL on the Internet zone
+### Install IIS Media Services 4.1
 
-#### Add an HTTPS binding to the site in IIS
+#### Download Web Platform Installer
+
+(skipped)
 
 ```PowerShell
 cls
 ```
 
-### # Enable disk-based caching for the Web application
+#### # Install IIS Media Services
 
 ```PowerShell
-Push-Location C:\inetpub\wwwroot\wss\VirtualDirectories\cloud-test.securitasinc.com80
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+& ('\\ICEMAN\Products\Microsoft' `
+    + '\Web Platform Installer 5.0\wpilauncher.exe')
+```
+
+```PowerShell
+cls
+```
+
+### # Install Web Deploy 3.6
+
+#### # Install Web Deploy
+
+```PowerShell
+& ("\\ICEMAN\Products\Microsoft" `
+    + "\Web Platform Installer 5.0\wpilauncher.exe")
+```
+
+```PowerShell
+cls
+```
+
+### # Create media website on front-end Web servers
+
+#### # Create media website on first front-end Web server
+
+```PowerShell
+$tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
+
+$sourceScript = "\\EXT-APP02A\Builds\ClientPortal\4.0.675.0" `
+    + "\DeploymentFiles\Scripts\Configure Media Website.ps1"
+
+Get-Content $sourceScript | Out-File $tempScript
+
+& $tempScript -SiteName media-test.securitasinc.com -Verbose
+
+Remove-Item $tempScript
+```
+
+#### Configure SSL bindings on media website
+
+```PowerShell
+cls
+```
+
+#### # Create media website on other web servers in farm
+
+```PowerShell
+Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
+
+$websiteName = "media-test.securitasinc.com"
+
+.\msdeploy.exe -verb:sync `
+    -source:apppoolconfig="$websiteName" `
+    -dest:apppoolconfig="$websiteName"`,computername=EXT-WEB02B
+```
+
+.\\msdeploy.exe -verb:sync `
+
+```PowerShell
+    -source:apphostconfig="$websiteName" `
+    -dest:apphostconfig="$websiteName"`,computername=EXT-WEB02B
+```
+
+```PowerShell
+cls
+Pop-Location
+```
+
+### # Copy media website to front-end Web servers
+
+#### # Copy media website content from Production
+
+```PowerShell
+net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$websiteName = "media-test.securitasinc.com"
+
+robocopy `
+```
+
+    '[\\\\ICEMAN\\Archive\\Clients\\Securitas\\Media](\\ICEMAN\Archive\Clients\Securitas\Media)' C:\\inetpub\\wwwroot\\\$websiteName /E
+
+```PowerShell
+cls
+```
+
+#### # Copy media website content to other front-end Web server in farm
+
+```PowerShell
+$websiteName = "media-test.securitasinc.com"
+
+$contentPath = "C:\inetpub\wwwroot\$websiteName"
+
+Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
+
+.\msdeploy.exe -verb:sync `
+    -source:contentPath="$contentPath" `
+    -dest:contentPath="$contentPath"`,computername=EXT-WEB02B
+
+Pop-Location
+```
+
+## Create and configure the Cloud Portal Web application
+
+### Configure SSL on the Internet zone
+
+#### Add HTTPS binding to site in IIS
+
+```PowerShell
+cls
+```
+
+### # Enable disk-based caching for Web application
+
+```PowerShell
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + "cloud-test.securitasinc.com80")
 
 copy web.config "web - Copy.config"
 
-Notepad web.config
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    '\\EXT-APP02A\C$\inetpub\wwwroot\wss\VirtualDirectories\cloud-test.securitasinc.com80\web.config' `
+    .\web.config
+
+Pop-Location
 ```
-
----
-
-**Web.config**
-
-```XML
-    <BlobCache
-      location="D:\BlobCache\14"
-      path="\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
-      maxSize="2"
-      enabled="true" />
-```
-
----
 
 ```PowerShell
-Pop-Location
+cls
 ```
 
 ### # Configure logging
 
 ```PowerShell
-robocopy `
-    \\EXT-APP02A\C$\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles `
-    C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles /E
+$tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
 
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.114.0\DeploymentFiles\Scripts
+$sourceScript = "\\EXT-APP02A\Builds\CloudPortal\2.0.122.0" `
+    + "\DeploymentFiles\Scripts\Add Event Log Sources.ps1"
 
-& '.\Add Event Log Sources.ps1' -Verbose
+Get-Content $sourceScript | Out-File $tempScript
+
+& $tempScript -Verbose
+
+Remove-Item $tempScript
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Install Employee Portal
+# Install Employee Portal
 
 ## # Extend SecuritasConnect and Cloud Portal web applications
 
-### # Enable disk-based caching for the "intranet" websites
+```PowerShell
+cls
+```
+
+### # Enable disk-based caching for "intranet" websites
+
+#### # Enable disk-based caching for SecuritasConnect "intranet" website
+
+```PowerShell
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + "client2-test.securitasinc.com443")
+
+copy web.config "web - Copy.config"
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    '..\client-test.securitasinc.com80\web.config' `
+    .\web.config
+
+Pop-Location
+```
+
+#### # Enable disk-based caching for Cloud Portal "intranet" website
 
 ```PowerShell
 Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
     + "cloud2-test.securitasinc.com443")
 
-Notepad web.config
-```
+copy web.config "web - Copy.config"
 
----
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    '..\cloud-test.securitasinc.com80\web.config' `
+    .\web.config
 
-**Web.config**
-
-```XML
-    <BlobCache
-      location="D:\BlobCache\14"
-      path="\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
-      maxSize="2"
-      enabled="true" />
-```
-
----
-
-```Console
-cls
 Pop-Location
+```
+
+```PowerShell
+cls
 ```
 
 ### # Map intranet URLs to loopback address in Hosts file
@@ -992,9 +1129,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 
 ## Install Web Deploy 3.6
 
-### Download Web Platform Installer
-
 ### Install Web Deploy
+
+(skipped -- since this was completed earlier)
 
 ```PowerShell
 cls
@@ -1038,13 +1175,3 @@ Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
 > **Important**
 >
 > When prompted, restart the computer to complete the process of installing the updates.
-
-## Issue - IPv6 address range changed by Comcast
-
-### # Update IPv6 DNS servers
-
-```PowerShell
-Set-DnsClientServerAddress `
-    -InterfaceAlias Production `
-    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
-```

@@ -1,13 +1,19 @@
 ﻿# EXT-SQL02 - Windows Server 2012 R2 Standard
 
-Wednesday, June 1, 2016
-7:19 AM
+Tuesday, October 4, 2016
+5:12 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Deploy and configure the server infrastructure
+Install SecuritasConnect v4.0
+
+## Deploy and configure server infrastructure
+
+### Copy Windows Server installation files to file share
+
+(skipped)
 
 ### Install Windows Server 2012 R2
 
@@ -38,7 +44,7 @@ New-VM `
 
 Set-VM `
     -ComputerName $vmHost `
-    -VMName $vmName `
+    -Name $vmName `
     -ProcessorCount 4
 
 Set-VMDvdDrive `
@@ -160,7 +166,7 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
-### # Join domain
+### # Join member server to domain
 
 ```PowerShell
 Add-Computer `
@@ -187,7 +193,51 @@ Restart-Computer $computerName
 
 ---
 
-### Login as EXTRANET\\jjameson-admin
+---
+
+**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
+
+### # Create and configure setup account for SQL Server
+
+#### # Create setup account for SQL Server
+
+```PowerShell
+$displayName = "Setup account for SQL Server"
+$defaultUserName = "setup-sql"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@extranet.technologytoolbox.com"
+$orgUnit = "OU=Setup Accounts,OU=IT,DC=extranet,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true
+```
+
+#### # Add setup account to SQL Server Admins domain group
+
+```PowerShell
+Add-ADGroupMember `
+    -Identity "SQL Server Admins" `
+    -Members "setup-sql"
+```
+
+---
+
+### Login as EXTRANET\\setup-sql
+
+### # Set MaxPatchCacheSize to 0 (Recommended)
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+```
 
 ### # Select "High performance" power scheme
 
@@ -252,16 +302,9 @@ cls
 ```PowerShell
 $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
 
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$($adcsUrl.Host)")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns $adcsUrl.AbsoluteUri
 
 Start-Process $adcsUrl.AbsoluteUri
 ```
@@ -286,7 +329,7 @@ cls
 ##### # Import the certificate into the certificate store
 
 ```PowerShell
-$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+$certFile = "C:\Users\setup-sql\Downloads\certnew.cer"
 
 CertReq.exe -Accept $certFile
 
@@ -353,7 +396,7 @@ cls
 #### # Remove the Operations Manager installation media
 
 ```PowerShell
-Set-VMDvdDrive -ComputerName STORM -VMName EXT-SQL02 -Path $null
+Set-VMDvdDrive -ComputerName FORGE -VMName EXT-SQL02 -Path $null
 ```
 
 ---
@@ -379,10 +422,10 @@ slmgr /ato
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
 | 0    | C:           | 32 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 90 GB       | Fixed    | 64K                  | Data01       |
-| 2    | L:           | 10 GB       | Fixed    | 64K                  | Log01        |
+| 1    | D:           | 150 GB      | Fixed    | 64K                  | Data01       |
+| 2    | L:           | 25 GB       | Fixed    | 64K                  | Log01        |
 | 3    | T:           | 4 GB        | Fixed    | 64K                  | Temp01       |
-| 4    | Z:           | 100GB       | Dynamic  | 4K                   | Backup01     |
+| 4    | Z:           | 400GB       | Dynamic  | 4K                   | Backup01     |
 
 ---
 
@@ -401,7 +444,7 @@ $vmName = "EXT-SQL02"
 $vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
     + "_Data01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 90GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 150GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
@@ -411,7 +454,7 @@ Add-VMHardDiskDrive `
 $vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
     + "_Log01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 10GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 25GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
@@ -428,10 +471,10 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+$vhdPath = "F:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
     + "_Backup01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 100GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 400GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
@@ -498,19 +541,13 @@ Get-Disk 4 |
         -Confirm:$false
 ```
 
-### # Set MaxPatchCacheSize to 0 (Recommended)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
-```
-
 ### Install latest service pack and updates
 
 ### Install SQL Server 2014
 
 > **Important**
 >
-> Login as **EXTRANET\\jjameson-admin** to install SQL Server.
+> Login as **EXTRANET\\setup-sql** to install SQL Server.
 
 ---
 
@@ -523,16 +560,58 @@ cls
 #### # Mount SQL Server 2014 installation media
 
 ```PowerShell
+$vmHost = "FORGE"
+$vmName = "EXT-SQL02"
 $imagePath = "\\ICEMAN\Products\Microsoft\SQL Server 2014" `
-    + "\en_sql_server_2014_developer_edition_with_service_pack_1_x64_dvd_6668542.iso"
+    + "\en_sql_server_2014_developer_edition_with_service_pack_2_x64_dvd_8967821.iso"
 
-Set-VMDvdDrive -ComputerName FORGE -VMName EXT-SQL02 -Path $imagePath
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
 ```
 
 ---
 
 ```PowerShell
 & X:\setup.exe
+```
+
+> **Important**
+>
+> Wait for the installation to complete and restart the computer (if necessary).
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Dismount SQL Server 2014 installation media
+
+```PowerShell
+$vmHost = "FORGE"
+$vmName = "EXT-SQL02"
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Configure permissions on \\Windows\\System32\\LogFiles\\Sum files
+
+```PowerShell
+icacls C:\Windows\System32\LogFiles\Sum\Api.chk `
+    /grant "NT Service\MSSQLSERVER:(M)"
+
+icacls C:\Windows\System32\LogFiles\Sum\Api.log `
+    /grant "NT Service\MSSQLSERVER:(M)"
+
+icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb `
+    /grant "NT Service\MSSQLSERVER:(M)"
 ```
 
 ---
@@ -606,13 +685,9 @@ ALTER DATABASE [tempdb]
     SIZE = 50MB,
     FILEGROWTH = 10MB
   )
+
+GO
 ```
-
----
-
----
-
-**SQL Server Management Studio**
 
 ### -- Configure "Max Degree of Parallelism" for SharePoint
 
@@ -629,23 +704,6 @@ GO
 ```
 
 ---
-
-```PowerShell
-cls
-```
-
-### # Configure permissions on \\Windows\\System32\\LogFiles\\Sum files
-
-```PowerShell
-icacls C:\Windows\System32\LogFiles\Sum\Api.chk `
-    /grant "NT Service\MSSQLSERVER:(M)"
-
-icacls C:\Windows\System32\LogFiles\Sum\Api.log `
-    /grant "NT Service\MSSQLSERVER:(M)"
-
-icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb `
-    /grant "NT Service\MSSQLSERVER:(M)"
-```
 
 ### # Configure firewall rule for SQL Server
 
@@ -687,230 +745,275 @@ Start-Sleep -Seconds 15
 Start-Service SQLSERVERAGENT
 ```
 
-## Extend Data01 volume (D:) from 90 GB to 100 GB
-
-> **Note**
->
-> This process was performed after completing the SharePoint 2013 upgrade.
-
----
-
-**FOOBAR8**
-
-```PowerShell
-Resize-VHD `
-    -ComputerName FORGE `
-    -Path "D:\NotBackedUp\VMs\EXT-SQL02\Virtual Hard Disks\EXT-SQL02_Data01.vhdx" `
-    -SizeBytes 100GB
-```
-
----
-
-```PowerShell
-Get-Partition -DriveLetter D
-
-
-   Disk Number: 1
-
-PartitionNumber  DriveLetter Offset                                        Size Type
----------------  ----------- ------                                        ---- ----
-1                D           1048576                                      90 GB IFS
-
-
-$size = (Get-PartitionSupportedSize -DiskNumber 1 -PartitionNumber 1)
-Resize-Partition -DiskNumber 1 -PartitionNumber 1 -Size $size.SizeMax
-
-Get-Partition -DriveLetter D
-
-
-   Disk Number: 1
-
-PartitionNumber  DriveLetter Offset                                        Size Type
----------------  ----------- ------                                        ---- ----
-1                D           1048576                                     100 GB IFS
-```
-
-## Expand backup volume
-
-### Move Backup01 VHD to ICEMAN
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2D/46330C9362DF59D31244DB17343DB02AD347DA2D.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A4/ADCD983D2D2DE13DFD89F290C422657B60B56EA4.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/45/2ECA83F8FA9B7176D3C56DB206E24C52BE3AA945.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/E66D481A46AAF46A104498D1B05E485CF139B7F8.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D3/266B4D6C29727F78869BF395A29981B99307A4D3.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/50/031E8050C3B45BF87F9005878CB1BFC072D8AA50.png)
-
-[\\\\iceman.corp.technologytoolbox.com\\VM-Storage-Silver\\EXT-SQL02\\](\\iceman.corp.technologytoolbox.com\VM-Storage-Silver\EXT-SQL02\)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A7/6A447F908B86F86BB402798E18C66BD1804F24A7.png)
-
-### Expand Backup01 VHD
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/E834DBFBBE0CFCF7438E01135C6A14D7492F97E2.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/C54D0749E02FBEB34351F072EA790A96187DB1CE.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/48/743059D28409658B0C323C8845C9EA339EC9ED48.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D5/E57C24239D9F888F68A7EDF48E7DC4F44DB337D5.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/45FF1EB4EBB351B0F4B1C872A0B7D3DF96A78C2C.png)
-
-```PowerShell
-cls
-```
-
-### # Expand Z: partition
-
-```PowerShell
-$maxSize = (Get-PartitionSupportedSize -DriveLetter Z).SizeMax
-
-Resize-Partition -DriveLetter Z -Size $maxSize
-```
-
 ```PowerShell
 cls
 ```
 
 ## # Configure SQL Server backups
 
-### # Delete PROD backups
-
-```PowerShell
-Remove-Item "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full" -Recurse
-```
-
 ### # Create folders for backups
 
 ```PowerShell
-mkdir "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Differential"
-mkdir "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
-mkdir "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Transaction Log"
+$backupPath = "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup"
+
+New-Item -ItemType Directory -Path "$backupPath\Differential"
+New-Item -ItemType Directory -Path "$backupPath\Full"
+New-Item -ItemType Directory -Path "$backupPath\Transaction Log"
 ```
 
-### Create maintenance plans
+### Create backup maintenance plans
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A4/92EAB0ACBC0CFA9CE4DEDC7EC4E11178C6E4BEA4.png)
+<table>
+<thead>
+<th>
+<p><strong>Name</strong></p>
+</th>
+<th>
+<p><strong>Frequency</strong></p>
+</th>
+<th>
+<p><strong>Daily Frequency</strong></p>
+</th>
+<th>
+<p><strong>Backup compression</strong></p>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Full Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Weekly</strong><br />
+Recurs every: <strong>1</strong> week on</p>
+<ul>
+<li><strong>Sunday</strong></li>
+</ul>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>12:00:00 AM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>Compress backup</strong></p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Differential Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Daily</strong><br />
+Recurs every: <strong>1</strong> day</p>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>11:30:00 PM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>Compress backup</strong></p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Transaction Log Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Daily</strong><br />
+Recurs every: <strong>1</strong> day</p>
+</td>
+<td valign='top'>
+<p>Occurs every: <strong>1 hour</strong><br />
+Starting at:<strong> 12:55:00 AM</strong><br />
+Ending at:<strong> 11:59:59 PM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>Do not compress backup</strong></p>
+</td>
+</tr>
+</table>
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/6B2D0A94DA29FE8AE6BE575600EAAC81FC39453B.png)
+#### Create maintenance plan for full backup of all databases
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/ED/68EC3AB26AEEC9F704CA15C22E2335A8DEC27AED.png)
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Full Backup of All Databases**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Full)**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Back Up Database (Full) Task** page:
+      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Full**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, select **Compress backup**.
+      4. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0F/9D4735C00E9C5A69DF9513C8C2970FF05CD1E20F.png)
+#### Create maintenance plan for differential backup of all databases
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/0840D973A0BE838AFA974EA8DD0C037A1AA002EF.png)
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Differential Backup of All Databases**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Differential)**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Back Up Database (Differential) Task** page:
+      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Differential**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, select **Compress backup**.
+      4. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/9F33C9E1FCAEF021C023C2CBBF3A9FE0D6E45A94.png)
+#### Create maintenance plan for transaction log backup of all databases
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/47/F4B705FEB0DABFBEB96891879D18AB5A2B9AC947.png)
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Transaction Log Backup of All Databases**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Transaction Log)**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Back Up Database (Full) Task** page:
+      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, select **Do not compress backup**.
+      4. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F7/D1F01DF32846332C9F50696D6218DF9195998EF7.png)
+### Create cleanup maintenance plan
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/F0F72922397B1B266B1C1C6864B8B766CD9B1E30.png)
+<table>
+<thead>
+<th>
+<p><strong>Name</strong></p>
+</th>
+<th>
+<p><strong>Frequency</strong></p>
+</th>
+<th>
+<p><strong>Daily Frequency</strong></p>
+</th>
+<th>
+<p><strong>Maintenance Cleanup Task Settings</strong></p>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Remove Old Database Backups</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Weekly</strong><br />
+Recurs every: <strong>1</strong> week on</p>
+<ul>
+<li><strong>Sunday</strong></li>
+</ul>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>12:45:00 AM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>First Task (Remove Full and Differential Backups)</strong></p>
+<p><strong>Delete files of the following type:</strong></p>
+<ul>
+<li><strong>Backup files</strong></li>
+</ul>
+<p><strong>File location:</strong></p>
+<ul>
+<li><strong>Search folder and delete files based on an extension</strong>
+<ul>
+<li><strong>Folder: Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\</strong></li>
+<li><strong>File Extension: bak</strong></li>
+<li><strong>Include first-level subfolders: Yes (checked)</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>File age:</strong></p>
+<ul>
+<li><strong>Delete files based on the age of the file at task run time</strong></li>
+<li><strong>Delete files older than the following: 3  Week(s)</strong></li>
+</ul>
+<p><strong>Second Task (Remove Transaction Log Backups)</strong></p>
+<p><strong>Delete files of the following type:</strong></p>
+<ul>
+<li><strong>Backup files</strong></li>
+</ul>
+<p><strong>File location:</strong></p>
+<ul>
+<li><strong>Search folder and delete files based on an extension</strong>
+<ul>
+<li><strong>Folder: Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\</strong></li>
+<li><strong>File Extension: trn</strong></li>
+<li><strong>Include first-level subfolders: No (unchecked)</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>File age:</strong></p>
+<ul>
+<li><strong>Delete files based on the age of the file at task run time</strong></li>
+<li><strong>Delete files older than the following: 3  Week(s)</strong></li>
+</ul>
+</td>
+</tr>
+</table>
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/10/12FCA3503A84FD62BE38507210566B0949435E10.png)
+#### Create maintenance plan to remove old Full and Differential backups
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FD/92974E28265DE92F42D0A7A2C240A4B2E0A6C0FD.png)
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Remove Old Database Backups**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Maintenance Cleanup Task**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Maintenance Cleanup Task** page:
+      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\**.
+      2. In the **File extension **box, type **bak**.
+      3. Select the **Include first-level subfolders** checkbox.
+      4. In the **File age** section, configure the settings to delete files older than **3 Week(s)**.
+      5. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/68/348133783DF27FFC3442A97FF0D633E9F6E3E468.png)
+#### Modify maintenance plan to remove old Transaction Log backups
 
-Click **Next**.
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, expand **Maintenance Plans**, right-click **Remove Old Database Backups** and click **Modify**.
+3. In the Maintenance Plan designer:
+   1. Right-click **Maintenance Cleanup Task** and click **Properties**.
+   2. In the **Properties** window:
+      1. If necessary, expand the **Identification** section.
+      2. In the **Name** box, type **Remove Full and Differential Backups**.
+   3. Use the **Toolbox** to add a new **Maintenance Cleanup Task**.
+   4. Right-click the new task and click **Properties**.
+   5. In the **Properties** window:
+      1. If necessary, expand the **Identification** section.
+      2. In the **Name** box, type **Remove Transaction Log Backups**.
+   6. Right-click the **Remove Transaction Log Backups** task and click **Edit...**
+   7. In the **Maintenance Cleanup Task** window:
+      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
+      2. In the **File extension **box, type **trn**.
+      3. In the **File age** section, configure the settings to delete files older than **3 Week(s)**.
+      4. Click **OK**.
+4. On the **File** menu, click **Save Selected Items**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/77/AA95227C0936FC4B3D3767EFD2A87740A7D2A877.png)
-
-Click Finish.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/D4E1C303E2A2B267DF7CF29BDAD4AC6871DAB7D4.png)
-
-Click Close.
-
-Execute maintenance plan to backup databases.
-
-Diff backups
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E6/5D0821A67E2699D0E7D61751FF92DEE479CD8EE6.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A5/910820131F02D93389562BE1629678A07E5D11A5.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/DE90D224862447B2AF95A5A43E0D566ED9982971.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/1A8EF1DB5B2FF306796C1F3BD0FE249D6895D9C5.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/E9DDBF6B6B3BDC73A9D9BF53CC94F043B066B4AE.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/87/F52787696AF303146E9A28C77604A432D42E0687.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A1/EFFC50003F55582EE106DB9D4B650478534817A1.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B0/F2D247EEC5EBC002CF6E30E269F22895EE044FB0.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/68/348133783DF27FFC3442A97FF0D633E9F6E3E468.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/66/199D5CF3E0D38BDCD201AFA56CCA7BDB46F50866.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/022C9A742A243162881FBA86EEA5D85466A9D9B6.png)
-
-Tran logs
-
-Transaction Log Backup of All Databases
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C4/50DBCFEA92E579D8141565980415B7BA2B3CC4C4.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/C9526CAB07B7C275D5B24E901D2CA5E623CBCEB1.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8B/67B61D66F6141F1B2E143AA4EE162A552013868B.png)
-
-## Execute maintenance plan - Full Backup of All Databases
-
-Start 6/2/2016 8:46:36 PM\
-End 6/2/2016 9:06:18 PM
-
-Duration: 20 minutes
-
-### Network utilization
-
-#### ICEMAN
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/F73B1828336A853D8A19AE9442B01DC636D377BC.png)
-
-#### FORGE
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/83/C7EA41467D7EDE7354A56C648F4193B734B3D583.png)
-
-### Solution
-
-#### Move VHD back to DAS
-
-**E:\\NotBackedUp\\VMs\\EXT-SQL02\\Virtual Hard Disks\\EXT-SQL02_Backup01.vhdx**
-
-Start 6/3/2016 4:09:21 AM\
-End 6/3/2016 4:17:51 AM
-
-Duration: 8.5 minutes
-
-## Create scheduled task to delete old database backups
-
-1. Open Task Scheduler.
-2. Click **Import Task...**
-3. In the **Open** dialog:
-   1. In the **File name** box, type **C:\\NotBackedUp\\Public\\Toolbox\\PowerShell\\Remove Old Database Backups.xml**.
-   2. Click **Open**.
-4. In the **Create Task **dialog:
-   1. On the **Actions** tab, click **Edit...**
-   2. In the **Edit Action** dialog:
-      1. In the **Add arguments (optional)** box, type **Z:\\ 0**.
-      2. Click **OK**.
-   3. Click **OK**.
-
-> **Note**
->
-> The first argument (**Z:\\**) specifies the backup path. The second argument (**0**) specifies the number of days to keep backup files for. Since the task is scheduled to run at 11:45 PM every Saturday -- 15 minutes before the SQL Server maintenance plan that performs a full backup of all databases -- this results in the deletion of all previous backups just before starting a full backup of all databases.
+### Execute maintenance plan - Full Backup of All Databases
 
 ## Configure DCOM permissions for SQL Server
 
@@ -935,45 +1038,6 @@ to the user NT SERVICE\\SQLSERVERAGENT SID (S-1-5-80-344959196-2060754871-230248
 
 ```PowerShell
 & 'C:\NotBackedUp\Public\Toolbox\SQL\Configure DCOM Permissions.ps1'
-```
-
-## Extend Data01 volume (D:) from 90 GB to 100 GB
-
----
-
-**FOOBAR8**
-
-```PowerShell
-Resize-VHD `
-    -ComputerName FORGE `
-    -Path "D:\NotBackedUp\VMs\EXT-SQL02\Virtual Hard Disks\EXT-SQL02_Data01.vhdx" `
-    -SizeBytes 115GB
-```
-
----
-
-```PowerShell
-Get-Partition -DriveLetter D
-
-
-   Disk Number: 1
-
-PartitionNumber  DriveLetter Offset                                        Size Type
----------------  ----------- ------                                        ---- ----
-1                D           1048576                                     100 GB IFS
-
-
-$size = (Get-PartitionSupportedSize -DiskNumber 1 -PartitionNumber 1)
-Resize-Partition -DiskNumber 1 -PartitionNumber 1 -Size $size.SizeMax
-
-Get-Partition -DriveLetter D
-
-
-   Disk Number: 1
-
-PartitionNumber  DriveLetter Offset                                        Size Type
----------------  ----------- ------                                        ---- ----
-1                D           1048576                                     115 GB IFS
 ```
 
 **TODO:**
