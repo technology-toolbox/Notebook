@@ -1,7 +1,7 @@
 ﻿# EXT-DC03 - Windows Server 2012 R2 Datacenter
 
-Tuesday, July 19, 2016
-2:29 PM
+Saturday, October 8, 2016
+8:16 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -41,7 +41,7 @@ cls
 
 ```PowerShell
 $imageName = `
-    "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-20160617" `
+    "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-20160915" `
     + "-en.us-127GB.vhd"
 ```
 
@@ -168,7 +168,6 @@ $endpointNames |
 
         Set-AzureEndpoint -Name $endpointName -VM $vm -ACL $acl |
             Update-AzureVM
-
     }
 ```
 
@@ -187,10 +186,6 @@ Get-NetAdapter -Physical
 
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     Rename-NetAdapter -NewName "Azure - Production"
-```
-
-```PowerShell
-cls
 ```
 
 ##### # Configure setting for Azure VM to create reverse DNS record
@@ -254,10 +249,6 @@ Get-Disk 2 |
         -Confirm:$false
 ```
 
-```PowerShell
-cls
-```
-
 #### # Set MaxPatchCacheSize to 0 (Recommended)
 
 ```PowerShell
@@ -275,8 +266,10 @@ net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox `
-    C:\NotBackedUp\Public\Toolbox /E
+$source = "\\iceman.corp.technologytoolbox.com\Public\Toolbox"
+$dest = "C:\NotBackedUp\Public\Toolbox"
+
+robocopy $source $dest /E /NP
 ```
 
 #### # Enable PowerShell remoting
@@ -285,92 +278,26 @@ robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox `
 Enable-PSRemoting -Confirm:$false
 ```
 
-```PowerShell
-cls
-```
+## Configure domain controller
 
-### # Install and configure System Center Operations Manager
+---
 
-#### # Create certificate for Operations Manager
+**EXT-DC01**
 
-##### # Create request for Operations Manager certificate
+### # Create Active Directory site
 
 ```PowerShell
-& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+$siteName = "Azure-West-US"
+$subnet = "10.71.0.0/16"
+
+New-ADReplicationSite -Name $siteName
+
+New-ADReplicationSubnet -Name $subnet -Site $siteName
 ```
 
-##### Submit certificate request to the Certification Authority
+---
 
-**To submit the certificate request to an enterprise CA:**
-
-1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
-2. On the **Welcome** page, click **Request a certificate**.
-3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
-4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
-5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
-6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
-
-```PowerShell
-cls
-```
-
-##### # Import the certificate into the certificate store
-
-```PowerShell
-$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
-
-CertReq.exe -Accept $certFile
-
-Remove-Item $certFile
-```
-
-```PowerShell
-cls
-```
-
-#### # Install SCOM agent
-
-```PowerShell
-net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
-
-$imagePath = `
-    '\\iceman.corp.technologytoolbox.com\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-```PowerShell
-cls
-```
-
-#### # Import the certificate into Operations Manager using MOMCertImport
-
-```PowerShell
-$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
-
-$certImportToolPath = $imageDriveLetter + ':\SupportTools\AMD64'
-
-cd "$certImportToolPath"
-
-.\MOMCertImport.exe /SubjectName $hostName
-```
-
-#### # Approve manual agent install in Operations Manager
-
-```PowerShell
-cls
-```
-
-## # Configure domain controller
+### Login as EXTRANET\\jjameson-admin
 
 ### # Install Active Directory Domain Services
 
@@ -386,6 +313,12 @@ Install-WindowsFeature AD-Domain-Services -IncludeManagementTools -Restart
 cls
 ```
 
+### # Download PowerShell help files
+
+```PowerShell
+Update-Help
+```
+
 ### # Promote server to domain controller
 
 ```PowerShell
@@ -394,7 +327,6 @@ Import-Module ADDSDeployment
 Install-ADDSDomainController `
     -NoGlobalCatalog:$false `
     -CreateDnsDelegation:$false `
-    -Credential (Get-Credential) `
     -CriticalReplicationOnly:$false `
     -DatabasePath "E:\Windows\NTDS" `
     -DomainName "extranet.technologytoolbox.com" `
@@ -405,3 +337,147 @@ Install-ADDSDomainController `
     -SysvolPath "E:\Windows\SYSVOL" `
     -Force:$true
 ```
+
+```PowerShell
+cls
+```
+
+## # Install and configure System Center Operations Manager
+
+### # Create certificate for Operations Manager
+
+#### # Create request for Operations Manager certificate
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+#### # Submit certificate request to the Certification Authority
+
+##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+[Uri] $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+[string[]] $domainParts = $adcsUrl.Host -split '\.'
+
+[string] $subdomain = $domainParts[0..1] -join '.'
+[string] $domain = $domainParts[2..3] -join '.'
+
+[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
+    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
+    + "\$domain")
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+[string] $registryKey = $registryKey + "\$subdomain"
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
+```
+
+##### # Submit the certificate request to an enterprise CA
+
+```PowerShell
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
+**To submit the certificate request to an enterprise CA:**
+
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+Remove-Item $certFile
+```
+
+### # Install SCOM agent
+
+```PowerShell
+net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+#### # Mount the Operations Manager installation media
+
+```PowerShell
+$imagePath = `
+    '\\iceman.corp.technologytoolbox.com\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+```
+
+#### # Start the Operations Manager installation
+
+```PowerShell
+$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = $imageDriveLetter + ':\SupportTools\AMD64'
+
+Push-Location "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName $hostName
+
+Pop-Location
+```
+
+#### # Remove the Operations Manager installation media
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+### # Approve manual agent install in Operations Manager
+
+### # Configure SCOM agent for domain controller
+
+In the **Agent Properties** window, on the **Security** tab, select **Allow this agent to act as a proxy and discover managed objects on other computers** and then click **OK**.
