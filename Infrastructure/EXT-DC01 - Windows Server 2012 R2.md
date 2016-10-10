@@ -674,6 +674,45 @@ Add conditional forwarder for **technologytoolbox.com** (**XAVIER1**, **XAVIER2*
 
 ## Install Microsoft Message Analyzer 1.4
 
+## Issue - NETLOGON 5810 warnings
+
+Log Name:      System\
+Source:        NETLOGON\
+Date:          6/24/2016 10:12:00 PM\
+Event ID:      5810\
+Task Category: None\
+Level:         Warning\
+Keywords:      Classic\
+User:          N/A\
+Computer:      EXT-DC01.extranet.technologytoolbox.com\
+Description:\
+During the past 4.20 hours, this domain controller has received 120 connections from dual-stack IPv4/IPv6 clients with partial subnet-site mappings. A client has a partial subnet-site mapping if its IPv4 address is mapped to a site but its global IPv6 address is not mapped to a site, or vice versa. To ensure correct behavior for applications running on member computers and servers that rely on subnet-site mappings, dual-stack IPv4/IPv6 clients must have both IPv4 and global IPv6 addresses mapped to the same site. If a partially mapped client attempts to connect to this domain controller using its unmapped IP address, its mapped address is used for the client's site mapping.
+
+The log files %SystemRoot%\\debug\\netlogon.log or %SystemRoot%\\debug\\netlogon.bak contain the name, unmapped IP address and mapped IP address for each partially mapped client. The log files may also contain unrelated debugging information. To locate the information pertaining to partial-subnet mappings, search for lines that contain the text 'PARTIAL_CLIENT_SITE_MAPPING:'. The first word after this text is the client name. Following the client name is the client's unmapped IP address (the IP address that does not have a subnet-site mapping) and the client's mapped IP address, which was used to return site information.
+
+USER ACTION\
+Use the Active Directory Sites and Services management console (MMC) snap-in to add the subnet mapping for the unmapped IP addresses to the same site being used by the mapped IP addresses. When adding site mappings for IPv6 addresses, you should use global IPv6 addresses and not for instance temporary, link-local or site-local IPv6 addresses.
+
+The default maximum size of the log files is 20000000 bytes. The current maximum size is 20000000 bytes. To set a different maximum size, create the following registry DWORD value to specify the maximum size in bytes:\
+HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\Netlogon\\Parameters\\LogFileMaxSize
+
+### Troubleshooting
+
+From C:\\Windows\\Debug\\netlogon.log:
+
+05/22 23:50:56 [6440] EXTRANET: PARTIAL_CLIENT_SITE_MAPPING: EXT-APP02A 2601:282:4201:e500::ed: Mapped address 192.168.10.67\
+05/22 23:51:56 [6380] EXTRANET: PARTIAL_CLIENT_SITE_MAPPING: EXT-WEB02B 2601:282:4201:e500::24: Mapped address 192.168.10.69\
+05/22 23:54:46 [6440] EXTRANET: PARTIAL_CLIENT_SITE_MAPPING: EXT-WEB02A 2601:282:4201:e500::c2: Mapped address 192.168.10.68\
+...
+
+### Solution
+
+#### # Add subnet to Active Directory site
+
+```PowerShell
+New-ADReplicationSubnet -Name "2601:282:4201:e500::/64" -Site "Technology-Toolbox-HQ"
+```
+
 ## Issue - IPv6 address range changed by Comcast
 
 ### # Update static IPv6 address
@@ -700,4 +739,10 @@ Remove-NetIPAddress `
 Set-DnsClientServerAddress `
     -InterfaceIndex $ifIndex `
     -ServerAddresses 2603:300b:802:8900::210, ::1
+```
+
+### # Add subnet to Active Directory site
+
+```PowerShell
+New-ADReplicationSubnet -Name "2603:300b:802:8900::/64" -Site "Technology-Toolbox-HQ"
 ```
