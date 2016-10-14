@@ -438,7 +438,7 @@ $command = "New-NetFirewallRule ``
     -Profile Domain ``
     -Action Allow"
 
-$scriptBlock = [scriptblock]::Create($command)
+$scriptBlock = [ScriptBlock]::Create($command)
 
 Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
@@ -498,9 +498,7 @@ Manual steps required to complete the installation of this update
 
 From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
 
-## Issue: Errors due to insufficient memory
-
-### Issue
+## Issue - WSUS errors due to insufficient memory
 
 Log Name:      Application\
 Source:        System.ServiceModel 4.0.0.0\
@@ -531,3 +529,40 @@ Change VM to use dynamic memory (and increase maximum RAM from 2 GB to 4 GB):
 - Startup RAM: **2 GB**
 - Minimum RAM: **512 MB**
 - Maximum RAM: **4 GB**
+
+## Issue - WSUS crashing due to memory constraint
+
+Windows Update failing on clients:
+
+- HRESULT: 0x80244022
+- HRESULT: 0x8024400A
+
+### Troubleshooting
+
+Log Name:      System\
+Source:        Microsoft-Windows-WAS\
+Date:          10/14/2016 9:32:42 AM\
+Event ID:      5117\
+Task Category: None\
+Level:         Information\
+Keywords:      Classic\
+User:          N/A\
+Computer:      COLOSSUS.corp.technologytoolbox.com\
+Description:\
+A worker process serving application pool 'WsusPool' has requested a recycle because it reached its private bytes memory limit.
+
+Log Name:      System\
+Source:        Microsoft-Windows-WAS\
+Date:          10/14/2016 9:33:42 AM\
+Event ID:      5002\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      COLOSSUS.corp.technologytoolbox.com\
+Description:\
+Application pool 'WsusPool' is being automatically disabled due to a series of failures in the process(es) serving that application pool.
+
+### Solution
+
+Modify the properties for **WsusPool** to increase the **Private Memory Limit (KB)** from **1258015** to **2500000**.
