@@ -105,7 +105,7 @@ mountvol X: $volumeId
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
 Get-NetFirewallRule |
@@ -235,5 +235,7 @@ Mozilla Firefox 36.0\
 Mozilla Thunderbird 31.3.0\
 Remote Server Administration Tools for Windows 8.1\
 Hyper-V Management Tools enabled
+
+## Expand C: drive to 34 GB
 
 **TODO:**
