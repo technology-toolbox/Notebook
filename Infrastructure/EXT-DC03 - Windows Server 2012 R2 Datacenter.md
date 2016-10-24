@@ -255,23 +255,6 @@ Get-Disk 2 |
 reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize /t REG_DWORD /d 0 /f
 ```
 
-#### # Copy Toolbox content
-
-```PowerShell
-net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$source = "\\iceman.corp.technologytoolbox.com\Public\Toolbox"
-$dest = "C:\NotBackedUp\Public\Toolbox"
-
-robocopy $source $dest /E /NP
-```
-
 #### # Enable PowerShell remoting
 
 ```PowerShell
@@ -338,6 +321,10 @@ Install-ADDSDomainController `
     -Force:$true
 ```
 
+> **Note**
+>
+> When prompted, specify the password for the administrator account when the computer is started in Safe Mode or a variant of Safe Mode, such as Directory Services Restore Mode.
+
 ```PowerShell
 cls
 ```
@@ -345,6 +332,23 @@ cls
 ## # Install and configure System Center Operations Manager
 
 ### # Create certificate for Operations Manager
+
+#### # Copy Toolbox content
+
+```PowerShell
+net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$source = "\\iceman.corp.technologytoolbox.com\Public\Toolbox"
+$dest = "C:\NotBackedUp\Public\Toolbox"
+
+robocopy $source $dest /E /NP
+```
 
 #### # Create request for Operations Manager certificate
 
@@ -359,35 +363,14 @@ cls
 ```PowerShell
 [Uri] $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
 
-[string[]] $domainParts = $adcsUrl.Host -split '\.'
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns $adcsUrl.AbsoluteUri
 
-[string] $subdomain = $domainParts[0..1] -join '.'
-[string] $domain = $domainParts[2..3] -join '.'
-
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$domain")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-[string] $registryKey = $registryKey + "\$subdomain"
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name $adcsUrl.Scheme -Value 2
+Start-Process $adcsUrl.AbsoluteUri
 ```
 
 ##### # Submit the certificate request to an enterprise CA
-
-```PowerShell
-Start-Process $adcsUrl.AbsoluteUri
-```
 
 > **Note**
 >
@@ -429,9 +412,9 @@ net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 #### # Mount the Operations Manager installation media
 
 ```PowerShell
-$imagePath = `
-    '\\iceman.corp.technologytoolbox.com\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+$imagePath = ('\\iceman.corp.technologytoolbox.com\Products\Microsoft' `
+    + '\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso')
 
 $imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
     Get-Volume).DriveLetter
@@ -476,8 +459,42 @@ Pop-Location
 Dismount-DiskImage -ImagePath $imagePath
 ```
 
-### # Approve manual agent install in Operations Manager
+### Approve manual agent install in Operations Manager
 
-### # Configure SCOM agent for domain controller
+### Configure SCOM agent for domain controller
 
 In the **Agent Properties** window, on the **Security** tab, select **Allow this agent to act as a proxy and discover managed objects on other computers** and then click **OK**.
+
+## Issue - License Activation failures
+
+Log Name:      Application\
+Source:        Microsoft-Windows-Security-SPP\
+Date:          10/10/2016 6:02:46 PM\
+Event ID:      8198\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      EXT-DC03.extranet.technologytoolbox.com\
+Description:\
+License Activation (slui.exe) failed with the following error code:\
+hr=0xC004F074\
+Command-line arguments:\
+RuleId=eeba1977-569e-4571-b639-7623d8bfecc0;Action=AutoActivate;AppId=55c92734-d682-4d71-983e-d6ec3f16059f;SkuId=00091344-1ea4-4f37-b789-01750ba6988c;NotificationInterval=1440;Trigger=TimerEvent
+
+### Solution
+
+```Console
+C:\NotBackedUp\Public\Toolbox\Sysinternals\psping.exe kms.core.windows.net:1688
+
+cscript c:\windows\system32\slmgr.vbs /ckhc
+
+cscript c:\windows\system32\slmgr.vbs /skms kms.core.windows.net:1688
+
+cscript c:\windows\system32\slmgr.vbs /ato
+```
+
+### Reference
+
+**Windows Server 2012 Datacenter Not Activating - Windows Azure**\
+From <[https://social.msdn.microsoft.com/Forums/azure/en-US/f29d5fe7-4f0f-433d-8333-1d336f68a4db/windows-server-2012-datacenter-not-activating-windows-azure?forum=WAVirtualMachinesforWindows](https://social.msdn.microsoft.com/Forums/azure/en-US/f29d5fe7-4f0f-433d-8333-1d336f68a4db/windows-server-2012-datacenter-not-activating-windows-azure?forum=WAVirtualMachinesforWindows)>
