@@ -3752,3 +3752,163 @@ Disable-ADAccount -Identity setup-sql
 ```
 
 ---
+
+## Upgrade SecuritasConnect to "v4.0 Sprint-26" release
+
+### # Copy new build from TFS drop location
+
+```PowerShell
+net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$newBuild = "4.0.677.0"
+
+$sourcePath = "\\ICEMAN\Builds\Securitas\ClientPortal\$newBuild"
+$destPath = "C:\Shares\Builds\ClientPortal\$newBuild"
+
+robocopy $sourcePath $destPath /E
+```
+
+### # Remove previous versions of SecuritasConnect WSPs
+
+```PowerShell
+$oldBuild = "4.0.675.0"
+
+Push-Location ("C:\Shares\Builds\ClientPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Deactivate Features.ps1' -Verbose
+
+& '.\Retract Solutions.ps1' -Verbose
+
+& '.\Delete Solutions.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Install new versions of SecuritasConnect WSPs
+
+```PowerShell
+Push-Location ("C:\Shares\Builds\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Configure application settings for TEKWave integration
+
+```PowerShell
+Start-Process "http://client-test.securitasinc.com"
+```
+
+---
+
+**EXT-SQL02 - SQL Server Management Studio**
+
+### -- Configure TEKWave in SecuritasPortal database
+
+```SQL
+USE [SecuritasPortal]
+GO
+```
+
+#### -- Add TEKWave services
+
+```Console
+SET IDENTITY_INSERT Customer.Services ON
+
+INSERT INTO Customer.Services
+(
+    ServiceId
+    , ServiceName
+    , Description
+)
+VALUES
+(
+    9
+    , 'TEKWave - Commercial'
+    , 'Visitor Management - Commercial & Logistics'
+)
+
+INSERT INTO Customer.Services
+(
+    ServiceId
+    , ServiceName
+    , Description
+)
+VALUES
+(
+    10
+    , 'TEKWave - Community'
+    , 'Visitor Management - Community'
+)
+
+SET IDENTITY_INSERT Customer.Services OFF
+GO
+```
+
+#### -- Remove CapSure from all sites
+
+```SQL
+DELETE SiteServices
+FROM
+    Customer.SiteServices
+    INNER JOIN Customer.Services
+    ON SiteServices.ServiceId = Services.ServiceId
+WHERE
+    Services.ServiceName = 'CapSure'
+```
+
+#### -- Add TEKWave to "ABC Company" sites
+
+```SQL
+INSERT INTO Customer.SiteServices
+(
+    SiteId
+    , ServiceId
+)
+SELECT
+    SiteId
+    , Services.ServiceId
+FROM
+    Customer.Sites
+    INNER JOIN Customer.Clients
+    ON Sites.ClientId = Clients.ClientId
+    INNER JOIN Customer.Services
+    ON Services.ServiceName = 'TEKWave - Commercial'
+WHERE
+    Clients.ClientName = 'ABC Company'
+```
+
+---
+
+### Edit user profiles to add credentials for TEKWave
+
+```PowerShell
+cls
+```
+
+### # Delete old build
+
+```PowerShell
+Remove-Item C:\Shares\Builds\ClientPortal\4.0.675.0 -Recurse -Force
+```
