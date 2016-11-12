@@ -590,60 +590,257 @@ mkdir "Z:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Differential"
 mkdir "Z:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Transaction Log"
 ```
 
-#### Full backup of all databases
+#### Create backup maintenance plans
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/E9B4AD115094D24286E2FD4D91A834C611368CD7.png)
+<table>
+<thead>
+<th>
+<p><strong>Name</strong></p>
+</th>
+<th>
+<p><strong>Frequency</strong></p>
+</th>
+<th>
+<p><strong>Daily Frequency</strong></p>
+</th>
+<th>
+<p><strong>Backup compression</strong></p>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Full Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Weekly</strong><br />
+Recurs every: <strong>1</strong> week on</p>
+<ul>
+<li><strong>Sunday</strong></li>
+</ul>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>1:00:00 AM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>Compress backup</strong></p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Differential Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Daily</strong><br />
+Recurs every: <strong>1</strong> day</p>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>12:50:00 AM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>Compress backup</strong></p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Transaction Log Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Daily</strong><br />
+Recurs every: <strong>1</strong> day</p>
+</td>
+<td valign='top'>
+<p>Occurs every: <strong>15 minutes</strong><br />
+Starting at:<strong> 12:15:00 AM</strong><br />
+Ending at:<strong> 11:59:59 PM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>Compress backup</strong></p>
+</td>
+</tr>
+</table>
 
-Right-click **Maintenance Plans** and click **Maintenance Plan Wizard**.
+##### Create maintenance plan for full backup of all databases
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/704A09951485E3C05368B69C36408A1420DCBF9D.png)
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Full Backup of All Databases**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Full)**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Back Up Database (Full) Task** page:
+      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL11.MSSQLSERVER\\MSSQL\\Backup\\Full**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, select **Compress backup**.
+      4. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F9/74A07343F5EC0ADF19DC60BD77C0DDCF10A501F9.png)
+##### Create maintenance plan for differential backup of all databases
 
-In the **Schedule** section, click **Change...**
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Differential Backup of All Databases**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Differential)**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Back Up Database (Differential) Task** page:
+      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL11.MSSQLSERVER\\MSSQL\\Backup\\Differential**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, select **Compress backup**.
+      4. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/61/A16C7EA6E06310367C400A27C32F2517D00F0261.png)
+##### Create maintenance plan for transaction log backup of all databases
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/4A303D282592167075123900B75E5B39270EE021.png)
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Transaction Log Backup of All Databases**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Transaction Log)**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Back Up Database (Full) Task** page:
+      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL11.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, select **Compress backup**.
+      4. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/1F526D384BD3B5362991EB03D53045B846E90830.png)
+##### Create cleanup maintenance plan
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/C0402F796985C4D2CA811B0898D5AD58A237D51E.png)
+<table>
+<thead>
+<th>
+<p><strong>Name</strong></p>
+</th>
+<th>
+<p><strong>Frequency</strong></p>
+</th>
+<th>
+<p><strong>Daily Frequency</strong></p>
+</th>
+<th>
+<p><strong>Maintenance Cleanup Task Settings</strong></p>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Remove Old Database Backups</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Weekly</strong><br />
+Recurs every: <strong>1</strong> week on</p>
+<ul>
+<li><strong>Sunday</strong></li>
+</ul>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>12:55:00 AM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>First Task (Remove Full and Differential Backups)</strong></p>
+<p><strong>Delete files of the following type:</strong></p>
+<ul>
+<li><strong>Backup files</strong></li>
+</ul>
+<p><strong>File location:</strong></p>
+<ul>
+<li><strong>Search folder and delete files based on an extension</strong>
+<ul>
+<li><strong>Folder: Z:\\Microsoft SQL Server\\MSSQL11.MSSQLSERVER\\MSSQL\\Backup\\</strong></li>
+<li><strong>File Extension: bak</strong></li>
+<li><strong>Include first-level subfolders: Yes (checked)</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>File age:</strong></p>
+<ul>
+<li><strong>Delete files based on the age of the file at task run time</strong></li>
+<li><strong>Delete files older than the following: 2 Week(s)</strong></li>
+</ul>
+<p><strong>Second Task (Remove Transaction Log Backups)</strong></p>
+<p><strong>Delete files of the following type:</strong></p>
+<ul>
+<li><strong>Backup files</strong></li>
+</ul>
+<p><strong>File location:</strong></p>
+<ul>
+<li><strong>Search folder and delete files based on an extension</strong>
+<ul>
+<li><strong>Folder: Z:\\Microsoft SQL Server\\MSSQL11.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\</strong></li>
+<li><strong>File Extension: trn</strong></li>
+<li><strong>Include first-level subfolders: No (unchecked)</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>File age:</strong></p>
+<ul>
+<li><strong>Delete files based on the age of the file at task run time</strong></li>
+<li><strong>Delete files older than the following: 2 Week(s)</strong></li>
+</ul>
+</td>
+</tr>
+</table>
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/71FC6103F1C3048856E7DA098870A616A449794D.png)
+##### Create maintenance plan to remove old Full and Differential backups
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/10BCEA4758880B6AFB64B971921F2E4658A40DCA.png)
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Remove Old Database Backups**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Maintenance Cleanup Task**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Maintenance Cleanup Task** page:
+      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL11.MSSQLSERVER\\MSSQL\\Backup\\**.
+      2. In the **File extension **box, type **bak**.
+      3. Select the **Include first-level subfolders** checkbox.
+      4. In the **File age** section, configure the settings to delete files older than **2 Week(s)**.
+      5. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/02/07BDB2BE0B0324752C5B3995E00DDFD3B1C54302.png)
+##### Modify maintenance plan to remove old Transaction Log backups
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E7/5BC4DF7D314C5FDB0F74C7EF2EFCEB75D9871EE7.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/D07DCA4A3853B9F2EDD91B4C207E2943E8F5E86A.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3E/68EDCE3E0914FE79478DCC7DD8BC4D9ADAEA693E.png)
-
-#### Differential backup of all databases
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/67A8AB130CE9E9303899B4E0D75E3D6D0BE1F4BC.png)
-
-#### Transaction log backup of all databases
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/1804598D619F7D35A4C79C1ABB59348AD5189E0C.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/7F261629A3F51D9F3A5B880CFDCD78F583EF47AE.png)
-
-```PowerShell
-cls
-```
-
-### # Create scheduled task to delete old database backups
-
-```PowerShell
-[string] $xml = Get-Content `
-  'C:\NotBackedUp\Public\Toolbox\PowerShell\Remove Old Database Backups.xml'
-
-Register-ScheduledTask -TaskName "Remove Old Database Backups" -Xml $xml
-```
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, expand **Maintenance Plans**, right-click **Remove Old Database Backups** and click **Modify**.
+3. In the Maintenance Plan designer:
+   1. Right-click **Maintenance Cleanup Task** and click **Properties**.
+   2. In the **Properties** window:
+      1. If necessary, expand the **Identification** section.
+      2. In the **Name** box, type **Remove Full and Differential Backups**.
+   3. Use the **Toolbox** to add a new **Maintenance Cleanup Task**.
+   4. Right-click the new task and click **Properties**.
+   5. In the **Properties** window:
+      1. If necessary, expand the **Identification** section.
+      2. In the **Name** box, type **Remove Transaction Log Backups**.
+   6. Right-click the **Remove Transaction Log Backups** task and click **Edit...**
+   7. In the **Maintenance Cleanup Task** window:
+      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL11.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
+      2. In the **File extension **box, type **trn**.
+      3. In the **File age** section, configure the settings to delete files older than **2 Week(s)**.
+      4. Click **OK**.
+4. On the **File** menu, click **Save Selected Items**.
 
 ## Execute maintenance plan to backup all databases
 
