@@ -185,13 +185,12 @@ cls
 ## # Promote to domain controller
 
 ```PowerShell
-dcpromo
+dcpromo /adv
 ```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/11/3C1B4C1B6B8EE02C91C584B8B800CA2A487FDE11.png)
 
-Select **Use advanced mode installation**.\
-Click **Next**.
+Ensure **Use advanced mode installation **is selected and click **Next**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/CCBE954418E58868007D48C55BD2852C2158D3F5.png)
 
@@ -249,13 +248,7 @@ Click **Next**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/65763518385C7044BEEAC7DECE4C19E7D691C662.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/51/07FF838F2E57630C0909E972339F4E2756E84E51.png)
-
-Click **Finish**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/81/D05F8E1F463556560286D8A005F3EAA3FED09281.png)
-
-Click **Restart Now**.
+Select **Reboot on completion**.
 
 ```PowerShell
 cls
@@ -364,14 +357,50 @@ nltest /DSGETDC:us.pinkertons.com
 
 Yep, it's trying to communicate with 10.1.16.117 using LDAP...success.
 
-Function Remove-DnsServerResourceRecord(\
-\$ZoneName,\
-\$Name,\
-\$RRType,\
-\$ComputerName = ".")\
-{\
-    \$cmd = "dnscmd \$ComputerName /RecordDelete \$ZoneName \$Name \$RRType" 
+### Import DNS zone for PNKCAN
 
-    Write-Host "cmd: \$cmd"
-    #Invoke-Expression \$cmd\
+```Console
+copy \NotBackedUp\Temp\DNS\PNKCAN.txt C:\Windows\System32\dns\local.securitas.ca.dns
+```
+
+## Prune DNS records
+
+```PowerShell
+cls
+
+Function Remove-DnsServerResourceRecord(
+    [Parameter(Mandatory = $true, Position = 1)]
+    [string] $ZoneName,
+    [Parameter(Mandatory = $true, Position = 2)]
+    [string] $Name,
+    [Parameter(Mandatory = $true, Position = 3)]
+    [string] $RRType,
+    [string] $ComputerName = ".",
+    [switch] $Force)
+{
+    If ($Force)
+    {
+        dnscmd $ComputerName /RecordDelete $ZoneName $Name $RRType /f
+    }
+    Else
+    {
+        dnscmd $ComputerName /RecordDelete $ZoneName $Name $RRType
+    }
 }
+
+Import-Csv '.\Extraneous DNS Records - PNKUS.csv' | % {
+    If ($_.ZoneName[0] -eq '#')
+    {
+        Write-Host "Skipping DNS record ($($_.NodeName))..."
+        return
+    }
+
+    Write-Host "Deleting DNS record ($($_.NodeName))..."
+
+    Remove-DnsServerResourceRecord `
+        -ZoneName $_.ZoneName `
+        -Name $_.NodeName `
+        -RRType $_.RRType `
+        -Force
+}
+```
