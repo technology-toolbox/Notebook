@@ -384,15 +384,15 @@ From <[https://technet.microsoft.com/en-us/library/hh305235.aspx](https://techne
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/F9/38966C2EFD06871ECBC1DCEA7AF65BEC194854F9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/8E04895733FD0BAECEE2770B27723F14F37C7A7C.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/44/FD08E4C03F8CFB90803760AEE7A2EFD639808C44.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/423F04CC7771D3C5B35C0FF48A8FFE2D76BD9A4F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/96/B95B1102917C746060E159EA5FAC209696BA2F96.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/6F91E83F2F92D0518F130C2E8F4822DB557CDF1C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DE/60BCD48E917176CFA3EEC31AFCF5C7ECF2758FDE.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/89/27BCA18D6F15FF15ADD4452B3578C4459F18CD89.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/1FDE3196C20F8C93ECA3D13C0FDB3A1A8FBACCEF.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D6/8EA9EBB91D184C4B18977FE2C0E45598292FDCD6.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/63/557FC9D3A85D2AA0D21F9462FB843043059B1563.png)
 
@@ -432,7 +432,7 @@ From <[https://technet.microsoft.com/en-us/library/hh305235.aspx](https://techne
 
 ### Phase 3: Configure SharePoint 2013 to trust AD FS as an identity provider
 
-#### # Copy token-signing certificate from ADFS server
+#### # Copy token-signing certificate to SharePoint server
 
 ```PowerShell
 net use \\ext-foobar9.extranet.technologytoolbox.com\C$ `
@@ -446,12 +446,12 @@ net use \\ext-foobar9.extranet.technologytoolbox.com\C$ `
 ```PowerShell
 copy `
     'C:\Users\jjameson-admin\Desktop\ADFS Signing - fs.fabrikam.com.cer' `
-    \\ext-foobar9.extranet.technologytoolbox.com\C$\Users\jjameson\Desktop `
+    \\ext-foobar9.extranet.technologytoolbox.com\C$\Users\jjameson\Desktop
 ```
 
 ---
 
-**EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson-admin**
+**EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson**
 
 #### # Import token signing certificate
 
@@ -465,10 +465,6 @@ $cert = `
 New-SPTrustedRootAuthority `
     -Name "ADFS Signing - fs.fabrikam.com" `
     -Certificate $cert
-```
-
-```PowerShell
-cls
 ```
 
 #### # Define claim mappings and identifier claim
@@ -485,7 +481,7 @@ $upnClaimMapping = New-SPClaimTypeMapping `
     -SameAsIncoming
 
 $roleClaimMapping = New-SPClaimTypeMapping `
-    -IncomingClaimType "http://schemas.xmlsoap.org/ws/2008/06/identity/claims/role" `
+    -IncomingClaimType "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" `
     -IncomingClaimTypeDisplayName "Role" `
     -SameAsIncoming
 
@@ -503,24 +499,40 @@ $claimsMappings = @(
 $identifierClaim = $emailClaimMapping.InputClaimType
 ```
 
-```PowerShell
-cls
-```
-
 #### # Create authentication provider
 
 ```PowerShell
-$realm = "urn:sharepoint:securitas:client-local-9"
+$realm = "urn:sharepoint:securitas"
 $signInURL = "https://fs.fabrikam.com/adfs/ls"
 
 $authProvider = New-SPTrustedIdentityTokenIssuer `
-    -Name "SAML Provider for client-local-9.securitasinc.com" `
-    -Description "AD FS provider for SecuritasConnect" `
+    -Name "AD FS Provider for SharePoint" `
+    -Description "AD FS provider for Securitas web applications" `
     -Realm $realm `
     -ImportTrustCertificate $cert `
     -ClaimsMappings  $claimsMappings `
     -SignInUrl $signInURL `
     -IdentifierClaim $identifierClaim
+```
+
+#### # Configure authentication provider for SecuritasConnect
+
+```PowerShell
+$uri = New-Object System.Uri("https://client3-local-9.securitasinc.com")
+$realm = "urn:sharepoint:securitas:client3-local-9"
+
+$authProvider.ProviderRealms.Add($uri, $realm)
+$authProvider.Update()
+```
+
+#### # Configure authentication provider for Cloud Portal
+
+```PowerShell
+$uri = New-Object System.Uri("https://cloud3-local-9.securitasinc.com")
+$realm = "urn:sharepoint:securitas:cloud3-local-9"
+
+$authProvider.ProviderRealms.Add($uri, $realm)
+$authProvider.Update()
 ```
 
 ---
@@ -531,7 +543,7 @@ $authProvider = New-SPTrustedIdentityTokenIssuer `
 
 **EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson-admin**
 
-#### # Configure SSL on SecuritasConnect Web application
+#### # Configure SSL on web applications
 
 ##### # Install SSL certificate
 
@@ -558,15 +570,256 @@ Import-PfxCertificate `
     -Password $certPassword
 ```
 
-##### Add public URL for HTTPS
+##### Add public URLs for HTTPS
 
-##### Add HTTPS binding to site in IIS
+##### Add HTTPS bindings to sites in IIS
 
-Site: **SharePoint - client2-local-9.securitasinc.com**\
-Host name: **client2-local-9.securitasinc.com**\
+Site: **SharePoint - client-local-9.securitasinc.com**\
+Host name: **client-local-9.securitasinc.com**\
 SSL certificate: **\*.securitasinc.com**
 
-#### # Associate an existing web application with the AD FS identity provider
+Site: **SharePoint - cloud2-local-9.securitasinc.com**\
+Host name: **cloud2-local-9.securitasinc.com**\
+SSL certificate: **\*.securitasinc.com**
+
+Site: **employee-local-9.securitasinc.com**\
+Host name: **employee-local-9.securitasinc.com**\
+SSL certificate: **\*.securitasinc.com**
+
+---
+
+---
+
+**EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson**
+
+#### # Extend web applications to Extranet zone
+
+```PowerShell
+Notepad "C:\NotBackedUp\Temp\Extend Web Applications.ps1"
+```
+
+---
+
+**Extend Web Applications.ps1**
+
+```PowerShell
+[CmdletBinding(
+    SupportsShouldProcess = $true,
+    ConfirmImpact = "High")]
+Param(
+    [switch] $SecureSocketsLayer)
+
+Begin
+{
+    Set-StrictMode -Version Latest
+    $ErrorActionPreference = "Stop"
+
+    If ((Get-PSSnapin Microsoft.SharePoint.PowerShell `
+        -ErrorAction SilentlyContinue) -eq $null)
+    {
+        $ver = $host | select version
+
+        If ($ver.Version.Major -gt 1)
+        {
+            $Host.Runspace.ThreadOptions = "ReuseThread"
+        }
+
+        Write-Debug "Adding snapin (Microsoft.SharePoint.PowerShell)..."
+
+        Add-PSSnapin Microsoft.SharePoint.PowerShell
+    }
+
+    Function ExtendWebAppToExtranetZone(
+        [Uri] $DefaultUrl = $(Throw "Default URL must be specified."),
+        [Uri] $ExtranetUrl = $(Throw "Extranet URL must be specified."))
+    {
+        $webApp = Get-SPWebApplication `
+            -Identity $DefaultUrl.AbsoluteUri `
+            -Debug:$false `
+            -Verbose:$false
+
+        Write-Debug ("Extending Web application $(($DefaultUrl.AbsoluteUri))" `
+            + " to Extranet zone $(($ExtranetUrl.AbsoluteUri))...")
+
+        $hostHeader = $ExtranetUrl.Host
+
+        $windowsAuthProvider = New-SPAuthenticationProvider `
+            -Debug:$false `
+            -Verbose:$false
+
+        If ($ExtranetUrl.Scheme -eq "http")
+        {
+            $webAppName = "SharePoint - " + $hostHeader + "80"
+
+            $webApp | New-SPWebApplicationExtension `
+                -Name $webAppName `
+                -Zone Extranet `
+                -AuthenticationProvider $windowsAuthProvider `
+                -HostHeader $hostHeader `
+                -Port 80 `
+                -Debug:$false `
+                -Verbose:$false
+
+        }
+        ElseIf ($ExtranetUrl.Scheme -eq "https")
+        {
+            $webAppName = "SharePoint - " + $hostHeader + "443"
+
+            $webApp | New-SPWebApplicationExtension `
+                -Name $webAppName `
+                -Zone Extranet `
+                -AuthenticationProvider $windowsAuthProvider `
+                -HostHeader $hostHeader `
+                -Port 443 `
+                -SecureSocketsLayer `
+                -Debug:$false `
+                -Verbose:$false
+        }
+        Else
+        {
+            Throw "The specified scheme ($($ExtranetUrl.Scheme)) is not supported."
+        }
+
+        Write-Debug ("Successfully extended Web application" `
+            + " ($(($DefaultUrl.AbsoluteUri))) to Extranet zone" `
+            + " ($(($ExtranetUrl.AbsoluteUri))).")
+    }
+
+    Function GetTimestamp
+    {
+        Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    }
+
+    Function LogActivity(
+        [string] $activity,
+        [string] $status,
+        [switch] $completed,
+        [System.Diagnostics.Stopwatch] $stopwatch)
+    {
+        Write-Progress `
+            -Activity $activity `
+            -Status $status `
+            -Completed:([bool]::Parse($completed))
+
+        If ($completed)
+        {
+            If ($stopwatch -eq $null)
+            {
+                Write-Host -Fore Green "[$(GetTimestamp)] $status"
+            }
+            Else
+            {
+                Write-Host -Fore Green "[$(GetTimestamp)] $status " -NoNewLine
+                WriteElapsedTime $stopwatch
+            }
+        }
+        Else
+        {
+            Write-Verbose "[$(GetTimestamp)] $status"
+        }
+    }
+
+    Function WriteElapsedTime(
+        [System.Diagnostics.Stopwatch] $stopwatch =
+            $(Throw "Value cannot be null: stopwatch"))
+    {
+        $timespan = $stopwatch.Elapsed
+
+        $formattedTime = [string]::Format(
+            "{0:00}:{1:00}",
+            $timespan.Minutes,
+            $timespan.Seconds)
+
+        Write-Host -Fore Cyan "(Elapsed time: $formattedTime)"
+    }
+}
+
+Process
+{
+    $clientWebAppDefaultUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+
+    If ([string]::IsNullOrEmpty($clientWebAppDefaultUrl) -eq $true)
+    {
+        # default to Production
+        $clientWebAppDefaultUrl = "http://client.securitasinc.com"
+    }
+
+    $cloudWebAppDefaultUrl = $env:SECURITAS_CLOUD_PORTAL_URL
+
+    If ([string]::IsNullOrEmpty($cloudWebAppDefaultUrl) -eq $true)
+    {
+        # default to Production
+        $cloudWebAppDefaultUrl = "http://cloud.securitasinc.com"
+    }
+
+    $clientWebAppExtranetUrl = $clientWebAppDefaultUrl.Replace(
+        "client",
+        "client3")
+
+    $cloudWebAppExtranetUrl = $cloudWebAppDefaultUrl.Replace(
+        "cloud",
+        "cloud3")
+
+    If ($SecureSocketsLayer -eq $true)
+    {
+        $clientWebAppExtranetUrl = $clientWebAppExtranetUrl.Replace(
+            "http://",
+            "https://")
+
+        $cloudWebAppExtranetUrl = $cloudWebAppExtranetUrl.Replace(
+            "http://",
+            "https://")
+    }
+
+    Write-Host "Extend web applications -"
+    Write-Host
+    Write-Host "  SecuritasConnect extranet URL: $clientWebAppExtranetUrl"
+    Write-Host "  Cloud Portal extranet URL: $cloudWebAppExtranetUrl"
+
+    If ($PSCmdlet.ShouldProcess($env:COMPUTERNAME))
+    {
+        $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+
+        [string] $activity = "Extend Web Applications"
+
+        LogActivity $activity ("Extending Web application " `
+            + " ($clientWebAppDefaultUrl) to Extranet zone" `
+            + " ($clientWebAppExtranetUrl)...")
+
+        ExtendWebAppToExtranetZone `
+            -DefaultUrl $clientWebAppDefaultUrl `
+            -ExtranetUrl $clientWebAppExtranetUrl
+
+        LogActivity $activity ("Extending Web application " `
+            + " ($cloudWebAppDefaultUrl) to Extranet zone" `
+            + " ($cloudWebAppExtranetUrl)...")
+
+        ExtendWebAppToExtranetZone `
+            -DefaultUrl $cloudWebAppDefaultUrl `
+            -ExtranetUrl $cloudWebAppExtranetUrl
+
+        LogActivity `
+            $activity `
+            "Successfully extended web applications." `
+            -Complete `
+            $stopwatch
+    }
+}
+```
+
+---
+
+```PowerShell
+& "C:\NotBackedUp\Temp\Extend Web Applications.ps1" -SecureSocketsLayer
+```
+
+---
+
+---
+
+**EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson-admin**
+
+#### # Associate web applications with the AD FS identity provider
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/D8/7F642FAA44021E95DB1A7A6FD9F2677B23C0BDD8.png)
 
@@ -574,8 +827,147 @@ SSL certificate: **\*.securitasinc.com**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/261788A78C597B7B328B3AA6A02A1D0BCDE47DD7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/01BB4D5580C26AE349696606E5DF0FD68E8D2D5F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/3961FD8DDEC896049CABAED6C8AE3A3699790C5E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C8/080412076DB3F2C0DDDF29CB285C35D7535912C8.png)
+In the **Authentication Providers** window, click **Extranet**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AC/186F5C73F0D1F5C63212C085C66949AA49270FAC.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FD/83C8A40ECDDE81D2D1EFFCFC960CEA62C08ABBFD.png)
 
 ---
+
+### Customize the AD FS sign-in pages
+
+#### Reference
+
+**Customizing the AD FS Sign-in Pages**\
+From <[https://technet.microsoft.com/library/dn280950.aspx](https://technet.microsoft.com/library/dn280950.aspx)>
+
+```PowerShell
+cls
+```
+
+#### # Customize the AD FS sign-in page for SecuritasConnect
+
+```PowerShell
+$relyingPartyTrustName = "client3-local-9.securitasinc.com"
+$companyName = "SecuritasConnect"
+$organizationalNameDescriptionText = "Sign in with your SecuritasConnect credentials or your organizational account (if supported)"
+
+$signInPageDescription = "<p>SecuritasConnect is a powerful tool that can improve the efficiency of your security program and enhance the performance of your team. No paper logbooks or handwritten reports. Everything is recorded and available online.</p><p>&nbsp;</p><p>SecuritasConnect is your direct link to key and relevant information needed to manage your security program. Accessible through any internet connection, the features and tools in Connect help you stay on top of what's happening down the hall or around the world, allowing you to monitor and protect your interests day and night.</p>"
+
+$illustrationPath = "C:\NotBackedUp\Temp\SecuritasConnect-1420x1080.png"
+
+Set-AdfsRelyingPartyWebContent `
+    -TargetRelyingPartyName $relyingPartyTrustName `
+    -CompanyName $companyName `
+    -OrganizationalNameDescriptionText $organizationalNameDescriptionText `
+    -SignInPageDescription $signInPageDescription
+
+Set-AdfsRelyingPartyWebTheme `
+    -TargetRelyingPartyName $relyingPartyTrustName `
+    -Illustration @{path=$illustrationPath}
+```
+
+#### # Revert customizations for SecuritasConnect (demo)
+
+```PowerShell
+$relyingPartyTrustName = "client3-local-9.securitasinc.com"
+$companyName = $null
+$organizationalNameDescriptionText = $null
+$signInPageDescription = $null
+$illustrationPath = $null
+
+Set-AdfsRelyingPartyWebContent `
+    -TargetRelyingPartyName $relyingPartyTrustName `
+    -CompanyName $companyName `
+    -OrganizationalNameDescriptionText $organizationalNameDescriptionText `
+    -SignInPageDescription $signInPageDescription
+
+Set-AdfsRelyingPartyWebTheme `
+    -TargetRelyingPartyName $relyingPartyTrustName `
+    -Illustration @{path=$illustrationPath}
+```
+
+```PowerShell
+cls
+```
+
+#### # Customize the AD FS sign-in page for Cloud Portal
+
+```PowerShell
+$relyingPartyTrustName = "cloud3-local-9.securitasinc.com"
+$companyName = "Collaboration & Community"
+$organizationalNameDescriptionText = $null
+
+$signInPageDescription = "<p>This system is restricted solely for Securitas Security Services USA, Inc. authorized users for legitimate business purposes only.  If you are not a legitimate Securitas USA user or an authorized business associate, do not attempt to access this system.</p><p>&nbsp;</p><p>The actual or attempted unauthorized access, use, or modification of this system is strictly prohibited.  Unauthorized users are subject to company disciplinary proceedings and/or criminal and civil penalties under applicable state, federal, or applicable domestic and foreign laws.  The user of this system may be monitored and recorded for administrative and security reasons.  Anyone accessing this system expressly consents to such monitoring and is advised that if monitoring reveals possible evidence of criminal activity, Securitas Security Services USA, Inc. may provide information of such activity to law enforcement officials.</p><p>&nbsp;</p><p>Authorized users are not permitted to store PII (Personal Identity Information) on laptop or desktop computers and this data may not be exchanged with or transmitted to unsecured email or fax machines (PII includes, but is not limited to, credit card, bank account, and Social Security Number information).  Securitas Security Services USA, Inc. reserves the right to review and monitor all PII information usage.  A copy of the complete PII Protection Policy is available on the Portal under Operational Support Services/Company Information/Company Policies & Procedures.</p>"
+
+$illustrationPath = "C:\NotBackedUp\Temp\Securitas-Cloud-Portal-1420x1080.jpg"
+
+Set-AdfsRelyingPartyWebContent `
+    -TargetRelyingPartyName $relyingPartyTrustName `
+    -CompanyName $companyName `
+    -OrganizationalNameDescriptionText $organizationalNameDescriptionText `
+    -SignInPageDescription $signInPageDescription
+
+Set-AdfsRelyingPartyWebTheme `
+    -TargetRelyingPartyName $relyingPartyTrustName `
+    -Illustration @{path=$illustrationPath}
+```
+
+#### # Revert customizations for Cloud Portal (demo)
+
+```PowerShell
+$relyingPartyTrustName = "cloud3-local-9.securitasinc.com"
+$companyName = $null
+$organizationalNameDescriptionText = $null
+$signInPageDescription = $null
+$illustrationPath = $null
+
+Set-AdfsRelyingPartyWebContent `
+    -TargetRelyingPartyName $relyingPartyTrustName `
+    -CompanyName $companyName `
+    -OrganizationalNameDescriptionText $organizationalNameDescriptionText `
+    -SignInPageDescription $signInPageDescription
+
+Set-AdfsRelyingPartyWebTheme `
+    -TargetRelyingPartyName $relyingPartyTrustName `
+    -Illustration @{path=$illustrationPath}
+```
+
+## Configure claims provider trust for Contoso
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.233 `
+    -Hostnames fs.contoso.com
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6D/CB602CAE1566470CA8F3BC2E9EAB6132D6008C6D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/DD1910BA8F6AE78C00C82B20593CB41D8B8BD02F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/D8B080A53B0B76217A471071215F2F877885B686.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/ED/4421084548D03A492CC5DF11D18922B4CAEDF8ED.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9E/5A0A7D524A794F1DB169C4C6FA26D88FAA7CA29E.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/38DA58BC55EEF13586F819A3E5F95C553D0B4CE2.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/34/F51DA62281CC644464C0D0F7524CC3521420DD34.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/A154911313189EF6DC96A8ADCEBC49EF70695E46.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/E23AEBFCB13328E48526648AC47449717E94E73B.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/67/87BDA6F851FB8A53FF87EAC9AF424ADDE3566267.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/20/4C46FB0D6BA4B19551431471C451F99141AA7B20.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6F/D6EC718CB995FE61ACC2B2F5B892B419B934A76F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/C22BAB8B2EDF42FA2B7325D7FFEBDA366C048EA9.png)
+
+[https://fs.contoso.com/adfs/ls/?wa=wsignin1.0&wtrealm=http%3a%2f%2ffs.fabrikam.com%2fadfs%2fservices%2ftrust&wctx=9ab97163-e20c-45e5-840f-6f14462d6356](https://fs.contoso.com/adfs/ls/?wa=wsignin1.0&wtrealm=http%3a%2f%2ffs.fabrikam.com%2fadfs%2fservices%2ftrust&wctx=9ab97163-e20c-45e5-840f-6f14462d6356)
