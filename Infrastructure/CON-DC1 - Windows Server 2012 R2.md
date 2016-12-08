@@ -282,3 +282,59 @@ Add-DnsServerPrimaryZone `
     -NetworkID "2603:300b:802:8900::/64" `
     -ReplicationScope Forest
 ```
+
+```PowerShell
+cls
+```
+
+## # Create demo users
+
+##### # Create OU for demo users
+
+```PowerShell
+New-ADOrganizationalUnit `
+    -Name "Demo" `
+    -Path "DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name "Users" `
+    -Path "OU=Demo,DC=corp,DC=contoso,DC=com"
+```
+
+##### # Copy input file
+
+```PowerShell
+net use \\ICEMAN\Public /USER:TECHTOOLBOX\jjameson
+
+New-Item -Type Directory -Path C:\NotBackedUp\Temp
+
+Copy-Item "\\ICEMAN\Public\Fake Users.csv" C:\NotBackedUp\Temp
+
+cd C:\NotBackedUp\Temp
+
+$password = ConvertTo-SecureString "{redacted}" -AsPlainText -Force
+$orgUnit = "OU=Users,OU=Demo,DC=corp,DC=contoso,DC=com"
+
+Import-Csv "Fake Users.csv" |
+    ? { $_.NameSet -eq "American" } |
+    select -First 5000 |
+    % {
+        $displayName = $_.GivenName + " " + $_.Surname
+        $emailAddress = $_.Username + "@contoso.com"
+        $userPrincipalName = $_.Username + "@corp.contoso.com"
+
+        New-ADUser `
+            -Name $displayName `
+            -DisplayName $displayName `
+            -GivenName $_.GivenName `
+            -Surname $_.Surname `
+            -EmailAddress $emailAddress `
+            -OfficePhone $_.TelephoneNumber `
+            -SamAccountName $_.Username `
+            -AccountPassword $password `
+            -UserPrincipalName $userPrincipalName `
+            -Path $orgUnit `
+            -Enabled:$true `
+            -PasswordNeverExpires:$true
+    }
+```
