@@ -444,3 +444,12 @@ From <[https://technet.microsoft.com/en-us/library/hh305235.aspx](https://techne
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A7/F9CB924E85465B86523D537A4F9EFB73DC2ED1A7.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/960CB969CBE54CCEF60AE3FD696490CB9B061412.png)
+
+## # Configure alternate login ID
+
+```PowerShell
+Set-AdfsClaimsProviderTrust `
+    -TargetIdentifier "AD AUTHORITY" `
+    -AlternateLoginID mail `
+    -LookupForests corp.contoso.com
+```
