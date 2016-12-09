@@ -971,3 +971,16 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/C22BAB8B2EDF42FA2B7325D7FFEBDA366C048EA9.png)
 
 [https://fs.contoso.com/adfs/ls/?wa=wsignin1.0&wtrealm=http%3a%2f%2ffs.fabrikam.com%2fadfs%2fservices%2ftrust&wctx=9ab97163-e20c-45e5-840f-6f14462d6356](https://fs.contoso.com/adfs/ls/?wa=wsignin1.0&wtrealm=http%3a%2f%2ffs.fabrikam.com%2fadfs%2fservices%2ftrust&wctx=9ab97163-e20c-45e5-840f-6f14462d6356)
+
+## Customize home realm discovery
+
+```PowerShell
+Set-AdfsClaimsProviderTrust `
+    -TargetName "Contoso Pharmaceuticals" `
+    -OrganizationalAccountSuffix @("contoso.com")
+```
+
+### Reference
+
+**Customize the Home Realm Discovery page to ask for UPN right away**\
+From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/](https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/)>
