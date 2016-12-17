@@ -498,3 +498,65 @@ cscript c:\windows\system32\slmgr.vbs /ato
 
 **Windows Server 2012 Datacenter Not Activating - Windows Azure**\
 From <[https://social.msdn.microsoft.com/Forums/azure/en-US/f29d5fe7-4f0f-433d-8333-1d336f68a4db/windows-server-2012-datacenter-not-activating-windows-azure?forum=WAVirtualMachinesforWindows](https://social.msdn.microsoft.com/Forums/azure/en-US/f29d5fe7-4f0f-433d-8333-1d336f68a4db/windows-server-2012-datacenter-not-activating-windows-azure?forum=WAVirtualMachinesforWindows)>
+
+## Issue - DNS registration errors
+
+Log Name:      System\
+Source:        NETLOGON\
+Date:          12/16/2016 7:13:50 PM\
+Event ID:      5774\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      EXT-DC03.extranet.technologytoolbox.com\
+Description:\
+The dynamic registration of the DNS record '_ldap._tcp.dc._msdcs.extranet.technologytoolbox.com. 600 IN SRV 0 100 389 EXT-DC03.extranet.technologytoolbox.com.' failed on the following DNS server:
+
+DNS server IP address: 192.168.10.209\
+Returned Response Code (RCODE): 5\
+Returned Status Code: 9017
+
+For computers and users to locate this domain controller, this record must be registered in DNS.
+
+USER ACTION\
+Determine what might have caused this failure, resolve the problem, and initiate registration of the DNS records by the domain controller. To determine what might have caused this failure, run DCDiag.exe. To learn more about DCDiag.exe, see Help and Support Center. To initiate registration of the DNS records by this domain  controller, run 'nltest.exe /dsregdns' from the command prompt on the domain controller or restart Net Logon service.\
+  Or, you can manually add this record to DNS, but it is not recommended.
+
+ADDITIONAL DATA\
+Error Value: DNS bad key.
+
+### Troubleshooting
+
+```Text
+PS C:\Windows\system32> nslookup
+DNS request timed out.
+    timeout was 2 seconds.
+Default Server:  UnKnown
+Address:  ::1
+
+PS C:\Windows\system32> Get-DnsClientServerAddress -InterfaceAlias "Azure - Production" | select AddressFamily, ServerAddresses
+
+AddressFamily ServerAddresses
+------------- ---------------
+            2 {192.168.10.209, 192.168.10.210, 127.0.0.1}
+           23 {::1}
+```
+
+### Solution
+
+```Text
+PS C:\Windows\system32> Set-DnsClientServerAddress -InterfaceAlias "Azure - Production" -ResetServerAddresses
+PS C:\Windows\system32> Get-DnsClientServerAddress -InterfaceAlias "Azure - Production" | select AddressFamily, ServerAddresses
+
+AddressFamily ServerAddresses
+------------- ---------------
+            2 {192.168.10.209, 192.168.10.210}
+           23 {}
+
+PS C:\Windows\system32> nslookup
+Default Server:  ext-dc01.extranet.technologytoolbox.com
+Address:  192.168.10.209
+
+PS C:\Windows\system32> Restart-Computer
+```
