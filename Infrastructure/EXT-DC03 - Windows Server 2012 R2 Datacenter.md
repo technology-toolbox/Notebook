@@ -1,7 +1,7 @@
 ﻿# EXT-DC03 - Windows Server 2012 R2 Datacenter
 
-Saturday, October 8, 2016
-8:16 AM
+Friday, December 16, 2016
+3:40 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -41,7 +41,7 @@ cls
 
 ```PowerShell
 $imageName = `
-    "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-20160915" `
+    "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-20161214" `
     + "-en.us-127GB.vhd"
 ```
 
@@ -63,6 +63,7 @@ If ($domainCred -eq $null)
         -Message "Type the user name and password for joining the domain."
 }
 
+$subscriptionId = "********-fdf5-4fd0-b21b-{redacted}"
 $storageAccount = "techtoolbox"
 $location = "West US"
 $vmName = "EXT-DC03"
@@ -113,7 +114,7 @@ $vmConfig = New-AzureVMConfig `
     Set-AzureStaticVNetIP -IPAddress $ipAddress
 
 Set-AzureSubscription `
-    -SubscriptionId ********-fdf5-4fd0-b21b-{redacted} `
+    -SubscriptionId $subscriptionId `
     -CurrentStorageAccountName $storageAccount
 
 New-AzureVM `
