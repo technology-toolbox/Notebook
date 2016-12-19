@@ -1,7 +1,7 @@
 ﻿# EXT-DC03 - Windows Server 2012 R2 Datacenter
 
-Friday, December 16, 2016
-3:40 PM
+Sunday, December 18, 2016
+6:00 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -41,7 +41,7 @@ cls
 
 ```PowerShell
 $imageName = `
-    "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-20161214" `
+    "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-20160915" `
     + "-en.us-127GB.vhd"
 ```
 
@@ -185,7 +185,7 @@ $endpointNames |
 ```PowerShell
 Get-NetAdapter -Physical
 
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter #2" |
     Rename-NetAdapter -NewName "Azure - Production"
 ```
 
@@ -277,6 +277,10 @@ $subnet = "10.71.0.0/16"
 New-ADReplicationSite -Name $siteName
 
 New-ADReplicationSubnet -Name $subnet -Site $siteName
+
+Set-ADReplicationSiteLink `
+    -Identity DEFAULTIPSITELINK `
+    -SitesIncluded @{Add="$siteName"}
 ```
 
 ---
@@ -326,7 +330,73 @@ Install-ADDSDomainController `
 >
 > When prompted, specify the password for the administrator account when the computer is started in Safe Mode or a variant of Safe Mode, such as Directory Services Restore Mode.
 
-```PowerShell
+## Issue - DNS registration errors
+
+Log Name:      System\
+Source:        NETLOGON\
+Date:          12/18/2016 6:45:04 PM\
+Event ID:      5774\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      EXT-DC03.extranet.technologytoolbox.com\
+Description:\
+The dynamic registration of the DNS record '_ldap._tcp.extranet.technologytoolbox.com. 600 IN SRV 0 100 389 EXT-DC03.extranet.technologytoolbox.com.' failed on the following DNS server:
+
+DNS server IP address: ::\
+Returned Response Code (RCODE): 0\
+Returned Status Code: 0
+
+For computers and users to locate this domain controller, this record must be registered in DNS.
+
+USER ACTION\
+Determine what might have caused this failure, resolve the problem, and initiate registration of the DNS records by the domain controller. To determine what might have caused this failure, run DCDiag.exe. To learn more about DCDiag.exe, see Help and Support Center. To initiate registration of the DNS records by this domain  controller, run 'nltest.exe /dsregdns' from the command prompt on the domain controller or restart Net Logon service.\
+  Or, you can manually add this record to DNS, but it is not recommended.
+
+ADDITIONAL DATA\
+Error Value: Bad DNS packet.
+
+### Troubleshooting
+
+```Text
+PS C:\Windows\system32> nslookup
+DNS request timed out.
+    timeout was 2 seconds.
+Default Server:  UnKnown
+Address:  ::1
+
+> exit
+
+PS C:\Windows\system32> Get-DnsClientServerAddress -InterfaceAlias "Azure - Production" | select AddressFamily, ServerAddresses
+
+AddressFamily ServerAddresses
+------------- ---------------
+            2 {192.168.10.209, 192.168.10.210, 127.0.0.1}
+           23 {::1}
+```
+
+### Solution
+
+```Text
+PS C:\Windows\system32> Set-DnsClientServerAddress -InterfaceAlias "Azure - Production" -ResetServerAddresses
+PS C:\Windows\system32> Get-DnsClientServerAddress -InterfaceAlias "Azure - Production" | select AddressFamily, ServerAddresses
+
+AddressFamily ServerAddresses
+------------- ---------------
+            2 {192.168.10.209, 192.168.10.210}
+           23 {}
+
+PS C:\Windows\system32> nslookup
+Default Server:  ext-dc01.extranet.technologytoolbox.com
+Address:  192.168.10.209
+
+> exit
+
+PS C:\Windows\system32> Restart-Computer
+```
+
+```Console
 cls
 ```
 
@@ -466,6 +536,8 @@ Dismount-DiskImage -ImagePath $imagePath
 
 In the **Agent Properties** window, on the **Security** tab, select **Allow this agent to act as a proxy and discover managed objects on other computers** and then click **OK**.
 
+**TODO:**
+
 ## Issue - License Activation failures
 
 Log Name:      Application\
@@ -499,65 +571,3 @@ cscript c:\windows\system32\slmgr.vbs /ato
 
 **Windows Server 2012 Datacenter Not Activating - Windows Azure**\
 From <[https://social.msdn.microsoft.com/Forums/azure/en-US/f29d5fe7-4f0f-433d-8333-1d336f68a4db/windows-server-2012-datacenter-not-activating-windows-azure?forum=WAVirtualMachinesforWindows](https://social.msdn.microsoft.com/Forums/azure/en-US/f29d5fe7-4f0f-433d-8333-1d336f68a4db/windows-server-2012-datacenter-not-activating-windows-azure?forum=WAVirtualMachinesforWindows)>
-
-## Issue - DNS registration errors
-
-Log Name:      System\
-Source:        NETLOGON\
-Date:          12/16/2016 7:13:50 PM\
-Event ID:      5774\
-Task Category: None\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      EXT-DC03.extranet.technologytoolbox.com\
-Description:\
-The dynamic registration of the DNS record '_ldap._tcp.dc._msdcs.extranet.technologytoolbox.com. 600 IN SRV 0 100 389 EXT-DC03.extranet.technologytoolbox.com.' failed on the following DNS server:
-
-DNS server IP address: 192.168.10.209\
-Returned Response Code (RCODE): 5\
-Returned Status Code: 9017
-
-For computers and users to locate this domain controller, this record must be registered in DNS.
-
-USER ACTION\
-Determine what might have caused this failure, resolve the problem, and initiate registration of the DNS records by the domain controller. To determine what might have caused this failure, run DCDiag.exe. To learn more about DCDiag.exe, see Help and Support Center. To initiate registration of the DNS records by this domain  controller, run 'nltest.exe /dsregdns' from the command prompt on the domain controller or restart Net Logon service.\
-  Or, you can manually add this record to DNS, but it is not recommended.
-
-ADDITIONAL DATA\
-Error Value: DNS bad key.
-
-### Troubleshooting
-
-```Text
-PS C:\Windows\system32> nslookup
-DNS request timed out.
-    timeout was 2 seconds.
-Default Server:  UnKnown
-Address:  ::1
-
-PS C:\Windows\system32> Get-DnsClientServerAddress -InterfaceAlias "Azure - Production" | select AddressFamily, ServerAddresses
-
-AddressFamily ServerAddresses
-------------- ---------------
-            2 {192.168.10.209, 192.168.10.210, 127.0.0.1}
-           23 {::1}
-```
-
-### Solution
-
-```Text
-PS C:\Windows\system32> Set-DnsClientServerAddress -InterfaceAlias "Azure - Production" -ResetServerAddresses
-PS C:\Windows\system32> Get-DnsClientServerAddress -InterfaceAlias "Azure - Production" | select AddressFamily, ServerAddresses
-
-AddressFamily ServerAddresses
-------------- ---------------
-            2 {192.168.10.209, 192.168.10.210}
-           23 {}
-
-PS C:\Windows\system32> nslookup
-Default Server:  ext-dc01.extranet.technologytoolbox.com
-Address:  192.168.10.209
-
-PS C:\Windows\system32> Restart-Computer
-```
