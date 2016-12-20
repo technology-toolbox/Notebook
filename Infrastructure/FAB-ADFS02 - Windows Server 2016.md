@@ -506,8 +506,8 @@ $realm = "urn:sharepoint:securitas"
 $signInURL = "https://fs.fabrikam.com/adfs/ls"
 
 $authProvider = New-SPTrustedIdentityTokenIssuer `
-    -Name "AD FS Provider for SharePoint" `
-    -Description "AD FS provider for Securitas web applications" `
+    -Name "ADFS" `
+    -Description "Active Directory Federation Services provider" `
     -Realm $realm `
     -ImportTrustCertificate $cert `
     -ClaimsMappings  $claimsMappings `
@@ -542,6 +542,10 @@ $authProvider.Update()
 ---
 
 **EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
 
 #### # Configure SSL on web applications
 
@@ -819,7 +823,7 @@ Process
 
 **EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson-admin**
 
-#### # Associate web applications with the AD FS identity provider
+#### # Associate web applications with the ADFS identity provider
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/D8/7F642FAA44021E95DB1A7A6FD9F2677B23C0BDD8.png)
 
@@ -833,7 +837,7 @@ In the **Authentication Providers** window, click **Extranet**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/AC/186F5C73F0D1F5C63212C085C66949AA49270FAC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FD/83C8A40ECDDE81D2D1EFFCFC960CEA62C08ABBFD.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/23C3B22B6BCD53BA3BDDFD63FDD6E72954959D1C.png)
 
 ---
 
