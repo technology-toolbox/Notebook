@@ -1,7 +1,7 @@
 ﻿# WIN8-TEST1 - Windows 8.1 Enterprise (x64)
 
-Monday, October 19, 2015
-8:29 AM
+Monday, December 26, 2016
+5:43 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,32 +9,39 @@ Monday, October 19, 2015
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ### # Create virtual machine (WIN8-TEST1)
 
 ```PowerShell
+$vmHost = "FORGE"
 $vmName = "WIN8-TEST1"
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
+    -ComputerName $vmHost `
     -Name $vmName `
     -Path C:\NotBackedUp\VMs `
     -NewVHDPath $vhdPath `
-    -NewVHDSizeBytes 25GB `
+    -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
+    -SwitchName "Production"
 
-Set-VMMemory `
+Set-VM `
+    -ComputerName $vmHost `
     -VMName $vmName `
-    -DynamicMemoryEnabled $true `
-    -MinimumBytes 256MB `
-    -MaximumBytes 4GB
+    -ProcessorCount 2 `
+    -DynamicMemory `
+    -MemoryMinimumBytes 256MB `
+    -MemoryMaximumBytes 4GB
 
-Set-VMDvdDrive -VMName $vmName -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
+Set-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
 
-Start-VM $vmName
+Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
@@ -51,32 +58,57 @@ Start-VM $vmName
     - Google
       - **Chrome**
     - Mozilla
-      - **Firefox 40.0.2**
-      - **Thunderbird 38.2.0**
+      - **Firefox 45.0.1**
+      - **Thunderbird 38.7.0**
   - Click **Next**.
 
+#### # Copy latest Toolbox content
+
 ```PowerShell
-cls
+net use \\ICEMAN\IPC$ /USER:TECHTOOLBOX\jjameson
 ```
 
-## # Rename local Administrator account and set password
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
+robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
+```
+
+#### # Rename local Administrator account and set password
 
 ```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted, type the password for the local Administrator account.
+
+```PowerShell
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
 $adminUser = [ADSI] 'WinNT://./Administrator,User'
 $adminUser.Rename('foo')
-$adminUser.SetPassword('{password}')
+$adminUser.SetPassword($plainPassword)
 
 logoff
 ```
 
+#### Login as WIN8-TEST1\\foo
+
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ## # Remove disk from virtual CD/DVD drive
 
 ```PowerShell
-Set-VMDvdDrive -VMName WIN8-TEST1 -Path $null
+Set-VMDvdDrive -ComputerName FORGE -VMName WIN8-TEST1 -Path $null
 ```
 
 ---
@@ -105,34 +137,6 @@ mountvol X: $volumeId
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-Get-NetFirewallRule |
-  Where-Object { `
-    $_.Profile -eq 'Domain' `
-      -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
-  Enable-NetFirewallRule
-
-New-NetFirewallRule `
-  -Name 'Remote Windows Update (Dynamic RPC)' `
-  -DisplayName 'Remote Windows Update (Dynamic RPC)' `
-  -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-  -Group 'Technology Toolbox (Custom)' `
-  -Program '%windir%\system32\dllhost.exe' `
-  -Direction Inbound `
-  -Protocol TCP `
-  -LocalPort RPC `
-  -Profile Domain `
-  -Action Allow
-```
-
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-Disable-NetFirewallRule -DisplayName 'Remote Windows Update (Dynamic RPC)'
-```
-
 ```PowerShell
 cls
 ```
@@ -140,8 +144,14 @@ cls
 ## # Install Remote Server Administration Tools for Windows 8.1
 
 ```PowerShell
-net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+net use \\ICEMAN\IPC$ /USER:TECHTOOLBOX\jjameson
+```
 
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
 & '\\ICEMAN\Public\Download\Microsoft\Remote Server Administration Tools for Windows 8.1\Windows8.1-KB2693643-x64.msu'
 ```
 
@@ -188,7 +198,9 @@ cls
 slmgr /ipk {product key}
 ```
 
-**Note:** When notified that the product key was set successfully, click **OK**.
+> **Note**
+>
+> When notified that the product key was set successfully, click **OK**.
 
 ```Console
 slmgr /ato
@@ -201,13 +213,15 @@ slmgr /ato
 
 ## Install updates using Windows Update
 
-**Note:** Repeat until there are no updates available for the computer.
+> **Note**
+>
+> Repeat until there are no updates available for the computer.
 
 ```PowerShell
 cls
 ```
 
-## # Delete C:\\Windows\\SoftwareDistribution folder (257 MB)
+## # Delete C:\\Windows\\SoftwareDistribution folder (2.11 GB)
 
 ```PowerShell
 Stop-Service wuauserv
@@ -215,27 +229,71 @@ Stop-Service wuauserv
 Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
 
+## Update Hyper-V Integration Services
+
+## Update Google Chrome
+
+## Update Mozilla Firefox
+
+## Snapshot VM
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
-cls
+$vmHost = "FORGE"
+$vmName = "WIN8-TEST1"
 ```
 
-## # Shutdown VM
+### # Specify configuration in VM notes
 
 ```PowerShell
-Stop-Computer
+$notes = Get-VM -ComputerName $vmHost -VMName $vmName |
+    select -ExpandProperty Notes
+
+$newNotes = `
+"Windows 8.1 Enterprise (x64)
+Microsoft Office Professional Plus 2013 (x86)
+Adobe Reader 8.3.1
+Google Chrome
+Mozilla Firefox 50.1.0
+Mozilla Thunderbird 38.7.0
+Remote Server Administration Tools for Windows 8.1
+Hyper-V Management Tools enabled" `
+    + [System.Environment]::NewLine `
+    + [System.Environment]::NewLine `
+    + $notes
+
+Set-VM `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Notes $newNotes
 ```
 
-## Snapshot VM - "Baseline"
+### # Shutdown VM
 
-Windows 8.1 Enterprise (x64)\
-Microsoft Office Professional Plus 2013 (x86)\
-Adobe Reader 8.3.1\
-Google Chrome\
-Mozilla Firefox 36.0\
-Mozilla Thunderbird 31.3.0\
-Remote Server Administration Tools for Windows 8.1\
-Hyper-V Management Tools enabled
+```PowerShell
+Stop-VM -ComputerName $vmHost -VMName $vmName
+```
 
-## Expand C: drive to 34 GB
+### # Remove disk from virtual CD/DVD drive
+
+```PowerShell
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+### # Snapshot VM - "Baseline"
+
+```PowerShell
+$snapshotName = "Baseline"
+
+Checkpoint-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -SnapshotName $snapshotName
+```
+
+---
 
 **TODO:**
