@@ -1371,4 +1371,22 @@ ping ANGEL -f -l 8900
 ping 10.1.10.107 -f -l 8900
 ```
 
+## Reconfigure "Storage" network adapter (to enable SMB Multichannel)
+
+```PowerShell
+$interfaceAlias = "Storage"
+
+Enable-NetAdapterBinding -Name $interfaceAlias `
+    -DisplayName "Client for Microsoft Networks"
+
+Enable-NetAdapterBinding -Name $interfaceAlias `
+    -DisplayName "File and Printer Sharing for Microsoft Networks"
+
+Enable-NetAdapterBinding -Name $interfaceAlias `
+    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
+
+Enable-NetAdapterBinding -Name $interfaceAlias `
+    -DisplayName "Link-Layer Topology Discovery Responder"
+```
+
 **TODO:**
