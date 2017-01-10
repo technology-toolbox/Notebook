@@ -1,13 +1,13 @@
-﻿# STORM - Windows Server 2012 R2 Standard
+﻿# TT-HV01 - Windows Server 2016
 
-Monday, January 25, 2016
-2:54 PM
+Monday, January 9, 2017
+8:59 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Install Windows Server 2012 R2
+## Install Windows Server 2016
 
 ## Rename computer and join domain
 
@@ -22,7 +22,7 @@ sconfig
 **FOOBAR8**
 
 ```PowerShell
-$computerName = "STORM"
+$computerName = "TT-HV01"
 $targetPath = ("OU=Hyper-V Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
 
@@ -61,24 +61,6 @@ robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 cls
 ```
 
-## # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-```PowerShell
-cls
-```
-
 ## # Select "High performance" power scheme
 
 ```PowerShell
@@ -99,135 +81,18 @@ cls
 Get-NetAdapter -Physical | select InterfaceDescription
 
 Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
-    Rename-NetAdapter -NewName "Management"
+    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
+    Rename-NetAdapter -NewName "Datacenter-1"
 
 Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
-    Rename-NetAdapter -NewName "Production"
+    -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
+    Rename-NetAdapter -NewName "Datacenter-2"
 
 Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
-    Rename-NetAdapter -NewName "Storage"
-```
+    Rename-NetAdapter -NewName "Tenant-1"
 
-```PowerShell
-cls
-```
-
-## # Configure "Management" network adapter
-
-### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "192.168.10.108"
-
-New-NetIPAddress `
-    -InterfaceAlias "Management" `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-
-Set-DNSClientServerAddress `
-    -InterfaceAlias "Management" `
-    -ServerAddresses 192.168.10.104,192.168.10.103
-```
-
-### # Configure static IPv6 address
-
-```PowerShell
-$ipAddress = "2601:282:4201:e500::108"
-
-New-NetIPAddress `
-    -InterfaceAlias "Management" `
-    -IPAddress $ipAddress `
-    -PrefixLength 64
-
-Set-DNSClientServerAddress `
-    -InterfaceAlias "Management" `
-    -ServerAddresses 2601:282:4201:e500::104,2601:282:4201:e500::103
-```
-
-```PowerShell
-cls
-```
-
-## # Configure "Management" network adapter
-
-```PowerShell
-Disable-NetAdapterBinding -Name "Production" `
-    -DisplayName "Client for Microsoft Networks"
-
-Disable-NetAdapterBinding -Name "Production" `
-    -DisplayName "File and Printer Sharing for Microsoft Networks"
-
-Disable-NetAdapterBinding -Name "Production" `
-    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
-
-Disable-NetAdapterBinding -Name "Production" `
-    -DisplayName "Link-Layer Topology Discovery Responder"
-
-$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
-    -Filter "NetConnectionId = 'Production'"
-
-$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
-    -Filter "Index= '$($adapter.DeviceID)'"
-```
-
-### # Do not register this connection in DNS
-
-```PowerShell
-$adapterConfig.SetDynamicDNSRegistration($false)
-```
-
-### # Disable NetBIOS over TCP/IP
-
-```PowerShell
-$adapterConfig.SetTcpipNetbios(2)
-```
-
-```PowerShell
-cls
-```
-
-## # Configure "Storage" network adapter
-
-```PowerShell
-$ipAddress = "10.1.10.108"
-
-New-NetIPAddress `
-    -InterfaceAlias "Storage" `
-    -IPAddress $ipAddress `
-    -PrefixLength 24
-
-Disable-NetAdapterBinding -Name "Storage" `
-    -DisplayName "Client for Microsoft Networks"
-
-Disable-NetAdapterBinding -Name "Storage" `
-    -DisplayName "File and Printer Sharing for Microsoft Networks"
-
-Disable-NetAdapterBinding -Name "Storage" `
-    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
-
-Disable-NetAdapterBinding -Name "Storage" `
-    -DisplayName "Link-Layer Topology Discovery Responder"
-
-$adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
-    -Filter "NetConnectionId = 'Storage'"
-
-$adapterConfig = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
-    -Filter "Index= '$($adapter.DeviceID)'"
-```
-
-### # Do not register this connection in DNS
-
-```PowerShell
-$adapterConfig.SetDynamicDNSRegistration($false)
-```
-
-### # Disable NetBIOS over TCP/IP
-
-```PowerShell
-$adapterConfig.SetTcpipNetbios(2)
+Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Tenant-2"
 ```
 
 ```PowerShell
@@ -239,52 +104,212 @@ cls
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name "Management" `
+Set-NetAdapterAdvancedProperty -Name "Datacenter-1" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-Set-NetAdapterAdvancedProperty -Name "Production" `
+Set-NetAdapterAdvancedProperty -Name "Datacenter-2" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-Set-NetAdapterAdvancedProperty -Name "Storage" `
+Set-NetAdapterAdvancedProperty -Name "Tenant-1" `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
+
+Set-NetAdapterAdvancedProperty -Name "Tenant-2" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
 ping ICEMAN -f -l 8900
-ping 10.1.10.106 -f -l 8900
 ```
 
-Note: Trying to ping ICEMAN or the iSCSI network adapter on ICEMAN with a 9000 byte packet from BEAST resulted in an error (suggesting that jumbo frames were not configured). It also worked with 8970 bytes.
+## Issue - SMB Multichannel works with Intel 82574L but not with Intel 82579LM
+
+```PowerShell
+Get-NetAdapter
+
+Name                      InterfaceDescription                    ifIndex Status       LinkSpeed
+----                      --------------------                    ------- ------       ---------
+Tenant-1                  Intel(R) Gigabit CT Desktop Adapter           9 Up              1 Gbps
+Datacenter-1              Intel(R) 82579LM Gigabit Network Con...       4 Up              1 Gbps
+Tenant-2                  Intel(R) Gigabit CT Desktop Adapter #2        8 Disconnected     0 bps
+Datacenter-2              Intel(R) 82574L Gigabit Network Conn...       6 Up              1 Gbps
+
+
+Get-NetAdapterRSS
+
+
+Name                                            : Tenant-1
+InterfaceDescription                            : Intel(R) Gigabit CT Desktop Adapter
+Enabled                                         : True
+NumberOfReceiveQueues                           : 2
+Profile                                         : NUMAStatic
+BaseProcessor: [Group:Number]                   : 0:0
+MaxProcessor: [Group:Number]                    : 0:6
+MaxProcessors                                   : 4
+...
+
+Name                                            : Datacenter-1
+InterfaceDescription                            : Intel(R) 82579LM Gigabit Network Connection
+Enabled                                         : True
+NumberOfReceiveQueues                           : 1
+Profile                                         : Closest
+BaseProcessor: [Group:Number]                   : 0:0
+MaxProcessor: [Group:Number]                    : 0:6
+MaxProcessors                                   : 4
+...
+
+Name                                            : Tenant-2
+InterfaceDescription                            : Intel(R) Gigabit CT Desktop Adapter #2
+Enabled                                         : True
+NumberOfReceiveQueues                           : 2
+Profile                                         : NUMAStatic
+BaseProcessor: [Group:Number]                   : 0:0
+MaxProcessor: [Group:Number]                    : 0:6
+MaxProcessors                                   : 4
+...
+
+Name                                            : Datacenter-2
+InterfaceDescription                            : Intel(R) 82574L Gigabit Network Connection
+Enabled                                         : True
+NumberOfReceiveQueues                           : 2
+Profile                                         : NUMAStatic
+BaseProcessor: [Group:Number]                   : :0
+MaxProcessor: [Group:Number]                    : :63
+MaxProcessors                                   : 8
+...
+
+
+Set-NetAdapterRss -Name "Datacenter-1" -Profile NUMAStatic -NumberOfReceiveQueues 2
+Set-NetAdapterRss : Failed to set 'NumberOfReceiveQueues' of 'RSS' configuration of adapter 'Datacenter-1'
+At line:1 char:1
++ Set-NetAdapterRss -Name "Datacenter-1" -Profile NUMAStatic -NumberOfR ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (MSFT_NetAdapter...219C6E3D121B}"):ROOT/StandardCi...rRssSettingData)
+   [Set-NetAdapterRss], CimException
+    + FullyQualifiedErrorId : Windows System Error 50,Set-NetAdapterRss
+
+Get-NetAdapterRSS
+
+
+Name                                            : Tenant-1
+InterfaceDescription                            : Intel(R) Gigabit CT Desktop Adapter
+Enabled                                         : True
+NumberOfReceiveQueues                           : 2
+Profile                                         : NUMAStatic
+BaseProcessor: [Group:Number]                   : 0:0
+MaxProcessor: [Group:Number]                    : 0:6
+MaxProcessors                                   : 4
+...
+
+Name                                            : Datacenter-1
+InterfaceDescription                            : Intel(R) 82579LM Gigabit Network Connection
+Enabled                                         : True
+NumberOfReceiveQueues                           : 1
+Profile                                         : NUMAStatic
+BaseProcessor: [Group:Number]                   : 0:0
+MaxProcessor: [Group:Number]                    : 0:6
+MaxProcessors                                   : 4
+...
+
+Name                                            : Tenant-2
+InterfaceDescription                            : Intel(R) Gigabit CT Desktop Adapter #2
+Enabled                                         : True
+NumberOfReceiveQueues                           : 2
+Profile                                         : NUMAStatic
+BaseProcessor: [Group:Number]                   : 0:0
+MaxProcessor: [Group:Number]                    : 0:6
+MaxProcessors                                   : 4
+...
+
+Name                                            : Datacenter-2
+InterfaceDescription                            : Intel(R) 82574L Gigabit Network Connection
+Enabled                                         : True
+NumberOfReceiveQueues                           : 2
+Profile                                         : NUMAStatic
+BaseProcessor: [Group:Number]                   : :0
+MaxProcessor: [Group:Number]                    : :63
+MaxProcessors                                   : 8
+...
+
+
+Get-NetAdapterAdvancedProperty -Name "Datacenter-1" |
+    select DisplayName, DisplayValue
+
+DisplayName                    DisplayValue
+-----------                    ------------
+Flow Control                   Rx & Tx Enabled
+Interrupt Moderation           Enabled
+IPv4 Checksum Offload          Rx & Tx Enabled
+Jumbo Packet                   9014 Bytes
+Large Send Offload V2 (IPv4)   Enabled
+Large Send Offload V2 (IPv6)   Enabled
+ARP Offload                    Enabled
+NS Offload                     Enabled
+Packet Priority & VLAN         Packet Priority & VLAN Enabled
+Receive Buffers                256
+Receive Side Scaling           Enabled
+Speed & Duplex                 Auto Negotiation
+TCP Checksum Offload (IPv4)    Rx & Tx Enabled
+TCP Checksum Offload (IPv6)    Rx & Tx Enabled
+Transmit Buffers               512
+UDP Checksum Offload (IPv4)    Rx & Tx Enabled
+UDP Checksum Offload (IPv6)    Rx & Tx Enabled
+Adaptive Inter-Frame Spacing   Disabled
+Interrupt Moderation Rate      Adaptive
+Log Link State Event           Enabled
+Gigabit Master Slave Mode      Auto Detect
+Locally Administered Address   --
+Wait for Link                  Auto Detect
+
+
+Set-NetAdapterRss -Name "Datacenter-1" -NumberOfReceiveQueues 2
+Set-NetAdapterRss : Failed to set 'NumberOfReceiveQueues' of 'RSS' configuration of adapter 'Datacenter-1'
+At line:1 char:1
++ Set-NetAdapterRss -Name "Datacenter-1" -NumberOfReceiveQueues 2
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (MSFT_NetAdapter...219C6E3D121B}"):ROOT/StandardCi...rRssSettingData)
+   [Set-NetAdapterRss], CimException
+    + FullyQualifiedErrorId : Windows System Error 50,Set-NetAdapterRss
+
+Set-NetAdapterRss -Name "Datacenter-1" -Profile Closest
+```
 
 ```PowerShell
 cls
 ```
 
-## # Enable PowerShell remoting
+### # Resolution - Use Intel Gigabit CT network adapters for "Datacenter" networks
 
 ```PowerShell
-Enable-PSRemoting -Confirm:$false
+Get-NetAdapter -Physical | select InterfaceDescription
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
+    Rename-NetAdapter -NewName "Temp-1"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
+    Rename-NetAdapter -NewName "Temp-2"
+
+Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+    Rename-NetAdapter -NewName "Datacenter-1"
+
+Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Datacenter-2"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
+    Rename-NetAdapter -NewName "Tenant-1"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
+    Rename-NetAdapter -NewName "Tenant-2"
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+The following screenshot shows 1.5 Gbps throughput when copying a large file from ICEMAN to TT-HYP01:
 
-```PowerShell
-New-NetFirewallRule `
-    -Name 'Remote Windows Update (Dynamic RPC)' `
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
-    -Group 'Technology Toolbox (Custom)' `
-    -Program '%windir%\system32\dllhost.exe' `
-    -Direction Inbound `
-    -Protocol TCP `
-    -LocalPort RPC `
-    -Profile Domain `
-    -Action Allow
-```
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BF/23003F17717A47C9DBD69AA186B26F6046296FBF.png)
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+The following screenshot shows the load spread across two network adapters (729 Mbps and 619 Mbps) on TT-HYP01:
 
-```PowerShell
-Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
-```
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/5154E5668F6139E3AD3699F02EB196B0D026244F.png)
 
 ## Enable Virtualization in BIOS
 
@@ -307,6 +332,8 @@ Install-WindowsFeature `
 
 ```PowerShell
 Update-Help
+
+TODO:
 ```
 
 ```PowerShell
