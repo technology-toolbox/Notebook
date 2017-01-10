@@ -1,4 +1,4 @@
-﻿# TT-HV01 - Windows Server 2016
+﻿# TT-HV01A - Windows Server 2016
 
 Monday, January 9, 2017
 8:59 AM
@@ -14,6 +14,10 @@ Monday, January 9, 2017
 ```Console
 sconfig
 ```
+
+> **Note**
+>
+> Rename the computer to **TT-HV01** and join the **corp.technologytoolbox.com** domain.
 
 ## Move computer to "Hyper-V Servers" OU
 
@@ -267,7 +271,11 @@ At line:1 char:1
     + CategoryInfo          : InvalidOperation: (MSFT_NetAdapter...219C6E3D121B}"):ROOT/StandardCi...rRssSettingData)
    [Set-NetAdapterRss], CimException
     + FullyQualifiedErrorId : Windows System Error 50,Set-NetAdapterRss
+```
 
+#### # Revert profile for Intel 82579LM network adapter
+
+```PowerShell
 Set-NetAdapterRss -Name "Datacenter-1" -Profile Closest
 ```
 
@@ -311,7 +319,23 @@ The following screenshot shows the load spread across two network adapters (729 
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/5154E5668F6139E3AD3699F02EB196B0D026244F.png)
 
-## Enable Virtualization in BIOS
+```PowerShell
+cls
+```
+
+## # Configure tenant network team
+
+#### # Create NIC team
+
+```PowerShell
+$interfaceAlias = "Tenant Team"
+
+New-NetLbfoTeam -Name $interfaceAlias -TeamMembers "Tenant-1", "Tenant-2"
+```
+
+## Enable Hyper-V role
+
+### Enable Virtualization in BIOS
 
 Intel Virtualization Technology: **Enabled**
 
@@ -319,7 +343,7 @@ Intel Virtualization Technology: **Enabled**
 cls
 ```
 
-## # Add Hyper-V role
+### # Add Hyper-V role
 
 ```PowerShell
 Install-WindowsFeature `
@@ -328,29 +352,24 @@ Install-WindowsFeature `
     -Restart
 ```
 
-## # Download PowerShell help files (for Hyper-V cmdlets)
+### # Download PowerShell help files (for Hyper-V cmdlets)
 
 ```PowerShell
 Update-Help
-
-TODO:
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Create virtual switches
+## # Configure Hyper-V virtual switch
+
+### # Create Hyper-V virtual switch
 
 ```PowerShell
 New-VMSwitch `
-    -Name "Production" `
-    -NetAdapterName "Production" `
-    -AllowManagementOS $true
-
-New-VMSwitch `
-    -Name "Storage" `
-    -NetAdapterName "Storage" `
+    -Name "Tenant vSwitch" `
+    -NetAdapterName "Tenant Team" `
     -AllowManagementOS $true
 ```
 
@@ -358,34 +377,28 @@ New-VMSwitch `
 cls
 ```
 
-## # Enable jumbo frames on virtual switches
+### # Enable jumbo frames on virtual switches
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 Set-NetAdapterAdvancedProperty `
-    -Name "vEthernet (Production)" `
+    -Name "vEthernet (Tenant vSwitch)" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-Set-NetAdapterAdvancedProperty `
-    -Name "vEthernet (Storage)" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-ping ICEMAN -f -l 8900
-ping 10.1.10.106 -f -l 8900
+ping ICEMAN -f -l 8900 -S 192.168.10.41
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Modify "Production" and "Storage" virtual switches to disallow management OS
+### # Modify virtual switch to disallow management OS
 
 ```PowerShell
-Get-VMSwitch "Production" |
-    Set-VMSwitch -AllowManagementOS $false
-
-Get-VMSwitch "Storage" |
+Get-VMSwitch "Tenant vSwitch" |
     Set-VMSwitch -AllowManagementOS $false
 ```
 
@@ -422,8 +435,8 @@ Get-VMSwitch "Storage" |
 <p>0</p>
 </td>
 <td valign='top'>
-<p>Model: Samsung SSD 840 PRO Series<br />
-Serial number: *********03944B</p>
+<p>Model: Samsung SSD 840 Series<br />
+Serial number: *********01728J</p>
 </td>
 <td valign='top'>
 <p>512 GB</p>
@@ -442,8 +455,8 @@ Serial number: *********03944B</p>
 <p>1</p>
 </td>
 <td valign='top'>
-<p>Model: Samsung SSD 840 Series<br />
-Serial number: *********01728J</p>
+<p>Model: Samsung SSD 840 PRO Series<br />
+Serial number: *********03944B</p>
 </td>
 <td valign='top'>
 <p>512 GB</p>
@@ -554,8 +567,8 @@ PhysicalDisk4</p>
 
 | Name   | Layout | Provisioning | Capacity | SSD Tier | HDD Tier | Volume | Volume Label | Write-Back Cache |
 | ------ | ------ | ------------ | -------- | -------- | -------- | ------ | ------------ | ---------------- |
-| Data01 | Mirror | Fixed        | 125 GB   | 125 GB   |          | D:     | Data01       |                  |
-| Data02 | Mirror | Fixed        | 700 GB   | 200 GB   | 500 GB   | E:     | Data02       | 5 GB             |
+| Data01 | Mirror | Fixed        | 200 GB   | 200 GB   |          | D:     | Data01       |                  |
+| Data02 | Mirror | Fixed        | 900 GB   | 200 GB   | 700 GB   | E:     | Data02       | 5 GB             |
 | Data03 | Simple | Fixed        | 200 GB   |          | 200 GB   | F:     | Data03       | 1 GB             |
 
 ```PowerShell
@@ -565,8 +578,11 @@ cls
 ### # Create storage pool
 
 ```PowerShell
-$storageSubSystemUniqueId = Get-StorageSubSystem `
-    -FriendlyName "Storage Spaces on STORM" | select -ExpandProperty UniqueId
+$storageSubSystemName = "Windows Storage on $env:COMPUTERNAME"
+
+$storageSubSystemUniqueId = `
+    Get-StorageSubSystem -FriendlyName $storageSubSystemName |
+    select -ExpandProperty UniqueId
 
 New-StoragePool `
     -FriendlyName "Pool 1" `
@@ -611,7 +627,7 @@ Get-StoragePool "Pool 1" |
         -FriendlyName "Data01" `
         -ResiliencySettingName Mirror `
         -StorageTiers $ssdTier `
-        -StorageTierSizes 125GB
+        -StorageTierSizes 200GB
 
 $hddTier = Get-StorageTier -FriendlyName "HDD Tier"
 
@@ -620,7 +636,7 @@ Get-StoragePool "Pool 1" |
         -FriendlyName "Data02" `
         -ResiliencySettingName Mirror `
         -StorageTiers $ssdTier,$hddTier `
-        -StorageTierSizes 200GB,500GB `
+        -StorageTierSizes 200GB,700GB `
         -WriteCacheSize 5GB
 
 Get-StoragePool "Pool 1" |
@@ -729,26 +745,91 @@ Set-ScheduledTask $task
 **Save a report when Storage Tiers Optimization runs**\
 From <[https://technet.microsoft.com/en-us/library/dn789160.aspx](https://technet.microsoft.com/en-us/library/dn789160.aspx)>
 
-## Benchmark storage performance
+## Issue - Poor write performance on mirrored Samsung 840 SSDs
 
-### Benchmark C: (SSD - Samsung 850 Pro 128GB)
+### Before
+
+#### C: (SSD - Samsung 850 Pro 128GB)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/24/56970BCBD63990C24E3E71C2875C4C9CD3A79B24.png)
+
+#### D: (Mirror SSD storage space - 2x Samsung 840 512GB)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/03/9250118972EEF9F8B918E57C9B5E519737AF9703.png)
+
+#### E: (Mirror SSD/HDD storage space)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DC/BA90DE05C35CCD69741C558CC9ED6FB364FC13DC.png)
+
+#### F: (Simple HDD storage space)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D3/849F2F590EE26E94B3B7A48DAA064B00A843AED3.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/ED/654FBE2B044D7E7EB063D5E9CC10B2846778D8ED.png)
+
+### STORM (for comparison)
+
+#### Benchmark C: (SSD - Samsung 850 Pro 128GB)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/EA8C629095523D0CF0C88B9D6AEB08B729772D0C.png)
 
-### Benchmark D: (Mirror SSD storage space - 2x Samsung 840 512GB)
+#### Benchmark D: (Mirror SSD storage space - 2x Samsung 840 512GB)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/FA049D8B5BD2DE10A5174B037923D27E07AF0C3C.png)
 
-### Benchmark E: (Mirror SSD/HDD storage space)
+#### Benchmark E: (Mirror SSD/HDD storage space)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/BFEFC0258A705B18A95939C9EB07CCB1A8075D5F.png)
 
-### Benchmark F: (Simple HDD storage space)
+#### Benchmark F: (Simple HDD storage space)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/D4BE461147A604A22BD43FE4B4DDAF2597417688.png)
 
+### Solution
+
+#### Update AHCI drivers
+
+1. Download the latest AHCI drivers from the Intel website:\
+   **Intel® RSTe AHCI & SCU Software RAID driver for Windows**\
+   From <[https://downloadcenter.intel.com/download/25393/Intel-RSTe-AHCI-SCU-Software-RAID-driver-for-Windows-](https://downloadcenter.intel.com/download/25393/Intel-RSTe-AHCI-SCU-Software-RAID-driver-for-Windows-)>
+2. Extract the drivers and copy the files to a temporary location on the server:
+3. Install the drivers for the **Intel(R) C600 series chipset SATA AHCI Controller (PCI\\VEN_8086&DEV_1D02&...)**:
+4. Restart the server.
+
+```Console
+    robocopy "C:\NotBackedUp\Temp\Drivers\Intel\RSTe AHCI & SCU Software RAID driver for Windows\Drivers\x64\Win8_10_2K8R2_2K12\AHCI" '\\TT-HV01\C$\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI' /E
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI\iaAHCI.inf
+```
+
+#### Swap SATA controllers for SSD drives
+
+Apparently, there is a known issue with the Marvell 88SE9128 controller which caps SSD throughput at just under 400 MB/sec. Consequently, I moved the Samsung 850 128 GB drive to the Marvell controller (since write throughput on that drive is not as important) and moved the two Samsung 840 512 GB drives to the Intel RST controller.
+
+### After
+
+#### Benchmark C: (SSD - Samsung 850 Pro 128GB)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/15/519535B0A6F687236645B38D82247E8E34153115.png)
+
+#### Benchmark D: (Mirror SSD storage space - 2x Samsung 840 512GB)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/308440FA708C0191F113E9861A0D04DD419FF3F4.png)
+
+#### Benchmark E: (Mirror SSD/HDD storage space)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/E9B332D01CBB9B3B944ECFC49EF2260280AC28DD.png)
+
+#### Benchmark F: (Simple HDD storage space)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/29/357F84ED3D27DC1E086F6E5B9DDBFDB70AB64629.png)
+
+## # Rename server (so that TT-HV01 can be used as cluster name)
+
 ```PowerShell
-cls
+Rename-Computer -NewName TT-HV01A -Restart
 ```
 
 ## # Configure VM storage
@@ -770,39 +851,122 @@ Pasted from <[http://technet.microsoft.com/en-us/library/jj134199.aspx](http://t
 
 ### Configure constrained delegation in Active Directory
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/AD85D8814AE85E1B2E8FC6544B7F10881939535E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/3AB56ACC8B218B968CE0C6727BC4E299BC153C8D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C0/7D57372A9F2C4599B1E8C9C68FED9A6D2D6DD1C0.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/41DF2FCE6A360FA1A82E17944B565C52CCE17FDB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/97/A795AEE3AF6234B0FCCDB35A944B7B9C9D7ACA97.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/6E149755619C12978D14C0D0A378885865E0419D.png)
 
-Click Add...
+Click **Add...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/18818661BC0C359C33EE49E6F3341FAAF867998D.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/09A60E64FFA9B1ABD7006A7C1CDF2083DFB02388.png)
 
-Click Users or Computers...
+Click **Users or Computers...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/8654E4EB4BCDED7D97C922ACD01D131EE50A9FA9.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EB/FA75FE5321E1F56B92CE8DB42269E09A121600EB.png)
 
-Click OK.
+Click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/014B30411E0CCCA9773E8A8F094CB221AAEEC465.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/06893082035B65F145E934E616B3A6FE4D543E39.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B2/8ADDCBFE162FE1FEC1348BD0F8E59018BA685DB2.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/87EA8CE1DA9437014BE88E78125AF40E0EC4113D.png)
 
-Click OK.
+Click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/5C396AC2F25DB666ABDBBA361383898FBAD04F7F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/F09D765142F09D6C036F8DD9B1C385318675B4FF.png)
+
+Repeat the previous steps to add the following services to **BEAST** and **FORGE**:
+
+- **cifs - TT-HV01A.corp.technologytoolbox.com**
+- **Microsoft Virtual System Migration Service - TT-HV01A.corp.technologytoolbox.com**
+
+### Restart Hyper-V servers
+
+This is necessary to avoid an error when migrating VMs:
+
+```PowerShell
+Move-VM : Virtual machine migration operation for 'BANSHEE' failed at migration source 'FORGE'. (Virtual machine ID D46FD5CD-A9CB-40B1-ACFB-5CC8C759E2D5)
+The Virtual Machine Management Service failed to establish a connection for a Virtual Machine migration with host 'TT-HV01A': No credentials are available in the security package (0x8009030E).
+Failed to authenticate the connection at the source host: no suitable credentials available.
+...
+```
+
+```PowerShell
+cls
+```
 
 ### # Configure the server for live migration
 
 ```PowerShell
 Enable-VMMigration
 
-Add-VMMigrationNetwork 192.168.10.108
+Set-VMHost -UseAnyNetworkForMigration $true
 
 Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
 ```
+
+## Migrate virtual machines to TT-HV01A
+
+---
+
+**FOOBAR8**
+
+**# Note:** Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName FORGE -Name BANSHEE
+
+Move-VM `
+    -ComputerName FORGE `
+    -Name BANSHEE `
+    -DestinationHost TT-HV01A `
+    -IncludeStorage `
+    -DestinationStoragePath E:\NotBackedUp\VMs\BANSHEE
+
+Start-VM -ComputerName TT-HV01A -Name BANSHEE
+```
+
+```PowerShell
+cls
+```
+
+**# Note:** Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName FORGE -Name EXT-DC01
+
+Move-VM `
+    -ComputerName FORGE `
+    -Name EXT-DC01 `
+    -DestinationHost TT-HV01A `
+    -IncludeStorage `
+    -DestinationStoragePath E:\NotBackedUp\VMs\EXT-DC01
+
+Start-VM -ComputerName TT-HV01A -Name EXT-DC01
+```
+
+```PowerShell
+cls
+```
+
+**# Note:** Must shutdown the VM first since the processors are not compatible
+
+```PowerShell
+Stop-VM -ComputerName FORGE -Name FAB-DC01
+
+Move-VM `
+    -ComputerName FORGE `
+    -Name FAB-DC01 `
+    -DestinationHost TT-HV01A `
+    -IncludeStorage `
+    -DestinationStoragePath E:\NotBackedUp\VMs\FAB-DC01
+
+Start-VM -ComputerName TT-HV01A -Name FAB-DC01
+```
+
+---
+
+**TODO:**
 
 ```PowerShell
 cls
@@ -821,116 +985,6 @@ Stop-Service wuauserv
 
 Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
-
-## Migrate virtual machines to STORM
-
----
-
-**FOOBAR8**
-
-### # Note: BANSHEE was already shutdown
-
-```PowerShell
-Move-VM `
-    -ComputerName ROGUE `
-    -Name BANSHEE `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\BANSHEE
-```
-
-```PowerShell
-cls
-```
-
-### # Note: Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName ROGUE -Name EXT-DC01
-
-Move-VM `
-    -ComputerName ROGUE `
-    -Name EXT-DC01 `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\EXT-DC01
-
-Start-VM -ComputerName STORM -Name EXT-DC01
-```
-
-```PowerShell
-cls
-```
-
-### # Note: Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName ROGUE -Name EXT-SQL01A
-
-Move-VM `
-    -ComputerName ROGUE `
-    -Name EXT-SQL01A `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\EXT-SQL01A
-
-Start-VM -ComputerName STORM -Name EXT-SQL01A
-```
-
-```PowerShell
-cls
-```
-
-### # Note: Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName ROGUE -Name FAB-DC01
-
-Move-VM `
-    -ComputerName ROGUE `
-    -Name FAB-DC01 `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\FAB-DC01
-
-Start-VM -ComputerName STORM -Name FAB-DC01
-```
-
-```PowerShell
-cls
-```
-
-### # Note: FOOBAR was already shutdown
-
-```PowerShell
-Move-VM `
-    -ComputerName ROGUE `
-    -Name FOOBAR `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\FOOBAR
-```
-
-```PowerShell
-cls
-```
-
-### # Note: Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName ROGUE -Name XAVIER1
-
-Move-VM `
-    -ComputerName ROGUE `
-    -Name XAVIER1 `
-    -DestinationHost STORM `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\XAVIER1
-
-Start-VM -ComputerName STORM -Name XAVIER1
-```
-
----
 
 ```PowerShell
 cls
@@ -1018,526 +1072,4 @@ slmgr /ipk {product key}
 
 ```Console
 slmgr /ato
-```
-
-```Console
-cls
-```
-
-## # Enable SMB Multichannel
-
-### # Modify "Production" virtual switch to allow management OS
-
-```PowerShell
-Get-VMSwitch "Production" |
-    Set-VMSwitch -AllowManagementOS $true
-```
-
-## # Configure NIC teaming
-
-```PowerShell
-Get-NetAdapter -Physical
-
-Get-NetIPAddress | select InterfaceIndex, InterfaceAlias, IPAddress | sort InterfaceIndex
-```
-
-```PowerShell
-cls
-```
-
-### # Disconnect virtual switches from network adapters
-
-```PowerShell
-Get-VMSwitch | Set-VMSwitch -AllowManagementOS:$false
-
-Get-VMSwitch | Set-VMSwitch -SwitchType Private
-```
-
-### # Rename network connections
-
-```PowerShell
-Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
-        Rename-NetAdapter -NewName "Ethernet"
-
-Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
-        Rename-NetAdapter -NewName "Ethernet 2"
-```
-
-```PowerShell
-cls
-```
-
-### # Configure "Ethernet" network adapter
-
-```PowerShell
-$interfaceAlias = "Ethernet"
-```
-
-#### # Remove static IP addresses
-
-```PowerShell
-Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
-```
-
-#### # Enable DHCP
-
-```PowerShell
-@("IPv4", "IPv6") | ForEach-Object {
-    $addressFamily = $_
-
-    $interface = Get-NetAdapter $interfaceAlias |
-        Get-NetIPInterface -AddressFamily $addressFamily
-
-    If ($interface.Dhcp -eq "Disabled")
-    {
-        # Remove existing gateway
-        $ipConfig = $interface | Get-NetIPConfiguration
-
-        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
-        {
-            $interface |
-                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
-        }
-        ElseIf ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
-        {
-            $interface |
-                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
-        }
-
-        # Enable DHCP
-        $interface | Set-NetIPInterface -DHCP Enabled
-
-        # Configure the  DNS Servers automatically
-        $interface | Set-DnsClientServerAddress -ResetServerAddresses
-    }
-}
-
-ipconfig /renew
-```
-
-```PowerShell
-cls
-```
-
-#### # Configure network adapter properties
-
-```PowerShell
-Enable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "Client for Microsoft Networks"
-
-Enable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "File and Printer Sharing for Microsoft Networks"
-
-Enable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
-
-Enable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "Link-Layer Topology Discovery Responder"
-
-$adapter = Get-WmiObject `
-    -Class "Win32_NetworkAdapter" `
-    -Filter ("NetConnectionId = '" + $interfaceAlias + "'")
-
-$adapterConfig = Get-WmiObject `
-    -Class "Win32_NetworkAdapterConfiguration" `
-    -Filter "Index= '$($adapter.DeviceID)'"
-
-# Register this connection in DNS
-$adapterConfig.SetDynamicDNSRegistration($true)
-
-# Use NetBIOS setting from the DHCP server
-$adapterConfig.SetTcpipNetbios(0)
-```
-
-```PowerShell
-cls
-```
-
-### # Configure "Ethernet 2" network adapter
-
-```PowerShell
-$interfaceAlias = "Ethernet 2"
-```
-
-#### # Remove static IP addresses
-
-```PowerShell
-Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
-```
-
-#### # Enable DHCP
-
-```PowerShell
-@("IPv4", "IPv6") | ForEach-Object {
-    $addressFamily = $_
-
-    $interface = Get-NetAdapter $interfaceAlias |
-        Get-NetIPInterface -AddressFamily $addressFamily
-
-    If ($interface.Dhcp -eq "Disabled")
-    {
-        # Remove existing gateway
-        If (($interface | Get-NetIPConfiguration).Ipv4DefaultGateway)
-        {
-            $interface | Remove-NetRoute -Confirm:$false
-        }
-
-        If (($interface | Get-NetIPConfiguration).Ipv6DefaultGateway)
-        {
-            $interface | Remove-NetRoute -Confirm:$false
-        }
-
-        # Enable DHCP
-        $interface | Set-NetIPInterface -DHCP Enabled
-
-        # Configure the  DNS Servers automatically
-        $interface | Set-DnsClientServerAddress -ResetServerAddresses
-    }
-}
-
-ipconfig /renew
-```
-
-```PowerShell
-cls
-```
-
-#### # Configure network adapter properties
-
-```PowerShell
-Enable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "Client for Microsoft Networks"
-
-Enable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "File and Printer Sharing for Microsoft Networks"
-
-Enable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
-
-Enable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "Link-Layer Topology Discovery Responder"
-
-$adapter = Get-WmiObject `
-    -Class "Win32_NetworkAdapter" `
-    -Filter ("NetConnectionId = '" + $interfaceAlias + "'")
-
-$adapterConfig = Get-WmiObject `
-    -Class "Win32_NetworkAdapterConfiguration" `
-    -Filter "Index= '$($adapter.DeviceID)'"
-
-# Register this connection in DNS
-$adapterConfig.SetDynamicDNSRegistration($true)
-
-# Use NetBIOS setting from the DHCP server
-$adapterConfig.SetTcpipNetbios(0)
-```
-
-```PowerShell
-cls
-```
-
-### # Configure "Storage" network adapter
-
-```PowerShell
-$interfaceAlias = "Storage"
-```
-
-#### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "10.1.10.108"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24
-```
-
-#### # Configure network adapter properties
-
-```PowerShell
-Disable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "Client for Microsoft Networks"
-
-Disable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "File and Printer Sharing for Microsoft Networks"
-
-Disable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
-
-Disable-NetAdapterBinding `
-    -Name $interfaceAlias `
-    -DisplayName "Link-Layer Topology Discovery Responder"
-
-$adapter = Get-WmiObject `
-    -Class "Win32_NetworkAdapter" `
-    -Filter ("NetConnectionId = '" + $interfaceAlias + "'")
-
-$adapterConfig = Get-WmiObject `
-    -Class "Win32_NetworkAdapterConfiguration" `
-    -Filter "Index= '$($adapter.DeviceID)'"
-
-# Do not register this connection in DNS
-$adapterConfig.SetDynamicDNSRegistration($false)
-
-# Disable NetBIOS over TCP/IP
-$adapterConfig.SetTcpipNetbios(2)
-```
-
-```PowerShell
-cls
-```
-
-### # Create and configure NIC team
-
-#### # Create NIC team
-
-```PowerShell
-$interfaceAlias = "Production"
-
-New-NetLbfoTeam -Name $interfaceAlias -TeamMembers "Ethernet", "Ethernet 2"
-```
-
-```PowerShell
-cls
-```
-
-#### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "192.168.10.108"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.104,192.168.10.103
-```
-
-#### # Configure static IPv6 address
-
-```PowerShell
-$ipAddress = "2601:282:4201:e500::108"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress
-
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 2601:282:4201:e500::104, 2601:282:4201:e500::103
-```
-
-```PowerShell
-cls
-```
-
-### # Connect virtual switches to network adapters
-
-```PowerShell
-Get-VMSwitch Storage | Set-VMSwitch -NetAdapterName Storage -AllowManagementOS $true
-
-Get-VMSwitch Production |
-    Set-VMSwitch -NetAdapterName Production -AllowManagementOS $true
-```
-
-```PowerShell
-cls
-```
-
-### # Enable jumbo frames on virtual switches
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name "vEthernet (Production)" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
-
-Set-NetAdapterAdvancedProperty `
-    -Name "vEthernet (Storage)" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
-
-ping ICEMAN -f -l 8900
-ping 10.1.10.106 -f -l 8900
-```
-
-## Swap "Production" Team NIC
-
-> **Note**
->
-> Port statistics on Netgear GS724T show a high number of **Packets received with Errors** on port **g15** (i.e. **Intel 82579LM**) -- so disconnect the motherboard network adapter and replace it with an Intel Gigabit CT Desktop Adapter.
-
-```PowerShell
-Get-NetAdapter -Physical
-```
-
-### # Rename network connections
-
-```PowerShell
-Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
-        Rename-NetAdapter -NewName "Questionable NIC"
-
-Get-NetAdapter `
-    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
-        Rename-NetAdapter -NewName "Ethernet 2"
-```
-
-```PowerShell
-cls
-```
-
-### # Enable jumbo frames
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty -Name "Ethernet 2" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
-```
-
-```PowerShell
-cls
-```
-
-### # Replace NIC team member
-
-#### # Remove "bad" NIC
-
-```PowerShell
-$interfaceAlias = "Production"
-
-Get-NetLbfoTeam -Name $interfaceAlias |
-    Get-NetLbfoTeamMember |
-    ? { $_.Name -eq "Questionable NIC" } |
-    Remove-NetLbfoTeamMember
-```
-
-```PowerShell
-cls
-```
-
-#### # Add replacement NIC to team
-
-```PowerShell
-Add-NetLbfoTeamMember -Name "Ethernet 2" -Team $interfaceAlias
-```
-
-## Extend volume (D: - Data01) from 125 GB to 150 GB
-
-This is necessary to increase the capacity for **Data01** volume on **EXT-SQL02**.
-
-### # Extend virtual disk
-
-```PowerShell
-Get-StorageTier -FriendlyName "Data01_SSD Tier" |
-    Format-Table FriendlyName, @{Label="Size [GB]";Expression={$_.Size / 1GB}}
-
-
-FriendlyName                                                          Size [GB]
-------------                                                          ---------
-Data01_SSD Tier                                                             125
-
-Resize-StorageTier -FriendlyName "Data01_SSD Tier" -Size 150GB
-
-Get-StorageTier -FriendlyName "Data01_SSD Tier" |
-    Format-Table FriendlyName, @{Label="Size [GB]";Expression={$_.Size / 1GB}}
-
-
-FriendlyName                                                          Size [GB]
-------------                                                          ---------
-Data01_SSD Tier                                                             150
-```
-
-### # Extend virtual disk
-
-```PowerShell
-Get-VirtualDisk Data01 | Get-Disk
-
-Number Friendly Name                            Operationa Total Size Partition
-                                                lStatus                Style
------- -------------                            ---------- ---------- ---------
-6      Microsoft Storage Space Device           Online         125 GB GPT
-
-Get-VirtualDisk Data01 | Get-Disk | Update-Disk
-
-Number Friendly Name                            Operationa Total Size Partition
-                                                lStatus                Style
------- -------------                            ---------- ---------- ---------
-6      Microsoft Storage Space Device           Online         150 GB GPT
-
-Get-VirtualDisk -FriendlyName Data01 | Get-Disk | Get-Partition
-
-
-   Disk Number: 6
-
-PartitionNumber  DriveLetter Offset                    Size Type
----------------  ----------- ------                    ---- ----
-1                            17408                   128 MB Reserved
-2                D           135266304            124.87 GB Basic
-
-$size = (Get-PartitionSupportedSize -DiskNumber 6 -PartitionNumber 2)
-Resize-Partition -DiskNumber 6 -PartitionNumber 2 -Size $size.SizeMax
-
-Get-VirtualDisk -FriendlyName Data01 | Get-Disk | Get-Partition
-
-   Disk Number: 6
-
-PartitionNumber  DriveLetter Offset                    Size Type
----------------  ----------- ------                    ---- ----
-1                            17408                   128 MB Reserved
-2                D           135266304            149.87 GB Basic
-```
-
-## Issue - IPv6 address range changed by Comcast
-
-### # Remove static IPv4 and IPv6 addresses
-
-```PowerShell
-Remove-NetIPAddress 2601:282:4201:e500::108 -Confirm:$false
-
-$interfaceAlias = "vEthernet (Production)"
-
-@("IPv4", "IPv6") | ForEach-Object {
-    $addressFamily = $_
-
-    $interface = Get-NetAdapter $interfaceAlias |
-        Get-NetIPInterface -AddressFamily $addressFamily
-
-    If ($interface.Dhcp -eq "Disabled")
-    {
-        # Remove existing gateway
-        $ipConfig = $interface | Get-NetIPConfiguration
-
-        If ($ipConfig.Ipv4DefaultGateway -or $ipConfig.Ipv6DefaultGateway)
-        {
-            $interface |
-                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
-        }
-
-        # Enable DHCP
-        $interface | Set-NetIPInterface -DHCP Enabled
-
-        # Configure the  DNS Servers automatically
-        $interface | Set-DnsClientServerAddress -ResetServerAddresses
-    }
-}
 ```
