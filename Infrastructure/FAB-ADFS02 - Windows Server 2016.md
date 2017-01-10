@@ -122,6 +122,28 @@ Get-NetAdapter `
 $interfaceAlias = "Production"
 ```
 
+#### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "192.168.10.225"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24 `
+    -DefaultGateway 192.168.10.1
+```
+
+#### # Configure static IPv6 address
+
+```PowerShell
+$ipAddress = "2603:300b:802:8900::225"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress
+```
+
 ##### # Configure IPv4 DNS servers
 
 ```PowerShell
