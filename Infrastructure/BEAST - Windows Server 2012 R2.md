@@ -944,3 +944,122 @@ $interfaceAlias = "vEthernet (Production)"
     }
 }
 ```
+
+## Expand virtual disks
+
+### Expand "Data01" virtual disk (SSD tier)
+
+```PowerShell
+Get-StorageTier |
+    ft FriendlyName, @{Label="Size [GB]";Expression={$_.Size/1GB}} -auto
+
+FriendlyName    Size [GB]
+------------    ---------
+SSD Tier                0
+HDD Tier                0
+Data01_SSD Tier       125
+Data02_SSD Tier       200
+Data02_HDD Tier       500
+Data03_HDD Tier       200
+
+Resize-StorageTier "Data01_SSD Tier" -Size 200GB
+
+Get-VirtualDisk Data01 | Get-Disk
+
+Number Friendly Name                   OperationalStatus  Total Size
+------ -------------                   -----------------  ----------
+10     Microsoft Storage Space Device  Online                 125 GB
+
+
+Get-VirtualDisk Data01 | Get-Disk | Update-Disk
+Get-VirtualDisk Data01 | Get-Disk
+
+Number Friendly Name                   OperationalStatus  Total Size
+------ -------------                   -----------------  ----------
+10     Microsoft Storage Space Device  Online                 200 GB
+
+Get-VirtualDisk Data01 | Get-Disk | Get-Partition | ft -auto
+
+
+   Disk Number: 10
+
+PartitionNumber DriveLetter Offset         Size Type
+--------------- ----------- ------         ---- ----
+1                           17408        128 MB Reserved
+2               D           135266304 124.87 GB Basic
+
+$size = (Get-PartitionSupportedSize -DiskNumber 10 -PartitionNumber 2)
+Resize-Partition -DiskNumber 10 -PartitionNumber 2 -Size $size.SizeMax
+
+Get-VirtualDisk Data01 | Get-Disk | Get-Partition | ft -auto
+
+
+   Disk Number: 10
+
+PartitionNumber DriveLetter Offset         Size Type
+--------------- ----------- ------         ---- ----
+1                           17408        128 MB Reserved
+2               D           135266304 199.87 GB Basic
+```
+
+### Expand "Data02" virtual disk (HDD tier)
+
+```PowerShell
+Get-StorageTier |
+    ft FriendlyName, @{Label="Size [GB]";Expression={$_.Size/1GB}} -auto
+
+FriendlyName    Size [GB]
+------------    ---------
+SSD Tier                0
+HDD Tier                0
+Data01_SSD Tier       200
+Data02_SSD Tier       200
+Data02_HDD Tier       500
+Data03_HDD Tier       200
+
+Get-StorageTierSupportedSize -FriendlyName "Data02_HDD Tier" |
+    ft @{Label="TierSizeMax [GB]";Expression={$_.TierSizeMax/1GB}} -auto
+
+TierSizeMax [GB]
+----------------
+             330
+
+Resize-StorageTier "Data02_HDD Tier" -Size 830GB
+
+Get-VirtualDisk Data02 | Get-Disk
+
+Number Friendly Name                   OperationalStatus  Total Size
+------ -------------                   -----------------  ----------
+9      Microsoft Storage Space Device  Online                 700 GB
+
+
+Get-VirtualDisk Data02 | Get-Disk | Update-Disk
+Get-VirtualDisk Data02 | Get-Disk
+
+Number Friendly Name                   OperationalStatus  Total Size
+------ -------------                   -----------------  ----------
+9      Microsoft Storage Space Device  Online                1.01 TB
+
+Get-VirtualDisk Data02 | Get-Disk | Get-Partition | ft -auto
+
+
+   Disk Number: 9
+
+PartitionNumber DriveLetter Offset         Size Type
+--------------- ----------- ------         ---- ----
+1                           17408        128 MB Reserved
+2               E           135266304 699.87 GB Basic
+
+$size = (Get-PartitionSupportedSize -DiskNumber 9 -PartitionNumber 2)
+Resize-Partition -DiskNumber 9 -PartitionNumber 2 -Size $size.SizeMax
+
+Get-VirtualDisk Data02 | Get-Disk | Get-Partition | ft -auto
+
+
+   Disk Number: 9
+
+PartitionNumber DriveLetter Offset       Size Type
+--------------- ----------- ------       ---- ----
+1                           17408      128 MB Reserved
+2               E           135266304 1.01 TB Basic
+```
