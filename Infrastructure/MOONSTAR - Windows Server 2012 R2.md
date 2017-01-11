@@ -430,7 +430,7 @@ cls
 ```PowerShell
 $command = "net localgroup Administrators TECHTOOLBOX\s-vmm-management /ADD"
 
-$scriptBlock = [scriptblock]::Create($command)
+$scriptBlock = [ScriptBlock]::Create($command)
 
 Get-SCVMHost |
     ForEach-Object {
@@ -481,6 +481,64 @@ cls
                 Register-SCStorageFileShare -StorageFileShare $fileShare -VMHost $_
             }
     }
+```
+
+---
+
+## Configure storage classifications and pools
+
+---
+
+**FOOBAR8**
+
+### # Create storage classifications
+
+```PowerShell
+New-SCStorageClassification -Name "Gold"
+New-SCStorageClassification -Name "Silver"
+New-SCStorageClassification -Name "Bronze"
+```
+
+```PowerShell
+cls
+```
+
+### # Configure storage classifications for file shares
+
+#### # Configure "Gold" VM storage
+
+```PowerShell
+$fileShare = Get-SCStorageFileShare "VM-Storage-Gold"
+
+$storageClassification = Get-SCStorageClassification -Name "Gold"
+
+Set-SCStorageFileShare `
+    -StorageFileShare $fileShare `
+    -StorageClassification $storageClassification
+```
+
+#### # Configure "Silver" VM storage
+
+```PowerShell
+$fileShare = Get-SCStorageFileShare "VM-Storage-Silver"
+
+$storageClassification = Get-SCStorageClassification -Name "Silver"
+
+Set-SCStorageFileShare `
+    -StorageFileShare $fileShare `
+    -StorageClassification $storageClassification
+```
+
+#### # Configure "Bronze" VM storage
+
+```PowerShell
+$fileShare = Get-SCStorageFileShare "VM-Storage-Bronze"
+
+$storageClassification = Get-SCStorageClassification -Name "Bronze"
+
+Set-SCStorageFileShare `
+    -StorageFileShare $fileShare `
+    -StorageClassification $storageClassification
 ```
 
 ---
