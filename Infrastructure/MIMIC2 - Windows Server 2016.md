@@ -738,12 +738,12 @@ Edit the task sequence to include the actions required to update the reference i
 
 ### Configure task sequence - "Windows Server 2016"
 
-Edit the task sequence to include the actions required to update the reference image with the latest updates from WSUS, copy Toolbox content from ICEMAN, install .NET Framework 3.5, and easily suspend the deployment process after installing applications.
+Edit the task sequence to include the actions required to update the reference image with the latest updates from WSUS, copy Toolbox content from ICEMAN and easily suspend the deployment process after installing applications.
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows Server 2016**, right-click **Windows Server 2016 - Baseline**, and click **Properties**.
 2. In the **Windows Server 2016 - Baseline Properties** window:
    1. On the **General **tab, configure the following settings:
-      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, and latest patches**
+      1. Comments: **Reference image - Toolbox content and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
          1. Enable the **Windows Update (Pre-Application Installation)** action.
@@ -755,11 +755,7 @@ Edit the task sequence to include the actions required to update the reference i
             1. Name: **Copy Toolbox content from ICEMAN**
             2. Command line: **robocopy [\\\\ICEMAN\\Public\\Toolbox](\\ICEMAN\Public\Toolbox) C:\\NotBackedUp\\Public\\Toolbox /E**
             3. Success codes: **0 1 2 3 4 5 6 7 8 16**
-         6. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Install Roles and Features** action with the following settings:
-            1. Name: **Install Microsoft .NET Framework 3.5**
-            2. Select the operating system for which roles are to be installed: **Windows Server 2016**
-            3. Select the roles and features that should be installed: **.NET Framework 3.5 (includes .NET 2.0 and 3.0)**
-         7. After the **Install Applications** action, add a new **Run Command Line** action with the following settings:
+         6. After the **Install Applications** action, add a new **Run Command Line** action with the following settings:
             1. Name: **Suspend**
             2. Command line: **cscript.exe "%SCRIPTROOT%\\LTISuspend.wsf"**
             3. Disable this step:** Yes (checked)**
@@ -880,3 +876,213 @@ New-Item `
         + "</SelectionProfile>") `
     -ReadOnly $false
 ```
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Update files in TFS
+
+```PowerShell
+cd C:\NotBackedUp\TechnologyToolbox\Infrastructure
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\x64\sgdm.exe `
+    \\ICEMAN\MDT-Build$ '.\Main\MDT-Build$'
+```
+
+#### # Sync files
+
+```PowerShell
+robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD `$OEM`$ Applications Backup Boot Captures Logs "Operating Systems" Packages Servicing Tools
+```
+
+#### Check-in files
+
+---
+
+## # Add custom Windows 10 and Windows Server 2016 images to MDT production deployment share
+
+### # Create folder - "Operating Systems\\Windows 10"
+
+```PowerShell
+Import-Module 'C:\Program Files\Microsoft Deployment Toolkit\Bin\MicrosoftDeploymentToolkit.psd1'
+
+New-PSDrive -Name "DS002" -PSProvider MDTProvider -Root \\ICEMAN\MDT-Deploy$
+
+New-Item -Path "DS002:\Operating Systems" -Name "Windows 10" -ItemType Folder
+```
+
+```PowerShell
+cls
+```
+
+### # Import operating system - "Windows 10 Enterprise (x64) - Baseline"
+
+```PowerShell
+$imagePath = "\\ICEMAN\MDT-Build$\Captures\W10ENT-X64-REF_12-28-2016-6-00-09-AM.wim"
+
+$destinationFolder = "W10Ent-x64"
+
+$os = Import-MDTOperatingSystem `
+    -Path "DS002:\Operating Systems\Windows 10" `
+    -SourceFile $imagePath `
+    -DestinationFolder $destinationFolder `
+    -Move
+
+$os.RenameItem("Windows 10 Enterprise (x64) - Baseline")
+```
+
+```PowerShell
+cls
+```
+
+### # Create folder - "Operating Systems\\Windows Server 2016"
+
+```PowerShell
+New-Item `
+    -Path "DS002:\Operating Systems" `
+    -Name "Windows Server 2016" `
+    -ItemType Folder
+```
+
+```PowerShell
+cls
+```
+
+### # Import operating system - "Windows Server 2016 Standard - Baseline"
+
+```PowerShell
+$imagePath = "\\ICEMAN\MDT-Build$\Captures\WS2016-REF_1-10-2017-10-35-31-AM.wim"
+
+$destinationFolder = "WS2016"
+
+$os = Import-MDTOperatingSystem `
+    -Path "DS002:\Operating Systems\Windows Server 2016" `
+    -SourceFile $imagePath `
+    -DestinationFolder $destinationFolder `
+    -Move
+
+$os.RenameItem("Windows Server 2016 Standard - Baseline")
+```
+
+---
+
+**WOLVERINE**
+
+### # Update files in TFS
+
+```PowerShell
+cd C:\NotBackedUp\TechnologyToolbox\Infrastructure
+
+robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot Captures Logs "Operating Systems" Servicing Tools
+```
+
+#### # Add files to TFS
+
+```PowerShell
+& "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\TF.exe" add Main /r
+```
+
+##### Check-in files
+
+---
+
+```PowerShell
+cls
+```
+
+## # Create task sequences for Windows 10 and Windows Server 2016 deployments
+
+### # Create folder - "Task Sequences\\Windows 10"
+
+```PowerShell
+New-Item -Path "DS002:\Task Sequences" -Name "Windows 10" -ItemType Folder
+```
+
+### # Create task sequence - "Windows 10 Enterprise (x64)"
+
+```PowerShell
+$osPath = "DS002:\Operating Systems\Windows 10\Windows 10 Enterprise (x64) - Baseline"
+
+Import-MDTTaskSequence `
+    -Path "DS002:\Task Sequences\Windows 10" `
+    -ID "W10ENT-X64" `
+    -Name "Windows 10 Enterprise (x64)" `
+    -Comments "Production image" `
+    -Version "1.0" `
+    -Template "Client.xml" `
+    -OperatingSystemPath $osPath `
+    -FullName "Windows User" `
+    -OrgName "Technology Toolbox" `
+    -HomePage "about:blank"
+```
+
+```PowerShell
+cls
+```
+
+### # Create folder - "Task Sequences\\Windows Server 2016"
+
+```PowerShell
+New-Item `
+    -Path "DS002:\Task Sequences" `
+    -Name "Windows Server 2016" `
+    -ItemType Folder
+```
+
+### # Create task sequence - "Windows Server 2016"
+
+```PowerShell
+$osPath = "DS002:\Operating Systems\Windows Server 2016" `
+    + "\Windows Server 2016 Standard - Baseline"
+
+Import-MDTTaskSequence `
+    -Path "DS002:\Task Sequences\Windows Server 2016" `
+    -ID "WS2016" `
+    -Name "Windows Server 2016" `
+    -Comments "Production image" `
+    -Version "1.0" `
+    -Template "Server.xml" `
+    -OperatingSystemPath $osPath `
+    -FullName "Windows User" `
+    -OrgName "Technology Toolbox" `
+    -HomePage "about:blank" `
+    -ProductKey "WC2BQ-8NRM3-FDDYY-2BFGV-KHKQY"
+```
+
+> **Important**
+>
+> The MSDN version of Windows Server 2016 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.The product key specified above was obtained from the following:
+>
+> **Appendix A: KMS Client Setup Keys**\
+> From <[https://technet.microsoft.com/en-us/library/jj612867(v=ws.11).aspx](https://technet.microsoft.com/en-us/library/jj612867(v=ws.11).aspx)>
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Update files in TFS
+
+```PowerShell
+cd C:\NotBackedUp\TechnologyToolbox\Infrastructure
+
+robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot Captures Logs "Operating Systems" Servicing Tools
+```
+
+#### # Add files to TFS
+
+```PowerShell
+& "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\TF.exe" add Main /r
+```
+
+##### Check-in files
+
+---
