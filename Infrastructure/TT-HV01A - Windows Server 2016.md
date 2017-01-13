@@ -35,6 +35,19 @@ Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 
 ---
 
+## Add computer to "Hyper-V Servers" domain group
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+Import-Module ActiveDirectory
+Add-ADGroupMember -Identity "Hyper-V Servers" -Members TT-HV01$
+```
+
+---
+
 ```PowerShell
 cls
 ```
@@ -965,6 +978,31 @@ Start-VM -ComputerName TT-HV01A -Name FAB-DC01
 ```
 
 ---
+
+```PowerShell
+cls
+```
+
+## # Configure "Datacenter-2" network adapter
+
+```PowerShell
+$interfaceAlias = "Datacenter-2"
+```
+
+### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "10.1.10.102"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.103,192.168.10.104
+```
 
 **TODO:**
 
