@@ -1387,6 +1387,24 @@ Enable-NetAdapterBinding -Name $interfaceAlias `
 
 Enable-NetAdapterBinding -Name $interfaceAlias `
     -DisplayName "Link-Layer Topology Discovery Responder"
+
+$adapter = Get-WmiObject `
+    -Class "Win32_NetworkAdapter" `
+    -Filter ("NetConnectionId = '" + $interfaceAlias + "'")
+
+$adapterConfig = Get-WmiObject `
+    -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+
+# Register this connection in DNS
+$adapterConfig.SetDynamicDNSRegistration($true)
+
+# Enable NetBIOS over TCP/IP
+$adapterConfig.SetTcpipNetbios(1)
+
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.103,192.168.10.104
 ```
 
 **TODO:**
