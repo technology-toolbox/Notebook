@@ -1407,4 +1407,23 @@ Set-DNSClientServerAddress `
     -ServerAddresses 192.168.10.103,192.168.10.104
 ```
 
+---
+
+**XAVIER1**
+
+```PowerShell
+cls
+```
+
+## # Create CNAME record for iSCSI clients
+
+```PowerShell
+Add-DnsServerResourceRecordCName `
+    -Name "iscsi-01" `
+    -HostNameAlias "iceman.corp.technologytoolbox.com" `
+    -ZoneName "corp.technologytoolbox.com"
+```
+
+---
+
 **TODO:**
