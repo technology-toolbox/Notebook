@@ -1,4 +1,4 @@
-﻿# TT-HV01A (2017-01-09) - Windows Server 2016
+﻿# TT-HV01A - Windows Server 2016
 
 Monday, January 9, 2017
 8:59 AM
@@ -17,7 +17,7 @@ sconfig
 
 > **Note**
 >
-> Rename the computer to **TT-HV01** and join the **corp.technologytoolbox.com** domain.
+> Rename the computer to **TT-HV01A** and join the **corp.technologytoolbox.com** domain.
 
 ## Move computer to "Hyper-V Servers" OU
 
@@ -26,7 +26,7 @@ sconfig
 **FOOBAR8**
 
 ```PowerShell
-$computerName = "TT-HV01"
+$computerName = "TT-HV01A"
 $targetPath = ("OU=Hyper-V Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
 
@@ -43,7 +43,7 @@ Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 
 ```PowerShell
 Import-Module ActiveDirectory
-Add-ADGroupMember -Identity "Hyper-V Servers" -Members TT-HV01$
+Add-ADGroupMember -Identity "Hyper-V Servers" -Members TT-HV01A$
 ```
 
 ---
@@ -97,19 +97,19 @@ cls
 ```PowerShell
 Get-NetAdapter -Physical | select InterfaceDescription
 
+Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+    Rename-NetAdapter -NewName "Datacenter 1"
+
+Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Datacenter 2"
+
 Get-NetAdapter `
     -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
-    Rename-NetAdapter -NewName "Datacenter-1"
+    Rename-NetAdapter -NewName "Tenant 1"
 
 Get-NetAdapter `
     -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
-    Rename-NetAdapter -NewName "Datacenter-2"
-
-Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
-    Rename-NetAdapter -NewName "Tenant-1"
-
-Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
-    Rename-NetAdapter -NewName "Tenant-2"
+    Rename-NetAdapter -NewName "Tenant 2"
 ```
 
 ```PowerShell
@@ -121,210 +121,22 @@ cls
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name "Datacenter-1" `
+Set-NetAdapterAdvancedProperty -Name "Datacenter 1" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-Set-NetAdapterAdvancedProperty -Name "Datacenter-2" `
+Set-NetAdapterAdvancedProperty -Name "Datacenter 2" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-Set-NetAdapterAdvancedProperty -Name "Tenant-1" `
+Set-NetAdapterAdvancedProperty -Name "Tenant 1" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-Set-NetAdapterAdvancedProperty -Name "Tenant-2" `
+Set-NetAdapterAdvancedProperty -Name "Tenant 2" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
 ping ICEMAN -f -l 8900
 ```
 
-## Issue - SMB Multichannel works with Intel 82574L but not with Intel 82579LM
-
-```PowerShell
-Get-NetAdapter
-
-Name                      InterfaceDescription                    ifIndex Status       LinkSpeed
-----                      --------------------                    ------- ------       ---------
-Tenant-1                  Intel(R) Gigabit CT Desktop Adapter           9 Up              1 Gbps
-Datacenter-1              Intel(R) 82579LM Gigabit Network Con...       4 Up              1 Gbps
-Tenant-2                  Intel(R) Gigabit CT Desktop Adapter #2        8 Disconnected     0 bps
-Datacenter-2              Intel(R) 82574L Gigabit Network Conn...       6 Up              1 Gbps
-
-
-Get-NetAdapterRSS
-
-
-Name                                            : Tenant-1
-InterfaceDescription                            : Intel(R) Gigabit CT Desktop Adapter
-Enabled                                         : True
-NumberOfReceiveQueues                           : 2
-Profile                                         : NUMAStatic
-BaseProcessor: [Group:Number]                   : 0:0
-MaxProcessor: [Group:Number]                    : 0:6
-MaxProcessors                                   : 4
-...
-
-Name                                            : Datacenter-1
-InterfaceDescription                            : Intel(R) 82579LM Gigabit Network Connection
-Enabled                                         : True
-NumberOfReceiveQueues                           : 1
-Profile                                         : Closest
-BaseProcessor: [Group:Number]                   : 0:0
-MaxProcessor: [Group:Number]                    : 0:6
-MaxProcessors                                   : 4
-...
-
-Name                                            : Tenant-2
-InterfaceDescription                            : Intel(R) Gigabit CT Desktop Adapter #2
-Enabled                                         : True
-NumberOfReceiveQueues                           : 2
-Profile                                         : NUMAStatic
-BaseProcessor: [Group:Number]                   : 0:0
-MaxProcessor: [Group:Number]                    : 0:6
-MaxProcessors                                   : 4
-...
-
-Name                                            : Datacenter-2
-InterfaceDescription                            : Intel(R) 82574L Gigabit Network Connection
-Enabled                                         : True
-NumberOfReceiveQueues                           : 2
-Profile                                         : NUMAStatic
-BaseProcessor: [Group:Number]                   : :0
-MaxProcessor: [Group:Number]                    : :63
-MaxProcessors                                   : 8
-...
-
-
-Set-NetAdapterRss -Name "Datacenter-1" -Profile NUMAStatic -NumberOfReceiveQueues 2
-Set-NetAdapterRss : Failed to set 'NumberOfReceiveQueues' of 'RSS' configuration of adapter 'Datacenter-1'
-At line:1 char:1
-+ Set-NetAdapterRss -Name "Datacenter-1" -Profile NUMAStatic -NumberOfR ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidOperation: (MSFT_NetAdapter...219C6E3D121B}"):ROOT/StandardCi...rRssSettingData)
-   [Set-NetAdapterRss], CimException
-    + FullyQualifiedErrorId : Windows System Error 50,Set-NetAdapterRss
-
-Get-NetAdapterRSS
-
-
-Name                                            : Tenant-1
-InterfaceDescription                            : Intel(R) Gigabit CT Desktop Adapter
-Enabled                                         : True
-NumberOfReceiveQueues                           : 2
-Profile                                         : NUMAStatic
-BaseProcessor: [Group:Number]                   : 0:0
-MaxProcessor: [Group:Number]                    : 0:6
-MaxProcessors                                   : 4
-...
-
-Name                                            : Datacenter-1
-InterfaceDescription                            : Intel(R) 82579LM Gigabit Network Connection
-Enabled                                         : True
-NumberOfReceiveQueues                           : 1
-Profile                                         : NUMAStatic
-BaseProcessor: [Group:Number]                   : 0:0
-MaxProcessor: [Group:Number]                    : 0:6
-MaxProcessors                                   : 4
-...
-
-Name                                            : Tenant-2
-InterfaceDescription                            : Intel(R) Gigabit CT Desktop Adapter #2
-Enabled                                         : True
-NumberOfReceiveQueues                           : 2
-Profile                                         : NUMAStatic
-BaseProcessor: [Group:Number]                   : 0:0
-MaxProcessor: [Group:Number]                    : 0:6
-MaxProcessors                                   : 4
-...
-
-Name                                            : Datacenter-2
-InterfaceDescription                            : Intel(R) 82574L Gigabit Network Connection
-Enabled                                         : True
-NumberOfReceiveQueues                           : 2
-Profile                                         : NUMAStatic
-BaseProcessor: [Group:Number]                   : :0
-MaxProcessor: [Group:Number]                    : :63
-MaxProcessors                                   : 8
-...
-
-
-Get-NetAdapterAdvancedProperty -Name "Datacenter-1" |
-    select DisplayName, DisplayValue
-
-DisplayName                    DisplayValue
------------                    ------------
-Flow Control                   Rx & Tx Enabled
-Interrupt Moderation           Enabled
-IPv4 Checksum Offload          Rx & Tx Enabled
-Jumbo Packet                   9014 Bytes
-Large Send Offload V2 (IPv4)   Enabled
-Large Send Offload V2 (IPv6)   Enabled
-ARP Offload                    Enabled
-NS Offload                     Enabled
-Packet Priority & VLAN         Packet Priority & VLAN Enabled
-Receive Buffers                256
-Receive Side Scaling           Enabled
-Speed & Duplex                 Auto Negotiation
-TCP Checksum Offload (IPv4)    Rx & Tx Enabled
-TCP Checksum Offload (IPv6)    Rx & Tx Enabled
-Transmit Buffers               512
-UDP Checksum Offload (IPv4)    Rx & Tx Enabled
-UDP Checksum Offload (IPv6)    Rx & Tx Enabled
-Adaptive Inter-Frame Spacing   Disabled
-Interrupt Moderation Rate      Adaptive
-Log Link State Event           Enabled
-Gigabit Master Slave Mode      Auto Detect
-Locally Administered Address   --
-Wait for Link                  Auto Detect
-
-
-Set-NetAdapterRss -Name "Datacenter-1" -NumberOfReceiveQueues 2
-Set-NetAdapterRss : Failed to set 'NumberOfReceiveQueues' of 'RSS' configuration of adapter 'Datacenter-1'
-At line:1 char:1
-+ Set-NetAdapterRss -Name "Datacenter-1" -NumberOfReceiveQueues 2
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidOperation: (MSFT_NetAdapter...219C6E3D121B}"):ROOT/StandardCi...rRssSettingData)
-   [Set-NetAdapterRss], CimException
-    + FullyQualifiedErrorId : Windows System Error 50,Set-NetAdapterRss
-```
-
-#### # Revert profile for Intel 82579LM network adapter
-
-```PowerShell
-Set-NetAdapterRss -Name "Datacenter-1" -Profile Closest
-```
-
-```PowerShell
-cls
-```
-
-### # Resolution - Use Intel Gigabit CT network adapters for "Datacenter" networks
-
-```PowerShell
-Get-NetAdapter -Physical | select InterfaceDescription
-
-Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
-    Rename-NetAdapter -NewName "Temp-1"
-
-Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
-    Rename-NetAdapter -NewName "Temp-2"
-
-Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
-    Rename-NetAdapter -NewName "Datacenter-1"
-
-Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
-    Rename-NetAdapter -NewName "Datacenter-2"
-
-Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
-    Rename-NetAdapter -NewName "Tenant-1"
-
-Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
-    Rename-NetAdapter -NewName "Tenant-2"
-```
-
-The following screenshot shows 1.5 Gbps throughput when copying a large file from ICEMAN to TT-HYP01:
+The following screenshot shows 1.5 Gbps throughput when copying a large file from ICEMAN to TT-HV01A:
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/BF/23003F17717A47C9DBD69AA186B26F6046296FBF.png)
 
@@ -343,7 +155,7 @@ cls
 ```PowerShell
 $interfaceAlias = "Tenant Team"
 
-New-NetLbfoTeam -Name $interfaceAlias -TeamMembers "Tenant-1", "Tenant-2"
+New-NetLbfoTeam -Name $interfaceAlias -TeamMembers "Tenant 1", "Tenant 2"
 ```
 
 ## Enable Hyper-V role
@@ -839,12 +651,6 @@ Apparently, there is a known issue with the Marvell 88SE9128 controller which ca
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/29/357F84ED3D27DC1E086F6E5B9DDBFDB70AB64629.png)
 
-## # Rename server (so that TT-HV01 can be used as cluster name)
-
-```PowerShell
-Rename-Computer -NewName TT-HV01A -Restart
-```
-
 ## # Configure VM storage
 
 ```PowerShell
@@ -916,105 +722,6 @@ Enable-VMMigration
 Set-VMHost -UseAnyNetworkForMigration $true
 
 Set-VMHost -VirtualMachineMigrationAuthenticationType Kerberos
-```
-
-## Migrate virtual machines to TT-HV01A
-
----
-
-**FOOBAR8**
-
-**# Note:** Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName FORGE -Name BANSHEE
-
-Move-VM `
-    -ComputerName FORGE `
-    -Name BANSHEE `
-    -DestinationHost TT-HV01A `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\BANSHEE
-
-Start-VM -ComputerName TT-HV01A -Name BANSHEE
-```
-
-```PowerShell
-cls
-```
-
-**# Note:** Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName FORGE -Name EXT-DC01
-
-Move-VM `
-    -ComputerName FORGE `
-    -Name EXT-DC01 `
-    -DestinationHost TT-HV01A `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\EXT-DC01
-
-Start-VM -ComputerName TT-HV01A -Name EXT-DC01
-```
-
-```PowerShell
-cls
-```
-
-**# Note:** Must shutdown the VM first since the processors are not compatible
-
-```PowerShell
-Stop-VM -ComputerName FORGE -Name FAB-DC01
-
-Move-VM `
-    -ComputerName FORGE `
-    -Name FAB-DC01 `
-    -DestinationHost TT-HV01A `
-    -IncludeStorage `
-    -DestinationStoragePath E:\NotBackedUp\VMs\FAB-DC01
-
-Start-VM -ComputerName TT-HV01A -Name FAB-DC01
-```
-
----
-
-```PowerShell
-cls
-```
-
-## # Configure "Datacenter-2" network adapter
-
-```PowerShell
-$interfaceAlias = "Datacenter-2"
-```
-
-### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "10.1.10.102"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24
-
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.103,192.168.10.104
-```
-
-### # Configure static IPv6 address
-
-**# Note:** Private IPv6 address range (fd66:d7e2:39d6:a4d9::/64) generated by [http://simpledns.com/private-ipv6.aspx](http://simpledns.com/private-ipv6.aspx)
-
-```PowerShell
-$ipAddress = "fd66:d7e2:39d6:a4d9::102"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 64
 ```
 
 **TODO:**
