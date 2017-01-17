@@ -1,7 +1,7 @@
 ﻿# TT-HV01A - Windows Server 2016
 
-Monday, January 9, 2017
-8:59 AM
+Tuesday, January 17, 2017
+3:15 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -224,18 +224,18 @@ cls
 ```PowerShell
 Get-NetAdapter -Physical | select InterfaceDescription
 
-Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+Get-NetAdapter -InterfaceDescription "Intel(R) I210 Gigabit Network Connection" |
     Rename-NetAdapter -NewName "Datacenter 1"
 
-Get-NetAdapter -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+Get-NetAdapter -InterfaceDescription "Intel(R) I210 Gigabit Network Connection #2" |
     Rename-NetAdapter -NewName "Datacenter 2"
 
 Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82579LM Gigabit Network Connection" |
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
     Rename-NetAdapter -NewName "Tenant 1"
 
 Get-NetAdapter `
-    -InterfaceDescription "Intel(R) 82574L Gigabit Network Connection" |
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
     Rename-NetAdapter -NewName "Tenant 2"
 ```
 
@@ -265,9 +265,9 @@ The following screenshot shows 1.5 Gbps throughput when copying a large file fro
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/BF/23003F17717A47C9DBD69AA186B26F6046296FBF.png)
 
-The following screenshot shows the load spread across two network adapters (729 Mbps and 619 Mbps) on TT-HV01A:
+The following screenshot shows the load spread across all four network adapters on TT-HV01A:
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/5154E5668F6139E3AD3699F02EB196B0D026244F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/BCB8ECD3C1B63B876B7F540CDE22C9703AB50584.png)
 
 ### Configure storage
 
@@ -302,11 +302,11 @@ The following screenshot shows the load spread across two network adapters (729 
 <p>0</p>
 </td>
 <td valign='top'>
-<p>Model: Samsung SSD 840 Series<br />
-Serial number: *********01728J</p>
+<p>Model: WDC WD4002FYYZ-01B7CB0<br />
+Serial number: *****03Y</p>
 </td>
 <td valign='top'>
-<p>512 GB</p>
+<p>4 TB</p>
 </td>
 <td valign='top'>
 </td>
@@ -322,11 +322,11 @@ Serial number: *********01728J</p>
 <p>1</p>
 </td>
 <td valign='top'>
-<p>Model: Samsung SSD 840 PRO Series<br />
-Serial number: *********03944B</p>
+<p>Model: ST1000NM0033-9ZM173<br />
+Serial number: *****EMV</p>
 </td>
 <td valign='top'>
-<p>512 GB</p>
+<p>1 TB</p>
 </td>
 <td valign='top'>
 </td>
@@ -340,6 +340,26 @@ Serial number: *********03944B</p>
 <tr>
 <td valign='top'>
 <p>2</p>
+</td>
+<td valign='top'>
+<p>Model: ST1000NM0033-9ZM173<br />
+Serial number: *****4YL</p>
+</td>
+<td valign='top'>
+<p>1 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>3</p>
 </td>
 <td valign='top'>
 <p>Model: Samsung SSD 850 PRO 128GB<br />
@@ -362,14 +382,14 @@ Serial number: *********03705D</p>
 </tr>
 <tr>
 <td valign='top'>
-<p>3</p>
+<p>4</p>
 </td>
 <td valign='top'>
-<p>Model: Seagate ST1000NM0033-9ZM173<br />
-Serial number: *****4YL</p>
+<p>Model: Samsung SSD 850 PRO 512GB<br />
+Serial number: *********10883Y</p>
 </td>
 <td valign='top'>
-<p>1 TB</p>
+<p>512 GB</p>
 </td>
 <td valign='top'>
 </td>
@@ -382,14 +402,74 @@ Serial number: *****4YL</p>
 </tr>
 <tr>
 <td valign='top'>
-<p>4</p>
+<p>5</p>
 </td>
 <td valign='top'>
-<p>Model: Seagate ST1000NM0033-9ZM173<br />
-Serial number: *****EMV</p>
+<p>Model: Samsung SSD 850 PRO 512GB<br />
+Serial number: *********10872K</p>
 </td>
 <td valign='top'>
-<p>1 TB</p>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>6</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 840 Series<br />
+Serial number: *********01728J</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>7</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 840 Series<br />
+Serial number: *********45678J</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>8</p>
+</td>
+<td valign='top'>
+<p>Model: WDC WD4002FYYZ-01B7CB0<br />
+Serial number: *****0RY</p>
+</td>
+<td valign='top'>
+<p>4 TB</p>
 </td>
 <td valign='top'>
 </td>
@@ -422,10 +502,10 @@ Get-PhysicalDisk | select DeviceId, Model, SerialNumber, CanPool | sort DeviceId
 <p>Pool 1</p>
 </td>
 <td valign='top'>
-<p>PhysicalDisk0<br />
-PhysicalDisk1<br />
-PhysicalDisk3<br />
-PhysicalDisk4</p>
+<p>PhysicalDisk4<br />
+PhysicalDisk5<br />
+PhysicalDisk0<br />
+PhysicalDisk8</p>
 </td>
 </tr>
 </table>
@@ -437,6 +517,28 @@ PhysicalDisk4</p>
 | Data01 | Mirror | Fixed        | 200 GB   | 200 GB   |          | D:     | Data01       |                  |
 | Data02 | Mirror | Fixed        | 900 GB   | 200 GB   | 700 GB   | E:     | Data02       | 5 GB             |
 | Data03 | Simple | Fixed        | 200 GB   |          | 200 GB   | F:     | Data03       | 1 GB             |
+
+#### Update AHCI drivers
+
+1. Download the latest AHCI drivers from the Intel website:\
+   **Intel® RSTe AHCI & SCU Software RAID driver for Windows**\
+   From <[https://downloadcenter.intel.com/download/25393/Intel-RSTe-AHCI-SCU-Software-RAID-driver-for-Windows-](https://downloadcenter.intel.com/download/25393/Intel-RSTe-AHCI-SCU-Software-RAID-driver-for-Windows-)>
+2. Extract the drivers (**[\\\\ICEMAN\\Public\\Download\\Drivers\\Intel\\RSTe](\\ICEMAN\Public\Download\Drivers\Intel\RSTe) AHCI & SCU Software RAID driver for Windows**) and copy the files to a temporary location on the server:
+3. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA AHCI Controller (PCI\\VEN_8086&DEV_8D02&...)**:
+4. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA AHCI Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+5. Restart the server.
+
+```Console
+    robocopy "\\ICEMAN\Public\Download\Drivers\Intel\RSTe AHCI & SCU Software RAID driver for Windows\Drivers\x64\Win8_10_2K8R2_2K12\AHCI" '\\TT-HV01A\C$\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI' /E
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI\iaAHCI.inf
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI\iaAHCIB.inf
+```
 
 ```PowerShell
 cls
@@ -451,10 +553,16 @@ $storageSubSystemUniqueId = `
     Get-StorageSubSystem -FriendlyName $storageSubSystemName |
     select -ExpandProperty UniqueId
 
+$physicalDisks = @(
+    (Get-PhysicalDisk -SerialNumber *********10883Y),
+    (Get-PhysicalDisk -SerialNumber *********10872K),
+    (Get-PhysicalDisk -SerialNumber *****03Y),
+    (Get-PhysicalDisk -SerialNumber *****0RY))
+
 New-StoragePool `
     -FriendlyName "Pool 1" `
     -StorageSubSystemUniqueId $storageSubSystemUniqueId `
-    -PhysicalDisks (Get-PhysicalDisk -CanPool $true)
+    -PhysicalDisks $physicalDisks
 ```
 
 #### # Check media type configuration
@@ -482,10 +590,6 @@ Get-StoragePool "Pool 1" |
 
 Get-StoragePool "Pool 1" |
     New-StorageTier -FriendlyName "HDD Tier" -MediaType HDD
-```
-
-```PowerShell
-cls
 ```
 
 #### # Create storage spaces
@@ -544,6 +648,10 @@ Initialize-Volume `
     -Confirm:$false
 ```
 
+```PowerShell
+cls
+```
+
 ##### # Create volume "E" on Data02
 
 ```PowerShell
@@ -561,6 +669,10 @@ Initialize-Volume `
     -FileSystem NTFS `
     -NewFileSystemLabel "Data02" `
     -Confirm:$false
+```
+
+```PowerShell
+cls
 ```
 
 ##### # Create volume "F" on Data03
@@ -589,7 +701,10 @@ cls
 #### # Configure "Storage Tiers Optimization" scheduled task to append to log file
 
 ```PowerShell
-New-Item -ItemType Directory -Path C:\NotBackedUp\Temp
+If ((Test-Path C:\NotBackedUp\Temp) -eq $false)
+{
+    New-Item -ItemType Directory -Path C:\NotBackedUp\Temp
+}
 
 $logFile = "C:\NotBackedUp\Temp\Storage-Tiers-Optimization.log"
 
@@ -620,19 +735,19 @@ From <[https://technet.microsoft.com/en-us/library/dn789160.aspx](https://techne
 
 ##### C: (SSD - Samsung 850 Pro 128GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/D4C4253F58688B819E4D813F52FCC5E3CC1FD946.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/60996922D69C4E5DFC63309E17F3F897D3B38ADD.png)
 
-##### D: (Mirror SSD storage space - 2x Samsung 840 512GB)
+##### D: (Mirror SSD storage space - 2x Samsung 850 Pro 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/21009D0FDBFF029C7F5D4B8272BCB948088EB674.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/54/2ED9DFA64793898C2B6C49CDA72921C3BB90A554.png)
 
 ##### E: (Mirror SSD/HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/47/5DFF257B071ABB458985BCE5E6899A7E324C4847.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2E/471C3B1E98288E080A9F4718DE74A4DD30047E2E.png)
 
 ##### F: (Simple HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C0/FC4CCC37839C4681B6D00593FC8D919764C722C0.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/E76E9DCC9DDDFAEA198939271F442AE923B62CE2.png)
 
 ## Deploy Hyper-V
 
@@ -662,7 +777,15 @@ New-NetLbfoTeam `
     -Name $interfaceAlias `
     -TeamMembers $teamMembers `
     -Confirm:$false
+
+Start-Sleep -Seconds 20
+
+Get-NetLbfoTeam
 ```
+
+> **Important**
+>
+> Ensure the **Status** property of the network team is **Up**.
 
 ### Enable Virtualization in BIOS
 
@@ -776,10 +899,6 @@ cls
 ```PowerShell
 Get-VMSwitch "Tenant vSwitch" |
     Set-VMSwitch -AllowManagementOS $false
-```
-
-```PowerShell
-cls
 ```
 
 ### # Configure VM storage
