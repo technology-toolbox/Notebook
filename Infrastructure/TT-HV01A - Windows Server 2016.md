@@ -7,9 +7,135 @@ Monday, January 9, 2017
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Install Windows Server 2016
+## Deploy and configure the server infrastructure
 
-## Rename computer and join domain
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Create domain group for fabric administrators
+
+```PowerShell
+$fabricAdminsGroup = "Fabric Admins"
+$orgUnit = "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name $fabricAdminsGroup `
+    -Description "Complete and unrestricted access to fabric resources" `
+    -GroupScope Global `
+    -Path $orgUnit
+```
+
+### # Create fabric administrator account
+
+```PowerShell
+$displayName = "Jeremy Jameson (fabric admin)"
+$defaultUserName = "jjameson-fabric"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Admin Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true
+```
+
+### # Add fabric admin account to fabric administrators domain group
+
+```PowerShell
+Add-ADGroupMember `
+    -Identity $fabricAdminsGroup `
+    -Members $cred.UserName
+```
+
+---
+
+### Install Windows Server 2016 ("Server Core")
+
+### Login as local administrator account
+
+```PowerShell
+cls
+```
+
+### # Install latest patches
+
+#### # Install cumulative update for Windows Server 2016
+
+##### # Copy patch to local storage
+
+```PowerShell
+net use \\ICEMAN\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the server.
+
+```PowerShell
+$source = "\\ICEMAN\Products\Microsoft\Windows 10\Patches"
+$destination = "C:\NotBackedUp\Temp"
+$patch = "windows10.0-kb3213522-x64_fc88893ff1fbe75cac5f5aae7ff1becee55c89dd.msu"
+
+robocopy $source $destination $patch
+```
+
+##### # Validate local copy of patch
+
+```PowerShell
+robocopy \\ICEMAN\Public\Toolbox\FCIV \NotBackedUp\Public\Toolbox\FCIV
+
+C:\NotBackedUp\Public\Toolbox\FCIV\fciv.exe -sha1 `
+C:\NotBackedUp\Temp\windows10.0-kb3213522-x64_fc88893ff1fbe75cac5f5aae7ff1becee55c89dd.msu
+```
+
+> **Important**
+>
+> Ensure the checksum matches the expected value (specified in the filename).
+
+##### # Install patch
+
+```PowerShell
+& "$destination\$patch"
+```
+
+> **Note**
+>
+> When prompted, restart the computer to complete the installation.
+
+```Console
+PowerShell
+```
+
+```Console
+cls
+```
+
+##### # Delete local copy of patch
+
+```PowerShell
+Remove-Item ("C:\NotBackedUp\Temp" `
+    + "\windows10.0-kb3213522-x64_fc88893ff1fbe75cac5f5aae7ff1becee55c89dd.msu")
+```
+
+#### # Install latest patches using Windows Update
+
+```PowerShell
+sconfig
+```
+
+### Rename computer and join domain
 
 ```Console
 sconfig
@@ -19,80 +145,81 @@ sconfig
 >
 > Rename the computer to **TT-HV01A** and join the **corp.technologytoolbox.com** domain.
 
-## Move computer to "Hyper-V Servers" OU
-
 ---
 
 **FOOBAR8**
+
+```PowerShell
+cls
+```
+
+### # Move computer to "Hyper-V Servers" OU
 
 ```PowerShell
 $computerName = "TT-HV01A"
 $targetPath = ("OU=Hyper-V Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
-
-Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 ```
 
----
-
-## Add computer to "Hyper-V Servers" domain group
-
----
-
-**FOOBAR8**
+### # Add computer to "Hyper-V Servers" domain group
 
 ```PowerShell
+Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+
 Import-Module ActiveDirectory
 Add-ADGroupMember -Identity "Hyper-V Servers" -Members TT-HV01A$
 ```
 
----
+### # Add fabric administrators domain group to local Administrators group on Hyper-V server
 
 ```PowerShell
+$scriptBlock = {
+    net localgroup Administrators "TECHTOOLBOX\Fabric Admins" /ADD
+}
+
+Invoke-Command -ComputerName $computerName -ScriptBlock $scriptBlock
+```
+
+---
+
+### Login as fabric administrator account
+
+```Console
+PowerShell
+```
+
+```Console
 cls
 ```
 
-## # Set time zone
+### # Set time zone
 
 ```PowerShell
 tzutil /s "Mountain Standard Time"
 ```
 
-## # Download PowerShell help files
+### # Copy Toolbox content
 
 ```PowerShell
-Update-Help
+$source = "\\ICEMAN\Public\Toolbox"
+$destination = "C:\NotBackedUp\Public\Toolbox"
+
+robocopy $source $destination  /E /XD "Microsoft SDKs"
+```
+
+### # Set MaxPatchCacheSize to 0 (recommended)
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Copy Toolbox content
+### # Configure networking
 
-```PowerShell
-robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
-```
-
-```PowerShell
-cls
-```
-
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-```PowerShell
-cls
-```
-
-## # Rename network connections
+#### # Rename network connections
 
 ```PowerShell
 Get-NetAdapter -Physical | select InterfaceDescription
@@ -112,11 +239,7 @@ Get-NetAdapter `
     Rename-NetAdapter -NewName "Tenant 2"
 ```
 
-```PowerShell
-cls
-```
-
-## # Enable jumbo frames
+#### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
@@ -136,100 +259,19 @@ Set-NetAdapterAdvancedProperty -Name "Tenant 2" `
 ping ICEMAN -f -l 8900
 ```
 
+#### Ensure SMB Multichannel is working as expected
+
 The following screenshot shows 1.5 Gbps throughput when copying a large file from ICEMAN to TT-HV01A:
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/BF/23003F17717A47C9DBD69AA186B26F6046296FBF.png)
 
-The following screenshot shows the load spread across two network adapters (729 Mbps and 619 Mbps) on TT-HYP01:
+The following screenshot shows the load spread across two network adapters (729 Mbps and 619 Mbps) on TT-HV01A:
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/5154E5668F6139E3AD3699F02EB196B0D026244F.png)
 
-```PowerShell
-cls
-```
+### Configure storage
 
-## # Configure tenant network team
-
-#### # Create NIC team
-
-```PowerShell
-$interfaceAlias = "Tenant Team"
-
-New-NetLbfoTeam -Name $interfaceAlias -TeamMembers "Tenant 1", "Tenant 2"
-```
-
-## Enable Hyper-V role
-
-### Enable Virtualization in BIOS
-
-Intel Virtualization Technology: **Enabled**
-
-```PowerShell
-cls
-```
-
-### # Add Hyper-V role
-
-```PowerShell
-Install-WindowsFeature `
-    -Name Hyper-V `
-    -IncludeManagementTools `
-    -Restart
-```
-
-### # Download PowerShell help files (for Hyper-V cmdlets)
-
-```PowerShell
-Update-Help
-```
-
-```PowerShell
-cls
-```
-
-## # Configure Hyper-V virtual switch
-
-### # Create Hyper-V virtual switch
-
-```PowerShell
-New-VMSwitch `
-    -Name "Tenant vSwitch" `
-    -NetAdapterName "Tenant Team" `
-    -AllowManagementOS $true
-```
-
-```PowerShell
-cls
-```
-
-### # Enable jumbo frames on virtual switches
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name "vEthernet (Tenant vSwitch)" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
-
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-ping ICEMAN -f -l 8900 -S 192.168.10.41
-```
-
-```PowerShell
-cls
-```
-
-### # Modify virtual switch to disallow management OS
-
-```PowerShell
-Get-VMSwitch "Tenant vSwitch" |
-    Set-VMSwitch -AllowManagementOS $false
-```
-
-## Configure storage
-
-### Physical disks
+#### Physical disks
 
 <table>
 <tr>
@@ -361,10 +403,10 @@ Serial number: *****EMV</p>
 </table>
 
 ```PowerShell
-Get-PhysicalDisk | select DeviceId, Model, SerialNumber | sort DeviceId
+Get-PhysicalDisk | select DeviceId, Model, SerialNumber, CanPool | sort DeviceId
 ```
 
-### Storage pools
+#### Storage pools
 
 <table>
 <tr>
@@ -388,7 +430,7 @@ PhysicalDisk4</p>
 </tr>
 </table>
 
-### Virtual disks
+#### Virtual disks
 
 | Name   | Layout | Provisioning | Capacity | SSD Tier | HDD Tier | Volume | Volume Label | Write-Back Cache |
 | ------ | ------ | ------------ | -------- | -------- | -------- | ------ | ------------ | ---------------- |
@@ -400,7 +442,7 @@ PhysicalDisk4</p>
 cls
 ```
 
-### # Create storage pool
+#### # Create storage pool
 
 ```PowerShell
 $storageSubSystemName = "Windows Storage on $env:COMPUTERNAME"
@@ -415,7 +457,7 @@ New-StoragePool `
     -PhysicalDisks (Get-PhysicalDisk -CanPool $true)
 ```
 
-### # Check media type configuration
+#### # Check media type configuration
 
 ```PowerShell
 Get-StoragePool "Pool 1" |
@@ -424,11 +466,15 @@ Get-StoragePool "Pool 1" |
     ft FriendlyName, Size, MediaType, HealthStatus, OperationalStatus -AutoSize
 ```
 
+> **Important**
+>
+> Ensure the **MediaType** property for the SSDs is set to **SSD**.
+
 ```PowerShell
 cls
 ```
 
-### # Create storage tiers
+#### # Create storage tiers
 
 ```PowerShell
 Get-StoragePool "Pool 1" |
@@ -442,7 +488,7 @@ Get-StoragePool "Pool 1" |
 cls
 ```
 
-### # Create storage spaces
+#### # Create storage spaces
 
 ```PowerShell
 $ssdTier = Get-StorageTier -FriendlyName "SSD Tier"
@@ -477,9 +523,9 @@ Get-StoragePool "Pool 1" |
 cls
 ```
 
-### # Create partitions and volumes
+#### # Create partitions and volumes
 
-#### # Create volume "D" on Data01
+##### # Create volume "D" on Data01
 
 ```PowerShell
 Get-VirtualDisk "Data01" | Get-Disk | Set-Disk -IsReadOnly 0
@@ -498,7 +544,7 @@ Initialize-Volume `
     -Confirm:$false
 ```
 
-#### # Create volume "E" on Data02
+##### # Create volume "E" on Data02
 
 ```PowerShell
 Get-VirtualDisk "Data02" | Get-Disk | Set-Disk -IsReadOnly 0
@@ -517,7 +563,7 @@ Initialize-Volume `
     -Confirm:$false
 ```
 
-#### # Create volume "F" on Data03
+##### # Create volume "F" on Data03
 
 ```PowerShell
 Get-VirtualDisk "Data03" | Get-Disk | Set-Disk -IsReadOnly 0
@@ -540,7 +586,7 @@ Initialize-Volume `
 cls
 ```
 
-### # Configure "Storage Tiers Optimization" scheduled task to append to log file
+#### # Configure "Storage Tiers Optimization" scheduled task to append to log file
 
 ```PowerShell
 New-Item -ItemType Directory -Path C:\NotBackedUp\Temp
@@ -565,93 +611,178 @@ Set-ScheduledTask $task
 > Simply appending ">> {log file}" (as described in the "To change the Storage Tiers Optimization task to save a report (Task Scheduler)" section of the [TechNet article](TechNet article)) did not work. Specifically, when running the task, the log file was not created and the task immediately finished without reporting any error.\
 > Changing the **Program/script** (i.e. the action's **Execute** property) to launch "%windir%\\system32\\defrag.exe" using "%windir%\\system32\\cmd.exe" resolved the issue.
 
-#### Reference
+##### Reference
 
 **Save a report when Storage Tiers Optimization runs**\
 From <[https://technet.microsoft.com/en-us/library/dn789160.aspx](https://technet.microsoft.com/en-us/library/dn789160.aspx)>
 
-## Issue - Poor write performance on mirrored Samsung 840 SSDs
+#### Benchmark storage performance
 
-### Before
+##### C: (SSD - Samsung 850 Pro 128GB)
 
-#### C: (SSD - Samsung 850 Pro 128GB)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/D4C4253F58688B819E4D813F52FCC5E3CC1FD946.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/24/56970BCBD63990C24E3E71C2875C4C9CD3A79B24.png)
+##### D: (Mirror SSD storage space - 2x Samsung 840 512GB)
 
-#### D: (Mirror SSD storage space - 2x Samsung 840 512GB)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/21009D0FDBFF029C7F5D4B8272BCB948088EB674.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/03/9250118972EEF9F8B918E57C9B5E519737AF9703.png)
+##### E: (Mirror SSD/HDD storage space)
 
-#### E: (Mirror SSD/HDD storage space)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/47/5DFF257B071ABB458985BCE5E6899A7E324C4847.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DC/BA90DE05C35CCD69741C558CC9ED6FB364FC13DC.png)
+##### F: (Simple HDD storage space)
 
-#### F: (Simple HDD storage space)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C0/FC4CCC37839C4681B6D00593FC8D919764C722C0.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D3/849F2F590EE26E94B3B7A48DAA064B00A843AED3.png)
+## Deploy Hyper-V
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/ED/654FBE2B044D7E7EB063D5E9CC10B2846778D8ED.png)
+```PowerShell
+cls
+```
 
-### STORM (for comparison)
+### # Select "High performance" power scheme
 
-#### Benchmark C: (SSD - Samsung 850 Pro 128GB)
+```PowerShell
+powercfg.exe /L
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/EA8C629095523D0CF0C88B9D6AEB08B729772D0C.png)
+powercfg.exe /S SCHEME_MIN
 
-#### Benchmark D: (Mirror SSD storage space - 2x Samsung 840 512GB)
+powercfg.exe /L
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/FA049D8B5BD2DE10A5174B037923D27E07AF0C3C.png)
+### # Configure tenant network team
 
-#### Benchmark E: (Mirror SSD/HDD storage space)
+#### # Create NIC team
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/BFEFC0258A705B18A95939C9EB07CCB1A8075D5F.png)
+```PowerShell
+$interfaceAlias = "Tenant Team"
+$teamMembers = "Tenant 1", "Tenant 2"
 
-#### Benchmark F: (Simple HDD storage space)
+New-NetLbfoTeam `
+    -Name $interfaceAlias `
+    -TeamMembers $teamMembers `
+    -Confirm:$false
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/D4BE461147A604A22BD43FE4B4DDAF2597417688.png)
+### Enable Virtualization in BIOS
 
-### Solution
+Intel Virtualization Technology: **Enabled**
 
-#### Update AHCI drivers
+```PowerShell
+cls
+```
 
-1. Download the latest AHCI drivers from the Intel website:\
-   **Intel® RSTe AHCI & SCU Software RAID driver for Windows**\
-   From <[https://downloadcenter.intel.com/download/25393/Intel-RSTe-AHCI-SCU-Software-RAID-driver-for-Windows-](https://downloadcenter.intel.com/download/25393/Intel-RSTe-AHCI-SCU-Software-RAID-driver-for-Windows-)>
-2. Extract the drivers and copy the files to a temporary location on the server:
-3. Install the drivers for the **Intel(R) C600 series chipset SATA AHCI Controller (PCI\\VEN_8086&DEV_1D02&...)**:
-4. Restart the server.
+### # Add Hyper-V role
+
+```PowerShell
+Install-WindowsFeature `
+    -Name Hyper-V `
+    -IncludeManagementTools `
+    -Restart
+```
+
+### Login as fabric administrator account
+
+### # Install latest patches using Windows Update
+
+```PowerShell
+sconfig
+```
+
+> **Important**
+>
+> Restart the server to complete the patching.
+
+#### Login as fabric administrator account
 
 ```Console
-    robocopy "C:\NotBackedUp\Temp\Drivers\Intel\RSTe AHCI & SCU Software RAID driver for Windows\Drivers\x64\Win8_10_2K8R2_2K12\AHCI" '\\TT-HV01\C$\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI' /E
+PowerShell
 ```
 
 ```Console
-    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\Win8_10_2K8R2_2K12\AHCI\iaAHCI.inf
+cls
 ```
 
-#### Swap SATA controllers for SSD drives
+#### # Delete C:\\Windows\\SoftwareDistribution folder
 
-Apparently, there is a known issue with the Marvell 88SE9128 controller which caps SSD throughput at just under 400 MB/sec. Consequently, I moved the Samsung 850 128 GB drive to the Marvell controller (since write throughput on that drive is not as important) and moved the two Samsung 840 512 GB drives to the Intel RST controller.
+```PowerShell
+Stop-Service wuauserv
 
-### After
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
 
-#### Benchmark C: (SSD - Samsung 850 Pro 128GB)
+Start-Service wuauserv
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/15/519535B0A6F687236645B38D82247E8E34153115.png)
+```PowerShell
+cls
+```
 
-#### Benchmark D: (Mirror SSD storage space - 2x Samsung 840 512GB)
+## # Configure Hyper-V virtual switch
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/308440FA708C0191F113E9861A0D04DD419FF3F4.png)
+### # Create Hyper-V virtual switch
 
-#### Benchmark E: (Mirror SSD/HDD storage space)
+```PowerShell
+New-VMSwitch `
+    -Name "Tenant vSwitch" `
+    -NetAdapterName "Tenant Team" `
+    -AllowManagementOS $true
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/E9B332D01CBB9B3B944ECFC49EF2260280AC28DD.png)
+```PowerShell
+cls
+```
 
-#### Benchmark F: (Simple HDD storage space)
+### # Enable jumbo frames on virtual switch
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/29/357F84ED3D27DC1E086F6E5B9DDBFDB70AB64629.png)
+```PowerShell
+$vSwitchIpAddress = Get-NetAdapter -Name "vEthernet (Tenant vSwitch)" |
+    Get-NetIPAddress -AddressFamily IPv4 |
+    select -ExpandProperty IPAddress
 
-## # Configure VM storage
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*" | select Name, DisplayValue
+
+Name                       DisplayValue
+----                       ------------
+vEthernet (Tenant vSwitch) Disabled
+Datacenter 2               9014 Bytes
+Tenant 1                   9014 Bytes
+Datacenter 1               9014 Bytes
+Tenant 2                   9014 Bytes
+
+Set-NetAdapterAdvancedProperty `
+    -Name "vEthernet (Tenant vSwitch)" `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
+
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*" | select Name, DisplayValue
+
+Name                       DisplayValue
+----                       ------------
+vEthernet (Tenant vSwitch) 9014 Bytes
+Datacenter 2               9014 Bytes
+Tenant 1                   9014 Bytes
+Datacenter 1               9014 Bytes
+Tenant 2                   9014 Bytes
+
+
+ping ICEMAN -f -l 8900 -S $vSwitchIpAddress
+```
+
+```PowerShell
+cls
+```
+
+### # Modify virtual switch to disallow management OS
+
+```PowerShell
+Get-VMSwitch "Tenant vSwitch" |
+    Set-VMSwitch -AllowManagementOS $false
+```
+
+```PowerShell
+cls
+```
+
+### # Configure VM storage
 
 ```PowerShell
 mkdir D:\NotBackedUp\VMs
@@ -660,6 +791,8 @@ mkdir F:\NotBackedUp\VMs
 
 Set-VMHost -VirtualMachinePath E:\NotBackedUp\VMs
 ```
+
+**TODO:**
 
 ## Configure Live Migration (without Failover Clustering)
 
