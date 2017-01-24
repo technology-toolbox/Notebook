@@ -313,3 +313,20 @@ Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
 
 ---
+
+## Upgrade to DPM 2016
+
+### Uninstall previous version of DPM agent
+
+Restart the server to complete the removal.
+
+### # Install new version of DPM agent
+
+```PowerShell
+$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+    + "\Agents\DPMAgentInstaller_x64.exe"
+
+& $installer TT-DPM01.corp.technologytoolbox.com
+```
+
+### Attach DPM agent

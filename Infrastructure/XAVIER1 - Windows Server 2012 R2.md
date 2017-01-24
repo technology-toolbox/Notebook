@@ -503,7 +503,7 @@ $computer = 'XAVIER1'$command = "New-NetFirewallRule ``
     -Profile Domain ``
     -Action Allow"
 
-$scriptBlock = [scriptblock]::Create($command)
+$scriptBlock = [ScriptBlock]::Create($command)
 
 Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
@@ -556,3 +556,48 @@ The following GPOs were detected by the PowerShell script:
 ### Solution
 
 Grant **Read** permission to **Domain Computers** on each of the GPOs listed above.
+
+## Upgrade to DPM 2016
+
+### Uninstall previous version of DPM agent
+
+Restart the server to complete the removal.
+
+### # Install new version of DPM agent
+
+```PowerShell
+$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+    + "\Agents\DPMAgentInstaller_x64.exe"
+
+& $installer TT-DPM01.corp.technologytoolbox.com
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/8606359F39CE8CC41F23D5E33BB31AACA8650974.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F0/19102D8B868CECE5197A03D706E3B773B8AD48F0.png)
+
+#### Reference
+
+**Installing Protection Agents Manually**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
+
+### Attach DPM agent
+
+**Note: Did *not* create "Allow DPM Remote Agent Push" firewall rule**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3E/5512AC5FDFBE769E572849E6A1B97929063E693E.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1B/51AACF3C7BA09AAF48B7F17D6D4F246C502FF01B.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9C/F2D46AEC4C74202FAD03D73A4DD71755F9862F9C.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F9/EDFFFB92B64C2ACE945C24A3D8EF88818265A5F9.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C1/805B340BA7B52D879093A4E31A753B2DBAB5E3C1.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/30509E6EA186F522EC5771E3E98DA71494BEC0BB.png)
+
+#### Reference
+
+**Attaching Protection Agents**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757916.aspx](http://technet.microsoft.com/en-us/library/hh757916.aspx)>
