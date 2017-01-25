@@ -407,19 +407,43 @@ From <[https://technet.microsoft.com/en-us/library/hh305235.aspx](https://techne
 
 ### Configure AD FS for a relying party
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/354167E0AA0EF92CB41CDE6660975DF4E463F4BB.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/1A2A9B693602AB83AE70679E3C6E4BC5C3A897A9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/6AC72383753C7437044F9BB0237657795084FC37.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/CE5D2ACA15130FEC1DDD92DA2C28DECDE352177C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/1E5EF3C7E50AAE23B056EF2497D4A8525AF3237F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/66/E6497979EDB38928014DEEF533DFB62A249EE166.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/85/354D5A4A02C2BE1E0B6C6AC95B591B313E3F8085.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/02E7438C9F6E14297E4A6595326DE0C7A15FCDB8.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/64C20D03B780955F8AB6A9F55EA0177DE28EAD3F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AD/0FFEE9494D540725C2F33F5145CA0DE6AC7997AD.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A3/BA79737A135A1EED5342EDA34067AF7FF03373A3.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/C41A7C4C86AF64FD877A2A0FFCEBFD3F3E6FDA3B.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/77/E2B838567E091651F687403CD36F154B1AF5B377.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/B293139B7A93C06EA0E18AC44103D1CC515AEC12.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A8/B6878427FB8AA53BE2169485DBA667A25607B4A8.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/729A6CBF4D96F35A769D95FDD65D6C4F9930C162.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C2/5C1FE5B7AE6BF64E1FE4B0DABC2923F96F5646C2.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CD/F02F79505BCC37987CFDD0F35917A89DDE9CA9CD.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A6/9909B3C6417B41A8D43EEE9DD2E755AFF6E883A6.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/00/640C5A26709C6B67B324E316490CB543ACAD8A00.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/FC/9E8947EA5FA0239F551589CFB7DC2D6504A5A4FC.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/19/5571D6DDB146A08922B431E4E099050139F53019.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1F/E87FB488CCBCE8414FC5991F6C3360D71C5FD41F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/92/0E9806DC1C1AA31A13AC573DA5BBA1A716360F92.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/76/7C955DD1216A40FB7613888A0CE47449DB142276.png)
 
