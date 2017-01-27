@@ -17,7 +17,9 @@ Tuesday, January 24, 2017
 cls
 ```
 
-### # Create service account for ADFS
+### # Create and configure service account for ADFS
+
+#### # Create service account for ADFS
 
 ```PowerShell
 $displayName = "Service account for ADFS farm (EXT-ADFS01)"
@@ -39,6 +41,17 @@ New-ADUser `
     -CannotChangePassword:$true `
     -PasswordNeverExpires:$true
 ```
+
+#### # Configure Service Principal Name for ADFS service account
+
+```PowerShell
+setspn -S host/fs.technologytoolbox.com $cred.UserName
+```
+
+#### Reference
+
+**Manually Configure a Service Account for a Federation Server Farm**\
+From <[https://technet.microsoft.com/en-us/library/dd807078(v=ws.11).aspx](https://technet.microsoft.com/en-us/library/dd807078(v=ws.11).aspx)>
 
 ---
 
@@ -461,19 +474,19 @@ From <[https://technet.microsoft.com/en-us/library/hh305235.aspx](https://techne
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/C3495D2B2A755FC7668669A00DDEAB904258CEDB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/15/83B89CF9AC1D679C1BDA5615E0AB0C1186ED0B15.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/983BF1918905BAE459E22149D16968191BA3337F.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/EE/0F85DE69F6F6CFD7638A808C73CD97B93C7406EE.png)
 
 ### Export the token signing certificate
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B3/24EBAD90C8316D653F0CCDE0490E84E4BF150BB3.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/75/0ECB37338DC24D1C97BD8CB04A1D2F1539EF5675.png)
 
 Right-click the token-signing certificate and click **View Certificate...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AA/B9B444EED6A05F37890FEB5690388DDC7FEBBCAA.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/12A2A8DF665D7B16A552AD7793C8B4BBDA88C4F8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/16F6DFD269EEEA7B194497276BF5F57D648D985C.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C3/572AEB343EFACC4B9125498ED10653CF52C8B4C3.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/3EDC2106856C070AF5E6D3ED610E30EF76EA5DEF.png)
 
@@ -498,7 +511,7 @@ In the **Certificate Export Wizard**, click **Next**.
 
 ```PowerShell
 net use \\ext-foobar4.extranet.technologytoolbox.com\C$ `
-    /USER:TECHTOOLBOX\jjameson
+    /USER:EXTRANET\setup-sharepoint-dev
 ```
 
 > **Note**
@@ -508,21 +521,41 @@ net use \\ext-foobar4.extranet.technologytoolbox.com\C$ `
 ```PowerShell
 copy `
     'C:\Users\jjameson-admin\Desktop\ADFS Signing - fs.technologytoolbox.com.cer' `
-    \\ext-foobar4.extranet.technologytoolbox.com\C$\Users\jjameson\Desktop
+    \\ext-foobar4.extranet.technologytoolbox.com\C$\Users\setup-sharepoint-dev\Desktop
 ```
 
 ---
 
-**EXT-FOOBAR4 - Run as TECHTOOLBOX\\jjameson**
+**EXT-FOOBAR4 - Run as EXTRANET\\setup-sharepoint-dev**
+
+```PowerShell
+cls
+```
 
 #### # Import token signing certificate
 
 ```PowerShell
-Enable-SharePointCmdlets
+If ((Get-PSSnapin Microsoft.SharePoint.PowerShell `
+    -ErrorAction SilentlyContinue) -eq $null)
+{
+    Write-Debug "Adding snapin (Microsoft.SharePoint.PowerShell)..."
+
+    $ver = $host | select version
+
+    If ($ver.Version.Major -gt 1)
+    {
+        $Host.Runspace.ThreadOptions = "ReuseThread"
+    }
+
+    Add-PSSnapin Microsoft.SharePoint.PowerShell
+}
+
+$certPath = "C:\Users\setup-sharepoint-dev\Desktop" `
+    + "\ADFS Signing - fs.technologytoolbox.com.cer"
 
 $cert = `
     New-Object System.Security.Cryptography.X509Certificates.X509Certificate2(
-        "C:\Users\jjameson\Desktop\ADFS Signing - fs.technologytoolbox.com.cer")
+        $certPath)
 
 New-SPTrustedRootAuthority `
     -Name "ADFS Signing - fs.technologytoolbox.com" `
@@ -634,9 +667,9 @@ Click **Save**.
 
 ---
 
-### Customize the AD FS sign-in pages
+## Customize the AD FS sign-in pages
 
-#### Reference
+### Reference
 
 **Customizing the AD FS Sign-in Pages**\
 From <[https://technet.microsoft.com/library/dn280950.aspx](https://technet.microsoft.com/library/dn280950.aspx)>
@@ -645,10 +678,10 @@ From <[https://technet.microsoft.com/library/dn280950.aspx](https://technet.micr
 cls
 ```
 
-#### # Customize the AD FS sign-in page for SecuritasConnect
+### # Customize the AD FS sign-in page for SecuritasConnect
 
 ```PowerShell
-$relyingPartyTrustName = "client-local-4.securitasinc.com"
+$relyingPartyName = "client-local-4.securitasinc.com"
 $companyName = "SecuritasConnect"
 $organizationalNameDescriptionText = "Sign in with your SecuritasConnect credentials or your organizational account (if supported)"
 
@@ -658,17 +691,81 @@ $signInPageDescription = "<p>SecuritasConnect is a powerful tool that can improv
 $illustrationPath = "C:\NotBackedUp\Temp\ADFS_splash_v1-01.jpg"
 
 Set-AdfsRelyingPartyWebContent `
-    -TargetRelyingPartyName $relyingPartyTrustName `
+    -TargetRelyingPartyName $relyingPartyName `
     -CompanyName $companyName `
     -OrganizationalNameDescriptionText $organizationalNameDescriptionText `
-    -SignInPageDescription $signInPageDescription
+    -SignInPageDescription $signInPageDescription `
+    -HomeRealmDiscoveryOtherOrganizationDescriptionText "Enter your e-mail address below."
 
 Set-AdfsRelyingPartyWebTheme `
-    -TargetRelyingPartyName $relyingPartyTrustName `
+    -TargetRelyingPartyName $relyingPartyName `
     -Illustration @{path=$illustrationPath}
 ```
 
-#### # Revert customizations for SecuritasConnect (demo)
+```PowerShell
+cls
+```
+
+#### # Create a custom theme
+
+```PowerShell
+$themeName = "SecuritasConnect"
+
+New-AdfsWebTheme -Name $themeName -SourceName Default
+
+mkdir "C:\NotBackedUp\Temp\$themeName-Theme"
+
+Export-AdfsWebTheme `
+```
+
+    -Name \$themeName `\
+    -DirectoryPath "C:\\NotBackedUp\\Temp\\\$themeName-Theme"
+
+```Console
+Notepad "C:\NotBackedUp\Temp\$themeName-Theme\script\onload.js"
+```
+
+---
+
+**onload.js**
+
+```JavaScript
+var copyright = document.getElementById("copyright");
+
+copyright.innerHTML = '&copy; 2017 Securitas Security Services USA, Inc.';
+
+var identityProviders = document.querySelectorAll("div[class='idp']");
+
+var childNode;
+
+if (identityProviders) {
+    if (identityProviders.length > 0) {
+        childNode = identityProviders[0].childNodes[1].childNodes[0];
+
+        if (childNode.innerText === 'Active Directory') {
+            childNode.innerText = 'Securitas login';
+        }
+    }
+
+    if (identityProviders.length > 1) {
+        childNode = identityProviders[1].childNodes[1].childNodes[0];
+
+        if (childNode.innerText === 'Other organization') {
+            childNode.innerText = 'Client login';
+        }
+    }
+}
+```
+
+---
+
+```PowerShell
+Set-AdfsRelyingPartyWebTheme `
+    -TargetRelyingPartyName $relyingPartyName `
+    -OnLoadScriptPath "C:\NotBackedUp\Temp\$themeName-Theme\script\onload.js"
+```
+
+### # Revert customizations for SecuritasConnect (demo)
 
 ```PowerShell
 $relyingPartyTrustName = "client-local-4.securitasinc.com"
@@ -688,37 +785,111 @@ Set-AdfsRelyingPartyWebTheme `
     -Illustration @{path=$illustrationPath}
 ```
 
-```PowerShell
+### -- Migrate Securitas users
+
+```Console
+USE [SecuritasPortal]
+GO
+
+UPDATE [Customer].[BranchManagerAssociatedUsers]
+SET BranchManagerUserName = 'smasters@technologytoolbox.com'
+WHERE BranchManagerUserName = 'TECHTOOLBOX\smasters'
+```
+
+```Console
 cls
 ```
 
 ## # Configure claims provider trust for Contoso
 
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
-    -IPAddress 192.168.10.233 `
-    -Hostnames fs.contoso.com
-```
+### Configure relying party on Contoso ADFS server
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/33/2B5216F84AAFB3DFC63888F3DE30598319C3AE33.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/6AC72383753C7437044F9BB0237657795084FC37.png)
+
+[https://fs.technologytoolbox.com/federationmetadata/2007-06/federationmetadata.xml](https://fs.technologytoolbox.com/federationmetadata/2007-06/federationmetadata.xml)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/66/E6497979EDB38928014DEEF533DFB62A249EE166.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/ABDC199E6C277A1EF4CA199E47798EFAD80B1AE2.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/87/C4A976ECD7C04A54FA053713E58F6FE464114B87.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AD/0FFEE9494D540725C2F33F5145CA0DE6AC7997AD.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/E9DCC7042E274A8C238E56F02A9519603057E1D4.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A0/DE335A5D02CFB34A2894BC08697FDEDA10CFF3A0.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B4/E4D6C1557280E6BC69A073A2D6D0AA7578BDEFB4.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F0/F8F1A92198DB69F6D9E1061056FA507DE12932F0.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A8/B6878427FB8AA53BE2169485DBA667A25607B4A8.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/C3495D2B2A755FC7668669A00DDEAB904258CEDB.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C2/5C1FE5B7AE6BF64E1FE4B0DABC2923F96F5646C2.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CD/F02F79505BCC37987CFDD0F35917A89DDE9CA9CD.png)
+
+### Export the token-signing certificate from Contoso ADFS server
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B2/1F44EDD0EFECD117B9FFC90CCBE7516AA22C0FB2.png)
+
+Right-click the token-signing certificate and click **View Certificate...**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/98/C5A23A82A2B602C450373A9E87E41CD44749FB98.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AD/5731B10ABF95185DBC39E1831215E4452287A2AD.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/3EDC2106856C070AF5E6D3ED610E30EF76EA5DEF.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E6/54A9EDD43268EEED727857568498FE867D78ACE6.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/2B96A5526809347461B44BF394BB759CA2CFFC86.png)
+
+In the **Save As** window:
+
+1. In the **File name** box, type **Token-signing - fs.contoso.com**.
+2. Click **Save**.
+
+In the **Certificate Export Wizard**, click **Next**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/57/3659B355327C8EAA4FD9D76C233D8506286D5A57.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/59FF9A0B43CDB1F9B3FA385EEC89D94AB63A3C6A.png)
+
+### Copy token-signing certificate to ADFS server
+
+### Create claims provider trust
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/6D/CB602CAE1566470CA8F3BC2E9EAB6132D6008C6D.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/DD1910BA8F6AE78C00C82B20593CB41D8B8BD02F.png)
 
-**[https://fs.contoso.com/federationmetadata/2007-06/federationmetadata.xml](https://fs.contoso.com/federationmetadata/2007-06/federationmetadata.xml)**
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/35/64DF815A9BF1E186343EEE877D80614D0E410835.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/D8B080A53B0B76217A471071215F2F877885B686.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4C/E239513A36451D9ED73962CC7304536510F7E94C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/ED/4421084548D03A492CC5DF11D18922B4CAEDF8ED.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/570761A2B8CA8649785F855F82F2A09DE6AC1F0C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9E/5A0A7D524A794F1DB169C4C6FA26D88FAA7CA29E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/B4FC297A36F47CCF3604927A95F45AAC589126DA.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CD/F462EFC0354B8DED4FDFED6D0F96ED09F3BAF3CD.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EA/388850787F014AA82125D1779C4EA576006E25EA.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/A1AEDF452D1CA129380FA55AECF614602CDF4BAF.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9E/372A04FF18E2AF7D5DB54606AE5D13AD18E5829E.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/2804A8A9D2E7C330F0A21BB1D9955BF73A697BBC.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/38DA58BC55EEF13586F819A3E5F95C553D0B4CE2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/34/F51DA62281CC644464C0D0F7524CC3521420DD34.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/A154911313189EF6DC96A8ADCEBC49EF70695E46.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/E23AEBFCB13328E48526648AC47449717E94E73B.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/9BAC5EACAF3B3AF7519BB6FD8B1D6E44746F555C.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/67/87BDA6F851FB8A53FF87EAC9AF424ADDE3566267.png)
 
@@ -728,13 +899,18 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/C22BAB8B2EDF42FA2B7325D7FFEBDA366C048EA9.png)
 
-[https://fs.contoso.com/adfs/ls/?wa=wsignin1.0&wtrealm=http%3a%2f%2ffs.fabrikam.com%2fadfs%2fservices%2ftrust&wctx=9ab97163-e20c-45e5-840f-6f14462d6356](https://fs.contoso.com/adfs/ls/?wa=wsignin1.0&wtrealm=http%3a%2f%2ffs.fabrikam.com%2fadfs%2fservices%2ftrust&wctx=9ab97163-e20c-45e5-840f-6f14462d6356)
+Repeat the previous steps to pass through the following additional claims:
+
+- **Name (pass through all claim values)**
+- **UPN (pass through only claim values that match a specific email suffix value - contoso.com)**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/C88F2C430D53FF49358980D8366A732772C01FA2.png)
 
 ```PowerShell
 cls
 ```
 
-## # Customize home realm discovery
+### # Customize home realm discovery
 
 ```PowerShell
 Set-AdfsClaimsProviderTrust `
@@ -742,7 +918,85 @@ Set-AdfsClaimsProviderTrust `
     -OrganizationalAccountSuffix @("contoso.com")
 ```
 
-### Reference
+#### Reference
 
 **Customize the Home Realm Discovery page to ask for UPN right away**\
 From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/](https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/)>
+
+### Configure relying party trust to pass through claims from claims providers other than Active Directory
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/1572A7C9C2707DF78789E0281A1E3C7542005D7E.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/57/17005CBFCC144AFD425E923F44D26D4F52AF9857.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/67/87BDA6F851FB8A53FF87EAC9AF424ADDE3566267.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A6/099A594E54CE56397B0E5662FF033594B92690A6.png)
+
+Repeat the previous steps to pass through the following additional claims:
+
+- **Name (pass through all claim values)**
+- **UPN (pass through all claim values)**
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/10/BA6D2707162F6AD3897B147198B2B6C23FD5BA10.png)
+
+### -- Migrate federated users
+
+```SQL
+USE [SecuritasPortal]
+GO
+```
+
+#### -- Migrate "Angela.Parks" --> "aparks@contoso.com"
+
+```Console
+UPDATE [Customer].[ClientUsers]
+SET UserName = 'aparks@contoso.com'
+WHERE UserName = 'Angela.Parks'
+
+UPDATE [Customer].SitePermissions
+SET UserName = 'aparks@contoso.com'
+WHERE UserName = 'Angela.Parks'
+
+UPDATE dbo.aspnet_Users
+SET
+    UserName = 'aparks@contoso.com'
+    , LoweredUserName = 'aparks@contoso.com'
+WHERE UserName = 'Angela.Parks'
+
+UPDATE [Customer].[BranchManagerAssociatedUsers]
+SET AssociatedUserName = 'aparks@contoso.com'
+WHERE AssociatedUserName = 'Angela.Parks'
+```
+
+#### -- Migrate "Ian.Lunn" --> "ilunn@woodgrove.com"
+
+```PowerShell
+UPDATE [Customer].[ClientUsers]
+SET UserName = 'ilunn@woodgrove.com'
+WHERE UserName = 'Ian.Lunn'
+
+UPDATE [Customer].SitePermissions
+SET UserName = 'ilunn@woodgrove.com'
+WHERE UserName = 'Ian.Lunn'
+
+UPDATE dbo.aspnet_Users
+SET
+    UserName = 'ilunn@woodgrove.com'
+    , LoweredUserName = 'ilunn@woodgrove.com'
+WHERE UserName = 'Ian.Lunn'
+
+UPDATE [Customer].[BranchManagerAssociatedUsers]
+SET AssociatedUserName = 'ilunn@woodgrove.com'
+WHERE AssociatedUserName = 'Ian.Lunn'
+
+
+
+
+
+Set-AdfsClaimsProviderTrust `
+    -TargetName "idp-local-4.securitasinc.com" `
+    -OrganizationalAccountSuffix @("woodgrove.com")
+
+Foo
+```
