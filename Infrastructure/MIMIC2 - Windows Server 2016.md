@@ -1086,3 +1086,174 @@ robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot C
 ##### Check-in files
 
 ---
+
+```PowerShell
+cls
+```
+
+## # Import new versions (January 2017) of Windows 10 and Windows Server 2016
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+```
+
+### # Import operating system - "Windows 10 Enterprise, Version 1607 (x64)"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows 10" `
+    + "\en_windows_10_enterprise_version_1607_updated_jan_2017_x64_dvd_9714415.iso"
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "W10Ent-1607-x64"
+
+$os = Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows 10" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+
+$os.RenameItem("Windows 10 Enterprise, Version 1607 (x64)")
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+```PowerShell
+cls
+```
+
+### # Import operating system - "Windows Server 2016"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows Server 2016" `
+    + "\en_windows_server_2016_x64_dvd_9718492.iso"
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "WS2016"
+
+$os = Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows Server 2016" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+
+$os[0].RenameItem("Windows Server 2016 Standard (Server Core Installation)")
+$os[1].RenameItem("Windows Server 2016 Standard")
+$os[2].RenameItem("Windows Server 2016 Datacenter (Server Core Installation)")
+$os[3].RenameItem("Windows Server 2016 Datacenter")
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Update files in TFS
+
+```PowerShell
+cd C:\NotBackedUp\TechnologyToolbox\Infrastructure
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\x64\sgdm.exe `
+    \\TT-FS01\MDT-Build$ '.\Main\MDT-Build$'
+```
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Captures Logs "Operating Systems" Packages Servicing Tools
+```
+
+#### Check-in files
+
+---
+
+```Console
+cls
+```
+
+# Build baseline images
+
+---
+
+**TT-HV02A**
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 10 Enterprise (x64) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x64.iso -Force
+```
+
+---
+
+---
+
+**TT-HV02B**
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2016 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x64.iso -Force
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Update MDT production deployment images
+
+---
+
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
+
+& '.\Update Deployment Images.ps1'
+```
+
+---
