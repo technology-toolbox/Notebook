@@ -1,7 +1,7 @@
 ﻿# TT-VMM01B - Windows Server 2016 Standard Edition
 
-Thursday, January 12, 2017
-7:47 AM
+Sunday, January 29, 2017
+4:56 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -20,7 +20,7 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "BEAST"
+$vmHost = "TT-HV02B"
 $vmName = "TT-VMM01B"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
@@ -32,7 +32,7 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 4GB `
-    -SwitchName "Production"
+    -SwitchName "Tenant vSwitch"
 
 Set-VM `
     -ComputerName $vmHost `
@@ -43,7 +43,7 @@ Set-VM `
 Set-VMDvdDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
-    -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
+    -Path \\TT-FS01\Products\Microsoft\MDT-Deploy-x86.iso
 
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
@@ -94,7 +94,7 @@ cls
 ### # Remove disk from virtual CD/DVD drive
 
 ```PowerShell
-$vmHost = "BEAST"
+$vmHost = "TT-HV02B"
 $vmName = "TT-VMM01B"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
@@ -109,6 +109,14 @@ $targetPath = ("OU=System Center Servers,OU=Servers,OU=Resources,OU=IT" `
 Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 Restart-VM -ComputerName $vmHost -VMName $vmName -Force
+```
+
+> **Important**
+>
+> Wait for the VM to restart before proceeding.
+
+```PowerShell
+cls
 ```
 
 ### # Add VMM administrators domain group to local Administrators group on VMM server
@@ -148,7 +156,7 @@ Set-NetAdapterAdvancedProperty `
     -DisplayName "Jumbo Packet" `
     -RegistryValue 9014
 
-ping ICEMAN -f -l 8900
+ping TT-FS01 -f -l 8900
 ```
 
 ## # Configure storage
@@ -192,12 +200,12 @@ cls
 #### # Add a second network adapter for cluster network
 
 ```PowerShell
-$vmHost = "BEAST"
+$vmHost = "TT-HV02B"
 $vmName = "TT-VMM01B"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
 
-Add-VMNetworkAdapter -ComputerName $vmHost -VMName $vmName -SwitchName "Production"
+Add-VMNetworkAdapter -ComputerName $vmHost -VMName $vmName -SwitchName "Tenant vSwitch"
 
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
@@ -276,7 +284,7 @@ cls
 #### # Install Windows Assessment and Deployment Kit (Windows ADK) for Windows 10
 
 ```PowerShell
-& "\\ICEMAN\Public\Download\Microsoft\Windows Kits\10\ADK\adksetup.exe"
+& "\\TT-FS01\Public\Download\Microsoft\Windows Kits\10\ADK\adksetup.exe"
 ```
 
 1. On the **Specify Location** page, click **Next**.
@@ -297,7 +305,7 @@ cls
 #### # Install SQL Server 2012 Native Client
 
 ```PowerShell
-& "\\iceman\Products\Microsoft\SQL Server 2012\Native Client\x64\sqlncli.msi"
+& "\\TT-FS01\Products\Microsoft\SQL Server 2012\Native Client\x64\sqlncli.msi"
 ```
 
 ```PowerShell
@@ -307,7 +315,7 @@ cls
 #### # Install SQL Server 2012 Command Line Utilities
 
 ```PowerShell
-& ("\\iceman\Products\Microsoft\SQL Server 2012\Command Line Utilities\x64" `
+& ("\\TT-FS01\Products\Microsoft\SQL Server 2012\Command Line Utilities\x64" `
     + "\SqlCmdLnUtils.msi")
 ```
 
@@ -344,10 +352,10 @@ cls
 ### # Insert the VMM 2016 installation media
 
 ```PowerShell
-$vmHost = "BEAST"
+$vmHost = "TT-HV02B"
 $vmName = "TT-VMM01B"
 
-$isoPath = "\\ICEMAN\Products\Microsoft\System Center 2016" `
+$isoPath = "\\TT-FS01\Products\Microsoft\System Center 2016" `
     + "\mu_system_center_2016_virtual_machine_manager_x64_dvd_9368503.iso"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
@@ -458,7 +466,7 @@ cls
 ## # Install SCOM agent
 
 ```PowerShell
-$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
+$imagePath = '\\TT-FS01\Products\Microsoft\System Center 2012 R2' `
     + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
 
 $imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
