@@ -20,12 +20,12 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV02B"
 $vmName = "WS2016-Std"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
-$isoPath = "\\ICEMAN\Products\Microsoft\Windows Server 2016" `
-    + "\en_windows_server_2016_x64_dvd_9327751.iso"
+$isoPath = "\\TT-FS01\Products\Microsoft\Windows Server 2016" `
+    + "\en_windows_server_2016_x64_dvd_9718492.iso"
 
 New-VM `
     -ComputerName $vmHost `
@@ -65,7 +65,7 @@ cls
 ### # Remove disk from virtual CD/DVD drive
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV02B"
 $vmName = "WS2016-Std"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
@@ -92,7 +92,7 @@ tzutil /s "Mountain Standard Time"
 ### # Copy Toolbox content
 
 ```PowerShell
-$source = "\\ICEMAN\Public\Toolbox"
+$source = "\\TT-FS01\Public\Toolbox"
 $destination = "C:\NotBackedUp\Public\Toolbox"
 
 net use $source /USER:TECHTOOLBOX\jjameson
@@ -117,43 +117,6 @@ cls
 ```
 
 ## # Install latest patches
-
-### # Install cumulative update for Windows Server 2016
-
-#### # Copy patch to local storage
-
-```PowerShell
-$source = "\\ICEMAN\Products\Microsoft\Windows 10\Patches"
-$destination = "C:\NotBackedUp\Temp"
-$patch = "windows10.0-kb3213522-x64_fc88893ff1fbe75cac5f5aae7ff1becee55c89dd.msu"
-
-robocopy $source $destination $patch
-```
-
-#### # Install patch
-
-```PowerShell
-& "$destination\$patch"
-```
-
-> **Note**
->
-> When prompted, restart the computer to complete the installation.
-
-```Console
-PowerShell
-```
-
-```Console
-cls
-```
-
-#### # Delete local copy of patch
-
-```PowerShell
-Remove-Item ("C:\NotBackedUp\Temp" `
-    + "\windows10.0-kb3213522-x64_fc88893ff1fbe75cac5f5aae7ff1becee55c89dd.msu")
-```
 
 ### # Install latest patches using Windows Update
 
@@ -210,7 +173,7 @@ cls
 ### # Shutdown VM
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV02B"
 $vmName = "WS2016-Std"
 
 Stop-VM -ComputerName $vmHost -VMName $vmName
@@ -269,13 +232,13 @@ cls
 ### # Copy VHD to VM Library
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV02B"
 $vmName = "WS2016-Std"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdFolderPath = "$vmPath\$vmName\Virtual Hard Disks"
 $vhdUncFolderPath = "\\$vmHost\" + $vhdFolderPath.Replace(":", "`$")
 
-$destination = "\\ICEMAN\VMM-Library\VHDs"
+$destination = "\\TT-FS01\VM-Library\VHDs"
 
 robocopy $vhdUncFolderPath $destination ($vmName + ".vhdx")
 ```
