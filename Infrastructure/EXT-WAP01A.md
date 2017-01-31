@@ -106,6 +106,14 @@ Set-DNSClientServerAddress `
     -ServerAddresses 192.168.10.209,192.168.10.210
 ```
 
+#### # Configure IPv6 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
+```
+
 #### # Enable jumbo frames
 
 ```PowerShell
@@ -215,4 +223,157 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
+```
+
+## WAP prerequisites
+
+### Reference
+
+**Install and Configure the Web Application Proxy Server**\
+From <[https://technet.microsoft.com/en-us/library/dn383662(v=ws.11).aspx](https://technet.microsoft.com/en-us/library/dn383662(v=ws.11).aspx)>
+
+```PowerShell
+cls
+```
+
+### # Add Remote Access - Web Application Proxy server role
+
+```PowerShell
+Install-WindowsFeature Web-Application-Proxy -IncludeManagementTools
+```
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Checkpoint VM
+
+```PowerShell
+$vmHost = "TT-HV02A"
+$vmName = "EXT-WAP01A"
+$snapshotName = "Before - Configure Web Application Proxy"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Checkpoint-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -SnapshotName $snapshotName
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+### Install certificate - fs.technologytoolbox.com
+
+```PowerShell
+cls
+```
+
+### # Configure Web Application Proxy
+
+```PowerShell
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=fs.technologytoolbox.com,*" }
+
+$cert
+
+$federationServiceTrustCredential = Get-Credential EXTRANET\jjameson-admin
+```
+
+> **Note**
+>
+> When prompted, type the password for the domain administrator account.
+
+```PowerShell
+Install-WebApplicationProxy `
+    -CertificateThumbprint $cert.Thumbprint `
+    -FederationServiceTrustCredential $federationServiceTrustCredential `
+    -FederationServiceName fs.technologytoolbox.com
+
+
+WARNING: A machine restart is required to complete ADFS service configuration. For more information, see:
+http://go.microsoft.com/fwlink/?LinkId=798725
+
+Message                                   Context              Status
+-------                                   -------              ------
+The configuration completed successfully. DeploymentSucceeded Success
+
+
+Restart-Computer
+```
+
+## Publish applications using ADFS preauthentication
+
+### Install certificates
+
+#### Install certificate - \*.securitasinc.com
+
+#### Install certificate - idp.technologytoolbox.com
+
+```PowerShell
+cls
+```
+
+### # Publish applications
+
+#### # Add hostnames - EXT-FOOBAR4
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.218 `
+    -Hostnames `
+        ext-foobar4,
+        client-local-4.securitasinc.com,
+        idp.technologytoolbox.com
+```
+
+#### # Publish https://idp.technologytoolbox.com
+
+```PowerShell
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=idp.technologytoolbox.com,*" }
+
+$cert
+
+Add-WebApplicationProxyApplication `
+    -BackendUrl 'https://idp.technologytoolbox.com' `
+    -ExternalUrl 'https://idp.technologytoolbox.com' `
+    -Name 'idp.technologytoolbox.com' `
+    -ExternalCertificateThumbprint $cert.Thumbprint `
+    -ExternalPreAuthentication PassThrough
+```
+
+#### # Publish https://client-local-4.securitasinc.com
+
+```PowerShell
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=`*.securitasinc.com,*" }
+
+$cert
+
+Add-WebApplicationProxyApplication `
+    -BackendUrl 'https://client-local-4.securitasinc.com' `
+    -ExternalUrl 'https://client-local-4.securitasinc.com' `
+    -Name 'client-local-4.securitasinc.com' `
+    -ExternalCertificateThumbprint $cert.Thumbprint `
+    -ExternalPreAuthentication PassThrough
+
+TODO:
+
+Add-WebApplicationProxyApplication `
+    -BackendServerUrl 'https://client2-local-4.securitasinc.com' `
+    -ExternalCertificateThumbprint '36D400C0B1B36F085340C1BE33B23A18046B764F' `
+    -EnableHTTPRedirect:$true `
+    -ExternalUrl 'https://client-local-4.securitasinc.com' `
+    -Name 'client-local-4.securitasinc.com' `
+    -ExternalPreAuthentication ADFS `
+    -ADFSRelyingPartyName 'client-local-4.securitasinc.com'
 ```
