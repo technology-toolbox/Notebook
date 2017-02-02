@@ -1,7 +1,7 @@
 ﻿# TT-GW01 - Windows Server 2016
 
-Sunday, January 15, 2017
-5:49 AM
+Wednesday, February 1, 2017
+5:36 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -20,12 +20,12 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV01A"
+$vmHost = "TT-HV03"
 $vmName = "TT-GW01"
-$vmPath = "E:\NotBackedUp\VMs"
+$vmPath = "D:\NotBackedUp\VMs"
 $vhdFolderPath = "$vmPath\$vmName\Virtual Hard Disks"
 $vhdPath = "$vhdFolderPath\$vmName.vhdx"
-$sysPrepedImage = "\\ICEMAN\VMM-Library\VHDs\WS2016-Std-Core.vhdx"
+$sysPrepedImage = "\\TT-FS01\VM-Library\VHDs\WS2016-Std-Core.vhdx"
 
 $vhdUncPath = "\\$vmHost\" + $vhdPath.Replace(":", "`$")
 
@@ -175,7 +175,7 @@ Set-NetAdapterAdvancedProperty `
     -DisplayName "Jumbo Packet" `
     -RegistryValue 9014
 
-ping ICEMAN -f -l 8900
+ping TT-FS01 -f -l 8900
 ```
 
 ---
@@ -189,7 +189,7 @@ cls
 ### # Add a second network adapter for network virtualization
 
 ```PowerShell
-$vmHost = "TT-HV01A"
+$vmHost = "TT-HV03"
 $vmName = "TT-GW01"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
@@ -235,7 +235,11 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-## Deploy multitenant gateway
+```PowerShell
+cls
+```
+
+## # Deploy multitenant gateway
 
 ### # Install role services and features
 
@@ -273,7 +277,7 @@ cls
 ### # Update VM baseline
 
 ```PowerShell
-$vmHost = "TT-HV01A"
+$vmHost = "TT-HV03"
 $vmName = "TT-GW01"
 
 C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
@@ -302,24 +306,8 @@ cls
 Install-RemoteAccess -MultiTenancy
 ```
 
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
 ### # Add VMM administrators domain group to local Administrators group on gateway server
 
 ```PowerShell
-$vmName = "TT-GW01"
-
-$scriptBlock = {
-    net localgroup Administrators "TECHTOOLBOX\VMM Admins" /ADD
-}
-
-Invoke-Command -ComputerName $vmName -ScriptBlock $scriptBlock
+net localgroup Administrators "TECHTOOLBOX\VMM Admins" /ADD
 ```
-
----
