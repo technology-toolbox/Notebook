@@ -33,7 +33,8 @@ New-VM `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
-    -MemoryStartupBytes 2GB
+    -MemoryStartupBytes 2GB `
+    -SwitchName "Tenant vSwitch"
 
 Set-VM `
     -ComputerName $vmHost `

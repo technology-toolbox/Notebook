@@ -1,171 +1,150 @@
-﻿# WS2012-R2-STD
+﻿# WS2012-R2-Std
 
-Saturday, January 03, 2015
-2:40 PM
+Thursday, February 2, 2017
+1:09 PM
+
+```Text
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
+```
+
+## Deploy and configure the server infrastructure
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Create virtual machine
+
+```PowerShell
+$vmHost = "TT-HV02B"
+$vmName = "WS2012-R2-Std"
+$vmPath = "C:\NotBackedUp\VMs"
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$isoPath = "\\TT-FS01\Products\Microsoft\Windows Server 2012 R2" `
+    + "\en_windows_server_2012_r2_with_update_x64_dvd_6052708.iso"
+
+New-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -Path $vmPath `
+    -NewVHDPath $vhdPath `
+    -NewVHDSizeBytes 32GB `
+    -MemoryStartupBytes 2GB `
+    -SwitchName "Tenant vSwitch"
+
+Set-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -ProcessorCount 2 `
+    -DynamicMemory `
+    -MemoryMinimumBytes 2GB `
+    -MemoryMaximumBytes 4GB
+
+Set-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $isoPath
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+### Install Windows Server 2012 R2 Standard (Server with a GUI)
+
+Product key: **NPD6V-MT6HM-C8F3J-4QFH8-HMGPB**
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Remove disk from virtual CD/DVD drive
+
+```PowerShell
+$vmHost = "TT-HV02B"
+$vmName = "WS2012-R2-Std"
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+---
+
+### Set password for the local Administrator account
 
 ```Console
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
+PowerShell
+```
+
+```Console
+cls
+```
+
+### # Set time zone
+
+```PowerShell
+tzutil /s "Mountain Standard Time"
+```
+
+### # Copy Toolbox content
+
+```PowerShell
+$source = "\\TT-FS01\Public\Toolbox"
+$destination = "C:\NotBackedUp\Public\Toolbox"
+
+net use $source /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
+robocopy $source $destination  /E /XD "Microsoft SDKs"
+```
+
+### # Set MaxPatchCacheSize to 0 (recommended)
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+```
+
+```PowerShell
+cls
+```
+
+## # Install latest patches
+
+### # Install latest patches using Windows Update
+
+```PowerShell
+sconfig
 
 PowerShell
 ```
 
-## # [STORM] Create virtual machine (WS2012-R2-STD)
-
-```PowerShell
-$vmName = "WS2012-R2-STD"
-
-New-VM `
-    -Name $vmName `
-    -Path C:\NotBackedUp\VMs `
-    -MemoryStartupBytes 1GB `
-    -SwitchName "Virtual LAN 2 - 192.168.10.x"
-
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
-
-New-VHD -Path $vhdPath -SizeBytes 32GB
-
-Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
-
-$isoPath = "\\iceman.corp.technologytoolbox.com\Products\Microsoft" `
-    + "\Windows Server 2012 R2" `
-    + "\en_windows_server_2012_r2_with_update_x64_dvd_4065220.iso"
-
-Set-VMDvdDrive -VMName $vmName -Path $isoPath
-
-Start-VM $vmName
-```
-
-## Install Windows Server 2012 R2 Standard Edition with Update
-
-When prompted to select the operating system to install, select **Windows Server 2012 R2 Standard (Server with a GUI)**.
-
-## # Remove disk from virtual CD/DVD drive
-
-```PowerShell
-$sh = New-Object -ComObject "Shell.Application"
-$sh.Namespace(17).Items() |
-    Where-Object { $_.Type -eq "CD Drive" } |
-        foreach { $_.InvokeVerb("Eject") }
-```
-
-Reference:
-
-**Ejecting CDs with PowerShell on remote computer**\
-[http://www.purgar.net/ejecting-cds-with-powershell-on-remote-computer/](http://www.purgar.net/ejecting-cds-with-powershell-on-remote-computer/)
-
-```Console
-cls
-```
-
-**# Set time zone**
-
-```Console
-tzutil /s "Mountain Standard Time"
-```
-
-## # Set MaxPatchCacheSize to 0
-
-```PowerShell
-reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize /t REG_DWORD /d 0 /f
-```
-
-## # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
 ```PowerShell
 cls
 ```
 
-## # Download PowerShell help files
-
-```PowerShell
-Update-Help
-```
-
-```PowerShell
-cls
-```
-
-## # Copy Toolbox content
-
-```PowerShell
-net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
-
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
-```
-
-```PowerShell
-cls
-```
-
-## # Create Temp folder
-
-```PowerShell
-mkdir C:\NotBackedUp\Temp
-```
-
-## Configure custom icons for folders
-
-- C:\\NotBackedUp
-- C:\\NotBackedUp\\Public
-- C:\\NotBackedUp\\Temp
-
-```PowerShell
-cls
-```
-
-## # Configure WSUS
-
-```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\WSUS\WSUS - colossus.reg'
-```
-
-When prompted to add information to the registry, click **Yes**.
-
-```PowerShell
-Restart-Service wuauserv
-```
-
-## Install patches using Windows Update (round 1)
-
-- 67 important updates available
-- ~1.6 GB
-- Approximate time: 1 hour 32 minutes (6:34 AM - 8:06 AM) - Hyper-V on STORM
-- Approximate time: 1 hour 21 minutes (8:43 AM - ) - VirtualBox on WOLVERINE
-
-## Install patches using Windows Update (round 2)
-
-- 3 important updates available
-- ~173 MB
-- Approximate time: 5 minutes (8:30 AM - 8:33 AM)
-
-## # Delete C:\\Windows\\SoftwareDistribution folder (1.73 GB)
+### # Delete C:\\Windows\\SoftwareDistribution folder
 
 ```PowerShell
 Stop-Service wuauserv
 
 Remove-Item C:\Windows\SoftwareDistribution -Recurse
 
-Restart-Computer
+Start-Service wuauserv
 ```
 
-## Check for updates using Windows Update (after removing patches folder)
-
-- **Most recent check for updates: Never -> Most recent check for updates: Today at 8:45 AM**
-- C:\\Windows\\SoftwareDistribution folder is now 43 MB
-
-## # Reset WSUS
+### # Reset WSUS
 
 ```PowerShell
 & 'C:\NotBackedUp\Public\Toolbox\WSUS\Reset WSUS for SysPrep Image.cmd'
@@ -183,54 +162,106 @@ Note that script contains the following statements:
 
 When prompted to **Press any key to continue . . .**, press CTRL+C to terminate script.
 
-## # Shutdown VM
+## Prepare to run SysPrep
 
-```PowerShell
-Stop-Computer
-```
+Copy VM before running SysPrep (to avoid issues with running SysPrep multiple times)
 
-```PowerShell
-cls
-```
+---
 
-## # [STORM] Copy VM before running SysPrep (to avoid issues with running SysPrep multiple times)
-
-```PowerShell
-robocopy C:\NotBackedUp\VMs\WS2012-R2-STD "D:\Shares\VM Library\WS2012-R2-STD" /E /MIR
-```
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-**# [STORM] Start VM**
+### # Shutdown VM
 
 ```PowerShell
-Start-VM WS2012-R2-STD
+$vmHost = "TT-HV02B"
+$vmName = "WS2012-R2-Std"
+
+Stop-VM -ComputerName $vmHost -VMName $vmName
 ```
 
-## # SysPrep VM
+### # Copy VHD
 
 ```PowerShell
-C:\Windows\system32\Sysprep\sysprep.exe /generalize /oobe /shutdown
+$vmPath = "C:\NotBackedUp\VMs"
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vhdCopyPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName-Before-SysPrep.vhdx"
+
+$script = "
+    Write-Host `"Copying file ($vhdPath)...`"
+
+    Copy-Item `"$vhdPath`" `"$vhdCopyPath`"
+"
+
+$scriptBlock = [ScriptBlock]::Create($script)
+
+Invoke-Command -ComputerName $vmHost -ScriptBlock $scriptBlock
 ```
+
+### # Start VM
 
 ```PowerShell
-cls
+Start-VM -ComputerName $vmHost -VMName $vmName
 ```
 
-## # [STORM] Copy VHD to VM Library
+---
 
-```PowerShell
-copy "C:\NotBackedUp\VMs\WS2012-R2-STD\Virtual Hard Disks\WS2012-R2-STD.vhdx" \\iceman\VM-Library\VHDs
-```
-
-```PowerShell
-cls
-```
-
-**# [STORM] Restore VHD copied before SysPrep**
+## Create SysPrep VHD
 
 ```Console
-copy "D:\Shares\VM Library\WS2012-R2-STD\Virtual Hard Disks\WS2012-R2-STD.vhdx" "C:\NotBackedUp\VMs\WS2012-R2-STD\Virtual Hard Disks"
+PowerShell
 ```
+
+```Console
+cls
+```
+
+### # SysPrep VM
+
+```PowerShell
+C:\Windows\System32\Sysprep\sysprep.exe /generalize /oobe /shutdown
+```
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Copy VHD to VM Library
+
+```PowerShell
+$vmHost = "TT-HV02B"
+$vmName = "WS2012-R2-Std"
+$vmPath = "C:\NotBackedUp\VMs"
+$vhdFolderPath = "$vmPath\$vmName\Virtual Hard Disks"
+$vhdUncFolderPath = "\\$vmHost\" + $vhdFolderPath.Replace(":", "`$")
+
+$destination = "\\TT-FS01\VM-Library\VHDs"
+
+robocopy $vhdUncFolderPath $destination ($vmName + ".vhdx")
+```
+
+### # Restore VHD copied before SysPrep
+
+```PowerShell
+$vhdCopyPath = "$vhdFolderPath\$vmName-Before-SysPrep.vhdx"
+$vhdPath = "$vhdFolderPath\$vmName.vhdx"
+
+$script = "
+    Write-Host `"Restoring VHD copy ($vhdCopyPath)...`"
+
+    Move-Item `"$vhdCopyPath`" `"$vhdPath`" -Force
+"
+
+$scriptBlock = [ScriptBlock]::Create($script)
+
+Invoke-Command -ComputerName $vmHost -ScriptBlock $scriptBlock
+```
+
+---

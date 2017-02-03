@@ -33,7 +33,8 @@ New-VM `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
-    -MemoryStartupBytes 2GB
+    -MemoryStartupBytes 2GB `
+    -SwitchName "Tenant vSwitch"
 
 Set-VM `
     -ComputerName $vmHost `
@@ -175,7 +176,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV02B"
-$vmName = "WS2016-Std-Core"
+$vmName = "WS2012-R2-Std-Core"
 
 Stop-VM -ComputerName $vmHost -VMName $vmName
 ```
@@ -234,7 +235,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV02B"
-$vmName = "WS2016-Std-Core"
+$vmName = "WS2012-R2-Std-Core"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdFolderPath = "$vmPath\$vmName\Virtual Hard Disks"
 $vhdUncFolderPath = "\\$vmHost\" + $vhdFolderPath.Replace(":", "`$")
