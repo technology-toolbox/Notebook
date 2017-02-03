@@ -25,7 +25,7 @@ $vmName = "TT-GW01"
 $vmPath = "D:\NotBackedUp\VMs"
 $vhdFolderPath = "$vmPath\$vmName\Virtual Hard Disks"
 $vhdPath = "$vhdFolderPath\$vmName.vhdx"
-$sysPrepedImage = "\\TT-FS01\VM-Library\VHDs\WS2016-Std-Core.vhdx"
+$sysPrepedImage = "\\TT-FS01\VM-Library\VHDs\WS2012-R2-Std-Core.vhdx"
 
 $vhdUncPath = "\\$vmHost\" + $vhdPath.Replace(":", "`$")
 
@@ -36,7 +36,7 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Tenant vSwitch"
+    -SwitchName "Tenant Logical Switch"
 
 Copy-Item $sysPrepedImage $vhdUncPath
 
@@ -45,6 +45,7 @@ Set-VM `
     -Name $vmName `
     -ProcessorCount 2 `
     -DynamicMemory `
+    -MemoryMinimumBytes 2GB `
     -MemoryMaximumBytes 4GB
 
 Start-VM -ComputerName $vmHost -Name $vmName
@@ -71,6 +72,56 @@ $adminUser.Rename('foo')
 
 logoff
 ```
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "TT-GW01"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+
+$ipPool = Get-SCStaticIPAddressPool -Name "Tenant Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---
 
 ### Rename server and join domain
 
@@ -207,7 +258,31 @@ Start-VM -ComputerName $vmHost -Name $vmName
 PowerShell
 ```
 
-```Console
+#### # Rename "front end" network adapter used for gateway
+
+```PowerShell
+$interfaceAlias = "Front end (gateway)"
+```
+
+#### # Rename network connection
+
+```PowerShell
+Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter #2" |
+    Rename-NetAdapter -NewName $interfaceAlias
+```
+
+#### # Configure static IPv4 addresses
+
+```PowerShell
+$ipAddress = "192.168.10.254"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+```
+
+```PowerShell
 cls
 ```
 
@@ -235,10 +310,6 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-```PowerShell
-cls
-```
-
 ## # Deploy multitenant gateway
 
 ### # Install role services and features
@@ -260,10 +331,16 @@ PowerShell
 cls
 ```
 
-### # Install patches using Windows Update
+### # Add VMM administrators domain group to local Administrators group on gateway server
 
 ```PowerShell
-sconfig
+net localgroup Administrators "TECHTOOLBOX\VMM Admins" /ADD
+```
+
+### # Install remote access and enable multitenancy
+
+```PowerShell
+Install-RemoteAccess -MultiTenancy
 ```
 
 ---
@@ -289,25 +366,3 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
-
-### Login using fabric administrator account
-
-```Console
-PowerShell
-```
-
-```Console
-cls
-```
-
-### # Install remote access and enable multitenancy
-
-```PowerShell
-Install-RemoteAccess -MultiTenancy
-```
-
-### # Add VMM administrators domain group to local Administrators group on gateway server
-
-```PowerShell
-net localgroup Administrators "TECHTOOLBOX\VMM Admins" /ADD
-```
