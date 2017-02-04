@@ -17,6 +17,50 @@ Tuesday, January 31, 2017
 cls
 ```
 
+### # Create failover cluster objects in Active Directory
+
+#### # Create cluster object for SOFS failover cluster and delegate permission to create the cluster to any member of the fabric administrators group
+
+```PowerShell
+$failoverClusterName = "TT-SOFS01-FC"
+$delegate = "Fabric Admins"
+$orgUnit = "OU=Storage Servers,OU=Servers,OU=Resources,OU=IT," `
+    + "DC=corp,DC=technologytoolbox,DC=com"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\New-ClusterObject.ps1 `
+    -Name $failoverClusterName  `
+    -Delegate $delegate `
+    -Path $orgUnit
+
+# HACK: Wait a few seconds to avoid issue where the cluster object just created is not found when delegating permission
+
+Start-Sleep -Seconds 5
+```
+
+#### # Create failover cluster name for VMM service and delegate permission to create the cluster name to the failover cluster service (TT-VMM01-FC\$)
+
+```PowerShell
+$failoverClusterName = "TT-SOFS01"
+$delegate = "TT-SOFS01-FC$"
+$description = "Failover cluster name for Scale-Out File Server"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\New-ClusterObject.ps1 `
+    -Name $failoverClusterName  `
+    -Delegate $delegate `
+    -Description $description `
+    -Path $orgUnit
+```
+
+---
+
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
 ### # Create virtual machine
 
 ```PowerShell
@@ -36,7 +80,7 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Tenant vSwitch"
+    -SwitchName "Embedded Team Switch"
 
 Copy-Item $sysPrepedImage $vhdUncPath
 
@@ -45,6 +89,7 @@ Set-VM `
     -Name $vmName `
     -ProcessorCount 4 `
     -DynamicMemory `
+    -MemoryMinimumBytes 2GB `
     -MemoryMaximumBytes 8GB
 
 Start-VM -ComputerName $vmHost -Name $vmName
@@ -143,7 +188,7 @@ Invoke-Command -ComputerName $vmName -ScriptBlock $scriptBlock
 
 ## Configure networking
 
-### Login as fabric adminstrator
+### Login as fabric administrator
 
 ```Console
 PowerShell
@@ -156,7 +201,7 @@ cls
 ### # Configure network settings
 
 ```PowerShell
-$interfaceAlias = "Datacenter 1"
+$interfaceAlias = "Management"
 ```
 
 #### # Rename network connection
@@ -176,36 +221,96 @@ Set-NetAdapterAdvancedProperty `
     -DisplayName "Jumbo Packet" `
     -RegistryValue 9014
 
+Start-Sleep -Seconds 15
+
 ping TT-FS01 -f -l 8900
 ```
 
 ---
 
-**FOOBAR8**
+**TT-VMM01A**
 
 ```PowerShell
 cls
 ```
 
-### # Add a network adapters for iSCSI storage
+#### # Set port classification on management network adapter
 
 ```PowerShell
-$vmHost = "TT-HV03"
 $vmName = "TT-SOFS01A"
 
-Stop-VM -ComputerName $vmHost -Name $vmName
+$vm = Get-SCVirtualMachine $vmName
 
-Add-VMNetworkAdapter `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -SwitchName "Internal vSwitch 1"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vm
 
-Add-VMNetworkAdapter `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -SwitchName "Internal vSwitch 2"
+$portClassification = Get-SCPortClassification -Name "Host management"
 
-Start-VM -ComputerName $vmHost -Name $vmName
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -PortClassification $PortClassification
+```
+
+#### # Add network adapters for iSCSI and SMB (SOFS) traffic
+
+```PowerShell
+Stop-SCVirtualMachine -VM $vm
+```
+
+##### # Add two internal network adapters for iSCSI traffic
+
+```PowerShell
+New-SCVirtualNetworkAdapter -VM $vm -VirtualNetwork "Internal vSwitch 1" -Synthetic
+New-SCVirtualNetworkAdapter -VM $vm -VirtualNetwork "Internal vSwitch 2" -Synthetic
+```
+
+##### # Add network adapter for SMB traffic
+
+```PowerShell
+$vmNetwork = Get-SCVMNetwork -Name "Storage VM Network"
+
+$vmSubnet = $vmNetwork.VMSubnet[0]
+
+$portClassification = Get-SCPortClassification -Name "SMB workload"
+
+$networkAdapter = New-SCVirtualNetworkAdapter `
+    -VirtualNetwork "Embedded Team Switch" `
+    -PortClassification $portClassification `
+    -Synthetic `
+    -VM $vm `
+    -VMNetwork $vmNetwork `
+    -VMSubnet $vmSubnet
+```
+
+##### # Assign static IP address to network adapter for SMB traffic
+
+```PowerShell
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Storage Address Pool"
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vm.Name `
+    -VirtualNetworkAdapter $networkAdapter
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipAddressPool `
+    -Description $vm.Name
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress `
+    -IPv4AddressType Static `
+    -IPv4Address $ipAddress
+```
+
+#### # Restart VM
+
+```PowerShell
+Start-SCVirtualMachine -VM $vm
 ```
 
 ---
@@ -225,20 +330,19 @@ cls
 #### # Rename network connection
 
 ```PowerShell
-Get-NetAdapter -Physical | select InterfaceDescription
+$iScsiAdapters = Get-NetAdapter -Physical |
+    ? { $_.LinkSpeed -eq "10 Gbps" } |
+    sort ifIndex
 
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter #2" |
-    Rename-NetAdapter -NewName "iSCSI 1"
-
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter #3" |
-    Rename-NetAdapter -NewName "iSCSI 2"
+$iScsiAdapters[0] | Rename-NetAdapter -NewName "iSCSI 1"
+$iScsiAdapters[1] | Rename-NetAdapter -NewName "iSCSI 2"
 ```
 
 #### # Configure static IPv4 addresses
 
 ```PowerShell
 $interfaceAlias = "iSCSI 1"
-$ipAddress = "10.1.12.4"
+$ipAddress = "10.1.12.3"
 
 New-NetIPAddress `
     -InterfaceAlias $interfaceAlias `
@@ -246,7 +350,7 @@ New-NetIPAddress `
     -PrefixLength 24
 
 $interfaceAlias = "iSCSI 2"
-$ipAddress = "10.1.12.5"
+$ipAddress = "10.1.13.3"
 
 New-NetIPAddress `
     -InterfaceAlias $interfaceAlias `
@@ -289,11 +393,57 @@ New-NetIPAddress `
         Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
             -DisplayName "Jumbo Packet" -RegistryValue 9014
     }
-
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 ```
 
 ```PowerShell
+cls
+```
+
+### # Configure SMB storage network adapter
+
+```PowerShell
+$interfaceAlias = "Storage"
+```
+
+#### # Rename network connection
+
+```PowerShell
+$networkAdapter = Get-NetAdapter -Physical |
+    ? { $_.LinkSpeed -eq "2 Gbps" -and $_.Name -ne "Management" }
+
+$networkAdapter | Rename-NetAdapter -NewName $interfaceAlias
+```
+
+#### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty `
+    -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
+
+ping TT-FS01 -f -l 8900
+```
+
+```PowerShell
+cls
+```
+
+### # Install Multipath I/O
+
+```PowerShell
+Install-WindowsFeature -Name Multipath-IO -IncludeManagementTools -Restart
+```
+
+### Login as fabric administrator account
+
+```Console
+PowerShell
+```
+
+```Console
 cls
 ```
 
@@ -313,209 +463,9 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-### Login as fabric administrator account
+### # Configure iSCSI client
 
-```Console
-PowerShell
-```
-
-```Console
-cls
-```
-
-### # Configure networking
-
-#### # Configure network settings
-
-```PowerShell
-$interfaceAlias = "Datacenter 1"
-```
-
-#### # Rename network connection
-
-```PowerShell
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName $interfaceAlias
-```
-
-#### # Enable jumbo frames
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
-
-ping TT-FS01 -f -l 8900
-```
-
-## Configure failover clustering network
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-### # Add a second network adapter for cluster network
-
-```PowerShell
-$vmHost = "FORGE"
-$vmName = "TT-SOFS01A"
-
-Stop-VM -ComputerName $vmHost -Name $vmName
-
-Add-VMNetworkAdapter -ComputerName $vmHost -VMName $vmName -SwitchName "Production"
-
-Start-VM -ComputerName $vmHost -Name $vmName
-```
-
----
-
-### Login as fabric adminstrator
-
-```Console
-PowerShell
-```
-
-```Console
-cls
-```
-
-### # Configure cluster network settings
-
-#### # Configure cluster network adapter
-
-```PowerShell
-$interfaceAlias = "Cluster"
-```
-
-##### # Configure cluster network adapter
-
-```PowerShell
-Get-NetAdapter `
-    -InterfaceDescription "Microsoft Hyper-V Network Adapter #2" |
-    Rename-NetAdapter -NewName $interfaceAlias
-```
-
-##### # Disable DHCP and router discovery
-
-```PowerShell
-Set-NetIPInterface -InterfaceAlias $interfaceAlias -Dhcp Disabled -RouterDiscovery Disabled
-```
-
-##### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "172.16.3.1"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24
-```
-
-#### # Configure static IPv6 address
-
-**# Note:** Private IPv6 address range (fd66:d7e2:39d6:a4d9::/64) generated by [http://simpledns.com/private-ipv6.aspx](http://simpledns.com/private-ipv6.aspx)
-
-```PowerShell
-$ipAddress = "fd66:d7e2:39d6:a4db::1"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 64
-```
-
-## Configure storage
-
-### Login using fabric administrator account
-
-```Console
-PowerShell
-```
-
-### # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-### Configure shared storage for SOFS cluster
-
-#### Configure iSCSI server
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-##### # Create iSCSI target
-
-```PowerShell
-$initiatorIds = @(
-    "IQN:iqn.1991-05.com.microsoft:tt-sofs01a.corp.technologytoolbox.com",
-    "IQN:iqn.1991-05.com.microsoft:tt-sofs01b.corp.technologytoolbox.com")
-
-New-IscsiServerTarget `
-    -ComputerName ICEMAN `
-    -TargetName TT-SOFS01 `
-    -InitiatorIds $initiatorIds
-```
-
-##### # Create iSCSI disks
-
-```PowerShell
-New-IscsiVirtualDisk `
-    -ComputerName ICEMAN `
-    -Path E:\iSCSIVirtualDisks\TT-SOFS01_Quorum.vhdx `
-    -SizeBytes 512MB
-
-New-IscsiVirtualDisk `
-    -ComputerName ICEMAN `
-    -Path E:\iSCSIVirtualDisks\TT-SOFS01_Data01.vhdx `
-    -SizeBytes 150GB
-```
-
-##### # Map iSCSI disks to target
-
-```PowerShell
-Add-IscsiVirtualDiskTargetMapping `
-    -ComputerName ICEMAN `
-    -TargetName TT-SOFS01 `
-    -Path E:\iSCSIVirtualDisks\TT-SOFS01_Quorum.vhdx
-
-Add-IscsiVirtualDiskTargetMapping `
-    -ComputerName ICEMAN `
-    -TargetName TT-SOFS01 `
-    -Path E:\iSCSIVirtualDisks\TT-SOFS01_Data01.vhdx
-```
-
----
-
-```PowerShell
-cls
-```
-
-#### # Configure iSCSI client
-
-##### # Start iSCSI service
+#### # Start iSCSI service
 
 ```PowerShell
 Set-Service msiscsi -StartupType Automatic
@@ -523,21 +473,33 @@ Set-Service msiscsi -StartupType Automatic
 Start-Service msiscsi
 ```
 
-##### # Connect to iSCSI Portal
+#### # Connect to iSCSI Portal
 
 ```PowerShell
-New-IscsiTargetPortal -TargetPortalAddress iscsi-01
+New-IscsiTargetPortal -TargetPortalAddress iscsi01
+
+Start-Sleep 30
 
 Connect-IscsiTarget `
-    -NodeAddress "iqn.1991-05.com.microsoft:iceman-tt-sofs01-target" `
+    -NodeAddress "iqn.1991-05.com.microsoft:tt-hv03-tt-sofs01-target" `
     -IsPersistent $true
 ```
 
-##### # Online and initialize disks
+```PowerShell
+cls
+```
+
+#### # Online and initialize disks
 
 ```PowerShell
-Get-Disk |
-    ? {$_.FriendlyName -eq "MSFT Virtual HD"} |
+$iscsiDisks = Get-Disk | ? {$_.BusType -eq "iSCSI"}
+
+$quorumDiskNumber = $iscsiDisks |
+    sort Size |
+    select -First 1 |
+    select -ExpandProperty Number
+
+$iscsiDisks |
     % {
         $disk = $_
 
@@ -546,7 +508,24 @@ Get-Disk |
         }
 
         If ($disk.PartitionStyle -eq 'RAW') {
-            Initialize-Disk -Number $disk.Number -PartitionStyle MBR
+            If ($disk.Number -eq $quorumDiskNumber) {
+                # Note: ReFS cannot be used on small disks (e.g. 512 MB)
+
+                Initialize-Disk -Number $disk.Number -PartitionStyle GPT -PassThru |
+                    New-Partition -UseMaximumSize |
+                    Format-Volume `
+                        -FileSystem NTFS `
+                        -NewFileSystemLabel "Quorum" `
+                        -Confirm:$false
+            }
+            Else {
+                Initialize-Disk -Number $disk.Number -PartitionStyle GPT -PassThru |
+                    New-Partition -UseMaximumSize |
+                    Format-Volume `
+                        -FileSystem ReFS `
+                        -NewFileSystemLabel "CSV01" `
+                        -Confirm:$false
+            }
         }
     }
 ```
@@ -583,8 +562,8 @@ Test-Cluster -Node TT-SOFS01A, TT-SOFS01B
 ### # Review cluster validation report
 
 ```PowerShell
-$source = "$env:TEMP\Validation Report 2017.01.14 At 18.03.21.htm"
-$destination = "\\ICEMAN.corp.technologytoolbox.com\Public"
+$source = "$env:TEMP\Validation Report 2017.01.31 At 09.43.52.htm"
+$destination = "\\TT-FS01\Public"
 
 Copy-Item $source $destination
 ```
@@ -594,7 +573,7 @@ Copy-Item $source $destination
 **WOLVERINE**
 
 ```PowerShell
-& "\\ICEMAN\Public\Validation Report 2017.01.14 At 18.03.21.htm"
+& "\\TT-FS01\Public\Validation Report 2017.01.31 At 09.43.52.htm"
 ```
 
 ---
@@ -608,25 +587,155 @@ cls
 ```PowerShell
 New-Cluster -Name TT-SOFS01-FC -Node TT-SOFS01A, TT-SOFS01B
 
-WARNING: There were issues while creating the clustered role that may prevent it from starting. For more information view the report file below.
-WARNING: Report file location: C:\windows\cluster\Reports\Create Cluster Wizard TT-VMM01-FC on 2017.01.12 At 05.31.12.htm
-
 Name
 ----
-TT-VMM01-FC
+TT-SOFS01-FC
+```
 
+### Issue: Wrong disk used for disk witness
 
-& "C:\windows\cluster\Reports\Create Cluster Wizard TT-VMM01-FC on 2017.01.12 At 05.31.12.htm"
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/2520B11DF5BA4DD1BAAB25B167DECB83C94933F8.png)
+
+```PowerShell
+cls
+```
+
+#### # Move cluster quorum to correct disk
+
+##### # Set quorum configuration and disk witness
+
+```PowerShell
+Set-ClusterQuorum -NodeAndDiskMajority "Cluster Disk 2"
+```
+
+##### # Rename cluster disk for quorum
+
+```PowerShell
+Remove-ClusterResource "Cluster Disk 1"
 ```
 
 > **Note**
 >
-> The cluster creation report contains the following warnings:
->
-> - **An appropriate disk was not found for configuring a disk witness. The cluster is not configured with a witness. As a best practice, configure a witness to help achieve the highest availability of the cluster. If this cluster does not have shared storage, configure a File Share Witness or a Cloud Witness.**
+> Open Failover Cluster Manager and rename **Cluster Disk 2** to **Cluster Disk 1**.
 
-## Benchmark storage performance
+```PowerShell
+cls
+```
 
-### Benchmark C: (Mirror SSD/HDD storage space)
+##### # Re-add cluster disk for CSV
 
-### Benchmark D: (Mirror SSD storage space - 2x Samsung 840 512GB)
+```PowerShell
+Get-ClusterAvailableDisk | Add-ClusterDisk
+```
+
+### # Configure cluster shared volumes
+
+```PowerShell
+Add-ClusterSharedVolume -Name "Cluster Disk 2"
+```
+
+```PowerShell
+cls
+```
+
+### Configure Scale-Out File Server
+
+```PowerShell
+Add-ClusterScaleOutFileServerRole -Name TT-SOFS01
+```
+
+### # Create a continuously available file share on the cluster shared volume
+
+#### # Create folder
+
+```PowerShell
+$folderName = "VM-Storage-Silver"
+$path = "C:\ClusterStorage\Volume1\Shares\$folderName"
+
+New-Item -Path $path -ItemType Directory
+```
+
+#### # Remove "BUILTIN\\Users" and "Everyone" permissions
+
+```PowerShell
+icacls $path /inheritance:d
+icacls $path /remove:g "BUILTIN\Users"
+icacls $path /remove:g "Everyone"
+```
+
+#### # Share folder
+
+```PowerShell
+New-SmbShare -Name $folderName -Path $path -FullAccess Everyone
+```
+
+#### # Grant permissions for fabric administrators
+
+```PowerShell
+icacls $path /grant '"Fabric Admins":(OI)(CI)(RX)'
+```
+
+#### # Grant permissions for VMM management account
+
+```PowerShell
+icacls $path /grant '"s-vmm01-mgmt":(OI)(CI)(F)'
+```
+
+#### # Grant permissions for Hyper-V servers
+
+```PowerShell
+icacls $path /grant 'Hyper-V Servers:(OI)(CI)(F)'
+
+icacls $path /grant 'TT-HV02A$:(OI)(CI)(F)'
+icacls $path /grant 'TT-HV02B$:(OI)(CI)(F)'
+icacls $path /grant 'TT-HV02C$:(OI)(CI)(F)'
+```
+
+```PowerShell
+cls
+```
+
+### # Create virtual machines
+
+Function GetRandomMachineName([String] \$prefix)
+{
+    \$name = [System.IO.Path]::GetRandomFileName()\
+\$name = \$name.ToUpper()\
+\$name = [System.IO.Path]::GetFileNameWithoutExtension(\$name)\
+If ([String]::IsNullOrWhiteSpace(\$name) -eq \$false)
+    {
+        \$name = \$prefix + \$name
+    }\
+return \$name
+}
+
+1..10 |\
+% {
+
+```PowerShell
+$vmName = GetRandomMachineName "VM-"
+$vmPath = "\\TT-SOFS01\VM-Storage-Silver"
+$vhdFolderPath = "$vmPath\$vmName\Virtual Hard Disks"
+$vhdPath = "$vhdFolderPath\$vmName.vhdx"
+
+$sysPrepedImage = "\\TT-FS01\VM-Library\VHDs\WS2016-Std.vhdx"
+
+New-VM `
+    -Name $vmName `
+    -Path $vmPath `
+    -NewVHDPath $vhdPath `
+    -NewVHDSizeBytes 32GB `
+    -MemoryStartupBytes 2GB `
+    -SwitchName "Tenant vSwitch"
+
+Copy-Item $sysPrepedImage $vhdPath
+
+Set-VM `
+    -Name $vmName `
+    -ProcessorCount 2 `
+    -DynamicMemory `
+    -MemoryMaximumBytes 4GB
+
+Start-VM -Name $vmName
+}
+```
