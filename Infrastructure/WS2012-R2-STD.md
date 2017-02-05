@@ -20,7 +20,7 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02B"
+$vmHost = "TT-HV02C"
 $vmName = "WS2012-R2-Std"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
@@ -34,7 +34,7 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Tenant vSwitch"
+    -SwitchName "Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
@@ -69,7 +69,7 @@ cls
 ### # Remove disk from virtual CD/DVD drive
 
 ```PowerShell
-$vmHost = "TT-HV02B"
+$vmHost = "TT-HV02C"
 $vmName = "WS2012-R2-Std"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
@@ -177,7 +177,7 @@ cls
 ### # Shutdown VM
 
 ```PowerShell
-$vmHost = "TT-HV02B"
+$vmHost = "TT-HV02C"
 $vmName = "WS2012-R2-Std"
 
 Stop-VM -ComputerName $vmHost -VMName $vmName
@@ -236,7 +236,7 @@ cls
 ### # Copy VHD to VM Library
 
 ```PowerShell
-$vmHost = "TT-HV02B"
+$vmHost = "TT-HV02C"
 $vmName = "WS2012-R2-Std"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdFolderPath = "$vmPath\$vmName\Virtual Hard Disks"
