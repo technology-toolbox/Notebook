@@ -36,7 +36,7 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Embedded Team Switch"
+    -SwitchName "Team Switch"
 
 Copy-Item $sysPrepedImage $vhdUncPath
 
@@ -184,102 +184,89 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR8**
+**TT-VMM01A**
 
 ```PowerShell
 cls
 ```
 
-#### # Add network adapters for iSCSI storage
+#### # Set port classification on management network adapter
 
 ```PowerShell
-$vmHost = "TT-HV03"
 $vmName = "TT-SOFS01B"
 
-Stop-SCVirtualMachine -VM $vmName
+$vm = Get-SCVirtualMachine $vmName
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vm
+
+$portClassification = Get-SCPortClassification -Name "Host management"
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -PortClassification $PortClassification
 ```
 
-PS C:\\>\$VM = Get-SCVirtualMachine -Name "VM05"\
-PS C:\\> \$LogicalNet = Get-SCLogicalNetwork -Name "LogicalNetwork01"\
-PS C:\\> \$VirtualNet = Get-SCVirtualNetwork -Name "ExternalVirtualNetwork01"
-
-New-SCVirtualNetworkAdapter `\
--VM \$VM `\
--LogicalNetwork \$LogicalNet `\
--VirtualNetwork \$VirtualNet `\
--MACAddress "00-16-D3-CC-00-1A" `\
--MACAddressType "Static" `\
--VLANEnabled \$True `\
--VLANId 3
+#### # Add network adapters for iSCSI and SMB (SOFS) traffic
 
 ```PowerShell
-New-SCVirtualNetworkAdapter -VirtualNetwork "Internal vSwitch 1" -Synthetic
-
-New-SCVirtualNetworkAdapter -VMMServer tt-vmm01 -JobGroup c636f0a6-3fcd-4ff3-9883-86b0714fd442 -VirtualNetwork "Internal vSwitch 2" -Synthetic
-
-$VMSubnet = Get-SCVMSubnet -VMMServer tt-vmm01 -Name "Storage VM Network_0" | where {$_.VMNetwork.ID -eq "f3ed0cfe-df0b-4653-9879-c7a0c0d1a459"}
-
-$VMNetwork = Get-SCVMNetwork -VMMServer tt-vmm01 -Name "Storage VM Network" -ID "f3ed0cfe-df0b-4653-9879-c7a0c0d1a459"
-
-$PortClassification = Get-SCPortClassification -VMMServer tt-vmm01 | where {$_.Name -eq "SMB workload"}
-
-New-SCVirtualNetworkAdapter -VMMServer tt-vmm01 -JobGroup c636f0a6-3fcd-4ff3-9883-86b0714fd442 -MACAddressType Dynamic -VirtualNetwork "Embedded Team Switch" -Synthetic -IPv4AddressType Dynamic -IPv6AddressType Dynamic -VMSubnet $VMSubnet -VMNetwork $VMNetwork -PortClassification $PortClassification
-
-
-
-$VirtualNetworkAdapter = Get-SCVirtualNetworkAdapter -VMMServer tt-vmm01 -Name "TT-SOFS01B" -ID "504d4cb9-5254-405c-ae31-ed888063726b"
-$VMNetwork = Get-SCVMNetwork -VMMServer tt-vmm01 -Name "Management VM Network" -ID "11ceb7c3-7522-47e5-84c0-7f5fe50519fb"
-$PortClassification = Get-SCPortClassification -VMMServer tt-vmm01 | where {$_.Name -eq "Host management"}
-
-Set-SCVirtualNetworkAdapter -VirtualNetworkAdapter $VirtualNetworkAdapter -VMNetwork $VMNetwork -VLanEnabled $false -VirtualNetwork "Embedded Team Switch" -MACAddressType Dynamic -IPv4AddressType Dynamic -IPv6AddressType Dynamic -PortClassification $PortClassification -JobGroup c636f0a6-3fcd-4ff3-9883-86b0714fd442
-
-
-
-
-
-
-
-
-
-
-
-
-Add-VMNetworkAdapter `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -SwitchName "Internal vSwitch 1"
-
-Add-VMNetworkAdapter `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -SwitchName "Internal vSwitch 2"
-
-Start-VM -ComputerName $vmHost -Name $vmName
+Stop-SCVirtualMachine -VM $vm
 ```
 
+##### # Add two internal network adapters for iSCSI traffic
+
 ```PowerShell
-cls
+New-SCVirtualNetworkAdapter -VM $vm -VirtualNetwork "Internal vSwitch 1" -Synthetic
+New-SCVirtualNetworkAdapter -VM $vm -VirtualNetwork "Internal vSwitch 2" -Synthetic
 ```
 
-#### # Add network adapters for SMB traffic (SOFS storage)
+##### # Add network adapter for SMB traffic
 
 ```PowerShell
-$vmHost = "TT-HV03"
-$vmName = "TT-SOFS01B"
+$vmNetwork = Get-SCVMNetwork -Name "Storage VM Network"
 
-Stop-VM -ComputerName $vmHost -Name $vmName
+$vmSubnet = $vmNetwork.VMSubnet[0]
 
-Add-VMNetworkAdapter `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -SwitchName "Internal vSwitch 1"
+$portClassification = Get-SCPortClassification -Name "SMB workload"
 
-Add-VMNetworkAdapter `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -SwitchName "Internal vSwitch 2"
+$networkAdapter = New-SCVirtualNetworkAdapter `
+    -VirtualNetwork "Embedded Team Switch" `
+    -PortClassification $portClassification `
+    -Synthetic `
+    -VM $vm `
+    -VMNetwork $vmNetwork `
+    -VMSubnet $vmSubnet
+```
 
-Start-VM -ComputerName $vmHost -Name $vmName
+##### # Assign static IP address to network adapter for SMB traffic
+
+```PowerShell
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Storage Address Pool"
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vm.Name `
+    -VirtualNetworkAdapter $networkAdapter
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipAddressPool `
+    -Description $vm.Name
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress `
+    -IPv4AddressType Static `
+    -IPv4Address $ipAddress
+```
+
+#### # Restart VM
+
+```PowerShell
+Start-SCVirtualMachine -VM $vm
 ```
 
 ---
@@ -299,13 +286,12 @@ cls
 #### # Rename network connection
 
 ```PowerShell
-Get-NetAdapter -Physical | select InterfaceDescription
+$iScsiAdapters = Get-NetAdapter -Physical |
+    ? { $_.LinkSpeed -eq "10 Gbps" } |
+    sort ifIndex
 
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter #2" |
-    Rename-NetAdapter -NewName "iSCSI 1"
-
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter #3" |
-    Rename-NetAdapter -NewName "iSCSI 2"
+$iScsiAdapters[0] | Rename-NetAdapter -NewName "iSCSI 1"
+$iScsiAdapters[1] | Rename-NetAdapter -NewName "iSCSI 2"
 ```
 
 #### # Configure static IPv4 addresses
@@ -363,8 +349,38 @@ New-NetIPAddress `
         Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
             -DisplayName "Jumbo Packet" -RegistryValue 9014
     }
+```
 
+```PowerShell
+cls
+```
+
+### # Configure SMB storage network adapter
+
+```PowerShell
+$interfaceAlias = "Storage"
+```
+
+#### # Rename network connection
+
+```PowerShell
+$networkAdapter = Get-NetAdapter -Physical |
+    ? { $_.LinkSpeed -eq "2 Gbps" -and $_.Name -ne "Management" }
+
+$networkAdapter | Rename-NetAdapter -NewName $interfaceAlias
+```
+
+#### # Enable jumbo frames
+
+```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty `
+    -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
+
+ping TT-FS01 -f -l 8900
 ```
 
 ```PowerShell

@@ -80,7 +80,7 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Embedded Team Switch"
+    -SwitchName "Team Switch"
 
 Copy-Item $sysPrepedImage $vhdUncPath
 

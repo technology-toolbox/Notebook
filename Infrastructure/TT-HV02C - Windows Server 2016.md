@@ -1053,6 +1053,16 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-KCD.ps1 `
     -Add
 ```
 
+#### # Configure constrained delegation for VMs stored on Scale-Out File Server
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-KCD.ps1 `
+    -TrustedComputer TT-HV02C `
+    -TrustingComputer TT-SOFS01 `
+    -ServiceType cifs `
+    -Add
+```
+
 ---
 
 ```PowerShell
@@ -1091,16 +1101,6 @@ Remove-NetLbfoTeam -Name "Tenant Team"
 cls
 ```
 
-### # Examine network adapter properties to confirm identical configuration settings for Switch Embedded Team (SET)
-
-```PowerShell
-Get-NetAdapterAdvancedProperty | sort DisplayName, Name
-```
-
-```PowerShell
-cls
-```
-
 ### # Rename network connections
 
 ```PowerShell
@@ -1133,10 +1133,65 @@ sconfig
 cls
 ```
 
+### # Configure networking
+
+#### # Disable DHCPv6 on storage and live migration networks
+
+```PowerShell
+$interfaceAliases = @(
+    "vEthernet (Cluster)",
+    "vEthernet (Live Migration)"
+    "vEthernet (Storage 1)",
+    "vEthernet (Storage 2)")
+
+$interfaceAliases |
+    % {
+        Set-NetIPInterface `
+            -InterfaceAlias $_ `
+            -Dhcp Disabled `
+            -RouterDiscovery Disabled
+    }
+```
+
+> **Important**
+>
+> If IPv6 addresses are assigned, failover clustering combines the different network adapters into a single cluster network.
+
+```PowerShell
+cls
+```
+
+#### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+$interfaceAliases = @(
+    "vEthernet (Embedded Team Switch)",
+    "vEthernet (Storage 1)",
+    "vEthernet (Storage 2)",
+    "vEthernet (Live Migration)")
+
+$interfaceAliases |
+    % {
+        Set-NetAdapterAdvancedProperty `
+            -Name $_ `
+            -DisplayName "Jumbo Packet" `
+            -RegistryValue 9014
+    }
+
+ping 10.1.10.1 -f -l 8900
+ping 10.1.11.1 -f -l 8900
+```
+
+```PowerShell
+cls
+```
+
 ### # Verify SMB Multichannel is working as expected
 
 ```PowerShell
-$source = "\\TT-HV02B\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
+$source = "\\TT-HV02A\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
 $destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
 
 robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
@@ -1161,7 +1216,7 @@ Get-SCVirtualMachine -VMHost TT-HV02C |
         Get-SCVirtualNetworkAdapter -VM $_ |
             Set-SCVirtualNetworkAdapter `
                 -VMNetwork $vmNetwork `
-                -VirtualNetwork "Team Switch" `
+                -VirtualNetwork "Embedded Team Switch" `
                 -PortClassification $portClassification
     }
 ```

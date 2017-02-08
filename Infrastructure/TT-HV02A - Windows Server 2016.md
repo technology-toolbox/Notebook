@@ -1354,6 +1354,16 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-KCD.ps1 `
     -Add
 ```
 
+#### # Configure constrained delegation for VMs stored on Scale-Out File Server
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-KCD.ps1 `
+    -TrustedComputer TT-HV02A `
+    -TrustingComputer TT-SOFS01 `
+    -ServiceType cifs `
+    -Add
+```
+
 ---
 
 ## Remove shared storage
@@ -1561,12 +1571,6 @@ Get-VMSwitch | Remove-VMSwitch
 Remove-NetLbfoTeam -Name "Tenant Team"
 ```
 
-### # Examine network adapter properties to confirm identical configuration settings for Switch Embedded Team (SET)
-
-```PowerShell
-Get-NetAdapterAdvancedProperty | sort DisplayName, Name
-```
-
 ```PowerShell
 cls
 ```
@@ -1591,33 +1595,97 @@ Get-NetAdapter `
     Rename-NetAdapter -NewName "Team 1D"
 ```
 
+### Configure DHCP addresses on all network adapters
+
+```Console
+sconfig
+```
+
+### Add logical switch in VMM
+
 ```PowerShell
 cls
 ```
 
-### # Configure DHCP addresses on all network adapters
+### # Configure networking
+
+#### # Disable DHCPv6 on storage and live migration networks
 
 ```PowerShell
-Get-NetIPAddress |
-    ? { $_.PrefixOrigin -eq 'Manual' } |
-    % {
-        Set-DnsClientServerAddress `
-        -InterfaceAlias $_.InterfaceAlias `
-        -ResetServerAddresses
+$interfaceAliases = @(
+    "vEthernet (Cluster)",
+    "vEthernet (Live Migration)"
+    "vEthernet (Storage 1)",
+    "vEthernet (Storage 2)")
 
-        Remove-NetIPAddress $_
-    }
-
-Get-NetAdapter |
+$interfaceAliases |
     % {
         Set-NetIPInterface `
-            -InterfaceAlias $_.Name `
-            -Dhcp Enabled `
-            -RouterDiscovery Enabled
+            -InterfaceAlias $_ `
+            -Dhcp Disabled `
+            -RouterDiscovery Disabled
     }
 ```
 
-### Add logical switch in VMM
+> **Important**
+>
+> If IPv6 addresses are assigned, failover clustering combines the different network adapters into a single cluster network.
+
+```PowerShell
+cls
+```
+
+#### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+$interfaceAliases = @(
+    "vEthernet (Embedded Team Switch)",
+    "vEthernet (Storage 1)",
+    "vEthernet (Storage 2)",
+    "vEthernet (Live Migration)")
+
+$interfaceAliases |
+    % {
+        Set-NetAdapterAdvancedProperty `
+            -Name $_ `
+            -DisplayName "Jumbo Packet" `
+            -RegistryValue 9014
+    }
+
+ping 10.1.10.1 -f -l 8900
+ping 10.1.11.1 -f -l 8900
+```
+
+```PowerShell
+cls
+```
+
+#### # Do not allow cluster network communication on the "storage" network (10.1.10.0/24)
+
+```PowerShell
+Get-ClusterNetwork | Get-ClusterNetworkInterface
+
+(Get-ClusterNetwork -Name "Cluster Network 4").Role = 0
+```
+
+##### Reference
+
+**Network Recommendations for a Hyper-V Cluster in Windows Server 2012**\
+From <[https://technet.microsoft.com/en-us/library/dn550728(v=ws.11).aspx](https://technet.microsoft.com/en-us/library/dn550728(v=ws.11).aspx)>
+
+```PowerShell
+cls
+```
+
+### # Change network binding order for cluster network
+
+```PowerShell
+Get-NetIPInterface | sort AddressFamily, InterfaceMetric
+
+Set-NetIPInterface -InterfaceAlias "vEthernet (Cluster)" -InterfaceMetric 15
+```
 
 ```PowerShell
 cls
