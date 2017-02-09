@@ -68,8 +68,6 @@ $adminUser.Rename('foo')
 logoff
 ```
 
-### Rename server and join domain
-
 #### Login as local administrator account
 
 ```PowerShell
@@ -79,7 +77,7 @@ cls
 ### # Rename server
 
 ```PowerShell
-Rename-Computer -NewName TT-MGMT02 -Restart
+Rename-Computer -NewName WS2016-TEST2 -Restart
 ```
 
 > **Note**
@@ -92,56 +90,21 @@ Rename-Computer -NewName TT-MGMT02 -Restart
 cls
 ```
 
-### # Join server to domain
-
-```PowerShell
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
-```
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-### # Move computer to different OU
-
-```PowerShell
-$vmName = "TT-MGMT02"
-
-$targetPath = ("OU=Servers,OU=Resources,OU=IT" `
-    + ",DC=corp,DC=technologytoolbox,DC=com")
-
-Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
-```
-
----
-
-```PowerShell
-cls
-```
-
-### # Set time zone
-
-```PowerShell
-tzutil /s "Mountain Standard Time"
-```
-
 ### # Copy Toolbox content
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
 
 ```PowerShell
 $source = "\\TT-FS01\Public\Toolbox"
 $destination = "C:\NotBackedUp\Public\Toolbox"
 
-robocopy $source $destination  /E /XD "Microsoft SDKs"
-```
-
-### # Set MaxPatchCacheSize to 0 (recommended)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+robocopy $source $destination /E /MIR /XD "Microsoft SDKs"
 ```
 
 ```PowerShell
@@ -150,13 +113,17 @@ cls
 
 ### # Configure networking
 
+```PowerShell
+$interfaceAlias = "Management"
+```
+
 #### # Rename network connections
 
 ```PowerShell
 Get-NetAdapter -Physical | select InterfaceDescription
 
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "Datacenter 1"
+    Rename-NetAdapter -NewName $interfaceAlias
 ```
 
 #### # Enable jumbo frames
@@ -164,40 +131,10 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name "Datacenter 1" `
+Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-ping ICEMAN -f -l 8900
-```
-
-```PowerShell
-cls
-```
-
-#### # Configure static IP addresses on "Datacenter 1" network
-
-```PowerShell
-$interfaceAlias = "Datacenter 1"
-```
-
-##### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "192.168.10.102"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-```
-
-##### # Configure IPv4 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.103,192.168.10.104
+ping TT-FS01 -f -l 8900
 ```
 
 ```PowerShell
