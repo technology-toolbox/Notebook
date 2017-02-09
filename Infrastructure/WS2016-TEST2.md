@@ -1,4 +1,4 @@
-﻿# WS2016-TEST1
+﻿# WS2016-TEST2
 
 Thursday, February 9, 2017
 8:46 AM
@@ -21,7 +21,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV02B"
-$vmName = "WS2016-TEST1"
+$vmName = "WS2016-TEST2"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 $sysPrepedImage = "\\TT-FS01\VM-Library\VHDs\WS2016-Std.vhdx"
@@ -68,6 +68,8 @@ $adminUser.Rename('foo')
 logoff
 ```
 
+### Rename server and join domain
+
 #### Login as local administrator account
 
 ```PowerShell
@@ -77,7 +79,7 @@ cls
 ### # Rename server
 
 ```PowerShell
-Rename-Computer -NewName WS2016-TEST1 -Restart
+Rename-Computer -NewName TT-MGMT02 -Restart
 ```
 
 > **Note**
@@ -90,21 +92,56 @@ Rename-Computer -NewName WS2016-TEST1 -Restart
 cls
 ```
 
-### # Copy Toolbox content
+### # Join server to domain
 
 ```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+Add-Computer -DomainName corp.technologytoolbox.com -Restart
 ```
 
-> **Note**
->
-> When prompted, type the password to connect to the file share.
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Move computer to different OU
+
+```PowerShell
+$vmName = "TT-MGMT02"
+
+$targetPath = ("OU=Servers,OU=Resources,OU=IT" `
+    + ",DC=corp,DC=technologytoolbox,DC=com")
+
+Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Set time zone
+
+```PowerShell
+tzutil /s "Mountain Standard Time"
+```
+
+### # Copy Toolbox content
 
 ```PowerShell
 $source = "\\TT-FS01\Public\Toolbox"
 $destination = "C:\NotBackedUp\Public\Toolbox"
 
-robocopy $source $destination /E /MIR /XD "Microsoft SDKs"
+robocopy $source $destination  /E /XD "Microsoft SDKs"
+```
+
+### # Set MaxPatchCacheSize to 0 (recommended)
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
 ```PowerShell
@@ -113,17 +150,13 @@ cls
 
 ### # Configure networking
 
-```PowerShell
-$interfaceAlias = "Management"
-```
-
 #### # Rename network connections
 
 ```PowerShell
 Get-NetAdapter -Physical | select InterfaceDescription
 
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName $interfaceAlias
+    Rename-NetAdapter -NewName "Datacenter 1"
 ```
 
 #### # Enable jumbo frames
@@ -131,10 +164,40 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
+Set-NetAdapterAdvancedProperty -Name "Datacenter 1" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-ping TT-FS01 -f -l 8900
+ping ICEMAN -f -l 8900
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure static IP addresses on "Datacenter 1" network
+
+```PowerShell
+$interfaceAlias = "Datacenter 1"
+```
+
+##### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "192.168.10.102"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24 `
+    -DefaultGateway 192.168.10.1
+```
+
+##### # Configure IPv4 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.103,192.168.10.104
 ```
 
 ```PowerShell
@@ -155,39 +218,4 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
-```
-
-```PowerShell
-cls
-```
-
-## # Deploy file server
-
-### # Add roles for File and Storage Services
-
-```PowerShell
-Install-WindowsFeature `
-    -Name FS-FileServer, FS-Resource-Manager `
-    -IncludeManagementTools
-```
-
-### # Configure file shares
-
-#### # Create folder
-
-```PowerShell
-$folderName = "Temp"
-$path = "C:\NotBackedUp\$folderName"
-
-New-Item -Path $path -ItemType Directory
-```
-
-#### # Share folder
-
-```PowerShell
-New-SmbShare `
-    -Name $folderName `
-    -Path $path `
-    -CachingMode None `
-    -FullAccess Everyone
 ```
