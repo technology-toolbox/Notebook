@@ -1,4 +1,4 @@
-﻿# WS2016-TEST2
+﻿# TT-WS2016-TEST1
 
 Thursday, February 9, 2017
 8:46 AM
@@ -21,7 +21,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV02B"
-$vmName = "WS2016-TEST2"
+$vmName = "TT-WS2016-TEST1"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 $sysPrepedImage = "\\TT-FS01\VM-Library\VHDs\WS2016-Std.vhdx"
@@ -68,6 +68,8 @@ $adminUser.Rename('foo')
 logoff
 ```
 
+### Rename server and join domain
+
 #### Login as local administrator account
 
 ```PowerShell
@@ -77,7 +79,7 @@ cls
 ### # Rename server
 
 ```PowerShell
-Rename-Computer -NewName WS2016-TEST2 -Restart
+Rename-Computer -NewName TT-WS2016-TEST1 -Restart
 ```
 
 > **Note**
@@ -90,21 +92,56 @@ Rename-Computer -NewName WS2016-TEST2 -Restart
 cls
 ```
 
-### # Copy Toolbox content
+### # Join server to domain
 
 ```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+Add-Computer -DomainName corp.technologytoolbox.com -Restart
 ```
 
-> **Note**
->
-> When prompted, type the password to connect to the file share.
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Move computer to different OU
+
+```PowerShell
+$vmName = "TT-WS2016-TEST1"
+
+$targetPath = ("OU=Servers,OU=Resources,OU=IT" `
+    + ",DC=corp,DC=technologytoolbox,DC=com")
+
+Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Set time zone
+
+```PowerShell
+tzutil /s "Mountain Standard Time"
+```
+
+### # Copy Toolbox content
 
 ```PowerShell
 $source = "\\TT-FS01\Public\Toolbox"
 $destination = "C:\NotBackedUp\Public\Toolbox"
 
-robocopy $source $destination /E /MIR /XD "Microsoft SDKs"
+robocopy $source $destination  /E /XD "Microsoft SDKs"
+```
+
+### # Set MaxPatchCacheSize to 0 (recommended)
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
 ```PowerShell
