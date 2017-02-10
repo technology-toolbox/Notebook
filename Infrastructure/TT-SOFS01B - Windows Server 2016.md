@@ -419,7 +419,11 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-### # Configure iSCSI client
+### Configure iSCSI client
+
+```PowerShell
+cls
+```
 
 #### # Start iSCSI service
 
@@ -429,15 +433,67 @@ Set-Service msiscsi -StartupType Automatic
 Start-Service msiscsi
 ```
 
-#### # Connect to iSCSI Portal
+#### # Configure MPIO settings
+
+##### # Enable automatic claiming of all iSCSI volumes
 
 ```PowerShell
-New-IscsiTargetPortal -TargetPortalAddress iscsi01
+Enable-MSDSMAutomaticClaim -BusType iSCSI
+```
+
+##### # Set default load balancing policy
+
+```PowerShell
+Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy RR
+```
+
+##### # Configure disk timeout
+
+```PowerShell
+Set-MPIOSetting -NewDiskTimeout 60
+
+Restart-Computer
+```
+
+### Login as fabric administrator account
+
+```Console
+PowerShell
+```
+
+#### # Connect to iSCSI portal (using multiple paths)
+
+```PowerShell
+New-IscsiTargetPortal `
+    -TargetPortalAddress 10.1.12.2 `
+    -InitiatorPortalAddress 10.1.12.4
+
+New-IscsiTargetPortal `
+    -TargetPortalAddress 10.1.13.2 `
+    -InitiatorPortalAddress 10.1.13.4
 
 Start-Sleep 30
+```
 
+#### # Connect first path to iSCSI target
+
+```PowerShell
 Connect-IscsiTarget `
     -NodeAddress "iqn.1991-05.com.microsoft:tt-hv03-tt-sofs01-target" `
+    -TargetPortalAddress 10.1.12.2 `
+    -InitiatorPortalAddress 10.1.12.4 `
+    -IsMultipathEnabled $true `
+    -IsPersistent $true
+```
+
+#### # Connect additional paths to iSCSI target
+
+```PowerShell
+Connect-IscsiTarget `
+    -NodeAddress "iqn.1991-05.com.microsoft:tt-hv03-tt-sofs01-target" `
+    -TargetPortalAddress 10.1.13.2 `
+    -InitiatorPortalAddress 10.1.13.4 `
+    -IsMultipathEnabled $true `
     -IsPersistent $true
 ```
 

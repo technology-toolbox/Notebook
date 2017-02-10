@@ -463,7 +463,16 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-### # Configure iSCSI client
+### Configure iSCSI client
+
+#### Reference
+
+**Configuring multiple ISCSI Connections for Multipath IO using PowerShell.**\
+From <[https://chinnychukwudozie.com/2013/11/11/configuring-multipath-io-with-multiple-iscsi-connections-using-powershell/](https://chinnychukwudozie.com/2013/11/11/configuring-multipath-io-with-multiple-iscsi-connections-using-powershell/)>
+
+```PowerShell
+cls
+```
 
 #### # Start iSCSI service
 
@@ -473,15 +482,67 @@ Set-Service msiscsi -StartupType Automatic
 Start-Service msiscsi
 ```
 
-#### # Connect to iSCSI Portal
+#### # Configure MPIO settings
+
+##### # Enable automatic claiming of all iSCSI volumes
 
 ```PowerShell
-New-IscsiTargetPortal -TargetPortalAddress iscsi01
+Enable-MSDSMAutomaticClaim -BusType iSCSI
+```
+
+##### # Set default load balancing policy
+
+```PowerShell
+Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy RR
+```
+
+##### # Configure disk timeout
+
+```PowerShell
+Set-MPIOSetting -NewDiskTimeout 60
+
+Restart-Computer
+```
+
+### Login as fabric administrator account
+
+```Console
+PowerShell
+```
+
+#### # Connect to iSCSI portal (using multiple paths)
+
+```PowerShell
+New-IscsiTargetPortal `
+    -TargetPortalAddress 10.1.12.2 `
+    -InitiatorPortalAddress 10.1.12.3
+
+New-IscsiTargetPortal `
+    -TargetPortalAddress 10.1.13.2 `
+    -InitiatorPortalAddress 10.1.13.3
 
 Start-Sleep 30
+```
 
+#### # Connect first path to iSCSI target
+
+```PowerShell
 Connect-IscsiTarget `
     -NodeAddress "iqn.1991-05.com.microsoft:tt-hv03-tt-sofs01-target" `
+    -TargetPortalAddress 10.1.12.2 `
+    -InitiatorPortalAddress 10.1.12.3 `
+    -IsMultipathEnabled $true `
+    -IsPersistent $true
+```
+
+#### # Connect additional paths to iSCSI target
+
+```PowerShell
+Connect-IscsiTarget `
+    -NodeAddress "iqn.1991-05.com.microsoft:tt-hv03-tt-sofs01-target" `
+    -TargetPortalAddress 10.1.13.2 `
+    -InitiatorPortalAddress 10.1.13.3 `
+    -IsMultipathEnabled $true `
     -IsPersistent $true
 ```
 
@@ -492,7 +553,7 @@ cls
 #### # Online and initialize disks
 
 ```PowerShell
-$iscsiDisks = Get-Disk | ? {$_.BusType -eq "iSCSI"}
+$iscsiDisks = Get-Disk | ? { $_.BusType -eq "iSCSI" }
 
 $quorumDiskNumber = $iscsiDisks |
     sort Size |
