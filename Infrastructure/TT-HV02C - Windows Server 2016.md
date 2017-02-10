@@ -1135,6 +1135,25 @@ cls
 
 ### # Configure networking
 
+#### # Set affinity between virtual network adapters and physical network adapters
+
+```PowerShell
+Set-VMNetworkAdapterTeamMapping `
+    -ManagementOS `
+    -VMNetworkAdapterName "Storage 1" `
+    -PhysicalNetAdapterName "Team 1A"
+
+Set-VMNetworkAdapterTeamMapping `
+    -ManagementOS `
+    -VMNetworkAdapterName "Storage 2" `
+    -PhysicalNetAdapterName "Team 1B"
+
+Set-VMNetworkAdapterTeamMapping `
+    -ManagementOS `
+    -VMNetworkAdapterName "Live Migration" `
+    -PhysicalNetAdapterName "Team 1C"
+```
+
 #### # Disable DHCPv6 on storage and live migration networks
 
 ```PowerShell
