@@ -835,48 +835,161 @@ icacls $path /grant '"BUILTIN\Users":(OI)(CI)(RX)'
 icacls $path /grant '"Hyper-V Servers":(OI)(CI)(RX)'
 ```
 
-## Replace Hyper-V "standard switch" with VMM "Logical Switch"
+## Reconfigure networking (to use logical switch defined in VMM)
+
+### # Shutdown all VMs and disconnect network adapters
 
 ```PowerShell
-Ethernet adapter Tenant Team:
+Get-VM | Stop-VM
 
-   Connection-specific DNS Suffix  . : corp.technologytoolbox.com
-   IPv6 Address. . . . . . . . . . . : 2603:300b:802:8900:6d8b:20d6:9948:a7ee
-   Link-local IPv6 Address . . . . . : fe80::6d8b:20d6:9948:a7ee%3
-   IPv4 Address. . . . . . . . . . . : 192.168.10.50
-   Subnet Mask . . . . . . . . . . . : 255.255.255.0
-   Default Gateway . . . . . . . . . : fe80::c0c6:87ff:fe04:2638%3
-                                       192.168.10.1
-Remove-VMSwitch -Name "Tenant vSwitch"
-
-Remove-NetLbfoTeam "Tenant Team"
-
-VMM01A:
-
-# Get Host 'TT-HV03.corp.technologytoolbox.com'
-$vmHost = Get-SCVMHost -ID "85d93fff-16d4-47a6-9b8a-523c364400fe"
-
-
-# Get Host Network Adapter 'Intel(R) Gigabit CT Desktop Adapter'
-$networkAdapter = Get-SCVMHostNetworkAdapter -ID "2332d37f-90ab-4f36-9f71-3509d93e577c"
-$uplinkPortProfileSet = Get-SCUplinkPortProfileSet -ID "db46eebf-9d50-4009-b411-453376943b65"
-Set-SCVMHostNetworkAdapter -VMHostNetworkAdapter $networkAdapter -UplinkPortProfileSet $uplinkPortProfileSet -JobGroup "8e968393-0076-44aa-a323-6a99e1d6aabd"
-# Get Host Network Adapter 'Intel(R) Gigabit CT Desktop Adapter #2'
-$networkAdapter = Get-SCVMHostNetworkAdapter -ID "c8397b37-29a6-4738-9bd0-0b5f2f3f1048"
-$uplinkPortProfileSet = Get-SCUplinkPortProfileSet -ID "db46eebf-9d50-4009-b411-453376943b65"
-Set-SCVMHostNetworkAdapter -VMHostNetworkAdapter $networkAdapter -UplinkPortProfileSet $uplinkPortProfileSet -JobGroup "8e968393-0076-44aa-a323-6a99e1d6aabd"
-$networkAdapter = @()
-$networkAdapter += Get-SCVMHostNetworkAdapter -ID "2332d37f-90ab-4f36-9f71-3509d93e577c"
-$networkAdapter += Get-SCVMHostNetworkAdapter -ID "c8397b37-29a6-4738-9bd0-0b5f2f3f1048"
-$logicalSwitch = Get-SCLogicalSwitch -ID "61028b6e-981a-4e0c-a61f-03fc01d3b567"
-$vmNetwork = Get-SCVMNetwork -ID "11ceb7c3-7522-47e5-84c0-7f5fe50519fb"
-New-SCVirtualNetwork -VMHost $vmHost -VMHostNetworkAdapters $networkAdapter -LogicalSwitch $logicalSwitch -JobGroup "8e968393-0076-44aa-a323-6a99e1d6aabd" -CreateManagementAdapter -ManagementAdapterName "Management vNIC" -ManagementAdapterVMNetwork $vmNetwork
-
-
-
-
-Set-SCVMHost -VMHost $vmHost -JobGroup "8e968393-0076-44aa-a323-6a99e1d6aabd" -RunAsynchronously
+Get-VM | Get-VMNetworkAdapter | Disconnect-VMNetworkAdapter
 ```
+
+```PowerShell
+cls
+```
+
+### # Remove standard Hyper-V switch and NIC team
+
+```PowerShell
+Get-VMSwitch "Tenant vSwitch" | Remove-VMSwitch
+
+Remove-NetLbfoTeam -Name "Tenant Team"
+```
+
+```PowerShell
+cls
+```
+
+### # Rename network connections
+
+```PowerShell
+Get-NetAdapter -Physical | select InterfaceDescription
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+    Rename-NetAdapter -NewName "Team 1A"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Team 1B"
+```
+
+### Configure DHCP addresses on all network adapters
+
+```Console
+sconfig
+```
+
+### Add logical switch in VMM
+
+```PowerShell
+cls
+```
+
+### # Configure networking
+
+#### # Set affinity between virtual network adapters and physical network adapters
+
+```PowerShell
+Set-VMNetworkAdapterTeamMapping `
+    -ManagementOS `
+    -VMNetworkAdapterName "Storage 1" `
+    -PhysicalNetAdapterName "Team 1A"
+
+Set-VMNetworkAdapterTeamMapping `
+    -ManagementOS `
+    -VMNetworkAdapterName "Storage 2" `
+    -PhysicalNetAdapterName "Team 1B"
+```
+
+#### # Disable DHCPv6 on cluster, live migration, and storage networks
+
+```PowerShell
+$interfaceAliases = @(
+    "vEthernet (Cluster)",
+    "vEthernet (Live Migration)"
+    "vEthernet (Storage 1)",
+    "vEthernet (Storage 2)")
+
+$interfaceAliases |
+    % {
+        Set-NetIPInterface `
+            -InterfaceAlias $_ `
+            -Dhcp Disabled `
+            -RouterDiscovery Disabled
+    }
+```
+
+> **Important**
+>
+> If IPv6 addresses are assigned, the various networks are routable (instead of being treated as separate networks).
+
+```PowerShell
+cls
+```
+
+#### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+$interfaceAliases = @(
+    "vEthernet (Embedded Team Switch)",
+    "vEthernet (Live Migration)",
+    "vEthernet (Storage 1)",
+    "vEthernet (Storage 2)")
+
+$interfaceAliases |
+    % {
+        Set-NetAdapterAdvancedProperty `
+            -Name $_ `
+            -DisplayName "Jumbo Packet" `
+            -RegistryValue 9014
+    }
+
+ping 10.1.10.39 -f -l 8900
+ping 10.1.11.23 -f -l 8900
+```
+
+```PowerShell
+cls
+```
+
+### # Verify SMB Multichannel is working as expected
+
+```PowerShell
+$source = "\\TT-HV02B\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
+$destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
+
+robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
+```
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+### # Reconnect all VM network adapters
+
+```PowerShell
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+$portClassification = Get-SCPortClassification -Name "1 Gbps Tenant vNIC"
+
+Get-SCVirtualMachine -VMHost TT-HV03 |
+    % {
+        Get-SCVirtualNetworkAdapter -VM $_ |
+            Set-SCVirtualNetworkAdapter `
+                -VMNetwork $vmNetwork `
+                -VirtualNetwork "Embedded Team Switch" `
+                -PortClassification $portClassification
+    }
+```
+
+---
 
 **TODO:**
 
