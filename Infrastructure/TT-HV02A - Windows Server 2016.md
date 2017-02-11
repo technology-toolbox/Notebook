@@ -1609,6 +1609,25 @@ cls
 
 ### # Configure networking
 
+#### # Set affinity between virtual network adapters and physical network adapters
+
+```PowerShell
+Set-VMNetworkAdapterTeamMapping `
+    -ManagementOS `
+    -VMNetworkAdapterName "Storage 1" `
+    -PhysicalNetAdapterName "Team 1A"
+
+Set-VMNetworkAdapterTeamMapping `
+    -ManagementOS `
+    -VMNetworkAdapterName "Storage 2" `
+    -PhysicalNetAdapterName "Team 1B"
+
+Set-VMNetworkAdapterTeamMapping `
+    -ManagementOS `
+    -VMNetworkAdapterName "Live Migration" `
+    -PhysicalNetAdapterName "Team 1C"
+```
+
 #### # Disable DHCPv6 on storage and live migration networks
 
 ```PowerShell
@@ -1694,10 +1713,466 @@ cls
 ### # Verify SMB Multichannel is working as expected
 
 ```PowerShell
-$source = "\\TT-FS01\Products\Microsoft\Windows Server 2016"
+$source = "\\TT-HV02B\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
 $destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
 
 robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
+```
+
+### Issue: SMB Multichannel starts off strong, but throughput quickly drops
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/FCD0204F25E247CE44526B294F19C51A284F243C.png)
+
+```PowerShell
+cls
+```
+
+#### # Remove affinity between virtual network adapters and physical network adapters
+
+```PowerShell
+Get-VMNetworkAdapterTeamMapping -ManagementOS |
+```
+
+    % { Remove-VMNetworkAdapterTeamMapping -Name \$_.Name -ManagementOS }
+
+```PowerShell
+cls
+```
+
+### # Configure NIC team
+
+#### # Rename network connections
+
+```PowerShell
+Get-NetAdapter -Physical | select InterfaceDescription
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+    Rename-NetAdapter -NewName "Storage Team 1A"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Storage Team 1B"
+```
+
+#### # Configure network team
+
+```PowerShell
+$interfaceAlias = "Storage Team 1"
+```
+
+##### # Create NIC team
+
+```PowerShell
+$teamMembers = "Storage Team 1A", "Storage Team 1B"
+
+New-NetLbfoTeam `
+    -Name $interfaceAlias `
+    -TeamMembers $teamMembers `
+    -Confirm:$false
+```
+
+##### # Verify NIC team status - "Storage Team 1"
+
+```PowerShell
+Write-Host "Waiting for NIC team to initialize..."
+Start-Sleep -Seconds 5
+
+do {
+    If (Get-NetLbfoTeam -Name $interfaceAlias | Where Status -eq "Up")
+    {
+        return
+    }
+
+    Write-Host "." -NoNewline
+    Start-Sleep -Seconds 5
+```
+
+}  while (\$true)
+
+> **Important**
+>
+> Ensure the **Status** property of the network team is **Up**.
+
+```PowerShell
+cls
+```
+
+### # Verify SMB copy achieves ~2 Gbps throughput...
+
+```PowerShell
+$source = "\\TT-HV02B\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
+$destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
+
+robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
+```
+
+### ...nope, only 1 Gbps throughput -- so try Switch Embedded Team (SET) instead of LBFO team
+
+#### # Remove teamed switch
+
+```PowerShell
+Get-NetLbfoTeam | Remove-NetLbfoTeam
+```
+
+#### # Create Hyper-V switch using Switch Embedded Team
+
+```PowerShell
+New-VMSwitch -Name "Storage Team" -AllowManagementOS $True -NetAdapterName "Storage Team 1A", "Storage Team 1B" -EnableEmbeddedTeaming $True
+```
+
+```PowerShell
+cls
+```
+
+### # Verify SMB copy achieves ~2 Gbps throughput...
+
+```PowerShell
+ipconfig /registerdns
+ipconfig /flushdns
+
+$source = "\\TT-HV02B\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
+$destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
+
+robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
+```
+
+### ...nope, only 1 Gbps throughput -- so don't use teaming for "storage" network
+
+#### # Remove teamed switch
+
+```PowerShell
+Get-VMSwitch "Storage Team" | Remove-VMSwitch
+```
+
+```PowerShell
+cls
+```
+
+### # Verify SMB copy achieves ~2 Gbps throughput...
+
+```PowerShell
+ipconfig /registerdns
+ipconfig /flushdns
+
+$source = "\\TT-HV02B\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
+$destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
+
+robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
+```
+
+### ...yes
+
+```PowerShell
+cls
+```
+
+#### # Rename network connections
+
+```PowerShell
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+    Rename-NetAdapter -NewName "Storage 1"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Storage 2"
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure static IP addresses on "Storage 1" network
+
+```PowerShell
+$interfaceAlias = "Storage 1"
+```
+
+##### # Disable DHCP and router discovery
+
+```PowerShell
+Set-NetIPInterface `
+    -InterfaceAlias $interfaceAlias `
+    -Dhcp Disabled `
+    -RouterDiscovery Disabled
+```
+
+##### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "10.1.10.1"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+```
+
+##### # Configure static IPv6 address
+
+**# Note:** Private IPv6 address range (fd87:77eb:097e:95a1::/64) generated by [http://simpledns.com/private-ipv6.aspx](http://simpledns.com/private-ipv6.aspx)
+
+```PowerShell
+$ipAddress = "fd87:77eb:097e:95a1::1"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 64
+```
+
+##### # Configure IPv4 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.103,192.168.10.104
+```
+
+##### # Configure IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure static IP addresses on "Storage 2" network
+
+```PowerShell
+$interfaceAlias = "Storage 2"
+```
+
+##### # Disable DHCP and router discovery
+
+```PowerShell
+Set-NetIPInterface `
+    -InterfaceAlias $interfaceAlias `
+    -Dhcp Disabled `
+    -RouterDiscovery Disabled
+```
+
+##### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "10.1.10.2"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+```
+
+##### # Configure static IPv6 address
+
+```PowerShell
+$ipAddress = "fd87:77eb:097e:95a1::2"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 64
+```
+
+##### # Configure IPv4 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.103,192.168.10.104
+```
+
+##### # Configure IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
+```
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+### # Configure "storage" logical switches in VMM (for storage network adapters with no teaming)
+
+#### # Create "storage" uplink port profile
+
+```PowerShell
+$networkSites = @()
+$networkSites += Get-SCLogicalNetworkDefinition -Name "Storage - VLAN 10"
+
+New-SCNativeUplinkPortProfile `
+    -Name "Storage Uplink" `
+    -Description "" `
+    -LogicalNetworkDefinition $networkSites `
+    -LBFOLoadBalancingAlgorithm HostDefault `
+    -LBFOTeamMode SwitchIndependent
+```
+
+#### # Create logical switches ("Storage 1" and "Storage 2")
+
+```PowerShell
+1..2 |
+    % {
+        $switchNumber = $_
+
+        # Create logical switch
+
+        $virtualSwitchExtensions = @()
+        $virtualSwitchExtensions += Get-SCVirtualSwitchExtension `
+            -Name "Microsoft Windows Filtering Platform"
+
+        $logicalSwitch = New-SCLogicalSwitch `
+            -Name "Storage $switchNumber" `
+            -Description "" `
+            -MinimumBandwidthMode Weight `
+            -VirtualSwitchExtensions $virtualSwitchExtensions
+
+        # Add virtual ports to logical switch
+
+        $portClassification = Get-SCPortClassification -Name "SMB workload"
+
+        $networkAdapterPortProfile = Get-SCVirtualNetworkAdapterNativePortProfile `
+            -Name "SMB"
+
+        New-SCVirtualNetworkAdapterPortProfileSet `
+            -Name $portClassification.Name `
+            -PortClassification $portClassification `
+            -LogicalSwitch $logicalSwitch `
+            -IsDefaultPortProfileSet $true `
+            -VirtualNetworkAdapterNativePortProfile $networkAdapterPortProfile
+
+        # Add virtual network adapters
+
+        $uplinkPortProfile = Get-SCNativeUplinkPortProfile -Name "Storage Uplink"
+
+        $uplinkPortProfileSet = New-SCUplinkPortProfileSet `
+            -Name ("Storage Uplink - " + $logicalSwitch.Name) `
+            -LogicalSwitch $logicalSwitch `
+            -NativeUplinkPortProfile $uplinkPortProfile
+
+        $vmNetwork = Get-SCVMNetwork "Storage VM Network"
+        $vmSubnet = Get-SCVMSubnet -Name "Storage VM Network_0"
+        $portClassification = Get-SCPortClassification -Name "SMB workload"
+        $ipV4Pool = Get-SCStaticIPAddressPool -Name "Storage Address Pool"
+
+        New-SCLogicalSwitchVirtualNetworkAdapter `
+            -Name "Storage $switchNumber" `
+            -UplinkPortProfileSet $uplinkPortProfileSet `
+            -VMNetwork $vmNetwork `
+            -VMSubnet $vmSubnet `
+            -PortClassification $portClassification `
+            -IPv4AddressType Static `
+            -IPv4AddressPool $ipV4Pool
+    }
+```
+
+#### # Add virtual switches to each Hyper-V host
+
+```PowerShell
+@("TT-HV02A.corp.technologytoolbox.com",
+    "TT-HV02B.corp.technologytoolbox.com",
+    "TT-HV02C.corp.technologytoolbox.com") |
+    % {
+        $vmHost = Get-SCVMHost -ComputerName $_
+
+        $switchNumber = 1
+
+        @("Intel(R) Gigabit CT Desktop Adapter",
+            "Intel(R) Gigabit CT Desktop Adapter #2") |
+            % {
+                $nicName = $_
+
+                $logicalSwitch = Get-SCLogicalSwitch -Name "Storage $switchNumber"
+
+                $uplinkPortProfileSet = Get-SCUplinkPortProfileSet `
+                    -Name ("Storage Uplink - " + $logicalSwitch.Name)
+
+                $networkAdapter = Get-SCVMHostNetworkAdapter `
+                    -VMHost $vmHost `
+                    -Name $nicName
+
+                Set-SCVMHostNetworkAdapter `
+                    -VMHostNetworkAdapter $networkAdapter `
+                    -UplinkPortProfileSet $uplinkPortProfileSet
+
+                New-SCVirtualNetwork `
+                    -VMHost $vmHost `
+                    -VMHostNetworkAdapters $networkAdapter `
+                    -LogicalSwitch $logicalSwitch `
+                    -DeployVirtualNetworkAdapters
+
+                $switchNumber++
+            }
+    }
+```
+
+---
+
+#### # Disable DHCPv6 and enable jumbo frames on storage networks
+
+```PowerShell
+$interfaceAliases = @(
+    "vEthernet (Storage 1)",
+    "vEthernet (Storage 2)")
+
+$interfaceAliases |
+    % {
+        $interfaceAlias = $_
+
+        Set-NetIPInterface `
+            -InterfaceAlias $interfaceAlias `
+            -Dhcp Disabled `
+            -RouterDiscovery Disabled
+
+        Set-NetAdapterAdvancedProperty `
+            -Name $interfaceAlias `
+            -DisplayName "Jumbo Packet" `
+            -RegistryValue 9014
+    }
+
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+```
+
+```PowerShell
+cls
+```
+
+### # Verify SMB copy achieves ~2 Gbps throughput...
+
+```PowerShell
+ipconfig /registerdns
+ipconfig /flushdns
+
+$source = "\\TT-HV02B\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
+$destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
+
+robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
+```
+
+### ...nope, throughput dropped from ~1.84 Gbps to ~1.51 Gbps (due to virtual switch)
+
+```PowerShell
+$interfaceAliases = @(
+    "Storage 1",
+    "Storage 2")
+
+$interfaceAliases |
+    % {
+        $interfaceAlias = $_
+
+        Set-NetAdapter -Name $interfaceAlias -VlanID 10
+    }
 ```
 
 ---
