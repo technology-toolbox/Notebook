@@ -1207,7 +1207,87 @@ cls
 
 ---
 
-**TT-HV02A**
+**TT-HV02A / TT-HV02B / TT-HV02C**
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 7 Ultimate (x86) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 7 Ultimate (x64) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -VhdSize 40GB `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2008 R2 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 8.1 Enterprise (x64) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2012 R2 Standard - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "SharePoint Server 2013 - Development"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -VhdSize 50GB `
+    -Force
+```
 
 ```PowerShell
 cls
@@ -1217,14 +1297,10 @@ cls
 
 ```PowerShell
 & 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
-    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x64.iso -Force
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
 ```
-
----
-
----
-
-**TT-HV02B**
 
 ```PowerShell
 cls
@@ -1234,7 +1310,9 @@ cls
 
 ```PowerShell
 & 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
-    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x64.iso -Force
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
 ```
 
 ---
