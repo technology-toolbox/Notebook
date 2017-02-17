@@ -7,7 +7,15 @@ Tuesday, February 14, 2017
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Deploy and configure the server infrastructure
+## Deploy federated authentication in SecuritasConnect
+
+### Phase 1: Configure SSL in development environments
+
+#### Import wildcard SSL certificate (*.securitasinc.com)
+
+#### Add public URL for HTTPS
+
+### Phase 2: Install and configure federation server farm
 
 ---
 
@@ -17,9 +25,9 @@ Tuesday, February 14, 2017
 cls
 ```
 
-### # Create and configure service account for ADFS
+#### # Create and configure service account for ADFS farm
 
-#### # Create service account for ADFS
+##### # Create service account for ADFS
 
 ```PowerShell
 $displayName = "Service account for ADFS farm (EXT-ADFS02)"
@@ -42,7 +50,7 @@ New-ADUser `
     -PasswordNeverExpires:$true
 ```
 
-#### # Configure Service Principal Name for ADFS service account
+##### # Configure Service Principal Name for ADFS service account
 
 ```PowerShell
 setspn -S host/fs.technologytoolbox.com $cred.UserName
@@ -55,6 +63,8 @@ From <[https://technet.microsoft.com/en-us/library/dd807078(v=ws.11).aspx](https
 
 ---
 
+#### Install Windows Server 2016 on AD FS and WAP servers
+
 ---
 
 **FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
@@ -63,7 +73,7 @@ From <[https://technet.microsoft.com/en-us/library/dd807078(v=ws.11).aspx](https
 cls
 ```
 
-### # Create virtual machine
+##### # Create virtual machine
 
 ```PowerShell
 $vmHost = "TT-HV02A"
@@ -98,13 +108,13 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-### Set password for the local Administrator account
+##### Set password for the local Administrator account
 
 ```PowerShell
 cls
 ```
 
-### # Rename local Administrator account
+##### # Rename local Administrator account
 
 ```PowerShell
 $adminUser = [ADSI] 'WinNT://./Administrator,User'
@@ -118,13 +128,13 @@ logoff
 cls
 ```
 
-### # Configure networking
+##### # Configure networking
 
 ```PowerShell
 $interfaceAlias = "Management"
 ```
 
-#### # Rename network connections
+###### # Rename network connections
 
 ```PowerShell
 Get-NetAdapter -Physical | select InterfaceDescription
@@ -133,7 +143,7 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-#### # Configure static IPv4 address
+###### # Configure static IPv4 address
 
 ```PowerShell
 $ipAddress = "192.168.10.241"
@@ -145,7 +155,7 @@ New-NetIPAddress `
     -DefaultGateway 192.168.10.1
 ```
 
-#### # Configure IPv4 DNS servers
+###### # Configure IPv4 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
@@ -153,7 +163,7 @@ Set-DNSClientServerAddress `
     -ServerAddresses 192.168.10.209,192.168.10.210
 ```
 
-#### # Enable jumbo frames
+###### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
@@ -166,15 +176,13 @@ Set-NetAdapterAdvancedProperty `
 ping TT-FS01.corp.technologytoolbox.com -f -l 8900
 ```
 
-### Rename server and join domain
-
 #### Login as local administrator account
 
 ```PowerShell
 cls
 ```
 
-### # Rename server
+##### # Rename server
 
 ```PowerShell
 Rename-Computer -NewName EXT-ADFS02A -Restart
@@ -184,13 +192,9 @@ Rename-Computer -NewName EXT-ADFS02A -Restart
 >
 > Wait for the VM to restart.
 
-#### Login as local administrator account
+##### Login as local administrator account
 
-```PowerShell
-cls
-```
-
-### # Join server to domain
+#### Join servers to domain
 
 ```PowerShell
 $cred = Get-Credential EXTRANET\jjameson-admin
@@ -206,7 +210,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Credential $cred -Resta
 cls
 ```
 
-### # Move computer to different OU
+##### # Move computer to different OU
 
 ```PowerShell
 $vmName = "EXT-ADFS02A"
@@ -223,7 +227,23 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 cls
 ```
 
-### # Copy Toolbox content
+#### # Configure storage
+
+##### # Change drive letter for DVD-ROM
+
+```PowerShell
+$cdrom = Get-WmiObject -Class Win32_CDROMDrive
+$driveLetter = $cdrom.Drive
+
+$volumeId = mountvol $driveLetter /L
+$volumeId = $volumeId.Trim()
+
+mountvol $driveLetter /D
+
+mountvol X: $volumeId
+```
+
+##### # Copy Toolbox content
 
 ```PowerShell
 $source = "\\TT-FS01\Public\Toolbox"
@@ -240,39 +260,13 @@ net use $source /USER:TECHTOOLBOX\jjameson
 robocopy $source $destination  /E /XD "Microsoft SDKs"
 ```
 
-### # Set MaxPatchCacheSize to 0 (recommended)
+##### # Set MaxPatchCacheSize to 0 (recommended)
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
-```PowerShell
-cls
-```
-
-## # Configure storage
-
-## # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-```PowerShell
-cls
-```
-
-## # AD FS prerequisites
-
-### # Import certificate for secure communication with AD FS
+#### # Import certificate for secure communication with AD FS
 
 ```PowerShell
 net use \\TT-FS01\Users$ /USER:TECHTOOLBOX\jjameson
@@ -283,7 +277,8 @@ net use \\TT-FS01\Users$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$certFilePath = "\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC" `
+$certFilePath =
+    "\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC" `
     + "\Certificates\fs.technologytoolbox.com.pfx"
 
 $certPassword = `
@@ -305,21 +300,6 @@ cls
 Install-WindowsFeature ADFS-Federation -IncludeManagementTools
 ```
 
-## Deploy federation server farm
-
-**Deploying a Federation Server Farm**\
-From <[https://technet.microsoft.com/en-us/library/dn486775.aspx](https://technet.microsoft.com/en-us/library/dn486775.aspx)>
-
-```PowerShell
-cls
-```
-
-### # Add AD FS server role
-
-```PowerShell
-Install-WindowsFeature ADFS-Federation -IncludeManagementTools
-```
-
 ---
 
 **FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
@@ -328,7 +308,7 @@ Install-WindowsFeature ADFS-Federation -IncludeManagementTools
 cls
 ```
 
-### # Checkpoint VM
+##### # Checkpoint VM
 
 ```PowerShell
 $vmHost = "TT-HV02A"
@@ -351,7 +331,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 cls
 ```
 
-### # Create AD FS farm
+#### # Create AD FS farm
 
 ```PowerShell
 $cert = Get-ChildItem -Path Cert:\LocalMachine\My |
@@ -420,7 +400,7 @@ Restart-Computer
 
 **EXT-SQL02 - SQL Server Management Studio**
 
-### -- Backup AD FS databases
+#### -- Backup AD FS databases
 
 ```SQL
 BACKUP DATABASE AdfsArtifactStore
@@ -442,9 +422,27 @@ GO
 
 ---
 
-### Add second federation server to AD FS farm
+#### Add second federation server to AD FS farm
 
-### Configure federation service name resolution
+```PowerShell
+cls
+```
+
+#### # Extend validity period for self-signed certificates in AD FS
+
+```PowerShell
+Set-AdfsProperties -CertificateDuration (365*5)
+
+Update-AdfsCertificate -Urgent
+```
+
+#### Configure federation service name resolution
+
+##### Configure federation service name resolution on WAP servers
+
+(skipped)
+
+##### Create internal DNS records for AD FS services
 
 ---
 
@@ -466,82 +464,103 @@ Add-DnsServerResourceRecordA `
 
 ---
 
-## Configure SAML-based claims authentication for SecuritasConnect
+##### Create external DNS record for AD FS services
 
-**Configure SAML-based claims authentication with AD FS in SharePoint 2013**\
-From <[https://technet.microsoft.com/en-us/library/hh305235.aspx](https://technet.microsoft.com/en-us/library/hh305235.aspx)>
+(skipped)
 
-### Configure AD FS for a relying party
+#### Add Web Application Proxy role
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7B/A16AB91610692D28A559185A07D333733976B07B.png)
+#### Configure Web Application Proxy role
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/06/3B82A4FBB3CF98086964CA3A129EB5FC52F00C06.png)
+### Phase 3: Configure relying party in AD FS for SecuritasConnect
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1A/607DDDAA50B46B27153E2BB51ED8B7734C7BE51A.png)
+```PowerShell
+cls
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/79B44DF8E26EC90116977EE25B53BA9422A33394.png)
+#### # Create relying party in AD FS
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/1228BE2E28904129FBEB695F0174255C58720A8D.png)
+```PowerShell
+$clientPortalUrl = [Uri] "http://client-local-9.securitasinc.com"
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/423F04CC7771D3C5B35C0FF48A8FFE2D76BD9A4F.png)
+$relyingPartyDisplayName = $clientPortalUrl.Host
+$wsFedEndpointUrl = "https://" + $clientPortalUrl.Host + "/_trust/"
+$additionalIdentifier = "urn:sharepoint:securitas:" `
+    + ($clientPortalUrl.Host -split '\.' | select -First 1)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/89/AB9809C0B2A76FDB40A6657A2E53D6E85258C489.png)
+$identifiers = $wsFedEndpointUrl, $additionalIdentifier
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2D/7603A9E53CEDB1518C4883C2B94080942869662D.png)
+Add-AdfsRelyingPartyTrust `
+    -Name $relyingPartyDisplayName `
+    -Identifier $identifiers `
+    -WSFedEndpoint $wsFedEndpointUrl `
+    -AccessControlPolicyName "Permit everyone"
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/41/6FC109AE140703A81EA1FE9F8DC3F75CB79DAC41.png)
+```PowerShell
+cls
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/63/557FC9D3A85D2AA0D21F9462FB843043059B1563.png)
+#### # Configure claim issuance policy for relying party
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/C65655E9DBC535699682257CEA205428928B605C.png)
+```PowerShell
+$clientPortalUrl = [Uri] "http://client-local-9.securitasinc.com"
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/C0253CA6E945C90C7BCF8AE3C260A99F80DC1ED1.png)
+$relyingPartyDisplayName = $clientPortalUrl.Host
 
-### Configure the claim rule
+$claimRules = `
+'@RuleTemplate = "LdapClaims"
+@RuleName = "Active Directory Claims"
+c:[Type ==
+    "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname",
+    Issuer == "AD AUTHORITY"]
+ => issue(
+      store = "Active Directory",
+      types = (
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"),
+      query = ";mail,displayName,userPrincipalName,tokenGroups;{0}",
+      param = c.Value);'
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/72/9B60C13031E10F293F11B4F35250E1B692DE0D72.png)
+$tempFile = [System.IO.Path]::GetTempFileName()
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/E23AEBFCB13328E48526648AC47449717E94E73B.png)
+Set-Content -Value $claimRules -LiteralPath $tempFile
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/C3495D2B2A755FC7668669A00DDEAB904258CEDB.png)
+Set-AdfsRelyingPartyTrust `
+    -TargetName $relyingPartyDisplayName `
+    -IssuanceTransformRulesFile $tempFile
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/983BF1918905BAE459E22149D16968191BA3337F.png)
+### Phase 4: Configure SharePoint 2013 to trust AD FS as an identity provider
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EE/0F85DE69F6F6CFD7638A808C73CD97B93C7406EE.png)
+```PowerShell
+cls
+```
 
-### Export the token signing certificate
+#### # Export token-signing certificate from AD FS farm
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/75/0ECB37338DC24D1C97BD8CB04A1D2F1539EF5675.png)
+```PowerShell
+$serviceCert = Get-AdfsCertificate -CertificateType Token-Signing
 
-Right-click the token-signing certificate and click **View Certificate...**
+$certBytes = $serviceCert.Certificate.Export(
+    [System.Security.Cryptography.X509Certificates.X509ContentType]::Cert)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/12A2A8DF665D7B16A552AD7793C8B4BBDA88C4F8.png)
+$certName = $serviceCert.Certificate.Subject.Replace("CN=", "")
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C3/572AEB343EFACC4B9125498ED10653CF52C8B4C3.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/3EDC2106856C070AF5E6D3ED610E30EF76EA5DEF.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E6/54A9EDD43268EEED727857568498FE867D78ACE6.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/2B96A5526809347461B44BF394BB759CA2CFFC86.png)
-
-In the **Save As** window:
-
-1. In the **File name** box, type **ADFS Signing - fs.technologytoolbox.com**.
-2. Click **Save**.
-
-In the **Certificate Export Wizard**, click **Next**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/F393492A8E78D4A9F5376C17164DED9B30F4B80E.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/59FF9A0B43CDB1F9B3FA385EEC89D94AB63A3C6A.png)
-
-### Phase 3: Configure SharePoint 2013 to trust AD FS as an identity provider
+[System.IO.File]::WriteAllBytes(
+    "C:\" + $certName + ".cer",
+    $certBytes)
+```
 
 #### # Copy token-signing certificate to SharePoint server
 
 ```PowerShell
-net use \\ext-foobar4.extranet.technologytoolbox.com\C$ `
+$source = "C:\ADFS Signing - fs.technologytoolbox.com.cer"
+$destination = "\\EXT-FOOBAR9.extranet.technologytoolbox.com\C$"
+
+net use $destination `
     /USER:EXTRANET\setup-sharepoint-dev
 ```
 
@@ -549,21 +568,19 @@ net use \\ext-foobar4.extranet.technologytoolbox.com\C$ `
 >
 > When prompted, type the password to connect to the file share.
 
-```PowerShell
-copy `
-    'C:\Users\jjameson-admin\Desktop\ADFS Signing - fs.technologytoolbox.com.cer' `
-    \\ext-foobar4.extranet.technologytoolbox.com\C$\Users\setup-sharepoint-dev\Desktop
+```Console
+copy $source $destination
 ```
 
 ---
 
-**EXT-FOOBAR4 - Run as EXTRANET\\setup-sharepoint-dev**
+**EXT-FOOBAR9 - Run as EXTRANET\\setup-sharepoint-dev**
 
 ```PowerShell
 cls
 ```
 
-#### # Import token signing certificate
+#### # Import token signing certificate to SharePoint farm
 
 ```PowerShell
 If ((Get-PSSnapin Microsoft.SharePoint.PowerShell `
@@ -581,8 +598,7 @@ If ((Get-PSSnapin Microsoft.SharePoint.PowerShell `
     Add-PSSnapin Microsoft.SharePoint.PowerShell
 }
 
-$certPath = "C:\Users\setup-sharepoint-dev\Desktop" `
-    + "\ADFS Signing - fs.technologytoolbox.com.cer"
+$certPath = "C:\ADFS Signing - fs.technologytoolbox.com.cer"
 
 $cert = `
     New-Object System.Security.Cryptography.X509Certificates.X509Certificate2(
@@ -593,7 +609,9 @@ New-SPTrustedRootAuthority `
     -Certificate $cert
 ```
 
-#### # Define claim mappings and identifier claim
+#### # Create authentication provider for AD FS
+
+##### # Define claim mappings and identifier claim
 
 ```PowerShell
 $emailClaimMapping = New-SPClaimTypeMapping `
@@ -631,11 +649,15 @@ $claimsMappings = @(
 $identifierClaim = $emailClaimMapping.InputClaimType
 ```
 
-#### # Create authentication provider
+##### # Create authentication provider
 
 ```PowerShell
 $realm = "urn:sharepoint:securitas"
 $signInURL = "https://fs.technologytoolbox.com/adfs/ls"
+
+$cert = Get-SPTrustedRootAuthority |
+    where { $_.Name -eq "ADFS Signing - fs.technologytoolbox.com" } |
+    select -ExpandProperty Certificate
 
 $authProvider = New-SPTrustedIdentityTokenIssuer `
     -Name "ADFS" `
@@ -650,51 +672,39 @@ $authProvider = New-SPTrustedIdentityTokenIssuer `
 #### # Configure authentication provider for SecuritasConnect
 
 ```PowerShell
-$uri = New-Object System.Uri("https://client-local-4.securitasinc.com")
-$realm = "urn:sharepoint:securitas:client-local-4"
+$clientPortalUrl = [Uri] "http://client-local-9.securitasinc.com"
 
-$authProvider.ProviderRealms.Add($uri, $realm)
+$secureClientPortalUrl = "https://" + $clientPortalUrl.Host
+
+$realm = "urn:sharepoint:securitas:" `
+    + ($clientPortalUrl.Host -split '\.' | select -First 1)
+
+$authProvider.ProviderRealms.Add($secureClientPortalUrl, $realm)
 $authProvider.Update()
 ```
 
----
+### # Phase 5: Configure web application to use AD FS trusted identity provider
 
-### Phase 4: Configure web applications to use claims-based authentication and AD FS as the trusted identity provider
+#### # Configure SecuritasConnect web application with AD FS identity provider
 
----
+```PowerShell
+$clientPortalUrl = [Uri] "http://client-local-9.securitasinc.com"
 
-**EXT-FOOBAR4 - Run as TECHTOOLBOX\\jjameson**
+$trustedIdentityProvider = Get-SPTrustedIdentityTokenIssuer -Identity ADFS
 
-#### Associate web applications with the ADFS identity provider
+Set-SPWebApplication `
+    -Identity $clientPortalUrl.AbsoluteUri `
+    -Zone Default `
+    -AuthenticationProvider $trustedIdentityProvider `
+    -SignInRedirectURL ""
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A7/E1DE75F7C1D3037A4F0AABCEBEE6BA0A5778DCA7.png)
+$webApp = Get-SPWebApplication $clientPortalUrl.AbsoluteUri
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/620022B90B3B71CAA21A62FD140FF018E7504A84.png)
+$defaultZone = [Microsoft.SharePoint.Administration.SPUrlZone]::Default
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/31/B4243F052D0EBEC99B73A0F15027860A1C42FA31.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/D1B9B666C17685E74483BCBD71FC46558F4DA838.png)
-
-In the **Authentication Providers** window, click **Default**.
-
-In the **Anonymous Access** section, clear the **Enable anonymous access** checkbox.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/568902A53BE28048858B9DF152BF9674E8FB1812.png)
-
-In the **Claims Authentication Types** section:
-
-1. Clear the **Enable Windows Authentication** checkbox.
-2. Clear the **Enable Forms Based Authentication (FBA)** checkbox.
-3. Select the **Trusted Identity provider** checkbox.
-4. Select the checkbox for the **ADFS** Trusted Identity Provider.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/07/F372189109BBA6E860CE65D9569C2323B892E907.png)
-
-In the **Sign In Page URL** section, select **Default Sign In Page**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/61/4CF5C3C8C5B9401ED71A66A8947853CE5C8FB561.png)
-
-Click **Save**.
+$webApp.IisSettings[$defaultZone].AllowAnonymous = $false
+$webApp.Update()
+```
 
 ---
 
@@ -1303,6 +1313,4 @@ WHERE AssociatedUserName = 'Ian.Lunn'
 Set-AdfsClaimsProviderTrust `
     -TargetName "idp-local-4.securitasinc.com" `
     -OrganizationalAccountSuffix @("woodgrove.com")
-
-Foo
 ```
