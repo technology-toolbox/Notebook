@@ -855,6 +855,8 @@ $task.Actions[0].Arguments = `
     "/C `"%windir%\system32\defrag.exe -c -h -g -# >> $logFile`""
 
 Set-ScheduledTask $task
+
+Enable-ScheduledTask $task
 ```
 
 > **Important**

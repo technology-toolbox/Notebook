@@ -441,6 +441,68 @@ cls
 Remove-Item "C:\NotBackedUp\Temp\System Center 2016 Virtual Machine Manager" -Recurse
 ```
 
+---
+
+**TT-VMM01A**
+
+## # Reconfigure "Cluster" network adapter
+
+```PowerShell
+$vm = Get-SCVirtualMachine TT-VMM01B
+
+Stop-SCVirtualMachine $vm
+
+$networkAdapter =  Get-SCVirtualNetworkAdapter -VM $vm |
+    ? { $_.SlotId -eq 1 }
+```
+
+### # Connect network adapter to Cluster VM Network
+
+```PowerShell
+$vmNetwork = Get-SCVMNetwork -Name "Cluster VM Network"
+
+$vmSubnet = $vmNetwork.VMSubnet[0]
+
+$portClassification = Get-SCPortClassification -Name "Host Cluster Workload"
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VirtualNetwork "Embedded Team Switch" `
+    -PortClassification $portClassification `
+    -VMNetwork $vmNetwork `
+    -VMSubnet $vmSubnet
+```
+
+### # Assign static IP address to network adapter for cluster traffic
+
+```PowerShell
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Cluster Address Pool"
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vm.Name `
+    -VirtualNetworkAdapter $networkAdapter
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipAddressPool `
+    -Description $vm.Name
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress `
+    -IPv4AddressType Static `
+    -IPv4Address $ipAddress
+
+Start-SCVirtualMachine $vm
+```
+
+---
+
 **TODO:**
 
 ```PowerShell

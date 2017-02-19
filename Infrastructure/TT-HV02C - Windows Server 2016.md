@@ -815,6 +815,8 @@ $task.Actions[0].Arguments = `
     "/C `"%windir%\system32\defrag.exe -c -h -g -# >> $logFile`""
 
 Set-ScheduledTask $task
+
+Enable-ScheduledTask $task
 ```
 
 > **Important**
@@ -1207,6 +1209,35 @@ ping 10.1.11.1 -f -l 8900
 cls
 ```
 
+#### # Do not allow cluster network communication on the "storage" network (10.1.10.0/24)
+
+```PowerShell
+Get-ClusterNetwork | Get-ClusterNetworkInterface
+
+(Get-ClusterNetwork -Name "Cluster Network 4").Role = 0
+```
+
+##### Reference
+
+**Network Recommendations for a Hyper-V Cluster in Windows Server 2012**\
+From <[https://technet.microsoft.com/en-us/library/dn550728(v=ws.11).aspx](https://technet.microsoft.com/en-us/library/dn550728(v=ws.11).aspx)>
+
+```PowerShell
+cls
+```
+
+### # Change network binding order for cluster network
+
+```PowerShell
+Get-NetIPInterface | sort AddressFamily, InterfaceMetric
+
+Set-NetIPInterface -InterfaceAlias "vEthernet (Cluster)" -InterfaceMetric 15
+```
+
+```PowerShell
+cls
+```
+
 ### # Verify SMB Multichannel is working as expected
 
 ```PowerShell
@@ -1214,6 +1245,278 @@ $source = "\\TT-HV02A\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
 $destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
 
 robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
+```
+
+### Issue: SMB Multichannel starts off strong, but throughput quickly drops
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/FCD0204F25E247CE44526B294F19C51A284F243C.png)
+
+```PowerShell
+cls
+```
+
+#### # Remove affinity between virtual network adapters and physical network adapters
+
+```PowerShell
+Get-VMNetworkAdapterTeamMapping -ManagementOS |
+```
+
+    % { Remove-VMNetworkAdapterTeamMapping -Name \$_.Name -ManagementOS }
+
+```PowerShell
+cls
+```
+
+### # Configure NIC team
+
+#### # Rename network connections
+
+```PowerShell
+Get-NetAdapter -Physical | select InterfaceDescription
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+    Rename-NetAdapter -NewName "Storage Team 1A"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Storage Team 1B"
+```
+
+#### # Configure network team
+
+```PowerShell
+$interfaceAlias = "Storage Team 1"
+```
+
+##### # Create NIC team
+
+```PowerShell
+$teamMembers = "Storage Team 1A", "Storage Team 1B"
+
+New-NetLbfoTeam `
+    -Name $interfaceAlias `
+    -TeamMembers $teamMembers `
+    -Confirm:$false
+```
+
+##### # Verify NIC team status - "Storage Team 1"
+
+```PowerShell
+Write-Host "Waiting for NIC team to initialize..."
+Start-Sleep -Seconds 5
+
+do {
+    If (Get-NetLbfoTeam -Name $interfaceAlias | Where Status -eq "Up")
+    {
+        return
+    }
+
+    Write-Host "." -NoNewline
+    Start-Sleep -Seconds 5
+```
+
+}  while (\$true)
+
+> **Important**
+>
+> Ensure the **Status** property of the network team is **Up**.
+
+```PowerShell
+cls
+```
+
+### # Verify SMB copy achieves ~2 Gbps throughput...
+
+```PowerShell
+$source = "\\TT-HV02A\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
+$destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
+
+robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
+```
+
+### ...nope, only 1 Gbps throughput -- so try Switch Embedded Team (SET) instead of LBFO team
+
+#### # Remove teamed switch
+
+```PowerShell
+Get-NetLbfoTeam | Remove-NetLbfoTeam
+```
+
+#### # Create Hyper-V switch using Switch Embedded Team
+
+```PowerShell
+New-VMSwitch -Name "Storage Team" -AllowManagementOS $True -NetAdapterName "Storage Team 1A", "Storage Team 1B" -EnableEmbeddedTeaming $True
+```
+
+```PowerShell
+cls
+```
+
+### # Verify SMB copy achieves ~2 Gbps throughput...
+
+```PowerShell
+ipconfig /registerdns
+ipconfig /flushdns
+
+$source = "\\TT-HV02A\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
+$destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
+
+robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
+```
+
+### ...nope, only 1 Gbps throughput -- so don't use teaming for "storage" network
+
+#### # Remove teamed switch
+
+```PowerShell
+Get-VMSwitch "Storage Team" | Remove-VMSwitch
+```
+
+#### # Rename network connections
+
+```PowerShell
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter" |
+    Rename-NetAdapter -NewName "Storage 1"
+
+Get-NetAdapter `
+    -InterfaceDescription "Intel(R) Gigabit CT Desktop Adapter #2" |
+    Rename-NetAdapter -NewName "Storage 2"
+```
+
+```PowerShell
+cls
+```
+
+### # Verify SMB copy achieves ~2 Gbps throughput...
+
+```PowerShell
+ipconfig /registerdns
+ipconfig /flushdns
+
+$source = "\\TT-HV02B\C$\NotBackedUp\Products\Microsoft\Windows Server 2016"
+$destination = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016"
+
+robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
+```
+
+### ...yes
+
+```PowerShell
+cls
+```
+
+#### # Configure static IP addresses on "Storage 1" network
+
+```PowerShell
+$interfaceAlias = "Storage 1"
+```
+
+##### # Disable DHCP and router discovery
+
+```PowerShell
+Set-NetIPInterface `
+    -InterfaceAlias $interfaceAlias `
+    -Dhcp Disabled `
+    -RouterDiscovery Disabled
+```
+
+##### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "10.1.10.5"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+```
+
+##### # Configure static IPv6 address
+
+**# Note:** Private IPv6 address range (fd87:77eb:097e:95a1::/64) generated by [http://simpledns.com/private-ipv6.aspx](http://simpledns.com/private-ipv6.aspx)
+
+```PowerShell
+$ipAddress = "fd87:77eb:097e:95a1::5"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 64
+```
+
+##### # Configure IPv4 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.103,192.168.10.104
+```
+
+##### # Configure IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure static IP addresses on "Storage 2" network
+
+```PowerShell
+$interfaceAlias = "Storage 2"
+```
+
+##### # Disable DHCP and router discovery
+
+```PowerShell
+Set-NetIPInterface `
+    -InterfaceAlias $interfaceAlias `
+    -Dhcp Disabled `
+    -RouterDiscovery Disabled
+```
+
+##### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "10.1.10.6"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+```
+
+##### # Configure static IPv6 address
+
+```PowerShell
+$ipAddress = "fd87:77eb:097e:95a1::6"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 64
+```
+
+##### # Configure IPv4 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.103,192.168.10.104
+```
+
+##### # Configure IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
 ```
 
 ---
