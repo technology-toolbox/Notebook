@@ -1545,6 +1545,75 @@ Get-SCVirtualMachine -VMHost TT-HV02C |
 
 ---
 
+## Install DPM agent
+
+```Console
+PowerShell
+```
+
+### # Install DPM 2016 agent
+
+```PowerShell
+$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+    + "\Agents\DPMAgentInstaller_x64.exe"
+
+& $installer TT-DPM01.corp.technologytoolbox.com
+```
+
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
+
+- Exception for DPMRA.exe in all profiles
+- Exception for Windows Management Instrumentation service
+- Exception for RemoteAdmin service
+- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
+
+#### Reference
+
+**Installing Protection Agents Manually**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
+
+---
+
+**TT-DPM01 - DPM Management Shell**
+
+```PowerShell
+cls
+```
+
+### # Attach DPM agent
+
+```PowerShell
+$productionServer = 'TT-HV02C'
+
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName TT-DPM01 `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+> **Note**
+>
+> When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
 **TODO:**
 
 ```PowerShell
@@ -1571,66 +1640,3 @@ msiexec.exe /i $msiPath `
 ```
 
 ### # Approve manual agent install in Operations Manager
-
-```PowerShell
-cls
-```
-
-## # Install and configure Data Protection Manager
-
-### # Install DPM 2012 R2 agent
-
-```PowerShell
-$imagePath = "\\iceman\Products\Microsoft\System Center 2012 R2\" `
-    + "mu_system_center_2012_r2_data_protection_manager_x86_and_x64_dvd_2945939.iso"
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$installer = $imageDriveLetter + ":\SCDPM\Agents\DPMAgentInstaller_x64.exe"
-
-& $installer JUGGERNAUT.corp.technologytoolbox.com
-```
-
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
-
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
-
-- Exception for DPMRA.exe in all profiles
-- Exception for Windows Management Instrumentation service
-- Exception for RemoteAdmin service
-- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
-
-#### Reference
-
-**Installing Protection Agents Manually**\
-Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
-
-### Attach DPM agent
-
-On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the following commands:
-
-```PowerShell
-$productionServer = "STORM"
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName JUGGERNAUT `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `-UserName jjameson-admin
-```
-
-```PowerShell
-cls
-```
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
