@@ -9,13 +9,21 @@ Tuesday, February 14, 2017
 
 ## Deploy federated authentication in SecuritasConnect
 
-### Phase 1: Configure SSL in development environments
+### Configure SSL in development environments
 
-#### Import wildcard SSL certificate (*.securitasinc.com)
+#### Install certificate for secure communication with SecuritasConnect
 
-#### Add public URL for HTTPS
+#### Add public URLs for HTTPS
 
-### Phase 2: Install and configure federation server farm
+#### Unextend web applications
+
+#### Extend web applications to Intranet zone using SSL
+
+#### Add HTTPS bindings to IIS websites
+
+#### Change web service URLs (from HTTP to HTTPS) in Employee Portal
+
+### Install and configure federation server farm
 
 ---
 
@@ -25,9 +33,9 @@ Tuesday, February 14, 2017
 cls
 ```
 
-#### # Create and configure service account for ADFS farm
+#### # Create and configure service account for AD FS farm
 
-##### # Create service account for ADFS
+##### # Create service account for AD FS
 
 ```PowerShell
 $displayName = "Service account for ADFS farm (EXT-ADFS02)"
@@ -50,7 +58,7 @@ New-ADUser `
     -PasswordNeverExpires:$true
 ```
 
-##### # Configure Service Principal Name for ADFS service account
+##### # Configure Service Principal Name for AD FS service account
 
 ```PowerShell
 setspn -S host/fs.technologytoolbox.com $cred.UserName
@@ -428,6 +436,65 @@ GO
 cls
 ```
 
+#### # Enable Securitas employees to login using their e-mail addresses
+
+```PowerShell
+net localgroup Administrators TECHTOOLBOX\jjameson /ADD
+
+runas /USER:TECHTOOLBOX\jjameson cmd
+```
+
+---
+
+**Command Prompt - running as TECHTOOLBOX\\jjameson**
+
+```Console
+PowerShell
+```
+
+---
+
+**PowerShell - running as TECHTOOLBOX\\jjameson**
+
+```PowerShell
+Start-Process PowerShell -Verb runAs
+```
+
+---
+
+**Administrator PowerShell - running as TECHTOOLBOX\\jjameson**
+
+```PowerShell
+Set-AdfsClaimsProviderTrust `
+    -TargetIdentifier "AD AUTHORITY" `
+    -AlternateLoginID mail `
+    -LookupForests corp.technologytoolbox.com
+
+exit
+```
+
+---
+
+```Console
+exit
+```
+
+---
+
+```Console
+exit
+```
+
+---
+
+```Console
+net localgroup Administrators TECHTOOLBOX\jjameson /DELETE
+```
+
+```Console
+cls
+```
+
 #### # Extend validity period for self-signed certificates in AD FS
 
 ```PowerShell
@@ -472,11 +539,11 @@ Add-DnsServerResourceRecordA `
 
 #### Configure Web Application Proxy role
 
-### Phase 3: Configure relying party in AD FS for SecuritasConnect
-
 ```PowerShell
 cls
 ```
+
+### # Configure relying party in AD FS for SecuritasConnect
 
 #### # Create relying party in AD FS
 
@@ -495,10 +562,6 @@ Add-AdfsRelyingPartyTrust `
     -Identifier $identifiers `
     -WSFedEndpoint $wsFedEndpointUrl `
     -AccessControlPolicyName "Permit everyone"
-```
-
-```PowerShell
-cls
 ```
 
 #### # Configure claim issuance policy for relying party
@@ -522,7 +585,13 @@ c:[Type ==
         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
         "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"),
       query = ";mail,displayName,userPrincipalName,tokenGroups;{0}",
-      param = c.Value);'
+      param = c.Value);
+
+@RuleTemplate = "PassThroughClaims"
+@RuleName = "Pass through E-mail Address"
+c:[Type ==
+"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]
+ => issue(claim = c);'
 
 $tempFile = [System.IO.Path]::GetTempFileName()
 
@@ -533,11 +602,11 @@ Set-AdfsRelyingPartyTrust `
     -IssuanceTransformRulesFile $tempFile
 ```
 
-### Phase 4: Configure SharePoint 2013 to trust AD FS as an identity provider
-
 ```PowerShell
 cls
 ```
+
+### # Configure trust relationship from SharePoint farm to AD FS farm
 
 #### # Export token-signing certificate from AD FS farm
 
@@ -580,7 +649,7 @@ copy $source $destination
 cls
 ```
 
-#### # Import token signing certificate to SharePoint farm
+#### # Import token-signing certificate to SharePoint farm
 
 ```PowerShell
 If ((Get-PSSnapin Microsoft.SharePoint.PowerShell `
@@ -683,9 +752,7 @@ $authProvider.ProviderRealms.Add($secureClientPortalUrl, $realm)
 $authProvider.Update()
 ```
 
-### # Phase 5: Configure web application to use AD FS trusted identity provider
-
-#### # Configure SecuritasConnect web application with AD FS identity provider
+### # Configure SecuritasConnect to use AD FS trusted identity provider
 
 ```PowerShell
 $clientPortalUrl = [Uri] "http://client-local-9.securitasinc.com"
@@ -708,7 +775,127 @@ $webApp.Update()
 
 ---
 
-## Customize the AD FS sign-in pages
+### Upgrade to "v4.0 Sprint-29" build
+
+#### Copy new build from TFS drop location
+
+#### Remove previous versions of SecuritasConnect WSPs
+
+#### Install new versions of SecuritasConnect WSPs
+
+### Migrate users
+
+### Install and configure identity provider for client users
+
+```PowerShell
+cls
+```
+
+##### # Configure name resolution for identity provider website
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.224 `
+    -Hostnames idp.technologytoolbox.com
+```
+
+#### # Configure claims provider trust in ADFS
+
+```PowerShell
+Add-AdfsClaimsProviderTrust `
+    -Name idp.technologytoolbox.com `
+    -MetadataURL https://idp.technologytoolbox.com/core/wsfed/metadata `
+    -MonitoringEnabled $true `
+    -AutoUpdateEnabled $true `
+    -SignatureAlgorithm http://www.w3.org/2000/09/xmldsig#rsa-sha1
+```
+
+#### # Configure claim acceptance rules for claims provider trust
+
+```PowerShell
+$claimsProviderTrustName = "idp.technologytoolbox.com"
+
+$claimRules = `
+'@RuleTemplate = "PassThroughClaims"
+@RuleName = "Pass through E-mail Address"
+c:[Type ==
+"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]
+ => issue(claim = c);'
+
+$tempFile = [System.IO.Path]::GetTempFileName()
+
+Set-Content -Value $claimRules -LiteralPath $tempFile
+
+Set-AdfsClaimsProviderTrust `
+    -TargetName $claimsProviderTrustName `
+    -AcceptanceTransformRulesFile $tempFile
+```
+
+### Associate client email domains with claims provider trust
+
+---
+
+**EXT-FOOBAR9 - SQL Server Management Studio**
+
+#### -- Create configuration file for AD FS claims provider trust
+
+```SQL
+USE SecuritasPortal
+GO
+
+SELECT DISTINCT
+  LOWER(
+    REVERSE(
+      SUBSTRING(
+        REVERSE(Email),
+        0,
+        CHARINDEX('@', REVERSE(Email))))) AS OrganizationalAccountSuffix,
+  'idp.technologytoolbox.com' AS TargetName
+FROM
+  dbo.aspnet_Membership
+WHERE
+  Email NOT LIKE '%securitasinc.com'
+
+-- Save results to file
+-- C:\NotBackedUp\Temp\ADFS-Claims-Provider-Trust-Configuration.csv
+--
+-- Insert headers:
+-- OrganizationalAccountSuffix,TargetName
+```
+
+---
+
+```PowerShell
+cls
+
+$source = '\\EXT-FOOBAR9\C$\NotBackedUp\Temp' `
+    + '\ADFS-Claims-Provider-Trust-Configuration.csv'
+
+$destination = 'C:\NotBackedUp\Temp'
+
+copy $source $destination
+```
+
+#### # Set organizational account suffixes on AD FS claims provider trust
+
+```PowerShell
+Push-Location $destination
+
+$claimsProviderTrustName = "idp.technologytoolbox.com"
+
+$orgAccountSuffixes = `
+    Import-Csv .\ADFS-Claims-Provider-Trust-Configuration.csv |
+        where { $_.TargetName -eq $claimsProviderTrustName } |
+        select -ExpandProperty OrganizationalAccountSuffix
+
+Set-AdfsClaimsProviderTrust `
+    -TargetName $claimsProviderTrustName `
+    -OrganizationalAccountSuffix $orgAccountSuffixes
+
+Pop-Location
+```
+
+## Customize AD FS login pages
 
 ### References
 
@@ -722,294 +909,57 @@ From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-rea
 cls
 ```
 
-### # Customize the AD FS sign-in page for SecuritasConnect
+### # Customize AD FS login pages
+
+#### # Customize text and image on login pages for SecuritasConnect relying party
 
 ```PowerShell
-$relyingPartyName = "client-local-4.securitasinc.com"
-$companyName = "SecuritasConnect"
-$organizationalNameDescriptionText = "Enter your Securitas e-mail address and password below."
+$clientPortalUrl = [Uri] "http://client-local-9.securitasinc.com"
 
-#$signInPageDescription = "<p>{Placeholder text for employee login page}</p>"
-$signInPageDescription = $null
-
-#$illustrationPath = "C:\NotBackedUp\Temp\SecuritasConnect-1420x1080.png"
-$illustrationPath = "C:\NotBackedUp\Temp\ADFS_splash_v1-01.jpg"
+$relyingPartyDisplayName = $clientPortalUrl.Host
 
 Set-AdfsRelyingPartyWebContent `
-    -TargetRelyingPartyName $relyingPartyName `
-    -CompanyName $companyName `
-    -OrganizationalNameDescriptionText $organizationalNameDescriptionText `
-    -SignInPageDescription $signInPageDescription `
-    -HomeRealmDiscoveryOtherOrganizationDescriptionText "Enter your e-mail address below."
+    -TargetRelyingPartyName $relyingPartyDisplayName `
+    -CompanyName "SecuritasConnect" `
+    -OrganizationalNameDescriptionText `
+        "Enter your Securitas e-mail address and password below." `
+    -SignInPageDescription $null `
+    -HomeRealmDiscoveryOtherOrganizationDescriptionText `
+        "Enter your e-mail address below."
+
+$tempFile = [System.Io.Path]::GetTempFileName()
+$tempFile = $tempFile.Replace(".tmp", ".jpg")
+
+Invoke-WebRequest `
+    -Uri https://idp.technologytoolbox.com/images/illustration.jpg `
+    -OutFile $tempFile
 
 Set-AdfsRelyingPartyWebTheme `
-    -TargetRelyingPartyName $relyingPartyName `
-    -Illustration @{path=$illustrationPath}
+    -TargetRelyingPartyName $relyingPartyDisplayName `
+    -Illustration @{ path = $tempFile }
+
+Remove-Item $tempFile
 ```
+
+#### # Configure custom JavaScript file for additional customizations
 
 ```PowerShell
-cls
-```
+$clientPortalUrl = [Uri] "http://client-local-9.securitasinc.com"
 
-#### # Create a custom theme
+$relyingPartyDisplayName = $clientPortalUrl.Host
 
-```PowerShell
-$themeName = "SecuritasConnect"
+$tempFile = [System.Io.Path]::GetTempFileName()
+$tempFile = $tempFile.Replace(".tmp", ".js")
 
-New-AdfsWebTheme -Name $themeName -SourceName Default
+Invoke-WebRequest `
+    -Uri https://idp.technologytoolbox.com/js/onload.js `
+    -OutFile $tempFile
 
-mkdir "C:\NotBackedUp\Temp\$themeName-Theme"
-
-Export-AdfsWebTheme `
-```
-
-    -Name \$themeName `\
-    -DirectoryPath "C:\\NotBackedUp\\Temp\\\$themeName-Theme"
-
-```Console
-Notepad "C:\NotBackedUp\Temp\$themeName-Theme\script\onload.js"
-```
-
----
-
-**onload.js**
-
-```JavaScript
-// -- Begin custom code
-
-var docCookies = {
-  getItem: function (sKey) {
-    if (!sKey) { return null; }
-    return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
-  },
-  setItem: function (sKey, sValue, vEnd, sPath, sDomain, bSecure) {
-    if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) { return false; }
-    var sExpires = "";
-    if (vEnd) {
-      switch (vEnd.constructor) {
-        case Number:
-          sExpires = vEnd === Infinity ? "; expires=Fri, 31 Dec 9999 23:59:59 GMT" : "; max-age=" + vEnd;
-          break;
-        case String:
-          sExpires = "; expires=" + vEnd;
-          break;
-        case Date:
-          sExpires = "; expires=" + vEnd.toUTCString();
-          break;
-      }
-    }
-    document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue) + sExpires + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "") + (bSecure ? "; secure" : "");
-    return true;
-  },
-  removeItem: function (sKey, sPath, sDomain) {
-    if (!this.hasItem(sKey)) { return false; }
-    document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "");
-    return true;
-  },
-  hasItem: function (sKey) {
-    if (!sKey) { return false; }
-    return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
-  },
-  keys: function () {
-    var aKeys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "").split(/\s*(?:\=[^;]*)?;\s*/);
-    for (var nLen = aKeys.length, nIdx = 0; nIdx < nLen; nIdx++) { aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]); }
-    return aKeys;
-  }
-};
-
-function getParameterByName(name, url) {
-  if (!url) {
-    url = window.location.href;
-  }
-  name = name.replace(/[\[\]]/g, "\\$&");
-  var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-    results = regex.exec(url);
-
-  if (!results) return null;
-  if (!results[2]) return '';
-  return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
-
-// http://stackoverflow.com/questions/1634748/how-can-i-delete-a-query-string-parameter-in-javascript
-function removeUrlParameter(url, parameter) {
-    //prefer to use l.search if you have a location/link object
-    var urlparts= url.split('?');
-    if (urlparts.length>=2) {
-
-        var prefix= encodeURIComponent(parameter)+'=';
-        var pars= urlparts[1].split(/[&;]/g);
-
-        //reverse iteration as may be destructive
-        for (var i= pars.length; i-- > 0;) {
-            //idiom for string.startsWith
-            if (pars[i].lastIndexOf(prefix, 0) !== -1) {
-                pars.splice(i, 1);
-            }
-        }
-
-        url= urlparts[0] + (pars.length > 0 ? '?' + pars.join('&') : "");
-        return url;
-    } else {
-        return url;
-    }
-}
-
-function resetLogin() {
-    docCookies.removeItem('SecuritasConnectUserName');
-    var redirectUrl = window.location.href;
-
-    redirectUrl = removeUrlParameter(redirectUrl, 'RedirectToIdentityProvider');
-    redirectUrl = removeUrlParameter(redirectUrl, 'userName');
-
-    window.location.href = redirectUrl;
-}
-
-var copyright = document.getElementById("copyright");
-
-copyright.innerHTML = '&copy; 2017 Securitas Security Services USA, Inc.';
-
-var identityProviders = document.querySelectorAll("div[class='idp']");
-
-var childNode;
-
-if (identityProviders) {
-    if (identityProviders.length > 0) {
-        childNode = identityProviders[0].childNodes[1].childNodes[0];
-
-        if (childNode.innerText === 'Active Directory') {
-            childNode.innerText = 'Securitas login';
-        }
-    }
-
-    if (identityProviders.length > 1) {
-        childNode = identityProviders[1].childNodes[1].childNodes[0];
-
-        if (childNode.innerText === 'Other organization') {
-            childNode.innerText = 'Client login';
-        }
-    }
-}
-
-var currentUrl = window.location.href;
-
-var hrdAreaElement = document.getElementById('hrdArea');
-if (hrdAreaElement) {
-    // Immediately show the email input form
-    HRD.showEmailInput();
-
-     //Remove the image and the login description message
-     //document.getElementsByClassName('groupMargin')[1].innerHTML = "" ;
-     //document.getElementsByClassName('groupMargin')[2].innerHTML = "Enter your credentials:" ;
-
-     var userName = docCookies.getItem('SecuritasConnectUserName');
-
-     if (userName) {
-        var errorTextElement = document.getElementById('errorText');
-        var emailInputAreaElement = document.getElementById('emailInputArea');
-        var emailIntroductionElement = document.getElementById('emailIntroduction');
-
-        if (errorTextElement && errorTextElement.innerHTML) {
-            // An error occurred in the HRD process (most likely due to email domain not recognized)
-        }
-        else {
-            if (emailInputAreaElement) {
-                emailInputAreaElement.innerHTML =
-'<div class="idp" tabindex="1">' +
-'<img class="largeIcon float" src="/adfs/portal/images/idp/idp.png" alt="User">' +
-'<div class="idpDescription float"><span class="largeTextNoWrap indentNonCollapsible">' + userName + '</span></div>' +
-'</div>' +
-'<input type="HIDDEN" id="emailInput" name="Email" value="' + userName + '" />' +
-'<div class="idp" tabindex="1" onkeypress="if (event &amp;&amp; (event.keyCode == 32 || event.keyCode == 13)) resetLogin();" onclick="resetLogin(); return false;">' +
-'<img class="largeIcon float" src="/adfs/portal/images/idp/idp.png" alt="User">' +
-'<div class="idpDescription float"><span class="largeTextNoWrap indentNonCollapsible">Use another account</span></div>' +
-'</div>';
-            }
-        }
-    }
-
-     //Override of the submitEmail function
-     HRD.submitEmail = function () {
-           var u = new InputUtil() ;
-           var e = new HRDErrors() ;
-           var email = document.getElementById(HRD.emailInput);
-
-           //Detect if the user typed the AD suffix
-           if (email.value.toLowerCase().match('(@technologytoolbox.com)$')) {
-                //Calculate the URL to redirect the user to the AD form
-                var redirectUrl = currentUrl;
-
-           	//Check if the URL has an empty username
-                if (redirectUrl.indexOf("username=") != -1 ) {
-                     //Discard the old name
-                     redirectUrl = redirectUrl.replace("username=","userNameOld=") ;
-                }
-
-                if (redirectUrl.indexOf("?") != -1 ) {
-                    redirectUrl += "&RedirectToIdentityProvider=AD+AUTHORITY&userName=" + email.value ;
-                }
-                else {
-                    redirectUrl += "?RedirectToIdentityProvider=AD+AUTHORITY&userName=" + email.value ;
-                }
-
-                window.location.href = redirectUrl;
-                return false ;
-           }
-           if (!email.value || !email.value.match('[@]')) {
-                u.setError(email, e.invalidSuffix) ;
-                return false ;
-           }
-
-           docCookies.setItem('SecuritasConnectUserName', email.value, Infinity);
-
-           return true ;
-     };
-}
-
-var userNameAreaElement = document.getElementById('userNameArea') ;
-if (userNameAreaElement) {
-    var userName = getParameterByName("userName", currentUrl);
-
-    if (userName) {
-        docCookies.setItem('SecuritasConnectUserName', userName, Infinity);
-    }
-    else {
-        userName = docCookies.getItem('SecuritasConnectUserName');
-    }
-
-    if (userName) {
-        var userNameInputElement = document.getElementById('userNameInput');
-        userNameInputElement.value = userName;
-
-        var u = new InputUtil();
-        u.setInitialFocus(Login.passwordInput);
-
-        userNameAreaElement.innerHTML =
-'<div class="idp" tabindex="1">' +
-'<img class="largeIcon float" src="/adfs/portal/images/idp/localsts.png" alt="Employee badge">' +
-'<div class="idpDescription float"><span class="largeTextNoWrap indentNonCollapsible">' + userName + '</span></div>' +
-'</div>' +
-'<input type="HIDDEN" id="userNameInput" name="userName" value="' + userName + '" />';
-
-        var submissionAreaElement = document.getElementById('submissionArea') ;
-        if (submissionAreaElement) {
-            var newElement = document.createElement("div");
-            submissionAreaElement.parentElement.insertBefore(newElement, submissionAreaElement);
-
-            newElement.outerHTML = '<div class="idp" tabindex="1" onkeypress="if (event &amp;&amp; (event.keyCode == 32 || event.keyCode == 13)) resetLogin();" onclick="resetLogin(); return false;">' +
-'<img class="largeIcon float" src="/adfs/portal/images/idp/idp.png" alt="User">' +
-'<div class="idpDescription float"><span class="largeTextNoWrap indentNonCollapsible">Use another account</span></div>' +
-'</div>';
-        }
-    }
-}
-```
-
----
-
-```PowerShell
 Set-AdfsRelyingPartyWebTheme `
-    -TargetRelyingPartyName $relyingPartyName `
-    -OnLoadScriptPath "C:\NotBackedUp\Temp\$themeName-Theme\script\onload.js"
+    -TargetRelyingPartyName $relyingPartyDisplayName `
+    -OnLoadScriptPath $tempFile
+
+Remove-Item $tempFile
 ```
 
 #### Disable HRD cookie (due to issue with toggling between "Securitas login" and "Client login")
@@ -1018,105 +968,7 @@ Set-AdfsRelyingPartyWebTheme `
 Set-ADFSWebConfig -HRDCookieEnabled $false
 ```
 
-#### TODO
-
-Incorrect user ID or password. Type the correct user ID and password, and try again.
-
-### # Revert customizations for SecuritasConnect (demo)
-
-```PowerShell
-$relyingPartyTrustName = "client-local-4.securitasinc.com"
-$companyName = $null
-$organizationalNameDescriptionText = $null
-$signInPageDescription = $null
-$illustrationPath = $null
-
-Set-AdfsRelyingPartyWebContent `
-    -TargetRelyingPartyName $relyingPartyTrustName `
-    -CompanyName $companyName `
-    -OrganizationalNameDescriptionText $organizationalNameDescriptionText `
-    -SignInPageDescription $signInPageDescription
-
-Set-AdfsRelyingPartyWebTheme `
-    -TargetRelyingPartyName $relyingPartyTrustName `
-    -Illustration @{path=$illustrationPath}
-```
-
-### -- Migrate Securitas users
-
-```Console
-USE [SecuritasPortal]
-GO
-
-UPDATE [Customer].[BranchManagerAssociatedUsers]
-SET BranchManagerUserName = 'smasters@technologytoolbox.com'
-WHERE BranchManagerUserName = 'TECHTOOLBOX\smasters'
-```
-
-```Console
-cls
-```
-
-### # Enable Securitas employees to login using e-mail address (instead of UPN or SAM Account Name)
-
-```PowerShell
-net localgroup Administrators TECHTOOLBOX\jjameson /ADD
-
-runas /USER:TECHTOOLBOX\jjameson cmd
-```
-
----
-
-**Command Prompt - running as TECHTOOLBOX\\jjameson**
-
-```Console
-PowerShell
-```
-
----
-
-**PowerShell - running as TECHTOOLBOX\\jjameson**
-
-```PowerShell
-Start-Process PowerShell -Verb runAs
-```
-
----
-
-**Administrator PowerShell - running as TECHTOOLBOX\\jjameson**
-
-```PowerShell
-Set-AdfsClaimsProviderTrust `
-    -TargetIdentifier "AD AUTHORITY" `
-    -AlternateLoginID mail `
-    -LookupForests corp.technologytoolbox.com
-
-exit
-```
-
----
-
-```Console
-exit
-```
-
----
-
-```Console
-exit
-```
-
----
-
-```Console
-net localgroup Administrators TECHTOOLBOX\jjameson /DELETE
-```
-
-```Console
-cls
-```
-
-## # Configure claims provider trust for Contoso
+## Configure claims provider trust for Contoso
 
 ### Configure relying party on Contoso ADFS server
 
@@ -1240,77 +1092,3 @@ Set-AdfsClaimsProviderTrust `
 From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/](https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/)>
 
 ### Configure relying party trust to pass through claims from claims providers other than Active Directory
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/1572A7C9C2707DF78789E0281A1E3C7542005D7E.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/57/17005CBFCC144AFD425E923F44D26D4F52AF9857.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/67/87BDA6F851FB8A53FF87EAC9AF424ADDE3566267.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A6/099A594E54CE56397B0E5662FF033594B92690A6.png)
-
-Repeat the previous steps to pass through the following additional claims:
-
-- **Name (pass through all claim values)**
-- **UPN (pass through all claim values)**
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/10/BA6D2707162F6AD3897B147198B2B6C23FD5BA10.png)
-
-### -- Migrate federated users
-
-```SQL
-USE [SecuritasPortal]
-GO
-```
-
-#### -- Migrate "Angela.Parks" --> "aparks@contoso.com"
-
-```Console
-UPDATE [Customer].[ClientUsers]
-SET UserName = 'aparks@contoso.com'
-WHERE UserName = 'Angela.Parks'
-
-UPDATE [Customer].SitePermissions
-SET UserName = 'aparks@contoso.com'
-WHERE UserName = 'Angela.Parks'
-
-UPDATE dbo.aspnet_Users
-SET
-    UserName = 'aparks@contoso.com'
-    , LoweredUserName = 'aparks@contoso.com'
-WHERE UserName = 'Angela.Parks'
-
-UPDATE [Customer].[BranchManagerAssociatedUsers]
-SET AssociatedUserName = 'aparks@contoso.com'
-WHERE AssociatedUserName = 'Angela.Parks'
-```
-
-#### -- Migrate "Ian.Lunn" --> "ilunn@woodgrove.com"
-
-```PowerShell
-UPDATE [Customer].[ClientUsers]
-SET UserName = 'ilunn@woodgrove.com'
-WHERE UserName = 'Ian.Lunn'
-
-UPDATE [Customer].SitePermissions
-SET UserName = 'ilunn@woodgrove.com'
-WHERE UserName = 'Ian.Lunn'
-
-UPDATE dbo.aspnet_Users
-SET
-    UserName = 'ilunn@woodgrove.com'
-    , LoweredUserName = 'ilunn@woodgrove.com'
-WHERE UserName = 'Ian.Lunn'
-
-UPDATE [Customer].[BranchManagerAssociatedUsers]
-SET AssociatedUserName = 'ilunn@woodgrove.com'
-WHERE AssociatedUserName = 'Ian.Lunn'
-
-
-
-
-
-Set-AdfsClaimsProviderTrust `
-    -TargetName "idp-local-4.securitasinc.com" `
-    -OrganizationalAccountSuffix @("woodgrove.com")
-```
