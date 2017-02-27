@@ -34,7 +34,7 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Team Switch"
+    -SwitchName "Embedded Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
