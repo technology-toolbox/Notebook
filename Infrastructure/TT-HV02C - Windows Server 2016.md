@@ -1614,6 +1614,146 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
+## Issue: Storage tiers do not work with ReFS
+
+From Storage-Tiers-Optimization.log:
+
+```Text
+    Microsoft Drive Optimizer
+    Copyright (c) 2013 Microsoft Corp.
+
+    Invoking tier optimization on Data01 (D:)...
+
+
+
+    The operation requested is not supported by the hardware backing the volume. (0x8900002A)
+```
+
+Apparently there are some known issues with storage tiering and ReFS:
+
+"ReFS should be used with Storage Spaces Direct (S2D), and stick with NTFS for all other scenarios."
+
+-- Elden Christensen (MSFT)
+
+**Windows Server 2016 Storage Spaces Tier ReFS**\
+From <[https://social.technet.microsoft.com/Forums/windows/en-US/06f07aaf-484c-435e-b655-2761a1dcbb67/windows-server-2016-storage-spaces-tier-refs?forum=winserverfiles](https://social.technet.microsoft.com/Forums/windows/en-US/06f07aaf-484c-435e-b655-2761a1dcbb67/windows-server-2016-storage-spaces-tier-refs?forum=winserverfiles)>
+
+### Workaround
+
+#### Move virtual machines to different hypervisor
+
+#### Login as fabric administrator account
+
+```Console
+PowerShell
+```
+
+#### # Delete virtual disks
+
+```PowerShell
+Get-VirtualDisk | Remove-VirtualDisk
+```
+
+```PowerShell
+cls
+```
+
+#### # Recreate mirrored virtual disk (and format using NTFS)
+
+```PowerShell
+$ssdTier = Get-StorageTier -FriendlyName "SSD Tier"
+$hddTier = Get-StorageTier -FriendlyName "HDD Tier"
+
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
+        -FriendlyName "Data01" `
+        -ResiliencySettingName Mirror `
+        -StorageTiers $ssdTier, $hddTier `
+        -StorageTierSizes 250GB, 3724GB `
+        -WriteCacheSize 5GB
+```
+
+> **Note**
+>
+> **3724GB** was found by trial and error:
+>
+> New-VirtualDisk : Not Supported
+>
+> Extended information:\
+> The storage pool does not have sufficient eligible resources for the creation of the specified virtual disk.
+>
+> Recommended Actions:\
+> - Choose a combination of FaultDomainAwareness and NumberOfDataCopies (or PhysicalDiskRedundancy) supported by the\
+> storage pool.\
+> - Choose a value for NumberOfColumns that is less than or equal to the number of physical disks in the storage fault\
+> domain selected for the virtual disk.
+
+```PowerShell
+cls
+```
+
+#### # Create partitions and volumes
+
+##### # Create volume "D" on Data01
+
+```PowerShell
+Get-VirtualDisk "Data01" | Get-Disk | Set-Disk -IsReadOnly 0
+
+Get-VirtualDisk "Data01"| Get-Disk | Set-Disk -IsOffline 0
+
+Get-VirtualDisk "Data01"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+
+Get-VirtualDisk "Data01"| Get-Disk |
+    New-Partition -DriveLetter "D" -UseMaximumSize
+
+Initialize-Volume `
+    -DriveLetter "D" `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Data01" `
+    -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure "Storage Tiers Optimization" scheduled task to append to log file
+
+```PowerShell
+If ((Test-Path C:\NotBackedUp\Temp) -eq $false)
+{
+    New-Item -ItemType Directory -Path C:\NotBackedUp\Temp
+}
+
+$logFile = "C:\NotBackedUp\Temp\Storage-Tiers-Optimization.log"
+
+$taskPath = "\Microsoft\Windows\Storage Tiers Management\"
+$taskName = "Storage Tiers Optimization"
+
+$task = Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName
+
+$task.Actions[0].Execute = "%windir%\system32\cmd.exe"
+
+$task.Actions[0].Arguments = `
+    "/C `"%windir%\system32\defrag.exe -c -h -g -# >> $logFile`""
+
+Set-ScheduledTask $task
+
+Enable-ScheduledTask $task
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure VM storage
+
+```PowerShell
+mkdir D:\NotBackedUp\VMs
+
+Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
+```
+
 **TODO:**
 
 ```PowerShell
