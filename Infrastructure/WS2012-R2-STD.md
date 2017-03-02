@@ -20,11 +20,12 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02C"
+$vmHost = "TT-HV02A"
 $vmName = "WS2012-R2-Std"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
-$isoPath = "\\TT-FS01\Products\Microsoft\Windows Server 2012 R2" `
+$isoPath = "\\TT-FS01.corp.technologytoolbox.com\Products\Microsoft" `
+    + "\Windows Server 2012 R2" `
     + "\en_windows_server_2012_r2_with_update_x64_dvd_6052708.iso"
 
 New-VM `
@@ -79,11 +80,7 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 
 ### Set password for the local Administrator account
 
-```Console
-PowerShell
-```
-
-```Console
+```PowerShell
 cls
 ```
 
@@ -126,8 +123,6 @@ cls
 
 ```PowerShell
 sconfig
-
-PowerShell
 ```
 
 ```PowerShell
