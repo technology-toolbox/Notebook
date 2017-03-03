@@ -704,3 +704,62 @@ Set-DnsClientServerAddress `
     -InterfaceAlias $interfaceAlias `
     -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
 ```
+
+```PowerShell
+cls
+```
+
+## # Install DPM agent
+
+### # Install DPM 2016 agent
+
+```PowerShell
+net use \\TT-FS01\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+    + "\Agents\DPMAgentInstaller_x64.exe"
+
+& $installer TT-DPM01.corp.technologytoolbox.com
+```
+
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
+
+- Exception for DPMRA.exe in all profiles
+- Exception for Windows Management Instrumentation service
+- Exception for RemoteAdmin service
+- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
+
+#### Reference
+
+**Installing Protection Agents Manually**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
+
+---
+
+**TT-DPM01 - DPM Management Shell**
+
+```PowerShell
+cls
+```
+
+### # Attach DPM agent
+
+```PowerShell
+$productionServer = 'TT-SOFS01B'
+
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName TT-DPM01 `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
+```
+
+---

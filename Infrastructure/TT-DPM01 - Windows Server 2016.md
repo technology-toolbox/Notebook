@@ -1342,25 +1342,6 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
-## # Install SCOM agent
-
-```PowerShell
-$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-## # Approve manual agent install in Operations Manager
-
 ## Set up protection for live migration
 
 ### Reference
@@ -1372,41 +1353,114 @@ From <[https://technet.microsoft.com/en-us/library/jj656643.aspx](https://techne
 cls
 ```
 
-### # Install the VMM console
+### # Install VMM console on DPM server
+
+---
+
+**TT-VMM01 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
-$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
-    + '\mu_system_center_2012_r2_virtual_machine_manager_x86_and_x64_dvd_2913737.iso'
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-& ($imageDriveLetter + ":\Setup.exe")
+cls
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/60997802DE1D0243391A2FA44927FF7E3F160962.png)
+#### # Insert the VMM 2016 installation media
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BE/EB8E82E613AB6B5A91576F47E0C3F1048C7715BE.png)
+```PowerShell
+$isoName = "mu_system_center_2016_virtual_machine_manager_x64_dvd_9368503.iso"
+$vmName = "TT-DPM01"
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/63C2F0563CD8ABFE0BD9A12AFB1D3A360673C355.png)
+$iso = Get-SCISO | where { $_.Name -eq $isoName }
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7B/E25157D8EDCFD7C7327880EDEC8B42FF7AA05A7B.png)
+$dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/6782996D0CAA170F9A8FCB15AC2EAA6C6BDC4DD1.png)
+Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -ISO $iso -Link
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/57/E403C040F0A39BEB1AB21A73D8D9454659E26957.png)
+---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BE/85B51E633CFD2CE08467D8E30EDA1B7E4E1B58BE.png)
+```PowerShell
+cls
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/E46B9AE2A518B3DA86EF87F29441793B3D815EB9.png)
+#### # Extract VMM setup files
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/87A63FE2C78E00997B6628916CDB1F9E509BD971.png)
+```PowerShell
+X:\SC2016_SCVMM.EXE
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/47/17E8A97F5BD18071E9AFF932338A8FC175249047.png)
+Destination location: **C:\\NotBackedUp\\Temp\\System Center 2016 Virtual Machine Manager**
+
+---
+
+**TT-VMM01 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Remove the VMM 2016 installation media
+
+```PowerShell
+$vmName = "TT-DPM01"
+
+$dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
+
+Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -NoMedia
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Install VMM console
+
+**To install the VMM console:**
+
+1. To start the Virtual Machine Manager Setup Wizard, on your installation media, right-click **setup.exe**, and then click **Run as administrator**.
+2. On the main setup page, click **Install**.
+3. On the **Select features to install** page, select the **VMM console** check box, and click **Next**.
+4. On the **Please read this notice** page, review the license agreement, select the **I agree with the terms of this notice** check box, and then click **Next**.
+5. On the **Diagnostic and Usage Data** page, review the data collection and usage policy and then click **Next**.
+6. On the **Installation location** page, ensure the default path is specified (**C:\\Program Files\\Microsoft System Center 2016\\Virtual Machine Manager**), and then click **Next**.
+7. On the **Port configuration** page, ensure the default port number (**8100**) is specified for communication with the VMM management server, and click **Next**.
+8. On the **Installation summary** page, review your selections and do one of the following:
+9. On the **Setup completed... **page:
+   1. Review any warnings that occurred.
+   2. Clear the **Check for the latest Virtual Machine Manager updates** checkbox.
+   3. Clear the **Open the VMM console when this wizard closes** checkbox.
+   4. Click **Close** to finish the installation.
+
+```PowerShell
+    & "C:\NotBackedUp\Temp\System Center 2016 Virtual Machine Manager\setup.exe"
+```
+
+- Click **Previous** to change any selections.
+- Click **Install** to install the VMM console.
+
+After you click **Install**, the **Installing features** page appears and installation progress is displayed.
+
+> **Important**
+>
+> During Setup, VMM enables the following firewall rules, which remain in effect even if you later uninstall VMM:
+>
+> - File Server Remote Management
+> - Windows Standards-Based Storage Management firewall rules
+
+```PowerShell
+cls
+```
+
+#### # Remove temporary VMM setup files
+
+```PowerShell
+Remove-Item "C:\NotBackedUp\Temp\System Center 2016 Virtual Machine Manager" -Recurse
+```
 
 ### Update VMM using Windows Update
 
-**Update Rollup 9 for Microsoft System Center 2012 R2 - Virtual Machine Manager (KB3129783)**
+**Update Rollup 2.1 for Microsoft System Center 2016 - Virtual Machine Manager Administrator Console (KB4011492)**
 
 ### Add DPM machine account as Read-Only Administrator in VMM
 
@@ -1415,14 +1469,14 @@ From <[https://technet.microsoft.com/en-us/library/hh356036.aspx](https://techne
 
 ---
 
-**FOOBAR8**
+**TT-VMM01 - Run as TECHTOOLBOX\\jjameson-admin**
 
 1. Open **Virtual Machine Manager**.
 2. In the **Settings** workspace, on the **Home** tab in the **Create** group, click **Create User Role**.
 3. In the **Create User Role Wizard**:
    1. On the **Name and description** page, in the **Name** box, type **DPM Servers** and click **Next**.
    2. On the **Profile** page, select **Read-Only Administrator** and then click **Next**.
-   3. On the **Members** page, click **Add** to add **TECHTOOLBOX\\JUGGERNAUT\$** to the user role with the **Select Users, Computers, or Groups** dialog box. After you have added the members, click **Next**.
+   3. On the **Members** page, click **Add** to add **TECHTOOLBOX\\TT-DPM01\$** to the user role with the **Select Users, Computers, or Groups** dialog box. After you have added the members, click **Next**.
    4. On the **Scope** page, select **All Hosts** and click **Next**.
    5. On the **Library servers** page, click **Next**.
    6. On the **Run As accounts** page, click **Next**.
@@ -1437,7 +1491,7 @@ cls
 ### # Connect DPM server to VMM server
 
 ```PowerShell
-Set-DPMGlobalProperty -DPMServerName JUGGERNAUT -KnownVMMServers MOONSTAR
+Set-DPMGlobalProperty -DPMServerName TT-DPM01 -KnownVMMServers TT-VMM01
 ```
 
 **TODO:**
@@ -1446,26 +1500,10 @@ Set-DPMGlobalProperty -DPMServerName JUGGERNAUT -KnownVMMServers MOONSTAR
 cls
 ```
 
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-```Console
-cls
-```
-
 ## # Install SCOM agent
 
 ```PowerShell
-$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
+$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
     + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
 
 $imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
