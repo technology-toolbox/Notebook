@@ -1,7 +1,7 @@
-﻿# EXT-DC03 - Windows Server 2012 R2 Datacenter
+﻿# EXT-DC06
 
-Sunday, December 18, 2016
-6:00 AM
+Monday, March 20, 2017
+6:18 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -41,7 +41,7 @@ cls
 
 ```PowerShell
 $imageName = `
-    "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-20160915" `
+    "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-20170111" `
     + "-en.us-127GB.vhd"
 ```
 
@@ -66,7 +66,7 @@ If ($domainCred -eq $null)
 $subscriptionId = "********-fdf5-4fd0-b21b-{redacted}"
 $storageAccount = "techtoolbox"
 $location = "West US"
-$vmName = "EXT-DC03"
+$vmName = "EXT-DC06"
 $cloudService = $vmName
 $instanceSize = "Basic_A0"
 $vhdPath = "https://$storageAccount.blob.core.windows.net/vhds/$vmName"
