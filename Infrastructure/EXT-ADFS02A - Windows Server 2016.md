@@ -81,16 +81,13 @@ From <[https://technet.microsoft.com/en-us/library/dd807078(v=ws.11).aspx](https
 cls
 ```
 
-##### # Create virtual machine
+### # Create virtual machine
 
 ```PowerShell
 $vmHost = "TT-HV02A"
 $vmName = "EXT-ADFS02A"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
-$sysPrepedImage = "\\TT-FS01\VM-Library\VHDs\WS2016-Std.vhdx"
-
-$vhdUncPath = "\\$vmHost\" + $vhdPath.Replace(":", "`$")
 
 New-VM `
     -ComputerName $vmHost `
@@ -101,15 +98,18 @@ New-VM `
     -MemoryStartupBytes 2GB `
     -SwitchName "Embedded Team Switch"
 
-Copy-Item $sysPrepedImage $vhdUncPath
-
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
-    -ProcessorCount 2 `
     -DynamicMemory `
     -MemoryMinimumBytes 2GB `
-    -MemoryMaximumBytes 4GB
+    -MemoryMaximumBytes 4GB `
+    -ProcessorCount 2
+
+Set-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path C:\NotBackedUp\Products\Microsoft\MDT-Deploy-x64.iso
 
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
@@ -583,8 +583,9 @@ c:[Type ==
         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid",
         "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"),
-      query = ";mail,displayName,userPrincipalName,tokenGroups;{0}",
+      query = ";mail,displayName,userPrincipalName,objectSid,tokenGroups;{0}",
       param = c.Value);
 
 @RuleTemplate = "PassThroughClaims"
@@ -641,147 +642,15 @@ net use $destination `
 copy $source $destination
 ```
 
----
+#### Import token-signing certificate to SharePoint farm
 
-**EXT-FOOBAR9 - Run as EXTRANET\\setup-sharepoint-dev**
+#### Create authentication provider for AD FS
 
-```PowerShell
-cls
-```
+#### Configure authentication provider for SecuritasConnect
 
-#### # Import token-signing certificate to SharePoint farm
-
-```PowerShell
-If ((Get-PSSnapin Microsoft.SharePoint.PowerShell `
-    -ErrorAction SilentlyContinue) -eq $null)
-{
-    Write-Debug "Adding snapin (Microsoft.SharePoint.PowerShell)..."
-
-    $ver = $host | select version
-
-    If ($ver.Version.Major -gt 1)
-    {
-        $Host.Runspace.ThreadOptions = "ReuseThread"
-    }
-
-    Add-PSSnapin Microsoft.SharePoint.PowerShell
-}
-
-$certPath = "C:\ADFS Signing - fs.technologytoolbox.com.cer"
-
-$cert = `
-    New-Object System.Security.Cryptography.X509Certificates.X509Certificate2(
-        $certPath)
-
-New-SPTrustedRootAuthority `
-    -Name "ADFS Signing - fs.technologytoolbox.com" `
-    -Certificate $cert
-```
-
-#### # Create authentication provider for AD FS
-
-##### # Define claim mappings and identifier claim
-
-```PowerShell
-$emailClaimMapping = New-SPClaimTypeMapping `
-    -IncomingClaimType "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" `
-    -IncomingClaimTypeDisplayName "EmailAddress" `
-    -SameAsIncoming
-
-# Note: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name is a reserved claim
-```
-
-# type in SharePoint
-
-```PowerShell
-$nameClaimMapping = New-SPClaimTypeMapping `
-    -IncomingClaimType "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name" `
-    -IncomingClaimTypeDisplayName "Name" `
-    -LocalClaimType "http://schemas.technologytoolbox.com/ws/2017/01/identity/claims/name"
-
-$upnClaimMapping = New-SPClaimTypeMapping `
-    -IncomingClaimType "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn" `
-    -IncomingClaimTypeDisplayName "UPN" `
-    -SameAsIncoming
-
-$roleClaimMapping = New-SPClaimTypeMapping `
-    -IncomingClaimType "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" `
-    -IncomingClaimTypeDisplayName "Role" `
-    -SameAsIncoming
-
-$claimsMappings = @(
-    $emailClaimMapping,
-    $nameClaimMapping,
-    $upnClaimMapping,
-    $roleClaimMapping)
-
-$identifierClaim = $emailClaimMapping.InputClaimType
-```
-
-##### # Create authentication provider
-
-```PowerShell
-$realm = "urn:sharepoint:securitas"
-$signInURL = "https://fs.technologytoolbox.com/adfs/ls"
-
-$cert = Get-SPTrustedRootAuthority |
-    where { $_.Name -eq "ADFS Signing - fs.technologytoolbox.com" } |
-    select -ExpandProperty Certificate
-
-$authProvider = New-SPTrustedIdentityTokenIssuer `
-    -Name "ADFS" `
-    -Description "Active Directory Federation Services provider" `
-    -Realm $realm `
-    -ImportTrustCertificate $cert `
-    -ClaimsMappings  $claimsMappings `
-    -SignInUrl $signInURL `
-    -IdentifierClaim $identifierClaim
-```
-
-#### # Configure authentication provider for SecuritasConnect
-
-```PowerShell
-$clientPortalUrl = [Uri] "http://client-local-9.securitasinc.com"
-
-$secureClientPortalUrl = "https://" + $clientPortalUrl.Host
-
-$realm = "urn:sharepoint:securitas:" `
-    + ($clientPortalUrl.Host -split '\.' | select -First 1)
-
-$authProvider.ProviderRealms.Add($secureClientPortalUrl, $realm)
-$authProvider.Update()
-```
-
-### # Configure SecuritasConnect to use AD FS trusted identity provider
-
-```PowerShell
-$clientPortalUrl = [Uri] "http://client-local-9.securitasinc.com"
-
-$trustedIdentityProvider = Get-SPTrustedIdentityTokenIssuer -Identity ADFS
-
-Set-SPWebApplication `
-    -Identity $clientPortalUrl.AbsoluteUri `
-    -Zone Default `
-    -AuthenticationProvider $trustedIdentityProvider `
-    -SignInRedirectURL ""
-
-$webApp = Get-SPWebApplication $clientPortalUrl.AbsoluteUri
-
-$defaultZone = [Microsoft.SharePoint.Administration.SPUrlZone]::Default
-
-$webApp.IisSettings[$defaultZone].AllowAnonymous = $false
-$webApp.Update()
-```
-
----
+### Configure SecuritasConnect to use AD FS trusted identity provider
 
 ### Upgrade to "v4.0 Sprint-29" build
-
-#### Copy new build from TFS drop location
-
-#### Remove previous versions of SecuritasConnect WSPs
-
-#### Install new versions of SecuritasConnect WSPs
 
 ### Migrate users
 
@@ -941,25 +810,34 @@ Set-AdfsRelyingPartyWebTheme `
 Remove-Item $tempFile
 ```
 
-#### # Configure custom JavaScript file for additional customizations
+#### # Configure custom CSS and JavaScript files for additional customizations
 
 ```PowerShell
 $clientPortalUrl = [Uri] "http://client-local-9.securitasinc.com"
 
 $relyingPartyDisplayName = $clientPortalUrl.Host
 
-$tempFile = [System.Io.Path]::GetTempFileName()
-$tempFile = $tempFile.Replace(".tmp", ".js")
+$tempCssFile = [System.Io.Path]::GetTempFileName()
+$tempCssFile = $tempCssFile.Replace(".tmp", ".css")
+
+$tempJsFile = [System.Io.Path]::GetTempFileName()
+$tempJsFile = $tempJsFile.Replace(".tmp", ".js")
+
+Invoke-WebRequest `
+    -Uri https://idp.technologytoolbox.com/css/styles.css `
+    -OutFile $tempCssFile
 
 Invoke-WebRequest `
     -Uri https://idp.technologytoolbox.com/js/onload.js `
-    -OutFile $tempFile
+    -OutFile $tempJsFile
 
 Set-AdfsRelyingPartyWebTheme `
     -TargetRelyingPartyName $relyingPartyDisplayName `
-    -OnLoadScriptPath $tempFile
+    -OnLoadScriptPath $tempJsFile `
+    -StyleSheet @{ path = $tempCssFile }
 
-Remove-Item $tempFile
+Remove-Item $tempCssFile
+Remove-Item $tempJsFile
 ```
 
 #### Disable HRD cookie (due to issue with toggling between "Securitas login" and "Client login")
@@ -1092,3 +970,12 @@ Set-AdfsClaimsProviderTrust `
 From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/](https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/)>
 
 ### Configure relying party trust to pass through claims from claims providers other than Active Directory
+
+**TODO:**
+
+USE AdfsConfigurationV3\
+GO\
+ALTER AUTHORIZATION ON SCHEMA::IdentityServerPolicy TO dbo\
+GO\
+ALTER ROLE db_owner ADD MEMBER [TECHTOOLBOX\\s-adfs]\
+GO
