@@ -1274,29 +1274,22 @@ mkdir D:\NotBackedUp\VMs
 Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
 ```
 
-**TODO:**
-
 ```PowerShell
 cls
 ```
 
-## # Install and configure System Center Operations Manager monitoring agent
+## # Configure monitoring using System Center Operations Manager
 
 ### # Install SCOM agent
 
 ```PowerShell
-$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016\Agents\SCOM\AMD64" `
+    + "\MOMAgent.msi"
 
 msiexec.exe /i $msiPath `
     MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01 `
     ACTIONS_USE_COMPUTER_ACCOUNT=1
 ```
 
-### # Approve manual agent install in Operations Manager
+### Approve manual agent install in Operations Manager

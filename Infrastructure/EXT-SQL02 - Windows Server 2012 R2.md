@@ -1040,4 +1040,40 @@ to the user NT SERVICE\\SQLSERVERAGENT SID (S-1-5-80-344959196-2060754871-230248
 & 'C:\NotBackedUp\Public\Toolbox\SQL\Configure DCOM Permissions.ps1'
 ```
 
+## # Upgrade to System Center Operations Manager 2016
+
+### # Uninstall SCOM 2012 R2 agent
+
+```PowerShell
+msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
+
+Restart-Computer
+```
+
+### # Install SCOM 2016 agent
+
+```PowerShell
+net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$msiPath = "\\tt-fs01.corp.technologytoolbox.com\Products\Microsoft" `
+    + "\System Center 2016\Agents\SCOM\AMD64\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=tt-scom01.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+### Approve manual agent install in Operations Manager
+
 **TODO:**

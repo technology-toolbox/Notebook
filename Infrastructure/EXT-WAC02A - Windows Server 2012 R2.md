@@ -268,6 +268,17 @@ New-NetFirewallRule `
     -Profile Domain `
     -Action Allow
 
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (SMB-In)' `
+    -DisplayName 'Remote Windows Update (SMB-In)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Remote Windows Update' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 445 `
+    -Profile Domain `
+    -Action Allow
+
 Enable-NetFirewallRule `
     -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)"
 
@@ -757,5 +768,65 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
+
+## Issue - IPv6 address range changed by Comcast
+
+### # Remove static IPv6 address
+
+```PowerShell
+$oldIpAddress = "2601:282:4201:e500::222"
+
+$ifIndex = Get-NetIPAddress $oldIpAddress |
+    Select -ExpandProperty InterfaceIndex
+
+Remove-NetIPAddress `
+    -InterfaceIndex $ifIndex `
+    -IPAddress $oldIpAddress `
+    -Confirm:$false
+```
+
+### # Update IPv6 DNS servers
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceIndex $ifIndex `
+    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
+```
+
+## # Upgrade to System Center Operations Manager 2016
+
+### # Uninstall SCOM 2012 R2 agent
+
+```PowerShell
+msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
+
+Restart-Computer
+```
+
+### # Install SCOM 2016 agent
+
+```PowerShell
+net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$msiPath = "\\tt-fs01.corp.technologytoolbox.com\Products\Microsoft" `
+    + "\System Center 2016\Agents\SCOM\AMD64\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=tt-scom01.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+### Approve manual agent install in Operations Manager
 
 **TODO:**

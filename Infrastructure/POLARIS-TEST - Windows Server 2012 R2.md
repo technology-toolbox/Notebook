@@ -1503,31 +1503,14 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ---
 
-**TODO:**
+## Upgrade to System Center Operations Manager 2016
 
-## Resolve SCOM alerts due to disk fragmentation
+### Uninstall SCOM 2012 R2 agent
 
-### Alert Name
+```Console
+msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
 
-Logical Disk Fragmentation Level is high
-
-### Alert Description
-
-The disk C: (C:) on computer CYCLOPS.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 15%. Defragmentation recommended: true.
-
-### Resolution
-
-#### # Copy Toolbox content
-
-```PowerShell
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
+Restart-Computer
 ```
 
-#### # Create scheduled task to optimize drives
-
-```PowerShell
-[string] $xml = Get-Content `
-  'C:\NotBackedUp\Public\Toolbox\Scheduled Tasks\Optimize Drives.xml'
-
-Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
-```
+### Install SCOM 2016 agent (using Operations Console)

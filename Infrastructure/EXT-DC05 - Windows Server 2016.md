@@ -463,4 +463,67 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
+## # Upgrade to System Center Operations Manager 2016
+
+### # Uninstall SCOM 2012 R2 agent
+
+```PowerShell
+msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
+
+Restart-Computer
+```
+
+### # Install SCOM 2016 agent
+
+```PowerShell
+net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$msiPath = "\\tt-fs01.corp.technologytoolbox.com\Products\Microsoft" `
+    + "\System Center 2016\Agents\SCOM\AMD64\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=tt-scom01.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+### Approve manual agent install in Operations Manager
+
+### Configure SCOM agent for domain controller
+
+#### Enable agent proxy
+
+In the **Agent Properties** window, on the **Security** tab, select **Allow this agent to act as a proxy and discover managed objects on other computers** and then click **OK**.
+
+```PowerShell
+cls
+```
+
+#### # Enable SCOM agent to run as LocalSystem on domain controller
+
+```PowerShell
+Push-Location "C:\Program Files\Microsoft Monitoring Agent\Agent"
+
+.\HSLockdown.exe HQ /R "NT AUTHORITY\SYSTEM"
+
+Pop-Location
+
+Restart-Service HealthService
+```
+
+##### Reference
+
+**Deploying SCOM 2016 Agents to Domain controllers - some assembly required**\
+From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/](https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/)>
+
 **TODO:**

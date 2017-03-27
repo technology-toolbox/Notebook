@@ -17,13 +17,13 @@ $vmName = "BANSHEE"
 New-VM `
     -Name $vmName `
     -Path C:\NotBackedUp\VMs `
-    -MemoryStartupBytes 256MB `
+    -MemoryStartupBytes 512MB `
     -SwitchName "Virtual LAN 2 - 192.168.10.x"
 
 Set-VMMemory `
     -VMName $vmName `
     -DynamicMemoryEnabled $true `-MinimumBytes 128MB `
-    -MaximumBytes 512MB
+    -MaximumBytes 1024MB
 
 $sysPrepedImage =
     "\\iceman\VHD Library\WS2003-R2-X64-ENT.vhdx"
@@ -139,3 +139,102 @@ In the **Outbound Security** window, select **Anonymous access**. (When **Integr
 In the **Advanced Delivery** window, clear the **Smart host** box (since **smarthost.technologytoolbox.com** is no longer used).
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/CF/7F26F2FC904B232A87A81A101A239AD692EF77CF.png)
+
+## Convert BANSHEE to test SMTP server
+
+### Disable relay e-mail
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/DE6F627F9344E9272A223D51852E694F01F66112.png)
+
+On the **Default SMTP Virtual Server Properties** window:
+
+1. Click **Relay...**
+2. On the **Relay Restrictions** window, clear the checkbox for **Allow all computers which successfully authenticate to relay, regardless of the list above** and click **OK**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/0AAE7E4E85AA9E696F9AA63149A0EDB9B7E64BCA.png)
+
+## Upgrade to System Center Operations Manager 2016
+
+### Uninstall SCOM 2012 R2 agent
+
+```Console
+msiexec /x {786970C5-E6F6-4A41-B238-AE25D4B91EEA}
+```
+
+Restart the server
+
+### Install SCOM 2016 agent
+
+> **Note**
+>
+> Installing the SCOM agent using the Operations Console results in an error (presumably due to Windows Server 2003):
+>
+> From agent install log:
+>
+> ```Text
+> MSI (s) (7C:9C) [08:16:29:147]: Windows Installer installed the product. Product Name: Microsoft Monitoring Agent. Product Version: 8.0.10918.0. Product Language: 0. Installation success or error status: 1603.
+> ```
+
+```Console
+msiexec.exe /i "\\TT-FS01\Products\Microsoft\System Center 2016\Agents\SCOM\AMD64\MOMAgent.msi" MANAGEMENT_GROUP=HQ MANAGEMENT_SERVER_DNS=TT-SCOM01 ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+Yep, SCOM 2016 agent is not supported on Windows Server 2003:
+
+This product must be installed on Windows Vista SP2, Windows Server 2008 SP2, or later.
+
+### Reinstall SCOM 2012 R2 agent
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+#### # Insert SCOM 2012 R2 installation media
+
+```PowerShell
+$vmName = "BANSHEE"
+$isoName = "en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso"
+
+$dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
+
+$iso = Get-SCISO | where {$_.Name -eq $isoName}
+
+Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -ISO $iso -Link
+```
+
+---
+
+#### REM Install Microsoft Monitoring Agent
+
+```Console
+msiexec.exe /i D:\agent\AMD64\MOMAgent.msi ^
+MANAGEMENT_GROUP=HQ ^
+MANAGEMENT_SERVER_DNS=TT-SCOM01 ^
+ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+#### # Remove SCOM 2012 R2 installation media
+
+```PowerShell
+$vmName = "BANSHEE"
+
+$dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
+
+Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -NoMedia
+```
+
+---
+
+### Approve manual agent install in Operations Manager

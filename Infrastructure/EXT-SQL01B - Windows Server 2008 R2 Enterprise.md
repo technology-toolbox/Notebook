@@ -781,3 +781,41 @@ netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=26
 
 netsh interface ipv6 add dnsserver name=$interfaceAlias address=2603:300b:802:8900::210
 ```
+
+## # Upgrade to System Center Operations Manager 2016
+
+### # Uninstall SCOM 2012 R2 agent
+
+```PowerShell
+msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
+
+Restart-Computer
+```
+
+### # Install SCOM 2016 agent
+
+```PowerShell
+net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$msiPath = "\\tt-fs01.corp.technologytoolbox.com\Products\Microsoft" `
+    + "\System Center 2016\Agents\SCOM\AMD64\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=tt-scom01.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+### Approve manual agent install in Operations Manager
+
+**TODO:**

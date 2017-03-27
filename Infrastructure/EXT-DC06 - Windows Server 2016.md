@@ -1,4 +1,4 @@
-﻿# EXT-DC06
+﻿# EXT-DC06 - Windows Server 2016
 
 Monday, March 20, 2017
 6:18 AM
@@ -145,7 +145,7 @@ New-AzureVM `
 **WOLVERINE**
 
 ```PowerShell
-$vmName = "EXT-DC03"
+$vmName = "EXT-DC06"
 
 $vm = Get-AzureVM -ServiceName $vmName -Name $vmName
 
@@ -330,32 +330,31 @@ Install-ADDSDomainController `
 >
 > When prompted, specify the password for the administrator account when the computer is started in Safe Mode or a variant of Safe Mode, such as Directory Services Restore Mode.
 
-## Issue - DNS registration errors
+## Issue - DNS errors
 
-Log Name:      System\
-Source:        NETLOGON\
-Date:          12/18/2016 6:45:04 PM\
-Event ID:      5774\
+Log Name:      DNS Server\
+Source:        Microsoft-Windows-DNS-Server-Service\
+Date:          3/21/2017 2:15:36 PM\
+Event ID:      4015\
 Task Category: None\
 Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      EXT-DC03.extranet.technologytoolbox.com\
+Keywords:      (131072)\
+User:          SYSTEM\
+Computer:      EXT-DC06.extranet.technologytoolbox.com\
 Description:\
-The dynamic registration of the DNS record '_ldap._tcp.extranet.technologytoolbox.com. 600 IN SRV 0 100 389 EXT-DC03.extranet.technologytoolbox.com.' failed on the following DNS server:
+The DNS server has encountered a critical error from the Active Directory. Check that the Active Directory is functioning properly. The extended error debug information (which may be empty) is "". The event data contains the error.
 
-DNS server IP address: ::\
-Returned Response Code (RCODE): 0\
-Returned Status Code: 0
-
-For computers and users to locate this domain controller, this record must be registered in DNS.
-
-USER ACTION\
-Determine what might have caused this failure, resolve the problem, and initiate registration of the DNS records by the domain controller. To determine what might have caused this failure, run DCDiag.exe. To learn more about DCDiag.exe, see Help and Support Center. To initiate registration of the DNS records by this domain  controller, run 'nltest.exe /dsregdns' from the command prompt on the domain controller or restart Net Logon service.\
-  Or, you can manually add this record to DNS, but it is not recommended.
-
-ADDITIONAL DATA\
-Error Value: Bad DNS packet.
+Log Name:      System\
+Source:        Microsoft-Windows-DNS-Client\
+Date:          3/24/2017 3:46:10 PM\
+Event ID:      1014\
+Task Category: (1014)\
+Level:         Warning\
+Keywords:      (268435456)\
+User:          NETWORK SERVICE\
+Computer:      EXT-DC06.extranet.technologytoolbox.com\
+Description:\
+Name resolution for the name microsoft.com timed out after none of the configured DNS servers responded.
 
 ### Troubleshooting
 
@@ -388,7 +387,7 @@ AddressFamily ServerAddresses
            23 {}
 
 PS C:\Windows\system32> nslookup
-Default Server:  ext-dc01.extranet.technologytoolbox.com
+Default Server:  EXT-DC04.extranet.technologytoolbox.com
 Address:  192.168.10.209
 
 > exit
@@ -407,7 +406,7 @@ cls
 #### # Copy Toolbox content
 
 ```PowerShell
-net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 ```
 
 > **Note**
@@ -415,10 +414,10 @@ net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$source = "\\iceman.corp.technologytoolbox.com\Public\Toolbox"
+$source = "\\tt-fs01.corp.technologytoolbox.com\Public\Toolbox"
 $dest = "C:\NotBackedUp\Public\Toolbox"
 
-robocopy $source $dest /E /NP
+robocopy $source $dest /E /NP /XD "Microsoft SDKs"
 ```
 
 #### # Create request for Operations Manager certificate
@@ -473,32 +472,20 @@ Remove-Item $certFile
 ### # Install SCOM agent
 
 ```PowerShell
-net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 ```
 
 > **Note**
 >
 > When prompted, type the password to connect to the file share.
 
-#### # Mount the Operations Manager installation media
-
 ```PowerShell
-$imagePath = ('\\iceman.corp.technologytoolbox.com\Products\Microsoft' `
-    + '\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso')
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-```
-
-#### # Start the Operations Manager installation
-
-```PowerShell
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
+$msiPath = "\\tt-fs01.corp.technologytoolbox.com\Products\Microsoft" `
+    + "\System Center 2016\Agents\SCOM\AMD64\MOMAgent.msi"
 
 msiexec.exe /i $msiPath `
     MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
+    MANAGEMENT_SERVER_DNS=tt-scom01.corp.technologytoolbox.com `
     ACTIONS_USE_COMPUTER_ACCOUNT=1
 ```
 
@@ -515,59 +502,39 @@ cls
 ```PowerShell
 $hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
 
-$certImportToolPath = $imageDriveLetter + ':\SupportTools\AMD64'
+$certImportToolPath = "\\tt-fs01.corp.technologytoolbox.com\Products\Microsoft" `
+    + "\System Center 2016\SupportTools\SCOM\AMD64\MOMCertImport.exe"
 
-Push-Location "$certImportToolPath"
-
-.\MOMCertImport.exe /SubjectName $hostName
-
-Pop-Location
-```
-
-#### # Remove the Operations Manager installation media
-
-```PowerShell
-Dismount-DiskImage -ImagePath $imagePath
+& $certImportToolPath /SubjectName $hostName
 ```
 
 ### Approve manual agent install in Operations Manager
 
 ### Configure SCOM agent for domain controller
 
+#### Enable agent proxy
+
 In the **Agent Properties** window, on the **Security** tab, select **Allow this agent to act as a proxy and discover managed objects on other computers** and then click **OK**.
 
-**TODO:**
-
-## Issue - License Activation failures
-
-Log Name:      Application\
-Source:        Microsoft-Windows-Security-SPP\
-Date:          10/10/2016 6:02:46 PM\
-Event ID:      8198\
-Task Category: None\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      EXT-DC03.extranet.technologytoolbox.com\
-Description:\
-License Activation (slui.exe) failed with the following error code:\
-hr=0xC004F074\
-Command-line arguments:\
-RuleId=eeba1977-569e-4571-b639-7623d8bfecc0;Action=AutoActivate;AppId=55c92734-d682-4d71-983e-d6ec3f16059f;SkuId=00091344-1ea4-4f37-b789-01750ba6988c;NotificationInterval=1440;Trigger=TimerEvent
-
-### Solution
-
-```Console
-C:\NotBackedUp\Public\Toolbox\Sysinternals\psping.exe kms.core.windows.net:1688
-
-cscript c:\windows\system32\slmgr.vbs /ckhc
-
-cscript c:\windows\system32\slmgr.vbs /skms kms.core.windows.net:1688
-
-cscript c:\windows\system32\slmgr.vbs /ato
+```PowerShell
+cls
 ```
 
-### Reference
+#### # Enable SCOM agent to run as LocalSystem on domain controller
 
-**Windows Server 2012 Datacenter Not Activating - Windows Azure**\
-From <[https://social.msdn.microsoft.com/Forums/azure/en-US/f29d5fe7-4f0f-433d-8333-1d336f68a4db/windows-server-2012-datacenter-not-activating-windows-azure?forum=WAVirtualMachinesforWindows](https://social.msdn.microsoft.com/Forums/azure/en-US/f29d5fe7-4f0f-433d-8333-1d336f68a4db/windows-server-2012-datacenter-not-activating-windows-azure?forum=WAVirtualMachinesforWindows)>
+```PowerShell
+Push-Location "C:\Program Files\Microsoft Monitoring Agent\Agent"
+
+.\HSLockdown.exe HQ /R "NT AUTHORITY\SYSTEM"
+
+Pop-Location
+
+Restart-Service HealthService
+```
+
+##### Reference
+
+**Deploying SCOM 2016 Agents to Domain controllers - some assembly required**\
+From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/](https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/)>
+
+**TODO:**

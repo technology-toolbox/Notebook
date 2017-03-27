@@ -799,3 +799,15 @@ npm config --global set registry https://registry.npmjs.org/
 ```PowerShell
 npm cache clear
 ```
+
+## Upgrade to System Center Operations Manager 2016
+
+### Uninstall SCOM 2012 R2 agent
+
+```Console
+msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
+
+Restart-Computer
+```
+
+### Install SCOM 2016 agent (using Operations Console)

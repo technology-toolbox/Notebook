@@ -382,6 +382,30 @@ Configure automatic approval rules
 & '\\ICEMAN\Public\Download\Microsoft\Report Viewer 2008 SP1\ReportViewer.exe'
 ```
 
+## Import scheduled task to cleanup WSUS
+
+"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WSUS Server Cleanup.xml"
+
+## Create SQL job for WSUS database maintenance
+
+Name: **WsusDBMaintenance**\
+Steps:
+
+- Step 1
+  - Step name: **Defragment database and update statistics**
+  - Type: **Transact-SQL script (T-SQL)**
+  - Command: (click **Open...** and then select script - **"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql"**)
+  - Database: **SUSDB**\
+    Schedule:
+
+- Schedule 1
+  - Name: **Weekly**
+  - Frequency:
+    - Occurs: **Weekly**
+    - Recurs every: **1 week on Sunday**
+  - Daily frequency:
+    - Occurs once at: **10:00 AM**
+
 ```PowerShell
 cls
 ```
@@ -566,3 +590,15 @@ Application pool 'WsusPool' is being automatically disabled due to a series of f
 ### Solution
 
 Modify the properties for **WsusPool** to increase the **Private Memory Limit (KB)** from **1258015** to **2500000**.
+
+## Upgrade to System Center Operations Manager 2016
+
+### Uninstall SCOM 2012 R2 agent
+
+```Console
+msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
+
+Restart-Computer
+```
+
+### Install SCOM 2016 agent (using Operations Console)
