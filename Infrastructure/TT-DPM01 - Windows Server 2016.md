@@ -1130,6 +1130,23 @@ Right-click **Full Backup of All Databases** and click **Execute**.
 
 ## Configure DPM
 
+### Enable DPM Administration Console to connect remotely (e.g. from FOOBAR11)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F6/E2E6646BEB92A9C477BED5E3CAF347F06F21A5F6.png)
+
+#### # Configure firewall rule for SQL Server Database Engine
+
+```PowerShell
+New-NetFirewallRule `
+    -Name "SQL Server Database Engine" `
+    -DisplayName "SQL Server Database Engine" `
+    -Group 'Technology Toolbox (Custom)' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort 1433 `
+    -Action Allow
+```
+
 ### Configure SMTP server for DPM
 
 #### Configure spam filter in Office 365
