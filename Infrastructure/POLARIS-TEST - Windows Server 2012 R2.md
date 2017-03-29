@@ -1514,3 +1514,25 @@ Restart-Computer
 ```
 
 ### Install SCOM 2016 agent (using Operations Console)
+
+## Issue - Incorrect IPv6 DNS server assigned by Comcast router
+
+```Text
+PS C:\Users\jjameson-admin> nslookup
+Default Server:  cdns01.comcast.net
+Address:  2001:558:feed::1
+```
+
+> **Note**
+>
+> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on the Comcast router -- and subsequently restarting the VM -- the incorrect DNS server is assigned to the network adapter.
+
+### Solution
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceAlias Management `
+    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
+
+Restart-Computer
+```
