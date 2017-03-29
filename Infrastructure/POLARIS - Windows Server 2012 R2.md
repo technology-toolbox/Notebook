@@ -1,7 +1,7 @@
 ﻿# POLARIS - Windows Server 2012 R2 Standard
 
-Tuesday, April 28, 2015
-12:09 PM
+Tuesday, September 8, 2015
+5:20 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,7 +9,9 @@ Tuesday, April 28, 2015
 
 ## # Stop SharePoint services
 
-& 'C:\\NotBackedUp\\Public\\Toolbox\\SharePoint\\Scripts\\Stop SharePoint Services.cmd'
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Stop SharePoint Services.cmd'
+```
 
 ## Backup production SharePoint databases
 
@@ -48,31 +50,31 @@ WITH NOFORMAT, NOINIT
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [ProfileDB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\ProfileDB.bak'
+BACKUP DATABASE [UserProfileService_Profile]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Profile.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'ProfileDB-Full Database Backup'
+    , NAME = N'UserProfileService_Profile-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [SocialDB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\SocialDB.bak'
+BACKUP DATABASE [UserProfileService_Social]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Social_.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'SocialDB-Full Database Backup'
+    , NAME = N'UserProfileService_Social-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [SyncDB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\SyncDB.bak'
+BACKUP DATABASE [UserProfileService_Sync]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Sync.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'SyncDB-Full Database Backup'
+    , NAME = N'UserProfileService_Sync-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 
-BACKUP DATABASE [Secure_Store_Service_DB]
-TO DISK = N'\\ICEMAN\Backups\HAVOK\Secure_Store_Service_DB.bak'
+BACKUP DATABASE [SecureStoreService]
+TO DISK = N'\\ICEMAN\Backups\HAVOK\SecureStoreService.bak'
 WITH NOFORMAT, NOINIT
-    , NAME = N'Secure_Store_Service_DB-Full Database Backup'
+    , NAME = N'SecureStoreService-Full Database Backup'
     , SKIP, NOREWIND, NOUNLOAD, STATS = 10
     , COPY_ONLY
 ```
@@ -81,9 +83,9 @@ WITH NOFORMAT, NOINIT
 
 ---
 
-**MOONSTAR**
+**FOOBAR8**
 
-### # Delete old VM
+## # Delete old VM
 
 ```PowerShell
 Stop-SCVirtualMachine POLARIS
@@ -95,19 +97,53 @@ Remove-Item \\STORM\c$\NotBackedUp\VMs\POLARIS
 
 ---
 
-## Create VM
+---
+
+**FOOBAR8**
+
+## Create VM using Virtual Machine Manager
 
 - Processors: **4**
 - Memory: **12 GB**
 - VHD size (GB): **45**
 - VHD file name:** POLARIS**
+- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+- Network Adapter 1:** Virtual LAN 2 - 192-168.10.x**
+- Host:** STORM**
+- Automatic actions
+  - **Turn on the virtual machine if it was running with the physical server stopped**
+  - **Save State**
+  - Operating system: **Windows Server 2012 R2 Standard**
+
+---
 
 ## Install custom Windows Server 2012 R2 image
 
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
 - On the **Computer Details** step, in the **Computer name** box, type **POLARIS** and click **Next**.
-- On the **Applications** step, click **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
+
+## # Rename local Administrator account and set password
+
+```PowerShell
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword('{password}')
+
+logoff
+```
+
+```PowerShell
+cls
+```
+
+## # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+powercfg.exe /S SCHEME_MIN
+powercfg.exe /L
+```
 
 ```PowerShell
 cls
@@ -125,17 +161,6 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
-```
-
-```PowerShell
-cls
-```
-
-## # Set password for local Administrator account
-
-```PowerShell
-$adminUser = [ADSI] "WinNT://./Administrator,User"
-$adminUser.SetPassword("{password}")
 ```
 
 ```PowerShell
@@ -164,6 +189,32 @@ Set-NetAdapterAdvancedProperty `
 ping ICEMAN -f -l 8900
 ```
 
+```PowerShell
+cls
+```
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+New-NetFirewallRule `
+    -Name 'Remote Windows Update (Dynamic RPC)' `
+    -DisplayName 'Remote Windows Update (Dynamic RPC)' `
+    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' `
+    -Group 'Technology Toolbox (Custom)' `
+    -Program '%windir%\system32\dllhost.exe' `
+    -Direction Inbound `
+    -Protocol TCP `
+    -LocalPort RPC `
+    -Profile Domain `
+    -Action Allow
+```
+
 ## Configure VM storage
 
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
@@ -174,24 +225,33 @@ ping ICEMAN -f -l 8900
 
 ---
 
-**STORM**
+**FOOBAR8**
 
-### # Create Data01 and Log01 VHDs
+### # Add disks to virtual machine
 
 ```PowerShell
-$vmName = "POLARIS"
+$vmHost = 'STORM'
+$vmName = 'POLARIS'
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Data01.vhdx"
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+    + $vmName + "_Data01.vhdx"
 
-New-VHD -Path $vhdPath -SizeBytes 5GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 5GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
 
-$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Log01.vhdx"
+$vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+    + $vmName + "_Log01.vhdx"
 
-New-VHD -Path $vhdPath -SizeBytes 5GB
-Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 5GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
 ```
 
 ---
@@ -200,24 +260,26 @@ Add-VMHardDiskDrive -VMName $vmName -ControllerType SCSI -Path $vhdPath
 cls
 ```
 
-### # Format Data01 drive
+### # Initialize disks and format volumes
+
+#### # Format Data01 drive
 
 ```PowerShell
 Get-Disk 1 |
     Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter D -UseMaximumSize |
+    New-Partition -UseMaximumSize -DriveLetter D |
     Format-Volume `
         -FileSystem NTFS `
         -NewFileSystemLabel "Data01" `
         -Confirm:$false
 ```
 
-### # Format Log01 drive
+#### # Format Log01 drive
 
 ```PowerShell
 Get-Disk 2 |
     Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter L -UseMaximumSize |
+    New-Partition -UseMaximumSize -DriveLetter L |
     Format-Volume `
         -FileSystem NTFS `
         -NewFileSystemLabel "Log01" `
@@ -229,33 +291,6 @@ Get-Disk 2 |
 **HAVOK**
 
 ## Configure Max Degree of Parallelism for SharePoint
-
-### -- Set Max Degree of Parallelism to 1
-
-```Console
-EXEC sys.sp_configure N'show advanced options', N'1'  RECONFIGURE WITH OVERRIDE
-GO
-EXEC sys.sp_configure N'max degree of parallelism', N'1'
-GO
-RECONFIGURE WITH OVERRIDE
-GO
-EXEC sys.sp_configure N'show advanced options', N'0'  RECONFIGURE WITH OVERRIDE
-GO
-```
-
-```Console
-cls
-```
-
-### # Restart SQL Server
-
-```PowerShell
-Stop-Service SQLSERVERAGENT
-
-Restart-Service MSSQLSERVER
-
-Start-Service SQLSERVERAGENT
-```
 
 ---
 
@@ -392,11 +427,6 @@ cls
 
 ```PowerShell
 Install-WindowsFeature `
-    NET-WCF-HTTP-Activation45,`
-    NET-WCF-TCP-Activation45, `
-    NET-WCF-Pipe-Activation45 `-Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS'
-
-Install-WindowsFeature `
     Net-Framework-Features,Web-Server,Web-WebServer,Web-Common-Http,
     Web-Static-Content,Web-Default-Doc,Web-Dir-Browsing,Web-Http-Errors,
     Web-App-Dev,Web-Asp-Net,Web-Net-Ext,Web-ISAPI-Ext,Web-ISAPI-Filter,
@@ -407,28 +437,34 @@ Install-WindowsFeature `
     Web-Metabase,Application-Server,AS-Web-Support,AS-TCP-Port-Sharing,
     AS-WAS-Support,AS-HTTP-Activation,AS-TCP-Activation,AS-Named-Pipes,
     AS-Net-Framework,WAS,WAS-Process-Model,WAS-NET-Environment,
-    WAS-Config-APIs,Web-Lgcy-Scripting,Windows-Identity-Foundation,
-    Server-Media-Foundation,Xps-Viewer `
+    WAS-Config-APIs,Web-Lgcy-Scripting,NET-WCF-HTTP-Activation45,
+    NET-WCF-TCP-Activation45,NET-WCF-Pipe-Activation45,
+    Windows-Identity-Foundation,Server-Media-Foundation,Xps-Viewer `
     -Source '\\ICEMAN\Products\Microsoft\Windows Server 2012 R2\Sources\SxS' `
     -Restart
 ```
 
-### Reference
+#### Reference
 
 **The Products Preparation Tool in SharePoint Server 2013 may not progress past "Configuring Application Server Role, Web Server (IIS) Role"**\
 Pasted from <[http://support.microsoft.com/kb/2765260](http://support.microsoft.com/kb/2765260)>
 
+## Install SharePoint 2013 with Service Pack 1
+
 ---
 
-**STORM**
+**FOOBAR8**
 
-### # Insert SharePoint 2013 ISO image into VM
+### # Insert the SharePoint 2013 installation media
 
 ```PowerShell
-$imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
-    + "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
+$vmHost = 'STORM'
+$vmName = 'POLARIS'
 
-Set-VMDvdDrive -VMName POLARIS -Path $imagePath
+$isoPath = '\\ICEMAN\Products\Microsoft\SharePoint 2013\' `
+    + 'en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso'
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
 ```
 
 ---
@@ -441,7 +477,7 @@ cls
 
 ```PowerShell
 $preReqPath = `
-    "\\ICEMAN\Products\Microsoft\SharePoint 2013\PrerequisiteInstallerFiles_SP1"
+    '\\ICEMAN\Products\Microsoft\SharePoint 2013\PrerequisiteInstallerFiles_SP1'
 
 & X:\PrerequisiteInstaller.exe `
     /SQLNCli:"$preReqPath\sqlncli.msi" `
@@ -457,10 +493,14 @@ $preReqPath = `
     /WCFDataServices56:"$preReqPath\WcfDataServices-5.6.exe"
 ```
 
-## # Install SharePoint Server 2013
+```PowerShell
+cls
+```
+
+### # Install SharePoint Server 2013
 
 ```PowerShell
-X:\setup.cmd
+& X:\setup.cmd
 ```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/59/6B1DE3E800C79386E287D5C9C6CE0EDAA054C059.png)
@@ -481,24 +521,6 @@ Click **Install SharePoint Server**. UAC, click Yes.
 
 Clear the checkbox and click **Close**.
 
----
-
-**STORM**
-
-## # Checkpoint VM - "Before SharePoint Server 2013 configuration"
-
-```PowerShell
-Stop-VM POLARIS
-
-Checkpoint-VM `
-    -Name POLARIS `
-    -SnapshotName "Before SharePoint Server 2013 configuration"
-
-Start-VM POLARIS
-```
-
----
-
 ```PowerShell
 cls
 ```
@@ -508,7 +530,7 @@ cls
 ### # Copy patch to local disk
 
 ```PowerShell
-robocopy "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4701.1001 - SharePoint 2013 March 2015 CU" C:\NotBackedUp\Temp
+robocopy '\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4727.1001 - SharePoint 2013 June 2015 CU' C:\NotBackedUp\Temp
 ```
 
 ### # Install patch
@@ -517,27 +539,49 @@ robocopy "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4701.1001 - S
 Push-Location C:\NotBackedUp\Temp
 
 .\Install.ps1
+```
 
+> **Important**
+>
+> Wait for the update to be installed before proceeding.
+
+```PowerShell
 Pop-Location
 ```
 
 ### # Remove patch files from local disk
 
 ```PowerShell
+Remove-Item C:\NotBackedUp\Temp\Install.ps1
 Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
 Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
-Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb2956166-fullfile-x64-glb.exe
+Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3054866-fullfile-x64-glb.exe
 ```
+
+## Snapshot VM before configuring SharePoint
+
+---
+
+**FOOBAR8**
+
+### # Checkpoint VM
 
 ```PowerShell
-cls
+$snapshotName = 'Before SharePoint Server 2013 configuration'
+$vmHost = 'STORM'
+$vmName = 'POLARIS'
+
+Stop-VM -ComputerName $vmHost -VMName $vmName
+
+Checkpoint-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -SnapshotName $snapshotName
+
+Start-VM -ComputerName $vmHost -VMName $vmName
 ```
 
-## # Mirror Toolbox content
-
-```PowerShell
-robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
-```
+---
 
 ```PowerShell
 cls
@@ -608,7 +652,7 @@ cls
 ### # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
-& '.\Configure DCOM Permissions.ps1'
+& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Configure DCOM Permissions.ps1'
 ```
 
 ### Reference
@@ -623,14 +667,12 @@ cls
 ### # Configure diagnostic logging
 
 ```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell
+
 Set-SPDiagnosticConfig `
     -LogLocation "L:\Microsoft Office Servers\15.0\Logs" `
     -LogDiskSpaceUsageGB 3 `
     -LogMaxDiskSpaceUsageEnabled:$true
-```
-
-```PowerShell
-cls
 ```
 
 ### # Configure usage and health data collection
@@ -677,14 +719,18 @@ cls
 
 **ICEMAN**
 
+```Console
+PowerShell
+```
+
 ### # Create share and configure permissions for SharePoint backups
 
 ```PowerShell
-mkdir "D:\Shares\Backups\SharePoint - POLARIS"
+mkdir 'D:\Shares\Backups\SharePoint - POLARIS'
 
-icacls "D:\Shares\Backups\SharePoint - POLARIS" /grant "TECHTOOLBOX\s-sharepoint:(OI)(CI)(F)"
+icacls 'D:\Shares\Backups\SharePoint - POLARIS' /grant 'TECHTOOLBOX\s-sharepoint:(OI)(CI)(F)'
 
-icacls "D:\Shares\Backups\SharePoint - POLARIS" /grant "TECHTOOLBOX\POLARIS`$:(OI)(CI)(F)"
+icacls 'D:\Shares\Backups\SharePoint - POLARIS' /grant 'TECHTOOLBOX\POLARIS$:(OI)(CI)(F)'
 ```
 
 ---
@@ -697,7 +743,7 @@ cls
 
 ```PowerShell
 Backup-SPFarm `
-    -Directory "\\ICEMAN\Backups\SharePoint - POLARIS" `
+    -Directory '\\ICEMAN\Backups\SharePoint - POLARIS' `
     -BackupMethod Full
 ```
 
@@ -730,6 +776,8 @@ cls
 ### # Configure the State Service
 
 ```PowerShell
+cd C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts
+
 & '.\Configure State Service.ps1'
 ```
 
@@ -780,7 +828,7 @@ New-ItemProperty `
 
 $acl = Get-Acl HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag
 $rule = New-Object System.Security.AccessControl.RegistryAccessRule(
-    $serviceAccount, "FullControl", "Allow")
+    $serviceAccount, "FullControl", "ContainerInherit", "None", "Allow")
 
 $acl.SetAccessRule($rule)
 Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
@@ -788,7 +836,7 @@ Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
 
 ---
 
-**HAVOK**
+**HAVOK (connect SQL Server Management Studio from FOOBAR8)**
 
 #### -- Configure permissions on stored procedures in SharePoint_Config database
 
@@ -800,7 +848,6 @@ GRANT EXECUTE ON [dbo].[proc_GetTimerJobLastRunTime] TO [WSS_Content_Application
 GRANT EXECUTE ON [dbo].[proc_putObjectTVP] TO [WSS_Content_Application_Pools]
 GRANT EXECUTE ON [dbo].[proc_putObject] TO [WSS_Content_Application_Pools]
 GRANT EXECUTE ON [dbo].[proc_putDependency] TO [WSS_Content_Application_Pools]
-GO
 ```
 
 ---
@@ -816,16 +863,31 @@ From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event
 **EXECUTE permission was denied on the object 'proc_putObjectTVP'**\
 From <[https://social.technet.microsoft.com/Forums/office/en-US/88c2c219-e1b0-4ed2-807a-267dba1a2c0b/execute-permission-was-denied-on-the-object-procputobjecttvp?forum=sharepointadmin](https://social.technet.microsoft.com/Forums/office/en-US/88c2c219-e1b0-4ed2-807a-267dba1a2c0b/execute-permission-was-denied-on-the-object-procputobjecttvp?forum=sharepointadmin)>
 
-#### # Enable continuous crawls
+#### # Configure search crawl schedules
 
 ```PowerShell
-Get-SPEnterpriseSearchServiceApplication |
-    Get-SPEnterpriseSearchCrawlContentSource |
-    Where-Object { $_.Type -eq "SharePoint" } |
-    ForEach-Object {
-        $_.EnableContinuousCrawls = $true
-        $_.Update()
-    }
+$searchApp = Get-SPEnterpriseSearchServiceApplication `
+    -Identity "Search Service Application"
+```
+
+##### # Enable continuous crawls for "Local SharePoint sites"
+
+```PowerShell
+$contentSource = Get-SPEnterpriseSearchCrawlContentSource `
+    -SearchApplication $searchApp `
+    -Identity "Local SharePoint sites"
+
+Set-SPEnterpriseSearchCrawlContentSource `
+    -Identity $contentSource `
+    -EnableContinuousCrawls $true
+
+Set-SPEnterpriseSearchCrawlContentSource `
+    -Identity $contentSource `
+    -ScheduleType Incremental `
+    -DailyCrawlSchedule `
+    -CrawlScheduleStartDateTime "12:00 AM" `
+    -CrawlScheduleRepeatInterval 240 `
+    -CrawlScheduleRepeatDuration 1440
 ```
 
 ```PowerShell
@@ -836,7 +898,7 @@ cls
 
 ---
 
-**HAVOK**
+**HAVOK (connect SQL Server Management Studio from FOOBAR8)**
 
 #### -- Restore service application database from production
 
@@ -844,10 +906,9 @@ cls
 RESTORE DATABASE [ManagedMetadataService]
     FROM DISK = N'\\ICEMAN\Backups\HAVOK\ManagedMetadataService.bak'
     WITH FILE = 1
-    , MOVE N'ManagedMetadataService' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\ManagedMetadataService.mdf'
-    , MOVE N'ManagedMetadataService_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\ManagedMetadataService_log.LDF'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'ManagedMetadataService' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\ManagedMetadataService.mdf'
+    , MOVE N'ManagedMetadataService_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\ManagedMetadataService_log.LDF'
+    , NOUNLOAD, STATS = 5
 ```
 
 ---
@@ -870,34 +931,31 @@ cls
 
 ---
 
-**HAVOK**
+**HAVOK (connect SQL Server Management Studio from FOOBAR8)**
 
 #### -- Restore service application databases from production
 
 ```SQL
 RESTORE DATABASE [UserProfileService_Profile]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\ProfileDB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Profile.bak'
     WITH FILE = 1
-    , MOVE N'ProfileDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\UserProfileService_Profile.mdf'
-    , MOVE N'ProfileDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\UserProfileService_Profile_log.LDF'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'ProfileDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Profile.mdf'
+    , MOVE N'ProfileDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Profile_log.LDF'
+    , NOUNLOAD, STATS = 5
 
 RESTORE DATABASE [UserProfileService_Social]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SocialDB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Social.bak'
     WITH FILE = 1
-    , MOVE N'SocialDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\UserProfileService_Social.mdf'
-    , MOVE N'SocialDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\UserProfileService_Social_log.LDF'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'SocialDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Social.mdf'
+    , MOVE N'SocialDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Social_log.LDF'
+    , NOUNLOAD, STATS = 5
 
 RESTORE DATABASE [UserProfileService_Sync]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SyncDB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\UserProfileService_Sync.bak'
     WITH FILE = 1
-    , MOVE N'SyncDB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\UserProfileService_Sync.mdf'
-    , MOVE N'SyncDB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\UserProfileService_Sync_log.LDF'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'SyncDB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\UserProfileService_Sync.mdf'
+    , MOVE N'SyncDB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\UserProfileService_Sync_log.LDF'
+    , NOUNLOAD, STATS = 5
 ```
 
 ---
@@ -920,18 +978,17 @@ cls
 
 ---
 
-**HAVOK**
+**HAVOK (connect SQL Server Management Studio from FOOBAR8)**
 
 #### -- Restore service application database from production
 
 ```SQL
 RESTORE DATABASE [SecureStoreService]
-    FROM DISK = N'\\ICEMAN\Backups\HAVOK\Secure_Store_Service_DB.bak'
+    FROM DISK = N'\\ICEMAN\Backups\HAVOK\SecureStoreService.bak'
     WITH FILE = 1
-    , MOVE N'Secure_Store_Service_DB' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\SecureStoreService.mdf'
-    , MOVE N'Secure_Store_Service_DB_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\SecureStoreService_log.ldf'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'Secure_Store_Service_DB' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\SecureStoreService.mdf'
+    , MOVE N'Secure_Store_Service_DB_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\SecureStoreService_log.ldf'
+    , NOUNLOAD, STATS = 5
 
 GO
 ```
@@ -946,6 +1003,10 @@ ALTER ROLE [SPDataAccess] ADD MEMBER [TECHTOOLBOX\s-spserviceapp]
 ```
 
 ---
+
+```PowerShell
+cls
+```
 
 #### # Configure the Secure Store Service
 
@@ -968,15 +1029,19 @@ $proxy = New-SPSecureStoreServiceApplicationProxy  `
     -DefaultProxyGroup
 ```
 
+```PowerShell
+cls
+```
+
 #### # Add domain group to Administrators for service application
 
 ```PowerShell
-$principal = New-SPClaimsPrincipal "SharePoint Admins" `
+$principal = New-SPClaimsPrincipal 'SharePoint Admins' `
     -IdentityType WindowsSecurityGroupName
 
 $security = Get-SPServiceApplicationSecurity $serviceApp -Admin
 
-Grant-SPObjectSecurity $security $principal "Full Control"
+Grant-SPObjectSecurity $security $principal 'Full Control'
 
 Set-SPServiceApplicationSecurity $serviceApp $security -Admin
 ```
@@ -1022,7 +1087,7 @@ New-SPWebApplication `
 
 ---
 
-**HAVOK**
+**HAVOK (connect SQL Server Management Studio from FOOBAR8)**
 
 ### -- Restore content database from production
 
@@ -1030,10 +1095,9 @@ New-SPWebApplication `
 RESTORE DATABASE [WSS_Content_ttweb]
     FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_ttweb.bak'
     WITH FILE = 1
-    , MOVE N'WSS_Content_ttweb' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_ttweb.mdf'
-    , MOVE N'WSS_Content_ttweb_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_ttweb_log.LDF'
-    , NOUNLOAD
-    , STATS = 5
+    , MOVE N'WSS_Content_ttweb' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\WSS_Content_ttweb.mdf'
+    , MOVE N'WSS_Content_ttweb_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\WSS_Content_ttweb_log.LDF'
+    , NOUNLOAD, STATS = 5
 ```
 
 ---
@@ -1094,7 +1158,7 @@ New-SPWebApplication `
 
 ---
 
-**HAVOK**
+**HAVOK (connect SQL Server Management Studio from FOOBAR8)**
 
 ### -- Restore content database from production
 
@@ -1102,8 +1166,8 @@ New-SPWebApplication `
 RESTORE DATABASE [WSS_Content_Team1]
     FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_Team1.bak'
     WITH FILE = 1
-    , MOVE N'WSS_Content_Team1' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_Team1.mdf'
-    , MOVE N'WSS_Content_Team1_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_Team1_log.LDF'
+    , MOVE N'WSS_Content_Team1' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\WSS_Content_Team1.mdf'
+    , MOVE N'WSS_Content_Team1_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\WSS_Content_Team1_log.LDF'
     , NOUNLOAD
     , STATS = 5
 ```
@@ -1161,7 +1225,7 @@ New-SPWebApplication `
 
 ---
 
-**HAVOK**
+**HAVOK (connect SQL Server Management Studio from FOOBAR8)**
 
 ### -- Restore content database from production
 
@@ -1169,8 +1233,8 @@ New-SPWebApplication `
 RESTORE DATABASE [WSS_Content_MySites]
     FROM DISK = N'\\ICEMAN\Backups\HAVOK\WSS_Content_MySites.bak'
     WITH FILE = 1
-    , MOVE N'WSS_Content_MySites' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\WSS_Content_MySites.mdf'
-    , MOVE N'WSS_Content_MySites_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\WSS_Content_MySites_log.LDF'
+    , MOVE N'WSS_Content_MySites' TO N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\WSS_Content_MySites.mdf'
+    , MOVE N'WSS_Content_MySites_log' TO N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\WSS_Content_MySites_log.LDF'
     , NOUNLOAD
     , STATS = 5
 ```
@@ -1216,6 +1280,36 @@ Set-SPProfileServiceApplication `
     -MySiteManagedPath sites
 ```
 
+---
+
+**FOOBAR8**
+
+## # Delete VM checkpoint - "Before SharePoint Server 2013 configuration"
+
+```PowerShell
+$vmHost = 'STORM'
+$vmName = 'POLARIS'
+
+Stop-VM -ComputerName $vmHost -VMName $vmName
+
+Remove-VMSnapshot `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Name 'Before SharePoint Server 2013 configuration'
+
+while (Get-VM -ComputerName $vmHost -VMName $vmName |
+    Where Status -eq "Merging disks") {
+    Write-Host "." -NoNewline
+    Start-Sleep -Seconds 5
+}
+
+Write-Host
+
+Start-VM -ComputerName $vmHost -VMName $vmName
+```
+
+---
+
 ```PowerShell
 cls
 ```
@@ -1223,31 +1317,11 @@ cls
 ## # Start full crawl
 
 ```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell
+
 Get-SPEnterpriseSearchServiceApplication |
     Get-SPEnterpriseSearchCrawlContentSource |
     % { $_.StartFullCrawl() }
-```
-
----
-
-**STORM**
-
-## # Delete VM checkpoint - "Before SharePoint Server 2013 configuration"
-
-```PowerShell
-Remove-VMSnapshot -VMName POLARIS -Name "Before SharePoint Server 2013 configuration"
-```
-
----
-
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
 ```
 
 ```PowerShell
@@ -1266,10 +1340,14 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
+```Console
+cls
+```
+
 ## # Install SCOM agent
 
 ```PowerShell
-$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+$imagePath = '\\iceman\Products\Microsoft\System Center 2012 R2' `
     + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
 
 $imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
@@ -1285,33 +1363,38 @@ msiexec.exe /i $msiPath `
 
 ## # Approve manual agent install in Operations Manager
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
-
 ```PowerShell
-$computer = 'POLARIS'
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
+cls
 ```
 
----
+## # Configure registry permissions to avoid errors with SharePoint timer jobs
+
+```PowerShell
+$identity = "$env:COMPUTERNAME\WSS_WPG"
+$registryPath = 'HKLM:SOFTWARE\Microsoft\Office Server\15.0'
+
+$acl = Get-Acl $registryPath
+$rule = New-Object System.Security.AccessControl.RegistryAccessRule(
+    $identity,
+    'ReadKey',
+    'ContainerInherit, ObjectInherit',
+    'None',
+    'Allow')
+
+$acl.SetAccessRule($rule)
+Set-Acl -Path $registryPath -AclObject $acl
+```
+
+#### Reference
+
+Source: Microsoft-SharePoint Products-SharePoint Foundation\
+Event ID: 6398\
+Event Category: 12\
+User: TECHTOOLBOX\\s-sharepoint\
+Computer: POLARIS.corp.technologytoolbox.com\
+Event Description: The Execute method of job definition Microsoft.SharePoint.Publishing.Internal.PersistedNavigationTermSetSyncJobDefinition (ID ...) threw an exception. More information is included below.
+
+Requested registry access is not allowed.
 
 ```PowerShell
 cls
@@ -1322,7 +1405,7 @@ cls
 ### # Copy patch to local disk
 
 ```PowerShell
-robocopy '\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4727.1001 - SharePoint 2013 June 2015 CU' C:\NotBackedUp\Temp
+robocopy "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4763.1000 - SharePoint 2013 October 2015 CU" C:\NotBackedUp\Temp
 ```
 
 ### # Install patch
@@ -1331,11 +1414,7 @@ robocopy '\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\15.0.4727.1001 - S
 Push-Location C:\NotBackedUp\Temp
 
 .\Install.ps1
-```
 
-When prompted to pause the Search Service Application or leave it running, specify to pause it.
-
-```PowerShell
 Pop-Location
 ```
 
@@ -1345,7 +1424,7 @@ Pop-Location
 Remove-Item C:\NotBackedUp\Temp\Install.ps1
 Remove-Item C:\NotBackedUp\Temp\ubersrv_1.cab
 Remove-Item C:\NotBackedUp\Temp\ubersrv_2.cab
-Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3054866-fullfile-x64-glb.exe
+Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3085492-fullfile-x64-glb.exe
 ```
 
 ### # Upgrade SharePoint
@@ -1354,6 +1433,78 @@ Remove-Item C:\NotBackedUp\Temp\ubersrv2013-kb3054866-fullfile-x64-glb.exe
 PSCONFIG.EXE -cmd upgrade -inplace b2b -wait
 ```
 
-**TODO:**
+```PowerShell
+cls
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/87D8F7F00E65C9FE5B09B4D655444EC47AD94D84.png)
+## # Install and configure Office Web Apps
+
+##### # Create the binding between SharePoint 2013 and Office Web Apps Server
+
+```PowerShell
+New-SPWOPIBinding -ServerName wac.fabrikam.com
+```
+
+```PowerShell
+cls
+```
+
+##### # View the WOPI zone of SharePoint 2013
+
+```PowerShell
+Get-SPWOPIZone
+```
+
+##### # Change the WOPI zone if necessary
+
+```PowerShell
+Set-SPWOPIZone -zone "external-https"
+```
+
+### Configure name resolution for Office Web Apps
+
+---
+
+**EXT-WAC02A**
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.37 `
+    -Hostnames POLARIS, my, team, ttweb
+```
+
+---
+
+## Upgrade to System Center Operations Manager 2016
+
+### Uninstall SCOM 2012 R2 agent
+
+```Console
+msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
+
+Restart-Computer
+```
+
+### Install SCOM 2016 agent (using Operations Console)
+
+## Issue - Incorrect IPv6 DNS server assigned by Comcast router
+
+```Text
+PS C:\Users\jjameson-admin> nslookup
+Default Server:  cdns01.comcast.net
+Address:  2001:558:feed::1
+```
+
+> **Note**
+>
+> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on the Comcast router -- and subsequently restarting the VM -- the incorrect DNS server is assigned to the network adapter.
+
+### Solution
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceAlias Management `
+    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
+
+Restart-Computer
+```
