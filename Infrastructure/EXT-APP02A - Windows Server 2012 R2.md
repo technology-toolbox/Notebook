@@ -3949,4 +3949,94 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
+## Issue - Error accessing SharePoint sites (e.g. http://client-test.securitasinc.com)
+
+Log Name:      Application\
+Source:        ASP.NET 4.0.30319.0\
+Date:          4/19/2017 5:56:51 PM\
+Event ID:      1325\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      EXT-APP02A.extranet.technologytoolbox.com\
+Description:\
+An unhandled exception occurred and the process was terminated.
+
+Application ID: /LM/W3SVC/762047535/ROOT
+
+Process ID: 6000
+
+Exception: System.IO.FileLoadException
+
+Message: Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)
+
+StackTrace:    at System.Linq.Enumerable.Sum(IEnumerable`1 source)\
+   at System.Web.Caching.SRefMultiple.get_ApproximateSize()\
+   at System.Web.Caching.CacheMemorySizePressure.GetCurrentPressure()\
+   at System.Web.Caching.CacheMemoryPressure.Update()\
+   at System.Web.Caching.CacheCommon.CacheManagerThread(Int32 minPercent)\
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)\
+   at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)\
+   at System.Threading.TimerQueueTimer.CallCallback()\
+   at System.Threading.TimerQueueTimer.Fire()\
+   at System.Threading.TimerQueue.FireNextTimers()
+
+### References
+
+**Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)**\
+From <[http://blog.bugrapostaci.com/2017/02/08/loading-this-assembly-would-produce-a-different-grant-set-from-other-instances-exception-from-hresult-0x80131401/](http://blog.bugrapostaci.com/2017/02/08/loading-this-assembly-would-produce-a-different-grant-set-from-other-instances-exception-from-hresult-0x80131401/)>
+
+**Monitoring SharePoint 2010 Applications in System Center 2012 SP1**\
+From <[https://technet.microsoft.com/en-us/library/jj614617.aspx?tduid=(1dfb939b69d4a5ed09b44f51992a8b97)(256380)(2459594)(TnL5HPStwNw-v0X_tBOK3jzpbtaadMW8RA)()](https://technet.microsoft.com/en-us/library/jj614617.aspx?tduid=(1dfb939b69d4a5ed09b44f51992a8b97)(256380)(2459594)(TnL5HPStwNw-v0X_tBOK3jzpbtaadMW8RA)())>
+
+**SCOM 2016 Sharepoint 2013 PerfMon64.dll crash W3wp.exe**\
+From <[https://social.technet.microsoft.com/Forums/en-US/24b4d768-57a2-42c9-8e18-1ef8c075913a/scom-2016-sharepoint-2013-perfmon64dll-crash-w3wpexe?forum=scomapm](https://social.technet.microsoft.com/Forums/en-US/24b4d768-57a2-42c9-8e18-1ef8c075913a/scom-2016-sharepoint-2013-perfmon64dll-crash-w3wpexe?forum=scomapm)>
+
+**SCOM 2016 Agent Crashing Legacy IIS Application Pools**\
+From <[http://kevingreeneitblog.blogspot.ie/2017/03/scom-2016-agent-crashing-legacy-iis.html](http://kevingreeneitblog.blogspot.ie/2017/03/scom-2016-agent-crashing-legacy-iis.html)>
+
+**APM feature in SCOM 2016 Agent may cause a crash for the IIS Application Pool running under .NET 2.0 runtime**\
+From <[https://blogs.technet.microsoft.com/momteam/2017/03/21/apm-feature-in-scom-2016-agent-may-cause-a-crash-for-the-iis-application-pool-running-under-net-2-0-runtime/](https://blogs.technet.microsoft.com/momteam/2017/03/21/apm-feature-in-scom-2016-agent-may-cause-a-crash-for-the-iis-application-pool-running-under-net-2-0-runtime/)>
+
+### Solution
+
+Remove SCOM agent and reinstall without Application Performance Monitoring (APM).
+
+#### Remove SCOM agent
+
+> **Note**
+>
+> When prompted, restart the server.
+
+#### # Clean up SCOM agent folder
+
+```PowerShell
+Remove-Item "C:\Program Files\Microsoft Monitoring Agent" -Recurse -Force
+```
+
+```PowerShell
+cls
+```
+
+#### # Install SCOM agent without Application Performance Monitoring (APM)
+
+```PowerShell
+net use \\TT-FS01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+
+$msiPath = "\\TT-FS01.corp.technologytoolbox.com\Products\Microsoft" `
+```
+
+    + "\\System Center 2016\\SCOM\\agent\\AMD64\\MOMAgent.msi"
+
+```PowerShell
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01 `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1 `
+    NOAPM=1
+```
+
+#### Approve manual agent install in Operations Manager
+
 **TODO:**
