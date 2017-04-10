@@ -537,4 +537,40 @@ Restart-Service HealthService
 **Deploying SCOM 2016 Agents to Domain controllers - some assembly required**\
 From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/](https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/)>
 
+## Issue - License Activation failures
+
+Log Name:      Application\
+Source:        Microsoft-Windows-Security-SPP\
+Date:          3/27/2017 1:27:16 PM\
+Event ID:      8198\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      EXT-DC06.extranet.technologytoolbox.com\
+Description:\
+License Activation (slui.exe) failed with the following error code:\
+hr=0xC004F074\
+Command-line arguments:\
+RuleId=502ff3ba-669a-4674-bbb1-601f34a3b968;Action=AutoActivateSilent;AppId=55c92734-d682-4d71-983e-d6ec3f16059f;SkuId=00091344-1ea4-4f37-b789-01750ba6988c;NotificationInterval=1440;Trigger=TimerEvent
+
+### Solution
+
+```Console
+C:\NotBackedUp\Public\Toolbox\Sysinternals\psping.exe kms.core.windows.net:1688
+
+cscript c:\windows\system32\slmgr.vbs /ckhc
+
+cscript c:\windows\system32\slmgr.vbs /skms kms.core.windows.net:1688
+
+cscript c:\windows\system32\slmgr.vbs /ato
+```
+
+### References
+
+**Windows Server 2012 Datacenter Not Activating - Windows Azure**\
+From <[https://social.msdn.microsoft.com/Forums/azure/en-US/f29d5fe7-4f0f-433d-8333-1d336f68a4db/windows-server-2012-datacenter-not-activating-windows-azure?forum=WAVirtualMachinesforWindows](https://social.msdn.microsoft.com/Forums/azure/en-US/f29d5fe7-4f0f-433d-8333-1d336f68a4db/windows-server-2012-datacenter-not-activating-windows-azure?forum=WAVirtualMachinesforWindows)>\
+**Troubleshooting Windows activation failures on Azure VMs**\
+From <[https://blogs.msdn.microsoft.com/mast/2014/12/23/troubleshooting-windows-activation-failures-on-azure-vms/](https://blogs.msdn.microsoft.com/mast/2014/12/23/troubleshooting-windows-activation-failures-on-azure-vms/)>
+
 **TODO:**
