@@ -1369,3 +1369,76 @@ Set-DnsClientServerAddress `
 
 Restart-Computer
 ```
+
+## Import new version (March 2017) of Windows 10
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+```
+
+### # Import operating system - "Windows 10 Enterprise, Version 1703 (x64)"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows 10" `
+```
+
+    + "\\en_windows_10_enterprise_version_1703_updated_march_2017_x64_dvd_10189290.iso"
+
+```PowerShell
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "W10Ent-1703-x64"
+
+$os = Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows 10" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+
+$os.RenameItem("Windows 10 Enterprise, Version 1703 (x64)")
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+### Modify task sequence to use Windows 10 Enterprise, Version 1703
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Update files in TFS
+
+```PowerShell
+cd C:\NotBackedUp\TechnologyToolbox\Infrastructure
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\x64\sgdm.exe `
+    \\TT-FS01\MDT-Build$ '.\Main\MDT-Build$'
+```
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Captures Logs "Operating Systems" Packages Servicing Tools
+```
+
+#### Check-in files
+
+---
