@@ -1,30 +1,36 @@
 ﻿# WIN7-TEST1 - Windows 7 Ultimate (x86)
 
-Monday, March 21, 2016
-5:48 AM
+Monday, April 17, 2017
+7:30 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+TODO:
 ```
 
 ---
 
 **FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
+```PowerShell
+cls
+```
+
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "STORM"
+$vmHost = "TT-HV02B"
 $vmName = "WIN7-TEST1"
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
     -Path C:\NotBackedUp\VMs `
     -NewVHDPath $vhdPath `
-    -NewVHDSizeBytes 25GB `
+    -NewVHDSizeBytes 30GB `
     -MemoryStartupBytes 2GB `
     -SwitchName "Production"
 
