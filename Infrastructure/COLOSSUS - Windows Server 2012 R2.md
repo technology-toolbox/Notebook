@@ -624,3 +624,51 @@ Set-DnsClientServerAddress `
 
 Restart-Computer
 ```
+
+## Issue - Errors installing updates on client computers
+
+### Symptoms
+
+- Exception from HRESULT: 0x8024401C
+- Exception from HRESULT: 0x80240440
+- Exception from HRESULT: 0x80244022
+- Very high CPU/memory usage on COLOSSUS (even after ramping up to 6 CPUs and 8 GB of RAM
+
+### Solution
+
+Remove SCOM agent and reinstall without Application Performance Monitoring (APM).
+
+#### Remove SCOM agent using Operations Console
+
+#### # Clean up SCOM agent folder
+
+```PowerShell
+Restart-Computer
+```
+
+> **Note**
+>
+> Wait for the server to restart.
+
+```PowerShell
+Remove-Item "C:\Program Files\Microsoft Monitoring Agent" -Recurse -Force
+```
+
+```PowerShell
+cls
+```
+
+#### # Install SCOM agent without Application Performance Monitoring (APM)
+
+```PowerShell
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\agent\AMD64" `
+    + "\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01 `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1 `
+    NOAPM=1
+```
+
+#### Approve manual agent install in Operations Manager
