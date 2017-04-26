@@ -373,4 +373,22 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
+## # Resolve low disk space on C
+
+### # Clean up WinSxS folder
+
+```PowerShell
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+```
+
+### # Clean up Windows Update files
+
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+
+Start-Service wuauserv
+```
+
 **TODO:**
