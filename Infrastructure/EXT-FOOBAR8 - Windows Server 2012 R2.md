@@ -1,7 +1,7 @@
 ﻿# EXT-FOOBAR8 - Windows Server 2012 R2 Standard
 
-Tuesday, July 26, 2016
-8:03 AM
+Wednesday, October 12, 2016
+4:27 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,9 +9,9 @@ Tuesday, July 26, 2016
 
 Install SecuritasConnect v4.0
 
-## Deploy and configure the server infrastructure
+## Deploy and configure server infrastructure
 
-### Copy Windows Server installation files to a file share
+### Copy Windows Server installation files to file share
 
 (skipped)
 
@@ -46,8 +46,7 @@ New-VM `
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
-    -ProcessorCount 4 `
-    -StaticMemory
+    -ProcessorCount 4
 
 Set-VMDvdDrive `
     -ComputerName $vmHost `
@@ -69,6 +68,20 @@ Start-VM -ComputerName $vmHost -Name $vmName
   - In the **Workgroup **box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
+
+#### # Copy latest Toolbox content
+
+```PowerShell
+net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
+robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
+```
 
 #### # Rename local Administrator account and set password
 
@@ -133,41 +146,6 @@ Get-NetAdapter `
 $interfaceAlias = "Production"
 ```
 
-###### # Disable DHCP
-
-```PowerShell
-@("IPv4", "IPv6") | ForEach-Object {
-    $addressFamily = $_
-
-    $interface = Get-NetAdapter $interfaceAlias |
-        Get-NetIPInterface -AddressFamily $addressFamily
-
-    If ($interface.Dhcp -eq "Enabled")
-    {
-        # Remove existing gateway
-        $ipConfig = $interface | Get-NetIPConfiguration
-
-        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
-        {
-            $interface |
-                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
-        }
-        ElseIf ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
-        {
-            $interface |
-                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
-        }
-
-        # Disable DHCP
-        $interface | Set-NetIPInterface -DHCP Disabled
-    }
-}
-```
-
-```PowerShell
-cls
-```
-
 ###### # Configure static IPv4 address
 
 ```PowerShell
@@ -180,6 +158,10 @@ New-NetIPAddress `
     -DefaultGateway 192.168.10.1
 ```
 
+```PowerShell
+cls
+```
+
 ###### # Configure IPv4 DNS servers
 
 ```PowerShell
@@ -188,23 +170,12 @@ Set-DNSClientServerAddress `
     -ServerAddresses 192.168.10.209,192.168.10.210
 ```
 
-###### # Configure static IPv6 address
-
-```PowerShell
-$ipAddress = "2601:282:4201:e500::223"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 64
-```
-
 ###### # Configure IPv6 DNS servers
 
 ```PowerShell
-Set-DNSClientServerAddress `
+Set-DnsClientServerAddress `
     -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
+    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
 ```
 
 ###### # Enable jumbo frames
@@ -239,18 +210,18 @@ Add-Computer `
 
 ---
 
-**EXT-DC01**
+**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
 
 ```PowerShell
 $computerName = "EXT-FOOBAR8"
-$targetPath = ("OU=SharePoint Servers,OU=Servers,OU=Resources,OU=Development" `
-    + ",DC=extranet,DC=technologytoolbox,DC=com")
+$targetPath = "OU=SharePoint Servers,OU=Servers,OU=Resources,OU=Development" `
+    + ",DC=extranet,DC=technologytoolbox,DC=com"
 
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 
 Restart-Computer $computerName
 
-Restart-Computer : Failed to restart the computer EXT-FOOBAR8 with the following error message: Call was canceled by the message filter. (Exception from HRESULT: 0x80010002 (RPC_E_CALL_CANCELED)).
+Restart-Computer : Failed to restart the computer EXT-FOOBAR8 with the following error message: The RPC server is unavailable. (Exception from HRESULT: 0x800706BA).
 At line:1 char:1
 + Restart-Computer $computerName
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -276,7 +247,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 | 1    | D:           | 150 GB      | Dynamic  | 64K                  | Data01       |
 | 2    | L:           | 25 GB       | Dynamic  | 64K                  | Log01        |
 | 3    | T:           | 4 GB        | Dynamic  | 64K                  | Temp01       |
-| 4    | Z:           | 400 GB      | Dynamic  | 4K                   | Backup01     |
+| 4    | Z:           | 150 GB      | Dynamic  | 4K                   | Backup01     |
 
 ### # Change drive letter for DVD-ROM
 
@@ -305,10 +276,10 @@ cls
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-FOOBAR8"
-$vmPath = "E:\NotBackedUp\VMs\$vmName"
+$silverVmStoragePath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
+$bronzeVmStoragePath = "F:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
 
-$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
-    + "_Data01.vhdx"
+$vhdPath = "$silverVmStoragePath\$vmName" + "_Data01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 150GB
 Add-VMHardDiskDrive `
@@ -317,8 +288,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
-    + "_Log01.vhdx"
+$vhdPath = "$silverVmStoragePath\$vmName" + "_Log01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 25GB
 Add-VMHardDiskDrive `
@@ -327,8 +297,7 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
-    + "_Temp01.vhdx"
+$vhdPath = "$silverVmStoragePath\$vmName" + "_Temp01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 4GB
 Add-VMHardDiskDrive `
@@ -337,10 +306,9 @@ Add-VMHardDiskDrive `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
-    + "_Backup01.vhdx"
+$vhdPath = "$bronzeVmStoragePath\$vmName" + "_Backup01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 400GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 150GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
@@ -434,7 +402,6 @@ cls
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-FOOBAR8"
-
 $imagePath = "\\ICEMAN\Products\Microsoft\SQL Server 2014" `
     + "\en_sql_server_2014_developer_edition_with_service_pack_2_x64_dvd_8967821.iso"
 
@@ -480,8 +447,9 @@ ALTER DATABASE [tempdb]
   MODIFY FILE
   (
     NAME = N'tempdev'
-    , SIZE = 128MB
-    , FILEGROWTH = 10MB
+    , SIZE = 512MB
+    , MAXSIZE = 768MB
+    , FILEGROWTH = 128MB
   );
 
 DECLARE @dataPath VARCHAR(300);
@@ -501,8 +469,9 @@ SELECT @sqlStatement =
     + '('
       + 'NAME = N''tempdev2'''
       + ', FILENAME = ''' + @dataPath + '2.mdf'''
-      + ', SIZE = 128MB'
-      + ', FILEGROWTH = 10MB'
+      + ', SIZE = 512MB'
+      + ', MAXSIZE = 768MB'
+      + ', FILEGROWTH = 128MB'
     + ')';
 
 EXEC sp_executesql @sqlStatement;
@@ -513,8 +482,9 @@ SELECT @sqlStatement =
     + '('
       + 'NAME = N''tempdev3'''
       + ', FILENAME = ''' + @dataPath + '3.mdf'''
-      + ', SIZE = 128MB'
-      + ', FILEGROWTH = 10MB'
+      + ', SIZE = 512MB'
+      + ', MAXSIZE = 768MB'
+      + ', FILEGROWTH = 128MB'
     + ')';
 
 EXEC sp_executesql @sqlStatement;
@@ -525,8 +495,9 @@ SELECT @sqlStatement =
     + '('
       + 'NAME = N''tempdev4'''
       + ', FILENAME = ''' + @dataPath + '4.mdf'''
-      + ', SIZE = 128MB'
-      + ', FILEGROWTH = 10MB'
+      + ', SIZE = 512MB'
+      + ', MAXSIZE = 768MB'
+      + ', FILEGROWTH = 128MB'
     + ')';
 
 EXEC sp_executesql @sqlStatement;
@@ -556,55 +527,7 @@ GO
 
 #### -- DEV - Change databases to Simple recovery model
 
-```SQL
-IF OBJECT_ID('tempdb..#CommandQueue') IS NOT NULL DROP TABLE #CommandQueue
-
-CREATE TABLE #CommandQueue
-(
-    ID INT IDENTITY ( 1, 1 )
-    , SqlStatement VARCHAR(1000)
-)
-
-INSERT INTO #CommandQueue
-(
-    SqlStatement
-)
-SELECT
-    'ALTER DATABASE [' + name + '] SET RECOVERY SIMPLE'
-FROM
-    sys.databases
-WHERE
-    name NOT IN ( 'master', 'msdb', 'tempdb' )
-
-DECLARE @id INT
-
-SELECT @id = MIN(ID)
-FROM #CommandQueue
-
-WHILE @id IS NOT NULL
-BEGIN
-    DECLARE @sqlStatement VARCHAR(1000)
-
-    SELECT
-        @sqlStatement = SqlStatement
-    FROM
-        #CommandQueue
-    WHERE
-        ID = @id
-
-    PRINT 'Executing ''' + @sqlStatement + '''...'
-
-    EXEC (@sqlStatement)
-
-    DELETE FROM #CommandQueue
-    WHERE ID = @id
-
-    SELECT @id = MIN(ID)
-    FROM #CommandQueue
-END
-
-GO
-```
+-- (skipped -- since this environment has a full copy of Production)
 
 #### -- DEV - Constrain maximum memory for SQL Server
 
@@ -612,8 +535,9 @@ GO
 EXEC sys.sp_configure N'show advanced options', N'1'
 RECONFIGURE WITH OVERRIDE
 GO
-EXEC sys.sp_configure N'max server memory (MB)', N'1024'
-RECONFIGURE WITH OVERRIDE
+EXEC sys.sp_configure N'min server memory (MB)', N'4096'
+GO
+EXEC sys.sp_configure N'max server memory (MB)', N'8192'
 GO
 EXEC sys.sp_configure N'show advanced options', N'0'
 RECONFIGURE WITH OVERRIDE
@@ -624,15 +548,11 @@ GO
 
 ## Install SharePoint Server 2013
 
-### Download SharePoint 2013 prerequisites to a file share
+### Download SharePoint 2013 prerequisites to file share
 
-(skipped)
+(skipped - since this was completed previously)
 
-```PowerShell
-cls
-```
-
-### # Install SharePoint 2013 prerequisites on farm servers
+### Install SharePoint 2013 prerequisites on farm servers
 
 ---
 
@@ -642,12 +562,11 @@ cls
 cls
 ```
 
-#### # Mount SharePoint 2013 installation media
+#### # Mount SharePoint Server 2013 installation media
 
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-FOOBAR8"
-
 $imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
     + "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
 
@@ -656,7 +575,13 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
 
 ---
 
-```Console
+```PowerShell
+cls
+```
+
+#### # Copy SharePoint Server 2013 prerequisite files to SharePoint server
+
+```PowerShell
 net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 ```
 
@@ -665,8 +590,8 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$sourcePath = `
-    "\\ICEMAN\Products\Microsoft\SharePoint 2013\PrerequisiteInstallerFiles_SP1"
+$sourcePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013" `
+    + "\PrerequisiteInstallerFiles_SP1"
 
 $prereqPath = "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1"
 
@@ -702,7 +627,7 @@ Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 cls
 ```
 
-### # Checkpoint VM
+#### # Checkpoint VM
 
 ```PowerShell
 $vmHost = "FORGE"
@@ -721,7 +646,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-### # HACK: Enable Windows Installer verbose logging (to avoid "ArpWrite timing" bug in SharePoint installation)
+#### # HACK: Enable Windows Installer verbose logging (to avoid "ArpWrite timing" bug in SharePoint installation)
 
 ```PowerShell
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer" /v Debug /t REG_DWORD /d 7 /f
@@ -735,7 +660,7 @@ Restart-Service msiserver
 >
 > The **x** logging option ("Extra debugging information") does not appear to be necessary to avoid the bug. However, the **!** option ("Flush each line to the log") is definitely required. Without it (i.e. specifying **voicewarmup**) the ArpWrite error was still encountered.
 
-#### References
+##### References
 
 **Sharepoint Server 2013 installation: why ArpWrite action fails?**\
 Pasted from <[http://sharepoint.stackexchange.com/questions/68620/sharepoint-server-2013-installation-why-arpwrite-action-fails](http://sharepoint.stackexchange.com/questions/68620/sharepoint-server-2013-installation-why-arpwrite-action-fails)>
@@ -760,11 +685,30 @@ cls
 >
 > Wait for the installation to complete.
 
+---
+
+**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
 cls
 ```
 
-### # HACK: Disable Windows Installer verbose logging
+##### # Dismount SharePoint Server 2013 installation media
+
+```PowerShell
+$vmHost = "FORGE"
+$vmName = "EXT-FOOBAR8"
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+---
+
+```PowerShell
+cls
+```
+
+##### # HACK: Disable Windows Installer verbose logging
 
 ```PowerShell
 reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer" /v Debug /f
@@ -774,14 +718,20 @@ reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer" /v Logging /f
 Restart-Service msiserver
 ```
 
-### # Add the SharePoint bin folder to the PATH environment variable
+### # Add SharePoint bin folder to PATH environment variable
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     ("C:\Program Files\Common Files\Microsoft Shared\web server extensions" `
         + "\15\BIN") `
     -EnvironmentVariableTarget "Machine"
+
+exit
 ```
+
+> **Important**
+>
+> Restart PowerShell for environment variable change to take effect.
 
 ---
 
@@ -853,16 +803,18 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 ```PowerShell
 $patch = "15.0.4833.1000 - SharePoint 2013 June 2016 CU"
 
-robocopy `
-    "\\ICEMAN\Products\Microsoft\SharePoint 2013\Patches\$patch" `
-    "C:\NotBackedUp\Temp\$patch" `
-    /E
+$sourcePath = ("\\ICEMAN\Products\Microsoft\SharePoint 2013" `
+    + "\Patches\$patch")
+
+$destPath = "C:\NotBackedUp\Temp\$patch"
+
+robocopy $sourcePath $destPath /E
 ```
 
 #### # Install update
 
 ```PowerShell
-& "C:\NotBackedUp\Temp\$patch\*.exe"
+& "$destPath\*.exe"
 ```
 
 > **Important**
@@ -881,16 +833,18 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 ```PowerShell
 $patch = "Cumulative Update 7"
 
-robocopy `
-    "\\ICEMAN\Products\Microsoft\AppFabric 1.1\Patches\$patch" `
-    "C:\NotBackedUp\Temp\$patch" `
-    /E
+$sourcePath = ("\\ICEMAN\Products\Microsoft\AppFabric 1.1" `
+    + "\Patches\$patch")
+
+$destPath = "C:\NotBackedUp\Temp\$patch"
+
+robocopy $sourcePath $destPath /E
 ```
 
 #### # Install update
 
 ```PowerShell
-& "C:\NotBackedUp\Temp\$patch\*.exe"
+& "$destPath\*.exe"
 ```
 
 > **Important**
@@ -930,20 +884,12 @@ cls
 ### # Install Prince on front-end Web servers
 
 ```PowerShell
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
 & "\\ICEMAN\Products\Prince\prince-7.1-setup.exe"
 ```
 
 > **Important**
 >
-> Wait for the software to be installed.
+> Wait for the installation to complete.
 
 ```PowerShell
 cls
@@ -974,12 +920,11 @@ Copy-Item `
 cls
 ```
 
-#### # Mount Visual Studio 2015 with Update 3 installation media
+#### # Mount Visual Studio 2015 installation media
 
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-FOOBAR8"
-
 $imagePath = "\\ICEMAN\Products\Microsoft\Visual Studio 2015" `
     + "\en_visual_studio_enterprise_2015_with_update_3_x86_x64_dvd_8923288.iso"
 
@@ -998,6 +943,10 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
 - **Microsoft SQL Server Data Tools**
 - **Microsoft Web Developer Tools**
 
+> **Important**
+>
+> Wait for the installation to complete and restart the computer if prompted to do so.
+
 ### DEV - Enter product key for Visual Studio
 
 1. Start Visual Studio.
@@ -1010,7 +959,13 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
 
 > **Note**
 >
-> Add **[https://www.microsoft.com](https://www.microsoft.com)** to **Trusted sites** zone.
+> # Add **[https://www.microsoft.com](https://www.microsoft.com)** to **Trusted sites** zone:
+>
+> ```PowerShell
+> C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+>     -Zone TrustedSites `
+>     -Patterns https://www.microsoft.com
+> ```
 
 Update:** Microsoft Office Developer Tools Update 2 for Visual Studio 2015**\
 File: **OfficeToolsForVS2015.3f.3fen.exe**
@@ -1019,7 +974,13 @@ File: **OfficeToolsForVS2015.3f.3fen.exe**
 
 > **Note**
 >
-> Add **[http://download.microsoft.com](http://download.microsoft.com)** to **Trusted sites** zone.
+> # Add **[https://download.microsoft.com](https://download.microsoft.com)** to **Trusted sites** zone:
+>
+> ```PowerShell
+> C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+>     -Zone TrustedSites `
+>     -Patterns https://download.microsoft.com
+> ```
 
 Update:** Microsoft SQL Server Data Tools (SSDT) Update**\
 File: **SSDTSetup.exe**
@@ -1045,7 +1006,6 @@ cls
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-FOOBAR8"
-
 $imagePath = "\\ICEMAN\Products\Microsoft\Office 2016" `
     + "\en_office_professional_plus_2016_x86_x64_dvd_6962141.iso"
 
@@ -1057,6 +1017,8 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
 ```Console
 X:
 .\setup.exe /AUTORUN
+
+C:
 ```
 
 ```Console
@@ -1092,7 +1054,6 @@ cls
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-FOOBAR8"
-
 $imagePath = "\\ICEMAN\Products\Microsoft\Visio 2016" `
     + "\en_visio_professional_2016_x86_x64_dvd_6962139.iso"
 
@@ -1136,7 +1097,7 @@ cls
 #### # Install Mozilla Firefox
 
 ```PowerShell
-& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 47.0.1.exe"
+& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 49.0.1.exe"
 ```
 
 ```PowerShell
@@ -1146,7 +1107,7 @@ cls
 #### # Install Google Chrome
 
 ```PowerShell
-& "\\ICEMAN\Products\Google\Chrome\ChromeStandaloneSetup64.exe"
+& "\\ICEMAN\Products\Google\Chrome\googlechromestandaloneenterprise64.msi"
 ```
 
 ```PowerShell
@@ -1167,11 +1128,21 @@ cls
 & "\\ICEMAN\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
 ```
 
+```PowerShell
+cls
+```
+
+#### # Install Microsoft Message Analyzer
+
+```PowerShell
+& "\\ICEMAN\Products\Microsoft\Message Analyzer 1.4\MessageAnalyzer64.msi"
+```
+
 ### Install additional service packs and updates
 
 > **Important**
 >
-> Wait for the updates to be installed and restart the server.
+> Wait for the updates to be installed and restart the server (if necessary).
 
 ### # Clean up Windows Update files
 
@@ -1203,12 +1174,18 @@ slmgr /ato
 cls
 ```
 
-### # Update VM snapshot
+### # Eject media from virtual DVD drive
 
 ```PowerShell
 $vmHost = "FORGE"
 $vmName = "EXT-FOOBAR8"
 
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+### # Update VM snapshot
+
+```PowerShell
 Stop-VM -ComputerName $vmHost -Name $vmName
 ```
 
@@ -1250,6 +1227,22 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ### # Copy SecuritasConnect build to SharePoint server
 
+#### # Create file share for builds
+
+```PowerShell
+New-Item -ItemType Directory -Path C:\Shares\Builds
+
+New-SmbShare `
+  -Name Builds `
+  -Path C:\Shares\Builds `
+  -CachingMode None `
+  -ChangeAccess Everyone
+
+New-Item -ItemType Directory -Path C:\Shares\Builds\ClientPortal
+```
+
+#### # Copy build to SharePoint server
+
 ```PowerShell
 net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 ```
@@ -1259,20 +1252,22 @@ net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-robocopy `
-    "\\ICEMAN\Builds\Securitas\ClientPortal\4.0.673.0" `
-    "C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0" `
-    /E
+$build = "4.0.675.0"
+
+$sourcePath = "\\ICEMAN\Builds\Securitas\ClientPortal\$build"
+$destPath = "C:\Shares\Builds\ClientPortal\$build"
+
+robocopy $sourcePath $destPath /E
 ```
 
 ### # Create SharePoint farm
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\ClientPortal\4.0.675.0\DeploymentFiles\Scripts
 
 $currentUser = whoami
 
-If ($currentUser -eq 'EXTRANET\setup-sharepoint-dev')
+If ($currentUser -eq "EXTRANET\setup-sharepoint-dev")
 {
     & '.\Create Farm.ps1' -CentralAdminAuthProvider NTLM -Verbose
 }
@@ -1285,7 +1280,7 @@ Else
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-sp-farm-dev**.\
-> Expect the previous operation to complete in approximately 5 minutes.
+> Expect the previous operation to complete in approximately 8 minutes.
 
 ### Add Web servers to SharePoint farm
 
@@ -1302,16 +1297,16 @@ cls
 ### # Configure PowerShell access for SharePoint administrators group
 
 ```PowerShell
+$adminsGroup = "EXTRANET\SharePoint Admins (DEV)"
+
 Get-SPDatabase |
     Where-Object {$_.WebApplication -like "SPAdministrationWebApplication"} |
-    Add-SPShellAdmin "EXTRANET\SharePoint Admins (DEV)"
+    Add-SPShellAdmin $adminsGroup
 ```
 
 ### # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
-
 & '.\Configure DCOM Permissions.ps1' -Verbose
 ```
 
@@ -1356,21 +1351,27 @@ $centralAdmin.UpdateMailSettings(
 Set-SPTimerJob "job-delete-job-history" -Schedule "Daily between 12:00:00 and 13:00:00"
 ```
 
+## Install and configure Office Web Apps
+
+### Create DNS record for Office Web Apps
+
+(skipped -- since this was done previously)
+
+### Deploy Office Web Apps farm
+
 ```PowerShell
 cls
 ```
 
-## # Install and configure Office Web Apps
-
-#### # Configure the SharePoint 2013 farm to use Office Web Apps
+#### # Configure SharePoint 2013 farm to use Office Web Apps
 
 ```PowerShell
 New-SPWOPIBinding -ServerName wac.fabrikam.com
 
-Set-SPWOPIZone -zone "external-https"
+Set-SPWOPIZone -zone external-https
 ```
 
-#### # Configure name resolution on Office Web Apps farm
+#### Configure name resolution on Office Web Apps farm
 
 ---
 
@@ -1388,9 +1389,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ### Backup databases in SharePoint 2010 environment
 
-(Download backup files from PROD)
-
-[\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups)
+(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups))
 
 ```PowerShell
 cls
@@ -1401,7 +1400,7 @@ cls
 ```PowerShell
 $destination = 'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full'
 
-mkdir $destination
+New-Item -ItemType Directory -Path $destination
 
 net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
 ```
@@ -1411,49 +1410,50 @@ net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
+cls
 robocopy `
     \\ICEMAN\Archive\Clients\Securitas\Backups `
     $destination `
-    *.bak
-```
-
-```PowerShell
-cls
+    *.bak /XF WSS_Content_CloudPortal*
 ```
 
 #### # Rename backup files
 
 ```PowerShell
-ren `
-    ($destination + '\Profile DB New_backup_2016_07_17_010009_3351668.bak') `
-    'Profile DB New.bak'
+Push-Location $destination
 
-ren `
-    ($destination + '\Securitas_CP_MMS_backup_2016_07_17_010009_3195641.bak') `
-    'Securitas_CP_MMS.bak'
+Rename-Item `
+    'ManagedMetadataService_backup_2016_09_29_084517_2036824.bak' `
+    'ManagedMetadataService.bak'
 
-ren `
-    ($destination + '\SecuritasPortal_backup_2016_07_17_010009_3039614.bak') `
+Rename-Item `
+    'SecuritasPortal_backup_2016_09_29_084517_2505600.bak' `
     'SecuritasPortal.bak'
 
-ren `
-    ($destination + '\Social DB New_backup_2016_07_17_010009_3663722.bak') `
-    'Social DB New.bak'
+Rename-Item `
+    'UserProfileService_Profile_backup_2016_09_29_084517_2193209.bak' `
+    'UserProfileService_Profile.bak'
 
-ren `
-    ($destination + '\Sync DB New_backup_2016_07_17_010009_3351668.bak') `
-    'Sync DB New.bak'
+Rename-Item `
+    'UserProfileService_Social_backup_2016_09_29_084517_2193209.bak' `
+    'UserProfileService_Social.bak'
 
-ren `
-    ($destination + '\WSS_Content_CloudPortal_backup_2016_07_17_010009_3819749.bak') `
-    'WSS_Content_CloudPortal.bak'
+Rename-Item `
+    'UserProfileService_Sync_backup_2016_09_29_084517_2193209.bak' `
+    'UserProfileService_Sync.bak'
 
-ren `
-    ($destination + '\WSS_Content_SecuritasPortal_backup_2016_07_17_010009_3039614.bak') `
+Rename-Item `
+    'WSS_Content_SecuritasPortal_backup_2016_09_29_084517_2349669.bak' `
     'WSS_Content_SecuritasPortal.bak'
+
+Rename-Item `
+    'WSS_Content_SecuritasPortal2_backup_2016_09_29_084517_2505600.bak' `
+    'WSS_Content_SecuritasPortal2.bak'
+
+Pop-Location
 ```
 
-### # Export the User Profile Synchronization encryption key
+### Export User Profile Synchronization encryption key
 
 ---
 
@@ -1488,20 +1488,18 @@ Copy-Item `
 
 ## # Configure SharePoint services and service applications
 
-### # Change the service account for the Distributed Cache
+### # Change service account for Distributed Cache
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
-
-& '.\Configure Distributed Cache.ps1' -Verbose
+& '.\Configure Distributed Cache.ps1' -Confirm:$false -Verbose
 ```
 
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-sp-serviceapp-dev**.\
-> Expect the previous operation to complete in approximately 7-8 minutes.
+> Expect the previous operation to complete in approximately 8 minutes.
 
-### DEV - Constrain the Distributed Cache
+### DEV - Constrain Distributed Cache
 
 (skipped -- since this environment is configured with 24 GB of RAM)
 
@@ -1509,13 +1507,13 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Script
 cls
 ```
 
-### # Configure the State Service
+### # Configure State Service
 
 ```PowerShell
 & '.\Configure State Service.ps1' -Verbose
 ```
 
-### # Configure the SharePoint ASP.NET Session State service
+### # Configure SharePoint ASP.NET Session State service
 
 ```PowerShell
 Enable-SPSessionStateService -DatabaseName SessionStateService
@@ -1524,7 +1522,7 @@ Enable-SPSessionStateService -DatabaseName SessionStateService
 ### # Create application pool for SharePoint service applications
 
 ```PowerShell
-& '.\Configure Service Application Pool.ps1' -Verbose
+& '.\Configure Service Application Pool.ps1' -Confirm:$false -Verbose
 ```
 
 > **Note**
@@ -1535,15 +1533,15 @@ Enable-SPSessionStateService -DatabaseName SessionStateService
 cls
 ```
 
-### # Configure the Managed Metadata Service
+### # Configure Managed Metadata Service
 
-#### # Restore the database backup from the SharePoint 2010 Managed Metadata Service
+#### # Restore database backup from Production
 
 ```PowerShell
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
   'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\'
-    + 'Securitas_CP_MMS.bak'
+    + 'ManagedMetadataService.bak'
 
 DECLARE @dataFilePath VARCHAR(255) =
   'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
@@ -1562,12 +1560,12 @@ RESTORE DATABASE ManagedMetadataService
     STATS = 5
 "@
 
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
 ```
 
-#### # Create the Managed Metadata Service
+#### # Create Managed Metadata Service
 
 ```PowerShell
 & '.\Configure Managed Metadata Service.ps1' -Confirm:$false -Verbose
@@ -1577,9 +1575,9 @@ Set-Location C:
 cls
 ```
 
-### # Configure the User Profile Service Application
+### # Configure User Profile Service Application
 
-#### # Restore the database backup from the SharePoint 2010 User Profile Service Application
+#### # Restore the database backup from Production
 
 ```PowerShell
 $sqlcmd = @"
@@ -1590,7 +1588,7 @@ $sqlcmd = @"
 ```Console
 DECLARE @backupFilePath VARCHAR(255) =
   'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\'
-    + 'Profile DB New.bak'
+    + 'UserProfileService_Profile.bak'
 
 DECLARE @dataFilePath VARCHAR(255) =
   'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
@@ -1614,7 +1612,7 @@ RESTORE DATABASE UserProfileService_Profile
 ```Console
 SET @backupFilePath =
   'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\'
-    + 'Sync DB New.bak'
+    + 'UserProfileService_Sync.bak'
 
 SET @dataFilePath =
   'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
@@ -1638,7 +1636,7 @@ RESTORE DATABASE UserProfileService_Sync
 ```Console
 SET @backupFilePath =
   'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\'
-    + 'Social DB New.bak'
+    + 'UserProfileService_Social.bak'
 
 SET @dataFilePath =
   'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
@@ -1687,14 +1685,14 @@ ALTER ROLE [db_owner] ADD MEMBER [EXTRANET\s-sp-farm-dev]
 GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
 ```
 
-#### # Create the User Profile Service Application
+#### # Create User Profile Service Application
 
-# Create User Profile Service Application as EXTRANET\\s-sp-farm-dev:
+# Use SharePoint farm service account to create User Profile Service Application:
 
 ```PowerShell
 $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
@@ -1720,9 +1718,9 @@ Start-Process $PSHOME\powershell.exe `
 **PowerShell -- running as EXTRANET\\s-sp-farm-dev**
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\ClientPortal\4.0.675.0\DeploymentFiles\Scripts
 
-& '.\Configure User Profile Service.ps1' -Verbose
+& '.\Configure User Profile Service.ps1' -Confirm:$false -Verbose
 ```
 
 > **Important**
@@ -1743,7 +1741,7 @@ Restart-Service SPTimerV4
 
 #### Disable social features
 
-(skipped -- since the database was restored from SharePoint 2010)
+(skipped -- since database was restored from Production)
 
 ```PowerShell
 cls
@@ -1768,7 +1766,7 @@ net localgroup Administrators /add $farmAccount
 Restart-Service SPTimerV4
 ```
 
-#### Start the User Profile Synchronization Service
+#### Start User Profile Synchronization Service
 
 ```PowerShell
 cls
@@ -1780,7 +1778,7 @@ cls
 # Note: NullReferenceException occurs if you attempt to perform this step before starting the User Profile Synchronization Service.
 ```
 
-# Import MIIS encryption key as EXTRANET\\s-sp-farm-dev:
+# Import MIIS encryption key as the SharePoint farm service account:
 
 ```PowerShell
 If ($farmCredential -eq $null)
@@ -1841,20 +1839,58 @@ net localgroup Administrators /delete $farmAccount
 Restart-Service SPTimerV4
 ```
 
+#### Grant the SharePoint farm service account the Remote Enable permission to Forefront Identity Manager
+
+1. On the server that is running the synchronization service, click **Start**.
+2. Type **wmimgmt.msc**, and then press Enter.
+3. Right click **WMI Control**, and then click **Properties**.
+4. In the **WMI Control Properties** window:
+   1. Click the **Security** tab.
+   2. Expand the **Root** list, and then select **MicrosoftIdentityIntegrationServer**.
+   3. Click the **Security** button.
+   4. In the **Security for ROOT\\MicrosoftIdentityIntegrationServer** window:
+      1. Add the SharePoint farm service account to the list of groups and users.
+      2. In the **Group or user names** list, select the SharePoint farm service account.
+      3. In the **Permissions **section, select the **Allow** checkbox for the **Remote Enable** permission.
+      4. Click **OK**.
+   5. Click **OK**.
+5. Close the WmiMgmt console.
+
+##### Reference
+
+[http://technet.microsoft.com/en-us/library/ee721049.aspx#RemovePermsProc](http://technet.microsoft.com/en-us/library/ee721049.aspx#RemovePermsProc)
+
 #### Configure synchronization connections and import data from Active Directory
+
+##### Create synchronization connections to Active Directory
 
 | **Connection Name** | **Forest Name**            | **Account Name**        |
 | ------------------- | -------------------------- | ----------------------- |
 | TECHTOOLBOX         | corp.technologytoolbox.com | TECHTOOLBOX\\svc-sp-ups |
 | FABRIKAM            | corp.fabrikam.com          | FABRIKAM\\s-sp-ups      |
 
+##### Start profile synchronization
+
+Number of user profiles (before import): 11,444\
+Number of user profiles (after import): 11,937
+
+```PowerShell
+Start-Process `
+    ("C:\Program Files\Microsoft Office Servers\15.0\Synchronization Service" `
+        + "\UIShell\miisclient.exe") `
+    -Credential $farmCredential
+```
+
+Start time: 8:50:37 AM\
+End time: 9:05:21 AM
+
 ```PowerShell
 cls
 ```
 
-### # Create and configure the search service application
+### # Create and configure search service application
 
-#### # Create the Search Service Application
+#### # Create Search Service Application
 
 ```PowerShell
 & '.\Configure SharePoint Search.ps1' -Verbose
@@ -1863,7 +1899,7 @@ cls
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-sp-crawler-dev**.\
-> Expect the previous operation to complete in approximately 5-6 minutes.
+> Expect the previous operation to complete in approximately 9 minutes.
 
 ```PowerShell
 cls
@@ -1925,7 +1961,7 @@ New-SPEnterpriseSearchCrawlContentSource `
     -StartAddresses $startAddress
 ```
 
-#### # Configure the search crawl schedules
+#### # Configure search crawl schedules
 
 ```PowerShell
 $searchApp = Get-SPEnterpriseSearchServiceApplication `
@@ -1950,7 +1986,7 @@ Set-SPEnterpriseSearchCrawlContentSource `
     -Identity $contentSource `
     -ScheduleType Incremental `
     -DailyCrawlSchedule `
-    -CrawlScheduleStartDateTime "12:00 AM" `
+    -CrawlScheduleStartDateTime "1:00 AM" `
     -CrawlScheduleRepeatInterval 240 `
     -CrawlScheduleRepeatDuration 1440
 ```
@@ -1977,7 +2013,7 @@ Set-SPEnterpriseSearchCrawlContentSource `
     -CrawlScheduleStartDateTime "4:00 AM"
 ```
 
-#### DEV - Configure performance level for the search crawl component
+#### DEV - Configure performance level for search crawl component
 
 (skipped -- since this environment has a full copy of PROD content)
 
@@ -1985,7 +2021,7 @@ Set-SPEnterpriseSearchCrawlContentSource `
 cls
 ```
 
-## # Create and configure the Web application
+## # Create and configure Web application
 
 ### # Set environment variables
 
@@ -2007,33 +2043,13 @@ exit
 >
 > Restart PowerShell for environment variables to take effect.
 
-### # Add the URL for the SecuritasConnect Web site to the "Local intranet" zone
+### # Add SecuritasConnect URL to "Local intranet" zone
 
 ```PowerShell
-[Uri] $url = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
-
-[string[]] $domainParts = $url.Host -split '\.'
-
-[string] $subdomain = $domainParts[0]
-[string] $domain = $domainParts[1..2] -join '.'
-
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$domain")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-[string] $registryKey = $registryKey + "\$subdomain"
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name http -Value 1
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns http://client-local-8.securitasinc.com,
+        https://client-local-8.securitasinc.com
 ```
 
 ### DEV - Snapshot VM
@@ -2077,7 +2093,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ### # Create Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\ClientPortal\4.0.675.0\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -2085,7 +2101,7 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Script
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-web-client-dev**.\
-> Expect the previous operation to complete in approximately 1 minute.
+> Expect the previous operation to complete in approximately 3 minutes.
 
 ```PowerShell
 cls
@@ -2099,7 +2115,7 @@ cls
 Remove-SPContentDatabase WSS_Content_SecuritasPortal -Confirm:$false -Force
 ```
 
-##### # Restore database backup
+##### # Restore database backups from Production
 
 ```PowerShell
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
@@ -2127,7 +2143,37 @@ RESTORE DATABASE WSS_Content_SecuritasPortal
 
 GO
 
+DECLARE @backupFilePath VARCHAR(255) =
+  'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\'
+    + 'WSS_Content_SecuritasPortal2.bak'
+
+DECLARE @dataFilePath VARCHAR(255) =
+  'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'WSS_Content_SecuritasPortal2.mdf'
+
+DECLARE @logFilePath VARCHAR(255) =
+  'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'WSS_Content_SecuritasPortal2_log.LDF'
+
+RESTORE DATABASE WSS_Content_SecuritasPortal2
+  FROM DISK = @backupFilePath
+  WITH FILE = 1,
+    MOVE 'WSS_Content_SecuritasPortal2' TO @dataFilePath,
+    MOVE 'WSS_Content_SecuritasPortal2_log' TO @logFilePath,
+    NOUNLOAD,
+    STATS = 5
+
+GO
+```
+
+###### -- Set databases to use Simple recovery model
+
+```PowerShell
 ALTER DATABASE [WSS_Content_SecuritasPortal]
+SET RECOVERY SIMPLE WITH NO_WAIT
+GO
+
+ALTER DATABASE [WSS_Content_SecuritasPortal2]
 SET RECOVERY SIMPLE WITH NO_WAIT
 GO
 "@
@@ -2142,44 +2188,21 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 3 minutes.\
-> RESTORE DATABASE successfully processed 4327388 pages in 94.447 seconds (357.954 MB/sec).
+> Expect the previous operation to complete in approximately 35 minutes.\
+> RESTORE DATABASE successfully processed 3720520 pages in 807.541 seconds (35.993 MB/sec).\
+> ...\
+> RESTORE DATABASE successfully processed 3606878 pages in 1217.707 seconds (23.140 MB/sec).
+
+##### Install SecuritasConnect v3.0 solution
+
+(skipped)
+
+##### Test content database
+
+(skipped)
 
 ```PowerShell
 cls
-```
-
-##### # Install SecuritasConnect v3.0 solution
-
-```PowerShell
-net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$build = "3.0.648.0"
-
-robocopy `
-    \\ICEMAN\Builds\Securitas\ClientPortal\$build `
-    C:\NotBackedUp\Builds\Securitas\ClientPortal\$build /E
-
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
-
-& '.\Add Solutions.ps1'
-
-& '.\Deploy Solutions.ps1'
-```
-
-##### # Test content database
-
-```PowerShell
-Test-SPContentDatabase `
-    -Name WSS_Content_SecuritasPortal `
-    -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
-    Out-File C:\NotBackedUp\Temp\Test-SPContentDatabase-SecuritasConnect.txt
 ```
 
 ##### # Attach content database
@@ -2189,8 +2212,11 @@ $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
 Mount-SPContentDatabase `
     -Name WSS_Content_SecuritasPortal `
-    -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL `
-    -MaxSiteCount 6000
+    -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL
+
+Mount-SPContentDatabase `
+    -Name WSS_Content_SecuritasPortal2 `
+    -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL
 
 $stopwatch.Stop()
 C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
@@ -2198,31 +2224,19 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 4-1/2 hours.
+> Expect the previous operation to complete in approximately 4 minutes.
+
+##### Remove SecuritasConnect v3.0 solution
+
+(skipped)
 
 ```PowerShell
 cls
 ```
 
-##### # Remove SecuritasConnect v3.0 solution
-
-```PowerShell
-$build = "3.0.648.0"
-
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
-
-& '.\Deactivate Features.ps1'
-
-& '.\Retract Solutions.ps1'
-
-& '.\Delete Solutions.ps1'
-```
-
 ### # Configure machine key for Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
-
 & '.\Configure Machine Key.ps1' -Verbose
 ```
 
@@ -2234,9 +2248,9 @@ cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Script
 iisreset
 ```
 
-### # Configure the People Picker to support searches across one-way trust
+### # Configure People Picker to support searches across one-way trust
 
-#### # Set the application password used for encrypting credentials
+#### # Set application password used for encrypting credentials
 
 ```PowerShell
 $appPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
@@ -2253,7 +2267,7 @@ $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
 stsadm -o setapppassword -password $plainPassword
 ```
 
-#### # Specify the credentials for accessing the trusted forest
+#### # Specify credentials for accessing trusted forest
 
 ```PowerShell
 $cred1 = Get-Credential "EXTRANET\s-web-client-dev"
@@ -2272,7 +2286,7 @@ $peoplePickerCredentials = $cred1, $cred2
 cls
 ```
 
-#### # Modify the permissions on the registry key where the encrypted credentials are stored
+#### # Modify permissions on registry key where encrypted credentials are stored
 
 ```PowerShell
 $regPath = `
@@ -2291,10 +2305,88 @@ $acl.SetAccessRule($rule)
 Set-Acl -Path $regPath -AclObject $acl
 ```
 
-{bunch o' stuff skipped here}
+### # Map Web application to loopback address in Hosts file
+
+```PowerShell
+& C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 127.0.0.1 `
+    -Hostnames client-local-8.securitasinc.com `
+    -Verbose
+```
+
+### # Allow specific host names mapped to 127.0.0.1
+
+```PowerShell
+& C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostNames.ps1 `
+    -HostNames client-local-8.securitasinc.com `
+    -Verbose
+```
+
+### # Configure SSL on Internet zone
+
+#### # Install SSL certificate
+
+```PowerShell
+net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted for the secure string, type the password for the exported certificate.
+
+```PowerShell
+Import-PfxCertificate `
+    -FilePath "\\ICEMAN\Archive\Clients\Securitas\securitasinc.com.pfx" `
+    -CertStoreLocation Cert:\LocalMachine\My `
+    -Password $certPassword
+```
+
+#### Add public URL for HTTPS
+
+#### Add HTTPS binding to site in IIS
 
 ```PowerShell
 cls
+```
+
+### # Enable disk-based caching for Web application
+
+```PowerShell
+[Uri] $tempUri = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
+
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + $tempUri.Host + "80")
+
+copy web.config "web - Copy.config"
+
+Notepad web.config
+```
+
+---
+
+**Web.config**
+
+```XML
+    <BlobCache
+      location="D:\BlobCache\14"
+      path="\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
+      maxSize="2"
+      enabled="true" />
+```
+
+---
+
+```Console
+cls
+Pop-Location
 ```
 
 ### # Configure Web application policy for SharePoint administrators group
@@ -2319,9 +2411,13 @@ $policy.PolicyRoleBindings.Add($policyRole)
 $webApp.Update()
 ```
 
+### Configure SharePoint groups
+
+(skipped -- since database was restored from Production)
+
 ### Configure My Site settings in User Profile service application
 
-**[http://client-local-8.securitasinc.com/sites/my](http://client-local-8.securitasinc.com/sites/my)**
+My Site Host location: **[http://client-local-8.securitasinc.com/sites/my](http://client-local-8.securitasinc.com/sites/my)**
 
 ## Deploy SecuritasConnect solution
 
@@ -2339,7 +2435,7 @@ cls
 $sqlcmd = @"
 ```
 
-#### -- Restore backup of SecuritasPortal database
+#### -- Restore backup of SecuritasPortal database from Production
 
 ```Console
 DECLARE @backupFilePath VARCHAR(255) =
@@ -2365,7 +2461,7 @@ RESTORE DATABASE SecuritasPortal
 GO
 ```
 
-#### -- Configure permissions for the SecuritasPortal database
+#### -- Configure permissions for SecuritasPortal database
 
 ```SQL
 USE [SecuritasPortal]
@@ -2396,16 +2492,26 @@ ALTER ROLE [Customer_Reader] ADD MEMBER [EXTRANET\s-web-client-dev]
 GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
+```
+
+### Create Branch Managers domain group and add members
+
+(skipped)
+
+### Create PODS Support domain group and add members
+
+(skipped)
+
+```PowerShell
+cls
 ```
 
 ### # Configure logging
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.673.0\DeploymentFiles\Scripts
-
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
 
@@ -2455,23 +2561,19 @@ notepad web.config
 
 ---
 
-```Console
-cls
+```PowerShell
 Pop-Location
 ```
 
-### # Upgrade core site collections
+### Upgrade core site collections
+
+(skipped)
 
 ```PowerShell
-$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
-
-@("/" , "/sites/cc", "/sites/my", "/sites/Search") |
-    ForEach-Object {
-        Upgrade-SPSite ($webAppUrl + $_) -VersionUpgrade -Unthrottled
-    }
+cls
 ```
 
-### # Install SecuritasConnect solutions and activate the features
+### # Install SecuritasConnect solutions and activate features
 
 #### # Deploy v4.0 solutions
 
@@ -2483,7 +2585,7 @@ $webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
 & '.\Activate Features.ps1' -Verbose
 ```
 
-#### Activate the "Securitas - Application Settings" feature
+#### Activate "Securitas - Application Settings" feature
 
 (skipped)
 
@@ -2491,7 +2593,7 @@ $webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
 
 (skipped)
 
-### Create users in the SecuritasPortal database
+### Create users in SecuritasPortal database
 
 #### Create users for Securitas clients
 
@@ -2517,7 +2619,7 @@ SET BranchManagerUserName = 'TECHTOOLBOX\jjameson'
 WHERE BranchManagerUserName = 'PNKUS\jjameson'
 "@
 
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
 ```
@@ -2539,13 +2641,13 @@ net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-Import-Csv "\\ICEMAN\Archive\Clients\Securitas\AppSettings-UAT_2016-04-19.csv" |
+Import-Csv "\\ICEMAN\Archive\Clients\Securitas\AppSettings-UAT_2016-10-06.csv" |
     ForEach-Object {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
 ```
 
-### Configure the SSO credentials for a user
+### Configure SSO credentials for a user
 
 (skipped)
 
@@ -2555,7 +2657,7 @@ cls
 
 ### # Configure C&C landing site
 
-#### # Grant Branch Managers permissions to the C&C landing site
+#### # Grant Branch Managers permissions to C&C landing site
 
 ```PowerShell
 Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
@@ -2576,80 +2678,33 @@ $group.AddUser($branchManagersUser)
 $site.Dispose()
 ```
 
-#### Hide the Search navigation item on the C&C landing site
+#### Hide Search navigation item on C&C landing site
 
-(skipped)
+(skipped -- since database was restored from Production)
 
-```PowerShell
-cls
-```
+#### Configure search settings for C&C landing site
 
-#### # Configure the search settings for the C&C landing site
+(skipped -- since database was restored from Production)
 
-```PowerShell
-Start-Process "$env:SECURITAS_CLIENT_PORTAL_URL/sites/cc"
-```
-
-### Configure Google Analytics on the SecuritasConnect Web application
+### Configure Google Analytics on SecuritasConnect Web application
 
 Tracking ID: **UA-25949832-4**
 
-```PowerShell
-cls
-```
+### Upgrade C&C site collections
 
-### # Upgrade C&C site collections
-
-```PowerShell
-$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
-
-$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
-
-Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
-    ? { $_.CompatibilityLevel -lt 15 } |
-    ForEach-Object {
-        $siteUrl = $_.Url
-
-        Write-Host "Upgrading site ($siteUrl)..."
-
-        Disable-SPFeature `
-            -Identity Securitas.Portal.Web_SecuritasDefaultMasterPage `
-            -Url $siteUrl `
-            -Confirm:$false
-
-        Disable-SPFeature `
-            -Identity Securitas.Portal.Web_PublishingLayouts `
-            -Url $siteUrl `
-            -Confirm:$false
-
-        Upgrade-SPSite $siteUrl -VersionUpgrade -Unthrottled
-
-        Enable-SPFeature `
-            -Identity Securitas.Portal.Web_PublishingLayouts `
-            -Url $siteUrl
-
-        Enable-SPFeature `
-            -Identity Securitas.Portal.Web_SecuritasDefaultMasterPage `
-            -Url $siteUrl
-    }
-
-$stopwatch.Stop()
-C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
-```
-
-> **Note**
->
-> Expect the previous operation to complete in approximately 3-1/2 minutes.
+(skipped -- since database was restored from Production)
 
 ### Defragment SharePoint databases
 
-Defragmentation took 13 minutes
+> **Note**
+>
+> Expect the defragmentation job to complete in approximately 2 hours and 50 minutes.
 
 ```PowerShell
 cls
 ```
 
-#### # Shrink log file for content database
+#### # Shrink log files for content databases
 
 ```PowerShell
 $sqlcmd = @"
@@ -2657,153 +2712,531 @@ USE [WSS_Content_SecuritasPortal]
 GO
 DBCC SHRINKFILE (N'WSS_Content_SecuritasPortal_log' , 0, TRUNCATEONLY)
 GO
-"@
-
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
-```
-
-#### # Shrink content database
-
-```PowerShell
-$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
-
-$sqlcmd = @"
-USE [WSS_Content_SecuritasPortal]
+USE [WSS_Content_SecuritasPortal2]
 GO
-DBCC SHRINKFILE (N'WSS_Content_SecuritasPortal')
+DBCC SHRINKFILE (N'WSS_Content_SecuritasPortal2_log' , 0, TRUNCATEONLY)
+GO
 "@
 
 Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
+```
 
-$stopwatch.Stop()
-C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+#### Shrink content database
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Change recovery model of content databases from Simple to Full
+
+```PowerShell
+$sqlcmd = @"
+ALTER DATABASE [WSS_Content_SecuritasPortal]
+SET RECOVERY FULL WITH NO_WAIT
+GO
+
+ALTER DATABASE [WSS_Content_SecuritasPortal2]
+SET RECOVERY FULL WITH NO_WAIT
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+```PowerShell
+cls
+```
+
+### # Configure SQL Server backups
+
+#### # Create folders for backups
+
+```PowerShell
+$backupPath = "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup"
+
+New-Item -ItemType Directory -Path "$backupPath\Differential"
+New-Item -ItemType Directory -Path "$backupPath\Full"
+New-Item -ItemType Directory -Path "$backupPath\Transaction Log"
+```
+
+#### Create backup maintenance plans
+
+<table>
+<thead>
+<th>
+<p><strong>Name</strong></p>
+</th>
+<th>
+<p><strong>Frequency</strong></p>
+</th>
+<th>
+<p><strong>Daily Frequency</strong></p>
+</th>
+<th>
+<p><strong>Backup compression</strong></p>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Full Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Weekly</strong><br />
+Recurs every: <strong>1</strong> week on</p>
+<ul>
+<li><strong>Sunday</strong></li>
+</ul>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>1:00:00 AM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>Compress backup</strong></p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Differential Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Daily</strong><br />
+Recurs every: <strong>1</strong> day</p>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>12:30:00 AM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>Compress backup</strong></p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Transaction Log Backup of All Databases</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Daily</strong><br />
+Recurs every: <strong>1</strong> day</p>
+</td>
+<td valign='top'>
+<p>Occurs every: <strong>30 minutes</strong><br />
+Starting at:<strong> 12:20:00 AM</strong><br />
+Ending at:<strong> 11:59:59 PM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>Compress backup</strong></p>
+</td>
+</tr>
+</table>
+
+##### Create maintenance plan for full backup of all databases
+
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Full Backup of All Databases**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Full)**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Back Up Database (Full) Task** page:
+      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Full**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, select **Compress backup**.
+      4. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
+
+##### Create maintenance plan for differential backup of all databases
+
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Differential Backup of All Databases**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Differential)**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Back Up Database (Differential) Task** page:
+      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Differential**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, select **Compress backup**.
+      4. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
+
+##### Create maintenance plan for transaction log backup of all databases
+
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Transaction Log Backup of All Databases**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Transaction Log)**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Back Up Database (Full) Task** page:
+      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, select **Compress backup**.
+      4. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
+
+##### Create cleanup maintenance plan
+
+<table>
+<thead>
+<th>
+<p><strong>Name</strong></p>
+</th>
+<th>
+<p><strong>Frequency</strong></p>
+</th>
+<th>
+<p><strong>Daily Frequency</strong></p>
+</th>
+<th>
+<p><strong>Maintenance Cleanup Task Settings</strong></p>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Remove Old Database Backups</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Weekly</strong><br />
+Recurs every: <strong>1</strong> week on</p>
+<ul>
+<li><strong>Sunday</strong></li>
+</ul>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>12:55:00 AM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>First Task (Remove Full and Differential Backups)</strong></p>
+<p><strong>Delete files of the following type:</strong></p>
+<ul>
+<li><strong>Backup files</strong></li>
+</ul>
+<p><strong>File location:</strong></p>
+<ul>
+<li><strong>Search folder and delete files based on an extension</strong>
+<ul>
+<li><strong>Folder: Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\</strong></li>
+<li><strong>File Extension: bak</strong></li>
+<li><strong>Include first-level subfolders: Yes (checked)</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>File age:</strong></p>
+<ul>
+<li><strong>Delete files based on the age of the file at task run time</strong></li>
+<li><strong>Delete files older than the following: 1 Hour(s)</strong></li>
+</ul>
+<p><strong>Second Task (Remove Transaction Log Backups)</strong></p>
+<p><strong>Delete files of the following type:</strong></p>
+<ul>
+<li><strong>Backup files</strong></li>
+</ul>
+<p><strong>File location:</strong></p>
+<ul>
+<li><strong>Search folder and delete files based on an extension</strong>
+<ul>
+<li><strong>Folder: Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\</strong></li>
+<li><strong>File Extension: trn</strong></li>
+<li><strong>Include first-level subfolders: No (unchecked)</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>File age:</strong></p>
+<ul>
+<li><strong>Delete files based on the age of the file at task run time</strong></li>
+<li><strong>Delete files older than the following: 1 Hour(s)</strong></li>
+</ul>
+</td>
+</tr>
+</table>
+
+##### Create maintenance plan to remove old Full and Differential backups
+
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **Remove Old Database Backups**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Maintenance Cleanup Task**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define Maintenance Cleanup Task** page:
+      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\**.
+      2. In the **File extension **box, type **bak**.
+      3. Select the **Include first-level subfolders** checkbox.
+      4. In the **File age** section, configure the settings to delete files older than **1 Hour(s)**.
+      5. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
+
+##### Modify maintenance plan to remove old Transaction Log backups
+
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, expand **Maintenance Plans**, right-click **Remove Old Database Backups** and click **Modify**.
+3. In the Maintenance Plan designer:
+   1. Right-click **Maintenance Cleanup Task** and click **Properties**.
+   2. In the **Properties** window:
+      1. If necessary, expand the **Identification** section.
+      2. In the **Name** box, type **Remove Full and Differential Backups**.
+   3. Use the **Toolbox** to add a new **Maintenance Cleanup Task**.
+   4. Right-click the new task and click **Properties**.
+   5. In the **Properties** window:
+      1. If necessary, expand the **Identification** section.
+      2. In the **Name** box, type **Remove Transaction Log Backups**.
+   6. Right-click the **Remove Transaction Log Backups** task and click **Edit...**
+   7. In the **Maintenance Cleanup Task** window:
+      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
+      2. In the **File extension **box, type **trn**.
+      3. In the **File age** section, configure the settings to delete files older than **1 Hour(s)**.
+      4. Click **OK**.
+4. On the **File** menu, click **Save Selected Items**.
+
+#### Execute maintenance plan - Full Backup of All Databases
+
+### Add content database and partition Post Orders site collections
+
+(skipped)
+
+### Resume Search Service Application and start a full crawl of all content sources
+
+(skipped)
+
+## Create and configure media website
+
+### Install IIS Media Services 4.1
+
+#### Download Web Platform Installer
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+#### # Install IIS Media Services
+
+```PowerShell
+net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 ```
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 9 minutes.
+> When prompted, type the password to connect to the file share.
 
-Size before: 34.5 GB
+```PowerShell
+& ('\\ICEMAN\Products\Microsoft' `
+    + '\Web Platform Installer 5.0\wpilauncher.exe')
+```
 
-Size after: 29.7 GB
+### Install Web Deploy 3.6
 
-### Change recovery model for content database to Full
-
-(skipped)
-
-### Configure SQL Server backups
-
-(skipped)
-
-**TODO:**
+(skipped -- since this is installed with Visual Studio 2015)
 
 ```PowerShell
 cls
 ```
 
-### # Add content database and partition Post Orders site collections
+### # Create media website on front-end Web servers
 
-#### # Add content database
+#### # Create media website on first front-end Web server
 
 ```PowerShell
-$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
-
-New-SPContentDatabase `
-    -Name WSS_Content_SecuritasPortal2 `
-    -WebApplication $webAppUrl
+& ".\Configure Media Website.ps1" `
+    -SiteName media-local-8.securitasinc.com `
+    -Verbose
 ```
 
----
+#### Configure SSL bindings on media website
 
-**SQL Server Management Studio**
+#### Create media website on other web servers in farm
 
-#### -- Expand second content database files
-
-```SQL
-USE [master]
-GO
-ALTER DATABASE [WSS_Content_SecuritasPortal2]
-  MODIFY FILE(
-    NAME = N'WSS_Content_SecuritasPortal2'
-    , SIZE = 14336000KB
-    , FILEGROWTH = 512000KB)
-GO
-ALTER DATABASE [WSS_Content_SecuritasPortal2]
-MODIFY FILE(
-    NAME = N'WSS_Content_SecuritasPortal2_log'
-    , SIZE = 512000KB
-    , MAXSIZE = UNLIMITED
-    , FILEGROWTH = 128000KB)
-GO
-```
-
----
+(skipped)
 
 ```PowerShell
 cls
 ```
 
-#### # Partition Post Orders site collections
+### # Copy media website to front-end Web servers
+
+#### # Copy media website content from Production
+
+```PowerShell
+net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$websiteName = "media-local-8.securitasinc.com"
+
+robocopy `
+```
+
+    '[\\\\ICEMAN\\Archive\\Clients\\Securitas\\Media](\\ICEMAN\Archive\Clients\Securitas\Media)' C:\\inetpub\\wwwroot\\\$websiteName /E
+
+#### Copy media website content to other front-end Web server in farm
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Delete extraneous media files
+
+```PowerShell
+$websiteName = "media-local-8.securitasinc.com"
+
+@(
+    "Connect",
+    "Connectold",
+    "Innovation",
+    "Marketing\ASIS-SecuritasFinal-2015",
+    "Marketing\EOC_Relocation",
+    "Marketing\ExampleVideoMarketing",
+    "Marketing\Henry's Honey",
+    "Marketing\MassTextLaunch",
+    "Marketing\SCR11_Procedures_20111222-Medium",
+    "Marketing\SCR11_Procedures_AE_20120105_H264",
+    "Marketing\SCR11_Reporting_AE_20120216_H264",
+    "Marketing\SCR11_SecureEntry_AE_20120612_ProRes",
+    "Marketing\SCR11_Vision_AE_20120105_H264",
+    "Marketing\SecuritasVision2013",
+    "Marketing\SecuritasVisitorManagement2013",
+    "Marketing\SecuritasVisitorManagementCommercial",
+    "Marketing\SecuritasVisitorManagementResidential",
+    "Solutions",
+    "Training\EmployeePortal",
+    "Training\EmployeePortal_LP",
+    "Training\LastPass",
+    "Training\LastPass_Old",
+    "Training\Ops Reports Navigation_w_audio in F4V format_WMV",
+    "Training\TAPS",
+    "Vigilance"
+) |
+    % {
+        Remove-Item "C:\inetpub\wwwroot\$websiteName\$_" -Recurse -Force
+    }
+```
+
+```PowerShell
+cls
+```
+
+## # Create and configure C&C site collections
+
+### # Create site collection for a Securitas client
+
+```PowerShell
+& '.\Create Client Site Collection.ps1' "Jeremy - Test 2 - Sprint-25"
+```
+
+### Apply "Securitas Client Site" template to top-level site
+
+### Modify site title, description, and logo
+
+### Update client site home page
+
+### Create team collaboration site (optional)
+
+### Create blog site (optional)
+
+```PowerShell
+cls
+```
+
+## # Add Branch Managers domain group to Post Orders template site
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$site = Get-SPSite "$env:SECURITAS_CLIENT_PORTAL_URL/Template-Sites/Post-Orders-en-US"
+
+$group = $site.RootWeb.SiteGroups["Post Orders Template Site (en-US) Visitors"]
+
+$claim = New-SPClaimsPrincipal -Identity "Branch Managers" `
+    -IdentityType WindowsSecurityGroupName
+
+$branchManagersUser = $site.RootWeb.EnsureUser($claim.ToEncodedString())
+$group.AddUser($branchManagersUser)
+$site.Dispose()
+```
+
+```PowerShell
+cls
+```
+
+## # Replace site collection administrators
 
 ```PowerShell
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
-$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+Function ReplaceSiteCollectionAdministrators(
+    $site)
+{
+    Write-Host `
+        "Replacing site collection administrators on site ($($site.Url))..."
 
-$row = 0
+    For ($i = 0; $i -lt $site.RootWeb.SiteAdministrators.Count; $i++)
+    {
+        $siteAdmin = $site.RootWeb.SiteAdministrators[$i]
 
-Get-SPSite -Identity "$webAppUrl/Post-Orders/*" -Limit ALL |
-    Select-Object `
-        Url,
-        @{Name="Created";Expression={$_.RootWeb.Created}} |
-    Sort-Object Created |
-    ForEach-Object {
-        $row++
+        Write-Debug "siteAdmin: $($siteAdmin.LoginName)"
 
-        $contentDatabase = 1
-
-        If ($row % 2 -eq 0)
+        If ($siteAdmin.DisplayName -eq "SEC\SharePoint Admins")
         {
-            $contentDatabase = 2
+            Write-Verbose "Removing administrator ($($siteAdmin.DisplayName))..."
+            $site.RootWeb.SiteAdministrators.Remove($i)
+            $i--;
         }
+    }
 
-        New-Object `
-            -TypeName PSObject `
-            -Property @{
-                Url=$_.Url;
-                Created=$_.Created;
-                DesiredContentDatabase = $contentDatabase
-            }
-    } |
-    Export-Csv C:\NotBackedUp\Temp\Post-Orders.csv
+    Write-Debug `
+        "Adding SharePoint Admins on site ($($site.Url))..."
 
-$stopwatch.Stop()
-C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
-```
+    $user = $site.RootWeb.EnsureUser("EXTRANET\SharePoint Admins (DEV)");
+    $user.IsSiteAdmin = $true;
+    $user.Update();
+}
 
-> **Note**
->
-> Expect the previous operation to complete in approximately 30 minutes.
-
-```PowerShell
-cls
-$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
-
-Import-Csv C:\NotBackedUp\Temp\Post-Orders.csv |
-    Where-Object { $_.DesiredContentDatabase -eq 2 } |
+Get-SPSite -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL -Limit ALL |
     ForEach-Object {
-        $siteUrl = $_.Url
+        $site = $_
 
-        Write-Host "Moving site ($siteUrl)..."
+        Write-Host `
+            "Processing site ($($site.Url))..."
 
-        Move-SPSite `
-            -Identity $siteUrl `
-            -DestinationDatabase WSS_Content_SecuritasPortal2 `
-            -Confirm:$false
+        ReplaceSiteCollectionAdministrators $site
+
+        $site.Dispose()
     }
 
 $stopwatch.Stop()
@@ -2812,47 +3245,57 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 1 hour and 50 minutes.
+> Expect the previous operation to complete in approximately 1 hour and 45 minutes.
+
+Install Cloud Portal v2.0
+
+## Installation prerequisites
+
+### Create Cloud Portal service account
+
+(skipped)
+
+## Backup SharePoint 2010 environment
+
+### Backup databases in SharePoint 2010 environment
+
+(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups))
 
 ```PowerShell
 cls
 ```
 
-#### # Reduce maximum number of site collections in initial content database
+### # Copy the backup files to the SQL Server for the SharePoint 2013 farm
 
 ```PowerShell
-Set-SPContentDatabase -Identity WSS_Content_SecuritasPortal -MaxSiteCount 5000
+net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
 ```
 
-### Resume Search Service Application and start a full crawl of all content sources
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
 
-(skipped)
+```PowerShell
+$source = "\\ICEMAN\Archive\Clients\Securitas\Backups"
+$destination = 'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full'
 
-{Begin skipped sections}
+robocopy `
+    $source `
+    $destination `
+    WSS_Content_CloudPortal*.bak
+```
 
-## Create and configure C&C site collections
+#### # Rename backup file
 
-### Create site collection for a Securitas client
+```PowerShell
+Push-Location $destination
 
-### Apply the "Securitas Client Site" template to the top-level site
+Rename-Item `
+    'WSS_Content_CloudPortal_backup_2016_09_29_084517_2505600.bak' `
+    'WSS_Content_CloudPortal.bak'
 
-### Modify the site title, description, and logo
-
-### Update the client site home page
-
-### Create a blog site (optional)
-
-### Create a wiki site (optional)
-
-{End skipped sections}
-
-Install Cloud Portal v2.0
-
-## Backup SharePoint 2010 environment
-
-#### Copy backup files to SQL Server for SharePoint 2013 farm
-
-(skipped -- since this was done previously during SecuritasConnect installation)
+Pop-Location
+```
 
 ## # Create and configure Cloud Portal Web application
 
@@ -2871,33 +3314,13 @@ exit
 >
 > Restart PowerShell for environment variable to take effect.
 
-### # Add URL for Cloud Portal Web site to "Local intranet" zone
+### # Add Cloud Portal URLs to "Local intranet" zone
 
 ```PowerShell
-[Uri] $url = [Uri] $env:SECURITAS_CLOUD_PORTAL_URL
-
-[string[]] $domainParts = $url.Host -split '\.'
-
-[string] $subdomain = $domainParts[0]
-[string] $domain = $domainParts[1..2] -join '.'
-
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$domain")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-[string] $registryKey = $registryKey + "\$subdomain"
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name http -Value 1
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns http://cloud-local-8.securitasinc.com,
+        https://cloud-local-8.securitasinc.com
 ```
 
 ### # Copy Cloud Portal build to SharePoint server
@@ -2911,16 +3334,18 @@ net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-robocopy `
-    "\\ICEMAN\Builds\Securitas\CloudPortal\2.0.120.0" `
-    "C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.120.0" `
-    /E
+$build = "2.0.122.0"
+
+$sourcePath = "\\ICEMAN\Builds\Securitas\CloudPortal\$build"
+$destPath = "C:\Shares\Builds\CloudPortal\$build"
+
+robocopy $sourcePath $destPath /E
 ```
 
-### # Create the Web application
+### # Create Web application
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.120.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\CloudPortal\2.0.122.0\DeploymentFiles\Scripts
 
 & '.\Create Web Application.ps1' -Verbose
 ```
@@ -2928,7 +3353,7 @@ cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.120.0\DeploymentFiles\Scripts
 > **Note**
 >
 > When prompted for the service account, specify **EXTRANET\\s-web-cloud-dev**.\
-> Expect the previous operation to complete in approximately 1 minute.
+> Expect the previous operation to complete in approximately 3-1/2 minutes.
 
 ```PowerShell
 cls
@@ -2957,7 +3382,7 @@ Add-Type -assembly "System.Io.Compression.FileSystem"
 
 $zipFile = Resolve-Path "ListCollectionSetup.zip"
 
-mkdir ".\ListCollectionSetup"
+New-Item -ItemType Directory -Path ListCollectionSetup
 $destination = Resolve-Path "ListCollectionSetup"
 
 [Io.Compression.ZipFile]::ExtractToDirectory($zipFile, $destination)
@@ -2970,6 +3395,10 @@ cd $destination
 > **Important**
 >
 > Wait for the installation to complete.
+
+> **Note**
+>
+> Expect the installation of BoostSolutions List Collection to complete in approximately 22 minutes (since it appears to query Active Directory for each user that has ever accessed the web application).
 
 ```Console
 cls
@@ -2988,9 +3417,11 @@ Remove-Item $tempPath -Recurse
 Remove-SPContentDatabase WSS_Content_CloudPortal -Confirm:$false -Force
 ```
 
-##### # Restore database backup
+##### # Restore database backup from Production
 
 ```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
   'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\'
@@ -3013,7 +3444,11 @@ RESTORE DATABASE WSS_Content_CloudPortal
     STATS = 5
 
 GO
+```
 
+##### -- Set database to use Simple recovery model
+
+```PowerShell
 ALTER DATABASE [WSS_Content_CloudPortal]
 SET RECOVERY SIMPLE WITH NO_WAIT
 GO
@@ -3022,49 +3457,6 @@ GO
 Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
-```
-
-##### # Install Cloud Portal v1.0 solution
-
-```PowerShell
-net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$build = "1.0.111.0"
-
-robocopy `
-    \\ICEMAN\Builds\Securitas\CloudPortal\$build `
-    C:\NotBackedUp\Builds\Securitas\CloudPortal\$build /E
-
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
-
-& '.\Add Solutions.ps1'
-
-& '.\Deploy Solutions.ps1'
-```
-
-##### # Test content database
-
-```PowerShell
-Test-SPContentDatabase `
-    -Name WSS_Content_CloudPortal `
-    -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL |
-    Out-File C:\NotBackedUp\Temp\Test-SPContentDatabase-CloudPortal.txt
-```
-
-##### # Attach content database
-
-```PowerShell
-$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
-
-Mount-SPContentDatabase `
-    -Name WSS_Content_CloudPortal `
-    -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL
 
 $stopwatch.Stop()
 C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
@@ -3072,39 +3464,48 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 4 minutes.
+> Expect the previous operation to complete in approximately 52 minutes.\
+> RESTORE DATABASE successfully processed 7351620 pages in 3023.752 seconds (18.994 MB/sec).
+
+##### Install Cloud Portal v1.0 solution
+
+(skipped)
+
+##### Test content database
+
+(skipped)
 
 ```PowerShell
 cls
 ```
 
-##### # Remove Cloud Portal v1.0 solution
+##### # Attach content database
 
 ```PowerShell
-$build = "1.0.111.0"
+Mount-SPContentDatabase `
+    -Name WSS_Content_CloudPortal `
+    -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL
+```
 
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
+##### Remove Cloud Portal v1.0 solution
 
-& '.\Deactivate Features.ps1'
+(skipped)
 
-& '.\Retract Solutions.ps1'
-
-& '.\Delete Solutions.ps1'
+```PowerShell
+cls
 ```
 
 ### # Configure object cache user accounts
 
 ```PowerShell
-cd C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.120.0\DeploymentFiles\Scripts
-
 & '.\Configure Object Cache User Accounts.ps1' -Verbose
 
 iisreset
 ```
 
-### # Configure the People Picker to support searches across one-way trusts
+### # Configure People Picker to support searches across one-way trusts
 
-#### # Specify the credentials for accessing the trusted forest
+#### # Specify credentials for accessing trusted forests
 
 ```PowerShell
 $cred1 = Get-Credential "EXTRANET\s-web-cloud-dev"
@@ -3127,20 +3528,50 @@ $cred3 = Get-Credential "FABRIKAM\s-sp-ups"
 
 (skipped)
 
-### Configure SSL on the Internet zone
+### Configure SSL on Internet zone
 
-(skipped)
+#### Add public URL for HTTPS
 
-### Enable anonymous access to the site
+#### Add HTTPS binding to site in IIS
 
-(skipped)
-
-### Enable disk-based caching for the Web application
+### Enable anonymous access to site
 
 (skipped)
 
 ```PowerShell
 cls
+```
+
+### # Enable disk-based caching for Web application
+
+```PowerShell
+[Uri] $tempUri = [Uri] $env:SECURITAS_CLOUD_PORTAL_URL
+
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + $tempUri.Host + "80")
+
+copy web.config "web - Copy.config"
+
+Notepad web.config
+```
+
+---
+
+**Web.config**
+
+```XML
+    <BlobCache
+      location="D:\BlobCache\14"
+      path="\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
+      maxSize="2"
+      enabled="true" />
+```
+
+---
+
+```Console
+cls
+Pop-Location
 ```
 
 ### # Configure Web application policy for SharePoint administrators group
@@ -3202,7 +3633,7 @@ ALTER ROLE [Customer_Reader] ADD MEMBER [EXTRANET\s-web-cloud-dev]
 GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
 ```
@@ -3213,13 +3644,15 @@ Set-Location C:
 & '.\Add Event Log Sources.ps1' -Verbose
 ```
 
-### # Upgrade main site collection
+### Upgrade main site collection
+
+(skipped)
 
 ```PowerShell
-Upgrade-SPSite $env:SECURITAS_CLOUD_PORTAL_URL -VersionUpgrade -Unthrottled
+cls
 ```
 
-### # Install Cloud Portal solutions and activate the features
+### # Install Cloud Portal solutions and activate features
 
 #### # Deploy v2.0 solutions
 
@@ -3231,9 +3664,9 @@ Upgrade-SPSite $env:SECURITAS_CLOUD_PORTAL_URL -VersionUpgrade -Unthrottled
 & '.\Activate Features.ps1' -Verbose
 ```
 
-### Create and configure the custom sign-in page
+### Create and configure custom sign-in page
 
-#### Create the custom sign-in page
+#### Create custom sign-in page
 
 (skipped)
 
@@ -3250,21 +3683,15 @@ Set-SPWebApplication `
     -SignInRedirectURL "/Pages/Sign-In.aspx"
 ```
 
-### Configure search settings for the Cloud Portal
+### Configure search settings for Cloud Portal
 
-#### Hide the Search navigation item on the Cloud Portal top-level site
+#### Hide Search navigation item on Cloud Portal top-level site
 
-(skipped -- since the database was restored from PROD)
+(skipped -- since this is already hidden in PROD)
 
-```PowerShell
-cls
-```
+#### Configure search settings for Cloud Portal top-level site
 
-#### # Configure the search settings for the Cloud Portal top-level site
-
-```PowerShell
-Start-Process $env:SECURITAS_CLOUD_PORTAL_URL
-```
+(skipped)
 
 ### Configure redirect for single-site users
 
@@ -3274,98 +3701,67 @@ Start-Process $env:SECURITAS_CLOUD_PORTAL_URL
 
 (skipped)
 
-### Configure Google Analytics on the Cloud Portal Web application
+### Configure Google Analytics on Cloud Portal Web application
 
 Tracking ID: **UA-25949832-5**
 
-{Begin skipped sections}
+### Upgrade C&C site collections
 
-## Create and configure C&C site collections
+(skipped)
 
-### Create "Collaboration & Community" site collection
+### Defragment SharePoint databases
 
-### Apply the "Securitas Client Site" template to the top-level site
-
-### Modify the site title, description, and logo
-
-### Update the C&C site home page
-
-### Create a team collaboration site (optional)
-
-### Create a blog site (optional)
-
-### Create a wiki site (optional)
-
-{End skipped sections}
+> **Note**
+>
+> Expect the defragmentation job to complete in approximately 1 hours and 16 minutes.
 
 ```PowerShell
 cls
 ```
 
-### # Upgrade C&C site collections
+### # Change recovery model of content database from Simple to Full
 
 ```PowerShell
-$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+$sqlcmd = @"
+ALTER DATABASE [WSS_Content_CloudPortal]
+SET RECOVERY FULL WITH NO_WAIT
+GO
+"@
 
-$webAppUrl = $env:SECURITAS_CLOUD_PORTAL_URL
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
-Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
-    Where-Object { $_.CompatibilityLevel -lt 15 } |
-    ForEach-Object {
-        $siteUrl = $_.Url
-
-        Write-Host "Upgrading site ($siteUrl)..."
-
-        Get-SPWeb -Site $siteUrl |
-            ForEach-Object {
-                $webUrl = $_.Url
-
-                Disable-SPFeature `
--Identity Securitas.CloudPortal.Web_SecuritasDefaultMasterPage `
-                    -Url $webUrl `
-                    -Confirm:$false
-            }
-
-        Disable-SPFeature `
-            -Identity Securitas.CloudPortal.Web_PublishingLayouts `
-            -Url $siteUrl `
-            -Confirm:$false
-
-        Upgrade-SPSite $siteUrl -VersionUpgrade -Unthrottled
-
-        Enable-SPFeature `
-            -Identity Securitas.CloudPortal.Web_PublishingLayouts `
-            -Url $siteUrl
-
-        Get-SPWeb -Site $siteUrl |
-            ForEach-Object {
-                $webUrl = $_.Url
-
-                Enable-SPFeature `
-                    -Identity Securitas.CloudPortal.Web_CloudPortalBranding `
-                    -Url $webUrl
-            }
-    }
-
-$stopwatch.Stop()
-C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+Set-Location C:
 ```
-
-> **Note**
->
-> Expect the previous operation to complete in approximately 1 hour.
-
-### Defragment SharePoint databases
-
-Defragmentation took 4 minutes
-
-### Change recovery model of content database to Full
-
-(skipped)
 
 ### Resume Search Service Application and start full crawl on all content sources
 
 (skipped)
+
+### Remove obsolete web app policies
+
+For each web application, delete the **Search Crawling Account** corresponding to **EXTRANET\\s-sp-serviceapp-dev**.
+
+```PowerShell
+cls
+```
+
+## # Create and configure C&C site collections
+
+### # Create "Collaboration & Community" site collection
+
+```PowerShell
+& '.\Create Client Site Collection.ps1' "Jeremy - Test 2 - Sprint-20"
+```
+
+### Apply "Securitas Client Site" template to top-level site
+
+### Modify site title, description, and logo
+
+### Update C&C site home page
+
+### Create team collaboration site (optional)
+
+### Create blog site (optional)
 
 ```Console
 cls
@@ -3375,12 +3771,10 @@ cls
 
 ## # Extend SecuritasConnect and Cloud Portal web applications
 
-TODO: Move this section in the install guide
-
 ### # Copy Employee Portal build to SharePoint server
 
 ```PowerShell
-net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
+net use \\ICEMAN\Builds /USER:PNKUS\jjameson
 ```
 
 > **Note**
@@ -3388,28 +3782,57 @@ net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-robocopy `
-    "\\ICEMAN\Builds\Securitas\EmployeePortal\1.0.29.0" `
-    "C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.29.0" `
-    /E
+$build = "1.0.29.0"
+
+$sourcePath = "\\ICEMAN\Builds\Securitas\EmployeePortal\$build"
+$destPath = "C:\Shares\Builds\EmployeePortal\$build"
+
+robocopy $sourcePath $destPath /E
 ```
 
 ### # Extend web applications to Intranet zone
 
 ```PowerShell
-cd ("C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.29.0" `
-    + "\Deployment Files\Scripts")
+cd 'C:\Shares\Builds\EmployeePortal\1.0.29.0\Deployment Files\Scripts'
 
-& '.\Extend Web Applications.ps1' -Confirm:$false -Verbose
+& '.\Extend Web Applications.ps1' -SecureSocketsLayer -Confirm:$false -Verbose
 ```
 
-> **Note**
->
-> Expect the previous operation to complete in approximately 5 minutes.
+```PowerShell
+cls
+```
 
-### Enable disk-based caching for the "intranet" websites
+### # Enable disk-based caching for "intranet" websites
 
-(skipped)
+#### # Enable disk-based caching for SecuritasConnect "intranet" website
+
+```PowerShell
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + "client2-local-8.securitasinc.com443")
+
+copy web.config "web - Copy.config"
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    '..\client-local-8.securitasinc.com80\web.config' `
+    .\web.config
+
+Pop-Location
+```
+
+#### # Enable disk-based caching for Cloud Portal "intranet" website
+
+```PowerShell
+Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
+    + "cloud2-local-8.securitasinc.com443")
+
+copy web.config "web - Copy.config"
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
+    '..\cloud-local-8.securitasinc.com80\web.config' `
+    .\web.config
+
+Pop-Location
+```
 
 ```PowerShell
 cls
@@ -3433,6 +3856,8 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 
 ### Download Web Platform Installer
 
+(skipped)
+
 ### Install Web Deploy
 
 (skipped -- since this is installed with Visual Studio 2015)
@@ -3447,33 +3872,13 @@ cls
 
 ## # Install Employee Portal
 
-### # Add the Employee Portal URL to the "Local intranet" zone
+### # Add Employee Portal URLs to "Local intranet" zone
 
 ```PowerShell
-[Uri] $url = [Uri] "http://employee-local-8.securitasinc.com"
-
-[string[]] $domainParts = $url.Host -split '\.'
-
-[string] $subdomain = $domainParts[0]
-[string] $domain = $domainParts[1..2] -join '.'
-
-[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
-    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
-    + "\$domain")
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-[string] $registryKey = $registryKey + "\$subdomain"
-
-If ((Test-Path $registryKey) -eq $false)
-{
-    New-Item $registryKey | Out-Null
-}
-
-Set-ItemProperty -Path $registryKey -Name http -Value 1
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns http://employee-local-8.securitasinc.com,
+        https://employee-local-8.securitasinc.com
 ```
 
 ### Create Employee Portal SharePoint site
@@ -3489,8 +3894,6 @@ cls
 #### # Create Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
-cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.29.0\Deployment Files\Scripts'
-
 & '.\Configure Employee Portal Website.ps1' `
     -SiteName employee-local-8.securitasinc.com `
     -Confirm:$false `
@@ -3499,9 +3902,7 @@ cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.29.0\Deployment Files\Scr
 
 #### Configure SSL bindings on Employee Portal website
 
-(skipped)
-
-#### Create Employee Portal website on other web servers in the farm
+#### Create Employee Portal website on other web servers in farm
 
 (skipped)
 
@@ -3514,7 +3915,7 @@ cls
 #### # Deploy Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
-Push-Location C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.29.0\Debug\_PublishedWebsites\Web_Package
+Push-Location C:\Shares\Builds\EmployeePortal\1.0.29.0\Release\_PublishedWebsites\Web_Package
 
 attrib -r .\Web.SetParameters.xml
 
@@ -3548,7 +3949,6 @@ Notepad .\Web.SetParameters.xml
 
 ```Console
 cls
-
 Pop-Location
 ```
 
@@ -3558,9 +3958,13 @@ Pop-Location
 Notepad C:\inetpub\wwwroot\employee-local-8.securitasinc.com\Web.config
 ```
 
-Set the value of the **GoogleAnalytics.TrackingId** application setting to **UA-25949832-3**.
+1. Set the value of the **GoogleAnalytics.TrackingId** application setting to **UA-25949832-3**.
+2. In the **`<errorMail>`** element, change the **smtpServer** attribute to **smtp-test.technologytoolbox.com**.
+3. Replace all instances of **[http://client2-local](http://client2-local)** with **[https://client2-local-8](https://client2-local-8)**.
+4. Replace all instances of **[http://cloud2-local](http://cloud2-local)** with **[https://cloud2-local-8](https://cloud2-local-8)**.
+5. Replace all instances of **TransportCredentialOnly** with **Transport**.
 
-#### Deploy Employee Portal website content to other web servers in the farm
+#### Deploy Employee Portal website content to other web servers in farm
 
 (skipped)
 
@@ -3587,14 +3991,79 @@ EXEC sp_addrolemember N'Employee_FullAccess', N'IIS APPPOOL\employee-local-8.sec
 GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
 ```
 
-### Grant PNKCAN and PNKUS users permissions on Cloud Portal site
+```PowerShell
+cls
+```
+
+### # Grant PNKCAN and PNKUS users permissions on Cloud Portal site
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$supportedDomains = ("FABRIKAM", "TECHTOOLBOX")
+
+$web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/"
+
+$group = $web.Groups["Cloud Portal Visitors"]
+
+$supportedDomains |
+    ForEach-Object {
+        $claim = New-SPClaimsPrincipal `
+            -Identity "$_\Domain Users" `
+            -IdentityType WindowsSecurityGroupName
+
+        $user = $web.EnsureUser($claim.ToEncodedString())
+        $group.AddUser($user)
+    }
+
+$web.Dispose()
+
+$web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/sites/Employee-Portal"
+
+$group = $web.SiteGroups["Viewers"]
+
+$supportedDomains |
+    ForEach-Object {
+        $claim = New-SPClaimsPrincipal `
+            -Identity "$_\Domain Users" `
+            -IdentityType WindowsSecurityGroupName
+
+        $user = $web.EnsureUser($claim.ToEncodedString())
+        $group.AddUser($user)
+    }
+
+$web.Dispose()
+
+$web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/sites/Employee-Portal/Profiles"
+
+$list = $web.Lists["Profile Pictures"]
+
+$contributeRole = $web.RoleDefinitions['Contribute']
+
+$supportedDomains |
+    ForEach-Object {
+        $domainUsers = $web.EnsureUser($_ + '\Domain Users')
+
+        $assignment = New-Object Microsoft.SharePoint.SPRoleAssignment(
+            $domainUsers)
+
+        $assignment.RoleDefinitionBindings.Add($contributeRole)
+        $list.RoleAssignments.Add($assignment)
+    }
+
+$web.Dispose()
+```
+
+### Replace absolute URLs in "User Sites" list
 
 (skipped)
 
-TODO: Add the following sections to the install guide
+### Install additional service packs and updates
 
 ```PowerShell
 cls
@@ -3614,10 +4083,6 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
     employee-local-8.securitasinc.com
 ```
 
-### Install additional service packs and updates
-
-(skipped)
-
 ```PowerShell
 cls
 ```
@@ -3635,17 +4100,40 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 > **Note**
 >
-> Expect the crawl to complete in approximately 2-3 minutes.
-
-Upgrade SecuritasConnect and Cloud Portal
+> Expect the crawl to complete in approximately 4 hours and 40 minutes.
 
 ```PowerShell
 cls
 ```
 
-## # Upgrade SecuritasConnect
+## # Clean up WinSxS folder
 
-### # Copy build to SharePoint server
+```PowerShell
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+```
+
+## Update client secret for LMS
+
+```Console
+cd C:\Shares\Builds\ClientPortal\4.0.675.0\DeploymentFiles\Scripts
+
+net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+Import-Csv "\\ICEMAN\Archive\Clients\Securitas\AppSettings-UAT_2016-10-06.csv" |
+    ForEach-Object {
+        .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
+    }
+```
+
+## Upgrade SecuritasConnect to "v4.0 Sprint-26" release
+
+### # Copy new build from TFS drop location
 
 ```PowerShell
 net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
@@ -3656,20 +4144,27 @@ net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$build = "4.0.675.0"
+$newBuild = "4.0.677.0"
 
-$sourcePath = "\\ICEMAN\Builds\Securitas\ClientPortal\$build"
-$destPath = "C:\NotBackedUp\Builds\Securitas\ClientPortal\$build"
+$sourcePath = "\\ICEMAN\Builds\Securitas\ClientPortal\$newBuild"
+$destPath = "C:\Shares\Builds\ClientPortal\$newBuild"
 
 robocopy $sourcePath $destPath /E
 ```
 
-### # Deploy build
+### # Remove previous versions of SecuritasConnect WSPs
 
 ```PowerShell
-Push-Location C:\NotBackedUp\Builds\Securitas\ClientPortal\$build\DeploymentFiles\Scripts
+$oldBuild = "4.0.675.0"
 
-& '.\Redeploy Features.ps1' -Verbose
+Push-Location ("C:\Shares\Builds\ClientPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Deactivate Features.ps1' -Verbose
+
+& '.\Retract Solutions.ps1' -Verbose
+
+& '.\Delete Solutions.ps1' -Verbose
 
 Pop-Location
 ```
@@ -3678,102 +4173,190 @@ Pop-Location
 cls
 ```
 
-## # Upgrade Cloud Portal
-
-### # Copy build to SharePoint server
+### # Install new versions of SecuritasConnect WSPs
 
 ```PowerShell
-$build = "2.0.121.0"
+Push-Location ("C:\Shares\Builds\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
 
-$sourcePath = "\\ICEMAN\Builds\Securitas\CloudPortal\$build"
-$destPath = "C:\NotBackedUp\Builds\Securitas\CloudPortal\$build"
+& '.\Add Solutions.ps1' -Verbose
 
-robocopy $sourcePath $destPath /E
-```
+& '.\Deploy Solutions.ps1' -Verbose
 
-### # Deploy build
+& '.\Activate Features.ps1' -Verbose
 
-```PowerShell
-Push-Location C:\NotBackedUp\Builds\Securitas\CloudPortal\$build\DeploymentFiles\Scripts
-
-& '.\Redeploy Features.ps1' -Verbose
-```
-
-```PowerShell
-cls
 Pop-Location
 ```
 
-## # Checkpoint VM
-
-### # Prepare for snapshot
-
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Prepare for Snapshot.cmd'
+cls
 ```
 
----
+### # Configure application settings for TEKWave integration
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+```PowerShell
+Start-Process "http://client-local-8.securitasinc.com"
+```
 
 ```PowerShell
 cls
 ```
 
-### # Checkpoint VM
-
-```PowerShell
-$vmHost = "WOLVERINE"
-$vmName = "EXT-FOOBAR4"
-
-$snapshotName = "Baseline Client Portal 4.0.674.0 / Cloud Portal 2.0.121.0 / Employee Portal 1.0.28.0"
-
-Stop-VM -ComputerName $vmHost -Name $vmName
-
-Checkpoint-VM `
-    -ComputerName $vmHost `
-    -Name $vmName `
-    -SnapshotName $snapshotName
-
-Start-VM -ComputerName $vmHost -Name $vmName
-```
-
----
-
-## # Add content database and partition Post Orders site collections
-
-```PowerShell
-asnp *SharePoint*
-```
-
-### # Add content database
-
-```PowerShell
-$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
-
-New-SPContentDatabase `
-    -Name WSS_Content_SecuritasPortal2 `
-    -WebApplication $webAppUrl
-```
-
-### # Expand second content database files
+### # Configure TEKWave in SecuritasPortal database
 
 ```PowerShell
 $sqlcmd = @"
-USE [master]
+USE [SecuritasPortal]
 GO
-ALTER DATABASE [WSS_Content_SecuritasPortal2]
-  MODIFY FILE(
-    NAME = N'WSS_Content_SecuritasPortal2'
-    , SIZE = 14336000KB
-    , FILEGROWTH = 512000KB)
+
+-- Add TEKWave services
+
+SET IDENTITY_INSERT Customer.Services ON
+
+INSERT INTO Customer.Services
+(
+    ServiceId
+    , ServiceName
+    , Description
+)
+VALUES
+(
+    9
+    , 'TEKWave - Commercial'
+    , 'Visitor Management - Commercial & Logistics'
+)
+
+INSERT INTO Customer.Services
+(
+    ServiceId
+    , ServiceName
+    , Description
+)
+VALUES
+(
+    10
+    , 'TEKWave - Community'
+    , 'Visitor Management - Community'
+)
+
+SET IDENTITY_INSERT Customer.Services OFF
 GO
-ALTER DATABASE [WSS_Content_SecuritasPortal2]
-MODIFY FILE(
-    NAME = N'WSS_Content_SecuritasPortal2_log'
-    , SIZE = 512000KB
-    , MAXSIZE = UNLIMITED
-    , FILEGROWTH = 128000KB)
+
+-- Remove CapSure from all sites
+
+DELETE SiteServices
+FROM
+    Customer.SiteServices
+    INNER JOIN Customer.Services
+    ON SiteServices.ServiceId = Services.ServiceId
+WHERE
+    Services.ServiceName = 'CapSure'
+
+-- Add TEKWave to "ABC Company" sites
+
+INSERT INTO Customer.SiteServices
+(
+    SiteId
+    , ServiceId
+)
+SELECT
+    SiteId
+    , Services.ServiceId
+FROM
+    Customer.Sites
+    INNER JOIN Customer.Clients
+    ON Sites.ClientId = Clients.ClientId
+    INNER JOIN Customer.Services
+    ON Services.ServiceName = 'TEKWave - Commercial'
+WHERE
+    Clients.ClientName = 'ABC Company'
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+### Edit user profiles to add credentials for TEKWave
+
+```PowerShell
+cls
+```
+
+### # Delete old build
+
+```PowerShell
+Remove-Item C:\Shares\Builds\ClientPortal\4.0.675.0 -Recurse -Force
+```
+
+## Refresh content from Production
+
+```PowerShell
+cls
+```
+
+### # Pause Search Service Application
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell
+
+Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
+    Suspend-SPEnterpriseSearchServiceApplication
+```
+
+### # Restore SecuritasPortal database backup
+
+#### # Extract database backups from zip file
+
+```PowerShell
+net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$zipFile = `
+    "SecuritasPortal_backup_2016_11_20_000009_8804925.zip"
+
+$sourcePath = "\\ICEMAN\Archive\Clients\Securitas\Backups"
+
+$destPath = "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
+
+Add-Type -assembly "System.Io.Compression.FileSystem"
+
+$zipFilePath = $sourcePath + "\" + $zipFile
+
+[Io.Compression.ZipFile]::ExtractToDirectory($zipFilePath, $destPath)
+```
+
+#### # Restore database backup from Production
+
+```PowerShell
+$backupFile = $zipFile.Replace(".zip", ".bak")
+
+$sqlcmd = @"
+DECLARE @backupFilePath VARCHAR(255) =
+  'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\$backupFile'
+
+DECLARE @dataFilePath VARCHAR(255) =
+  'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'SecuritasPortal.mdf'
+
+DECLARE @logFilePath VARCHAR(255) =
+  'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'SecuritasPortal_log.LDF'
+
+RESTORE DATABASE SecuritasPortal
+  FROM DISK = @backupFilePath
+  WITH FILE = 1,
+    MOVE 'SecuritasPortal' TO @dataFilePath,
+    MOVE 'SecuritasPortal_log' TO @logFilePath,
+    NOUNLOAD,
+    REPLACE,
+    STATS = 5
+
 GO
 "@
 
@@ -3782,52 +4365,174 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### Backup second content database
+#### # Configure permissions for SecuritasPortal database
 
-(skipped)
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+CREATE USER [EXTRANET\s-sp-farm-dev] FOR LOGIN [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Membership_BasicAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Membership_ReportingAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+
+CREATE USER [EXTRANET\s-web-client-dev] FOR LOGIN [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Membership_FullAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Profile_BasicAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [Customer_Reader] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+
+CREATE USER [IIS APPPOOL\employee-local-8.securitasinc.com]
+FOR LOGIN [IIS APPPOOL\employee-local-8.securitasinc.com]
+GO
+EXEC sp_addrolemember N'Employee_FullAccess', N'IIS APPPOOL\employee-local-8.securitasinc.com'
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+#### # Associate users to TECHTOOLBOX\\smasters
+
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+INSERT INTO Customer.BranchManagerAssociatedUsers
+SELECT 'TECHTOOLBOX\smasters', AssociatedUserName
+FROM Customer.BranchManagerAssociatedUsers
+WHERE BranchManagerUserName = 'PNKUS\jjameson'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+#### HACK: Update TrackTik password for bbarthelemy-demo
 
 ```PowerShell
 cls
 ```
 
-### # Partition Post Orders site collections
+### # Restore SecuritasConnect database backups
 
-#### # Pause Search Service Application
+#### # Extract database backups from zip file
 
 ```PowerShell
-Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
-    Suspend-SPEnterpriseSearchServiceApplication
+$zipFile = `
+    "WSS_Content_SecuritasPortal_backup_2016_11_20_000009_8804925.zip"
+
+$sourcePath = "\\ICEMAN\Archive\Clients\Securitas\Backups"
+
+$destPath = "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
+
+Add-Type -assembly "System.Io.Compression.FileSystem"
+
+$zipFilePath = $sourcePath + "\" + $zipFile
+
+[Io.Compression.ZipFile]::ExtractToDirectory($zipFilePath, $destPath)
+
+Exception calling "ExtractToDirectory" with "2" argument(s): "The archive entry was compressed using an unsupported compression method."
+At line:1 char:1
++ [Io.Compression.ZipFile]::ExtractToDirectory($zipFilePath, $destPath)
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
+    + FullyQualifiedErrorId : InvalidDataException
+```
+
+##### Workaround
+
+Extract zip file using Windows Explorer
+
+**Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Full**
+
+```PowerShell
+cls
+```
+
+#### # Restore content databases for SecuritasConnect
+
+##### # Remove existing content databases
+
+```PowerShell
+Remove-SPContentDatabase WSS_Content_SecuritasPortal -Confirm:$false -Force
+
+Remove-SPContentDatabase WSS_Content_SecuritasPortal2 -Confirm:$false -Force
+```
+
+##### # Restore database backups from Production
+
+```PowerShell
+$backup1 = "WSS_Content_SecuritasPortal_backup_2016_11_20_000009_8804925.bak"
+$backup2 = "WSS_Content_SecuritasPortal2_backup_2016_11_20_000009_8960930.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
-$webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+$sqlcmd = @"
+DECLARE @backupFilePath VARCHAR(255) =
+  'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\$backup1'
 
-$row = 0
+DECLARE @dataFilePath VARCHAR(255) =
+  'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'WSS_Content_SecuritasPortal.mdf'
 
-Get-SPSite -Identity "$webAppUrl/Post-Orders/*" -Limit ALL |
-    Select-Object `
-        Url,
-        @{Name="Created";Expression={$_.RootWeb.Created}} |
-    Sort-Object Created |
-    ForEach-Object {
-        $row++
+DECLARE @logFilePath VARCHAR(255) =
+  'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'WSS_Content_SecuritasPortal_log.LDF'
 
-        $contentDatabase = 1
+RESTORE DATABASE WSS_Content_SecuritasPortal
+  FROM DISK = @backupFilePath
+  WITH FILE = 1,
+    MOVE 'WSS_Content_SecuritasPortal' TO @dataFilePath,
+    MOVE 'WSS_Content_SecuritasPortal_log' TO @logFilePath,
+    NOUNLOAD,
+    STATS = 5
 
-        If ($row % 2 -eq 0)
-        {
-            $contentDatabase = 2
-        }
+GO
 
-        New-Object `
-            -TypeName PSObject `
-            -Property @{
-                Url=$_.Url;
-                Created=$_.Created;
-                DesiredContentDatabase = $contentDatabase
-            }
-    } |
-    Export-Csv C:\NotBackedUp\Temp\Post-Orders.csv
+DECLARE @backupFilePath VARCHAR(255) =
+  'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\$backup2'
+
+DECLARE @dataFilePath VARCHAR(255) =
+  'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'WSS_Content_SecuritasPortal2.mdf'
+
+DECLARE @logFilePath VARCHAR(255) =
+  'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'WSS_Content_SecuritasPortal2_log.LDF'
+
+RESTORE DATABASE WSS_Content_SecuritasPortal2
+  FROM DISK = @backupFilePath
+  WITH FILE = 1,
+    MOVE 'WSS_Content_SecuritasPortal2' TO @dataFilePath,
+    MOVE 'WSS_Content_SecuritasPortal2_log' TO @logFilePath,
+    NOUNLOAD,
+    STATS = 5
+
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
 
 $stopwatch.Stop()
 C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
@@ -3835,23 +4540,119 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 10 minutes.
+> Expect the previous operation to complete in approximately 32 minutes.\
+> RESTORE DATABASE successfully processed 4001436 pages in 308.557 seconds (101.314 MB/sec).\
+> ...\
+> RESTORE DATABASE successfully processed 3396484 pages in 854.186 seconds (31.064 MB/sec).
 
 ```PowerShell
 cls
+```
+
+##### # Attach content database
+
+```PowerShell
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
-Import-Csv C:\NotBackedUp\Temp\Post-Orders.csv |
-    Where-Object { $_.DesiredContentDatabase -eq 2 } |
+Mount-SPContentDatabase `
+    -Name WSS_Content_SecuritasPortal `
+    -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL
+
+Mount-SPContentDatabase `
+    -Name WSS_Content_SecuritasPortal2 `
+    -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 4 minutes.
+
+```PowerShell
+cls
+```
+
+### # Restore application settings from UAT
+
+```PowerShell
+cd C:\Shares\Builds\ClientPortal\4.0.677.0\DeploymentFiles\Scripts
+
+Import-Csv "\\ICEMAN\Archive\Clients\Securitas\AppSettings-UAT_2016-11-10.csv" |
     ForEach-Object {
-        $siteUrl = $_.Url
+        .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
+    }
+```
 
-        Write-Host "Moving site ($siteUrl)..."
+```PowerShell
+cls
+```
 
-        Move-SPSite `
-            -Identity $siteUrl `
-            -DestinationDatabase WSS_Content_SecuritasPortal2 `
-            -Confirm:$false
+### # Add Branch Managers domain group to Post Orders template site
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$site = Get-SPSite "$env:SECURITAS_CLIENT_PORTAL_URL/Template-Sites/Post-Orders-en-US"
+
+$group = $site.RootWeb.SiteGroups["Post Orders Template Site (en-US) Visitors"]
+
+$claim = New-SPClaimsPrincipal -Identity "Branch Managers" `
+    -IdentityType WindowsSecurityGroupName
+
+$branchManagersUser = $site.RootWeb.EnsureUser($claim.ToEncodedString())
+$group.AddUser($branchManagersUser)
+$site.Dispose()
+```
+
+```PowerShell
+cls
+```
+
+### # Replace site collection administrators
+
+```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
+Function ReplaceSiteCollectionAdministrators(
+    $site)
+{
+    Write-Host `
+        "Replacing site collection administrators on site ($($site.Url))..."
+
+    For ($i = 0; $i -lt $site.RootWeb.SiteAdministrators.Count; $i++)
+    {
+        $siteAdmin = $site.RootWeb.SiteAdministrators[$i]
+
+        Write-Debug "siteAdmin: $($siteAdmin.LoginName)"
+
+        If ($siteAdmin.DisplayName -eq "SEC\SharePoint Admins")
+        {
+            Write-Verbose "Removing administrator ($($siteAdmin.DisplayName))..."
+            $site.RootWeb.SiteAdministrators.Remove($i)
+            $i--;
+        }
+    }
+
+    Write-Debug `
+        "Adding SharePoint Admins on site ($($site.Url))..."
+
+    $user = $site.RootWeb.EnsureUser("EXTRANET\SharePoint Admins (DEV)");
+    $user.IsSiteAdmin = $true;
+    $user.Update();
+}
+
+Get-SPSite -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL -Limit ALL |
+    ForEach-Object {
+        $site = $_
+
+        Write-Host `
+            "Processing site ($($site.Url))..."
+
+        ReplaceSiteCollectionAdministrators $site
+
+        $site.Dispose()
     }
 
 $stopwatch.Stop()
@@ -3860,51 +4661,614 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 1-1/2 hours.
-
-> **Important**
->
-> IIS must be restarted before the changes will take effect.
-
-Reset IIS on each SharePoint server in the farm.
+> Expect the previous operation to complete in approximately 57 minutes.
 
 ```PowerShell
 cls
 ```
 
-### # Reduce maximum number of site collections in initial content database
+### # Restore Cloud Portal database backup
+
+#### # Copy database backup
 
 ```PowerShell
-Set-SPContentDatabase -Identity WSS_Content_SecuritasPortal -MaxSiteCount 5000
+$backupFile = `
+    "WSS_Content_CloudPortal_backup_2016_11_20_000009_8960930.bak"
+
+$sourcePath = "\\ICEMAN\Archive\Clients\Securitas\Backups"
+
+$destPath = "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
+
+robocopy $sourcePath $destPath $backupFile
 ```
 
-### # Resume Search Service Application and start full crawl on all content sources
+#### # Remove existing content databases
 
 ```PowerShell
-Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
-    Resume-SPEnterpriseSearchServiceApplication
+Remove-SPContentDatabase WSS_Content_CloudPortal -Confirm:$false -Force
 ```
 
-## Issue - IPv6 address range changed by Comcast
-
-### # Remove static IPv6 address
+#### # Restore database backup from Production
 
 ```PowerShell
-$oldIpAddress = "2601:282:4201:e500::223"
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
-$ifIndex = Get-NetIPAddress $oldIpAddress |
-    Select -ExpandProperty InterfaceIndex
+$sqlcmd = @"
+DECLARE @backupFilePath VARCHAR(255) =
+  'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\$backupFile'
 
-Remove-NetIPAddress `
-    -InterfaceIndex $ifIndex `
-    -IPAddress $oldIpAddress `
-    -Confirm:$false
+DECLARE @dataFilePath VARCHAR(255) =
+  'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'WSS_Content_CloudPortal.mdf'
+
+DECLARE @logFilePath VARCHAR(255) =
+  'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'WSS_Content_CloudPortal_log.LDF'
+
+RESTORE DATABASE WSS_Content_CloudPortal
+  FROM DISK = @backupFilePath
+  WITH FILE = 1,
+    MOVE 'WSS_Content_CloudPortal' TO @dataFilePath,
+    MOVE 'WSS_Content_CloudPortal_log' TO @logFilePath,
+    NOUNLOAD,
+    STATS = 5
+
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 ```
 
-### # Update IPv6 DNS servers
+> **Note**
+>
+> Expect the previous operation to complete in approximately 56 minutes.\
+> RESTORE DATABASE successfully processed 7585919 pages in 2877.267 seconds (20.597 MB/sec).
 
 ```PowerShell
-Set-DnsClientServerAddress `
-    -InterfaceIndex $ifIndex `
-    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
+cls
+```
+
+#### # Attach content database
+
+```PowerShell
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
+Mount-SPContentDatabase `
+    -Name WSS_Content_CloudPortal `
+    -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 6 seconds.
+
+```PowerShell
+cls
+```
+
+#### # Configure permissions for FABRIKAM and TECHTOOLBOX users
+
+```PowerShell
+Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
+
+$supportedDomains = ("FABRIKAM", "TECHTOOLBOX")
+```
+
+##### # Add domain users to Cloud Portal site
+
+```PowerShell
+$web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/"
+
+$group = $web.Groups["Cloud Portal Visitors"]
+
+$supportedDomains |
+    ForEach-Object {
+        $claim = New-SPClaimsPrincipal `
+            -Identity "$_\Domain Users" `
+            -IdentityType WindowsSecurityGroupName
+
+        $user = $web.EnsureUser($claim.ToEncodedString())
+        $group.AddUser($user)
+    }
+
+$web.Dispose()
+```
+
+##### # Add domain users to Employee Portal SharePoint site
+
+```PowerShell
+$web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/sites/Employee-Portal"
+
+$group = $web.SiteGroups["Viewers"]
+
+$supportedDomains |
+    ForEach-Object {
+        $claim = New-SPClaimsPrincipal `
+            -Identity "$_\Domain Users" `
+            -IdentityType WindowsSecurityGroupName
+
+        $user = $web.EnsureUser($claim.ToEncodedString())
+        $group.AddUser($user)
+    }
+
+$web.Dispose()
+```
+
+##### # Allow domain users to upload profile pictures in Employee Portal
+
+```PowerShell
+$web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/sites/Employee-Portal/Profiles"
+
+$list = $web.Lists["Profile Pictures"]
+
+$contributeRole = $web.RoleDefinitions['Contribute']
+
+$supportedDomains |
+    ForEach-Object {
+        $domainUsers = $web.EnsureUser($_ + '\Domain Users')
+
+        $assignment = New-Object Microsoft.SharePoint.SPRoleAssignment(
+            $domainUsers)
+
+        $assignment.RoleDefinitionBindings.Add($contributeRole)
+        $list.RoleAssignments.Add($assignment)
+    }
+
+$web.Dispose()
+```
+
+```PowerShell
+cls
+```
+
+### # Remove old database backups
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Remove-OldBackups.ps1 `
+    -NumberOfDaysToKeep 0
+```
+
+### # Start job to backup all databases
+
+```PowerShell
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo") |
+    Out-Null
+
+$sqlServer = New-Object Microsoft.SqlServer.Management.Smo.Server $HostName
+
+$job = ($sqlServer.JobServer.Jobs |
+    ? { $_.Name -eq "Full Backup of All Databases.Subplan_1" })
+
+$job.Start()
+```
+
+```PowerShell
+cls
+```
+
+### # Reset search index and perform full crawl
+
+```PowerShell
+$serviceApp = Get-SPEnterpriseSearchServiceApplication
+```
+
+#### # Reset search index
+
+```PowerShell
+$serviceApp.Reset($false, $false)
+```
+
+#### # Start full crawl
+
+```PowerShell
+$serviceApp |
+    Get-SPEnterpriseSearchCrawlContentSource |
+    % { $_.StartFullCrawl() }
+```
+
+> **Note**
+>
+> Expect the crawl to complete in approximately 6 hours 50 minutes.
+
+## Increase Data01 drive from 150 GB to 185 GB
+
+## Upgrade SecuritasConnect to "v4.0 Sprint-27" release
+
+### # Copy new build from TFS drop location
+
+```PowerShell
+net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$newBuild = "4.0.678.0"
+
+$sourcePath = "\\ICEMAN\Builds\Securitas\ClientPortal\$newBuild"
+$destPath = "C:\Shares\Builds\ClientPortal\$newBuild"
+
+robocopy $sourcePath $destPath /E
+```
+
+### # Remove previous versions of SecuritasConnect WSPs
+
+```PowerShell
+$oldBuild = "4.0.677.0"
+
+Push-Location ("C:\Shares\Builds\ClientPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Deactivate Features.ps1' -Verbose
+
+& '.\Retract Solutions.ps1' -Verbose
+
+& '.\Delete Solutions.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Install new versions of SecuritasConnect WSPs
+
+```PowerShell
+Push-Location ("C:\Shares\Builds\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+
+Pop-Location
+```
+
+### # Delete old build
+
+```PowerShell
+Remove-Item C:\Shares\Builds\ClientPortal\4.0.677.0 `
+   -Recurse -Force
+```
+
+## Upgrade Employee Portal to "v1.0 Sprint-5" release
+
+### # Copy new build from TFS drop location
+
+```PowerShell
+net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$build = "1.0.32.0"
+
+$sourcePath = "\\ICEMAN\Builds\Securitas\EmployeePortal\$build"
+$destPath = "C:\Shares\Builds\EmployeePortal\$build"
+
+robocopy $sourcePath $destPath /E
+```
+
+### # Backup Employee Portal Web.config file
+
+```PowerShell
+$websiteName = "employee-local-8.securitasinc.com"
+
+copy C:\inetpub\wwwroot\$websiteName\Web.config `
+    "C:\NotBackedUp\Temp\Web - $websiteName.config"
+```
+
+### # Deploy Employee Portal website on Central Administration server
+
+```PowerShell
+Push-Location ("C:\Shares\Builds\EmployeePortal\$build" `
+    + "\Release\_PublishedWebsites\Web_Package")
+
+attrib -r .\Web.SetParameters.xml
+Notepad .\Web.SetParameters.xml
+```
+
+---
+
+**Web.SetParameters.xml**
+
+```XML
+<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter
+    name="IIS Web Application Name"
+    value="employee-local-8.securitasinc.com" />
+  <setParameter
+    name="SecuritasPortal-Web.config Connection String"
+    value="Server=.; Database=SecuritasPortal; Integrated Security=true" />
+  <setParameter
+    name="SecuritasPortalDbContext-Web.config Connection String"
+    value="Data Source=.; Initial Catalog=SecuritasPortal;
+ Integrated Security=True; MultipleActiveResultSets=True;" />
+</parameters>
+```
+
+---
+
+```PowerShell
+.\Web.deploy.cmd /t
+
+.\Web.deploy.cmd /y
+
+Pop-Location
+```
+
+### # Configure application settings and web service URLs
+
+```PowerShell
+$websiteName = "employee-local-8.securitasinc.com"
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\x64\sgdm.exe `
+    "C:\NotBackedUp\Temp\Web - $websiteName.config" `
+    C:\inetpub\wwwroot\$websiteName\Web.config
+```
+
+### Deploy website content to other web servers in the farm
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Configure Employee Portal navigation items
+
+```PowerShell
+Push-Location ("C:\Shares\Builds\EmployeePortal\$build" `
+    + "\Deployment Files\Scripts")
+
+.\Set-Navigation.ps1 -State app.search -Title Search -Icon fa-search -Label New
+
+.\Set-Navigation.ps1 -State app.directory -Label "" -Force
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Delete old build
+
+```PowerShell
+Remove-Item C:\Shares\Builds\EmployeePortal\1.0.29.0 -Recurse -Force
+```
+
+## Upgrade SecuritasConnect to "v4.0 Sprint-28" release
+
+### # Copy new build from TFS drop location
+
+```PowerShell
+net use \\TT-FS01\Builds /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$newBuild = "4.0.681.0"
+
+$sourcePath = "\\TT-FS01\Builds\Securitas\ClientPortal\$newBuild"
+$destPath = "C:\Shares\Builds\ClientPortal\$newBuild"
+
+robocopy $sourcePath $destPath /E
+```
+
+### # Remove previous versions of SecuritasConnect WSPs
+
+```PowerShell
+$oldBuild = "4.0.678.0"
+
+Push-Location ("C:\Shares\Builds\ClientPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Deactivate Features.ps1' -Verbose
+
+& '.\Retract Solutions.ps1' -Verbose
+
+& '.\Delete Solutions.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Install new versions of SecuritasConnect WSPs
+
+```PowerShell
+Push-Location ("C:\Shares\Builds\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+
+Pop-Location
+```
+
+### # Delete old build
+
+```PowerShell
+Remove-Item C:\Shares\Builds\ClientPortal\4.0.678.0 `
+   -Recurse -Force
+```
+
+## Refresh SecuritasPortal database from Production
+
+### # Restore SecuritasPortal database backup
+
+```PowerShell
+$backupFile = "SecuritasPortal.bak"
+```
+
+#### # Restore database backup from Production
+
+```PowerShell
+$sqlcmd = @"
+DECLARE @backupFilePath VARCHAR(255) =
+  'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\$backupFile'
+
+DECLARE @dataFilePath VARCHAR(255) =
+  'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'SecuritasPortal.mdf'
+
+DECLARE @logFilePath VARCHAR(255) =
+  'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\'
+    + 'SecuritasPortal_log.LDF'
+
+RESTORE DATABASE SecuritasPortal
+  FROM DISK = @backupFilePath
+  WITH FILE = 1,
+    MOVE 'SecuritasPortal' TO @dataFilePath,
+    MOVE 'SecuritasPortal_log' TO @logFilePath,
+    NOUNLOAD,
+    REPLACE,
+    STATS = 5
+
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+#### # Configure permissions for SecuritasPortal database
+
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+CREATE USER [EXTRANET\s-sp-farm-dev] FOR LOGIN [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Membership_BasicAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Membership_ReportingAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-sp-farm-dev]
+GO
+
+CREATE USER [EXTRANET\s-web-client-dev] FOR LOGIN [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Membership_FullAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Profile_BasicAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Roles_BasicAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [aspnet_Roles_ReportingAccess] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+ALTER ROLE [Customer_Reader] ADD MEMBER [EXTRANET\s-web-client-dev]
+GO
+
+CREATE USER [IIS APPPOOL\employee-local-8.securitasinc.com]
+FOR LOGIN [IIS APPPOOL\employee-local-8.securitasinc.com]
+GO
+EXEC sp_addrolemember N'Employee_FullAccess', N'IIS APPPOOL\employee-local-8.securitasinc.com'
+GO
+
+DROP USER [SEC\258521-VM4$]
+DROP USER [SEC\424642-SP$]
+DROP USER [SEC\424646-SP$]
+DROP USER [SEC\784806-SPWFE1$]
+DROP USER [SEC\784807-SPWFE2$]
+DROP USER [SEC\784810-SPAPP$]
+DROP USER [SEC\s-sp-farm]
+DROP USER [SEC\s-web-client]
+DROP USER [SEC\s-web-cloud]
+DROP USER [SEC\svc-sharepoint-2010]
+DROP USER [SEC\svc-web-securitas]
+DROP USER [SEC\svc-web-securitas-20]
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+#### # Associate users to TECHTOOLBOX\\smasters
+
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+INSERT INTO Customer.BranchManagerAssociatedUsers
+SELECT 'TECHTOOLBOX\smasters', AssociatedUserName
+FROM Customer.BranchManagerAssociatedUsers
+WHERE BranchManagerUserName = 'PNKUS\jjameson'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+#### HACK: Update TrackTik password for Angela.Parks
+
+[https://client-local-8.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-8.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+
+#### HACK: Update TrackTik password for bbarthelemy-demo
+
+[https://client-local-8.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-8.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+
+## Expand C: drive
+
+---
+
+**FOOBAR10**
+
+### # Expand primary VHD for virtual machine
+
+```PowerShell
+$vmName = "EXT-FOOBAR8"
+$vmHost = "TT-HV02A"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
+Resize-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 80GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+### # Expand C: partition
+
+```PowerShell
+$maxSize = (Get-PartitionSupportedSize -DriveLetter C).SizeMax
+
+Resize-Partition -DriveLetter C -Size $maxSize
 ```
