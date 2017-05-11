@@ -1,7 +1,7 @@
-﻿# EXT-DC06 - Windows Server 2016
+﻿# EXT-DC07 Windows Server 2016
 
-Monday, March 20, 2017
-6:18 AM
+Wednesday, May 10, 2017
+9:54 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,7 +9,7 @@ Monday, March 20, 2017
 
 ## Deploy and configure the server infrastructure
 
-### Install Windows Server 2012 R2
+### Install Windows Server 2016
 
 ---
 
@@ -23,13 +23,13 @@ $VerbosePreference = "Continue"
 cls
 ```
 
-#### # Get list of Windows Server 2012 R2 images
+#### # Get list of Windows Server 2016 images
 
 ```PowerShell
 Add-AzureAccount
 
 Get-AzureVMImage |
-    where { $_.Label -like "Windows Server 2012 R2*" } |
+    where { $_.Label -like "Windows Server 2016*" } |
     select Label, ImageName
 ```
 
@@ -41,7 +41,7 @@ cls
 
 ```PowerShell
 $imageName = `
-    "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-20170111" `
+    "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2016-Datacenter-20170406" `
     + "-en.us-127GB.vhd"
 ```
 
@@ -66,7 +66,7 @@ If ($domainCred -eq $null)
 $subscriptionId = "********-fdf5-4fd0-b21b-{redacted}"
 $storageAccount = "techtoolbox"
 $location = "West US"
-$vmName = "EXT-DC06"
+$vmName = "EXT-DC07"
 $cloudService = $vmName
 $instanceSize = "Basic_A0"
 $vhdPath = "https://$storageAccount.blob.core.windows.net/vhds/$vmName"
@@ -145,7 +145,7 @@ New-AzureVM `
 **WOLVERINE**
 
 ```PowerShell
-$vmName = "EXT-DC06"
+$vmName = "EXT-DC07"
 
 $vm = Get-AzureVM -ServiceName $vmName -Name $vmName
 
@@ -332,27 +332,15 @@ Install-ADDSDomainController `
 
 ## Issue - DNS errors
 
-Log Name:      DNS Server\
-Source:        Microsoft-Windows-DNS-Server-Service\
-Date:          3/21/2017 2:15:36 PM\
-Event ID:      4015\
-Task Category: None\
-Level:         Error\
-Keywords:      (131072)\
-User:          SYSTEM\
-Computer:      EXT-DC06.extranet.technologytoolbox.com\
-Description:\
-The DNS server has encountered a critical error from the Active Directory. Check that the Active Directory is functioning properly. The extended error debug information (which may be empty) is "". The event data contains the error.
-
 Log Name:      System\
 Source:        Microsoft-Windows-DNS-Client\
-Date:          3/24/2017 3:46:10 PM\
+Date:          5/11/2017 1:35:49 AM\
 Event ID:      1014\
 Task Category: (1014)\
 Level:         Warning\
 Keywords:      (268435456)\
 User:          NETWORK SERVICE\
-Computer:      EXT-DC06.extranet.technologytoolbox.com\
+Computer:      EXT-DC07.extranet.technologytoolbox.com\
 Description:\
 Name resolution for the name microsoft.com timed out after none of the configured DNS servers responded.
 
@@ -481,7 +469,7 @@ net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 $msiPath = "\\tt-fs01.corp.technologytoolbox.com\Products\Microsoft" `
-    + "\System Center 2016\Agents\SCOM\AMD64\MOMAgent.msi"
+    + "\System Center 2016\SCOM\agent\AMD64\MOMAgent.msi"
 
 msiexec.exe /i $msiPath `
     MANAGEMENT_GROUP=HQ `
@@ -503,7 +491,7 @@ cls
 $hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
 
 $certImportToolPath = "\\tt-fs01.corp.technologytoolbox.com\Products\Microsoft" `
-    + "\System Center 2016\SupportTools\SCOM\AMD64\MOMCertImport.exe"
+    + "\System Center 2016\SCOM\SupportTools\AMD64\MOMCertImport.exe"
 
 & $certImportToolPath /SubjectName $hostName
 ```
@@ -537,6 +525,8 @@ Restart-Service HealthService
 **Deploying SCOM 2016 Agents to Domain controllers - some assembly required**\
 From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/](https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/)>
 
+**TODO:**
+
 ## Issue - License Activation failures
 
 Log Name:      Application\
@@ -547,7 +537,7 @@ Task Category: None\
 Level:         Error\
 Keywords:      Classic\
 User:          N/A\
-Computer:      EXT-DC06.extranet.technologytoolbox.com\
+Computer:      EXT-DC07.extranet.technologytoolbox.com\
 Description:\
 License Activation (slui.exe) failed with the following error code:\
 hr=0xC004F074\
