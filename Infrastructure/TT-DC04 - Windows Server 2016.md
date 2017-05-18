@@ -521,4 +521,33 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 Start-Service wuauserv
 ```
 
+## Configure firewall for cross-forest trust (EXTRANET --> TECHTOOLBOX)
+
+```PowerShell
+reg add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters `
+```
+
+    /v "TCP/IP Port" /t REG_DWORD /d 58349
+
+```PowerShell
+reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters `
+```
+
+    /v DCTcpipPort /t REG_DWORD /d 51164
+
+```PowerShell
+Restart-Computer
+```
+
+### References
+
+**How to configure a firewall for domains and trusts**\
+From <[https://support.microsoft.com/en-us/help/179442/how-to-configure-a-firewall-for-domains-and-trusts](https://support.microsoft.com/en-us/help/179442/how-to-configure-a-firewall-for-domains-and-trusts)>
+
+**Network Ports used by Trusts**\
+From <[https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx](https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx)>
+
+**Restricting Active Directory RPC traffic to a specific port**\
+From <[https://support.microsoft.com/en-us/help/224196/restricting-active-directory-rpc-traffic-to-a-specific-port](https://support.microsoft.com/en-us/help/224196/restricting-active-directory-rpc-traffic-to-a-specific-port)>
+
 **TODO:**
