@@ -203,3 +203,21 @@ Set-DnsClientServerAddress `
     -InterfaceIndex $ifIndex `
     -ServerAddresses 2603:300b:802:8900::201, ::1
 ```
+
+## Configure firewall for cross-forest trust (EXTRANET --> FABRIKAM)
+
+```PowerShell
+reg add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters `
+```
+
+    /v "TCP/IP Port" /t REG_DWORD /d 58349
+
+```PowerShell
+reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters `
+```
+
+    /v DCTcpipPort /t REG_DWORD /d 51164
+
+```PowerShell
+Restart-Computer
+```
