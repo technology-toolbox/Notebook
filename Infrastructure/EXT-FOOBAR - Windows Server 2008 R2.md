@@ -2195,3 +2195,59 @@ netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=26
 
 netsh interface ipv6 add dnsserver name=$interfaceAlias address=2603:300b:802:8900::210
 ```
+
+## Move VM to extranet VLAN
+
+### Enable DHCP
+
+### Rename network connection
+
+### Disable jumbo frames
+
+### Delete VM snapshot
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "EXT-FOOBAR"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet-20 VM Network"
+
+$ipAddressPool= Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Static `
+    -MACAddress $macAddress `
+    -IPv4AddressType Static `
+    -IPv4AddressPool $ipAddressPool
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+### Create VM snapshot
+
+**Baseline Client Portal 3.0.648.0 / Cloud Portal 1.0.111.0 / Employee Portal 1.0.28.0**

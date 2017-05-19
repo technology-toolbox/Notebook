@@ -5272,3 +5272,55 @@ $maxSize = (Get-PartitionSupportedSize -DriveLetter C).SizeMax
 
 Resize-Partition -DriveLetter C -Size $maxSize
 ```
+
+## Migrate VM to Extranet VM network
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "EXT-FOOBAR8"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
+
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---

@@ -2223,7 +2223,8 @@ New-SCStaticIPAddressPool `
     -DNSSuffix $dnsSuffix `
     -DNSSearchSuffix $dnsSearchSuffixes `
     -NetworkRoute $networkRoutes `
-    -IPAddressReservedSet $reservedAddressSet
+    -IPAddressReservedSet $reservedAddressSet `
+    -VIPAddressSet "10.1.20.200-10.1.20.254"
 ```
 
 ```PowerShell

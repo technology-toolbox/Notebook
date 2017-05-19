@@ -818,4 +818,57 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
+## Migrate VM to Extranet VM network
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "EXT-SQL01B"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
+
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
 **TODO:**

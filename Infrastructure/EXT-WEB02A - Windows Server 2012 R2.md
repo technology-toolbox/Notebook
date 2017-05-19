@@ -1212,4 +1212,215 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
+## Migrate VM to Extranet VM network
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "EXT-WEB02A"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
+
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+## Issue - Error accessing SharePoint sites (e.g. http://client-test.securitasinc.com)
+
+Log Name:      Application\
+Source:        ASP.NET 4.0.30319.0\
+Date:          5/18/2017 10:25:38 AM\
+Event ID:      1309\
+Task Category: Web Event\
+Level:         Warning\
+Keywords:      Classic\
+User:          N/A\
+Computer:      EXT-WEB02A.extranet.technologytoolbox.com\
+Description:\
+Event code: 3005\
+Event message: An unhandled exception has occurred.\
+Event time: 5/18/2017 10:25:38 AM\
+Event time (UTC): 5/18/2017 4:25:38 PM\
+Event ID: 53a12e3e19af46f19c73e78673fc5163\
+Event sequence: 8\
+Event occurrence: 1\
+Event detail code: 0\
+\
+Application information:\
+    Application domain: /LM/W3SVC/762047535/ROOT-1-131395983088891094\
+    Trust level: Full\
+    Application Virtual Path: /\
+    Application Path: C:\\inetpub\\wwwroot\\wss\\VirtualDirectories\\client-test.securitasinc.com80\\\
+    Machine name: EXT-WEB02A\
+\
+Process information:\
+    Process ID: 6056\
+    Process name: w3wp.exe\
+    Account name: EXTRANET\\s-web-client\
+\
+Exception information:\
+    Exception type: FileLoadException\
+    Exception message: Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)\
+   at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)\
+   at Microsoft.SharePoint.IdentityModel.SPChunkedCookieHandler.ReadCore(String name, HttpContext context)\
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.TryReadSessionTokenFromCookie(SessionSecurityToken& sessionToken)\
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
+   at Microsoft.SharePoint.IdentityModel.SPSessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
+   at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()\
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+
+\
+\
+Request information:\
+    Request URL: [https://client-test.securitasinc.com:443/favicon.ico](https://client-test.securitasinc.com:443/favicon.ico)\
+    Request path: /favicon.ico\
+    User host address: 127.0.0.1\
+    User:\
+    Is authenticated: False\
+    Authentication Type:\
+    Thread account name: EXTRANET\\s-web-client\
+\
+Thread information:\
+    Thread ID: 18\
+    Thread account name: EXTRANET\\s-web-client\
+    Is impersonating: False\
+    Stack trace:    at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)\
+   at Microsoft.SharePoint.IdentityModel.SPChunkedCookieHandler.ReadCore(String name, HttpContext context)\
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.TryReadSessionTokenFromCookie(SessionSecurityToken& sessionToken)\
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
+   at Microsoft.SharePoint.IdentityModel.SPSessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
+   at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()\
+   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)\
+
+### References
+
+**Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)**\
+From <[http://blog.bugrapostaci.com/2017/02/08/loading-this-assembly-would-produce-a-different-grant-set-from-other-instances-exception-from-hresult-0x80131401/](http://blog.bugrapostaci.com/2017/02/08/loading-this-assembly-would-produce-a-different-grant-set-from-other-instances-exception-from-hresult-0x80131401/)>
+
+**Monitoring SharePoint 2010 Applications in System Center 2012 SP1**\
+From <[https://technet.microsoft.com/en-us/library/jj614617.aspx?tduid=(1dfb939b69d4a5ed09b44f51992a8b97)(256380)(2459594)(TnL5HPStwNw-v0X_tBOK3jzpbtaadMW8RA)()](https://technet.microsoft.com/en-us/library/jj614617.aspx?tduid=(1dfb939b69d4a5ed09b44f51992a8b97)(256380)(2459594)(TnL5HPStwNw-v0X_tBOK3jzpbtaadMW8RA)())>
+
+**SCOM 2016 Sharepoint 2013 PerfMon64.dll crash W3wp.exe**\
+From <[https://social.technet.microsoft.com/Forums/en-US/24b4d768-57a2-42c9-8e18-1ef8c075913a/scom-2016-sharepoint-2013-perfmon64dll-crash-w3wpexe?forum=scomapm](https://social.technet.microsoft.com/Forums/en-US/24b4d768-57a2-42c9-8e18-1ef8c075913a/scom-2016-sharepoint-2013-perfmon64dll-crash-w3wpexe?forum=scomapm)>
+
+**SCOM 2016 Agent Crashing Legacy IIS Application Pools**\
+From <[http://kevingreeneitblog.blogspot.ie/2017/03/scom-2016-agent-crashing-legacy-iis.html](http://kevingreeneitblog.blogspot.ie/2017/03/scom-2016-agent-crashing-legacy-iis.html)>
+
+**APM feature in SCOM 2016 Agent may cause a crash for the IIS Application Pool running under .NET 2.0 runtime**\
+From <[https://blogs.technet.microsoft.com/momteam/2017/03/21/apm-feature-in-scom-2016-agent-may-cause-a-crash-for-the-iis-application-pool-running-under-net-2-0-runtime/](https://blogs.technet.microsoft.com/momteam/2017/03/21/apm-feature-in-scom-2016-agent-may-cause-a-crash-for-the-iis-application-pool-running-under-net-2-0-runtime/)>
+
+### Solution
+
+Remove SCOM agent and reinstall without Application Performance Monitoring (APM).
+
+#### Remove SCOM agent
+
+> **Note**
+>
+> When prompted, restart the server.
+
+#### # Clean up SCOM agent folder
+
+```PowerShell
+Remove-Item "C:\Program Files\Microsoft Monitoring Agent" -Recurse -Force
+```
+
+#### Install SCOM agent without Application Performance Monitoring (APM)
+
+---
+
+**FOOBAR10**
+
+```PowerShell
+cls
+```
+
+##### # Copy SCOM agent setup files from file server
+
+```PowerShell
+$source = "\\TT-FS01.corp.technologytoolbox.com\Products\Microsoft" `
+```
+
+    + "\\System Center 2016\\SCOM\\agent\\AMD64"
+
+```PowerShell
+$destination = "\\EXT-WEB02A.extranet.technologytoolbox.com\C$\NotBackedUp\Temp" `
+```
+
+    + "\\System Center 2016\\SCOM\\agent\\AMD64"
+
+```Console
+robocopy $source $destination /E /MIR
+```
+
+---
+
+```PowerShell
+cls
+```
+
+##### # Install SCOM agent
+
+```PowerShell
+$msiPath = "C:\NotBackedUp\Temp\System Center 2016\SCOM\agent\AMD64\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01.corp.technologytoolbox.com `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1 `
+    NOAPM=1
+```
+
+```PowerShell
+cls
+```
+
+##### # Delete SCOM agent setup files
+
+```PowerShell
+Remove-Item "C:\NotBackedUp\Temp\System Center 2016" -Recurse
+```
+
+#### Approve manual agent install in Operations Manager
+
 **TODO:**

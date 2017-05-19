@@ -1244,6 +1244,56 @@ WHERE BranchManagerUserName = 'PNKUS\jjameson'
 
 ## Snapshot VM - "Baseline Client Portal 3.0.645.0 / Cloud Portal 1.0.106.0"
 
+## Migrate VM to Extranet VM network
+
+### Delete VM snapshot
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "EXT-FOOBAR7"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet-20 VM Network"
+
+$ipAddressPool= Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Static `
+    -MACAddress $macAddress `
+    -IPv4AddressType Static `
+    -IPv4AddressPool $ipAddressPool
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+### Create VM snapshot
+
+**Baseline Client Portal 3.0.645.0 / Cloud Portal 1.0.106.0**
+
 **TODO:**
 
 ```PowerShell
