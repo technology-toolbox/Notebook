@@ -607,14 +607,22 @@ Get-StoragePool "Pool 1" |
 
 ```PowerShell
 $ssdTier = Get-StorageTier -FriendlyName "SSD Tier"
+
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
+        -FriendlyName "Gold01" `
+        -ResiliencySettingName Mirror `
+        -StorageTiers $ssdTier `
+        -StorageTierSizes 200GB
+
 $hddTier = Get-StorageTier -FriendlyName "HDD Tier"
 
 Get-StoragePool "Pool 1" |
     New-VirtualDisk `
-        -FriendlyName "Data01" `
+        -FriendlyName "Silver01" `
         -ResiliencySettingName Mirror `
-        -StorageTiers $ssdTier, $hddTier `
-        -StorageTierSizes 470GB, 2792GB `
+        -StorageTiers $ssdTier,$hddTier `
+        -StorageTierSizes 265GB,2792GB `
         -WriteCacheSize 5GB
 ```
 
@@ -639,22 +647,41 @@ cls
 
 #### # Create partitions and volumes
 
-##### # Create volume "D" on Data01
+##### # Create volume "D" on Gold01
 
 ```PowerShell
-Get-VirtualDisk "Data01" | Get-Disk | Set-Disk -IsReadOnly 0
+Get-VirtualDisk "Gold01" | Get-Disk | Set-Disk -IsReadOnly 0
 
-Get-VirtualDisk "Data01"| Get-Disk | Set-Disk -IsOffline 0
+Get-VirtualDisk "Gold01"| Get-Disk | Set-Disk -IsOffline 0
 
-Get-VirtualDisk "Data01"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+Get-VirtualDisk "Gold01"| Get-Disk | Initialize-Disk -PartitionStyle GPT
 
-Get-VirtualDisk "Data01"| Get-Disk |
+Get-VirtualDisk "Gold01"| Get-Disk |
     New-Partition -DriveLetter "D" -UseMaximumSize
 
 Initialize-Volume `
     -DriveLetter "D" `
-    -FileSystem ReFS `
-    -NewFileSystemLabel "Data01" `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Gold01" `
+    -Confirm:$false
+```
+
+##### # Create volume "E" on Silver01
+
+```PowerShell
+Get-VirtualDisk "Silver01" | Get-Disk | Set-Disk -IsReadOnly 0
+
+Get-VirtualDisk "Silver01"| Get-Disk | Set-Disk -IsOffline 0
+
+Get-VirtualDisk "Silver01"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+
+Get-VirtualDisk "Silver01"| Get-Disk |
+    New-Partition -DriveLetter "E" -UseMaximumSize
+
+Initialize-Volume `
+    -DriveLetter "E" `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Silver01" `
     -Confirm:$false
 ```
 
@@ -711,9 +738,13 @@ cls
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/36/75E46BF67E0D9DBD66C71AAB6879D65F2F282036.png)
 
-##### D: (Mirror SSD/HDD storage space)
+##### D: (Mirror SSD storage space - 2x Samsung 850 Pro 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AA/3BC9706B7D1AAFD2B7E7CB9CA4D318D3944B40AA.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0B/66B4B7EC5EEE72301988EC31530E26853D3A230B.png)
+
+##### E: (Mirror SSD/HDD storage space)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/40EA97844D8BEB92807D94EA400247484DCE4865.png)
 
 ## Prepare infrastructure for Hyper-V installation
 
@@ -848,8 +879,9 @@ cls
 
 ```PowerShell
 mkdir D:\NotBackedUp\VMs
+mkdir E:\NotBackedUp\VMs
 
-Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
+Set-VMHost -VirtualMachinePath E:\NotBackedUp\VMs
 ```
 
 ```PowerShell
