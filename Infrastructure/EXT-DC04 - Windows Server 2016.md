@@ -614,4 +614,113 @@ Pasted from <[http://support.microsoft.com/kb/816042](http://support.microsoft.c
 w32tm /resync /rediscover
 ```
 
-**TODO:**
+## # Move VM to extranet VLAN
+
+### # Enable DHCP
+
+```PowerShell
+$interfaceAlias = Get-NetAdapter `
+    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    select -ExpandProperty Name
+
+@("IPv4", "IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Disabled")
+    {
+        # Remove existing gateway
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        If ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        # Enable DHCP
+        $interface | Set-NetIPInterface -DHCP Enabled
+
+        # Configure the  DNS Servers automatically
+        $interface | Set-DnsClientServerAddress -ResetServerAddresses
+    }
+}
+```
+
+### # Rename network connection
+
+```PowerShell
+$interfaceAlias = "Extranet"
+
+Get-NetAdapter `
+    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
+```
+
+### # Disable jumbo frames
+
+```PowerShell
+Set-NetAdapterAdvancedProperty `
+    -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 1514
+
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+```
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+### # Change VM network
+
+```PowerShell
+$vmName = "EXT-DC04"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+### # Configure static IPv4 address
+
+```PowerShell
+$interfaceAlias = "Extranet"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress 10.1.20.103 `
+    -PrefixLength 24 `
+    -DefaultGateway 10.1.20.1
+```
+
+#### # Configure IPv4 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 10.1.20.104, 127.0.0.1
+```

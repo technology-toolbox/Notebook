@@ -236,8 +236,8 @@ netdom renamecomputer $env:COMPUTERNAME /newname:EXT-SQL01B /reboot
 ## # Join domain
 
 # **Note:**\
-# "-Restart" parameter is not available on Windows Server 2008 R2\
-# "-Credential" parameter must be specified to avoid error
+#  "-Restart" parameter is not available on Windows Server 2008 R2\
+#  "-Credential" parameter must be specified to avoid error
 
 ```PowerShell
 Add-Computer `
@@ -818,7 +818,13 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
-## Migrate VM to Extranet VM network
+## Move VM to extranet VLAN
+
+### Enable DHCP
+
+### Rename network connection
+
+### Disable jumbo frames
 
 ---
 

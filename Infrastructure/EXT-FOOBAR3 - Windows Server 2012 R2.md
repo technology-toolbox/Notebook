@@ -117,6 +117,10 @@ cls
 
 #### # Configure network settings
 
+```PowerShell
+$interfaceAlias = "Extranet-20"
+```
+
 ##### # Rename network connections
 
 ```PowerShell
@@ -124,14 +128,10 @@ Get-NetAdapter -Physical | select Name, InterfaceDescription
 
 Get-NetAdapter `
     -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "Production"
+    Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-##### # Configure "Production" network adapter
-
-```PowerShell
-$interfaceAlias = "Production"
-```
+##### # Configure "Extranet-20" network adapter
 
 ###### # Disable DHCP
 
@@ -3037,7 +3037,7 @@ Remove-NetIPAddress 2601:282:4201:e500::217 -Confirm:$false
 ### # Enable DHCP on IPv6 interface
 
 ```PowerShell
-$interfaceAlias = "Production"
+$interfaceAlias = "Extranet-20"
 
 @("IPv6") | ForEach-Object {
     $addressFamily = $_
@@ -3079,7 +3079,67 @@ Set-DNSClientServerAddress `
     -ServerAddresses 192.168.10.209,192.168.10.210
 ```
 
-## Migrate VM to Extranet VM network
+## # Move VM to extranet VLAN
+
+### # Enable DHCP
+
+```PowerShell
+$interfaceAlias = Get-NetAdapter `
+    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    select -ExpandProperty Name
+
+@("IPv4", "IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Disabled")
+    {
+        # Remove existing gateway
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        If ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        # Enable DHCP
+        $interface | Set-NetIPInterface -DHCP Enabled
+
+        # Configure the  DNS Servers automatically
+        $interface | Set-DnsClientServerAddress -ResetServerAddresses
+    }
+}
+```
+
+### # Rename network connection
+
+```PowerShell
+$interfaceAlias = "Extranet"
+
+Get-NetAdapter `
+    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
+```
+
+### # Disable jumbo frames
+
+```PowerShell
+Set-NetAdapterAdvancedProperty `
+    -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 1514
+
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+```
 
 ### Delete VM snapshot
 
@@ -3102,7 +3162,8 @@ $vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
 
 $ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
 
-$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
 
 Stop-SCVirtualMachine $vmName
 
@@ -3127,6 +3188,8 @@ Set-SCVirtualNetworkAdapter `
     -VMNetwork $vmNetwork `
     -IPv4AddressType Static `
     -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
 ```
 
 ---

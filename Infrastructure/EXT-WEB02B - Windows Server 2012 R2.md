@@ -1121,7 +1121,67 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
-## Migrate VM to Extranet VM network
+## # Move VM to extranet VLAN
+
+### # Enable DHCP
+
+```PowerShell
+$interfaceAlias = Get-NetAdapter `
+    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    select -ExpandProperty Name
+
+@("IPv4", "IPv6") | ForEach-Object {
+    $addressFamily = $_
+
+    $interface = Get-NetAdapter $interfaceAlias |
+        Get-NetIPInterface -AddressFamily $addressFamily
+
+    If ($interface.Dhcp -eq "Disabled")
+    {
+        # Remove existing gateway
+        $ipConfig = $interface | Get-NetIPConfiguration
+
+        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        If ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
+        {
+            $interface |
+                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
+        }
+
+        # Enable DHCP
+        $interface | Set-NetIPInterface -DHCP Enabled
+
+        # Configure the  DNS Servers automatically
+        $interface | Set-DnsClientServerAddress -ResetServerAddresses
+    }
+}
+```
+
+### # Rename network connection
+
+```PowerShell
+$interfaceAlias = "Extranet"
+
+Get-NetAdapter `
+    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
+```
+
+### # Disable jumbo frames
+
+```PowerShell
+Set-NetAdapterAdvancedProperty `
+    -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 1514
+
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+```
 
 ---
 

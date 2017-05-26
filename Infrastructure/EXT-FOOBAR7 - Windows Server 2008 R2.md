@@ -1244,7 +1244,13 @@ WHERE BranchManagerUserName = 'PNKUS\jjameson'
 
 ## Snapshot VM - "Baseline Client Portal 3.0.645.0 / Cloud Portal 1.0.106.0"
 
-## Migrate VM to Extranet VM network
+## Move VM to extranet VLAN
+
+### Enable DHCP
+
+### Rename network connection
+
+### Disable jumbo frames
 
 ### Delete VM snapshot
 
