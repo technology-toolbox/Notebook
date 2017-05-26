@@ -104,56 +104,70 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
-##### Login as .\\foo
+##### Configure networking
 
-#### # Configure networking
+---
+
+**TT-VMM01A**
 
 ```PowerShell
-$interfaceAlias = "Management"
+cls
 ```
 
-##### # Rename network connections
+###### # Configure static IP address using VMM
 
 ```PowerShell
+$vmName = "EXT-WAP02B"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
+
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+###### Login as .\\foo
+
+###### # Rename network connections
+
+```PowerShell
+$interfaceAlias = "Extranet"
+
 Get-NetAdapter -Physical | select InterfaceDescription
 
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     Rename-NetAdapter -NewName $interfaceAlias
-```
-
-##### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "192.168.10.245"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-```
-
-##### # Configure IPv4 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.209,192.168.10.210
-```
-
-##### # Enable jumbo frames
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
-
-Start-Sleep -Seconds 5
-
-ping TT-FS01.corp.technologytoolbox.com -f -l 8900
 ```
 
 ```PowerShell
@@ -235,27 +249,52 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 #### # Import certificate for secure communication with AD FS
 
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
-net use \\TT-FS01\Users$ /USER:TECHTOOLBOX\jjameson
+cls
+```
+
+##### # Copy certificate from internal file server
+
+```PowerShell
+$certFile = "securitasinc.com.pfx"
+
+$sourcePath = "\\TT-FS01\Archive\Clients\Securitas"
+
+$destPath = "\\EXT-WAP02B.extranet.technologytoolbox.com" `
+    + "\C$\NotBackedUp\Temp"
+
+robocopy $sourcePath $destPath $certFile
+```
+
+---
+
+```PowerShell
+cls
+```
+
+##### # Install certificate
+
+```PowerShell
+$certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
 ```
 
 > **Note**
 >
-> When prompted, type the password to connect to the file share.
+> When prompted for the secure string, type the password for the exported certificate.
 
 ```PowerShell
-cls
-$certFilePath =
-    "\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC" `
-    + "\Certificates\fs.technologytoolbox.com.pfx"
-
-$certPassword = `
-    C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+$certFile = "C:\NotBackedUp\Temp\securitasinc.com.pfx"
 
 Import-PfxCertificate `
-    -FilePath $certFilePath `
+    -FilePath $certFile `
     -CertStoreLocation Cert:\LocalMachine\My `
     -Password $certPassword
+
+Remove-Item $certFile
 ```
 
 ```PowerShell

@@ -1,4 +1,4 @@
-﻿# EXT-ADFS01A
+﻿# EXT-ADFS01A - Windows Server 2016
 
 Tuesday, January 24, 2017
 5:48 AM
@@ -57,7 +57,7 @@ From <[https://technet.microsoft.com/en-us/library/dd807078(v=ws.11).aspx](https
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -113,56 +113,69 @@ $adminUser.Rename('foo')
 logoff
 ```
 
+### Configure networking
+
+---
+
+**TT-VMM01A**
+
 ```PowerShell
 cls
 ```
 
-### # Configure networking
+#### # Configure static IP address using VMM
 
 ```PowerShell
-$interfaceAlias = "Datacenter"
+$vmName = "EXT-ADFS01A"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
+
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapte
+$inter
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
 ```
+
+---
 
 #### # Rename network connections
 
 ```PowerShell
+$interfaceAlias = "Extranet-20"
+
 Get-NetAdapter -Physical | select InterfaceDescription
 
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     Rename-NetAdapter -NewName $interfaceAlias
-```
-
-#### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "192.168.10.226"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-```
-
-#### # Configure IPv4 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.209,192.168.10.210
-```
-
-#### # Enable jumbo frames
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
-
-ping iceman.corp.technologytoolbox.com -f -l 8900
 ```
 
 ### Rename server and join domain
@@ -669,10 +682,13 @@ Click **Save**.
 
 ## Customize the AD FS sign-in pages
 
-### Reference
+### References
 
 **Customizing the AD FS Sign-in Pages**\
 From <[https://technet.microsoft.com/library/dn280950.aspx](https://technet.microsoft.com/library/dn280950.aspx)>
+
+**Customize the Home Realm Discovery page to ask for UPN right away**\
+From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/](https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/)>
 
 ```PowerShell
 cls
@@ -683,9 +699,10 @@ cls
 ```PowerShell
 $relyingPartyName = "client-local-4.securitasinc.com"
 $companyName = "SecuritasConnect"
-$organizationalNameDescriptionText = "Sign in with your SecuritasConnect credentials or your organizational account (if supported)"
+$organizationalNameDescriptionText = "Enter your Securitas e-mail address and password below."
 
-$signInPageDescription = "<p>SecuritasConnect is a powerful tool that can improve the efficiency of your security program and enhance the performance of your team. No paper logbooks or handwritten reports. Everything is recorded and available online.</p><p>&nbsp;</p><p>SecuritasConnect is your direct link to key and relevant information needed to manage your security program. Accessible through any internet connection, the features and tools in Connect help you stay on top of what's happening down the hall or around the world, allowing you to monitor and protect your interests day and night.</p>"
+#$signInPageDescription = "<p>{Placeholder text for employee login page}</p>"
+$signInPageDescription = $null
 
 #$illustrationPath = "C:\NotBackedUp\Temp\SecuritasConnect-1420x1080.png"
 $illustrationPath = "C:\NotBackedUp\Temp\ADFS_splash_v1-01.jpg"
@@ -730,6 +747,95 @@ Notepad "C:\NotBackedUp\Temp\$themeName-Theme\script\onload.js"
 **onload.js**
 
 ```JavaScript
+// -- Begin custom code
+
+var docCookies = {
+  getItem: function (sKey) {
+    if (!sKey) { return null; }
+    return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
+  },
+  setItem: function (sKey, sValue, vEnd, sPath, sDomain, bSecure) {
+    if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) { return false; }
+    var sExpires = "";
+    if (vEnd) {
+      switch (vEnd.constructor) {
+        case Number:
+          sExpires = vEnd === Infinity ? "; expires=Fri, 31 Dec 9999 23:59:59 GMT" : "; max-age=" + vEnd;
+          break;
+        case String:
+          sExpires = "; expires=" + vEnd;
+          break;
+        case Date:
+          sExpires = "; expires=" + vEnd.toUTCString();
+          break;
+      }
+    }
+    document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue) + sExpires + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "") + (bSecure ? "; secure" : "");
+    return true;
+  },
+  removeItem: function (sKey, sPath, sDomain) {
+    if (!this.hasItem(sKey)) { return false; }
+    document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "");
+    return true;
+  },
+  hasItem: function (sKey) {
+    if (!sKey) { return false; }
+    return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+  },
+  keys: function () {
+    var aKeys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "").split(/\s*(?:\=[^;]*)?;\s*/);
+    for (var nLen = aKeys.length, nIdx = 0; nIdx < nLen; nIdx++) { aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]); }
+    return aKeys;
+  }
+};
+
+function getParameterByName(name, url) {
+  if (!url) {
+    url = window.location.href;
+  }
+  name = name.replace(/[\[\]]/g, "\\$&");
+  var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+    results = regex.exec(url);
+
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+// http://stackoverflow.com/questions/1634748/how-can-i-delete-a-query-string-parameter-in-javascript
+function removeUrlParameter(url, parameter) {
+    //prefer to use l.search if you have a location/link object
+    var urlparts= url.split('?');
+    if (urlparts.length>=2) {
+
+        var prefix= encodeURIComponent(parameter)+'=';
+        var pars= urlparts[1].split(/[&;]/g);
+
+        //reverse iteration as may be destructive
+        for (var i= pars.length; i-- > 0;) {
+            //idiom for string.startsWith
+            if (pars[i].lastIndexOf(prefix, 0) !== -1) {
+                pars.splice(i, 1);
+            }
+        }
+
+        url= urlparts[0] + (pars.length > 0 ? '?' + pars.join('&') : "");
+        return url;
+    } else {
+        return url;
+    }
+}
+
+function resetLogin() {
+    docCookies.removeItem('SecuritasConnectUserName');
+    var redirectUrl = window.location.href;
+
+    redirectUrl = removeUrlParameter(redirectUrl, 'RedirectToIdentityProvider');
+    redirectUrl = removeUrlParameter(redirectUrl, 'userName');
+
+    window.location.href = redirectUrl;
+}
+
 var copyright = document.getElementById("copyright");
 
 copyright.innerHTML = '&copy; 2017 Securitas Security Services USA, Inc.';
@@ -755,6 +861,119 @@ if (identityProviders) {
         }
     }
 }
+
+var currentUrl = window.location.href;
+
+var hrdAreaElement = document.getElementById('hrdArea');
+if (hrdAreaElement) {
+    // Immediately show the email input form
+    HRD.showEmailInput();
+
+     //Remove the image and the login description message
+     //document.getElementsByClassName('groupMargin')[1].innerHTML = "" ;
+     //document.getElementsByClassName('groupMargin')[2].innerHTML = "Enter your credentials:" ;
+
+     var userName = docCookies.getItem('SecuritasConnectUserName');
+
+     if (userName) {
+        var errorTextElement = document.getElementById('errorText');
+        var emailInputAreaElement = document.getElementById('emailInputArea');
+        var emailIntroductionElement = document.getElementById('emailIntroduction');
+
+        if (errorTextElement && errorTextElement.innerHTML) {
+            // An error occurred in the HRD process (most likely due to email domain not recognized)
+        }
+        else {
+            if (emailInputAreaElement) {
+                emailInputAreaElement.innerHTML =
+'<div class="idp" tabindex="1">' +
+'<img class="largeIcon float" src="/adfs/portal/images/idp/idp.png" alt="User">' +
+'<div class="idpDescription float"><span class="largeTextNoWrap indentNonCollapsible">' + userName + '</span></div>' +
+'</div>' +
+'<input type="HIDDEN" id="emailInput" name="Email" value="' + userName + '" />' +
+'<div class="idp" tabindex="1" onkeypress="if (event &amp;&amp; (event.keyCode == 32 || event.keyCode == 13)) resetLogin();" onclick="resetLogin(); return false;">' +
+'<img class="largeIcon float" src="/adfs/portal/images/idp/idp.png" alt="User">' +
+'<div class="idpDescription float"><span class="largeTextNoWrap indentNonCollapsible">Use another account</span></div>' +
+'</div>';
+            }
+        }
+    }
+
+     //Override of the submitEmail function
+     HRD.submitEmail = function () {
+           var u = new InputUtil() ;
+           var e = new HRDErrors() ;
+           var email = document.getElementById(HRD.emailInput);
+
+           //Detect if the user typed the AD suffix
+           if (email.value.toLowerCase().match('(@technologytoolbox.com)$')) {
+                //Calculate the URL to redirect the user to the AD form
+                var redirectUrl = currentUrl;
+
+           	//Check if the URL has an empty username
+                if (redirectUrl.indexOf("username=") != -1 ) {
+                     //Discard the old name
+                     redirectUrl = redirectUrl.replace("username=","userNameOld=") ;
+                }
+
+                if (redirectUrl.indexOf("?") != -1 ) {
+                    redirectUrl += "&RedirectToIdentityProvider=AD+AUTHORITY&userName=" + email.value ;
+                }
+                else {
+                    redirectUrl += "?RedirectToIdentityProvider=AD+AUTHORITY&userName=" + email.value ;
+                }
+
+                window.location.href = redirectUrl;
+                return false ;
+           }
+           if (!email.value || !email.value.match('[@]')) {
+                u.setError(email, e.invalidSuffix) ;
+                return false ;
+           }
+
+           docCookies.setItem('SecuritasConnectUserName', email.value, Infinity);
+
+           return true ;
+     };
+}
+
+var userNameAreaElement = document.getElementById('userNameArea') ;
+if (userNameAreaElement) {
+    var userName = getParameterByName("userName", currentUrl);
+
+    if (userName) {
+        docCookies.setItem('SecuritasConnectUserName', userName, Infinity);
+    }
+    else {
+        userName = docCookies.getItem('SecuritasConnectUserName');
+    }
+
+    if (userName) {
+        var userNameInputElement = document.getElementById('userNameInput');
+        userNameInputElement.value = userName;
+
+        var u = new InputUtil();
+        u.setInitialFocus(Login.passwordInput);
+
+        userNameAreaElement.innerHTML =
+'<div class="idp" tabindex="1">' +
+'<img class="largeIcon float" src="/adfs/portal/images/idp/localsts.png" alt="Employee badge">' +
+'<div class="idpDescription float"><span class="largeTextNoWrap indentNonCollapsible">' + userName + '</span></div>' +
+'</div>' +
+'<input type="HIDDEN" id="userNameInput" name="userName" value="' + userName + '" />';
+
+        var submissionAreaElement = document.getElementById('submissionArea') ;
+        if (submissionAreaElement) {
+            var newElement = document.createElement("div");
+            submissionAreaElement.parentElement.insertBefore(newElement, submissionAreaElement);
+
+            newElement.outerHTML = '<div class="idp" tabindex="1" onkeypress="if (event &amp;&amp; (event.keyCode == 32 || event.keyCode == 13)) resetLogin();" onclick="resetLogin(); return false;">' +
+'<img class="largeIcon float" src="/adfs/portal/images/idp/idp.png" alt="User">' +
+'<div class="idpDescription float"><span class="largeTextNoWrap indentNonCollapsible">Use another account</span></div>' +
+'</div>';
+        }
+    }
+}
 ```
 
 ---
@@ -764,6 +983,16 @@ Set-AdfsRelyingPartyWebTheme `
     -TargetRelyingPartyName $relyingPartyName `
     -OnLoadScriptPath "C:\NotBackedUp\Temp\$themeName-Theme\script\onload.js"
 ```
+
+#### Disable HRD cookie (due to issue with toggling between "Securitas login" and "Client login")
+
+```PowerShell
+Set-ADFSWebConfig -HRDCookieEnabled $false
+```
+
+#### TODO
+
+Incorrect user ID or password. Type the correct user ID and password, and try again.
 
 ### # Revert customizations for SecuritasConnect (demo)
 
@@ -794,6 +1023,65 @@ GO
 UPDATE [Customer].[BranchManagerAssociatedUsers]
 SET BranchManagerUserName = 'smasters@technologytoolbox.com'
 WHERE BranchManagerUserName = 'TECHTOOLBOX\smasters'
+```
+
+```Console
+cls
+```
+
+### # Enable Securitas employees to login using e-mail address (instead of UPN or SAM Account Name)
+
+```PowerShell
+net localgroup Administrators TECHTOOLBOX\jjameson /ADD
+
+runas /USER:TECHTOOLBOX\jjameson cmd
+```
+
+---
+
+**Command Prompt - running as TECHTOOLBOX\\jjameson**
+
+```Console
+PowerShell
+```
+
+---
+
+**PowerShell - running as TECHTOOLBOX\\jjameson**
+
+```PowerShell
+Start-Process PowerShell -Verb runAs
+```
+
+---
+
+**Administrator PowerShell - running as TECHTOOLBOX\\jjameson**
+
+```PowerShell
+Set-AdfsClaimsProviderTrust `
+    -TargetIdentifier "AD AUTHORITY" `
+    -AlternateLoginID mail `
+    -LookupForests corp.technologytoolbox.com
+
+exit
+```
+
+---
+
+```Console
+exit
+```
+
+---
+
+```Console
+exit
+```
+
+---
+
+```Console
+net localgroup Administrators TECHTOOLBOX\jjameson /DELETE
 ```
 
 ```Console

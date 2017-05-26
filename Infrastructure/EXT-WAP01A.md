@@ -20,13 +20,13 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02A"
+$vmHost = "TT-HV02C"
 $vmName = "EXT-WAP01A"
-$vmPath = "E:\NotBackedUp\VMs"
+$vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 $sysPrepedImage = "\\TT-FS01\VM-Library\VHDs\WS2016-Std.vhdx"
 
-$vhdUncPath = $vhdPath.Replace("E:", "\\TT-HV02A\E$")
+$vhdUncPath = $vhdPath.Replace("D:", "\\TT-HV02C\D$")
 
 New-VM `
     -ComputerName $vmHost `
@@ -35,7 +35,7 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Tenant vSwitch"
+    -SwitchName "Embedded Team Switch"
 
 Copy-Item $sysPrepedImage $vhdUncPath
 
@@ -53,10 +53,6 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ### Set password for the local Administrator account
 
-```PowerShell
-cls
-```
-
 ### # Rename local Administrator account
 
 ```PowerShell
@@ -67,51 +63,68 @@ $adminUser.Rename('foo')
 logoff
 ```
 
+### Configure networking
+
+---
+
+**TT-VMM01A**
+
 ```PowerShell
 cls
 ```
 
-### # Configure networking
+#### # Configure static IP address using VMM
 
 ```PowerShell
-$interfaceAlias = "Datacenter"
+$vmName = "EXT-WAP01A"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
+
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
 ```
+
+---
 
 #### # Rename network connections
 
 ```PowerShell
+$interfaceAlias = "Extranet-20"
+
 Get-NetAdapter -Physical | select InterfaceDescription
 
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     Rename-NetAdapter -NewName $interfaceAlias
-```
-
-#### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "192.168.10.227"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-```
-
-#### # Configure IPv4 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.209,192.168.10.210
-```
-
-#### # Configure IPv6 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
 ```
 
 #### # Enable jumbo frames
@@ -124,7 +137,7 @@ Set-NetAdapterAdvancedProperty `
     -DisplayName "Jumbo Packet" `
     -RegistryValue 9014
 
-ping iceman.corp.technologytoolbox.com -f -l 8900
+ping EXT-DC04 -f -l 8900
 ```
 
 ### Rename server and join domain
@@ -135,7 +148,7 @@ ping iceman.corp.technologytoolbox.com -f -l 8900
 cls
 ```
 
-### # Rename server
+#### # Rename server
 
 ```PowerShell
 Rename-Computer -NewName EXT-WAP01A -Restart
@@ -151,7 +164,7 @@ Rename-Computer -NewName EXT-WAP01A -Restart
 cls
 ```
 
-### # Join server to domain
+#### # Join server to domain
 
 ```PowerShell
 Add-Computer -DomainName extranet.technologytoolbox.com -Restart
@@ -165,7 +178,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 cls
 ```
 
-### # Move computer to different OU
+#### # Move computer to different OU
 
 ```PowerShell
 $vmName = "EXT-WAP01A"
@@ -191,9 +204,7 @@ tzutil /s "Mountain Standard Time"
 ### # Copy Toolbox content
 
 ```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-
-$source = "\\TT-FS01\Public\Toolbox"
+$source = "\\EXT-DC04\C$\NotBackedUp\Public\Toolbox"
 $destination = "C:\NotBackedUp\Public\Toolbox"
 
 robocopy $source $destination  /E /XD "Microsoft SDKs"
@@ -253,7 +264,7 @@ cls
 ### # Checkpoint VM
 
 ```PowerShell
-$vmHost = "TT-HV02A"
+$vmHost = "TT-HV02C"
 $vmName = "EXT-WAP01A"
 $snapshotName = "Before - Configure Web Application Proxy"
 

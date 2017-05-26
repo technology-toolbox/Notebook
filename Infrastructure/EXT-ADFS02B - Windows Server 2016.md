@@ -52,99 +52,129 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-### Set password for the local Administrator account
+##### Install custom Windows Server 2016 image
+
+- On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
+- On the **Computer Details** step:
+  - In the **Computer name** box, type **EXT-ADFS02B**.
+  - Select **Join a workgroup**.
+  - In the **Workgroup **box, type **WORKGROUP**.
+  - Click **Next**.
+- On the **Applications** step, ensure no items are selected and click **Next**.
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Rename local Administrator account
+##### # Remove disk from virtual CD/DVD drive
 
 ```PowerShell
-$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$vmHost = "TT-HV02B"
+$vmName = "EXT-ADFS02B"
 
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+---
+
+##### # Rename local Administrator account and set password
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted, type the password for the local Administrator account.
+
+```PowerShell
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
 $adminUser.Rename('foo')
+$adminUser.SetPassword($plainPassword)
 
 logoff
 ```
 
+##### Configure networking
+
+---
+
+**TT-VMM01A**
+
 ```PowerShell
 cls
 ```
 
-### # Configure networking
+###### # Configure static IP address using VMM
 
 ```PowerShell
-$interfaceAlias = "Management"
+$vmName = "EXT-ADFS02B"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
+
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
 ```
 
-#### # Rename network connections
+---
+
+###### Login as .\\foo
+
+###### # Rename network connections
 
 ```PowerShell
+$interfaceAlias = "Extranet"
+
 Get-NetAdapter -Physical | select InterfaceDescription
 
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-#### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "192.168.10.242"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-```
-
-#### # Configure IPv4 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.209,192.168.10.210
-```
-
-#### # Enable jumbo frames
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
-
-ping TT-FS01.corp.technologytoolbox.com -f -l 8900
-```
-
-### Rename server and join domain
-
-#### Login as local administrator account
-
 ```PowerShell
 cls
 ```
 
-### # Rename server
-
-```PowerShell
-Rename-Computer -NewName EXT-ADFS02B -Restart
-```
-
-> **Note**
->
-> Wait for the VM to restart.
-
-#### Login as local administrator account
-
-```PowerShell
-cls
-```
-
-### # Join server to domain
+#### # Join servers to domain
 
 ```PowerShell
 $cred = Get-Credential EXTRANET\jjameson-admin
@@ -177,36 +207,9 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 cls
 ```
 
-### # Copy Toolbox content
+#### # Configure storage
 
-```PowerShell
-$source = "\\TT-FS01\Public\Toolbox"
-$destination = "C:\NotBackedUp\Public\Toolbox"
-
-net use $source /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```Console
-robocopy $source $destination  /E /XD "Microsoft SDKs"
-```
-
-### # Set MaxPatchCacheSize to 0 (recommended)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
-```
-
-```PowerShell
-cls
-```
-
-## # Configure storage
-
-## # Change drive letter for DVD-ROM
+##### # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -220,40 +223,95 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-```PowerShell
-cls
-```
-
-## # AD FS prerequisites
-
-### # Import certificate for secure communication with AD FS
+##### # Copy Toolbox content
 
 ```PowerShell
-net use \\TT-FS01\Users$ /USER:TECHTOOLBOX\jjameson
+$source = "\\TT-FS01\Public\Toolbox"
+$destination = "C:\NotBackedUp\Public\Toolbox"
+
+net use $source /USER:TECHTOOLBOX\jjameson
 ```
 
 > **Note**
 >
 > When prompted, type the password to connect to the file share.
 
-```PowerShell
-$certFilePath = "\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC" `
-    + "\Certificates\fs.technologytoolbox.com.pfx"
+```Console
+cls
+robocopy $source $destination /E /XD "Microsoft SDKs"
+```
 
-$certPassword = `
-    C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+##### # Set MaxPatchCacheSize to 0 (recommended)
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+```
+
+#### # Import certificate for secure communication with AD FS
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+##### # Copy certificate from internal file server
+
+```PowerShell
+$certFile = "securitasinc.com.pfx"
+
+$sourcePath = "\\TT-FS01\Archive\Clients\Securitas"
+
+$destPath = "\\EXT-ADFS02B.extranet.technologytoolbox.com" `
+    + "\C$\NotBackedUp\Temp"
+
+robocopy $sourcePath $destPath $certFile
+```
+
+---
+
+```PowerShell
+cls
+```
+
+##### # Install certificate
+
+```PowerShell
+$certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted for the secure string, type the password for the exported certificate.
+
+```PowerShell
+$certFile = "C:\NotBackedUp\Temp\securitasinc.com.pfx"
 
 Import-PfxCertificate `
-    -FilePath $certFilePath `
+    -FilePath $certFile `
     -CertStoreLocation Cert:\LocalMachine\My `
     -Password $certPassword
+
+Remove-Item $certFile
 ```
 
 ```PowerShell
 cls
 ```
 
-### # Add second federation server to AD FS farm
+#### # Add AD FS server role
+
+```PowerShell
+Install-WindowsFeature ADFS-Federation -IncludeManagementTools
+```
+
+```PowerShell
+cls
+```
+
+#### # Add second federation server to AD FS farm
 
 ```PowerShell
 $cert = Get-ChildItem -Path Cert:\LocalMachine\My |

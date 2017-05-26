@@ -81,7 +81,7 @@ From <[https://technet.microsoft.com/en-us/library/dd807078(v=ws.11).aspx](https
 cls
 ```
 
-### # Create virtual machine
+##### # Create virtual machine
 
 ```PowerShell
 $vmHost = "TT-HV02A"
@@ -116,93 +116,129 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-##### Set password for the local Administrator account
+##### Install custom Windows Server 2016 image
+
+- On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
+- On the **Computer Details** step:
+  - In the **Computer name** box, type **EXT-ADFS02A**.
+  - Select **Join a workgroup**.
+  - In the **Workgroup **box, type **WORKGROUP**.
+  - Click **Next**.
+- On the **Applications** step, ensure no items are selected and click **Next**.
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-##### # Rename local Administrator account
+##### # Remove disk from virtual CD/DVD drive
 
 ```PowerShell
-$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$vmHost = "TT-HV02A"
+$vmName = "EXT-ADFS02A"
 
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+---
+
+##### # Rename local Administrator account and set password
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted, type the password for the local Administrator account.
+
+```PowerShell
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
 $adminUser.Rename('foo')
+$adminUser.SetPassword($plainPassword)
 
 logoff
 ```
 
+##### Configure networking
+
+---
+
+**TT-VMM01A**
+
 ```PowerShell
 cls
 ```
 
-##### # Configure networking
+###### # Configure static IP address using VMM
 
 ```PowerShell
-$interfaceAlias = "Management"
+$vmName = "EXT-ADFS02A"
+
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+
+$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
+
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
+
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    ? { $_.SlotId -eq 0 }
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
 ```
+
+---
+
+###### Login as .\\foo
 
 ###### # Rename network connections
 
 ```PowerShell
+$interfaceAlias = "Extranet"
+
 Get-NetAdapter -Physical | select InterfaceDescription
 
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-###### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "192.168.10.241"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-```
-
-###### # Configure IPv4 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.209,192.168.10.210
-```
-
-###### # Enable jumbo frames
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
-
-ping TT-FS01.corp.technologytoolbox.com -f -l 8900
-```
-
-#### Login as local administrator account
-
 ```PowerShell
 cls
 ```
 
-##### # Rename server
-
-```PowerShell
-Rename-Computer -NewName EXT-ADFS02A -Restart
-```
-
-> **Note**
->
-> Wait for the VM to restart.
-
-##### Login as local administrator account
-
-#### Join servers to domain
+#### # Join servers to domain
 
 ```PowerShell
 $cred = Get-Credential EXTRANET\jjameson-admin
@@ -265,7 +301,8 @@ net use $source /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```Console
-robocopy $source $destination  /E /XD "Microsoft SDKs"
+cls
+robocopy $source $destination /E /XD "Microsoft SDKs"
 ```
 
 ##### # Set MaxPatchCacheSize to 0 (recommended)
@@ -276,26 +313,52 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 #### # Import certificate for secure communication with AD FS
 
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
-net use \\TT-FS01\Users$ /USER:TECHTOOLBOX\jjameson
+cls
+```
+
+##### # Copy certificate from internal file server
+
+```PowerShell
+$certFile = "securitasinc.com.pfx"
+
+$sourcePath = "\\TT-FS01\Archive\Clients\Securitas"
+
+$destPath = "\\EXT-ADFS02A.extranet.technologytoolbox.com" `
+    + "\C$\NotBackedUp\Temp"
+
+robocopy $sourcePath $destPath $certFile
+```
+
+---
+
+```PowerShell
+cls
+```
+
+##### # Install certificate
+
+```PowerShell
+$certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
 ```
 
 > **Note**
 >
-> When prompted, type the password to connect to the file share.
+> When prompted for the secure string, type the password for the exported certificate.
 
 ```PowerShell
-$certFilePath =
-    "\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC" `
-    + "\Certificates\fs.technologytoolbox.com.pfx"
-
-$certPassword = `
-    C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+$certFile = "C:\NotBackedUp\Temp\securitasinc.com.pfx"
 
 Import-PfxCertificate `
-    -FilePath $certFilePath `
+    -FilePath $certFile `
     -CertStoreLocation Cert:\LocalMachine\My `
     -Password $certPassword
+
+Remove-Item $certFile
 ```
 
 ```PowerShell
@@ -412,7 +475,7 @@ Restart-Computer
 
 ```SQL
 BACKUP DATABASE AdfsArtifactStore
-TO DISK = N'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\AdfsArtifactStore.bak'
+TO DISK = N'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\AdfsArtifactStore.bak'
 WITH NOFORMAT, NOINIT,
     NAME = N'AdfsArtifactStore-Full Database Backup',
     SKIP, NOREWIND, NOUNLOAD,  STATS = 10
@@ -420,7 +483,7 @@ WITH NOFORMAT, NOINIT,
 GO
 
 BACKUP DATABASE AdfsConfigurationV3
-TO DISK = N'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\AdfsConfigurationV3.bak'
+TO DISK = N'Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full\AdfsConfigurationV3.bak'
 WITH NOFORMAT, NOINIT,
     NAME = N'AdfsConfigurationV3-Full Database Backup',
     SKIP, NOREWIND, NOUNLOAD,  STATS = 10
@@ -513,19 +576,19 @@ Update-AdfsCertificate -Urgent
 
 ---
 
-**XAVIER1**
+**TT-DC04**
 
-#### # Create A records - "fs.technologytoolbox.com"
+###### # Create A records - "fs.technologytoolbox.com"
 
 ```PowerShell
 Add-DnsServerResourceRecordA `
     -Name "fs" `
-    -IPv4Address 192.168.10.241 `
+    -IPv4Address 10.1.20.128 `
     -ZoneName "technologytoolbox.com"
 
 Add-DnsServerResourceRecordA `
     -Name "fs" `
-    -IPv4Address 192.168.10.242 `
+    -IPv4Address 10.1.20.129 `
     -ZoneName "technologytoolbox.com"
 ```
 
