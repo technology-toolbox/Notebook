@@ -267,7 +267,12 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
-```Console
+## Activate Microsoft Office
+
+1. Start Word 2013
+2. Enter product key
+
+```PowerShell
 cls
 ```
 
@@ -290,9 +295,29 @@ Microsoft Money 2008 Biz Sunset\
 Microsoft Security Essentials\
 Internet Explorer 10
 
-**TODO:**
+## Expand C: drive
 
-## Activate Microsoft Office
+---
 
-1. Start Word 2013
-2. Enter product key
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+### # Increase the size of "System" VHD
+
+```PowerShell
+$vmHost = "TT-HV02B"
+$vmName = "WIN7-TEST3"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 35GB
+```
+
+---
+
+### Extend partition

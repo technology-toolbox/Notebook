@@ -282,4 +282,29 @@ Remote Server Administration Tools for Windows 7 SP1\
 Microsoft Security Essentials\
 Internet Explorer 10
 
-## Expand C: drive to 27 GB
+## Expand C: drive
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+### # Increase the size of "System" VHD
+
+```PowerShell
+$vmHost = "TT-HV02B"
+$vmName = "WIN7-TEST1"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 35GB
+```
+
+---
+
+### Extend partition

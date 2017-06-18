@@ -289,3 +289,30 @@ Internet Explorer 10
 
 1. Start Word 2013
 2. Enter product key
+
+## Expand C: drive
+
+---
+
+**FOOBAR8**
+
+```PowerShell
+cls
+```
+
+### # Increase the size of "System" VHD
+
+```PowerShell
+$vmHost = "TT-HV02B"
+$vmName = "WIN7-TEST2"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 40GB
+```
+
+---
+
+### Extend partition
