@@ -22,7 +22,7 @@ cls
 ```PowerShell
 $vmHost = "TT-HV02B"
 $vmName = "EXT-ADFS02B"
-$vmPath = "D:\NotBackedUp\VMs"
+$vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
@@ -249,9 +249,13 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 #### # Import certificate for secure communication with AD FS
 
+```PowerShell
+Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
+```
+
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE**
 
 ```PowerShell
 cls
@@ -260,20 +264,29 @@ cls
 ##### # Copy certificate from internal file server
 
 ```PowerShell
-$certFile = "securitasinc.com.pfx"
+$vmName = "EXT-ADFS02B.extranet.technologytoolbox.com"
+$certFile = "fs.technologytoolbox.com.pfx"
 
-$sourcePath = "\\TT-FS01\Archive\Clients\Securitas"
+$sourcePath = "\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC\Certificates"
 
-$destPath = "\\EXT-ADFS02B.extranet.technologytoolbox.com" `
-    + "\C$\NotBackedUp\Temp"
+$destPath = "\\$vmName\C$\NotBackedUp\Temp"
 
+net use \\$vmName\C$ /USER:EXTRANET\jjameson-admin
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
 robocopy $sourcePath $destPath $certFile
 ```
 
 ---
 
-```PowerShell
+```Console
 cls
+Disable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 ```
 
 ##### # Install certificate
@@ -287,14 +300,17 @@ $certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
 > When prompted for the secure string, type the password for the exported certificate.
 
 ```PowerShell
-$certFile = "C:\NotBackedUp\Temp\securitasinc.com.pfx"
+$certFile = "C:\NotBackedUp\Temp\fs.technologytoolbox.com.pfx"
 
 Import-PfxCertificate `
     -FilePath $certFile `
     -CertStoreLocation Cert:\LocalMachine\My `
     -Password $certPassword
 
-Remove-Item $certFile
+If ($? -eq $true)
+{
+    Remove-Item $certFile
+}
 ```
 
 ```PowerShell
