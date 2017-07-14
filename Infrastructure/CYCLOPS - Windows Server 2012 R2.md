@@ -693,3 +693,15 @@ Set-DnsClientServerAddress `
 
 Restart-Computer
 ```
+
+## Expand C: drive to 28 GB
+
+### Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FA/E0EFA5F39671836ED48406F27720DEF41DF2B5FA.png)
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/E726CD7E2665D95218D662FEE8F54CA7CC9F5469.png)
+
+Screen clipping taken: 7/14/2017 9:54 AM
