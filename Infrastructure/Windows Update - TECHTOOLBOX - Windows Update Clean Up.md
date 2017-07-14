@@ -18,15 +18,18 @@ cls
 ## # Clean up Windows Update files on all domain computers
 
 ```PowerShell
-$script = "
+$script = @"
 Stop-Service wuauserv
 
 Remove-Item C:\Windows\SoftwareDistribution -Recurse
 
 Start-Service wuauserv
-"
+"@
 
-$scriptBlock = [ScriptBlock]::Create($script)
+$tempFileName = [System.IO.Path]::GetTempFileName()
+$tempFileName = $tempFileName.Replace(".tmp", ".ps1")
+
+Set-Content -Path $tempFileName -Value ($script -replace "`n", "`r`n")
 
 $computers = Get-ADComputer -Filter * |
     Where-Object { $_.Name -notin
@@ -42,13 +45,12 @@ $computers = Get-ADComputer -Filter * |
             'TT-VMM01-FC') } |
     select Name
 
-$computers | ForEach-Object {
-    $computer = $_.Name
+$computers |
+    C:\NotBackedUp\Public\Toolbox\PowerShell\Run-CommandMultiThreaded.ps1 `
+        -Command $tempFileName `
+        -MaxThreads 5
 
-    Write-Host "Cleaning up Windows Update files ($computer)..."
-
-    Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-}
+Remove-Item -Path $tempFileName
 ```
 
 ---
