@@ -1555,6 +1555,23 @@ Restart-Computer
 
 ## Issue - Server running out of memory
 
+Log Name:      Application\
+Source:        MSSQLSERVER\
+Event ID:      8645\
+Task Category: Server\
+Level:         Error\
+Keywords:      Classic\
+User:          SYSTEM\
+Computer:      TT-DPM01.corp.technologytoolbox.com\
+Description:\
+A timeout occurred while waiting for memory resources to execute the query in resource pool 'internal' (1). Rerun the query.
+
+### Enable Dynamic Memory and set Maximum RAM to 6 GB
+
+> **Note**
+>
+> The problem still occurs, despite increasing the maximum memory for the VM.
+
 ---
 
 **SQL Server Management Studio**
@@ -1577,3 +1594,13 @@ GO
 ```PowerShell
 Restart-Computer
 ```
+
+> **Note**
+>
+> The problem still occurs, despite constraining the maximum memory for SQL Server.
+
+### Troubleshooting
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/42/445C9D09C8B29D70B1ED957F1DA347D9CBBD3E42.png)
+
+### Increase startup RAM and minimum RAM from 4 GB to 5 GB
