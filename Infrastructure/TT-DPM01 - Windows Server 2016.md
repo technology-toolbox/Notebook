@@ -1472,7 +1472,9 @@ cls
 #### # Remove temporary VMM setup files
 
 ```PowerShell
-Remove-Item "C:\NotBackedUp\Temp\System Center 2016 Virtual Machine Manager" -Recurse
+Remove-Item `
+    -Path "C:\NotBackedUp\Temp\System Center 2016 Virtual Machine Manager" `
+    -Recurse
 ```
 
 ### Update VMM using Windows Update
@@ -1604,3 +1606,26 @@ Restart-Computer
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/42/445C9D09C8B29D70B1ED957F1DA347D9CBBD3E42.png)
 
 ### Increase startup RAM and minimum RAM from 4 GB to 5 GB
+
+> **Note**
+>
+> The problem still occurs, despite increasing startup and minimum memory for SQL Server.
+
+It looks like it might be a memory leak in SQL Server:
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/D0A12856E9934E2116E94A0C2F4097C07EAF53F4.png)
+
+### Install latest update for SQL Server 2014
+
+**Cumulative Update 5 for SQL Server 2014 SP2**\
+From <[https://support.microsoft.com/en-us/help/4013098](https://support.microsoft.com/en-us/help/4013098)>
+
+#### Before
+
+12.0.5203.0 - MS16-136: Security Update for SQL Server 2014 Service Pack 2 GDR (KB3194714)
+
+> **Note**
+>
+> CU5 for SQL Server 2014 SP2 is approved in WSUS but is not detected as needed by any computers.
+
+#### After
