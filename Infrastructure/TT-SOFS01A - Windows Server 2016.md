@@ -981,51 +981,70 @@ Set-DnsClientServerAddress `
 Restart-Computer
 ```
 
+## Rebuild DPM 2016 server (replace TT-DPM01 with TT-DPM02)
+
+```Console
+PowerShell
+```
+
+### # Remove DPM agent
+
+```PowerShell
+MsiExec.exe /X "{14DD5B44-17CE-4E89-8BEB-2E6536B81B35}"
+```
+
+> **Note**
+>
+> The command to remove the DPM agent can be obtained from the following PowerShell:
+>
+> ```PowerShell
+> Get-ChildItem HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall |
+>     Get-ItemProperty |
+>     where { $_.DisplayName -eq 'Microsoft System Center 2016  DPM Protection Agent' } |
+>     select UninstallString
+> ```
+
+Restart the server to complete the removal.
+
+```PowerShell
+Restart-Computer
+```
+
+> **Note**
+>
+> Wait for the computer to restart.
+
+```Console
+PowerShell
+```
+
+### # Install DPM agent
+
+```PowerShell
+$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
+
+& $installer TT-DPM02.corp.technologytoolbox.com
+```
+
+---
+
+**TT-DPM02 - DPM Management Shell**
+
 ```PowerShell
 cls
 ```
 
-### # Create virtual machines
-
-Function GetRandomMachineName([String] \$prefix)
-{
-    \$name = [System.IO.Path]::GetRandomFileName()\
-\$name = \$name.ToUpper()\
-\$name = [System.IO.Path]::GetFileNameWithoutExtension(\$name)\
-If ([String]::IsNullOrWhiteSpace(\$name) -eq \$false)
-    {
-        \$name = \$prefix + \$name
-    }\
-return \$name
-}
-
-1..2 |\
-% {
+### # Attach DPM agent
 
 ```PowerShell
-$vmName = GetRandomMachineName "VM-"
-$vmPath = "\\TT-SOFS01\VM-Storage-Silver"
-$vhdFolderPath = "$vmPath\$vmName\Virtual Hard Disks"
-$vhdPath = "$vhdFolderPath\$vmName.vhdx"
+$productionServer = 'TT-SOFS01A'
 
-$sysPrepedImage = "\\TT-FS01\VM-Library\VHDs\WS2016-Std.vhdx"
-
-New-VM `
-    -Name $vmName `
-    -Path $vmPath `
-    -NewVHDPath $vhdPath `
-    -NewVHDSizeBytes 32GB `
-    -MemoryStartupBytes 2GB `
-    -SwitchName "Embedded Team Switch"
-
-Copy-Item $sysPrepedImage $vhdPath
-
-Set-VM `
-    -Name $vmName `
-    -ProcessorCount 2 `
-    -DynamicMemory `
-    -MemoryMaximumBytes 4GB
-
-Start-VM -Name $vmName
-}
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName TT-DPM02 `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
 ```
+
+---

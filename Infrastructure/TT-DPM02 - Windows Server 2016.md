@@ -1,7 +1,7 @@
-﻿# TT-DPM01 - Windows Server 2016
+﻿# TT-DPM02 - Windows Server 2016
 
-Saturday, January 21, 2017
-7:37 AM
+Friday, July 21, 2017
+9:37 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Saturday, January 21, 2017
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -30,7 +30,7 @@ New-ADGroup `
     -Path $orgUnit
 ```
 
-### # Add DPM administrators to group
+### # Add DPM administrators to domain group
 
 ```PowerShell
 Add-ADGroupMember -Identity $dpmAdminsGroup -Members jjameson-fabric
@@ -43,8 +43,8 @@ cls
 ### # Create service account for DPM SQL Server instance
 
 ```PowerShell
-$displayName = "Service account for SQL Server instance on TT-DPM01"
-$defaultUserName = "s-sql-dpm01"
+$displayName = "Service account for SQL Server instance on TT-DPM02"
+$defaultUserName = "s-sql-dpm02"
 
 $cred = Get-Credential -Message $displayName -UserName $defaultUserName
 
@@ -67,7 +67,7 @@ New-ADUser `
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -77,83 +77,87 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV02C"
-$vmName = "TT-DPM01"
-$vmPath = "E:\NotBackedUp\VMs"
+$vmName = "TT-DPM02"
+$vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
-$sysPrepedImage = "\\TT-FS01\VM-Library\VHDs\WS2016-Std.vhdx"
-
-$vhdUncPath = $vhdPath.Replace("E:", "\\TT-HV02C\E$")
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
-    -NewVHDSizeBytes 32GB `
+    -NewVHDSizeBytes 40GB `
     -MemoryStartupBytes 4GB `
-    -SwitchName "Tenant vSwitch"
-
-Copy-Item $sysPrepedImage $vhdUncPath
+    -SwitchName "Embedded Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
     -ProcessorCount 2
 
+Set-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path C:\NotBackedUp\Products\Microsoft\MDT-Deploy-x64.iso
+
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
 
-### Set password for the local Administrator account
+#### Install custom Windows Server 2016 image
+
+- On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
+- On the **Computer Details** step:
+  - In the **Computer name** box, type **TT-DPM02**.
+  - Click **Next**.
+- On the **Applications** step, ensure no items are selected and click **Next**.
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Rename local Administrator account
+#### # Remove disk from virtual DVD drive
 
 ```PowerShell
-$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$vmHost = "TT-HV02C"
+$vmName = "TT-DPM02"
 
-$adminUser.Rename('foo')
-
-logoff
-```
-
-### Rename server and join domain
-
-#### Login as local administrator account
-
-```PowerShell
-cls
-```
-
-### # Rename server
-
-```PowerShell
-Rename-Computer -NewName TT-DPM01 -Restart
-```
-
-> **Note**
->
-> Wait for the VM to restart.
-
-#### Login as local administrator account
-
-```PowerShell
-cls
-```
-
-### # Join server to domain
-
-```PowerShell
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 ```
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+#### # Rename local Administrator account and set password
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted, type the password for the local Administrator account.
+
+```PowerShell
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword($plainPassword)
+
+logoff
+```
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -162,7 +166,7 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "TT-DPM01"
+$vmName = "TT-DPM02"
 
 $targetPath = ("OU=System Center Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
@@ -172,36 +176,13 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ---
 
-```PowerShell
-cls
-```
-
-### # Set time zone
-
-```PowerShell
-tzutil /s "Mountain Standard Time"
-```
-
-### # Copy Toolbox content
-
-```PowerShell
-$source = "\\TT-FS01\Public\Toolbox"
-$destination = "C:\NotBackedUp\Public\Toolbox"
-
-robocopy $source $destination  /E /XD "Microsoft SDKs"
-```
-
-### # Set MaxPatchCacheSize to 0 (recommended)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
-```
-
-```PowerShell
-cls
-```
+### Login as local administrator account
 
 ### # Configure networking
+
+```PowerShell
+$interfaceAlias = "Management"
+```
 
 #### # Rename network connections
 
@@ -209,7 +190,7 @@ cls
 Get-NetAdapter -Physical | select InterfaceDescription
 
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "Datacenter 1"
+    Rename-NetAdapter -NewName $interfaceAlias
 ```
 
 #### # Enable jumbo frames
@@ -217,13 +198,17 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty -Name "Datacenter 1" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
+Set-NetAdapterAdvancedProperty `
+    -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
 
-ping ICEMAN -f -l 8900
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+ping TT-FS01 -f -l 8900
 ```
 
-## Configure storage
+### Configure storage
 
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------------------- | ------------ |
@@ -237,7 +222,7 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
-### # Change drive letter for DVD-ROM
+#### # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -253,19 +238,19 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR8**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Add disks for SQL Server storage (Data01, Log01, Temp01, and Backup01)
+#### # Add disks for SQL Server storage (Data01, Log01, Temp01, and Backup01)
 
 ```PowerShell
 $vmHost = "TT-HV02C"
-$vmName = "TT-DPM01"
+$vmName = "TT-DPM02"
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+$vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 3GB
@@ -275,7 +260,7 @@ Add-VMHardDiskDrive `
     -Path $vhdPath `
     -ControllerType SCSI
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+$vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Log01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 1GB
@@ -285,7 +270,7 @@ Add-VMHardDiskDrive `
     -Path $vhdPath `
     -ControllerType SCSI
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+$vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Temp01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 1GB
@@ -295,7 +280,7 @@ Add-VMHardDiskDrive `
     -Path $vhdPath `
     -ControllerType SCSI
 
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+$vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Backup01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 20GB
@@ -312,7 +297,7 @@ Add-VMHardDiskDrive `
 cls
 ```
 
-### # Initialize disks and format volumes
+#### # Initialize disks and format volumes
 
 ```PowerShell
 Get-Disk 1 |
@@ -352,21 +337,21 @@ Get-Disk 4 |
         -Confirm:$false
 ```
 
-### Add pass-through disks for DPM backups
+#### Add pass-through disks for DPM backups
 
 ---
 
-**FOOBAR8**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-#### # Add SCSI controller for pass-through disks
+##### # Add SCSI controller for pass-through disks
 
 ```PowerShell
 $vmHost = "TT-HV02C"
-$vmName = "TT-DPM01"
+$vmName = "TT-DPM02"
 
 Stop-VM -ComputerName $vmHost -VMName $vmName
 
@@ -375,7 +360,7 @@ Add-VMScsiController -ComputerName $vmHost -VMName $vmName
 Start-VM -ComputerName $vmHost -VMName $vmName
 ```
 
-#### # Add pass-through disks to SCSI controller
+##### # Add pass-through disks to SCSI controller
 
 ```PowerShell
 Get-VMScsiController -ComputerName $vmHost -VMName $vmName -ControllerNumber 1 |
@@ -387,13 +372,17 @@ Get-VMScsiController -ComputerName $vmHost -VMName $vmName -ControllerNumber 1 |
 
 ---
 
+#### Login as local administrator account
+
 ```PowerShell
 cls
 ```
 
-### # Initialize pass-through disks and format volumes
+#### # Initialize pass-through disks and format volumes
 
 ```PowerShell
+Get-Disk 5 | Clear-Disk -RemoveData -Confirm:$false
+
 Get-Disk 5 |
     Initialize-Disk -PartitionStyle GPT -PassThru |
     New-Partition -UseMaximumSize -DriveLetter E |
@@ -401,6 +390,8 @@ Get-Disk 5 |
         -FileSystem ReFS `
         -NewFileSystemLabel "Data02" `
         -Confirm:$false
+
+Get-Disk 6 | Clear-Disk -RemoveData -Confirm:$false
 
 Get-Disk 6 |
     Initialize-Disk -PartitionStyle GPT -PassThru |
@@ -432,40 +423,33 @@ $domainGroup = "DPM Admins"
     "WinNT://$domain/$domainGroup,group")
 ```
 
-### Login as TECHTOOLBOX\\jjameson-fabric
-
 ### Install SQL Server 2014
+
+#### Login as TECHTOOLBOX\\jjameson-fabric
 
 #### Install .NET Framework 3.5 (required for SQL Server features)
 
 ---
 
-**FOOBAR8**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-##### # Insert the Windows Server 2016 installation media
+##### # Insert Windows Server 2016 installation media
 
 ```PowerShell
-$vmHost = "TT-HV02C"
-$vmName = "TT-DPM01"
+$vmName = "TT-DPM02"
+$isoName = "en_windows_server_2016_x64_dvd_9718492.iso"
 
-$isoPath = "\\TT-FS01\Products\Microsoft\Windows Server 2016" `
-```
+$iso = Get-SCISO | where { $_.Name -eq $isoName }
 
-    + "\\en_windows_server_2016_x64_dvd_9327751.iso"
-
-```PowerShell
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+Get-SCVirtualDVDDrive -VM $vmName |
+    Set-SCVirtualDVDDrive -ISO $iso -Link
 ```
 
 ---
-
-```PowerShell
-cls
-```
 
 ##### # Install .NET Framework 3.5
 
@@ -477,22 +461,22 @@ Install-WindowsFeature Net-Framework-Core -Source 'X:\Sources\SxS'
 
 ---
 
-**FOOBAR8**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-##### # Insert the SQL Server 2014 installation media
+##### # Insert SQL Server 2014 installation media
 
 ```PowerShell
-$vmHost = "TT-HV02C"
-$vmName = "TT-DPM01"
+$vmName = "TT-DPM02"
+$isoName = "en_sql_server_2014_standard_edition_with_service_pack_2_x64_dvd_8961564.iso"
 
-$isoPath = "\\TT-FS01\Products\Microsoft\SQL Server 2014\" `
-    + "\en_sql_server_2014_standard_edition_with_service_pack_2_x86_dvd_8961302.iso"
+$iso = Get-SCISO | where { $_.Name -eq $isoName }
 
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+Get-SCVirtualDVDDrive -VM $vmName |
+    Set-SCVirtualDVDDrive -ISO $iso -Link
 ```
 
 ---
@@ -516,31 +500,39 @@ On the **Feature Selection** step, select the following checkboxes:
 
 On the **Server Configuration** step:
 
-- For the **SQL Server Agent** service, change the **Startup Type** to **Automatic**.
+- For the **SQL Server Agent** service:
+  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-dpm02**.
+  - Change the **Startup Type** to **Automatic**.
+- For the **SQL Server Database Engine **service:
+  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-dpm02**.
+  - Ensure the **Startup Type** is set to **Automatic**.
+- For the **SQL Server Reporting Services **service:
+  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-dpm02**.
+  - Ensure the **Startup Type** is set to **Automatic**.
+- For the **SQL Server Browser** service, ensure the **Startup Type** is set to **Disabled**.
 
 On the **Database Engine Configuration** step:
 
 - On the **Server Configuration** tab, in the **Specify SQL Server administrators** section, click **Add...** and then add the domain groups for DPM administrators and SQL Server administrators.
 - On the **Data Directories** tab:
   - In the **Data root directory** box, type **D:\\Microsoft SQL Server\\**.
-  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\MSSQL\\Data**).
-  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\MSSQL\\Backup**).
-- On the **TempDB **tab:
-  - In the **TempDB data files** section:
-    - Click **Remove** to remove the default data directory.
-    - Click **Add...**
-    - In the **Browse For Folder** window, select **T:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\MSSQL\\Data** and click **OK**.
-  - In the **TempDB log file** section:
-    - In the **Log directory** box, change the drive letter to **T:** (the value should be **T:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **Temp DB directory** box, change the drive letter to **T:** (the value should be **T:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Data**). Ensure the drive letter is also updated in the **Temp DB log directory** box.
+  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup**).
 
 On the **Reporting Services Configuration** step:
 
 - In the **Reporting Services Native Mode** section, ensure **Install and configure** is selected.
 - Click **Next**.
 
-#### -- Configure TempDB
+> **Important**
+>
+> Restart PowerShell for the SQL Server cmdlets to be available.
 
-```Console
+#### # Configure TempDB
+
+```PowerShell
+$sqlcmd = @"
 ALTER DATABASE [tempdb]
     MODIFY FILE
     (
@@ -580,13 +572,14 @@ ALTER DATABASE [tempdb]
         SIZE = 25MB,
         FILEGROWTH = 25MB
     )
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
 ```
 
-```Console
-cls
-```
-
-#### # Configure firewall rule for SQL Server (e.g. to connect to SQL Server Database Engine and DPM reporting from FOOBAR8)
+#### # Configure firewall rule for SQL Server (e.g. to connect to SQL Server Database Engine and DPM reporting from FOOBAR10)
 
 ```PowerShell
 New-NetFirewallRule `
@@ -608,18 +601,17 @@ New-NetFirewallRule `
     -Action Allow
 ```
 
-```PowerShell
-cls
-```
-
 #### # Fix permissions to avoid "ESENT" errors in event log
 
 ```PowerShell
-icacls C:\Windows\System32\LogFiles\Sum\Api.chk /grant 'TECHTOOLBOX\s-sql-dpm01:(M)'
+icacls C:\Windows\System32\LogFiles\Sum\Api.chk `
+    /grant 'TECHTOOLBOX\s-sql-dpm02:(M)'
 
-icacls C:\Windows\System32\LogFiles\Sum\Api.log /grant 'TECHTOOLBOX\s-sql-dpm01:(M)'
+icacls C:\Windows\System32\LogFiles\Sum\Api.log `
+    /grant 'TECHTOOLBOX\s-sql-dpm02:(M)'
 
-icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant 'TECHTOOLBOX\s-sql-dpm01:(M)'
+icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb `
+    /grant 'TECHTOOLBOX\s-sql-dpm02:(M)'
 ```
 
 ##### Reference
@@ -646,14 +638,14 @@ Event ID:      10016\
 Task Category: None\
 Level:         Error\
 Keywords:      Classic\
-User:          TECHTOOLBOX\\s-sql-dpm01\
-Computer:      TT-DPM01.corp.technologytoolbox.com\
+User:          TECHTOOLBOX\\s-sql-dpm02\
+Computer:      TT-DPM02.corp.technologytoolbox.com\
 Description:\
 The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID\
 {806835AE-FD04-4870-A1E8-D65535358293}\
  and APPID\
 {EE4171E6-C37E-4D04-AF4C-8617BC7D4914}\
- to the user TECHTOOLBOX\\s-sql-dpm01 SID (S-1-5-21-3914637029-2275272621-3670275343-12160) from address LocalHost (Using LRPC) running in the application container Unavailable SID (Unavailable). This security permission can be modified using the Component Services administrative tool.
+ to the user TECHTOOLBOX\\s-sql-dpm02 SID (S-1-5-21-3914637029-2275272621-3670275343-12160) from address LocalHost (Using LRPC) running in the application container Unavailable SID (Unavailable). This security permission can be modified using the Component Services administrative tool.
 
 > **Note**
 >
@@ -663,22 +655,22 @@ The application-specific permission settings do not grant Local Activation permi
 
 ---
 
-**FOOBAR8**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-#### # Insert the DPM 2016 installation media
+##### # Insert DPM 2016 installation media
 
 ```PowerShell
-$vmHost = "TT-HV02C"
-$vmName = "TT-DPM01"
+$vmName = "TT-DPM02"
+$isoName = "mu_system_center_2016_data_protection_manager_x64_dvd_9231242.iso"
 
-$isoPath = "\\TT-FS01\Products\Microsoft\System Center 2016" `
-    + "\mu_system_center_2016_data_protection_manager_x64_dvd_9231242.iso"
+$iso = Get-SCISO | where { $_.Name -eq $isoName }
 
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $isoPath
+Get-SCVirtualDVDDrive -VM $vmName |
+    Set-SCVirtualDVDDrive -ISO $iso -Link
 ```
 
 ---
@@ -713,11 +705,19 @@ cls
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/C791554377D1B570AC95910F63DD7E08B42DDF27.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/85951ED1CCF7DBD8E8AD098E5980CDF59EED237C.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/C9A4B29FEF80359D783BF5AFC2BA3BD8B7EB2CF5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/51/44318252EEC0BDD139496492605488F138A1E251.png)
+In the **Instance of SQL Server** box, type **TT-DPM02** and click **Check and Install**.
 
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/DF77422C39965D98A8C90AF27EABF09AD0D393AF.png)
+
+Wait for the DPM prerequisites to be installed and then restart the server.
+
+```PowerShell
 Restart-Computer
+```
+
+#### Login as TECHTOOLBOX\\jjameson-fabric
 
 #### # Restart DPM setup
 
@@ -733,19 +733,21 @@ Restart-Computer
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/52/82D1A2292C06DA05635A527276C9FD778A6AAD52.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/85951ED1CCF7DBD8E8AD098E5980CDF59EED237C.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/C9A4B29FEF80359D783BF5AFC2BA3BD8B7EB2CF5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/82/F87AB1FC29E8655A803FBF6518919D8B66705F82.png)
+In the **Instance of SQL Server** box, type **TT-DPM02** and click **Check and Install**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/02/F7B29A29CF81CAFA9D7534825C06275B27EF9C02.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/77/1095B7AA77565757B68CDCA921CCEA61BB41AC77.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/04/1824C09BC440B2396CD658B62A082C6D0C844D04.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/64/116C7EBCE17148E8F91DC430E6780206F22E8564.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/26/D686ADF2A9FAE881D6C5F62BE5DDBD2F23F31D26.png)
 
 Click **Use Microsoft Update when I check for updates (recommended)** and then click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/44/6FA03319ECFC8441C331D01CDB0481C7EBCC5B44.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/EDCCEA126A77238ED8639F6F409F2C2627092D3B.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/DC/43FCF34E6D6BE1F8E193D1C236AD7F27B0923CDC.png)
 
@@ -757,7 +759,7 @@ cls
 
 ```PowerShell
 $source = "C:\NotBackedUp\Temp\System Center 2016 Data Protection Manager\Agents"
-$destination = "\\TT-FS01\Products\Microsoft\System Center 2016\Agents"
+$destination = "\\TT-FS01\Products\Microsoft\System Center 2016\DPM\Agents"
 
 robocopy $source $destination
 ```
@@ -766,75 +768,122 @@ robocopy $source $destination
 cls
 ```
 
-## # Move log file for DPM database from D: to L
-
-### # Stop the DPM service
+#### # Remove temporary VMM setup files
 
 ```PowerShell
-Stop-Service DPM
-Stop-Service DpmWriter
+Remove-Item `
+    -Path "C:\NotBackedUp\Temp\System Center 2016 Data Protection Manager" `
+    -Recurse
 ```
 
-### -- Detach the DPM database
+## Configure DPM database
 
-```Console
-USE [master]
-GO
-EXEC master.dbo.sp_detach_db @dbname = N'DPMDB_TT_DPM01'
-GO
-```
+### Move log file for DPM database from D: to L
 
-```Console
+> **Note**
+>
+> DPM 2016 does not honor default path for SQL Server log files.
+
+```PowerShell
 cls
 ```
 
-### # Move the log file for the DPM database
+#### # Stop DPM services
 
 ```PowerShell
-move "D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\MSDPM2012`$DPMDB_TT_DPM01_log.ldf" "L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data"
+$dpmServices = @(
+    "DPM",
+    "DPMAMService",
+    "DpmWriter")
+
+$dpmServices |
+    foreach {
+        Stop-Service $_
+    }
 ```
 
-### -- Attach the DPM database
-
-```Console
-USE [master]
-GO
-CREATE DATABASE [DPMDB_TT_DPM01] ON
-( FILENAME = N'D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\MSDPM2012$DPMDB_TT_DPM01.mdf' ),
-( FILENAME = N'L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data\MSDPM2012$DPMDB_TT_DPM01_log.ldf' )
- FOR ATTACH
-GO
-```
-
-```Console
+```PowerShell
 cls
 ```
 
-### # Start the DPM services
+#### # Detach DPM database
 
 ```PowerShell
-Start-Service DpmWriter
-Start-Service DPM
+$sqlcmd = @"
+USE [master]
+GO
+EXEC master.dbo.sp_detach_db @dbname = N'DPMDB_TT_DPM02'
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
 ```
 
-## Configure database file growth
+#### # Move the log file for the DPM database
 
-```Console
-ALTER DATABASE [DPMDB_TT_DPM01]
+```PowerShell
+$dataPath = "D:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA"
+$logPath = "L:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data"
+
+Move-Item "$dataPath\MSDPM2012`$DPMDB_TT_DPM02_log.ldf" $logPath
+```
+
+#### # Attach DPM database
+
+```PowerShell
+$sqlcmd = @"
+USE [master]
+GO
+CREATE DATABASE [DPMDB_TT_DPM02] ON
+    (FILENAME = N'$dataPath\MSDPM2012`$DPMDB_TT_DPM02.mdf'),
+    (FILENAME = N'$logPath\MSDPM2012`$DPMDB_TT_DPM02_log.ldf')
+    FOR ATTACH
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+```PowerShell
+cls
+```
+
+#### # Start DPM services
+
+```PowerShell
+# Start services in the reverse order in which they are stopped
+[Array]::Reverse($dpmServices)
+
+$dpmServices |
+    foreach {
+        Start-Service $_
+    }
+```
+
+### # Configure database file growth
+
+```PowerShell
+$sqlcmd = @"
+ALTER DATABASE [DPMDB_TT_DPM02]
     MODIFY FILE (
-        NAME = N'MSDPM2012$DPMDB_TT_DPM01_dat',
+        NAME = N'MSDPM2012`$DPMDB_TT_DPM02_dat',
         FILEGROWTH = 100MB
     )
 
-ALTER DATABASE [DPMDB_TT_DPM01]
+ALTER DATABASE [DPMDB_TT_DPM02]
     MODIFY FILE (
-        NAME = N'MSDPM2012$DPMDB_TT_DPM01Log_dat',
+        NAME = N'MSDPM2012`$DPMDB_TT_DPM02Log_dat',
         FILEGROWTH = 25MB
     )
-```
+"@
 
-```Console
-cls
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
 ```
 
 ## # Configure SQL Server backups
@@ -1169,13 +1218,13 @@ New-NetFirewallRule `
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/BB6153E0286B508C3856C91808E1F406CC290F55.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/D06CE81485A2E900457EB1950C5A913EEDBA8A93.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/717FB72434C35388893B7B6F2BD4126D887BBEDD.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CB/E6CE454D49FFC1BB5E2C5509D3F72BD3AB57E1CB.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/987491849152B765F02DF314BF75F89FA56E8FAE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2E/9AFAE7B9770AD9B260ED4E385115DD6AC63E682E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/26/D9C889F0AD8BCC16828E3C745460A91F9D888626.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/23/8676604790EC531B9E509098FC6926D352A67E23.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/53/1488E5FDAD0E8B227ED9FC4B5E1A450882AF9953.png)
 
 ## Add disks to the storage pool
 
@@ -1188,15 +1237,19 @@ The **Add Disks to Storage Pool** dialog box appears. The **Available disks** se
 
 Pasted from <[http://technet.microsoft.com/en-us/library/hh758075.aspx](http://technet.microsoft.com/en-us/library/hh758075.aspx)>
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6B/AE05684B5544D5EB4823E3C0F0073475D8CC636B.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/51/08E62F0696A43E4F7182A55FE3532914B9E2F151.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/2D/39C115FF3A1A089CC814336165ED8DA106E8EE2D.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/CC/A71368BA6B705BE213D2F3D2E99B6617763CBBCC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/08/352F9FF4B71D11EF453E4A662FE867E1E978EA08.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/08/7C100086443518A11DF93D3CB9749E10FC926908.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/79/77E6DD12BAEA1C4B7B646B9971B67CACBF737979.png)
+
+## Update DPM using Windows Update
+
+**Update Rollup 2 for System Center 2016 - Data Protection Manager (KB3209593)**
 
 ## Upgrade DPM agents to DPM 2016
 
@@ -1326,7 +1379,7 @@ Application recovery points:
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/0061E9550C33C86432F6A42F3770698DFDD2EBA9.png)
 
-## Create protection group for critical files
+## Create protection group for file servers
 
 Protection group name: **Critical Files**\
 Retention range: **10 days**\
@@ -1343,22 +1396,6 @@ Application recovery points:
 
 - Express Full Backup: **11:00 PM Everyday**
 
-```PowerShell
-cls
-```
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
 ## Set up protection for live migration
 
 ### Reference
@@ -1366,15 +1403,11 @@ slmgr /ato
 **Set up protection for live migration**\
 From <[https://technet.microsoft.com/en-us/library/jj656643.aspx](https://technet.microsoft.com/en-us/library/jj656643.aspx)>
 
-```PowerShell
-cls
-```
-
-### # Install VMM console on DPM server
+### Install VMM console on DPM server
 
 ---
 
-**TT-VMM01 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -1384,7 +1417,7 @@ cls
 
 ```PowerShell
 $isoName = "mu_system_center_2016_virtual_machine_manager_x64_dvd_9368503.iso"
-$vmName = "TT-DPM01"
+$vmName = "TT-DPM02"
 
 $iso = Get-SCISO | where { $_.Name -eq $isoName }
 
@@ -1409,7 +1442,7 @@ Destination location: **C:\\NotBackedUp\\Temp\\System Center 2016 Virtual Machin
 
 ---
 
-**TT-VMM01 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -1418,7 +1451,7 @@ cls
 #### # Remove the VMM 2016 installation media
 
 ```PowerShell
-$vmName = "TT-DPM01"
+$vmName = "TT-DPM02"
 
 $dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
 
@@ -1427,11 +1460,7 @@ Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -NoMedia
 
 ---
 
-```PowerShell
-cls
-```
-
-#### # Install VMM console
+#### Install VMM console
 
 **To install the VMM console:**
 
@@ -1479,7 +1508,7 @@ Remove-Item `
 
 ### Update VMM using Windows Update
 
-**Update Rollup 2.1 for Microsoft System Center 2016 - Virtual Machine Manager Administrator Console (KB4011492)**
+**Update Rollup 3 for Microsoft System Center 2016 - Virtual Machine Manager Administrator Console (KB4014527)**
 
 ### Add DPM machine account as Read-Only Administrator in VMM
 
@@ -1495,7 +1524,7 @@ From <[https://technet.microsoft.com/en-us/library/hh356036.aspx](https://techne
 3. In the **Create User Role Wizard**:
    1. On the **Name and description** page, in the **Name** box, type **DPM Servers** and click **Next**.
    2. On the **Profile** page, select **Read-Only Administrator** and then click **Next**.
-   3. On the **Members** page, click **Add** to add **TECHTOOLBOX\\TT-DPM01\$** to the user role with the **Select Users, Computers, or Groups** dialog box. After you have added the members, click **Next**.
+   3. On the **Members** page, click **Add** to add **TECHTOOLBOX\\TT-DPM02\$** to the user role with the **Select Users, Computers, or Groups** dialog box. After you have added the members, click **Next**.
    4. On the **Scope** page, select **All Hosts** and click **Next**.
    5. On the **Library servers** page, click **Next**.
    6. On the **Run As accounts** page, click **Next**.
@@ -1510,11 +1539,7 @@ cls
 ### # Connect DPM server to VMM server
 
 ```PowerShell
-Set-DPMGlobalProperty -DPMServerName TT-DPM01 -KnownVMMServers TT-VMM01
-```
-
-```PowerShell
-cls
+Set-DPMGlobalProperty -DPMServerName TT-DPM02 -KnownVMMServers TT-VMM01
 ```
 
 ## # Configure monitoring using System Center Operations Manager
@@ -1522,7 +1547,7 @@ cls
 ### # Install SCOM agent
 
 ```PowerShell
-$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016\Agents\SCOM\AMD64" `
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64" `
     + "\MOMAgent.msi"
 
 msiexec.exe /i $msiPath `
@@ -1533,46 +1558,34 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
-## Issue - Incorrect IPv6 DNS server assigned by Comcast router
+```PowerShell
+cls
+```
 
-```Text
-PS C:\Users\jjameson-admin> nslookup
-Default Server:  cdns01.comcast.net
-Address:  2001:558:feed::1
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
 ```
 
 > **Note**
 >
-> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on the Comcast router -- and subsequently restarting the VM -- the incorrect DNS server is assigned to the network adapter.
+> When notified that the product key was set successfully, click **OK**.
 
-### Solution
-
-```PowerShell
-Set-DnsClientServerAddress `
-    -InterfaceAlias Management `
-    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
-
-Restart-Computer
+```Console
+slmgr /ato
 ```
+
+## Install Cumulative Update 5 for SQL Server 2014 SP2
 
 ## Issue - Server running out of memory
 
-Log Name:      Application\
-Source:        MSSQLSERVER\
-Event ID:      8645\
-Task Category: Server\
-Level:         Error\
-Keywords:      Classic\
-User:          SYSTEM\
-Computer:      TT-DPM01.corp.technologytoolbox.com\
-Description:\
-A timeout occurred while waiting for memory resources to execute the query in resource pool 'internal' (1). Rerun the query.
-
-### Enable Dynamic Memory and set Maximum RAM to 6 GB
-
-> **Note**
->
-> The problem still occurs, despite increasing the maximum memory for the VM.
+Alert: Available Megabytes of Memory is too low\
+Source: Microsoft Windows Server 2016 Standard\
+Path: TT-DPM02.corp.technologytoolbox.com\
+Last modified by: System\
+Last modified time: 8/5/2017 1:14:27 AM\
+Alert description: The threshold for the Memory\\Available MBytes performance counter has been exceeded. The value that exceeded the threshold is: 85.
 
 ---
 
@@ -1584,7 +1597,7 @@ A timeout occurred while waiting for memory resources to execute the query in re
 EXEC sys.sp_configure N'show advanced options', N'1'
 RECONFIGURE WITH OVERRIDE
 GO
-EXEC sys.sp_configure N'max server memory (MB)', N'2048'
+EXEC sys.sp_configure N'max server memory (MB)', N'1024'
 GO
 EXEC sys.sp_configure N'show advanced options', N'0'
 RECONFIGURE WITH OVERRIDE
@@ -1597,35 +1610,134 @@ GO
 Restart-Computer
 ```
 
-> **Note**
->
-> The problem still occurs, despite constraining the maximum memory for SQL Server.
+### Solution - Configure system file cache
 
-### Troubleshooting
+```Console
+C:\NotBackedUp\Public\Toolbox\Sysinternals\PsExec.exe -i -s -d cmd
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/42/445C9D09C8B29D70B1ED957F1DA347D9CBBD3E42.png)
+C:\NotBackedUp\Public\Toolbox\Sysinternals\Cacheset.exe
+```
 
-### Increase startup RAM and minimum RAM from 4 GB to 5 GB
+Accept EULA
 
-> **Note**
->
-> The problem still occurs, despite increasing startup and minimum memory for SQL Server.
+#### Create scheduled task
 
-It looks like it might be a memory leak in SQL Server:
+**Name: Configure system file cache**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/D0A12856E9934E2116E94A0C2F4097C07EAF53F4.png)
+**When running the task, use the following account: SYSTEM**
 
-### Install latest update for SQL Server 2014
+**Run with highest privileges: Yes (checked)**
 
-**Cumulative Update 5 for SQL Server 2014 SP2**\
-From <[https://support.microsoft.com/en-us/help/4013098](https://support.microsoft.com/en-us/help/4013098)>
+**Triggers: At startup**
 
-#### Before
+**Actions**
 
-12.0.5203.0 - MS16-136: Security Update for SQL Server 2014 Service Pack 2 GDR (KB3194714)
+**Action: Start a program**
 
-> **Note**
->
-> CU5 for SQL Server 2014 SP2 is approved in WSUS but is not detected as needed by any computers.
+**Program/script: C:\\NotBackedUp\\Public\\Toolbox\\Sysinternals\\Cacheset.exe**
 
-#### After
+**Add arguments (optional): 1024 524288**
+
+#### References
+
+**You experience performance issues in applications and services when the system file cache consumes most of the physical RAM**\
+From <[https://support.microsoft.com/en-us/help/976618/you-experience-performance-issues-in-applications-and-services-when-th](https://support.microsoft.com/en-us/help/976618/you-experience-performance-issues-in-applications-and-services-when-th)>
+
+**PRF: Memory Management (Large System Cache Issues)**\
+From <[https://blogs.technet.microsoft.com/askperf/2009/04/10/prf-memory-management-large-system-cache-issues/](https://blogs.technet.microsoft.com/askperf/2009/04/10/prf-memory-management-large-system-cache-issues/)>
+
+**Windows Server 2008 R2 Metafile RAM Usage**\
+From <[https://serverfault.com/a/527466](https://serverfault.com/a/527466)>
+
+**# get system file cache size**\
+From <[https://stackoverflow.com/a/17875550](https://stackoverflow.com/a/17875550)>
+
+**CacheSet v1.0**\
+From <[https://docs.microsoft.com/en-us/sysinternals/downloads/cacheset](https://docs.microsoft.com/en-us/sysinternals/downloads/cacheset)>
+
+**RAMKick™: Like RAMMap but Automatic, Empty System Working Set Memory**\
+From <[http://backupchain.com/i/ramkick-like-rammap-but-automatic-empty-system-working-set-memory](http://backupchain.com/i/ramkick-like-rammap-but-automatic-empty-system-working-set-memory)>
+
+## Issue - Not enough free space to install patches (Windows Update)
+
+6.93 GB of free space (after removing **C:\\Windows\\SoftwareDistribution**), but still unable to install **2017-10 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4041691)**.
+
+### Expand C:
+
+---
+
+**FOOBAR10**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV02C"
+$vmName = "TT-DPM02"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 45GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+#### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
+Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
+
+Resize-Partition : Size Not Supported
+
+Extended information:
+The partition is already the requested size.
+
+Activity ID: {c2ffbf30-7540-4558-9c5c-72afb5e17332}
+At line:1 char:1
++ Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (StorageWMI:ROOT/Microsoft/.../MSFT_Partition) [Resize-Partition], CimException
+    + FullyQualifiedErrorId : StorageWMI 4097,Resize-Partition
+```
+
+The error is due to the recovery partition:
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/11/A35AEE5BAFCCC1A0F72D33AA2EBA92FF4A805811.png)
+
+#### # Delete recovery partition
+
+```PowerShell
+Get-Partition -DiskNumber 0 -PartitionNumber 3
+
+
+   DiskPath:
+\\?\ide#diskvirtual_hd______________________________1.1.0___#5&1278c138&0&0.0.0#{53f56307-b6bf-11d0-94f2-00a0c91efb8b}
+
+PartitionNumber  DriveLetter Offset                                        Size Type
+---------------  ----------- ------                                        ---- ----
+3                            42520805376                                 408 MB Unknown
+
+Get-Partition -DiskNumber 0 -PartitionNumber 3 |
+    Remove-Partition -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+#### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
+Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
+```

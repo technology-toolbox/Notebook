@@ -550,4 +550,19 @@ From <[https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx](https
 **Restricting Active Directory RPC traffic to a specific port**\
 From <[https://support.microsoft.com/en-us/help/224196/restricting-active-directory-rpc-traffic-to-a-specific-port](https://support.microsoft.com/en-us/help/224196/restricting-active-directory-rpc-traffic-to-a-specific-port)>
 
+## Rebuild DPM 2016 server (replace TT-DPM01 with TT-DPM02)
+
+### Uninstall previous version of DPM agent
+
+Restart the server to complete the removal.
+
+### # Install new version of DPM agent
+
+```PowerShell
+$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
+
+& $installer TT-DPM02.corp.technologytoolbox.com
+```
+
 **TODO:**

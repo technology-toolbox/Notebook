@@ -409,4 +409,19 @@ reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters `
 Restart-Computer
 ```
 
+## Rebuild DPM 2016 server (replace TT-DPM01 with TT-DPM02)
+
+### Uninstall previous version of DPM agent
+
+Restart the server to complete the removal.
+
+### # Install new version of DPM agent
+
+```PowerShell
+$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
+
+& $installer TT-DPM02.corp.technologytoolbox.com
+```
+
 **TODO:**
