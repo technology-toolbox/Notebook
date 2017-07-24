@@ -2144,4 +2144,38 @@ Set-DnsClientServerAddress `
 Restart-Computer
 ```
 
+## Issue - Extranet servers unable to communicate to SCOM through firewall due to new IP address assigned to TT-SCOM01
+
+#### # Configure static IP addresses
+
+```PowerShell
+$interfaceAlias = "Management"
+```
+
+##### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "192.168.10.119"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24 `
+    -DefaultGateway 192.168.10.1
+```
+
+##### # Configure IPv4 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 192.168.10.104, 192.168.10.104
+```
+
+##### # Update DNS
+
+```PowerShell
+ipconfig /registerdns
+```
+
 **TODO:**
