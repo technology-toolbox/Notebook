@@ -236,8 +236,8 @@ netdom renamecomputer $env:COMPUTERNAME /newname:EXT-SQL01A /reboot
 ## # Join domain
 
 # **Note:**\
-# "-Restart" parameter is not available on Windows Server 2008 R2\
-# "-Credential" parameter must be specified to avoid error
+#  "-Restart" parameter is not available on Windows Server 2008 R2\
+#  "-Credential" parameter must be specified to avoid error
 
 ```PowerShell
 Add-Computer `
@@ -1070,7 +1070,13 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
-## Migrate VM to Extranet VM network
+## Move VM to extranet VLAN
+
+### Enable DHCP
+
+### Rename network connection
+
+### Disable jumbo frames on EXTRANET adapter
 
 ---
 
@@ -1121,7 +1127,53 @@ Set-SCVirtualNetworkAdapter `
 Start-SCVirtualMachine $vmName
 ```
 
+```PowerShell
+cls
+```
+
+### # Reserve static IP address for failover cluster name (EXT-SQL01-FC)
+
+```PowerShell
+Grant-SCIPAddress `
+    -GrantToObjectType VIP `
+    -StaticIPAddressPool $ipPool `
+    -Description "Cluster IP - EXT-SQL01-FC" |
+    select Address
+
+
+Address
+-------
+10.1.20.209
+```
+
+```PowerShell
+cls
+```
+
+### # Reserve static IP address for SQL Server cluster name (EXT-SQL01)
+
+```PowerShell
+Grant-SCIPAddress `
+    -GrantToObjectType VIP `
+    -StaticIPAddressPool $ipPool `
+    -Description "Cluster IP - EXT-SQL01" |
+    select Address
+
+
+Address
+-------
+10.1.20.200
+```
+
 ---
+
+### Configure static IP address for failover cluster name (EXT-SQL01-FC)
+
+**10.1.20.209**
+
+### Configure static IP address for SQL Server cluster name (EXT-SQL01)
+
+**10.1.20.200**
 
 **TODO:**
 
