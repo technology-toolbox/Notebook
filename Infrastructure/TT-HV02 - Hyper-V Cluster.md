@@ -56,7 +56,7 @@ $antiAffinityClassNames.Add("FAB-DC")
 (Get-ClusterGroup 'SCVMM FAB-DC01 Resources').AntiAffinityClassNames = $antiAffinityClassNames
 (Get-ClusterGroup 'SCVMM FAB-DC02 Resources').AntiAffinityClassNames = $antiAffinityClassNames
 
-Get-ClusterGroup |
+Get-ClusterGroup -Cluster TT-HV02-FC |
     ? { $_.GroupType -eq "VirtualMachine" } |
     select Name, AntiAffinityClassNames
 
@@ -97,7 +97,9 @@ cls
 ### # Check preferred owners
 
 ```PowerShell
-Get-ClusterGroup | ? { $_.GroupType -eq "VirtualMachine" } | Get-ClusterOwnerNode
+Get-ClusterGroup -Cluster TT-HV02-FC |
+    where { $_.GroupType -eq "VirtualMachine" } |
+    Get-ClusterOwnerNode
 
 ClusterObject                OwnerNodes
 -------------                ----------
@@ -114,17 +116,18 @@ SCVMM DAZZLER Resources      {}
 SCVMM EXT-DC04 Resources     {TT-HV02A}
 SCVMM EXT-DC05 Resources     {TT-HV02B}
 SCVMM EXT-RRAS1 Resources    {}
-SCVMM EXT-SQL02 Resources    {}
+SCVMM EXT-SQL02 Resources    {TT-HV02C}
 SCVMM EXT-WAC02A Resources   {}
 SCVMM FAB-DC01 Resources     {TT-HV02A}
 SCVMM FAB-DC02 Resources     {TT-HV02B}
 SCVMM FAB-WEB01 Resources    {}
+SCVMM FOOBAR10 Resources     {}
 SCVMM FOOBAR7 Resources      {}
 SCVMM HAVOK-TEST Resources   {}
-SCVMM JUBILEE Resources      {}
 SCVMM MIMIC Resources        {}
 SCVMM MIMIC2 Resources       {}
-SCVMM POLARIS-TEST Resources {}
+SCVMM POLARIS-TEST Resources {TT-HV02B}
+SCVMM TT-SCOM01 Resources    {}
 ```
 
 ```PowerShell
@@ -134,23 +137,38 @@ cls
 ### # Check priority of each VM
 
 ```PowerShell
-Get-ClusterGroup | ? { $_.GroupType -eq "VirtualMachine" } | select Name, Priority | ft -auto
+Get-ClusterGroup -Cluster TT-HV02-FC |
+    where { $_.GroupType -eq "VirtualMachine" } |
+    select Name, Priority |
+    ft -auto
 
-Name            Priority
-----            --------
-784804-AD1          3000
-784805-AD2          3000
-784806-SPWFE1       2000
-784807-SPWFE2       2000
-784808-SPWAC1       1000
-784809-SPWAC2       1000
-784810-SPAPP        2000
-784811-SQL1         3000
-784812-SQL2         3000
-784813-UATSPAPP     2000
-784814-UATWAC       1000
-784815-UATSPWFE     2000
-784816-UATSQL       3000
+Name                         Priority
+----                         --------
+SCVMM BANSHEE Resources          1000
+SCVMM CIPHER01 Resources         2000
+SCVMM COLOSSUS Resources         2000
+SCVMM CON-ADFS1 Resources        1000
+SCVMM CON-DC1 Resources          1000
+SCVMM CON-DC2 Resources          1000
+SCVMM CRYPTID Resources             0
+SCVMM CYCLOPS Resources          2000
+SCVMM CYCLOPS-TEST Resources     1000
+SCVMM DAZZLER Resources          1000
+SCVMM EXT-DC04 Resources         3000
+SCVMM EXT-DC05 Resources         3000
+SCVMM EXT-RRAS1 Resources           0
+SCVMM EXT-SQL02 Resources        3000
+SCVMM EXT-WAC02A Resources       1000
+SCVMM FAB-DC01 Resources         3000
+SCVMM FAB-DC02 Resources         3000
+SCVMM FAB-WEB01 Resources        1000
+SCVMM FOOBAR10 Resources         2000
+SCVMM FOOBAR7 Resources          1000
+SCVMM HAVOK-TEST Resources       1000
+SCVMM MIMIC Resources            1000
+SCVMM MIMIC2 Resources           1000
+SCVMM POLARIS-TEST Resources     1000
+SCVMM TT-SCOM01 Resources        2000
 ```
 
 ```PowerShell
@@ -159,16 +177,12 @@ cls
 
 ## # "Failover" properties
 
-```PowerShell
-cls
-```
-
 ### # Configure failback options
 
 ```PowerShell
-Get-ClusterGroup |
-    Where-Object { $_.GroupType -eq "VirtualMachine" } |
-    ForEach-Object {
+Get-ClusterGroup -Cluster TT-HV02-FC |
+    where { $_.GroupType -eq "VirtualMachine" } |
+    foreach {
         $_.AutoFailbackType = 1     # Allow failback
         $_.FailbackWindowStart = 21 # 9:00 PM
         $_.FailbackWindowEnd = 0    # 12:00 AM
@@ -182,9 +196,9 @@ cls
 ### # View failback configuration
 
 ```PowerShell
-Get-ClusterGroup |
-    Where-Object { $_.GroupType -eq "VirtualMachine" } |
-    Select-Object Name, AutoFailbackType, FailbackWindowStart, FailbackWindowEnd
+Get-ClusterGroup -Cluster TT-HV02-FC |
+    where { $_.GroupType -eq "VirtualMachine" } |
+    select Name, AutoFailbackType, FailbackWindowStart, FailbackWindowEnd
 
 Name                         AutoFailbackType FailbackWindowStart FailbackWindowEnd
 ----                         ---------------- ------------------- -----------------
@@ -206,12 +220,13 @@ SCVMM EXT-WAC02A Resources                  1                  21               
 SCVMM FAB-DC01 Resources                    1                  21                 0
 SCVMM FAB-DC02 Resources                    1                  21                 0
 SCVMM FAB-WEB01 Resources                   1                  21                 0
+SCVMM FOOBAR10 Resources                    1                  21                 0
 SCVMM FOOBAR7 Resources                     1                  21                 0
 SCVMM HAVOK-TEST Resources                  1                  21                 0
-SCVMM JUBILEE Resources                     1                  21                 0
 SCVMM MIMIC Resources                       1                  21                 0
 SCVMM MIMIC2 Resources                      1                  21                 0
 SCVMM POLARIS-TEST Resources                1                  21                 0
+SCVMM TT-SCOM01 Resources                   1                  21                 0
 ```
 
 ```PowerShell
@@ -221,10 +236,13 @@ cls
 ### # Verify VMs are running on preferred owner
 
 ```PowerShell
-Get-ClusterGroup -Verbose:$false |
-    ? { $_.GroupType -eq "VirtualMachine" } |
-    % {
-        $ownerNodeInfo = Get-ClusterOwnerNode -Group $_.Name -Verbose:$false
+Get-ClusterGroup -Cluster TT-HV02-FC -Verbose:$false |
+    where { $_.GroupType -eq "VirtualMachine" } |
+    foreach {
+        $ownerNodeInfo = Get-ClusterOwnerNode `
+            -Cluster TT-HV02-FC `
+            -Group $_.Name `
+            -Verbose:$false
 
         If ($ownerNodeInfo.OwnerNodes.Length -gt 0)
         {
@@ -250,10 +268,10 @@ cls
 ### # Move VMs to preferred owner
 
 ```PowerShell
-Get-ClusterGroup |
-    ? { $_.GroupType -eq "VirtualMachine" } |
-    % {
-        $ownerNodeInfo = Get-ClusterOwnerNode -Group $_.Name
+Get-ClusterGroup -Cluster TT-HV02-FC |
+    where { $_.GroupType -eq "VirtualMachine" } |
+    foreach {
+        $ownerNodeInfo = Get-ClusterOwnerNode -Cluster TT-HV02-FC -Group $_.Name
 
         If ($ownerNodeInfo.OwnerNodes.Length -gt 0)
         {
@@ -276,9 +294,9 @@ cls
 ## # Virtual disk info
 
 ```PowerShell
-Get-ClusterGroup |
-    ? { $_.GroupType -eq "VirtualMachine" } |
-    % {
+Get-ClusterGroup -Cluster TT-HV02-FC  |
+    where { $_.GroupType -eq "VirtualMachine" } |
+    foreach {
         Get-VM -ComputerName $_.OwnerNode -Name $_.Name |
             Get-VMHardDiskDrive |
             Get-VHD -ComputerName $_.OwnerNode |
