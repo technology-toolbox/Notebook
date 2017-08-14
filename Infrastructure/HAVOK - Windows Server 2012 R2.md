@@ -1041,3 +1041,38 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 
 & $installer TT-DPM02.corp.technologytoolbox.com
 ```
+
+## Expand C: drive
+
+---
+
+**FOOBAR10**
+
+```PowerShell
+cls
+```
+
+### # Expand primary VHD for virtual machine
+
+```PowerShell
+$vmName = "HAVOK"
+$vmHost = "TT-HV02C"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+$vhdPath = "D:\NotBackedUp\VMs\$vmName\$vmName.vhdx"
+
+Resize-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 30GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+### # Expand C: partition
+
+```PowerShell
+$maxSize = (Get-PartitionSupportedSize -DriveLetter C).SizeMax
+
+Resize-Partition -DriveLetter C -Size $maxSize
+```
