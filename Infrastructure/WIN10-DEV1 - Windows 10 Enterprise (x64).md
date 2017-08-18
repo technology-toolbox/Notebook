@@ -1,38 +1,45 @@
-﻿# WIN10-DEV1 - Windows 10 Enterprise (x64)
+﻿# WIN10-DEV1
 
-Friday, July 1, 2016
-4:07 AM
+Friday, August 18, 2017
+7:30 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
+## Install Windows 10
+
 ---
 
-**WOLVERINE**
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
 
 ### # Create virtual machine
 
 ```PowerShell
 $vmName = "WIN10-DEV1"
-
 $vmPath = "C:\NotBackedUp\VMs"
+
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -Name $vmName `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
-    -NewVHDSizeBytes 50GB `
-    -MemoryStartupBytes 4GB `
-    -SwitchName "Production"
+    -NewVHDSizeBytes 80GB `
+    -MemoryStartupBytes 8GB `
+    -SwitchName "Management"
 
 Set-VM `
-    -VMName $vmName `
-    -ProcessorCount 4
+    -Name $vmName `
+    -ProcessorCount 4 `
+    -StaticMemory
 
-$isoPath = ("\\ICEMAN\Products\Microsoft\Windows 10\" `
-    + "en_windows_10_enterprise_version_1511_updated_apr_2016_x64_dvd_8711771.iso")
+$isoPath = ("\\TT-FS01\Products\Microsoft\Windows 10\" `
+    + "en_windows_10_multiple_editions_version_1703_updated_july_2017_x64_dvd_10925340.iso")
 
 Set-VMDvdDrive `
     -VMName $vmName `
@@ -43,22 +50,98 @@ Start-VM -Name $vmName
 
 ---
 
-## Install Windows 10 Enterprise (x64)
+### Install Windows 10 Enterprise (x64)
 
-## # Create default folders
+```PowerShell
+cls
+```
+
+### # Set time zone
+
+```PowerShell
+tzutil /s "Mountain Standard Time"
+```
+
+### # Copy Toolbox content
+
+```PowerShell
+$source = "\\TT-FS01\Public\Toolbox"
+$destination = "C:\NotBackedUp\Public\Toolbox"
+
+robocopy $source $destination /E /XD "Microsoft SDKs"
+```
+
+### Rename computer and join domain
+
+#### Login as local administrator account
+
+```PowerShell
+cls
+```
+
+#### # Rename computer
+
+```PowerShell
+Rename-Computer -NewName EXT-SQL2014-TEST -Restart
+```
+
+> **Note**
+>
+> Wait for the VM to restart.
+
+#### Login as local administrator account
+
+```PowerShell
+cls
+```
+
+### # Join server to domain
+
+```PowerShell
+Add-Computer -DomainName extranet.technologytoolbox.com -Restart
+```
+
+---
+
+**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Move computer to different OU
+
+```PowerShell
+$vmName = "EXT-SQL2014-TEST"
+
+$targetPath = ("OU=Servers,OU=Resources,OU=IT" `
+    + ",DC=extranet,DC=technologytoolbox,DC=com")
+
+Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Configure storage
+
+### # Set MaxPatchCacheSize to 0 (recommended)
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+```
+
+### # Create default folders
 
 ```PowerShell
 mkdir C:\NotBackedUp\Public
 mkdir C:\NotBackedUp\Temp
 ```
 
-## # Set time zone
-
-```PowerShell
-tzutil /s "Mountain Standard Time"
-```
-
-### # Change drive letter for DVD-ROM
+## # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -72,33 +155,6 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-## # Copy Toolbox content
-
-```PowerShell
-net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
-
-robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
-```
-
-## # Rename computer
-
-```PowerShell
-Rename-Computer -NewName WIN10-DEV1 -Restart
-```
-
-```PowerShell
-cls
-```
-
-### # Join domain
-
-```PowerShell
-Add-Computer `
-    -DomainName corp.technologytoolbox.com `
-    -Credential (Get-Credential TECHTOOLBOX\jjameson-admin) `
-    -Restart
-```
-
 ### # Enable PowerShell remoting
 
 ```PowerShell
@@ -107,9 +163,9 @@ Enable-PSRemoting -Confirm:$false
 
 ### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
+```PowerShell
 Set-ExecutionPolicy RemoteSigned -Scope Process -Force
 
-```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
@@ -117,12 +173,6 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbose
-```
-
-### # Set MaxPatchCacheSize to 0 (Recommended)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
 ### Install latest service pack and updates
@@ -312,70 +362,6 @@ cls
 Stop-Computer
 ```
 
-## Remove disk from virtual CD/DVD drive
-
-## # Enable PowerShell remoting
-
-```PowerShell
-Enable-PSRemoting -Confirm:$false
-```
-
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
-
-```PowerShell
-$computer = 'WIN10-DEV1'
-
-$command = "Get-NetFirewallRule |
-    Where-Object { `$_.Profile -eq 'Domain' ``
-        -and `$_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
-    Enable-NetFirewallRule"
-
-$scriptBlock = [ScriptBlock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-```
-
----
-
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
-
-```PowerShell
-$computer = 'WIN10-DEV1'
-
-$command = "Disable-NetFirewallRule ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)'"
-
-$scriptBlock = [scriptblock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-```
-
----
-
 ## Snapshot VM - "Baseline"
 
 Windows 10 Enterprise (x64)\
@@ -386,342 +372,3 @@ Node.js v0.12.5\
 Adobe Reader 8.3.1\
 Google Chrome\
 Mozilla Firefox 39.0
-
-**TODO:**
-
-## Install Web Essentials 2015
-
-## Configure NPM to use HTTP instead of HTTPS
-
-### Reference
-
-**npm not working - "read ECONNRESET"**\
-From <[http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset](http://stackoverflow.com/questions/18419144/npm-not-working-read-econnreset)>
-
-```Console
-npm config set registry http://registry.npmjs.org/
-```
-
-## Install Yeoman
-
-### Reference
-
-**Install the Yeoman toolset**\
-From <[http://yeoman.io/codelab/setup.html](http://yeoman.io/codelab/setup.html)>
-
-```PowerShell
-cls
-```
-
-### # Install Grunt CLI
-
-```PowerShell
-npm install -g grunt-cli
-```
-
-### # Install Gulp
-
-```PowerShell
-npm install -g gulp
-```
-
-### # Install Bower
-
-```PowerShell
-npm install -g bower
-```
-
-### # Install Yeoman
-
-```PowerShell
-npm install -g yo
-```
-
-## # Install AngularJS generator
-
-```PowerShell
-npm install -g generator-angular
-```
-
-## # Configure credential helper for Git
-
-```PowerShell
-git config --global credential.helper !"C:\\NotBackedUp\\Public\\Toolbox\\git-credential-winstore.exe"
-```
-
-## # Configure e-mail and name for Git
-
-```PowerShell
-git config --global user.email "jeremy_jameson@live.com"
-git config --global user.name "Jeremy Jameson"
-```
-
-## # Clone repository - Training
-
-```PowerShell
-mkdir src\Repos
-
-cd src\Repos
-
-git clone https://techtoolbox.visualstudio.com/DefaultCollection/_git/Training
-```
-
-## # Install ng-demos
-
-### # Install package dependencies
-
-```PowerShell
-npm install -g node-inspector
-```
-
-### # Clone repo
-
-```PowerShell
-cd Training
-
-git clone https://github.com/johnpapa/ng-demos.git
-```
-
-### # Install packages
-
-```PowerShell
-cd ng-demos\modular
-
-npm install
-```
-
-### # Run dev build
-
-```PowerShell
-gulp serve-dev-debug
-```
-
-## Install custom Windows 7 image
-
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
-- On the **Task Sequence** step, select **Windows 7 Ultimate (x86)** and click **Next**.
-- On the **Computer Details** step, in the **Computer name** box, type **WIN7-TEST1** and click **Next**.
-- On the Applications step:
-  - Select the following items:
-    - Adobe
-      - **Adobe Reader 8.3.1**
-    - Google
-      - **Chrome**
-    - Mozilla
-      - **Firefox 45.0.1**
-      - **Thunderbird 38.7.0**
-  - Click **Next**.
-
-```PowerShell
-cls
-```
-
-## # Rename local Administrator account and set password
-
-```PowerShell
-Set-ExecutionPolicy Bypass -Scope Process -Force
-
-$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
-```
-
-> **Note**
->
-> When prompted, type the password for the local Administrator account.
-
-```PowerShell
-$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
-
-$adminUser = [ADSI] 'WinNT://./Administrator,User'
-$adminUser.Rename('foo')
-$adminUser.SetPassword($plainPassword)
-
-logoff
-```
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-## # Remove disk from virtual CD/DVD drive
-
-```PowerShell
-$vmHost = "STORM"
-$vmName = "WIN7-TEST1"
-
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
-```
-
----
-
-## Login as WIN7-TEST1\\foo
-
-```PowerShell
-cls
-```
-
-## # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-## # Enable PowerShell remoting
-
-```PowerShell
-Enable-PSRemoting -Confirm:$false
-```
-
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-netsh advfirewall firewall set rule `
-    name="File and Printer Sharing (Echo Request - ICMPv4-In)" profile=domain `
-    new enable=yes
-
-netsh advfirewall firewall set rule `
-    name="File and Printer Sharing (Echo Request - ICMPv6-In)" profile=domain `
-    new enable=yes
-
-netsh advfirewall firewall add rule `
-    name="Remote Windows Update (Dynamic RPC)" `
-    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
-    program="%windir%\system32\dllhost.exe" `
-    dir=in `
-    protocol=TCP `
-    localport=RPC `
-    profile=Domain `
-    action=Allow
-
-netsh advfirewall firewall add rule `
-    name="Remote Windows Update (SMB-In)" `
-    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
-    dir=in `
-    protocol=TCP `
-    localport=445 `
-    profile=Domain `
-    action=Allow
-
-netsh advfirewall firewall add rule `
-    name="Remote Windows Update (WMI-In)" `
-    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
-    program="%windir%\system32\svchost.exe" `
-    service=winmgmt `
-    dir=in `
-    protocol=TCP `
-    profile=Domain `
-    action=Allow
-```
-
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-netsh advfirewall firewall set rule `
-    name="Remote Windows Update (Dynamic RPC)" new enable=no
-
-netsh advfirewall firewall set rule `
-    name="Remote Windows Update (SMB-In)" new enable=no
-
-netsh advfirewall firewall set rule `
-    name="Remote Windows Update (WMI-In)" new enable=no
-```
-
-```PowerShell
-cls
-```
-
-## # Install Remote Server Administration Tools for Windows 7 SP1
-
-```PowerShell
-net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
-
-& '\\ICEMAN\Public\Download\Microsoft\Remote Server Administration Tools for Windows 7 SP1\Windows6.1-KB958830-x86-RefreshPkg.msu'
-```
-
-## Enable feature to add "netdom" command-line tool
-
-- **Remote Server Administration Tools**
-  - **AD DS and AD LDA Tools**
-    - **AD DS Tools**
-      - **AD DS Snap-ins and Command-line Tools**
-
-```PowerShell
-cls
-```
-
-## # Install Microsoft Security Essentials
-
-```PowerShell
-& "\\ICEMAN\Products\Microsoft\Security Essentials\Windows 7 (x86)\MSEInstall.exe"
-```
-
-## Install updates using Windows Update
-
-> **Note**
->
-> Repeat until there are no updates available for the computer.
-
-```PowerShell
-cls
-```
-
-## # Delete C:\\Windows\\SoftwareDistribution folder
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-```
-
-```PowerShell
-cls
-```
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-> **Note**
->
-> When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-## Activate Microsoft Office
-
-1. Start Word 2013
-2. Enter product key
-
-```PowerShell
-cls
-```
-
-## # Shutdown VM
-
-```PowerShell
-Stop-Computer
-```
-
-## Snapshot VM - "Baseline"
-
-Windows 7 Ultimate (x86)\
-Microsoft Office Professional Plus 2013 (x86)\
-Adobe Reader 8.3.1\
-Google Chrome\
-Mozilla Firefox 45.0.1\
-Mozilla Thunderbird 38.7.0\
-Remote Server Administration Tools for Windows 7 SP1\
-Microsoft Security Essentials\
-Internet Explorer 10
