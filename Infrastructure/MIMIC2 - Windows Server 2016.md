@@ -1442,3 +1442,218 @@ robocopy \\TT-FS01\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Ca
 #### Check-in files
 
 ---
+
+```Console
+cls
+```
+
+# Build baseline images
+
+---
+
+**TT-HV02A / TT-HV02B / TT-HV02C**
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 7 Ultimate (x86) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 7 Ultimate (x64) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -VhdSize 40GB `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2008 R2 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 8.1 Enterprise (x64) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2012 R2 Standard - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "SharePoint Server 2013 - Development"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -VhdSize 50GB `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 10 Enterprise (x64) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2016 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Update MDT production deployment images
+
+---
+
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
+
+& '.\Update Deployment Images.ps1'
+```
+
+---
+
+## Expand C: drive
+
+> **Note**
+>
+> Attempting to expand a VHD stored on a scale out file server from FOOBAR10 currently results in an "access denied" error:
+>
+> ```PowerShell
+> # Expand primary VHD for virtual machine
+>
+> $vmName = "MIMIC2"
+> $vmHost = "TT-HV02B"
+>
+> Stop-VM -ComputerName $vmHost -Name $vmName
+>
+> $vhdPath = "\\TT-SOFS01.corp.technologytoolbox.com\VM-Storage-Silver\$vmName\Virtual Hard Disks\$vmName.vhdx"
+>
+> Resize-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 35GB
+>
+> Resize-VHD : Failed to resize the virtual disk.
+> The system failed to resize '\\TT-SOFS01.corp.technologytoolbox.com\VM-Storage-Silver\MIMIC2\Virtual Hard Disks\MIMIC2.vhdx'.
+> Failed to resize the virtual disk.
+> The system failed to resize '\\TT-SOFS01.corp.technologytoolbox.com\VM-Storage-Silver\MIMIC2\Virtual Hard Disks\MIMIC2.vhdx': General access denied error (0x80070005).
+> At line:1 char:1
+> + Resize-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 35GB
+> + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>     + CategoryInfo          : PermissionDenied: (:) [Resize-VHD], VirtualizationException
+>     + FullyQualifiedErrorId : AccessDenied,Microsoft.Vhd.PowerShell.Cmdlets.ResizeVhd
+> ```
+>
+> To avoid this issue, expand the VHD directly from the Hyper-V cluster node.
+
+---
+
+**TT-HV02B**
+
+```PowerShell
+cls
+```
+
+### # Expand primary VHD for virtual machine
+
+```PowerShell
+$vmName = "MIMIC2"
+
+Stop-VM -Name $vmName
+
+$vhdPath = "\\TT-SOFS01.corp.technologytoolbox.com\VM-Storage-Silver" `
+    + "\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
+Resize-VHD -Path $vhdPath -SizeBytes 35GB
+
+Start-VM -Name $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
