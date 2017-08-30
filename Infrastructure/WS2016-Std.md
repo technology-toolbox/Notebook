@@ -11,7 +11,7 @@ Saturday, January 14, 2017
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -24,7 +24,7 @@ $vmHost = "TT-HV02B"
 $vmName = "WS2016-Std"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
-$isoPath = "\\TT-FS01\Products\Microsoft\Windows Server 2016" `
+$isoPath = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016" `
     + "\en_windows_server_2016_x64_dvd_9718492.iso"
 
 New-VM `
@@ -34,7 +34,7 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Tenant vSwitch"
+    -SwitchName "Embedded Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
@@ -57,7 +57,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -76,11 +76,7 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 
 ### Set password for the local Administrator account
 
-```Console
-PowerShell
-```
-
-```Console
+```PowerShell
 cls
 ```
 
@@ -123,9 +119,11 @@ cls
 
 ```PowerShell
 sconfig
-
-PowerShell
 ```
+
+> **Note**
+>
+> When prompted to restart the computer to complete Windows Updates, click **Yes**.
 
 ```PowerShell
 cls
@@ -165,7 +163,7 @@ Copy VM before running SysPrep (to avoid issues with running SysPrep multiple ti
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -224,7 +222,7 @@ C:\Windows\System32\Sysprep\sysprep.exe /generalize /oobe /shutdown
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls

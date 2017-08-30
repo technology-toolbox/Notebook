@@ -11,7 +11,7 @@ Saturday, January 14, 2017
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -24,7 +24,7 @@ $vmHost = "TT-HV02B"
 $vmName = "WS2016-Std-Core"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
-$isoPath = "\\TT-FS01\Products\Microsoft\Windows Server 2016" `
+$isoPath = "C:\NotBackedUp\Products\Microsoft\Windows Server 2016" `
     + "\en_windows_server_2016_x64_dvd_9718492.iso"
 
 New-VM `
@@ -34,7 +34,7 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Tenant vSwitch"
+    -SwitchName "Embedded Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
@@ -57,7 +57,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -104,7 +104,7 @@ net use $source /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```Console
-robocopy $source $destination  /E /XD "Microsoft SDKs"
+robocopy $source $destination  /E /XD "Microsoft SDKs" /NP
 ```
 
 ### # Set MaxPatchCacheSize to 0 (recommended)
@@ -123,11 +123,21 @@ cls
 
 ```PowerShell
 sconfig
+```
 
+> **Note**
+>
+> When prompted to restart the computer to complete Windows Updates, click **Yes**.
+
+> **Important**
+>
+> Repeat the previous steps until there are no more updates to install.
+
+```Console
 PowerShell
 ```
 
-```PowerShell
+```Console
 cls
 ```
 
