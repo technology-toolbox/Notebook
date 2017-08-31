@@ -1,68 +1,81 @@
 ﻿# WOLVERINE - Windows 10 Enterprise x64
 
-Tuesday, October 4, 2016
-4:41 AM
+Wednesday, August 9, 2017
+3:00 AM
 
 ## Install Windows 10 Enterprise (x64)
 
-### # Rename computer
+#### Install custom Windows 10 image
+
+- On the **Task Sequence** step, select **Windows 10 Enterprise** and click **Next**.
+- On the **Computer Details** step:
+  - In the **Computer name** box, type **WOLVERINE**.
+  - Specify **WORKGROUP**.
+  - Click **Next**.
+- On the **Applications** step, ensure no items are selected and click **Next**.
+
+#### # Rename local Administrator account and set password
 
 ```PowerShell
-Rename-Computer -NewName WOLVERINE -Restart
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
 ```
 
-### # Join domain
-
-```PowerShell
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
-```
-
-### # Create default folders
-
-> **Important**
+> **Note**
 >
-> Run the following commands using a non-elevated PowerShell window (to avoid issues with customizing the folder icons).
-
-```Console
-mkdir C:\NotBackedUp\Public
-mkdir C:\NotBackedUp\Temp
-```
-
-### # Set time zone
+> When prompted, type the password for the local Administrator account.
 
 ```PowerShell
-tzutil /s "Mountain Standard Time"
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword($plainPassword)
+
+logoff
 ```
 
-### # Set MaxPatchCacheSize to 0
+---
 
-```PowerShell
-reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize /t REG_DWORD /d 0 /f
-```
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Configure network settings
+### # Move computer to different OU
+
+```PowerShell
+$vmName = "WOLVERINE"
+
+$targetPath = ("OU=Workstations,OU=Resources,OU=Development" `
+    + ",DC=corp,DC=technologytoolbox,DC=com")
+
+Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
+```
+
+---
+
+### Login as local administrator account
+
+### # Configure networking
+
+```PowerShell
+$interfaceAlias = "Management"
+```
 
 #### # Rename network connections
 
 ```PowerShell
-Get-NetAdapter -Physical | select Name, InterfaceDescription
+Get-NetAdapter -Physical | select InterfaceDescription
 
-Get-NetAdapter `
-    -Name "Ethernet" |
-    Rename-NetAdapter -NewName "Production"
+Get-NetAdapter -InterfaceDescription "Intel(R) Ethernet Connection I217-V" |
+    Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-#### # Configure "Production" network adapter
-
-```PowerShell
-$interfaceAlias = "Production"
-```
-
-##### # Enable jumbo frames
+#### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
@@ -72,12 +85,10 @@ Set-NetAdapterAdvancedProperty `
     -DisplayName "Jumbo Packet" `
     -RegistryValue 9014
 
-ping ICEMAN -f -l 8900
-```
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-> **Note**
->
-> Trying to ping ICEMAN or the iSCSI network adapter on ICEMAN with a 9000 byte packet from FORGE resulted in an error (suggesting that jumbo frames were not configured). It also worked with 8970 bytes.
+ping TT-FS01 -f -l 8900
+```
 
 ```PowerShell
 cls
@@ -122,6 +133,261 @@ Disable-AutomaticallyDetectProxySettings
 **Disable-AutomaticallyDetectSettings.ps1**\
 From <[https://gist.github.com/ReubenBond/1387620](https://gist.github.com/ReubenBond/1387620)>
 
+### # Join domain
+
+```PowerShell
+Add-Computer -DomainName corp.technologytoolbox.com -Restart
+```
+
+### Configure storage
+
+```PowerShell
+cls
+```
+
+#### # Change drive letter for DVD-ROM
+
+```PowerShell
+$cdrom = Get-WmiObject -Class Win32_CDROMDrive
+$driveLetter = $cdrom.Drive
+
+$volumeId = mountvol $driveLetter /L
+$volumeId = $volumeId.Trim()
+
+mountvol $driveLetter /D
+
+mountvol X: $volumeId
+```
+
+#### Physical disks
+
+<table>
+<tr>
+<td valign='top'>
+<p>Disk</p>
+</td>
+<td valign='top'>
+<p>Description</p>
+</td>
+<td valign='top'>
+<p>Capacity</p>
+</td>
+<td valign='top'>
+<p>Drive Letter</p>
+</td>
+<td valign='top'>
+<p>Volume Size</p>
+</td>
+<td valign='top'>
+<p>Allocation Unit Size</p>
+</td>
+<td valign='top'>
+<p>Volume Label</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>0</p>
+</td>
+<td valign='top'>
+<p>Model: WDC WD1001FALS-00E3A0<br />
+Serial number: WD-******283566</p>
+</td>
+<td valign='top'>
+<p>1 TB</p>
+</td>
+<td valign='top'>
+<p>Z:</p>
+</td>
+<td valign='top'>
+<p>931 GB</p>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+<p>Backup01</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>1</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 850 PRO 512GB<br />
+Serial number: *********27828J</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+<p>C:</p>
+</td>
+<td valign='top'>
+<p>472 GB</p>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+<p>System</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>2</p>
+</td>
+<td valign='top'>
+<p>Model: M4-CT512M4SSD2<br />
+Serial number: 0000000*********8440</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+<p>D:</p>
+</td>
+<td valign='top'>
+<p>477 GB</p>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+<p>Gold01</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>3</p>
+</td>
+<td valign='top'>
+<p>Model: C300-CTFDDAC128MAG<br />
+Serial number: 0000000*********31DC</p>
+</td>
+<td valign='top'>
+<p>128 GB</p>
+</td>
+<td valign='top'>
+<p>E:</p>
+</td>
+<td valign='top'>
+<p>119 GB</p>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+<p>Silver01</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>4</p>
+</td>
+<td valign='top'>
+<p>Model: WDC WD1002FAEX-00Y9A0<br />
+Serial number: WD-******201582</p>
+</td>
+<td valign='top'>
+<p>1TB</p>
+</td>
+<td valign='top'>
+<p>F:</p>
+</td>
+<td valign='top'>
+<p>931 GB</p>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+<p>Bronze01</p>
+</td>
+</tr>
+</table>
+
+```PowerShell
+Get-PhysicalDisk | sort DeviceId
+
+Get-PhysicalDisk | select DeviceId, Model, SerialNumber, CanPool | sort DeviceId
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure partitions and volumes
+
+##### # Rename "Windows" volume to "System"
+
+```PowerShell
+Get-Volume -DriveLetter C | Set-Volume -NewFileSystemLabel System
+```
+
+##### # Create "Gold01" volume (D:)
+
+```PowerShell
+Get-PhysicalDisk |    where { $_.SerialNumber -eq '0000000*********8440' } |    Get-Disk |    Clear-Disk -RemoveData -Confirm:$false -PassThru |    Initialize-Disk -PartitionStyle GPT -PassThru |    New-Partition -DriveLetter "D" -UseMaximumSize |    Format-Volume `        -FileSystem NTFS `        -NewFileSystemLabel "Gold01" `        -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+##### # Create "Silver01" volume (E:)
+
+```PowerShell
+Get-PhysicalDisk |    where { $_.SerialNumber -eq '0000000*********31DC' } |    Get-Disk |    Clear-Disk -RemoveData -Confirm:$false -PassThru |    Initialize-Disk -PartitionStyle GPT -PassThru |    New-Partition -DriveLetter "E" -UseMaximumSize |    Format-Volume `        -FileSystem NTFS `        -NewFileSystemLabel "Silver01" `        -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+##### # Create "Bronze01" volume (F:)
+
+```PowerShell
+Get-PhysicalDisk |     where { $_.SerialNumber -eq 'WD-******201582' } |     Get-Disk |     Clear-Disk -RemoveData -Confirm:$false -PassThru |     Initialize-Disk -PartitionStyle GPT -PassThru |     New-Partition -DriveLetter "F" -UseMaximumSize |     Format-Volume `        -FileSystem NTFS `        -NewFileSystemLabel "Bronze01" `        -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+##### # Create "Backup01" volume (Z:)
+
+```PowerShell
+Get-PhysicalDisk |     where { $_.SerialNumber -eq 'WD-******283566' } |     Get-Disk |     Clear-Disk -RemoveData -Confirm:$false -PassThru |     Initialize-Disk -PartitionStyle GPT -PassThru |     New-Partition -DriveLetter "Z" -UseMaximumSize |     Format-Volume `        -FileSystem ReFS `        -NewFileSystemLabel "Backup01" `        -Confirm:$false
+```
+
+### Create default folders
+
+> **Important**
+>
+> Run the following commands using a non-elevated command prompt (to avoid issues with customizing the folder icons).
+
+---
+
+**Command Prompt**
+
+```Console
+mkdir C:\NotBackedUp\Public\Symbols
+mkdir C:\NotBackedUp\Temp
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Set MaxPatchCacheSize to 0
+
+```PowerShell
+reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize /t REG_DWORD /d 0 /f
+```
+
 ```PowerShell
 cls
 ```
@@ -139,7 +405,7 @@ powercfg.exe /L
 ### # Copy Toolbox content
 
 ```PowerShell
-net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+net use \\TT-FS01\ipc$ /USER:TECHTOOLBOX\jjameson
 ```
 
 > **Note**
@@ -147,35 +413,7 @@ net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```Console
-robocopy \\ICEMAN\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
-```
-
-```Console
-cls
-```
-
-### # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-```PowerShell
-cls
-```
-
-### # Download PowerShell help files
-
-```PowerShell
-Update-Help
+robocopy \\TT-FS01\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 ```
 
 ### # Enable PowerShell remoting
@@ -187,7 +425,7 @@ Enable-PSRemoting -Confirm:$false
 ### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
-Set-ExecutionPolicy RemoteSigned -Scope Process
+Set-ExecutionPolicy RemoteSigned -Scope Process -Force
 
 C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
 C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1  -Verbose
@@ -197,10 +435,12 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1  -Verbo
 cls
 ```
 
-## # Install Microsoft Money
+## # Install and configure Microsoft Money
+
+### # Install Microsoft Money
 
 ```PowerShell
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+net use \\TT-FS01\Products /USER:TECHTOOLBOX\jjameson
 ```
 
 > **Note**
@@ -208,29 +448,17 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-& "\\ICEMAN\Products\Microsoft\Money 2008\USMoneyBizSunset.exe"
+& "\\TT-FS01\Products\Microsoft\Money 2008\USMoneyBizSunset.exe"
 ```
-
-### Create custom invoice template
-
-Folder - C:\\Users\\All Users\\Microsoft\\Money\\17.0\\Invoice
-
-Edit invoice listing (2008Invoice.ntd) to move "Technology Toolbox" invoice to top so it is selected by default
-
-```Console
-cd "C:\Users\All Users\Microsoft\Money\17.0\Invoice"
-notepad .\2008Invoice.ntd
-```
-
-#### Reference
-
-**Sunset Home & Business - Invoice issues**\
-From <[https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices/](https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices/)>
 
 ### Patch Money DLL to avoid crash when importing transactions
 
-1. Open DLL in hex editor:
+1. Open DLL in hex editor:
 2. Make the following changes:
+
+```Console
+    C:\NotBackedUp\Public\Toolbox\HxD\HxD.exe "C:\Program Files (x86)\Microsoft Money Plus\MNYCoreFiles\mnyob99.dll"
+```
 
     File offset **003FACE8**: Change **85** to **8D**\
     File offset **003FACED**: Change **50** to **51**\
@@ -242,7 +470,55 @@ From <[https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices
 **Microsoft Money crashes during import of account transactions or when changing a payee of a downloaded transaction**\
 From <[http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx](http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx)>
 
-## Install Microsoft Office Professional Plus 2016
+```PowerShell
+cls
+```
+
+### # Create custom invoice template
+
+```PowerShell
+& "C:\Program Files (x86)\Microsoft Money Plus\MNYCoreFiles\tmplbldr.exe"
+```
+
+In the **New Template** window:
+
+1. Ensure **Create new template** is selected and click **Next**.
+2. In the **Name** box, type **Technology Toolbox** and click **Next**.
+3. Ensure **Portrait **is selected and click **Finish**.
+4. On the **File** menu, click **Save**.
+
+> **Note**
+>
+> The new invoice template is created in the following folder:
+>
+> C:\\Users\\All Users\\Microsoft\\Money\\17.0\\Invoice
+
+#### Overwrite file with custom template
+
+```PowerShell
+Copy-Item `
+    '\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC\InvoiceTemplate.htm' `
+    'C:\Users\All Users\Microsoft\Money\17.0\Invoice\usr19.htm'
+```
+
+#### Configure default invoice template
+
+Edit invoice listing (2008Invoice.ntd) to move the "Technology Toolbox" invoice to the top (so it is selected by default).
+
+```Console
+Notepad "C:\Users\All Users\Microsoft\Money\17.0\Invoice\2008Invoice.ntd"
+```
+
+#### Reference
+
+**Sunset Home & Business - Invoice issues**\
+From <[https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices/](https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices/)>
+
+```PowerShell
+cls
+```
+
+## # Install Microsoft Office Professional Plus 2016
 
 ```PowerShell
 Function Ensure-MountedDiskImage
@@ -267,29 +543,92 @@ Function Ensure-MountedDiskImage
 
 $isoFilename = "en_office_professional_plus_2016_x86_x64_dvd_6962141.iso"
 
-$destFolder = "E:\NotBackedUp\Temp"
-
-mkdir $destFolder
-
-$sourcePath = "\\ICEMAN\Products\Microsoft\Office 2016" `
+$imagePath = "\\TT-FS01\Products\Microsoft\Office 2016" `
     + "\$isoFilename"
 
-Copy $sourcePath $destFolder
+$imageDriveLetter = Ensure-MountedDiskImage $imagePath
 
-$imagePath = "$destFolder\$isoFilename"
+$setupPath = $imageDriveLetter + ':\setup.exe'
+
+& $setupPath
 ```
 
-## Install Microsoft Visio Professional 2016
+### Issue
+
+Error: "The system cannot find the file specified."
+
+#### Workaround
 
 ```PowerShell
+$tempPath = "C:\NotBackedUp\Temp"
+
+Copy-Item $imagePath $tempPath
+
+$imagePath = "$tempPath\$isoFilename"
+
+$imageDriveLetter = Ensure-MountedDiskImage $imagePath
+
+$setupPath = $imageDriveLetter + ':\setup.exe'
+
+& "$imageDriveLetter`:"
+
+& $setupPath
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```Console
+C:
+
+Dismount-DiskImage $imagePath
+```
+
+```Console
+cls
+```
+
+## # Install Microsoft Visio Professional 2016
+
+```PowerShell
+$isoFilename = "en_visio_professional_2016_x86_x64_dvd_6962139.iso"
+
+$imagePath = "\\TT-FS01\Products\Microsoft\Visio 2016" `
+    + "\$isoFilename"
+
+$imageDriveLetter = Ensure-MountedDiskImage $imagePath
+
+$setupPath = $imageDriveLetter + ':\setup.exe'
+
+& "$imageDriveLetter`:"
+
+& $setupPath
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```Console
+C:
+
+Dismount-DiskImage $imagePath
+```
+
+```Console
 cls
 ```
 
 ## # Install Microsoft InfoPath 2013
 
 ```PowerShell
-& "\\ICEMAN\Products\Microsoft\Office 2013\infopath_4753-1001_x86_en-us.exe"
+& "\\TT-FS01\Products\Microsoft\Office 2013\infopath_4753-1001_x86_en-us.exe"
 ```
+
+> **Important**
+>
+> Wait for the installation to complete.
 
 ```PowerShell
 cls
@@ -300,7 +639,7 @@ cls
 ### # Install Adobe Reader 8.3
 
 ```PowerShell
-& "\\ICEMAN\Products\Adobe\AdbeRdr830_en_US.msi"
+& "\\TT-FS01\Products\Adobe\AdbeRdr830_en_US.msi"
 ```
 
 > **Important**
@@ -310,7 +649,7 @@ cls
 ### # Install update for Adobe Reader
 
 ```PowerShell
-& "\\ICEMAN\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
+& "\\TT-FS01\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
 ```
 
 ```PowerShell
@@ -320,7 +659,7 @@ cls
 ## # Install Mozilla Firefox
 
 ```PowerShell
-& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 49.0.1.exe" -ms
+& "\\TT-FS01\Products\Mozilla\Firefox\Firefox Setup 55.0.exe" -ms
 ```
 
 ```PowerShell
@@ -330,17 +669,7 @@ cls
 ## # Install Google Chrome
 
 ```PowerShell
-& \\ICEMAN\Products\Google\Chrome\googlechromestandaloneenterprise64.msi
-```
-
-```PowerShell
-cls
-```
-
-## # Install FileZilla
-
-```PowerShell
-& \\ICEMAN\Products\FileZilla\FileZilla_3.22.1_win64-setup.exe
+& \\TT-FS01\Products\Google\Chrome\googlechromestandaloneenterprise64.msi
 ```
 
 ```PowerShell
@@ -350,31 +679,89 @@ cls
 ## # Install Paint.NET
 
 ```PowerShell
-& "\\ICEMAN\Products\Paint.NET\paint.net.4.0.12.install.zip"
+& "\\TT-FS01\Products\Paint.NET\paint.net.4.0.17.install.zip"
 ```
 
 ## Install Microsoft Expression Studio 4
+
+---
+
+**WOLVERINE**
 
 ```PowerShell
 cls
 ```
 
-## # Install Microsoft Visual Studio 2015 Enterprise with Update 2
+### # Copy installation media from internal file server
 
 ```PowerShell
-$sourcePath = "\\ICEMAN\Products\Microsoft\Visual Studio 2015"
-$destPath = "E:\NotBackedUp\Temp"
-$isoFilename = "en_visual_studio_enterprise_2015_with_update_3_x86_x64_dvd_8923288.iso"
+$isoFile = "en_expression_studio_4_ultimate_x86_dvd_537032.iso"
+
+$sourcePath = "\\TT-FS01\Products\Microsoft\Expression Studio"
+
+$destPath = "C:\NotBackedUp\Temp"
+
+robocopy $sourcePath $destPath $isoFile
+```
+
+---
+
+Error running setup: "Your computer is scheduled to restart. Restart your computer and run Setup to continue installing this Expression program."
+
+```PowerShell
+Restart-Computer
+
+Use the "Toolbox" script to install Expression Studio
+```
+
+```PowerShell
+cls
+```
+
+## # Install Microsoft SQL Server 2016
+
+```PowerShell
+net use \\TT-FS01\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$sourcePath = "\\TT-FS01\Products\Microsoft\SQL Server 2016"
+$destPath = "C:\NotBackedUp\Temp"
+$isoFilename = "en_sql_server_2016_developer_x64_dvd_8777069.iso"
 
 robocopy $sourcePath $destPath $isoFilename
 
 $imagePath = "$destPath\$isoFilename"
 
+Function Ensure-MountedDiskImage
+{
+    [CmdletBinding()]
+    Param(
+        [Parameter(Position = 1, Mandatory = $true)]
+        [string] $ImagePath)
+
+    $imageDriveLetter = (Get-DiskImage -ImagePath $ImagePath|
+        Get-Volume).DriveLetter
+
+    If ($imageDriveLetter -eq $null)
+    {
+        Write-Verbose "Mounting disk image ($ImagePath)..."
+        $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
+            Get-Volume).DriveLetter
+    }
+
+    return $imageDriveLetter
+}
+
 $imageDriveLetter = Ensure-MountedDiskImage $imagePath
 
-If ((Get-Process -Name "vs_enterprise" -ErrorAction SilentlyContinue) -eq $null)
+If ((Get-Process -Name "setup" -ErrorAction SilentlyContinue) -eq $null)
 {
-    $setupPath = $imageDriveLetter + ':\vs_enterprise.exe'
+    $setupPath = $imageDriveLetter + ':\setup.exe'
 
     Write-Verbose "Starting setup..."
 
@@ -384,34 +771,55 @@ If ((Get-Process -Name "vs_enterprise" -ErrorAction SilentlyContinue) -eq $null)
 }
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/ACDA391F5D951BCC223707F0D0AF2DF01F6ED49A.png)
+On the **Feature Selection** step, click **Select All** and then clear the checkbox for **PolyBase Query Service for External Data **(since this requires the Java Runtime Environment to be installed).
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/3D184DB58FB449B09BA3A8C96808BE56AFE0AC69.png)
+On the **Server Configuration** page:
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BD/7DA9EE2C35C29A126B4BAA3835DB28DC7EF69ABD.png)
+- For **SQL Server Database Engine**, change the **Startup Type** to **Manual**.
+- For **SQL Server Analysis Services**, change the **Startup Type** to **Manual**.
+- For **SQL Server Reporting Services**, change the **Startup Type** to **Manual**.
+- For **SQL Server Integration Services 13.0**, change the **Startup Type** to **Manual**.
 
-Select the following features:
+On the **Database Engine Configuration** page:
 
-- Windows and Web Development
-  - **Microsoft Office Developer Tools**
-  - **Microsoft Web Developer Tools**
+- On the **Server Configuration** tab, click **Add Current User**.
+- On the **Data Directories** tab:
+  - Change the **Data root directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\**
+  - Change the **Backup directory** to **Z:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\MSSQL\\Backup**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/83/92B19D856F2778744C00F8799038082A88EB9D83.png)
+On the **Analysis Services Configuration** page:
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EC/7BEC5B0BCF7DD4693FB012016FFC95B9ADFC9FEC.png)
+- On the **Server Configuration** tab, click **Add Current User**.
+- On the **Data Directories** tab:
+  - Change the **Data directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS13.MSSQLSERVER\\OLAP\\Data.**
+  - Change the **Log file directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS13.MSSQLSERVER\\OLAP\\Log.**
+  - Change the **Temp directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS13.MSSQLSERVER\\OLAP\\Temp.**
+  - Change the **Backup directory** to **Z:\\NotBackedUp\\Microsoft SQL Server\\MSAS13.MSSQLSERVER\\OLAP\\Backup**.
 
-### Install Microsoft Azure SDK 2.9.5
+On the **Distributed Replay Controller **page, click **Add Current User**.
 
-### Install Microsoft Office Developer Tools Update 2 for Visual Studio 2015
+```PowerShell
+Dismount-DiskImage $imagePath
+```
 
 ```PowerShell
 cls
 ```
 
-### # Install reference assemblies
+## # Install Microsoft SQL Server Management Studio (Release 17.2)
 
 ```PowerShell
-net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
+& '\\TT-FS01\Products\Microsoft\SQL Server 2016\SSMS-Setup-ENU.exe'
+```
+
+```PowerShell
+cls
+```
+
+## # Install Microsoft Visual Studio 2017 Enterprise with Update 2
+
+```PowerShell
+net use \\TT-FS01\Products /USER:TECHTOOLBOX\jjameson
 ```
 
 > **Note**
@@ -419,7 +827,71 @@ net use \\ICEMAN\ipc$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$source = '\\ICEMAN\Builds\Reference Assemblies'
+& '\\TT-FS01\Products\Microsoft\Visual Studio 2017\Enterprise\vs_Enterprise.exe'
+```
+
+```PowerShell
+cls
+```
+
+## # Install Visual Studio Code
+
+```PowerShell
+& '\\TT-FS01\Products\Microsoft\Visual Studio Code\VSCodeSetup-x64-1.15.0.exe'
+```
+
+On the **Select Additional Tasks** page, select the following checkboxes:
+
+- **Add "Open with Code" action to Windows Explorer file context menu**
+- **Add "Open with Code" action to Windows Explorer directory context menu**
+- **Add to PATH (available after restart)**
+
+```PowerShell
+cls
+```
+
+## # Configure development environment
+
+### # Install IIS
+
+```PowerShell
+Enable-WindowsOptionalFeature `
+    -Online `
+    -All `
+    -FeatureName IIS-ManagementConsole, `
+        IIS-ASPNET45, `
+        IIS-DefaultDocument, `
+        IIS-DirectoryBrowsing, `
+        IIS-HttpErrors, `
+        IIS-StaticContent, `
+        IIS-HttpLogging, `
+        IIS-HttpCompressionStatic, `
+        IIS-RequestFiltering, `
+        IIS-WindowsAuthentication
+```
+
+### # Configure symbol path for debugging
+
+```PowerShell
+$symbolPath = "SRV*C:\NotBackedUp\Public\Symbols" `
+     + "*\\TT-FS01\Public\Symbols" `
+     + "*http://msdl.microsoft.com/download/symbols"
+
+[Environment]::SetEnvironmentVariable("_NT_SYMBOL_PATH", $symbolPath, "Machine")
+```
+
+### # Install reference assemblies
+
+```PowerShell
+net use \\TT-FS01\ipc$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$source = '\\TT-FS01\Builds\Reference Assemblies'
 $dest = 'C:\Program Files\Reference Assemblies'
 
 robocopy $source $dest /E
@@ -443,77 +915,12 @@ robocopy $source $dest /E
 cls
 ```
 
-### # Configure symbol path for debugging
-
-```PowerShell
-$symbolPath = "SRV*C:\NotBackedUp\Public\Symbols*\\ICEMAN\Public\Symbols*http://msdl.microsoft.com/download/symbols"
-[Environment]::SetEnvironmentVariable("_NT_SYMBOL_PATH", $symbolPath, "Machine")
-```
-
-```PowerShell
-cls
-```
-
-## # Install Python (dependency for many node.js packages)
-
-### # Install Python (using default options)
-
-```PowerShell
-net use \\iceman\ipc$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-& "\\ICEMAN\Products\Python\python-2.7.11.amd64.msi"
-```
-
-### # Add Python folders to PATH environment variable
-
-```PowerShell
-Set-ExecutionPolicy RemoteSigned -Force
-
-$pythonPathFolders = 'C:\Python27\', 'C:\Python27\Scripts'
-
-C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
-    -Folders $pythonPathFolders `
-    -EnvironmentVariableTarget Machine
-```
-
-```PowerShell
-cls
-```
-
-## # Install Git (required by npm to download packages from GitHub)
-
-### # Install Git (using default options)
-
-```PowerShell
-& \\ICEMAN\Products\Git\Git-2.8.3-64-bit.exe
-```
-
-### # Add Git folder to PATH environment variable
-
-```PowerShell
-$gitPathFolder = 'C:\Program Files\Git\cmd'
-
-C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
-    -Folders $gitPathFolder `
-    -EnvironmentVariableTarget Machine
-```
-
-```PowerShell
-cls
-```
-
 ## # Install and configure Node.js
 
 ### # Install Node.js
 
 ```PowerShell
-& \\ICEMAN\Products\node.js\node-v4.4.7-x64.msi
+& \\TT-FS01\Products\node.js\node-v6.11.2-x64.msi
 ```
 
 > **Important**
@@ -530,24 +937,46 @@ From <[https://github.com/npm/npm/issues/4564](https://github.com/npm/npm/issues
 **`npm install -g bower` goes into infinite loop on windows with %appdata% being a UNC path**\
 From <[https://github.com/npm/npm/issues/8814](https://github.com/npm/npm/issues/8814)>
 
+> **Note**
+>
+> As illustrated in the following screenshot, the latest version of NPM (3.10.10) installs the latest version of Bower (1.8.0) when %APPDATA% refers to a network location -- so it appears this problem has been fixed.
+>
+> ![(screenshot)](https://assets.technologytoolbox.com/screenshots/50/023FB51E49C5E086909FFCCD50D6AB5E5426CF50.png)
+>
+> ```Text
+> PS C:\Users\jjameson> $env:APPDATA
+> \\TT-FS01\Users$\jjameson\Application Data
+> PS C:\Users\jjameson> npm install -g bower
+> npm WARN deprecated bower@1.8.0: ..psst! While Bower is maintained, we recommend Yarn and Webpack for *new* front-end projects! Yarn's advantage is security and reliability, and Webpack's is support for both CommonJS and AMD projects. Currently there's no migration path, but please help to create it: https://github.com/bower/bower/issues/2467
+> \\TT-FS01\Users$\jjameson\Application Data\npm\bower -> \\TT-FS01\Users$\jjameson\Application Data\npm\node_modules\bower\bin\bower
+> \\TT-FS01\Users$\jjameson\Application Data\npm
+> `-- bower@1.8.0
+> ```
+>
+> However, it still seems like a good idea to install global packages to %LOCALAPPDATA% instead of %APPDATA%.\
+> **npm on windows, install with -g flag should go into appdata/local rather than current appdata/roaming?**\
+> From <[https://github.com/npm/npm/issues/17325](https://github.com/npm/npm/issues/17325)>
+
 #### # Configure installed version of npm to avoid issues with redirected folders
 
 ```PowerShell
 notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
 ```
 
-In Notepad, change:
+---
+
+**C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
 
 ```Text
-    prefix=${APPDATA}\npm
+;prefix=${APPDATA}\npm
+prefix=${LOCALAPPDATA}\npm
+cache=${LOCALAPPDATA}\npm-cache
 ```
 
-...to:
+---
 
 ```Text
-    ;prefix=${APPDATA}\npm
-    prefix=${LOCALAPPDATA}\npm
-    cache=${LOCALAPPDATA}\npm-cache
+TODO:
 ```
 
 #### # Configure Visual Studio version of npm to avoid issues with redirected folders
@@ -727,14 +1156,18 @@ cls
 ## # Install Chocolatey
 
 ```PowerShell
-iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex
-
-exit
+((New-Object System.Net.WebClient).DownloadString(
+    'https://chocolatey.org/install.ps1')) |
+    Invoke-Expression
 ```
 
 > **Important**
 >
 > Restart PowerShell for environment changes to take effect.
+
+```Console
+exit
+```
 
 ### Reference
 
@@ -744,58 +1177,12 @@ From <[https://chocolatey.org/install](https://chocolatey.org/install)>
 ## # Install HTML Tidy
 
 ```PowerShell
-choco install html-tidy
+choco install html-tidy -y
 ```
 
 ## Install GitHub Desktop
 
 [https://desktop.github.com/](https://desktop.github.com/)
-
-## Install Microsoft SQL Server 2016
-
-```PowerShell
-$sourcePath = "\\ICEMAN\Products\Microsoft\SQL Server 2016"
-$destPath = "E:\NotBackedUp\Temp"
-$isoFilename = "en_sql_server_2016_developer_x64_dvd_8777069.iso"
-
-robocopy $sourcePath $destPath $isoFilename
-
-$imagePath = "$destPath\$isoFilename"
-
-$imageDriveLetter = Ensure-MountedDiskImage $imagePath
-
-If ((Get-Process -Name "setup" -ErrorAction SilentlyContinue) -eq $null)
-{
-    $setupPath = $imageDriveLetter + ':\setup.exe'
-
-    Write-Verbose "Starting setup..."
-
-    & $setupPath
-
-    Start-Sleep -Seconds 15
-}
-```
-
-On the **Server Configuration** page, for **SQL Server Database Engine**, change the **Startup Type** to **Manual**
-
-On the **Database Engine Configuration** page, on the **Data Directories** tab:
-
-- Change the **Data root directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\**
-- Change the **Backup directory** to **Z:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\MSSQL\\Backup**
-
-```PowerShell
-Dismount-DiskImage $imagePath
-```
-
-```PowerShell
-cls
-```
-
-## # Install Microsoft SQL Server Management Studio
-
-```PowerShell
-& '\\ICEMAN\Products\Microsoft\SQL Server 2016\SSMS-Setup-ENU.exe'
-```
 
 ## Install Fiddler
 
@@ -806,8 +1193,12 @@ cls
 ## # Install Microsoft Message Analyzer
 
 ```PowerShell
-& "\\ICEMAN\Products\Microsoft\Message Analyzer 1.4\MessageAnalyzer64.msi"
+& "\\TT-FS01\Products\Microsoft\Message Analyzer 1.4\MessageAnalyzer64.msi"
 ```
+
+"Windows blocked the installation of a digitally unsigned driver..."
+
+**Microsoft Message Anlayzer 1.4 - 'A Digitally Signed Driver Is Required'**From <[https://social.technet.microsoft.com/Forums/windows/en-US/48b4c226-fc3d-4793-b544-3440ed13424a/microsoft-message-anlayzer-14-a-digitally-signed-driver-is-required?forum=messageanalyzer](https://social.technet.microsoft.com/Forums/windows/en-US/48b4c226-fc3d-4793-b544-3440ed13424a/microsoft-message-anlayzer-14-a-digitally-signed-driver-is-required?forum=messageanalyzer)>
 
 ```PowerShell
 cls
@@ -816,7 +1207,7 @@ cls
 ## # Install Microsoft Log Parser 2.2
 
 ```PowerShell
-& "\\ICEMAN\Public\Download\Microsoft\LogParser 2.2\LogParser.msi"
+& "\\TT-FS01\Public\Download\Microsoft\LogParser 2.2\LogParser.msi"
 ```
 
 ```PowerShell
@@ -826,12 +1217,14 @@ cls
 ## # Install Remote Desktop Connection Manager
 
 ```PowerShell
-& "\\ICEMAN\Products\Microsoft\Remote Desktop Connection Manager\rdcman.msi"
+& "\\TT-FS01\Products\Microsoft\Remote Desktop Connection Manager\rdcman.msi"
 ```
 
 ## Install software for HP Photosmart 6515
 
 [http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793](http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B5/C53FF5F0549B9F389E6E62519EB11652F68F81B5.png)
 
 ## Share printer
 
@@ -865,8 +1258,8 @@ cls
 
 ```PowerShell
 New-VMSwitch `
-    -Name "Production" `
-    -NetAdapterName "Production" `
+    -Name "Management" `
+    -NetAdapterName "Management" `
     -AllowManagementOS $true
 ```
 
@@ -876,10 +1269,20 @@ New-VMSwitch `
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 Set-NetAdapterAdvancedProperty `
-    -Name "vEthernet (Production)" `
+    -Name "vEthernet (Management)" `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-ping ICEMAN -f -l 8900
+ping TT-FS01 -f -l 8900
+```
+
+```PowerShell
+cls
+```
+
+### # Download PowerShell help files
+
+```PowerShell
+Update-Help
 ```
 
 ```PowerShell
@@ -913,6 +1316,53 @@ Stop-Service wuauserv
 
 Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
+
+```PowerShell
+cls
+```
+
+## # Install Python 2 (dependency for PocketSense)
+
+### # Install Python (using default options)
+
+```PowerShell
+net use \\TT-FS01\ipc$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+& "\\TT-FS01\Products\Python\python-2.7.13.amd64.msi"
+```
+
+### # Add Python folders to PATH environment variable
+
+```PowerShell
+Set-ExecutionPolicy RemoteSigned -Force
+
+$pythonPathFolders = 'C:\Python27\', 'C:\Python27\Scripts'
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    -Folders $pythonPathFolders `
+    -EnvironmentVariableTarget Machine
+```
+
+## # Configure Git to use SourceGear DiffMerge
+
+```PowerShell
+git config --global diff.tool diffmerge
+
+git config --global difftool.diffmerge.cmd  '"C:/NotBackedUp/Public/Toolbox/DiffMerge/x64/sgdm.exe \"$LOCAL\" \"$REMOTE\"'
+```
+
+### Reference
+
+**Git for Windows (MSysGit) or Git Cmd**\
+From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html](https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html)>
+
+**TODO:**
 
 ## Disk Cleanup
 
