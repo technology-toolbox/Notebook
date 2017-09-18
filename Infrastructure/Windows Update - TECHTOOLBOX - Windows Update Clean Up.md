@@ -19,11 +19,19 @@ cls
 
 ```PowerShell
 $script = @"
-Stop-Service wuauserv
+Param(
+    [Parameter(Position = 1, Mandatory = `$true, ValueFromPipeline = `$true)]
+    [String] `$ComputerName)
 
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
+Process {
+    Invoke-Command -ComputerName `$ComputerName -ScriptBlock {
+        Stop-Service wuauserv
 
-Start-Service wuauserv
+        Remove-Item C:\Windows\SoftwareDistribution -Recurse
+
+        Start-Service wuauserv
+    }
+}
 "@
 
 $tempFileName = [System.IO.Path]::GetTempFileName()
@@ -32,7 +40,7 @@ $tempFileName = $tempFileName.Replace(".tmp", ".ps1")
 Set-Content -Path $tempFileName -Value ($script -replace "`n", "`r`n")
 
 $computers = Get-ADComputer -Filter * |
-    Where-Object { $_.Name -notin
+    where { $_.Name -notin
         @('BANSHEE',
             'SQL2014-DEV',
             'TFS2015-DEV',
@@ -43,11 +51,12 @@ $computers = Get-ADComputer -Filter * |
             'TT-SQL01-FC',
             'TT-VMM01',
             'TT-VMM01-FC') } |
-    select Name
+    select -ExpandProperty Name
 
 $computers |
     C:\NotBackedUp\Public\Toolbox\PowerShell\Run-CommandMultiThreaded.ps1 `
         -Command $tempFileName `
+        -InputParam ComputerName `
         -MaxThreads 5
 
 Remove-Item -Path $tempFileName
