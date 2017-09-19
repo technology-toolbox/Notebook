@@ -3,7 +3,11 @@
 Wednesday, July 5, 2017
 8:21 AM
 
-```PowerShell
+```Console
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
+```
+
+```Console
 cls
 ```
 
@@ -48,7 +52,7 @@ Copy-Item `
 ```PowerShell
 Get-SPTrustedRootAuthority |
     where { $_.Name -ne 'local' } |
-    ForEach-Object { Remove-SPTrustedRootAuthority -Identity $_.Name -Confirm:$false }
+    foreach { Remove-SPTrustedRootAuthority -Identity $_.Name -Confirm:$false }
 ```
 
 ---
@@ -62,12 +66,12 @@ cls
 #### # Copy SecuritasConnect build from TFS drop location
 
 ```PowerShell
-$build = "4.0.681.1"
+$build = "4.0.697.0"
 
-$sourcePath = "\\TT-FS01\Builds\Securitas\ClientPortal\$build"
-$destPath = "\\EXT-FOOBAR8\Builds\ClientPortal\$build"
+$source = "\\TT-FS01\Builds\Securitas\ClientPortal\$build"
+$destination = "\\EXT-FOOBAR8\Builds\ClientPortal\$build"
 
-robocopy $sourcePath $destPath /E
+robocopy $source $destination /E
 ```
 
 ---
@@ -79,7 +83,7 @@ cls
 #### # Rebuild web application
 
 ```PowerShell
-$build = "4.0.681.1"
+$build = "4.0.697.0"
 
 $peoplePickerCredentials = @(
     (Get-Credential "EXTRANET\s-web-client-dev"),
@@ -155,13 +159,13 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal.bak"
+$backupFile = "SecuritasPortal_backup_2017_09_03_000029_3502401.bak"
 
-$sourcePath = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destPath = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL" `
-    + "\Backup\Full"
+$source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
+$destination = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
+    + "\MSSQL\Backup\Full"
 
-robocopy $sourcePath $destPath $backupFile
+robocopy $source $destination $backupFile
 ```
 
 ---
@@ -179,7 +183,7 @@ iisreset /stop
 #### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal.bak"
+$backupFile = "SecuritasPortal_backup_2017_09_03_000029_3502401.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -194,7 +198,7 @@ RESTORE DATABASE SecuritasPortal
 GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose
 
 Set-Location C:
 ```
@@ -285,7 +289,7 @@ GO
 "@
 
 $employeePortalAccounts |
-    ForEach-Object {
+    foreach {
         $employeePortalAccount = $_
 
         $sqlcmd += [System.Environment]::NewLine
@@ -338,7 +342,7 @@ GO
 INSERT INTO Customer.BranchManagerAssociatedUsers
 SELECT 'TECHTOOLBOX\smasters', AssociatedUserName
 FROM Customer.BranchManagerAssociatedUsers
-WHERE BranchManagerUserName = 'PNKUS\jjameson'
+WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
 "@
 
 Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
@@ -382,19 +386,22 @@ cls
 #### # Copy database backups from Production
 
 ```PowerShell
-$backupFile1 = "WSS_Content_SecuritasPortal_backup_2017_07_02_000024_5233019.bak"
-$backupFile2 = "WSS_Content_SecuritasPortal2_backup_2017_07_02_000024_5389272.bak"
+$backupFile1 =
+    "WSS_Content_SecuritasPortal_backup_2017_09_03_000029_3346241.bak"
 
-$sourcePath = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destPath = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL" `
-    + "\Backup\Full"
+$backupFile2 =
+    "WSS_Content_SecuritasPortal2_backup_2017_09_03_000029_3502401.bak"
 
-robocopy $sourcePath $destPath $backupFile1 $backupFile2
+$source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
+$destination = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
+    + "\MSSQL\Backup\Full"
+
+robocopy $source $destination $backupFile1 $backupFile2
 ```
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 6 minutes.
+> Expect the previous operation to complete in approximately 8-1/2 minutes.
 
 ---
 
@@ -420,8 +427,11 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
 ##### # Restore database backups
 
 ```PowerShell
-$backupFile1 = "WSS_Content_SecuritasPortal_backup_2017_07_02_000024_5233019.bak"
-$backupFile2 = "WSS_Content_SecuritasPortal2_backup_2017_07_02_000024_5389272.bak"
+$backupFile1 =
+    "WSS_Content_SecuritasPortal_backup_2017_09_03_000029_3346241.bak"
+
+$backupFile2 =
+    "WSS_Content_SecuritasPortal2_backup_2017_09_03_000029_3502401.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -447,7 +457,7 @@ RESTORE DATABASE WSS_Content_SecuritasPortal2
 GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose
 
 Set-Location C:
 
@@ -457,10 +467,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 16 minutes.\
-> RESTORE DATABASE successfully processed 3809341 pages in 183.640 seconds (162.058 MB/sec).\
+> Expect the previous operation to complete in approximately 17 minutes.\
+> RESTORE DATABASE successfully processed 3809341 pages in 198.082 seconds (150.243 MB/sec).\
 > ...\
-> RESTORE DATABASE successfully processed 3738176 pages in 182.338 seconds (160.166 MB/sec).
+> RESTORE DATABASE successfully processed 3738176 pages in 194.225 seconds (150.364 MB/sec).
 
 ```PowerShell
 cls
@@ -491,7 +501,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 cls
 ```
 
-### # Configure web application policy for SharePoint administrators group
+### # Configure web application policy for SharePoint administrators
 
 ```PowerShell
 [Uri] $clientPortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
@@ -528,133 +538,53 @@ $webApp.Update()
 ```PowerShell
 Push-Location C:\Shares\Builds\ClientPortal\$build\DeploymentFiles\Scripts
 
-Import-Csv "C:\NotBackedUp\Temp\AppSettings-UAT_2017-06-06.csv" |
-    ForEach-Object {
+Import-Csv C:\NotBackedUp\Temp\AppSettings-UAT_2017-06-06.csv |
+    foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
 
 Pop-Location
 ```
 
-### # Add Branch Managers domain group to Post Orders template sites
+### # DEV - Add Branch Managers domain group to Post Orders template sites
 
 ```PowerShell
 Enable-SharePointCmdlets
 
-@("$env:SECURITAS_CLIENT_PORTAL_URL/Template-Sites/Post-Orders-en-US",
-    "$env:SECURITAS_CLIENT_PORTAL_URL/Template-Sites/Post-Orders-en-CA",
-    "$env:SECURITAS_CLIENT_PORTAL_URL/Template-Sites/Post-Orders-fr-CA") |
-    ForEach-Object {
-        $siteUrl = $_
+$templateSites = @(
+    "/Template-Sites/Post-Orders-en-US",
+    "/Template-Sites/Post-Orders-en-CA",
+    "/Template-Sites/Post-Orders-fr-CA")
+
+$branchManagersClaim = New-SPClaimsPrincipal -Identity "Branch Managers" `
+    -IdentityType WindowsSecurityGroupName
+
+$templateSites |
+    foreach {
+        $siteUrl = $env:SECURITAS_CLIENT_PORTAL_URL + $_
 
         $site = Get-SPSite $siteUrl
 
         $group = $site.RootWeb.AssociatedVisitorGroup
 
-        $claim = New-SPClaimsPrincipal -Identity "Branch Managers" `
-            -IdentityType WindowsSecurityGroupName
-
-        $branchManagersUser = $site.RootWeb.EnsureUser($claim.ToEncodedString())
-        $group.AddUser($branchManagersUser)
+        $user = $site.RootWeb.EnsureUser($branchManagersClaim.ToEncodedString())
+        $group.AddUser($user)
         $site.Dispose()
     }
 ```
-
-### # Replace site collection administrators
-
----
-
-**C:\\NotBackedUp\\Temp\\Replace Site Collection Administrators.ps1**
-
-```PowerShell
-param(
-    [parameter(Mandatory = $true, ValueFromPipeline = $true)]
-    [String] $Url,
-    [String] $AdminUserOrGroup = "EXTRANET\SharePoint Admins (DEV)"
-)
-
-begin
-{
-    Set-StrictMode -Version Latest
-    $ErrorActionPreference = "Stop"
-
-    If ((Get-PSSnapin Microsoft.SharePoint.PowerShell `
-        -ErrorAction SilentlyContinue) -eq $null)
-    {
-        Write-Debug "Adding snapin (Microsoft.SharePoint.PowerShell)..."
-
-        $ver = $host | select version
-
-        #If ($ver.Version.Major -gt 1)
-        #{
-        #    $Host.Runspace.ThreadOptions = "ReuseThread"
-        #}
-
-        Add-PSSnapin Microsoft.SharePoint.PowerShell
-    }
-
-    Function ReplaceSiteCollectionAdministrators(
-        $site,
-        $newAdminUserOrGroup)
-    {
-        Write-Verbose `
-            "Replacing site collection administrators on site ($($site.Url))..."
-
-        For ($i = 0; $i -lt $site.RootWeb.SiteAdministrators.Count; $i++)
-        {
-            $siteAdmin = $site.RootWeb.SiteAdministrators[$i]
-
-            Write-Debug "siteAdmin: $($siteAdmin.LoginName)"
-
-            If ($siteAdmin.DisplayName -eq "SEC\SharePoint Admins")
-            {
-                Write-Verbose "Removing administrator ($($siteAdmin.DisplayName))..."
-                $site.RootWeb.SiteAdministrators.Remove($i)
-                $i--
-            }
-        }
-
-        Write-Debug `
-            "Adding SharePoint Admins on site ($($site.Url))..."
-
-        $user = $site.RootWeb.EnsureUser($newAdminUserOrGroup)
-        $user.IsSiteAdmin = $true
-        $user.Update()
-
-        $output = New-Object PSObject
-
-        $output | Add-Member NoteProperty -Name "Url" `
-            -Value $site.Url
-
-        $output | Add-Member NoteProperty -Name "Admin" `
-            -Value $newAdminUserOrGroup
-
-        $output
-    }
-}
-
-process
-{
-    $site = Get-SPSite -Identity $Url
-
-    Try
-    {
-        Write-Verbose "Processing site ($($site.Url))..."
-
-        ReplaceSiteCollectionAdministrators $site $AdminUserOrGroup
-    }
-    Finally
-    {
-        $site.Dispose()
-    }
-}
-```
-
----
 
 ```PowerShell
 cls
-Push-Location C:\NotBackedUp\Temp
+```
+
+### # DEV - Replace site collection administrators
+
+```PowerShell
+Push-Location C:\Shares\Builds\ClientPortal\$build\DeploymentFiles\Scripts
+
+$claim = New-SPClaimsPrincipal `
+    -Identity "EXTRANET\SharePoint Admins (DEV)" `
+    -IdentityType WindowsSecurityGroupName
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -668,7 +598,8 @@ Get-SPSite -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL -Limit ALL |
 Import-Csv $tempFileName |
     select -ExpandProperty Url |
     C:\NotBackedUp\Public\Toolbox\PowerShell\Run-CommandMultiThreaded.ps1 `
-        -Command '.\Replace Site Collection Administrators.ps1' `
+        -Command '.\Set-SiteAdministrator.ps1' `
+        -AddParam @{"Claim" = $claim} `
         -SnapIns 'Microsoft.SharePoint.PowerShell'
 
 $stopwatch.Stop()
@@ -679,7 +610,7 @@ Pop-Location
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 29 minutes.
+> Expect the previous operation to complete in approximately 56 minutes.
 
 ```PowerShell
 cls
@@ -713,10 +644,10 @@ cls
 #### # Copy C&C build from TFS drop location
 
 ```PowerShell
-$build = "2.0.122.0"
+$build = "2.0.125.0"
 
 $sourcePath = "\\TT-FS01\Builds\Securitas\CloudPortal\$build"
-$destPath = "\\EXT-FOOBAR8\Builds\CloudPortal\$build"
+$destPath = "\\EXT-FOOBAR2\Builds\CloudPortal\$build"
 
 robocopy $sourcePath $destPath /E
 ```
@@ -730,7 +661,7 @@ cls
 #### # Rebuild web application
 
 ```PowerShell
-$build = "2.0.122.0"
+$build = "2.0.125.0"
 
 $peoplePickerCredentials = @(
     (Get-Credential "EXTRANET\s-web-cloud-dev"),
@@ -801,10 +732,10 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "WSS_Content_CloudPortal_backup_2017_07_23_000027_4306364.bak"
+$backupFile = "WSS_Content_CloudPortal_backup_2017_09_03_000029_3502401.bak"
 
 $sourcePath = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destPath = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL" `
+$destPath = "\\EXT-FOOBAR2\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL" `
     + "\Backup\Full"
 
 robocopy $sourcePath $destPath $backupFile
@@ -812,7 +743,7 @@ robocopy $sourcePath $destPath $backupFile
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 21 minutes.
+> Expect the previous operation to complete in approximately 20 minutes.
 
 ---
 
@@ -834,7 +765,7 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL |
 ##### # Restore database backup
 
 ```PowerShell
-$backupFile = "WSS_Content_CloudPortal_backup_2017_07_23_000027_4306364.bak"
+$backupFile = "WSS_Content_CloudPortal_backup_2017_09_03_000029_3502401.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -863,8 +794,8 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 49 minutes.\
-> RESTORE DATABASE successfully processed 8944387 pages in 2474.862 seconds (28.235 MB/sec).
+> Expect the previous operation to complete in approximately 48 minutes.\
+> RESTORE DATABASE successfully processed 8944387 pages in 2361.866 seconds (29.585 MB/sec).
 
 ```PowerShell
 cls
@@ -885,7 +816,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 10 seconds.
+> Expect the previous operation to complete in approximately 4 seconds.
 
 ```PowerShell
 cls

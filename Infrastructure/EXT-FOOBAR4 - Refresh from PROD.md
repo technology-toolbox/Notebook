@@ -18,12 +18,12 @@ cls
 ```PowerShell
 $backupFile = "SecuritasPortal.bak"
 
-$sourcePath = "\\TT-FS01\Archive\Clients\Securitas\Backups"
+$source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
 
-$destPath = "\\EXT-FOOBAR4.extranet.technologytoolbox.com\Z$" `
+$destination = "\\EXT-FOOBAR4.extranet.technologytoolbox.com\Z$" `
     + "\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
 
-robocopy $sourcePath $destPath $backupFile
+robocopy $source $destination $backupFile
 ```
 
 ---
@@ -198,9 +198,9 @@ USE [SecuritasPortal]
 GO
 
 INSERT INTO Customer.BranchManagerAssociatedUsers
-SELECT 'TECHTOOLBOX\smasters', AssociatedUserName
+SELECT 'smasters@technologytoolbox.com', AssociatedUserName
 FROM Customer.BranchManagerAssociatedUsers
-WHERE BranchManagerUserName = 'PNKUS\jjameson'
+WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
 "@
 
 Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
@@ -216,17 +216,17 @@ Set-Location C:
 
 #### Configure TrackTik credentials for Branch Manager
 
-[http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 Branch Manager: **TECHTOOLBOX\\smasters**\
 TrackTik username:** opanduro2m**
 
 #### HACK: Update TrackTik password for Angela.Parks
 
-[http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 #### HACK: Update TrackTik password for bbarthelemy-demo
 
-[http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ---
