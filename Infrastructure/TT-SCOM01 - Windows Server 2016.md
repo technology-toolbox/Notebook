@@ -2178,4 +2178,22 @@ Set-DNSClientServerAddress `
 ipconfig /registerdns
 ```
 
+## Enter product key for System Center Operations Manager
+
+**To upgrade from the evaluation version of Operations Manager to a licensed version:**
+
+1. On a management server, click **Start**, click **All Programs**, click **Microsoft System Center 2012**, click **Operations Manager**, and then run **Operations Manager Command Shell** as administrator.
+2. In the **Operations Manager Command Shell**, type the following command:
+3. Restart the System Center Data Access Service. You can use the Microsoft Management Console to restart services.
+4. Restart the System Center Data Access Service on all management servers in the management group.
+
+```PowerShell
+    Set-SCOMLicense {license key}
+```
+
+### Reference
+
+**How to Upgrade from the Evaluation Version of Operations Manager**\
+From <[https://technet.microsoft.com/en-us/library/hh966734(v=sc.12).aspx](https://technet.microsoft.com/en-us/library/hh966734(v=sc.12).aspx)>
+
 **TODO:**
