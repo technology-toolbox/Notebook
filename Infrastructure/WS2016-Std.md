@@ -20,7 +20,7 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02B"
+$vmHost = "TT-HV02A"
 $vmName = "WS2016-Std"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
@@ -33,15 +33,13 @@ New-VM `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
-    -MemoryStartupBytes 2GB `
+    -MemoryStartupBytes 4GB `
     -SwitchName "Embedded Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
-    -ProcessorCount 2 `
-    -DynamicMemory `
-    -MemoryMaximumBytes 4GB
+    -ProcessorCount 2
 
 Set-VMDvdDrive `
     -ComputerName $vmHost `
@@ -66,7 +64,7 @@ cls
 ### # Remove disk from virtual CD/DVD drive
 
 ```PowerShell
-$vmHost = "TT-HV02B"
+$vmHost = "TT-HV02A"
 $vmName = "WS2016-Std"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
@@ -100,7 +98,7 @@ net use $source /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```Console
-robocopy $source $destination  /E /XD "Microsoft SDKs"
+robocopy $source $destination /E /XD "Microsoft SDKs"
 ```
 
 ### # Set MaxPatchCacheSize to 0 (recommended)
@@ -124,6 +122,10 @@ sconfig
 > **Note**
 >
 > When prompted to restart the computer to complete Windows Updates, click **Yes**.
+
+> **Important**
+>
+> Repeat the previous steps until there are no more updates to install.
 
 ```PowerShell
 cls
@@ -206,11 +208,7 @@ Start-VM -ComputerName $vmHost -VMName $vmName
 
 ## Create SysPrep VHD
 
-```Console
-PowerShell
-```
-
-```Console
+```PowerShell
 cls
 ```
 
