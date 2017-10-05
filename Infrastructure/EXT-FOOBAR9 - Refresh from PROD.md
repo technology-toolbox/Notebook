@@ -66,11 +66,12 @@ cls
 ### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal.bak"
+$backupFile = "SecuritasPortal_backup_2017_10_01_000021_4616418.bak"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destination = "\\EXT-FOOBAR9\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL" `
-    + "\Backup\Full"
+
+$destination = "\\EXT-FOOBAR9.extranet.technologytoolbox.com\Z$" `
+    + "\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
 
 robocopy $source $destination $backupFile
 ```
@@ -84,7 +85,7 @@ cls
 ### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal.bak"
+$backupFile = "SecuritasPortal_backup_2017_10_01_000021_4616418.bak"
 
 iisreset /stop
 

@@ -16,7 +16,7 @@ cls
 ### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal.bak"
+$backupFile = "SecuritasPortal_backup_2017_10_01_000021_4616418.bak"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
 
@@ -41,7 +41,7 @@ iisreset /stop
 ### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal.bak"
+$backupFile = "SecuritasPortal_backup_2017_10_01_000021_4616418.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -190,6 +190,21 @@ Set-Location C:
 iisreset /start
 ```
 
+### # Issue - Owner is not set on database after restore (e.g. cannot create database diagrams)
+
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+EXEC dbo.sp_changedbowner @loginame = N'sa', @map = false
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
 ### # Associate users to TECHTOOLBOX\\smasters
 
 ```PowerShell
@@ -218,7 +233,7 @@ Set-Location C:
 
 [https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
-Branch Manager: **TECHTOOLBOX\\smasters**\
+Branch Manager: **smasters@technologytoolbox.com**\
 TrackTik username:** opanduro2m**
 
 #### HACK: Update TrackTik password for Angela.Parks
