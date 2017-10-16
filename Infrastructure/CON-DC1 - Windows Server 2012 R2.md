@@ -338,3 +338,84 @@ Import-Csv "Fake Users.csv" |
             -PasswordNeverExpires:$true
     }
 ```
+
+```PowerShell
+cls
+```
+
+## # Configure Active Directory organizational units
+
+```PowerShell
+New-ADOrganizationalUnit -Name IT -Path "DC=corp,DC=contoso,DC=com"
+New-ADOrganizationalUnit `
+    -Name "Admin Accounts" `
+    -Path "OU=IT,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit -Name Groups -Path "OU=IT,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit -Name Resources -Path "OU=IT,DC=corp,DC=contoso,DC=com"
+New-ADOrganizationalUnit `
+    -Name Laptops `
+    -Path "OU=Resources,OU=IT,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name Servers `
+    -Path "OU=Resources,OU=IT,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name Workstations `
+    -Path "OU=Resources,OU=IT,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name "Service Accounts" `
+    -Path "OU=IT,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name "Setup Accounts" `
+    -Path "OU=IT,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit -Name Users -Path "OU=IT,DC=corp,DC=contoso,DC=com"
+```
+
+```PowerShell
+cls
+```
+
+## # Configure Windows Update
+
+### # Create security groups for Windows Update
+
+```PowerShell
+New-ADGroup `
+```
+
+    -Name "Windows Update - Slot 17" `\
+    -GroupCategory Security `\
+    -GroupScope Global `\
+    -Path "OU=Groups,OU=IT,DC=corp,DC=contoso,DC=com"
+
+```PowerShell
+New-ADGroup `
+```
+
+    -Name "Windows Update - Slot 21" `\
+    -GroupCategory Security `\
+    -GroupScope Global `\
+    -Path "OU=Groups,OU=IT,DC=corp,DC=contoso,DC=com"
+
+```PowerShell
+New-ADGroup `
+```
+
+    -Name "Windows Update - Slot 22" `\
+    -GroupCategory Security `\
+    -GroupScope Global `\
+    -Path "OU=Groups,OU=IT,DC=corp,DC=contoso,DC=com"
+
+### # Add computers to security groups for Windows Update
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 17" -Members "CON-DC1$"
+Add-ADGroupMember -Identity "Windows Update - Slot 21" -Members "CON-DC2$"
+Add-ADGroupMember -Identity "Windows Update - Slot 22" -Members "CON-ADFS1$"
+```

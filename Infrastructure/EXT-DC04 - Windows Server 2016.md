@@ -724,3 +724,195 @@ Set-DNSClientServerAddress `
     -InterfaceAlias $interfaceAlias `
     -ServerAddresses 10.1.20.104, 127.0.0.1
 ```
+
+## Configure Windows Update schedule
+
+| Group Policy Name               | Scheduled Install Time | Security Filtering (Domain Group) |
+| ------------------------------- | ---------------------- | --------------------------------- |
+| Windows Update Policy - Slot 0  | 00:00                  | Windows Update - Slot 0           |
+| Windows Update Policy - Slot 1  | 01:00                  | Windows Update - Slot 1           |
+| Windows Update Policy - Slot 2  | 02:00                  | Windows Update - Slot 2           |
+| Windows Update Policy - Slot 3  | 03:00                  | Windows Update - Slot 3           |
+| Windows Update Policy - Slot 4  | 04:00                  | Windows Update - Slot 4           |
+| Windows Update Policy - Slot 7  | 07:00                  | Windows Update - Slot 7           |
+| Windows Update Policy - Slot 9  | 09:00                  | Windows Update - Slot 9           |
+| Windows Update Policy - Slot 20 | 20:00                  | Windows Update - Slot 20          |
+
+| Environment | Host     | Is Highly Available | Manual Update | Name             | Slot |
+| ----------- | -------- | ------------------- | ------------- | ---------------- | ---- |
+| Production  | TT-HV02C | FALSE               | TRUE          | EXT-ADFS01A      | 0    |
+| Production  | TT-HV02A | FALSE               | FALSE         | EXT-ADFS02A      | 4    |
+| Production  | TT-HV02B | FALSE               | FALSE         | EXT-ADFS02B      | 7    |
+| Production  | TT-HV02C | FALSE               | FALSE         | EXT-APP01A       | 3    |
+| Production  | TT-HV02C | FALSE               | FALSE         | EXT-APP02A       | 1    |
+| Production  | TT-HV02A | TRUE                | FALSE         | EXT-DC04         | 1    |
+| Production  | TT-HV02B | TRUE                | FALSE         | EXT-DC05         | 3    |
+| Development | TT-HV02B | FALSE               | TRUE          | EXT-FOOBAR       | 0    |
+| Development | TT-HV02B | FALSE               | FALSE         | EXT-FOOBAR2      | 20   |
+| Development | TT-HV02C | FALSE               | TRUE          | EXT-FOOBAR3      | 1    |
+| Development | TT-HV02C | FALSE               | TRUE          | EXT-FOOBAR7      | 2    |
+| Development | TT-HV02A | FALSE               | FALSE         | EXT-FOOBAR8      | 20   |
+| Production  | TT-HV02A | FALSE               | FALSE         | EXT-SQL01A       | 2    |
+| Production  | TT-HV02B | FALSE               | FALSE         | EXT-SQL01B       | 9    |
+| Production  | TT-HV02C | TRUE                | FALSE         | EXT-SQL02        | 3    |
+| Test        | TT-HV02A | FALSE               | TRUE          | EXT-SQL2014-TEST |      |
+| Production  | TT-HV02B | TRUE                | FALSE         | EXT-WAC02A       | 0    |
+| Development | TT-HV02C | FALSE               | TRUE          | EXT-WAP01A       | 3    |
+| Production  | TT-HV02A | FALSE               | FALSE         | EXT-WAP02A       | 3    |
+| Production  | TT-HV02B | FALSE               | FALSE         | EXT-WAP02B       | 1    |
+| Production  | TT-HV02A | FALSE               | FALSE         | EXT-WEB01A       | 0    |
+| Production  | TT-HV02B | FALSE               | FALSE         | EXT-WEB01B       | 2    |
+| Production  | TT-HV02A | FALSE               | FALSE         | EXT-WEB02A       | 0    |
+| Production  | TT-HV02B | FALSE               | FALSE         | EXT-WEB02B       | 3    |
+
+### # Create security groups for Windows Update schedule
+
+```PowerShell
+New-ADGroup `
+    -Name "Windows Update - Slot 0" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=extranet,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 1" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=extranet,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 2" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=extranet,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 3" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=extranet,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 4" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=extranet,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 7" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=extranet,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 9" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=extranet,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 20" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=extranet,DC=technologytoolbox,DC=com"
+```
+
+```PowerShell
+cls
+```
+
+### # Add computers to security groups for Windows Update schedule
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 0" -Members "EXT-ADFS01A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 0" -Members "EXT-FOOBAR$"
+Add-ADGroupMember -Identity "Windows Update - Slot 0" -Members "EXT-WAC02A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 0" -Members "EXT-WEB01A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 0" -Members "EXT-WEB02A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 1" -Members "EXT-APP02A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 1" -Members "EXT-DC04$"
+Add-ADGroupMember -Identity "Windows Update - Slot 1" -Members "EXT-FOOBAR3$"
+Add-ADGroupMember -Identity "Windows Update - Slot 1" -Members "EXT-WAP02B$"
+Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "EXT-FOOBAR7$"
+Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "EXT-SQL01A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "EXT-WEB01B$"
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "EXT-APP01A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "EXT-DC05$"
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "EXT-SQL02$"
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "EXT-WAP01A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "EXT-WAP02A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "EXT-WEB02B$"
+Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "EXT-ADFS02A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 7" -Members "EXT-ADFS02B$"
+Add-ADGroupMember -Identity "Windows Update - Slot 9" -Members "EXT-SQL01B$"
+Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members "EXT-FOOBAR2$"
+Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members "EXT-FOOBAR8$"
+```
+
+### Configure group policy objects for Windows Update schedule
+
+#### Create starter GPO
+
+Name: Windows Update Policy\
+Settings:
+
+- Computer Configuration
+  - Policies
+    - Administrative Templates
+      - Windows Components/Windows Update
+        - Configure automatic updating: 4 - Auto download and schedule the install
+        - Install during automatic maintenance: Disabled
+        - Scheduled install day: 0 - Every day
+        - Scheduled install time: 00:00
+
+#### Create GPO - "Default Windows Update Policy"
+
+Name: Default Windows Update Policy\
+Settings:
+
+- Computer Configuration
+  - Policies
+    - Administrative Templates
+      - Windows Components/Windows Update
+        - Specify intranet Microsoft update service location
+          - Set the intranet update service for detecting updates: [http://colossus.corp.technologytoolbox.com:8530](http://colossus.corp.technologytoolbox.com:8530)
+          - Set the intranet statistics server: [http://colossus.corp.technologytoolbox.com:8530](http://colossus.corp.technologytoolbox.com:8530)
+
+#### Create group policies for Windows Update schedule
+
+Name: Windows Update Policy - Slot 0\
+Settings:
+
+- Computer Configuration
+  - Policies
+    - Administrative Templates
+      - Windows Components/Windows Update
+        - Configure automatic updating: 4 - Auto download and schedule the install
+        - Install during automatic maintenance: Disabled
+        - Scheduled install day: 0 - Every day
+        - Scheduled install time: 00:00
+
+Security Filtering:
+
+- Name: Windows Update - Slot 0
+
+```PowerShell
+cls
+```
+
+### # Export Windows Update configuration
+
+```PowerShell
+$scriptPath = "C:\NotBackedUp\Public\Toolbox\PowerShell\Get-WindowsUpdateSettings.ps1"
+
+$computers = Get-ADComputer -Filter * |
+    where { $_.Name -notin
+        @('EXT-SP2013-DEV',
+        'EXT-SQL01',
+        'EXT-SQL01-FC') } |
+    select -ExpandProperty Name
+
+$computers |
+    foreach { Invoke-Command -ComputerName $_ -FilePath $scriptPath } |
+    Export-Csv tmp.csv
+```

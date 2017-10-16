@@ -427,3 +427,154 @@ From <[https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx](https
 
 **Restricting Active Directory RPC traffic to a specific port**\
 From <[https://support.microsoft.com/en-us/help/224196/restricting-active-directory-rpc-traffic-to-a-specific-port](https://support.microsoft.com/en-us/help/224196/restricting-active-directory-rpc-traffic-to-a-specific-port)
+
+```PowerShell
+cls
+```
+
+## # Configure Active Directory organizational units
+
+```PowerShell
+New-ADOrganizationalUnit -Name IT -Path "DC=corp,DC=fabrikam,DC=com"
+New-ADOrganizationalUnit `
+    -Name "Admin Accounts" `
+    -Path "OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADOrganizationalUnit -Name Groups -Path "OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADOrganizationalUnit -Name Resources -Path "OU=IT,DC=corp,DC=fabrikam,DC=com"
+New-ADOrganizationalUnit `
+    -Name Laptops `
+    -Path "OU=Resources,OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name Servers `
+    -Path "OU=Resources,OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name Workstations `
+    -Path "OU=Resources,OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name "Service Accounts" `
+    -Path "OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name "Setup Accounts" `
+    -Path "OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADOrganizationalUnit -Name Users -Path "OU=IT,DC=corp,DC=fabrikam,DC=com"
+```
+
+## Configure Windows Update schedule
+
+| Group Policy Name               | Scheduled Install Time | Security Filtering (Domain Group) |
+| ------------------------------- | ---------------------- | --------------------------------- |
+| Windows Update Policy - Slot 1  | 01:00                  | Windows Update - Slot 1           |
+| Windows Update Policy - Slot 2  | 02:00                  | Windows Update - Slot 2           |
+| Windows Update Policy - Slot 18 | 18:00                  | Windows Update - Slot 18          |
+| Windows Update Policy - Slot 19 | 19:00                  | Windows Update - Slot 19          |
+| Windows Update Policy - Slot 20 | 20:00                  | Windows Update - Slot 20          |
+
+| Environment | Host     | Is Highly Available | Manual Update | Name        | Slot |
+| ----------- | -------- | ------------------- | ------------- | ----------- | ---- |
+| Production  | TT-HV02C | FALSE               | FALSE         | FAB-ADFS02  | 2    |
+| Production  | TT-HV02A | TRUE                | FALSE         | FAB-DC01    | 19   |
+| Production  | TT-HV02B | TRUE                | FALSE         | FAB-DC02    | 18   |
+| Development | TT-HV02B | FALSE               | TRUE          | FAB-FOOBAR4 | 1    |
+| Production  | TT-HV02A | TRUE                | FALSE         | FAB-WEB01   | 20   |
+
+### # Create security groups for Windows Update schedule
+
+```PowerShell
+New-ADGroup `
+    -Name "Windows Update - Slot 1" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 2" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 18" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 19" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=fabrikam,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 20" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=fabrikam,DC=com"
+```
+
+```PowerShell
+cls
+```
+
+### # Add computers to security groups for Windows Update schedule
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 1" -Members "FAB-FOOBAR4$"
+Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "FAB-ADFS02$"
+Add-ADGroupMember -Identity "Windows Update - Slot 18" -Members "FAB-DC02$"
+Add-ADGroupMember -Identity "Windows Update - Slot 19" -Members "FAB-DC01$"
+Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members "FAB-WEB01$"
+```
+
+### Configure group policy objects for Windows Update schedule
+
+#### Create starter GPO
+
+Name: Windows Update Policy\
+Settings:
+
+- Computer Configuration
+  - Policies
+    - Administrative Templates
+      - Windows Components/Windows Update
+        - Configure automatic updating: 4 - Auto download and schedule the install
+        - Install during automatic maintenance: Disabled
+        - Scheduled install day: 0 - Every day
+        - Scheduled install time: 00:00
+
+#### Create GPO - "Default Windows Update Policy"
+
+Name: Default Windows Update Policy\
+Settings:
+
+- Computer Configuration
+  - Policies
+    - Administrative Templates
+      - Windows Components/Windows Update
+        - Specify intranet Microsoft update service location
+          - Set the intranet update service for detecting updates: [http://colossus.corp.technologytoolbox.com:8530](http://colossus.corp.technologytoolbox.com:8530)
+          - Set the intranet statistics server: [http://colossus.corp.technologytoolbox.com:8530](http://colossus.corp.technologytoolbox.com:8530)
+
+#### Create group policies for Windows Update schedule
+
+Name: Windows Update Policy - Slot 0\
+Settings:
+
+- Computer Configuration
+  - Policies
+    - Administrative Templates
+      - Windows Components/Windows Update
+        - Configure automatic updating: 4 - Auto download and schedule the install
+        - Install during automatic maintenance: Disabled
+        - Scheduled install day: 0 - Every day
+        - Scheduled install time: 00:00
+
+Security Filtering:
+
+- Name: Windows Update - Slot 0

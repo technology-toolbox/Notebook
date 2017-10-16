@@ -565,4 +565,255 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 & $installer TT-DPM02.corp.technologytoolbox.com
 ```
 
+## Configure Windows Update schedule
+
+| Group Policy Name               | Scheduled Install Time | Security Filtering (Domain Group) |
+| ------------------------------- | ---------------------- | --------------------------------- |
+| Windows Update Policy - Slot 0  | 00:00                  | Windows Update - Slot 0           |
+| Windows Update Policy - Slot 1  | 01:00                  | Windows Update - Slot 1           |
+| Windows Update Policy - Slot 2  | 02:00                  | Windows Update - Slot 2           |
+| Windows Update Policy - Slot 3  | 03:00                  | Windows Update - Slot 3           |
+| Windows Update Policy - Slot 4  | 04:00                  | Windows Update - Slot 4           |
+| Windows Update Policy - Slot 5  | 05:00                  | Windows Update - Slot 5           |
+| Windows Update Policy - Slot 6  | 06:00                  | Windows Update - Slot 6           |
+| Windows Update Policy - Slot 9  | 09:00                  | Windows Update - Slot 9           |
+| Windows Update Policy - Slot 17 | 17:00                  | Windows Update - Slot 17          |
+| Windows Update Policy - Slot 18 | 18:00                  | Windows Update - Slot 18          |
+| Windows Update Policy - Slot 19 | 19:00                  | Windows Update - Slot 19          |
+| Windows Update Policy - Slot 20 | 20:00                  | Windows Update - Slot 20          |
+| Windows Update Policy - Slot 21 | 21:00                  | Windows Update - Slot 21          |
+| Windows Update Policy - Slot 22 | 22:00                  | Windows Update - Slot 22          |
+
+| Environment | Host     | Is Highly Available | Manual Update | Name            | Slot |
+| ----------- | -------- | ------------------- | ------------- | --------------- | ---- |
+| Production  | TT-HV02C | TRUE                | FALSE         | BANSHEE         | 0    |
+| Production  | TT-HV02C | TRUE                | FALSE         | CIPHER01        | 2    |
+| Production  | TT-HV02A | TRUE                | FALSE         | COLOSSUS        | 17   |
+| Production  | TT-HV02B | TRUE                | FALSE         | CYCLOPS         | 2    |
+| Test        | TT-HV02C | TRUE                | FALSE         | CYCLOPS-TEST    | 20   |
+| Production  | TT-HV02A | TRUE                | FALSE         | DAZZLER         | 1    |
+| Development | TT-HV02B | FALSE               | FALSE         | FOOBAR          | 2    |
+| Production  | TT-HV02A | TRUE                | FALSE         | FOOBAR10        | 21   |
+| Production  | TT-HV02C | FALSE               | FALSE         | FOOBAR11        | 0    |
+| Development | TT-HV02C | TRUE                | FALSE         | FOOBAR7         | 22   |
+| Production  | TT-HV02C | FALSE               | TRUE          | HAVOK           |      |
+| Test        | TT-HV02A | TRUE                | FALSE         | HAVOK-TEST      | 18   |
+| Production  | TT-HV02C | TRUE                | FALSE         | MIMIC           | 4    |
+| Production  | TT-HV02B | TRUE                | FALSE         | MIMIC2          | 4    |
+| Production  | TT-HV02A | FALSE               | FALSE         | POLARIS         | 3    |
+| Test        | TT-HV02B | TRUE                | FALSE         | POLARIS-TEST    | 19   |
+| Production  | TT-HV02A | FALSE               | FALSE         | TT-DC04         | 2    |
+| Production  | TT-HV02B | FALSE               | FALSE         | TT-DC05         | 4    |
+| Production  | TT-HV02C | FALSE               | FALSE         | TT-DPM02        |      |
+| Production  | TT-HV02C | FALSE               | FALSE         | TT-FS01         |      |
+| Production  | TT-HV02B | TRUE                | FALSE         | TT-SCOM01       |      |
+| Production  | TT-HV03  | FALSE               | FALSE         | TT-SOFS01A      | 3    |
+| Production  | TT-HV03  | FALSE               | FALSE         | TT-SOFS01B      | 9    |
+| Production  | TT-HV02A | FALSE               | FALSE         | TT-SQL01A       | 4    |
+| Production  | TT-HV02B | FALSE               | FALSE         | TT-SQL01B       | 0    |
+| Production  | TT-HV02A | FALSE               | FALSE         | TT-VMM01A       | 5    |
+| Production  | TT-HV02B | FALSE               | FALSE         | TT-VMM01B       | 2    |
+| Test        | TT-HV02A | FALSE               | FALSE         | TT-WS2016-TEST1 | 21   |
+| Test        | TT-HV02B | FALSE               | FALSE         | WIN7-TEST1      | 3    |
+| Test        | TT-HV02B | FALSE               | FALSE         | WIN7-TEST2      | 4    |
+| Test        | TT-HV02B | FALSE               | FALSE         | WIN7-TEST3      | 5    |
+| Test        | TT-HV02B | FALSE               | FALSE         | WIN8-TEST1      | 6    |
+
+```PowerShell
+cls
+```
+
+### # Create security groups for Windows Update schedule
+
+```PowerShell
+New-ADGroup `
+    -Name "Windows Update - Slot 0" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 1" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 2" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 3" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 4" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 5" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 6" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 9" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 17" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 18" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 19" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 20" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 21" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name "Windows Update - Slot 22" `
+    -GroupCategory Security `
+    -GroupScope Global `
+    -Path "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+```
+
+```PowerShell
+cls
+```
+
+### # Add computers to security groups for Windows Update schedule
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 0" -Members "BANSHEE$"
+Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "CIPHER01$"
+Add-ADGroupMember -Identity "Windows Update - Slot 17" -Members "COLOSSUS$"
+Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "CYCLOPS$"
+Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members "CYCLOPS-TEST$"
+Add-ADGroupMember -Identity "Windows Update - Slot 1" -Members "DAZZLER$"
+Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "FOOBAR$"
+Add-ADGroupMember -Identity "Windows Update - Slot 21" -Members "FOOBAR10$"
+Add-ADGroupMember -Identity "Windows Update - Slot 0" -Members "FOOBAR11$"
+Add-ADGroupMember -Identity "Windows Update - Slot 22" -Members "FOOBAR7$"
+Add-ADGroupMember -Identity "Windows Update - Slot 18" -Members "HAVOK-TEST$"
+Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "MIMIC$"
+Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "MIMIC2$"
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "POLARIS$"
+Add-ADGroupMember -Identity "Windows Update - Slot 19" -Members "POLARIS-TEST$"
+Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "TT-DC04$"
+Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "TT-DC05$"
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "TT-SOFS01A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 9" -Members "TT-SOFS01B$"
+Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "TT-SQL01A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 0" -Members "TT-SQL01B$"
+Add-ADGroupMember -Identity "Windows Update - Slot 5" -Members "TT-VMM01A$"
+Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "TT-VMM01B$"
+Add-ADGroupMember -Identity "Windows Update - Slot 21" -Members "TT-WS2016-TEST1$"
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "WIN7-TEST1$"
+Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "WIN7-TEST2$"
+Add-ADGroupMember -Identity "Windows Update - Slot 5" -Members "WIN7-TEST3$"
+Add-ADGroupMember -Identity "Windows Update - Slot 6" -Members "WIN8-TEST1$"
+```
+
+### Configure group policy objects for Windows Update schedule
+
+#### Create starter GPO
+
+Name: Windows Update Policy\
+Settings:
+
+- Computer Configuration
+  - Policies
+    - Administrative Templates
+      - Windows Components/Windows Update
+        - Configure automatic updating: 4 - Auto download and schedule the install
+        - Install during automatic maintenance: Disabled
+        - Scheduled install day: 0 - Every day
+        - Scheduled install time: 00:00
+
+#### Create GPO - "Default Windows Update Policy"
+
+Name: Default Windows Update Policy\
+Settings:
+
+- Computer Configuration
+  - Policies
+    - Administrative Templates
+      - Windows Components/Windows Update
+        - Specify intranet Microsoft update service location
+          - Set the intranet update service for detecting updates: [http://colossus:8530](http://colossus:8530)
+          - Set the intranet statistics server: [http://colossus:8530](http://colossus:8530)
+
+#### Create group policies for Windows Update schedule
+
+Name: Windows Update Policy - Slot 0\
+Settings:
+
+- Computer Configuration
+  - Policies
+    - Administrative Templates
+      - Windows Components/Windows Update
+        - Configure automatic updating: 4 - Auto download and schedule the install
+        - Install during automatic maintenance: Disabled
+        - Scheduled install day: 0 - Every day
+        - Scheduled install time: 00:00
+
+Security Filtering:
+
+- Name: Windows Update - Slot 0
+
+```PowerShell
+cls
+```
+
+### # Export Windows Update configuration
+
+```PowerShell
+$scriptPath = "C:\NotBackedUp\Public\Toolbox\PowerShell\Get-WindowsUpdateSettings.ps1"
+
+$computers = Get-ADComputer -Filter * |
+    where { $_.Name -notin
+        @('EXT-SP2013-DEV',
+        'EXT-SQL01',
+        'EXT-SQL01-FC') } |
+    select -ExpandProperty Name
+
+$computers |
+    foreach { Invoke-Command -ComputerName $_ -FilePath $scriptPath } |
+    Export-Csv tmp.csv
+```
+
 **TODO:**
