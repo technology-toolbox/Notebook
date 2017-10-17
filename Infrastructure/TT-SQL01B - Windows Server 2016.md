@@ -874,3 +874,87 @@ Resize-Partition `
     -PartitionNumber $partition.PartitionNumber `
     -Size $size.SizeMax
 ```
+
+## Issue - Not enough free space to install patches (Windows Update)
+
+6.66 GB of free space (after removing **C:\\Windows\\SoftwareDistribution**), but still unable to install **2017-10 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4041691)**.
+
+### Expand C:
+
+---
+
+**FOOBAR10**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV02B"
+$vmName = "TT-SQL01B"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 35GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+#### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
+Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
+
+Resize-Partition : Size Not Supported
+
+Extended information:
+The partition is already the requested size.
+
+Activity ID: {a0136363-f246-47b5-9ca4-2824b3adf236}
+At line:1 char:1
++ Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (StorageWMI:ROOT/Microsoft/.../MSFT_Partition) [Resize-Partition], CimException
+    + FullyQualifiedErrorId : StorageWMI 4097,Resize-Partition
+```
+
+The error is due to the recovery partition:
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/59/D5F36F57939457DC81F72838629E8FEBE2DC3A59.png)
+
+#### # Delete recovery partition
+
+```PowerShell
+Get-Partition -DiskNumber 0 -PartitionNumber 3
+
+
+   DiskPath:
+\\?\ide#diskvirtual_hd______________________________1.1.0___#5&1278c138&0&0.0.0#{53f56307-b6bf-11d0-94f2-00a0c91efb8b}
+
+PartitionNumber  DriveLetter Offset                              Size Type
+---------------  ----------- ------                              ---- ----
+3                            34018951168                       324 MB Unknown
+
+
+Get-Partition -DiskNumber 0 -PartitionNumber 3 | Remove-Partition -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+#### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
+Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
+```
