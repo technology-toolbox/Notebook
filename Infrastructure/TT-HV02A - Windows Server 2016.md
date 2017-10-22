@@ -1208,3 +1208,27 @@ $productionServer = 'TT-HV02A'
 ```
 
 ---
+
+## Issue - Incorrect IPv6 DNS servers
+
+```Text
+PS C:\Users\jjameson-fabric> nslookup
+DNS request timed out.
+    timeout was 2 seconds.
+Default Server:  UnKnown
+Address:  2603:300b:802:8900::103
+```
+
+> **Note**
+>
+> Due to change in network configuration, TT-DC04 and TT-DC05 have addresses of 2603:300b:802:**89e0**::103 and 2603:300b:802:**89e0**::104, respectively.
+
+### Solution
+
+```PowerShell
+Set-DnsClientServerAddress `
+    -InterfaceAlias "vEthernet (Embedded Team Switch)" `
+    -ResetServerAddresses
+
+Restart-Computer
+```
