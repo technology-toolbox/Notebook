@@ -55,6 +55,8 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ### Install Windows Server 2016 Standard ("Server Core")
 
+### Set password for the local Administrator account
+
 ---
 
 **FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
@@ -73,8 +75,6 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 ```
 
 ---
-
-### Set password for the local Administrator account
 
 ```Console
 PowerShell
@@ -118,6 +118,20 @@ cls
 ```
 
 ## # Install latest patches
+
+### # Configure WSUS intranet location
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\WSUS\WSUS - colossus.reg'
+```
+
+> **Note**
+>
+> When prompted to make changes to the registry, click **Yes**.
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\WSUS\Reset WSUS.cmd'
+```
 
 ### # Install latest patches using Windows Update
 
@@ -175,7 +189,7 @@ Copy VM before running SysPrep (to avoid issues with running SysPrep multiple ti
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -234,7 +248,7 @@ C:\Windows\System32\Sysprep\sysprep.exe /generalize /oobe /shutdown
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls

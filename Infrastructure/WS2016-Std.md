@@ -53,6 +53,8 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ### Install Windows Server 2016 Standard ("Desktop Experience")
 
+### Set password for the local Administrator account
+
 ---
 
 **FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
@@ -71,8 +73,6 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 ```
 
 ---
-
-### Set password for the local Administrator account
 
 ```PowerShell
 cls
@@ -112,6 +112,20 @@ cls
 ```
 
 ## # Install latest patches
+
+### # Configure WSUS intranet location
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\WSUS\WSUS - colossus.reg'
+```
+
+> **Note**
+>
+> When prompted to make changes to the registry, click **Yes**.
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\WSUS\Reset WSUS.cmd'
+```
 
 ### # Install latest patches using Windows Update
 
@@ -174,7 +188,7 @@ cls
 ### # Shutdown VM
 
 ```PowerShell
-$vmHost = "TT-HV02B"
+$vmHost = "TT-HV02A"
 $vmName = "WS2016-Std"
 
 Stop-VM -ComputerName $vmHost -VMName $vmName
@@ -229,7 +243,7 @@ cls
 ### # Copy VHD to VM Library
 
 ```PowerShell
-$vmHost = "TT-HV02B"
+$vmHost = "TT-HV02A"
 $vmName = "WS2016-Std"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdFolderPath = "$vmPath\$vmName\Virtual Hard Disks"

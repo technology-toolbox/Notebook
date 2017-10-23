@@ -11,7 +11,7 @@ Thursday, February 2, 2017
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -20,7 +20,7 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02A"
+$vmHost = "TT-HV02B"
 $vmName = "WS2012-R2-Std"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
@@ -50,7 +50,28 @@ Set-VMDvdDrive `
     -VMName $vmName `
     -Path $isoPath
 
-Start-VM -ComputerName $vmHost -Name $vmName
+Set-VMDvdDrive : Failed to add device 'Virtual CD/DVD Disk'.
+User Account does not have permission to open attachment.
+'WS2012-R2-Std' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID 942DF038-D1CC-4723-BE8F-32EA0EEC9010)
+'WS2012-R2-Std': User account does not have permission required to open attachment
+'\\TT-FS01.corp.technologytoolbox.com\Products\Microsoft\Windows Server 2012
+R2\en_windows_server_2012_r2_with_update_x64_dvd_6052708.iso'. Error: 'General access denied error' (0x80070005).
+(Virtual machine ID 942DF038-D1CC-4723-BE8F-32EA0EEC9010)
+At line:1 char:1
++ Set-VMDvdDrive `
++ ~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (:) [Set-VMDvdDrive], VirtualizationException
+    + FullyQualifiedErrorId : AccessDenied,Microsoft.HyperV.PowerShell.Commands.SetVMDvdDrive
+
+$iso = Get-SCISO |
+    where {$_.Name -eq "en_windows_server_2012_r2_with_update_x64_dvd_6052708.iso"}
+
+Get-SCVirtualMachine -Name "WS2012-R2-Std" |
+    Get-SCVirtualDVDDrive |
+    Set-SCVirtualDVDDrive -ISO $iso -Link
+
+#Start-VM -ComputerName $vmHost -Name $vmName
+Start-SCVirtualMachine -VM $vmName
 ```
 
 ---
@@ -59,9 +80,11 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 Product key: **NPD6V-MT6HM-C8F3J-4QFH8-HMGPB**
 
+### Set password for the local Administrator account
+
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -70,15 +93,13 @@ cls
 ### # Remove disk from virtual CD/DVD drive
 
 ```PowerShell
-$vmHost = "TT-HV02C"
+$vmHost = "TT-HV02B"
 $vmName = "WS2012-R2-Std"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 ```
 
 ---
-
-### Set password for the local Administrator account
 
 ```PowerShell
 cls
@@ -118,6 +139,20 @@ cls
 ```
 
 ## # Install latest patches
+
+### # Configure WSUS intranet location
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\WSUS\WSUS - colossus.reg'
+```
+
+> **Note**
+>
+> When prompted to make changes to the registry, click **Yes**.
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\WSUS\Reset WSUS.cmd'
+```
 
 ### # Install latest patches using Windows Update
 
@@ -172,7 +207,7 @@ cls
 ### # Shutdown VM
 
 ```PowerShell
-$vmHost = "TT-HV02C"
+$vmHost = "TT-HV02B"
 $vmName = "WS2012-R2-Std"
 
 Stop-VM -ComputerName $vmHost -VMName $vmName
@@ -231,7 +266,7 @@ cls
 ### # Copy VHD to VM Library
 
 ```PowerShell
-$vmHost = "TT-HV02C"
+$vmHost = "TT-HV02B"
 $vmName = "WS2012-R2-Std"
 $vmPath = "C:\NotBackedUp\VMs"
 $vhdFolderPath = "$vmPath\$vmName\Virtual Hard Disks"
