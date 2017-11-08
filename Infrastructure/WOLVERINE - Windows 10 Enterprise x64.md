@@ -939,7 +939,7 @@ From <[https://github.com/npm/npm/issues/8814](https://github.com/npm/npm/issues
 
 > **Note**
 >
-> As illustrated in the following screenshot, the latest version of NPM (3.10.10) installs the latest version of Bower (1.8.0) when %APPDATA% refers to a network location -- so it appears this problem has been fixed.
+> As illustrated in the following screenshot, the latest version of NPM (3.10.10) successfully installs the latest version of Bower (1.8.0) when %APPDATA% refers to a network location -- so it appears this problem has been fixed.
 >
 > ![(screenshot)](https://assets.technologytoolbox.com/screenshots/50/023FB51E49C5E086909FFCCD50D6AB5E5426CF50.png)
 >
@@ -953,7 +953,7 @@ From <[https://github.com/npm/npm/issues/8814](https://github.com/npm/npm/issues
 > `-- bower@1.8.0
 > ```
 >
-> However, it still seems like a good idea to install global packages to %LOCALAPPDATA% instead of %APPDATA%.\
+> However, it still seems like a good idea to install global packages to %LOCALAPPDATA% instead of %APPDATA%:\
 > **npm on windows, install with -g flag should go into appdata/local rather than current appdata/roaming?**\
 > From <[https://github.com/npm/npm/issues/17325](https://github.com/npm/npm/issues/17325)>
 
@@ -975,40 +975,7 @@ cache=${LOCALAPPDATA}\npm-cache
 
 ---
 
-```Text
-TODO:
-```
-
-#### # Configure Visual Studio version of npm to avoid issues with redirected folders
-
 ```PowerShell
-& "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd" config set -g cache '${LOCALAPPDATA}\npm-cache'
-
-& : The term 'C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\WebTools\External\npm.cmd' is not recognized as the name of a cmdlet, function, script file, or operable program. Checkthe spelling of the name, or if a path was included, verify that the path is correct and try again.At line:1 char:3+ & "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Ex ...+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    + CategoryInfo          : ObjectNotFound: (C:\Program File...xternal\npm.cmd:String) [], CommandNotFoundException    + FullyQualifiedErrorId : CommandNotFoundException
-
-
-notepad "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\etc\npmrc"
-```
-
-##### Issue
-
-The system cannot find the path specified.
-
-**TODO:**
-
-In Notepad, change:
-
-```Text
-    cache = C:\Users\foo\AppData\Local\npm-cache
-```
-
-...to:
-
-```Text
-    cache = ${LOCALAPPDATA}\npm-cache
-```
-
-```Console
 cls
 ```
 
@@ -1027,17 +994,6 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -Folders "$env:ALLUSERSPROFILE\npm" `
     -EnvironmentVariableTarget Machine
 ```
-
-**TODO:**
-
-```PowerShell
-& "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd" config set -g cache "$env:ALLUSERSPROFILE\npm-cache"
-```
-
-#### Reference
-
-**How to use npm with node.exe?**\
-http://stackoverflow.com/a/9366416
 
 ## Install global NPM packages
 
@@ -1118,7 +1074,7 @@ cls
 npm install --global rimraf
 ```
 
-## TODO: # Configure npm locations for TECHTOOLBOX\\jjameson account
+## Configure npm locations for TECHTOOLBOX\\jjameson account
 
 ---
 
@@ -1128,26 +1084,24 @@ npm install --global rimraf
 npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
 
 npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
-
-& "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd" config set cache '${LOCALAPPDATA}\npm-cache'
 ```
 
 ---
 
-## TODO: "Upgrade NPM" version in Visual Studio 2015
+## Configure Visual Studio 2017 to use newer versions of Node.js and NPM
 
 ### Before
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/16ED937A4EC8A4D914E16BDF0D7F6EC115CC2965.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0F/3B5712D6462D49CC17DB1EFE2DDAF657FB52E00F.png)
 
 ### After
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/FD14463E819276232A1137CA4609DAE9E4FDB99F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/58/51CCEAA9A97B80142D704A7789E6919ADBFF7258.png)
 
 ### Reference
 
-**Upgrading NPM in Visual Studio 2015**\
-From <[http://jameschambers.com/2015/09/upgrading-npm-in-visual-studio-2015/](http://jameschambers.com/2015/09/upgrading-npm-in-visual-studio-2015/)>
+**Synchronizing node version with your environment in Visual Studio 2017**\
+From <[https://www.domstamand.com/synchronizing-node-version-with-your-environment-in-visual-studio-2017/](https://www.domstamand.com/synchronizing-node-version-with-your-environment-in-visual-studio-2017/)>
 
 ```PowerShell
 cls
@@ -1362,6 +1316,106 @@ git config --global difftool.diffmerge.cmd  '"C:/NotBackedUp/Public/Toolbox/Diff
 **Git for Windows (MSysGit) or Git Cmd**\
 From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html](https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html)>
 
+```PowerShell
+cls
+```
+
+## # Upgrade Node.js
+
+### # Copy installer from internal file server
+
+```PowerShell
+$installer = "node-v6.11.5-x64.msi"
+
+$source = "\\TT-FS01\Products\node.js"
+$destination = "C:\NotBackedUp\Temp"
+
+robocopy $source $destination $installer
+```
+
+##### # Install new version of Node.js
+
+```PowerShell
+Start-Process `
+    -FilePath "C:\NotBackedUp\Temp\$installer" `
+    -Wait
+```
+
+#### # Change NPM file locations to avoid issues with redirected folders
+
+```PowerShell
+notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
+```
+
+---
+
+**C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
+
+```Text
+;prefix=${APPDATA}\npm
+prefix=${LOCALAPPDATA}\npm
+cache=${LOCALAPPDATA}\npm-cache
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Change npm "global" locations to shared location for all users
+
+```PowerShell
+npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
+
+npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
+```
+
+#### # Clear NPM cache
+
+```PowerShell
+npm cache clean
+```
+
+> **Important**
+>
+> If an error occurs when clearing the NPM cache, try running the command a second time:
+>
+> ```Text
+> PS C:\windows\system32> npm cache clean
+> npm ERR! Windows_NT 6.3.9600
+> npm ERR! argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "cache" "clean"
+> npm ERR! node v6.11.5
+> npm ERR! npm  v3.10.10
+> npm ERR! path C:\ProgramData\npm-cache
+> npm ERR! code EPERM
+> npm ERR! errno -4048
+> npm ERR! syscall rmdir
+>
+> npm ERR! Error: EPERM: operation not permitted, rmdir 'C:\ProgramData\npm-cache'
+> npm ERR!     at Error (native)
+> npm ERR!  { Error: EPERM: operation not permitted, rmdir 'C:\ProgramData\npm-cache'
+> npm ERR!     at Error (native)
+> npm ERR!   errno: -4048,
+> npm ERR!   code: 'EPERM',
+> npm ERR!   syscall: 'rmdir',
+> npm ERR!   path: 'C:\\ProgramData\\npm-cache' }
+> npm ERR!
+> npm ERR! Please try running this command again as root/Administrator.
+>
+> npm ERR! Please include the following file with any support request:
+> npm ERR!     C:\windows\system32\npm-debug.log
+> PS C:\windows\system32>
+> PS C:\windows\system32> npm cache clean
+> PS C:\windows\system32>
+> ```
+
+### # Install new global NPM packages
+
+```PowerShell
+npm install --global @angular/cli@1.4.9
+```
+
 **TODO:**
 
 ## Disk Cleanup
@@ -1379,7 +1433,7 @@ git config --global user.email "jeremy_jameson@live.com"
 git config --global user.name "Jeremy Jameson"
 ```
 
-## TODO: Other stuff that may need to be done
+## Other stuff that may need to be done
 
 ### Install Android SDK (for debugging Chrome on Samsung Galaxy)
 
