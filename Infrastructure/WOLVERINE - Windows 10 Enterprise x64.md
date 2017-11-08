@@ -1107,6 +1107,20 @@ From <[https://www.domstamand.com/synchronizing-node-version-with-your-environme
 cls
 ```
 
+## # Install PowerShell modules
+
+```PowerShell
+Install-PackageProvider NuGet -MinimumVersion '2.8.5.201' -Force
+
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+
+Install-Module -Name 'posh-git'
+```
+
+```PowerShell
+cls
+```
+
 ## # Install Chocolatey
 
 ```PowerShell
