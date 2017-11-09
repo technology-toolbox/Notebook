@@ -416,6 +416,12 @@ net use \\TT-FS01\ipc$ /USER:TECHTOOLBOX\jjameson
 robocopy \\TT-FS01\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 ```
 
+### # Configure cmder shortcut in Windows Explorer ("Cmder Here")
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\cmder\Cmder.exe /REGISTER ALL
+```
+
 ### # Enable PowerShell remoting
 
 ```PowerShell
