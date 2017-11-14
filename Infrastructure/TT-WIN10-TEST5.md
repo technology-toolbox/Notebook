@@ -1,4 +1,4 @@
-﻿# TT-WIN10-TEST3
+﻿# TT-WIN10-TEST5
 
 Sunday, November 12, 2017
 6:20 AM
@@ -21,7 +21,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV02B"
-$vmName = "TT-WIN10-TEST3"
+$vmName = "TT-WIN10-TEST5"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -68,7 +68,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-WIN10-TEST3**.
+  - In the **Computer name** box, type **TT-WIN10-TEST5**.
   - Click **Next**.
 - On the **Applications** step:
   - Select the following applications:
@@ -89,7 +89,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV02B"
-$vmName = "TT-WIN10-TEST3"
+$vmName = "TT-WIN10-TEST5"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 ```
@@ -148,7 +148,7 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "TT-WIN10-TEST3"
+$vmName = "TT-WIN10-TEST5"
 
 $targetPath = ("OU=Workstations,OU=Resources,OU=Quality Assurance" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
@@ -334,7 +334,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV02B"
-$vmName = "TT-WIN10-TEST3"
+$vmName = "TT-WIN10-TEST5"
 
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
