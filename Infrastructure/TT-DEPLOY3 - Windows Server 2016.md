@@ -203,6 +203,7 @@ ping TT-FS01 -f -l 8900
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------------------- | ------------ |
 | 0    | C:           | 32 GB       | 4K                   | OSDisk       |
+| 1    | D:           | 50 GB       | 4K                   | Data01       |
 
 ```PowerShell
 cls
@@ -220,6 +221,50 @@ $volumeId = $volumeId.Trim()
 mountvol $driveLetter /D
 
 mountvol X: $volumeId
+```
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Add disks to virtual machine
+
+```PowerShell
+$vmHost = "TT-HV02B"
+$vmName = "TT-DEPLOY3"
+$vmPath = "E:\NotBackedUp\VMs"
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\" + $vmName + "_Data01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 50GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Initialize disks and format volumes
+
+#### # Format Data01 drive
+
+```PowerShell
+Get-Disk 1 |
+    Initialize-Disk -PartitionStyle MBR -PassThru |
+    New-Partition -UseMaximumSize -DriveLetter D |
+    Format-Volume `
+        -FileSystem NTFS `
+        -NewFileSystemLabel "Data01" `
+        -Confirm:$false
 ```
 
 ---
@@ -371,6 +416,346 @@ robocopy $source $destination /E /XD Applications Backup Boot Captures Logs "Ope
 
 ---
 
+```PowerShell
+cls
+```
+
+### # Install System Center 2012 R2 Configuration Manager Toolkit (for log viewer)
+
+```PowerShell
+& ("\\TT-FS01\Products\Microsoft\System Center 2012 R2" `
+    + "\System Center 2012 R2 Configuration Manager Toolkit\ConfigMgrTools.msi")
+```
+
+## Install and configure Windows Deployment Services
+
+### Reference
+
+**Windows Deployment Services Getting Started Guide for Windows Server 2012**\
+From <[https://technet.microsoft.com/en-us/library/jj648426.aspx](https://technet.microsoft.com/en-us/library/jj648426.aspx)>
+
+```PowerShell
+cls
+```
+
+### # Install Windows Deployment Services
+
+```PowerShell
+Install-WindowsFeature -Name WDS -IncludeManagementTools
+```
+
+### Configure Windows Deployment Services integrated with Active Directory
+
+To configure Windows Deployment Services integrated with Active Directory:
+
+1. Log on to the server as a member of the Domain Administrators group.
+2. Server Manager will start automatically. If it does not automatically start, click **Start**, type **servermanager.exe**, and then click **Server Manager**.
+3. Click **Tools**, and then click **Windows Deployment Services** to launch the Windows Deployment Services MMC-snap (or console).
+4. In the left pane of the Windows Deployment Services MMC snap-in, expand the list of servers.
+5. Right-click the desired server, click **Configure Server**.
+6. On the **Before You Begin** page, click **Next**.
+7. On the **Install Options** page, choose **Integrated with Active Directory**.
+8. On the **Remote Installation Folder Location** page:
+   1. In the **Path** box, type **D:\\RemoteInstall**.
+   2. Click **Next**.
+9. On the **PXE Server Initial Settings** page:
+   1. Select **Respond to all client computers (known and unknown)**.
+   2. Click **Next**. This will complete the
+10. Wait for the configuration of Windows Deployment Services to complete.
+11. On the **Operation Complete** page, clear the **Add images to the server now** checkbox and click **Finish**.
+
+```PowerShell
+cls
+```
+
+### # Add boot images
+
+```PowerShell
+Import-WdsBootImage `
+    -Path "\\TT-FS01\MDT-Build$\Boot\LiteTouchPE_x86.wim" `
+    -NewImageName "MDT Build (x86)" `
+    -NewDescription "Choose this image to create a reference build using MDT" `
+    -NewFileName "MDT-Build-x86-boot.wim"
+
+Import-WdsBootImage `
+    -Path "\\TT-FS01\MDT-Build$\Boot\LiteTouchPE_x64.wim" `
+    -NewImageName "MDT Build (x64)" `
+    -NewDescription "Choose this image to create a reference build using MDT" `
+    -NewFileName "MDT-Build-x64-boot.wim"
+
+Import-WdsBootImage `
+    -Path "\\TT-FS01\MDT-Deploy$\Boot\LiteTouchPE_x86.wim" `
+    -NewImageName "MDT Deploy (x86)" `
+    -NewDescription "Choose this image to deploy a reference build" `
+    -NewFileName "MDT-Deploy-x86-boot.wim"
+```
+
+#### Issue
+
+```PowerShell
+Import-WdsBootImage : Access is denied.
+At line:1 char:1
++ Import-WdsBootImage `
++ ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (MSFT_WdsBootImage:root/cimv2/MSFT_WdsBootImage) [Import-WdsBootImage], Ci
+   mException
+    + FullyQualifiedErrorId : 0x5,Import-WdsBootImage
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/035C7B5933D61C9098E622B937DCB65347ED8221.png)
+
+#### Reference
+
+**WDS : GUI or cmdlet : Access is denied**\
+From <[https://social.technet.microsoft.com/Forums/en-US/f3d9c5ef-f63a-4991-a72d-22850b5c2ec6/wds-gui-or-cmdlet-access-is-denied?forum=winserversetup](https://social.technet.microsoft.com/Forums/en-US/f3d9c5ef-f63a-4991-a72d-22850b5c2ec6/wds-gui-or-cmdlet-access-is-denied?forum=winserversetup)>
+
+#### Workaround
+
+Copy the WIM file locally and then call **Import-WdsBootImage**:
+
+```PowerShell
+mkdir C:\NotBackedUp\Temp
+
+Copy-Item "\\TT-FS01\MDT-Deploy$\Boot\LiteTouchPE_x86.wim" C:\NotBackedUp\Temp
+
+Import-WdsBootImage `
+    -Path "C:\NotBackedUp\Temp\LiteTouchPE_x86.wim" `
+    -NewImageName "MDT Deploy (x86)" `
+    -NewDescription "Choose this image to deploy a reference build" `
+    -NewFileName "MDT-Deploy-x86-boot.wim"
+
+Remove-Item "C:\NotBackedUp\Temp\LiteTouchPE_x86.wim"
+
+Copy-Item "\\TT-FS01\MDT-Deploy$\Boot\LiteTouchPE_x64.wim" C:\NotBackedUp\Temp
+
+Import-WdsBootImage `
+    -Path "C:\NotBackedUp\Temp\LiteTouchPE_x64.wim" `
+    -NewImageName "MDT Deploy (x64)" `
+    -NewDescription "Choose this image to deploy a reference build" `
+    -NewFileName "MDT-Deploy-x64-boot.wim"
+
+Remove-Item "C:\NotBackedUp\Temp\LiteTouchPE_x64.wim"
+```
+
+## Configure WDS to use PXELinux
+
+### Reference
+
+**Booting Alternative Images from WDS using PXELinux**\
+From <[https://www.mikeslab.net/?p=504](https://www.mikeslab.net/?p=504)>
+
+### Download syslinux
+
+[https://www.kernel.org/pub/linux/utils/boot/syslinux/4.xx/syslinux-4.07.zip](https://www.kernel.org/pub/linux/utils/boot/syslinux/4.xx/syslinux-4.07.zip)
+
+### Install PXELinux files
+
+#### Extract files
+
+Extract the following files to C:\\NotBackedUp\\Temp:
+
+- **core/pxelinux.0**
+- **com32/menu/vesamenu.c32**
+- **com32/chain/chain.c32**
+- **memdisk/memdisk**
+
+```PowerShell
+cls
+```
+
+#### # Rename and copy files
+
+```PowerShell
+Push-Location C:\NotBackedUp\Temp
+
+Rename-Item pxelinux.0 pxelinux.com
+
+robocopy . D:\RemoteInstall\Boot\x86 chain.c32 memdisk pxelinux.com vesamenu.c32
+
+Pop-Location
+
+Push-Location D:\RemoteInstall\Boot\x86
+
+Copy-Item .\abortpxe.com .\abortpxe.0
+Copy-Item .\pxeboot.n12 .\pxeboot.0
+
+Pop-Location
+
+Push-Location C:\NotBackedUp\Temp
+
+robocopy . D:\RemoteInstall\Boot\x64 chain.c32 memdisk pxelinux.com vesamenu.c32
+
+Pop-Location
+
+Push-Location D:\RemoteInstall\Boot\x64
+
+Copy-Item .\abortpxe.com .\abortpxe.0
+Copy-Item .\pxeboot.n12 .\pxeboot.0
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure PXELinux
+
+```PowerShell
+mkdir D:\RemoteInstall\Boot\pxelinux.cfg
+
+Push-Location D:\RemoteInstall\Boot\x86
+
+cmd /c mklink /J pxelinux.cfg D:\RemoteInstall\Boot\pxelinux.cfg
+
+Pop-Location
+
+Push-Location D:\RemoteInstall\Boot\x64
+
+cmd /c mklink /J pxelinux.cfg D:\RemoteInstall\Boot\pxelinux.cfg
+
+Pop-Location
+
+New-Item -ItemType File -Path D:\RemoteInstall\Boot\pxelinux.cfg\default
+
+Notepad D:\RemoteInstall\Boot\pxelinux.cfg\default
+```
+
+---
+
+**D:\\RemoteInstall\\Boot\\pxelinux.cfg\\default**
+
+```INI
+DEFAULT      vesamenu.c32
+
+NOESCAPE     0
+ALLOWOPTIONS 0
+
+# Time out and use the default menu option. Defined as tenths of a second.
+TIMEOUT 300
+
+# Prompt the user. Set to '1' to automatically choose the default option. This
+# is really meant for files matched to MAC addresses.
+PROMPT 0
+
+MENU BACKGROUND Technology-Toolbox-Background-640x480.png
+MENU MARGIN 10
+MENU ROWS 16
+MENU TABMSGROW 21
+MENU TIMEOUTROW 25
+MENU COLOR border       37;44    #ff3c78c3 #ffeeeeee none
+MENU COLOR scrollbar    37;44    #40000000 #ff959595 std
+MENU COLOR title        34;47    #ff1e4173 #ffffffff none
+MENU COLOR sel          7;37;40  #ff000000 #ffffff99 none
+MENU COLOR unsel        30;47    #ff4f4f4f #ffffffff none
+MENU COLOR timeout_msg  30;47    #ff3c78c3 #ffffffff none
+MENU COLOR timeout      30;47    #ffbd1c1c #ffffffff none
+MENU TITLE Technology Toolbox PXE Boot
+#---
+LABEL local
+    MENU DEFAULT
+    MENU LABEL Boot from hard disk
+    LOCALBOOT 0
+    Type 0x80
+#---
+LABEL memtest
+MENU LABEL Run Memtest86+
+LINUX /Linux/memtest86+
+#---
+LABEL WDS
+    MENU LABEL Windows Deployment Services
+    KERNEL pxeboot.0
+#---
+LABEL Abort
+    MENU LABEL Abort PXE
+    KERNEL abortpxe.0
+#---
+LABEL hdt
+MENU LABEL Run Hardware Detection Tool
+COM32 pxelinux.cfg/arch/hdt.c32
+
+LABEL partedmagic
+MENU LABEL Boot Parted Magic
+LINUX /images/memdisk
+INITRD /images/pmagic.iso
+APPEND iso raw
+
+LABEL reboot
+MENU LABEL Reboot
+COM32 pxelinux.cfg/arch/reboot.c32
+
+LABEL poweroff
+MENU LABEL Power off
+COMBOOT pxelinux.cfg/arch/poweroff.com
+```
+
+---
+
+```PowerShell
+$imageFile = "Technology-Toolbox-Background-640x480.png"
+$imagePath = "D:\RemoteInstall\Boot\x64\pxelinux.cfg\$imageFile"
+
+Push-Location D:\RemoteInstall\Boot\x86
+
+cmd /c mklink $imageFile $imagePath
+
+Pop-Location
+
+Push-Location D:\RemoteInstall\Boot\x64
+
+cmd /c mklink $imageFile $imagePath
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure WDS to use PXELinux as the boot program
+
+```PowerShell
+WDSUTIL /Set-Server /BootProgram:Boot\x86\pxelinux.com /Architecture:x86
+WDSUTIL /Set-Server /N12BootProgram:Boot\x86\pxelinux.com /Architecture:x86
+WDSUTIL /Set-Server /BootProgram:Boot\x64\pxelinux.com /Architecture:x64
+WDSUTIL /Set-Server /N12BootProgram:Boot\x64\pxelinux.com /Architecture:x64
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure Linux installation images
+
+```PowerShell
+mkdir D:\RemoteInstall\Images\Linux
+
+Push-Location D:\RemoteInstall\Boot\x86
+
+cmd /c mklink /J Linux D:\RemoteInstall\Images\Linux
+
+Pop-Location
+
+Push-Location D:\RemoteInstall\Boot\x64
+
+cmd /c mklink /J Linux D:\RemoteInstall\Images\Linux
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure WDS to use default boot programs
+
+```PowerShell
+WDSUTIL /Set-Server /BootProgram:boot\x86\pxeboot.com /Architecture:x86
+WDSUTIL /Set-Server /N12BootProgram:boot\x86\pxeboot.n12 /Architecture:x86
+WDSUTIL /Set-Server /BootProgram:boot\x64\pxeboot.com /Architecture:x64
+WDSUTIL /Set-Server /N12BootProgram:boot\x64\pxeboot.n12 /Architecture:x64
+```
+
 ## Upgrade to System Center Operations Manager 2016
 
 ### Uninstall SCOM 2012 R2 agent
@@ -417,3 +802,173 @@ slmgr /ipk {product key}
 ```Console
 slmgr /ato
 ```
+
+```Console
+cls
+```
+
+# Build baseline images
+
+---
+
+**TT-HV02A / TT-HV02B / TT-HV02C**
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 7 Ultimate (x86) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 7 Ultimate (x64) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -VhdSize 40GB `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2008 R2 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 8.1 Enterprise (x64) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2012 R2 Standard - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "SharePoint Server 2013 - Development"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -VhdSize 50GB `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows 10 Enterprise (x64) - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -VhdSize 40GB `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2016 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -VhdSize 40GB `
+    -Force
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Update MDT production deployment images
+
+---
+
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
+
+& '.\Update Deployment Images.ps1'
+```
+
+---
+
+## Modify task sequences to fail when errors occur installing patches via Windows Update
+
+### Reference
+
+Bug 4274 - Error installing patches via Windows Update are not reported when building reference images
+
+---
+
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Update files in TFS
+
+##### # Sync files
+
+```PowerShell
+cd C:\NotBackedUp\TechnologyToolbox\Infrastructure
+
+$source = '\\TT-FS01\MDT-Build$'
+$destination = '.\Main\MDT-Build$'
+
+robocopy $source $destination /E /XD Applications Backup Boot Captures Logs "Operating Systems" Servicing Tools
+```
+
+##### Check-in files
+
+---
