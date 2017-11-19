@@ -1076,3 +1076,51 @@ $maxSize = (Get-PartitionSupportedSize -DriveLetter C).SizeMax
 
 Resize-Partition -DriveLetter C -Size $maxSize
 ```
+
+## Expand C: drive to 32 GB
+
+### Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A7/2AA29D5C835DC5D321A03122A10772AAA4F986A7.png)
+
+Screen clipping taken: 11/18/2017 2:21 PM
+
+### Expand primary VHD for virtual machine
+
+---
+
+**FOOBAR10**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmName = "HAVOK"
+$vmHost = "TT-HV02C"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+$vhdPath = "D:\NotBackedUp\VMs\$vmName\$vmName.vhdx"
+
+Resize-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 32GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+#### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
+Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
+```
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/23/116AFC969938D10DCACA70A3EB8FE69BDB023723.png)
+
+Screen clipping taken: 11/18/2017 2:52 PM
