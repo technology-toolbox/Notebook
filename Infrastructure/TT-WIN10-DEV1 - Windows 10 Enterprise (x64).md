@@ -22,27 +22,23 @@ cls
 ```PowerShell
 $vmHost = "TT-HV02A"
 $vmName = "TT-WIN10-DEV1"
-$vmPath = "D:\NotBackedUp\VMs"
+$vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
+    -Generation 2 `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 50GB `
-    -MemoryStartupBytes 4GB `
+    -MemoryStartupBytes 2GB `
     -SwitchName "Embedded Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
     -ProcessorCount 2
-
-Set-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Path C:\NotBackedUp\Products\Microsoft\MDT-Deploy-x64.iso
 
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
@@ -60,6 +56,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
     - **Adobe Reader 8.3.1**
     - **Chrome (64-bit)**
     - **Firefox (64-bit)**
+    - **Thunderbird**
   - Click **Next**.
 
 ---
@@ -70,13 +67,15 @@ Start-VM -ComputerName $vmHost -Name $vmName
 cls
 ```
 
-### # Remove disk from virtual CD/DVD drive
+### # Move computer to different OU
 
 ```PowerShell
-$vmHost = "TT-HV02A"
 $vmName = "TT-WIN10-DEV1"
 
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+$targetPath = ("OU=Workstations,OU=Resources,OU=Development" `
+    + ",DC=corp,DC=technologytoolbox,DC=com")
+
+Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 ```
 
 ---
@@ -117,27 +116,6 @@ $adminUser.SetInfo()
 **Managing Local User Accounts with PowerShell**\
 From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershell.aspx](https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershell.aspx)>
 
----
-
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-### # Move computer to different OU
-
-```PowerShell
-$vmName = "TT-WIN10-DEV1"
-
-$targetPath = ("OU=Workstations,OU=Resources,OU=Development" `
-    + ",DC=corp,DC=technologytoolbox,DC=com")
-
-Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
-```
-
----
-
 ### Login as .\\foo
 
 ### # Copy Toolbox content
@@ -155,14 +133,6 @@ $source = "\\TT-FS01\Public\Toolbox"
 $destination = "C:\NotBackedUp\Public\Toolbox"
 
 robocopy $source $destination /E /XD "Microsoft SDKs"
-```
-
-### # Set MaxPatchCacheSize to 0 (recommended)
-
-```PowerShell
-Set-ExecutionPolicy Bypass -Scope Process -Force
-
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
 ### # Enable PowerShell remoting
@@ -209,57 +179,6 @@ ping TT-FS01 -f -l 8900
 cls
 ```
 
-### # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-## # Install Microsoft Office 2016
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$imagePath = "\\TT-FS01\Products\Microsoft\Office 2016" `
-```
-
-    + "\\en_office_professional_plus_2016_x86_x64_dvd_6962141.iso"
-
-```PowerShell
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$setupPath = "$imageDriveLetter`:\setup.exe"
-
-Push-Location "$imageDriveLetter`:\"
-
-Start-Process `
-    -FilePath $setupPath `
-    -Wait
-
-Pop-Location
-
-Dismount-DiskImage -ImagePath $imagePath
-```
-
-```PowerShell
-cls
-```
-
 ## # Install Visual Studio 2017
 
 ### # Launch Visual Studio 2017 setup
@@ -286,6 +205,12 @@ Select the following workloads:
 - **.NET desktop development**
 - **ASP.NET and web development**
 - **Office/SharePoint development**
+
+> **Note**
+>
+> When prompted, restart the computer to complete the installation.
+
+## Login as .\\foo
 
 ```PowerShell
 cls
@@ -319,7 +244,22 @@ Start-Process `
 
 ## Login as .\\foo
 
-## # Install Team Foundation Server Integration Tools (March 2012 Release)
+## # Install .NET Framework 3.5
+
+```PowerShell
+Enable-WindowsOptionalFeature `
+    -Online `
+    -FeatureName NetFx3 `
+    -All `
+    -LimitAccess `
+    -Source "\\TT-FS01\Products\Microsoft\Windows 10\Sources\SxS"
+```
+
+## Install Team Foundation Server Integration Tools (March 2012 Release)
+
+> **Note**
+>
+> The TFS Integration Tools setup checks if Team Explorer 2008, 2010, or "Dev 11" is installed. Since it does not recognize Team Explorer 2012 (which is actually "Dev 11"), Team Explorer 2010 must be installed.
 
 ### # Add TFS service account to the local Administrators group
 
@@ -367,6 +307,8 @@ $imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
 Start-Process `
     -FilePath "$imageDriveLetter`:\vs_teamExplorer.exe" `
     -Wait
+
+Dismount-DiskImage -ImagePath $imagePath
 ```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/02/DC91550586E4CF6143806056086329E222598802.png)
@@ -380,10 +322,6 @@ UAC -> click **OK**.
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/F0/4AC9DE14AC57036C04C831C1C69235CFFB53DFF0.png)
 
 Click **LAUNCH**.
-
-```PowerShell
-Dismount-DiskImage -ImagePath $imagePath
-```
 
 ### Install Visual Studio 2012 Update 5
 
@@ -487,12 +425,20 @@ System.UnauthorizedAccessException: Access to the path 'C:\\Program Files (x86)\
 
 ### Solution
 
-#### Grant "Modify" permissions to service account used to run TFS Integration
+#### # Grant "Modify" permissions to service account used to run TFS Integration
 
 ```PowerShell
 icacls 'C:\Program Files (x86)\Microsoft Team Foundation Server Integration Tools' `
     /grant TECHTOOLBOX\svc-tfs:`(OI`)`(CI`)`(M`)
 ```
+
+## Add virtual machine to Hyper-V protection group in DPM
+
+## Install updates using Windows Update
+
+> **Note**
+>
+> Repeat until there are no updates available for the computer.
 
 **TODO:**
 
@@ -502,7 +448,9 @@ icacls 'C:\Program Files (x86)\Microsoft Team Foundation Server Integration Tool
 slmgr /ipk {product key}
 ```
 
-**Note:** When notified that the product key was set successfully, click **OK**.
+> **Note**
+>
+> When notified that the product key was set successfully, click **OK**.
 
 ```Console
 slmgr /ato
@@ -512,77 +460,6 @@ slmgr /ato
 
 1. Start Word 2016
 2. Enter product key
-
-## Install updates using Windows Update
-
-**Note:** Repeat until there are no updates available for the computer.
-
-## Examine disk usage
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/B5102804865E764F95035C1DBDC89A3DE69603C5.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/E7259BF109597F294635D72CCBBFF7948F09FED7.png)
-
-## # Clean up the WinSxS folder
-
-### Before
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/B5102804865E764F95035C1DBDC89A3DE69603C5.png)
-
-```Console
-Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
-```
-
-### After
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/E5DD31AAC2432F3B070FA53CC499BF3363308ED9.png)
-
-```PowerShell
-cls
-```
-
-## # Delete C:\\Windows\\SoftwareDistribution folder (3.2 GB)
-
-### # Before
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/E5DD31AAC2432F3B070FA53CC499BF3363308ED9.png)
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-```
-
-### After
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F7/0CCCF21AB8382943FD7123C043143A06DCB9ACF7.png)
-
-```PowerShell
-cls
-```
-
-## # Shutdown VM
-
-```PowerShell
-Stop-Computer
-```
-
-## Checkpoint VM - "Baseline"
-
-Windows 10 Enterprise (x64)\
-Remote Server Administration Tools for Windows 10\
-Hyper-V Management Tools enabled\
-SQL Server 2016 Management Studio\
-System Center 2016 Operations Manager - Operations console\
-System Center 2016 Data Protection Manager Central Console\
-System Center 2016 Virtual Machine Manager console\
-Visual Studio 2017\
-Microsoft Office Professional Plus 2016 (x86)\
-Adobe Reader 8.3.1\
-Google Chrome\
-Mozilla Firefox 50.1.0
-
-## Add virtual machine to Hyper-V protection group in DPM
 
 ## Install dependencies for building SharePoint solutions
 
@@ -604,26 +481,4 @@ robocopy `
 & 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v4\AssemblyFoldersEx - x64.reg'
 
 & 'C:\Program Files\Reference Assemblies\Microsoft\SharePoint v5\AssemblyFoldersEx - x64.reg'
-```
-
-## Issue - Incorrect IPv6 DNS server assigned by Comcast router
-
-```Text
-PS C:\Users\jjameson-admin> nslookup
-Default Server:  cdns01.comcast.net
-Address:  2001:558:feed::1
-```
-
-> **Note**
->
-> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on the Comcast router -- and subsequently restarting the VM -- the incorrect DNS server is assigned to the network adapter.
-
-### Solution
-
-```PowerShell
-Set-DnsClientServerAddress `
-    -InterfaceAlias Management `
-    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
-
-Restart-Computer
 ```
