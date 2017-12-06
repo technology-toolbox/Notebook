@@ -705,3 +705,49 @@ Restart-Computer
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/E726CD7E2665D95218D662FEE8F54CA7CC9F5469.png)
 
 Screen clipping taken: 7/14/2017 9:54 AM
+
+## Expand C: drive to 30 GB
+
+### Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/D6B43238DE84C838AD8E2C0BA1061036D036489D.png)
+
+---
+
+**FOOBAR10**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV02C"
+$vmName = "CYCLOPS"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+# Note: VHD is stored on SOFS -- so expand using VMM cmdlet
+
+Get-SCVirtualDiskDrive -VM $vmName |
+    where { $_.BusType -eq "IDE" -and $_.Bus -eq 0 } |
+    Expand-SCVirtualDiskDrive -VirtualHardDiskSizeGB 30
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+#### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
+Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
+```
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/02/5555EF9A260ED6C9C3C555431709E7C7BC516002.png)
+
+Screen clipping taken: 11/3/2017 2:35 PM
