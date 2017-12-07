@@ -621,6 +621,107 @@ To configure new features for team projects, follow the steps in [https://msdn.m
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/96/5D97A10BC50561FE05645FEC3723DE275800B596.png)
 
+## Configure TFS backups
+
+### Reference
+
+**Configure a backup schedule and plan for Team Foundation Server**\
+From <[https://docs.microsoft.com/en-us/vsts/tfs-server/admin/backup/config-backup-sched-plan](https://docs.microsoft.com/en-us/vsts/tfs-server/admin/backup/config-backup-sched-plan)>
+
+```PowerShell
+cls
+```
+
+### # Configure backup share
+
+```PowerShell
+Grant-SmbShareAccess `
+    -Name Backups `
+    -AccountName TECHTOOLBOX\jjameson-admin `
+    -AccessRight Full `
+    -Confirm:$false
+
+New-Item -Type Directory -Path E:\Shares\Backups\TFS
+```
+
+### Configure schedule backups
+
+<table>
+<thead>
+<th>
+<p><strong>Setting</strong></p>
+</th>
+<th>
+<p><strong>Value</strong></p>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Network Backup Path</p>
+</td>
+<td valign='top'>
+<p><a href="%5C%5CTT-FS01%5CBackups%5CTFS">\\\\TT-FS01\\Backups\\TFS</a></p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Backup Retention Days</p>
+</td>
+<td valign='top'>
+<p>30</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Include reporting databases in the backup schedule</p>
+</td>
+<td valign='top'>
+<p>Yes (checked)</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Send email to TFS Administrators if a backup fails</p>
+</td>
+<td valign='top'>
+<p>Yes (checked)</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Send email to TFS Administrators when a backup job succeeds</p>
+</td>
+<td valign='top'>
+<p>Yes (checked)</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Custom Schedule</p>
+</td>
+<td valign='top'>
+<p>Full Backup Schedule: Every Sunday at 9:30 PM<br />
+Differential Backup Schedule: Daily at 9:00 PM<br />
+Transactional Backup Interval: Every 15 minutes</p>
+</td>
+</tr>
+</table>
+
+> **Note**
+>
+> TFS will automatically configure the permissions on the backup folder, which can be verified using the **icacls** utility:
+>
+> ```Text
+> PS E:\Shares> icacls .\Backups\TFS
+> .\Backups\TFS NT AUTHORITY\NETWORK SERVICE:(OI)(CI)(F)
+>               TECHTOOLBOX\HAVOK$:(OI)(CI)(F)
+>               TECHTOOLBOX\CYCLOPS$:(OI)(CI)(F)
+>               TECHTOOLBOX\jjameson-admin:(OI)(CI)(F)
+>               BUILTIN\Administrators:(I)(OI)(CI)(F)
+>               NT AUTHORITY\SYSTEM:(I)(OI)(CI)(F)
+>               CREATOR OWNER:(I)(OI)(CI)(IO)(F)
+> ```
+
 ```PowerShell
 cls
 ```
@@ -751,3 +852,102 @@ Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/02/5555EF9A260ED6C9C3C555431709E7C7BC516002.png)
 
 Screen clipping taken: 11/3/2017 2:35 PM
+
+## Issue - Error accessing TFS web services interactively
+
+### Repro steps
+
+1. Browse to [http://localhost:8080/tfs/TeamFoundation/Administration/v3.0/WarehouseControlService.asmx](http://localhost:8080/tfs/TeamFoundation/Administration/v3.0/WarehouseControlService.asmx)
+2. On the **WarehouseControlWebService** page, click **GetProcessingStatus**.
+3. On the **GetProcessingStatus** page, click **Invoke**.
+
+### Troubleshooting
+
+Log Name:      Operations Manager\
+Source:        Apm Agent\
+Date:          9/17/2017 6:19:45 AM\
+Event ID:      4009\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      CYCLOPS.corp.technologytoolbox.com\
+Description:\
+ Performance counters corrupted.
+
+System information:\
+Agent version: 8.0.10918.0\
+Windows version: 2.6.3.3.272.0.9.0;\
+.NET Framework: v4.0.30319\
+Process ID: 2892; Instance ID: 0;\
+InstanceName: w3wp.exe [x64];\
+Application Pool: Microsoft Team Foundation Server Application Pool.
+
+Log Name:      Operations Manager\
+Source:        Apm Agent\
+Date:          9/17/2017 6:19:45 AM\
+Event ID:      4151\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      CYCLOPS.corp.technologytoolbox.com\
+Description:\
+ Microsoft Monitoring Agent APM service is inaccessible. Please check that it is not in a disabled state.
+
+System information:\
+Agent version: 8.0.10918.0\
+Windows version: 2.6.3.3.272.0.9.0;\
+.NET Framework: v4.0.30319\
+Process ID: 2892; Instance ID: 0;\
+InstanceName: w3wp.exe [x64];\
+Application Pool: Microsoft Team Foundation Server Application Pool.
+
+### References
+
+**SCOM 2016 Agent Crashing Legacy IIS Application Pools**\
+From <[http://kevingreeneitblog.blogspot.ie/2017/03/scom-2016-agent-crashing-legacy-iis.html](http://kevingreeneitblog.blogspot.ie/2017/03/scom-2016-agent-crashing-legacy-iis.html)>
+
+**APM feature in SCOM 2016 Agent may cause a crash for the IIS Application Pool running under .NET 2.0 runtime**\
+From <[https://blogs.technet.microsoft.com/momteam/2017/03/21/apm-feature-in-scom-2016-agent-may-cause-a-crash-for-the-iis-application-pool-running-under-net-2-0-runtime/](https://blogs.technet.microsoft.com/momteam/2017/03/21/apm-feature-in-scom-2016-agent-may-cause-a-crash-for-the-iis-application-pool-running-under-net-2-0-runtime/)>
+
+### Solution
+
+Remove SCOM agent and reinstall without Application Performance Monitoring (APM).
+
+#### Remove SCOM agent using Operations Console
+
+#### # Clean up SCOM agent folder
+
+```PowerShell
+Restart-Computer
+```
+
+> **Note**
+>
+> Wait for the server to restart.
+
+```PowerShell
+Remove-Item "C:\Program Files\Microsoft Monitoring Agent" -Recurse -Force
+```
+
+```PowerShell
+cls
+```
+
+#### # Install SCOM agent without Application Performance Monitoring (APM)
+
+```PowerShell
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\agent\AMD64" `
+    + "\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01 `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1 `
+    NOAPM=1
+```
+
+On the **Agent Setup Options** step, select **Connect the agent to System Center Operations Manager**.
+
+#### Approve manual agent install in Operations Manager
