@@ -625,50 +625,541 @@ Set-DnsClientServerAddress `
 Restart-Computer
 ```
 
-## Issue - Errors installing updates on client computers
+## Move WSUS database from HAVOK to TT-SQL01
 
-### Symptoms
-
-- Exception from HRESULT: 0x8024401C
-- Exception from HRESULT: 0x80240440
-- Exception from HRESULT: 0x80244022
-- Very high CPU/memory usage on COLOSSUS (even after ramping up to 6 CPUs and 8 GB of RAM
-
-### Solution
-
-Remove SCOM agent and reinstall without Application Performance Monitoring (APM).
-
-#### Remove SCOM agent using Operations Console
-
-#### # Clean up SCOM agent folder
+### # Stop WSUS services
 
 ```PowerShell
-Restart-Computer
+Stop-Service wuauserv
+Stop-Service W3SVC
+Stop-Service WsusService
 ```
+
+### Backup database
 
 > **Note**
 >
-> Wait for the server to restart.
+> Use backup/restore -- instead of database detach/attach -- due to different versions of SQL Server running on HAVOK and TT-SQL01. Initially, detach/attach was attempted but it did not restore the log file due to different file location (i.e. "L:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\..." vs. "L:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\...").
+
+---
+
+**HAVOK - SQL Server Management Studio**
+
+#### -- Create copy-only database backup on source server
+
+```SQL
+DECLARE @databaseName VARCHAR(50) = 'SUSDB'
+
+DECLARE @backupDirectory VARCHAR(255)
+
+EXEC master.dbo.xp_instance_regread
+    N'HKEY_LOCAL_MACHINE'
+    , N'Software\Microsoft\MSSQLServer\MSSQLServer'
+    , N'BackupDirectory'
+    , @backupDirectory OUTPUT
+
+DECLARE @backupFilePath VARCHAR(255) =
+    @backupDirectory + '\' + @databaseName + '.bak'
+
+DECLARE @backupName VARCHAR(100) = @databaseName + '-Full Database Backup'
+
+BACKUP DATABASE @databaseName
+    TO DISK = @backupFilePath
+    WITH COMPRESSION
+        , COPY_ONLY
+        , INIT
+        , NAME = @backupName
+        , STATS = 10
+
+GO
+```
+
+---
+
+### Move database backup to destination server
+
+---
+
+**HAVOK**
 
 ```PowerShell
-Remove-Item "C:\Program Files\Microsoft Monitoring Agent" -Recurse -Force
+cls
+```
+
+#### # Move database backup
+
+```PowerShell
+Move-Item `
+    -Path "Z:\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\SUSDB.bak" `
+    -Destination "\\TT-SQL01A\Z$\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\Backup"
+```
+
+---
+
+### Restore database on destination server
+
+---
+
+**TT-SQL01A - SQL Server Management Studio**
+
+#### -- Restore database backup
+
+```SQL
+DECLARE @databaseName VARCHAR(50) = 'SUSDB'
+
+DECLARE @dataFile VARCHAR(25) = @databaseName
+DECLARE @logFile VARCHAR(25) = @databaseName + '_log'
+
+DECLARE @backupDirectory VARCHAR(255)
+DECLARE @dataDirectory VARCHAR(255) = CONVERT(
+    VARCHAR(255),
+    SERVERPROPERTY('instancedefaultdatapath'))
+
+DECLARE @logDirectory VARCHAR(255) = CONVERT(
+    VARCHAR(255),
+    SERVERPROPERTY('instancedefaultlogpath'))
+
+EXEC master.dbo.xp_instance_regread
+    N'HKEY_LOCAL_MACHINE'
+    , N'Software\Microsoft\MSSQLServer\MSSQLServer'
+    , N'BackupDirectory'
+    , @backupDirectory OUTPUT
+
+DECLARE @backupFilePath VARCHAR(255) =
+    @backupDirectory + '\' + @databaseName + '.bak'
+
+DECLARE @dataFilePath VARCHAR(255) =
+    @dataDirectory + '\' + @databaseName + '.mdf'
+
+DECLARE @logFilePath VARCHAR(255) =
+    @logDirectory + '\' + @databaseName + '.ldf'
+
+RESTORE DATABASE @databaseName
+    FROM DISK = @backupFilePath
+    WITH REPLACE
+        , MOVE @dataFile TO @dataFilePath
+        , MOVE @logFile TO @logFilePath
+        , STATS = 5
+
+GO
+```
+
+#### -- Create login used by WSUS database
+
+```SQL
+USE master
+GO
+
+CREATE LOGIN [TECHTOOLBOX\COLOSSUS$] FROM WINDOWS
+WITH DEFAULT_DATABASE=master, DEFAULT_LANGUAGE=us_english
+GO
+```
+
+---
+
+### Add SUSDB database to AlwaysOn Availability Group
+
+---
+
+**SQL Server Management Studio (TT-SQL01A)**
+
+#### -- Change recovery model for WSUS database from Simple to Full
+
+```SQL
+USE master
+GO
+ALTER DATABASE SUSDB SET RECOVERY FULL WITH NO_WAIT
+GO
+```
+
+#### -- Backup WSUS database
+
+```SQL
+DECLARE @backupFilePath VARCHAR(255) =
+    'Z:\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\Backup\'
+        + 'SUSDB.bak'
+
+BACKUP DATABASE SUSDB
+    TO DISK = @backupFilePath
+    WITH FORMAT, INIT, SKIP, REWIND, NOUNLOAD, COMPRESSION,  STATS = 5
+GO
+```
+
+#### -- Backup WSUS transaction log
+
+```SQL
+DECLARE @backupFilePath VARCHAR(255) =
+    'Z:\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\Backup\'
+        + 'SUSDB.trn'
+
+BACKUP LOG SUSDB
+    TO DISK = @backupFilePath
+    WITH NOFORMAT, NOINIT, NOSKIP, REWIND, NOUNLOAD, COMPRESSION,  STATS = 5
+GO
+```
+
+#### -- Add WSUS database to Availability Group
+
+```SQL
+ALTER AVAILABILITY GROUP [TT-SQL01] ADD DATABASE SUSDB
+GO
+```
+
+---
+
+---
+
+**SQL Server Management Studio (TT-SQL01B)**
+
+#### -- Create login used by WSUS database
+
+```SQL
+USE master
+GO
+
+CREATE LOGIN [TECHTOOLBOX\COLOSSUS$] FROM WINDOWS
+WITH DEFAULT_DATABASE=master, DEFAULT_LANGUAGE=us_english
+GO
+```
+
+#### -- Restore WSUS database from backup
+
+```SQL
+DECLARE @backupFilePath VARCHAR(255) =
+    '\\TT-SQL01A\SQL-Backups\SUSDB.bak'
+
+RESTORE DATABASE SUSDB
+    FROM DISK = @backupFilePath
+    WITH  NORECOVERY,  NOUNLOAD,  STATS = 5
+
+GO
+```
+
+#### -- Restore WSUS transaction log from backup
+
+```SQL
+DECLARE @backupFilePath VARCHAR(255) =
+    '\\TT-SQL01A\SQL-Backups\SUSDB.trn'
+
+RESTORE DATABASE SUSDB
+    FROM DISK = @backupFilePath
+    WITH  NORECOVERY,  NOUNLOAD,  STATS = 5
+
+GO
+```
+
+#### -- Wait for the replica to start communicating
+
+```Console
+begin try
+    declare @conn bit
+    declare @count int
+    declare @replica_id uniqueidentifier
+    declare @group_id uniqueidentifier
+    set @conn = 0
+    set @count = 30 -- wait for 5 minutes
+
+    if (serverproperty('IsHadrEnabled') = 1)
+        and (isnull(
+            (select member_state from master.sys.dm_hadr_cluster_members where upper(member_name COLLATE Latin1_General_CI_AS) = upper(cast(serverproperty('ComputerNamePhysicalNetBIOS') as nvarchar(256)) COLLATE Latin1_General_CI_AS)), 0) <> 0)
+        and (isnull((select state from master.sys.database_mirroring_endpoints), 1) = 0)
+    begin
+        select @group_id = ags.group_id
+        from master.sys.availability_groups as ags
+        where name = N'TT-SQL01'
+
+        select @replica_id = replicas.replica_id
+        from master.sys.availability_replicas as replicas
+        where
+            upper(replicas.replica_server_name COLLATE Latin1_General_CI_AS) =
+                upper(@@SERVERNAME COLLATE Latin1_General_CI_AS)
+            and group_id = @group_id
+
+    while @conn <> 1 and @count > 0
+        begin
+            set @conn = isnull(
+                (select connected_state
+                from master.sys.dm_hadr_availability_replica_states as states
+                where states.replica_id = @replica_id), 1)
+
+        if @conn = 1
+            begin
+                -- exit loop when the replica is connected,
+                -- or if the query cannot find the replica status
+                break
+            end
+
+            waitfor delay '00:00:10'
+            set @count = @count - 1
+        end
+    end
+end try
+begin catch
+    -- If the wait loop fails, do not stop execution of the alter database statement
+end catch
+GO
+
+ALTER DATABASE [SUSDB] SET HADR AVAILABILITY GROUP = [TT-SQL01]
+GO
+```
+
+---
+
+---
+
+**SQL Server Management Studio (TT-SQL01)**
+
+### -- Create SQL job for WSUS database maintenance
+
+```Console
+USE [msdb]
+GO
+
+/****** Object:  Job [WsusDBMaintenance]    Script Date: 8/15/2017 9:40:04 AM ******/
+BEGIN TRANSACTION
+DECLARE @ReturnCode INT
+SELECT @ReturnCode = 0
+/****** Object:  JobCategory [[Uncategorized (Local)]]    Script Date: 8/15/2017 9:40:04 AM ******/
+IF NOT EXISTS (SELECT name FROM msdb.dbo.syscategories WHERE name=N'[Uncategorized (Local)]' AND category_class=1)
+BEGIN
+EXEC @ReturnCode = msdb.dbo.sp_add_category @class=N'JOB', @type=N'LOCAL', @name=N'[Uncategorized (Local)]'
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+
+END
+
+DECLARE @jobId BINARY(16)
+EXEC @ReturnCode =  msdb.dbo.sp_add_job @job_name=N'WsusDBMaintenance',
+    @enabled=1,
+    @notify_level_eventlog=0,
+    @notify_level_email=0,
+    @notify_level_netsend=0,
+    @notify_level_page=0,
+    @delete_level=0,
+    @description=N'No description available.',
+    @category_name=N'[Uncategorized (Local)]',
+    @owner_login_name=N'TECHTOOLBOX\jjameson-admin', @job_id = @jobId OUTPUT
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+/****** Object:  Step [Defragment database and update statistics]    Script Date: 8/15/2017 9:40:04 AM ******/
+EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'Defragment database and update statistics',
+    @step_id=1,
+    @cmdexec_success_code=0,
+    @on_success_action=1,
+    @on_success_step_id=0,
+    @on_fail_action=2,
+    @on_fail_step_id=0,
+    @retry_attempts=0,
+    @retry_interval=0,
+    @os_run_priority=0, @subsystem=N'TSQL',
+    @command=N'/******************************************************************************
+This sample T-SQL script performs basic maintenance tasks on SUSDB
+1. Identifies indexes that are fragmented and defragments them. For certain
+   tables, a fill-factor is set in order to improve insert performance.
+   Based on MSDN sample at http://msdn2.microsoft.com/en-us/library/ms188917.aspx
+   and tailored for SUSDB requirements
+2. Updates potentially out-of-date table statistics.
+******************************************************************************/
+
+USE SUSDB;
+GO
+SET NOCOUNT ON;
+
+-- Rebuild or reorganize indexes based on their fragmentation levels
+DECLARE @work_to_do TABLE (
+    objectid int
+    , indexid int
+    , pagedensity float
+    , fragmentation float
+    , numrows int
+)
+
+DECLARE @objectid int;
+DECLARE @indexid int;
+DECLARE @schemaname nvarchar(130);
+DECLARE @objectname nvarchar(130);
+DECLARE @indexname nvarchar(130);
+DECLARE @numrows int
+DECLARE @density float;
+DECLARE @fragmentation float;
+DECLARE @command nvarchar(4000);
+DECLARE @fillfactorset bit
+DECLARE @numpages int
+
+-- Select indexes that need to be defragmented based on the following
+-- * Page density is low
+-- * External fragmentation is high in relation to index size
+PRINT ''Estimating fragmentation: Begin. '' + convert(nvarchar, getdate(), 121)
+INSERT @work_to_do
+SELECT
+    f.object_id
+    , index_id
+    , avg_page_space_used_in_percent
+    , avg_fragmentation_in_percent
+    , record_count
+FROM
+    sys.dm_db_index_physical_stats (DB_ID(), NULL, NULL , NULL, ''SAMPLED'') AS f
+WHERE
+    (f.avg_page_space_used_in_percent < 85.0 and f.avg_page_space_used_in_percent/100.0 * page_count < page_count - 1)
+    or (f.page_count > 50 and f.avg_fragmentation_in_percent > 15.0)
+    or (f.page_count > 10 and f.avg_fragmentation_in_percent > 80.0)
+
+PRINT ''Number of indexes to rebuild: '' + cast(@@ROWCOUNT as nvarchar(20))
+
+PRINT ''Estimating fragmentation: End. '' + convert(nvarchar, getdate(), 121)
+
+SELECT @numpages = sum(ps.used_page_count)
+FROM
+    @work_to_do AS fi
+    INNER JOIN sys.indexes AS i ON fi.objectid = i.object_id and fi.indexid = i.index_id
+    INNER JOIN sys.dm_db_partition_stats AS ps on i.object_id = ps.object_id and i.index_id = ps.index_id
+
+-- Declare the cursor for the list of indexes to be processed.
+DECLARE curIndexes CURSOR FOR SELECT * FROM @work_to_do
+
+-- Open the cursor.
+OPEN curIndexes
+
+-- Loop through the indexes
+WHILE (1=1)
+BEGIN
+    FETCH NEXT FROM curIndexes
+    INTO @objectid, @indexid, @density, @fragmentation, @numrows;
+    IF @@FETCH_STATUS < 0 BREAK;
+
+    SELECT
+        @objectname = QUOTENAME(o.name)
+        , @schemaname = QUOTENAME(s.name)
+    FROM
+        sys.objects AS o
+        INNER JOIN sys.schemas as s ON s.schema_id = o.schema_id
+    WHERE
+        o.object_id = @objectid;
+
+    SELECT
+        @indexname = QUOTENAME(name)
+        , @fillfactorset = CASE fill_factor WHEN 0 THEN 0 ELSE 1 END
+    FROM
+        sys.indexes
+    WHERE
+        object_id = @objectid AND index_id = @indexid;
+
+    IF ((@density BETWEEN 75.0 AND 85.0) AND @fillfactorset = 1) OR (@fragmentation < 30.0)
+        SET @command = N''ALTER INDEX '' + @indexname + N'' ON '' + @schemaname + N''.'' + @objectname + N'' REORGANIZE'';
+    ELSE IF @numrows >= 5000 AND @fillfactorset = 0
+        SET @command = N''ALTER INDEX '' + @indexname + N'' ON '' + @schemaname + N''.'' + @objectname + N'' REBUILD WITH (FILLFACTOR = 90)'';
+    ELSE
+        SET @command = N''ALTER INDEX '' + @indexname + N'' ON '' + @schemaname + N''.'' + @objectname + N'' REBUILD'';
+    PRINT convert(nvarchar, getdate(), 121) + N'' Executing: '' + @command;
+    EXEC (@command);
+    PRINT convert(nvarchar, getdate(), 121) + N'' Done.'';
+END
+
+-- Close and deallocate the cursor.
+CLOSE curIndexes;
+DEALLOCATE curIndexes;
+
+
+IF EXISTS (SELECT * FROM @work_to_do)
+BEGIN
+    PRINT ''Estimated number of pages in fragmented indexes: '' + cast(@numpages as nvarchar(20))
+    SELECT @numpages = @numpages - sum(ps.used_page_count)
+    FROM
+        @work_to_do AS fi
+        INNER JOIN sys.indexes AS i ON fi.objectid = i.object_id and fi.indexid = i.index_id
+        INNER JOIN sys.dm_db_partition_stats AS ps on i.object_id = ps.object_id and i.index_id = ps.index_id
+
+    PRINT ''Estimated number of pages freed: '' + cast(@numpages as nvarchar(20))
+END
+GO
+
+
+--Update all statistics
+PRINT ''Updating all statistics.'' + convert(nvarchar, getdate(), 121)
+EXEC sp_updatestats
+PRINT ''Done updating statistics.'' + convert(nvarchar, getdate(), 121)
+GO',
+    @database_name=N'SUSDB',
+    @flags=0
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+EXEC @ReturnCode = msdb.dbo.sp_update_job @job_id = @jobId, @start_step_id = 1
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+EXEC @ReturnCode = msdb.dbo.sp_add_jobschedule @job_id=@jobId, @name=N'Weekly',
+    @enabled=1,
+    @freq_type=8,
+    @freq_interval=1,
+    @freq_subday_type=1,
+    @freq_subday_interval=0,
+    @freq_relative_interval=0,
+    @freq_recurrence_factor=1,
+    @active_start_date=20161217,
+    @active_end_date=99991231,
+    @active_start_time=100000,
+    @active_end_time=235959,
+    @schedule_uid=N'e0a9c6bf-b402-47df-97c8-c70aeeb6d42b'
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+EXEC @ReturnCode = msdb.dbo.sp_add_jobserver @job_id = @jobId, @server_name = N'(local)'
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+COMMIT TRANSACTION
+GOTO EndSave
+QuitWithRollback:
+    IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION
+EndSave:
+
+GO
+```
+
+---
+
+---
+
+**HAVOK - SQL Server Management Studio**
+
+### -- Delete database on source server
+
+```SQL
+USE master
+GO
+DROP DATABASE SUSDB
+GO
+```
+
+### -- Delete SQL job for WSUS database maintenance
+
+```SQL
+USE msdb
+GO
+EXEC msdb.dbo.sp_delete_job @job_name=N'WsusDBMaintenance',
+    @delete_unused_schedule=1
+
+GO
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Configure WSUS server for new database server
+
+```PowerShell
+Set-ItemProperty `
+    -Path 'HKLM:\SOFTWARE\Microsoft\Update Services\Server\Setup' `
+    -Name SqlServerName `
+    -Value TT-SQL01
+
+Get-ItemProperty `
+    -Path 'HKLM:\SOFTWARE\Microsoft\Update Services\Server\Setup' `
+    -Name SqlServerName
 ```
 
 ```PowerShell
 cls
 ```
 
-#### # Install SCOM agent without Application Performance Monitoring (APM)
+### # Stop WSUS services
 
 ```PowerShell
-$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\agent\AMD64" `
-    + "\MOMAgent.msi"
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=TT-SCOM01 `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1 `
-    NOAPM=1
+Start-Service WsusService
+Start-Service W3SVC
+Start-Service wuauserv
 ```
-
-#### Approve manual agent install in Operations Manager
