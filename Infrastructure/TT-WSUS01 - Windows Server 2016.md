@@ -1,19 +1,279 @@
-﻿# COLOSSUS - Windows Server 2012 R2
+﻿# TT-WSUS01 - Windows Server 2016
 
-Monday, May 18, 2015
-7:42 AM
+Wednesday, December 20, 2017
+10:51 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Create service account for WSUS
+## Deploy Windows Server Update Services
+
+### Reference
+
+**Deploy Windows Server Update Services**\
+From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/deploy-windows-server-update-services](https://docs.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/deploy-windows-server-update-services)>
+
+### Plan WSUS deployment
+
+| Setting          | Value                                  |
+| ---------------- | -------------------------------------- |
+| Content location | [\\\\TT-FS01\\WSUS\$](\\TT-FS01\WSUS$) |
+| Current size     | 81.6 GB (7,820 files, 260 folders)     |
+
+### Deploy and configure the server infrastructure
+
+#### Install Windows Server 2016
 
 ---
 
-**XAVIER1**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
-### # Create the WSUS service account
+```PowerShell
+cls
+```
+
+##### # Create virtual machine
+
+```PowerShell
+$vmHost = "TT-HV02A"
+$vmName = "TT-WSUS01"
+$vmPath = "C:\NotBackedUp\VMs"
+$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
+
+New-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -Generation 2 `
+    -Path $vmPath `
+    -NewVHDPath $vhdPath `
+    -NewVHDSizeBytes 32GB `
+    -MemoryStartupBytes 2GB `
+    -SwitchName "Embedded Team Switch"
+
+Set-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -ProcessorCount 2 `
+    -DynamicMemory `
+    -MemoryMinimumBytes 2GB `
+    -MemoryMaximumBytes 4GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+##### Install custom Windows Server 2016 image
+
+- On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
+- On the **Computer Details** step:
+  - In the **Computer name** box, type **TT-WSUS01**.
+  - Click **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
+
+#### # Rename local Administrator account and set password
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted, type the password for the local Administrator account.
+
+```PowerShell
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
+$adminUser = [ADSI] 'WinNT://./Administrator,User'
+$adminUser.Rename('foo')
+$adminUser.SetPassword($plainPassword)
+
+logoff
+```
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Move computer to different OU
+
+```PowerShell
+$vmName = "TT-WSUS01"
+
+$targetPath = "OU=Servers,OU=Resources,OU=IT" `
+    + ",DC=corp,DC=technologytoolbox,DC=com"
+
+Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
+```
+
+---
+
+#### Login as .\\foo
+
+#### # Copy Toolbox content
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$source = "\\TT-FS01\Public\Toolbox"
+$destination = "C:\NotBackedUp\Public\Toolbox"
+
+robocopy $source $destination /E /XD "Microsoft SDKs"
+```
+
+#### # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+#### # Configure networking
+
+```PowerShell
+$interfaceAlias = "Management"
+```
+
+##### # Rename network connections
+
+```PowerShell
+Get-NetAdapter -Physical | select InterfaceDescription
+
+Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
+```
+
+##### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
+
+Start-Sleep -Seconds 5
+
+ping TT-FS01 -f -l 8900
+```
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+##### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "TT-WSUS01"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+$ipPool = Get-SCStaticIPAddressPool -Name "Management Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+```PowerShell
+cls
+```
+
+#### # Set first boot device to hard drive
+
+```PowerShell
+$vmHost = "TT-HV02A"
+$vmName = "TT-WSUS01"
+
+$vmHardDiskDrive = Get-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName |
+    where { $_.ControllerType -eq "SCSI" `
+        -and $_.ControllerNumber -eq 0 `
+        -and $_.ControllerLocation -eq 0 }
+
+Set-VMFirmware `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -FirstBootDevice $vmHardDiskDrive
+```
+
+---
+
+#### Add virtual machine to Hyper-V protection group in DPM
+
+```PowerShell
+cls
+```
+
+### # Install and configure prerequisites for WSUS
+
+#### # Install System CLR Types for SQL Server 2012
+
+> **Note**
+>
+> Report Viewer 2012 requires System CLR Types for SQL Server 2012.
+
+```PowerShell
+& ("\\TT-FS01\Products\Microsoft\System Center 2012 R2" `
+    + "\Microsoft System CLR Types for SQL Server 2012\SQLSysClrTypes.msi")
+```
+
+```PowerShell
+cls
+```
+
+#### # Install Report Viewer 2012
+
+```PowerShell
+& "\\TT-FS01\Products\Microsoft\Report Viewer 2012 Runtime\ReportViewer.msi"
+```
+
+#### Create service account for WSUS
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
+#### # Create WSUS service account
 
 ```PowerShell
 $displayName = "Service account for Windows Server Update Services"
@@ -38,239 +298,117 @@ New-ADUser `
 
 ---
 
-## Create VM
-
-- Processors: **2**
-- Memory: **2 GB**
-- VHD size (GB): **32**
-- VHD file name:** COLOSSUS**
-
-## Install custom Windows Server 2012 R2 image
-
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
-- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
-- On the **Computer Details** step, in the **Computer name** box, type **COLOSSUS** and click **Next**.
-- On the **Applications** step, do not select any applications, and click **Next**.
-
-```PowerShell
-cls
-```
-
-## # Set password for local Administrator account
-
-```PowerShell
-$adminUser = [ADSI] "WinNT://./Administrator,User"
-$adminUser.SetPassword("{password}")
-```
-
-## # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-```PowerShell
-cls
-```
-
-## # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-```PowerShell
-cls
-```
-
-## # Rename network connection
-
-```PowerShell
-Get-NetAdapter -Physical
-
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "LAN 1 - 192.168.10.x"
-```
-
-## # Enable jumbo frames
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name "LAN 1 - 192.168.10.x" `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
-
-ping ICEMAN -f -l 8900
-```
-
-## Create share for WSUS content
+#### Create share for WSUS content
 
 ---
 
-**ICEMAN**
+**TT-FS01**
 
-### # Create and share the WSUS\$ folder
+#### # Create and share folder for WSUS content
 
 ```PowerShell
-New-Item -Path D:\Shares\WSUS$ -ItemType Directory
+$wsusFolderPath = 'D:\Shares\WSUS$'
+
+New-Item -Path $wsusFolderPath -ItemType Directory
 
 New-SmbShare `
-    -Name WSUS$ `
-    -Path D:\Shares\WSUS$ `
+    -Name 'WSUS$' `
+    -Path $wsusFolderPath `
     -CachingMode None `
     -ChangeAccess Everyone
 ```
 
-#### # Remove "BUILTIN\\Users" permissions
+##### # Remove "BUILTIN\\Users" permissions
 
 ```PowerShell
-icacls D:\Shares\WSUS$ /inheritance:d
-icacls D:\Shares\WSUS$ /remove:g "BUILTIN\Users"
+icacls $wsusFolderPath /inheritance:d
+icacls $wsusFolderPath /remove:g "BUILTIN\Users"
 ```
 
-#### # Grant COLOSSUS computer account modify access to WSUS share
+##### # Grant WSUS computer account modify access to WSUS share
 
 ```PowerShell
-icacls D:\Shares\WSUS$ /grant 'COLOSSUS$:(OI)(CI)(M)'
+icacls $wsusFolderPath /grant 'TT-WSUS01$:(OI)(CI)(M)'
 ```
 
-#### # Grant WSUS service account read access to WSUS share
+##### # Grant WSUS service account read access to WSUS share
 
 ```PowerShell
-icacls D:\Shares\WSUS$ /grant 'TECHTOOLBOX\s-wsus:(OI)(CI)(RX)'
+icacls $wsusFolderPath /grant 'TECHTOOLBOX\s-wsus:(OI)(CI)(RX)'
 ```
 
 ---
 
-## Install WSUS
+### Install WSUS
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/95F18511CC7247AEBFB056D86C056311CDF89630.png)
+#### Reference
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/FB846A250D3906A80B6BCADC82439502C78B2186.png)
+**Step 1: Install the WSUS Server Role**\
+From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/1-install-the-wsus-server-role](https://docs.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/1-install-the-wsus-server-role)>
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/57/DECAEA9056214F80ED23DAC35925BD48E9DFED57.png)
+#### Install WSUS server role
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/6A839CBEFF04B4FE038EAC4BA699F2F44B5520DB.png)
+**To install the WSUS server role:**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B7/E46D8D9A779C378B7EC40C8FC9D7CFE8F7C85AB7.png)
+1. In **Server Manager**, click **Manage**, and then click **Add Roles and Features**.
+2. On the **Before you begin** page, click **Next**.
+3. On the **Select installation type** page, confirm the **Role-based or feature-based installation** option is selected and click **Next**.
+4. On the **Select destination server** page:
+   1. Ensure the **Select a server from the server pool** option is selected.
+   2. In the **Server Pool** list, select the server for the WSUS server role.
+   3. Click **Next**.
+5. On the **Select server roles** page:
+   1. Select **Windows Server Update Services**.
+   2. A dialog window opens for adding the features required for WSUS. Click **Add Features**.
+   3. Click **Next**.
+6. On the **Select features **page, click **Next**.
+7. On the **Windows Server Update Services** page, click **Next**.
+8. On the **Select role services** page:
+   1. Clear the **WID Connectivity** checkbox.
+   2. Ensure the **WSUS Services** checkbox is selected.
+   3. Select the **SQL Server Connectivity** checkbox.
+   4. Click **Next**.
+9. On the **Content location selection** page:
+   1. Ensure the **Store updates in the following location **checkbox is selected.
+   2. In the location box, type **[\\\\TT-FS01\\WSUS\$](\\TT-FS01\WSUS$)**.
+   3. Click **Next**.
+10. On the **Database Instance Selection** page:
+    1. In the **Specify an existing database server** box, type **HAVOK**.
+    2. Click **Check connection** and confirm the wizard is able to successfully connect to the server.
+    3. Click **Next**.
+11. On the **Web Server Role (IIS)** page, review the information, and then click **Next**.
+12. On the **Select roles services** page, click **Next**.
+13. On the **Confirm installation selections** page, review the selected options, and click **Install**. The WSUS installation wizard runs. This might take several minutes to complete.
+14. Wait for the WSUS installation to complete.
+15. In the summary window on the **Installation progress** page, click **Launch Post-Installation tasks**. The text changes to: **Please wait while your server is configured**.
+16. When the task has finished, the text changes to: **Configuration successfully completed**. Click **Close**.
+17. In **Server Manager**, verify if a notification appears to inform you that a restart is required. This can vary according to the installed server role. If it requires a restart make sure to restart the server to complete the installation.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/9A7204B4F1488D1F20747C3E64D592EEF2A42A94.png)
+### Configure WSUS
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B0/BC7F47D96B2DED1BF4D3F703154465A103A903B0.png)
+#### Reference
 
-**Note:** .NET Framework 3.5 is already installed (included in custom Windows Server 2012 R2 image).
+**Configure WSUS by using the WSUS Configuration Wizard**\
+From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/2-configure-wsus](https://docs.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/2-configure-wsus)>
 
-On the **Select features** page, click **Next**.
+#### Configure WSUS database
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/781FD98779CB611006D70034D4B17E9D3600CADF.png)
+---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8B/E6B3E7FD06A9E6A2DE52ED909516A038D387448B.png)
+**HAVOK - SQL Server Management Studio**
 
-Clear the **WID Database **checkbox.\
-Select the **Database** checkbox.
+#### -- Change auto-grow increment on SUSDB.mdf from 1 MB to 100 MB
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/4031BD06C91AD9D04DD3FE77EC08F208E0076D37.png)
+```SQL
+ALTER DATABASE [SUSDB]
+MODIFY FILE ( NAME = N'SUSDB', FILEGROWTH = 102400KB )
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C0/ADAC9E5EABE0C38CABC84C3AB0BD6783FB102FC0.png)
+---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/11/793C28119EA24D9C8B75E86F84B539E02AD3D611.png)
+#### Fix path for "Content" virtual directory
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F9/893AECD7B5782ED39B42DD634F51A07BB4638CF9.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/07/F7E386A0BAA49CF684B929FE7588E5D7329D0307.png)
-
-On the **Select role services** page, click **Next**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/28D8EFE93FB36C2BE75486B650BCB4197FD27C69.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/70FF3874946F7CA61DC5B64697E2BBF80B9BFA94.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D3/0EA9AF84E2C83C1FE047915A090E9E0E288312D3.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/81/EC07ED853599E824AEEB5363DD10B7A36CCA1981.png)
-
-Click **Launch Post-Installation tasks** to create the SUSDB database.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DE/A31230FF3E7F9339EB766A3E052175AF600D8DDE.png)
-
-Wait for the configuration to complete.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/D8C5E2F705807CCB65951C7D199EBDE8075D76DD.png)
-
-Configure WSUS database
-
-Change auto-grow increment on SUSDB.mdf from 1 MB to 100 MB
-
-## Configure WSUS
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A3/55029C1D2D40D052E79CB46843ED9509880256A3.png)
-
-Right-click the WSUS server (**COLOSSUS**) and then click **Windows Server Update Services**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BF/59B523B58BAF38759E98CA89C95C8BC30CFB84BF.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/79101F1DB298E5A71D7371D6D52F96906D6E23E1.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E9/6121955B47BDDD0DAB599829053D458284B86EE9.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/262435F7E3B602FB5C7A27B4A5101F2C65EB067E.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AB/D1D866E3C28877F7ABF202EC205E217BFE586AAB.png)
-
-Click **Start Connecting**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9E/8B6EEFB602732113E850408CF6E22F8944E9699E.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5A/49C645116CACA18DB33D04C3F49D6B2951B4265A.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/49/5A3A5F19A77F8FE68071F7166D9B348C73204649.png)
-
-- Microsoft
-  - Developer Tools, Runtimes, and Redistributables
-    - Visual Studio 2010
-    - Visual Studio 2012
-    - Visual Studio 2013
-  - Expression
-    - Expression Design 4
-    - Expression Web 4
-  - Office
-  - Silverlight
-  - SQL Server
-  - System Center
-    - System Center 2012 R2 - Data Protection Manager
-    - System Center 2012 R2 - Operations Manager
-    - System Center 2012 R2 - Virtual Machine Manager
-  - Windows
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/372FF0C6359D82EF6FF36E118CADD1024F6E8837.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3E/75DA8705948A2A9DCCED07E493A3A33B1F36C33E.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C3/D387144AB751593511B9A78CAAB1D264168EF5C3.png)
-
-Select **Begin initial synchronization** and then click **Next**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/FF3B78505B859800A50E68D1C4D807B58970083F.png)
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/C2ED7EF76661D9D8F560C4B789BB83208296D369.png)
-
-## Fix path for "Content" virtual directory
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E8/89D2BA3C12018E4D5D803D92766E367ABB5364E8.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/24/56E28B97ADA2E7B8DBADAAA4DFD38338F7846724.png)
 
 ```PowerShell
 Import-Module WebAdministration
@@ -278,10 +416,14 @@ Import-Module WebAdministration
 Set-ItemProperty `
     "IIS:\Sites\WSUS Administration\Content" `
     -Name physicalPath `
-    -Value "\\ICEMAN\WSUS$\WsusContent\"
+    -Value "\\TT-FS01\WSUS$\WsusContent\"
 ```
 
-## # Set credentials for accessing WSUS content on ICEMAN
+```PowerShell
+cls
+```
+
+#### # Set credentials for accessing WSUS content on file share
 
 ```PowerShell
 $displayName = "Service account for Windows Server Update Services"
@@ -304,20 +446,85 @@ Set-ItemProperty `
     -Value $password
 ```
 
-## Configure group policy for Windows Update
+### Configure WSUS by using the WSUS Configuration Wizard
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/05/4F75EE5CAEDF7E8EFB10F970F7B2301F4CB07905.png)
+**To configure WSUS:**
 
-## Add computer groups
+1. In the **Server Manager** navigation pane, select **WSUS**.
+2. In the servers list, right-click the WSUS server (**TT-WSUS01**) and then click **Windows Server Update Services**. The **Windows Server Update Services Wizard** opens.
+3. On the **Before You Begin** page, review the information, and then click **Next**.
+4. On the **Join the Microsoft Update Improvement Program** page, click **Next**.
+5. On the **Choose Upstream Server** page, ensure the **Synchronize from Microsoft Update** option is selected and click **Next**.
+6. On the **Specify Proxy Server** page, ensure the **Use a proxy server when synchronizing** checkbox is not selected, and click **Next**.
+7. On the **Connect to Upstream Server** page, click **Start Connecting**.
+8. Wait for the information to be downloaded and then click **Next**.
+9. On the **Choose Languages** page:
+   1. Select the **Download updates in only these languages** option.
+   2. In the list of languages, select **English**.
+   3. Click **Next**.
+10. After selecting the appropriate language options for your deployment, click **Next** to continue.
+11. On the **Choose Products** page:
+    1. Select the following products:\
+       **Microsoft**\
+       **Developer Tools, Runtimes, and Redistributables**\
+       **Visual Studio 2010**\
+       **Visual Studio 2012**\
+       **Visual Studio 2013**\
+       **Expression**\
+       **Expression Design 4**\
+       **Expression Web 4**\
+       **Office**\
+       **Silverlight**\
+       **SQL Server**\
+       **System Center**\
+       **System Center 2016 - Data Protection Manager**\
+       **System Center 2016 - Operations Manager**\
+       **System Center 2016 - Orchestrator**\
+       **System Center 2016 - Virtual Machine Manager**\
+       **Windows**
+    2. Click **Next**.
+12. On the **Choose Classifications** page:
+13. On the **Choose Classifications **page:
+    1. Select the following classifications:\
+       **All Classifications**\
+       **Critical Updates**\
+       **Definition Updates**\
+       **Drivers Sets**\
+       **Drivers**\
+       **Feature Packs**\
+       **Security Updates**\
+       **Service Packs**\
+       **Tools**\
+       **Update Rollups**\
+       **Updates**\
+       **Upgrades**
+    2. Click **Next**.
+14. On the **Set Sync Schedule** page:
+    1. Select the **Synchronize automatically** option.
+    2. In the **First synchronization** box, specify **11:10:00 PM**.
+    3. Click **Next**.
+15. On the **Finished** page:
+    1. Select the **Begin initial synchronization** checkbox.
+    2. Click **Finish**. The WSUS Management Console appears.
+    3. Wait for the initial synchronization to complete before proceeding.
+
+### Configure WSUS computer groups
+
+**To create a computer group:**
+
+1. In the **Update Services** console, in the navigation pane, expand **Computers**, and then select **All Computers**.
+2. In the **Actions** pane, click **Add Computer Group...**
+3. In the **Add Computer Group** window, in the **Name** box, type the name for the new computer group and click **OK**.
 
 Computers
 
-- All Computers
-  - Unassigned Computers
+- **All Computers**
+  - **Unassigned Computers**
   - .**NET Framework 3.5**
   - **.NET Framework 4**
   - **.NET Framework 4 Client Profile**
   - **.NET Framework 4.5**
+  - **Contoso**
   - **Fabrikam**
     - **Fabrikam - Development**
     - **Fabrikam - Quality Assurance**
@@ -334,53 +541,138 @@ Computers
       - **Beta Testing**
     - **WSUS Servers**
 
-1. In the **Update Services** console, in the navigation pane, expand **Computers**, and then select **All Computers**.
-2. In the **Actions** pane, click **Add Computer Group...**
-3. In the **Add Computer Group** window, in the **Name** box, type the name for the new computer group and click **OK**.
+### Secure WSUS with Secure Sockets Layer protocol
 
-Configure automatic approval rules
+#### Configure name resolution for WSUS
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/8802A21A02AE3A0F8F9E06A10EEE7D1EC50BDCC5.png)
+---
 
-1. In the **Automatic Approvals** window, on the **Update Rules** tab, select **Default Automatic Approval Rule**.
-2. In the **Rule properties** section, click **Critical Updates, Security Updates**.
-3. In the **Choose Update Classifications** window:
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+Add-DNSServerResourceRecordCName `
+    -ComputerName TT-DC04 `
+    -ZoneName technologytoolbox.com `
+    -Name wsus `
+    -HostNameAlias TT-WSUS01.corp.technologytoolbox.com
+```
+
+---
+
+#### Install SSL certificate
+
+Friendly name: **wsus.technologytoolbox.com**
+
+```PowerShell
+cls
+```
+
+#### # Configure SSL on WSUS server
+
+```PowerShell
+Push-Location 'C:\Program Files\Update Services\Tools\'
+
+.\WsusUtil.exe ConfigureSSL wsus.technologytoolbox.com
+
+Pop-Location
+```
+
+#### Configure HTTPS binding on IIS website
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/20/D40B6EF7536FD41FFB3A935DEFA6C78603DBB320.png)
+
+1. Click **Edit**.
+2. In the **Edit Site Binding** window:
+   1. In the **SSL certificate** dropdown, select **wsus.technologytoolbox.com**.
+   2. Click **OK**.
+3. Click **Close**.
+
+#### Validate SSL configuration
+
+[http://wsus.technologytoolbox.com:8530/Content/00/DAB142DAEF6CECF893FAF70D14A33A5526FF2000.txt](http://wsus.technologytoolbox.com:8530/Content/00/DAB142DAEF6CECF893FAF70D14A33A5526FF2000.txt)
+
+[https://wsus.technologytoolbox.com:8531/Content/00/DAB142DAEF6CECF893FAF70D14A33A5526FF2000.txt](https://wsus.technologytoolbox.com:8531/Content/00/DAB142DAEF6CECF893FAF70D14A33A5526FF2000.txt)
+
+```PowerShell
+cls
+```
+
+### # Decline superseded updates
+
+```PowerShell
+Get-WsusUpdate -Approval AnyExceptDeclined -Classification All -Status Any |
+    Where-Object -Property UpdatesSupersedingThisUpdate -NE -Value 'None' |
+    Deny-WsusUpdate -Verbose
+```
+
+### Approve and deploy updates in WSUS
+
+#### Reference
+
+**Approve and Deploy Updates in WSUS**\
+From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/3-approve-and-deploy-updates-in-wsus](https://docs.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/3-approve-and-deploy-updates-in-wsus)>
+
+**To approve and deploy WSUS updates:**
+
+1. In the **Update Services** console, click **Updates**. In the right pane, an update status summary is displayed for **All Updates**, **Critical Updates**, **Security Updates**, and **WSUS Updates**.
+2. In the **All Updates** section, click **Updates needed by computers**.
+3. In the list of updates, select the updates that you want to approve for installation. Information about a selected update is available in the bottom pane of the **Updates** panel. To select multiple contiguous updates, hold down the **shift** key while clicking the update names. To select multiple noncontiguous updates, press down the **CTRL** key while clicking the update names.
+4. Right-click the selection, and then click **Approve**.
+5. In the **Approve Updates** dialog box:
+   1. Select the desired computer group, click the down arrow, and click **Approved for Install**.
+   2. Click **OK**.
+6. The **Approval Progress** window appears, which shows the progress of the tasks that affect update approval. When the approval process is complete, click **Close**.
+
+#### Configure automatic approval rules
+
+**To configure automatic approval rules:**
+
+1. Open the **Update Services** console.
+2. In the left navigation pane, expand the WSUS server and select **Options**.
+3. In the **Options** pane, select **Automatic Approvals**.
+4. In the **Automatic Approvals** window, on the **Update Rules** tab, select **Default Automatic Approval Rule**.
+5. In the **Rule properties** section, click **Critical Updates, Security Updates**.
+6. In the **Choose Update Classifications** window:
    1. Select **Definition Updates**.
    2. Clear the checkboxes for all other update classifications.
    3. Click** OK**.
-4. Confirm the **Rule properties** for the **Default Automatic Approval Rule** are configured as follows:**When an update is in Definition UpdatesApprove the update for all computers**
-5. Select the **Default Automatic Approval Rule** checkbox.
-6. Click **New Rule...**
-7. In the **Add Rule** window:
-   1. In the **Step 1: Select properties** section, select** When an update is in a specific classification**.
-   2. In the **Step 2: Edit the properties** section:
-      1. Click **any classification**.
-         1. In the **Choose Update Classifications **window:
-            1. Clear the **All Classifications **checkbox.
-            2. Select the following checkboxes:
-               - **Critical Updates**
-               - **Security Updates**
-         2. Click **OK**.
-      2. Click **all computers**
-         1. In the **Choose Computer Groups** window:
-            1. Clear the **All Computers** checkbox.
-            2. Select the following checkboxes:
-               - **Fabrikam / Fabrikam - Quality Assurance / Fabrikam - Beta Testing**
-               - **Technology Toolbox / Quality Assurance / Beta Testing**
-         2. Click **OK**.
-   3. In the **Step 3: Specify a name **box, type **Beta Testing Approval Rule**.
-   4. Click **OK**.
-8. In the **Automatic Approvals** window:
-   1. Confirm the **Rule properties** for the **Beta Testing Approval Rule** are configured as follows:**When an update is in Critical Updates, Security UpdatesApprove the update for Fabrikam - Beta Testing, Beta Testing**
-   2. Click **OK**.
+7. Confirm the **Rule properties** for the **Default Automatic Approval Rule** are configured as follows:**When an update is in Definition UpdatesApprove the update for all computers**
+8. Select the **Default Automatic Approval Rule** checkbox.
+9. Click **New Rule...**
+10. In the **Add Rule** window:
+    1. In the **Step 1: Select properties** section, select** When an update is in a specific classification**.
+    2. In the **Step 2: Edit the properties** section:
+       1. Click **any classification**.
+          1. In the **Choose Update Classifications **window:
+             1. Clear the **All Classifications **checkbox.
+             2. Select the following checkboxes:
+                - **Critical Updates**
+                - **Security Updates**
+          2. Click **OK**.
+       2. Click **all computers**
+          1. In the **Choose Computer Groups** window:
+             1. Clear the **All Computers** checkbox.
+             2. Select the following checkboxes:
+                - **Fabrikam / Fabrikam - Quality Assurance / Fabrikam - Beta Testing**
+                - **Technology Toolbox / Quality Assurance / Beta Testing**
+          2. Click **OK**.
+    3. In the **Step 3: Specify a name **box, type **Beta Testing Approval Rule**.
+    4. Click **OK**.
+11. In the **Automatic Approvals** window:
+    1. Confirm the **Rule properties** for the **Beta Testing Approval Rule** are configured as follows:**When an update is in Critical Updates, Security UpdatesApprove the update for Fabrikam - Beta Testing, Beta Testing**
+    2. Click **OK**.
 
-## Install Report Viewer 2008 SP1
+### Configure client updates
 
-**Note: **.NET Framework 2.0 is required for Microsoft Report Viewer 2008 SP1.
+#### Configure group policies for Windows Update
 
-```PowerShell
-& '\\ICEMAN\Public\Download\Microsoft\Report Viewer 2008 SP1\ReportViewer.exe'
-```
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/90D027F45985EDDE45459FFE24B90162DB4EC7FF.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/6E21C9B289F9BA9956C626E0233D90918321943D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/70/30DD2864E090A114EA8533C7805470816BC07470.png)
+
+#### Configure firewall rules for Windows Update
 
 ## Import scheduled task to cleanup WSUS
 
@@ -441,34 +733,6 @@ msiexec.exe /i $msiPath `
 
 ## # Approve manual agent install in Operations Manager
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
-
----
-
-**FOOBAR8**
-
-```PowerShell
-$computer = 'COLOSSUS'
-
-$command = "New-NetFirewallRule ``
-    -Name 'Remote Windows Update (Dynamic RPC)' ``
-    -DisplayName 'Remote Windows Update (Dynamic RPC)' ``
-    -Description 'Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)' ``
-    -Group 'Technology Toolbox (Custom)' ``
-    -Program '%windir%\system32\dllhost.exe' ``
-    -Direction Inbound ``
-    -Protocol TCP ``
-    -LocalPort RPC ``
-    -Profile Domain ``
-    -Action Allow"
-
-$scriptBlock = [ScriptBlock]::Create($command)
-
-Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
-```
-
----
-
 ## Issue: Windows Update (KB3159706) broke WSUS console
 
 ### Issue
@@ -522,38 +786,6 @@ Manual steps required to complete the installation of this update
 
 From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
 
-## Issue - WSUS errors due to insufficient memory
-
-Log Name:      Application\
-Source:        System.ServiceModel 4.0.0.0\
-Date:          5/14/2016 5:49:18 AM\
-Event ID:      3\
-Task Category: WebHost\
-Level:         Error\
-Keywords:      Classic\
-User:          NETWORK SERVICE\
-Computer:      COLOSSUS.corp.technologytoolbox.com\
-Description:\
-WebHost failed to process a request.\
- Sender Information: System.ServiceModel.ServiceHostingEnvironment+HostingManager/6044116\
- Exception: System.ServiceModel.ServiceActivationException: The service '/ClientWebService/client.asmx' cannot be activated due to an exception during compilation.  The exception message is: Memory gates checking failed because the free memory (78831616 bytes) is less than 5% of total memory.  As a result, the service will not be available for incoming requests.  To resolve this, either reduce the load on the machine or adjust the value of minFreeMemoryPercentageToActivateService on the serviceHostingEnvironment config element.. ---> System.InsufficientMemoryException: Memory gates checking failed because the free memory (78831616 bytes) is less than 5% of total memory.  As a result, the service will not be available for incoming requests.  To resolve this, either reduce the load on the machine or adjust the value of minFreeMemoryPercentageToActivateService on the serviceHostingEnvironment config element.\
-   at System.ServiceModel.Activation.ServiceMemoryGates.Check(Int32 minFreeMemoryPercentage, Boolean throwOnLowMemory, UInt64& availableMemoryBytes)\
-   at System.ServiceModel.ServiceHostingEnvironment.HostingManager.CheckMemoryCloseIdleServices(EventTraceActivity eventTraceActivity)\
-   at System.ServiceModel.ServiceHostingEnvironment.HostingManager.EnsureServiceAvailable(String normalizedVirtualPath, EventTraceActivity eventTraceActivity)\
-   --- End of inner exception stack trace ---\
-   at System.ServiceModel.ServiceHostingEnvironment.HostingManager.EnsureServiceAvailable(String normalizedVirtualPath, EventTraceActivity eventTraceActivity)\
-   at System.ServiceModel.ServiceHostingEnvironment.EnsureServiceAvailableFast(String relativeVirtualPath, EventTraceActivity eventTraceActivity)\
- Process Name: w3wp\
- Process ID: 3668
-
-### Solution
-
-Change VM to use dynamic memory (and increase maximum RAM from 2 GB to 4 GB):
-
-- Startup RAM: **2 GB**
-- Minimum RAM: **512 MB**
-- Maximum RAM: **4 GB**
-
 ## Issue - WSUS crashing due to memory constraint
 
 Windows Update failing on clients:
@@ -602,28 +834,6 @@ Restart-Computer
 ```
 
 ### Install SCOM 2016 agent (using Operations Console)
-
-## Issue - Incorrect IPv6 DNS server assigned by Comcast router
-
-```Text
-PS C:\Users\jjameson-admin> nslookup
-Default Server:  cdns01.comcast.net
-Address:  2001:558:feed::1
-```
-
-> **Note**
->
-> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on the Comcast router -- and subsequently restarting the VM -- the incorrect DNS server is assigned to the network adapter.
-
-### Solution
-
-```PowerShell
-Set-DnsClientServerAddress `
-    -InterfaceAlias Management `
-    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
-
-Restart-Computer
-```
 
 ## Move WSUS database from HAVOK to TT-SQL01
 
@@ -750,7 +960,7 @@ GO
 USE master
 GO
 
-CREATE LOGIN [TECHTOOLBOX\COLOSSUS$] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\TT-WSUS01$] FROM WINDOWS
 WITH DEFAULT_DATABASE=master, DEFAULT_LANGUAGE=us_english
 GO
 ```
@@ -817,7 +1027,7 @@ GO
 USE master
 GO
 
-CREATE LOGIN [TECHTOOLBOX\COLOSSUS$] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\TT-WSUS01$] FROM WINDOWS
 WITH DEFAULT_DATABASE=master, DEFAULT_LANGUAGE=us_english
 GO
 ```
@@ -1156,7 +1366,7 @@ Get-ItemProperty `
 cls
 ```
 
-### # Stop WSUS services
+### # Start WSUS services
 
 ```PowerShell
 Start-Service WsusService
