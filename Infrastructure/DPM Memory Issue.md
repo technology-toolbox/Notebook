@@ -7,6 +7,8 @@ Saturday, December 30, 2017
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/A6D10B5D84BF6A486A49415C8877AA9FE2CA763D.png)
 
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D6/61BB74E507D2801E0EFF46C030C55460F7274DD6.png)
+
 ## References
 
 **You experience performance issues in applications and services when the system file cache consumes most of the physical RAM**\
