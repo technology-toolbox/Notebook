@@ -732,3 +732,64 @@ Remove-Item D:\Shares\VM-Library -Recurse
 Protection Group: Critical Files\
 Computer: TT-FS01\
 Volume: F:\\
+
+## Move file share to different drive
+
+```PowerShell
+$oldPath = "E:\Shares\Backups"
+$newPath = "F:\Shares\Backups"
+```
+
+### # Copy files
+
+```PowerShell
+robocopy $oldPath $newPath /E /COPYALL
+```
+
+```PowerShell
+cls
+```
+
+### # Change path for SMB share
+
+```PowerShell
+function Change-SharePath {
+    [cmdletbinding(SupportsShouldProcess=$true)]
+    param(
+        $OldPath,
+        $NewPath
+    )
+
+    $RegPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Shares'
+    dir -Path $RegPath | Select-Object -ExpandProperty Property | ForEach-Object {
+        $ShareName = $_
+        $ShareData = Get-ItemProperty -Path $RegPath -Name $ShareName |
+            Select-Object -ExpandProperty $ShareName
+
+        if ($ShareData | Where-Object { $_ -eq  "Path=$OldPath"}) {
+            $ShareData = $ShareData -replace [regex]::Escape("Path=$OldPath"), "Path=$NewPath"
+
+            if ($PSCmdlet.ShouldProcess($ShareName, 'Change-SharePath')) {
+                Set-ItemProperty -Path $RegPath -Name $ShareName -Value $ShareData
+            }
+        }
+    }
+}
+
+Change-SharePath -OldPath $oldPath -NewPath $newPath -Verbose
+```
+
+```PowerShell
+cls
+```
+
+### # Restart "Server" service
+
+```PowerShell
+Restart-Service -Name lanmanserver
+```
+
+### Reference
+
+**Changing Shared Folders’ Path**\
+From <[https://blogs.technet.microsoft.com/pstips/2014/12/21/changing-shared-folders-path/](https://blogs.technet.microsoft.com/pstips/2014/12/21/changing-shared-folders-path/)>
