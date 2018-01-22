@@ -184,7 +184,7 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2017_09_03_000029_3502401.bak"
+$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
 $destination = "\\EXT-FOOBAR2\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
@@ -208,7 +208,7 @@ iisreset /stop
 #### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2017_09_03_000029_3502401.bak"
+$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -618,10 +618,10 @@ cls
 
 ```PowerShell
 $backupFile1 =
-    "WSS_Content_SecuritasPortal_backup_2017_09_03_000029_3346241.bak"
+    "WSS_Content_SecuritasPortal_backup_2018_01_14_000010_4869606.bak"
 
 $backupFile2 =
-    "WSS_Content_SecuritasPortal2_backup_2017_09_03_000029_3502401.bak"
+    "WSS_Content_SecuritasPortal2_backup_2018_01_14_000010_5338567.bak"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
 $destination = "\\EXT-FOOBAR2\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
@@ -659,10 +659,10 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
 
 ```PowerShell
 $backupFile1 =
-    "WSS_Content_SecuritasPortal_backup_2017_09_03_000029_3346241.bak"
+    "WSS_Content_SecuritasPortal_backup_2018_01_14_000010_4869606.bak"
 
 $backupFile2 =
-    "WSS_Content_SecuritasPortal2_backup_2017_09_03_000029_3502401.bak"
+    "WSS_Content_SecuritasPortal2_backup_2018_01_14_000010_5338567.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -698,10 +698,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 37 minutes.\
-> RESTORE DATABASE successfully processed 4013739 pages in 830.639 seconds (37.750 MB/sec).\
+> Expect the previous operation to complete in approximately 51 minutes.\
+> RESTORE DATABASE successfully processed 4053939 pages in 1062.855 seconds (29.798 MB/sec).\
 > ...\
-> RESTORE DATABASE successfully processed 3815118 pages in 796.259 seconds (37.432 MB/sec).
+> RESTORE DATABASE successfully processed 3991413 pages in 896.711 seconds (34.774 MB/sec).
 
 ```PowerShell
 cls
@@ -726,7 +726,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 6-1/2 minutes.
+> Expect the previous operation to complete in approximately 9-1/2 minutes.
 
 ```PowerShell
 cls
@@ -771,7 +771,7 @@ $build = "4.0.701.0"
 
 Push-Location C:\Shares\Builds\ClientPortal\$build\DeploymentFiles\Scripts
 
-Import-Csv C:\NotBackedUp\Temp\AppSettings-UAT_2017-06-06.csv |
+Import-Csv C:\NotBackedUp\Temp\AppSettings-UAT_2018-01-19.csv |
     foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
@@ -788,9 +788,13 @@ cls
 ```PowerShell
 Push-Location C:\Shares\Builds\ClientPortal\$build\DeploymentFiles\Scripts
 
+#$claim = New-SPClaimsPrincipal `
+#    -Identity "EXTRANET\SharePoint Admins (DEV)" `
+#    -IdentityType WindowsSecurityGroupName
+
 $claim = New-SPClaimsPrincipal `
-    -Identity "EXTRANET\SharePoint Admins (DEV)" `
-    -IdentityType WindowsSecurityGroupName
+    -Identity "EXTRANET\setup-sharepoint-dev" `
+    -IdentityType WindowsSamAccountName
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -813,6 +817,21 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 Pop-Location
 ```
+
+> **Note**
+>
+> Attempting to use **EXTRANET\\SharePoint Admins (DEV)** results in the following error:
+>
+> ```PowerShell
+> C:\Shares\Builds\ClientPortal\4.0.701.0\DeploymentFiles\Scripts\Set-SiteAdministrator.ps1 : Exception calling "EnsureUser" with "1" argument(s): "The specified user c:0+.w|s-1-5-21-224930944-1780242101-1199596236-2127 could not be found."
+> At line:1 char:1
+> + .\Set-SiteAdministrator.ps1 $env:SECURITAS_CLIENT_PORTAL_URL -Claim $claim
+> + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>     + CategoryInfo          : NotSpecified: (:) [Set-SiteAdministrator.ps1], MethodInvocationException
+>     + FullyQualifiedErrorId : SPException,Set-SiteAdministrator.ps1
+> ```
+>
+> To avoid this error, the site collection administrator is set to **EXTRANET\\setup-sharepoint-dev**.
 
 > **Note**
 >
@@ -938,7 +957,7 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "WSS_Content_CloudPortal_backup_2017_09_03_000029_3502401.bak"
+$backupFile = "WSS_Content_CloudPortal_backup_2018_01_14_000010_5494577.bak"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
 $destination = "\\EXT-FOOBAR2\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
@@ -949,7 +968,7 @@ robocopy $source $destination $backupFile
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 20 minutes.
+> Expect the previous operation to complete in approximately 32 minutes.
 
 ---
 
@@ -971,7 +990,7 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL |
 ##### # Restore database backup
 
 ```PowerShell
-$backupFile = "WSS_Content_CloudPortal_backup_2017_09_03_000029_3502401.bak"
+$backupFile = "WSS_Content_CloudPortal_backup_2018_01_14_000010_5494577.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -1000,8 +1019,8 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 48 minutes.\
-> RESTORE DATABASE successfully processed 8944387 pages in 2361.866 seconds (29.585 MB/sec).
+> Expect the previous operation to complete in approximately 1 hour and 20 minutes.\
+> RESTORE DATABASE successfully processed 9873502 pages in 3822.642 seconds (20.178 MB/sec).
 
 ```PowerShell
 cls
@@ -1022,7 +1041,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 4 seconds.
+> Expect the previous operation to complete in approximately 13 seconds.
 
 ```PowerShell
 cls

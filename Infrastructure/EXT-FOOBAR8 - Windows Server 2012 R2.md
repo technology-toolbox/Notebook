@@ -7707,7 +7707,7 @@ $build = "1.0.38.0"
 
 $sourcePath = "\\TT-FS01\Builds\Securitas\EmployeePortal\$build"
 
-$destPath = "\\EXT-FOOBAR2.extranet.technologytoolbox.com\Builds" `
+$destPath = "\\EXT-FOOBAR8.extranet.technologytoolbox.com\Builds" `
     + "\EmployeePortal\$build"
 
 robocopy $sourcePath $destPath /E

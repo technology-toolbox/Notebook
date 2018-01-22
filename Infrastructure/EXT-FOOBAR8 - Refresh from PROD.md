@@ -66,7 +66,7 @@ cls
 #### # Copy SecuritasConnect build from TFS drop location
 
 ```PowerShell
-$build = "4.0.697.0"
+$build = "4.0.701.0"
 
 $source = "\\TT-FS01\Builds\Securitas\ClientPortal\$build"
 $destination = "\\EXT-FOOBAR8\Builds\ClientPortal\$build"
@@ -83,7 +83,7 @@ cls
 #### # Rebuild web application
 
 ```PowerShell
-$build = "4.0.697.0"
+$build = "4.0.701.0"
 
 $peoplePickerCredentials = @(
     (Get-Credential "EXTRANET\s-web-client-dev"),
@@ -95,13 +95,38 @@ Push-Location C:\Shares\Builds\ClientPortal\$build\DeploymentFiles\Scripts
     -PeoplePickerCredentials $peoplePickerCredentials `
     -Confirm:$false `
     -Verbose
-
-Pop-Location
 ```
 
 > **Note**
 >
 > Expect the previous operation to complete in approximately 22 minutes.
+
+> **Important**
+>
+> If an error occurs when activating the **Securitas.Portal.Web_ClaimsAuthenticationConfiguration** feature, restart IIS to resolve the issue with loading the custom ADFS claims provider:
+>
+> ```Console
+> iisreset
+> ```
+>
+> After restarting IIS, activate the features again:
+>
+> ```PowerShell
+> & '.\Activate Features.ps1' -Verbose
+> ```
+>
+> After all the features have been activated, complete the remaining steps for rebuilding the web application:
+>
+> ```PowerShell
+> & '.\Import Template Site Content.ps1' -Verbose
+>
+> & '.\Configure Trusted Root Authorities.ps1' -Verbose
+> ```
+
+```Console
+cls
+Pop-Location
+```
 
 #### # Activate "Securitas - Application Settings" feature
 
@@ -159,7 +184,7 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2017_09_03_000029_3502401.bak"
+$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
 $destination = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
@@ -183,7 +208,7 @@ iisreset /stop
 #### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2017_09_03_000029_3502401.bak"
+$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -226,10 +251,17 @@ Else
 
 [String] $employeePortalHostHeader = $employeePortalUrl.Host
 
+[Uri] $idpUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
+    "client",
+    "idp")
+
+[String] $idpHostHeader = $idpUrl.Host
+
 [String] $farmServiceAccount = "EXTRANET\s-sp-farm-dev"
 [String] $clientPortalServiceAccount = "EXTRANET\s-web-client-dev"
 [String] $cloudPortalServiceAccount = "EXTRANET\s-web-cloud-dev"
 [String[]] $employeePortalAccounts = "IIS APPPOOL\$employeePortalHostHeader"
+[String[]] $idpServiceAccounts = "IIS APPPOOL\$idpHostHeader"
 
 If ($employeePortalHostHeader -eq "employee-qa.securitasinc.com")
 {
@@ -239,6 +271,8 @@ If ($employeePortalHostHeader -eq "employee-qa.securitasinc.com")
     $employeePortalAccounts = @(
         'SEC\784813-UATSPAPP$',
         'SEC\784815-UATSPWFE$')
+
+    $idpServiceAccounts = $employeePortalAccounts
 }
 
 [String] $sqlcmd = @"
@@ -304,6 +338,31 @@ GO
 "@
     }
 
+$idpServiceAccounts |
+    foreach {
+        $idpServiceAccount = $_
+
+        $sqlcmd += [System.Environment]::NewLine
+
+        $sqlcmd += @"
+CREATE USER [$idpServiceAccount]
+FOR LOGIN [$idpServiceAccount]
+GO
+ALTER ROLE aspnet_Membership_BasicAccess
+ADD MEMBER [$idpServiceAccount]
+
+ALTER ROLE aspnet_Membership_ReportingAccess
+ADD MEMBER [$idpServiceAccount]
+
+ALTER ROLE aspnet_Roles_BasicAccess
+ADD MEMBER [$idpServiceAccount]
+
+ALTER ROLE aspnet_Roles_ReportingAccess
+ADD MEMBER [$idpServiceAccount]
+GO
+"@
+    }
+
 $sqlcmd += [System.Environment]::NewLine
 $sqlcmd += @"
 DROP USER [SEC\258521-VM4$]
@@ -332,6 +391,178 @@ Set-Location C:
 iisreset /start
 ```
 
+```PowerShell
+cls
+```
+
+### # Deploy federated authentication in SecuritasConnect
+
+#### # Configure relying party in AD FS for SecuritasConnect
+
+##### # Import token-signing certificate to SharePoint farm
+
+```PowerShell
+Enable-SharePointCmdlets
+
+$certPath = "C:\ADFS Signing - fs.technologytoolbox.com.cer"
+
+$cert = `
+    New-Object System.Security.Cryptography.X509Certificates.X509Certificate2(
+        $certPath)
+
+$certName = $cert.Subject.Replace("CN=", "")
+
+New-SPTrustedRootAuthority -Name $certName -Certificate $cert
+```
+
+##### # Create authentication provider for AD FS
+
+###### # Delete ADFS trusted identity token issuer
+
+```PowerShell
+Get-SPTrustedIdentityTokenIssuer -Identity ADFS |
+    Remove-SPTrustedIdentityTokenIssuer -Confirm:$false
+```
+
+###### # Define claim mappings and unique identifier claim
+
+```PowerShell
+$emailClaimMapping = New-SPClaimTypeMapping `
+    -IncomingClaimType `
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" `
+    -IncomingClaimTypeDisplayName "EmailAddress" `
+    -SameAsIncoming
+
+$nameClaimMapping = New-SPClaimTypeMapping `
+    -IncomingClaimType `
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name" `
+    -IncomingClaimTypeDisplayName "Name" `
+    -LocalClaimType `
+        "http://schemas.securitasinc.com/ws/2017/01/identity/claims/name"
+
+$sidClaimMapping = New-SPClaimTypeMapping `
+    -IncomingClaimType `
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid" `
+    -IncomingClaimTypeDisplayName "SID" `
+    -SameAsIncoming
+
+$upnClaimMapping = New-SPClaimTypeMapping `
+    -IncomingClaimType `
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn" `
+    -IncomingClaimTypeDisplayName "UPN" `
+    -SameAsIncoming
+
+$roleClaimMapping = New-SPClaimTypeMapping `
+    -IncomingClaimType `
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" `
+    -IncomingClaimTypeDisplayName "Role" `
+    -SameAsIncoming
+
+$claimsMappings = @(
+    $emailClaimMapping,
+    $nameClaimMapping,
+    $sidClaimMapping,
+    $upnClaimMapping,
+    $roleClaimMapping)
+
+$identifierClaim = $emailClaimMapping.InputClaimType
+```
+
+###### # Create authentication provider for AD FS
+
+```PowerShell
+$realm = "urn:sharepoint:securitas"
+$signInURL = "https://fs.technologytoolbox.com/adfs/ls"
+
+$cert = Get-SPTrustedRootAuthority |
+    where { $_.Name -eq "ADFS Signing - fs.technologytoolbox.com" } |
+    select -ExpandProperty Certificate
+
+$authProvider = New-SPTrustedIdentityTokenIssuer `
+    -Name "ADFS" `
+    -Description "Active Directory Federation Services provider" `
+    -Realm $realm `
+    -ImportTrustCertificate $cert `
+    -ClaimsMappings $claimsMappings `
+    -SignInUrl $signInURL `
+    -IdentifierClaim $identifierClaim
+```
+
+##### # Configure AD FS authentication provider for SecuritasConnect
+
+```PowerShell
+$clientPortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
+
+$secureClientPortalUrl = "https://" + $clientPortalUrl.Host
+
+$realm = "urn:sharepoint:securitas:" `
+    + ($clientPortalUrl.Host -split '\.' | select -First 1)
+
+$authProvider.ProviderRealms.Add($secureClientPortalUrl, $realm)
+$authProvider.Update()
+```
+
+#### # Configure SecuritasConnect to use AD FS trusted identity provider
+
+```PowerShell
+$clientPortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
+
+$trustedIdentityProvider = Get-SPTrustedIdentityTokenIssuer -Identity ADFS
+
+Set-SPWebApplication `
+    -Identity $clientPortalUrl.AbsoluteUri `
+    -Zone Default `
+    -AuthenticationProvider $trustedIdentityProvider `
+    -SignInRedirectURL ""
+
+$webApp = Get-SPWebApplication $clientPortalUrl.AbsoluteUri
+
+$defaultZone = [Microsoft.SharePoint.Administration.SPUrlZone]::Default
+
+$webApp.IisSettings[$defaultZone].AllowAnonymous = $false
+$webApp.Update()
+```
+
+```PowerShell
+cls
+```
+
+### # Update permissions on template sites
+
+```PowerShell
+$clientPortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
+
+$sites = @(
+    "Template-Sites/Post-Orders-en-US",
+    "Template-Sites/Post-Orders-en-CA",
+    "Template-Sites/Post-Orders-fr-CA")
+
+$sites |
+    % {
+        $siteUrl = $clientPortalUrl.AbsoluteUri + $_
+
+        $site = Get-SPSite -Identity $siteUrl
+
+        $group = $site.RootWeb.AssociatedVisitorGroup
+
+        $group.Users | % { $group.Users.Remove($_) }
+
+        $group.AddUser(
+            "c:0-.t|adfs|Branch Managers",
+            $null,
+            "Branch Managers",
+            $null)
+    }
+```
+
+### # Configure AD FS claim provider
+
+```PowerShell
+$tokenIssuer = Get-SPTrustedIdentityTokenIssuer -Identity ADFS
+$tokenIssuer.ClaimProviderName = "Securitas ADFS Claim Provider"
+$tokenIssuer.Update()
+```
+
 #### # Associate users to TECHTOOLBOX\\smasters
 
 ```PowerShell
@@ -340,7 +571,7 @@ USE [SecuritasPortal]
 GO
 
 INSERT INTO Customer.BranchManagerAssociatedUsers
-SELECT 'TECHTOOLBOX\smasters', AssociatedUserName
+SELECT 'smasters@technologytoolbox.com', AssociatedUserName
 FROM Customer.BranchManagerAssociatedUsers
 WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
 "@
@@ -360,7 +591,7 @@ Set-Location C:
 
 [https://client-local-8.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-8.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
-Branch Manager: **TECHTOOLBOX\\smasters**\
+Branch Manager: **smasters@technologytoolbox.com**\
 TrackTik username:** opanduro2m**
 
 ##### HACK: Update TrackTik password for Angela.Parks
@@ -387,10 +618,10 @@ cls
 
 ```PowerShell
 $backupFile1 =
-    "WSS_Content_SecuritasPortal_backup_2017_09_03_000029_3346241.bak"
+    "WSS_Content_SecuritasPortal_backup_2018_01_14_000010_4869606.bak"
 
 $backupFile2 =
-    "WSS_Content_SecuritasPortal2_backup_2017_09_03_000029_3502401.bak"
+    "WSS_Content_SecuritasPortal2_backup_2018_01_14_000010_5338567.bak"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
 $destination = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
@@ -428,10 +659,10 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
 
 ```PowerShell
 $backupFile1 =
-    "WSS_Content_SecuritasPortal_backup_2017_09_03_000029_3346241.bak"
+    "WSS_Content_SecuritasPortal_backup_2018_01_14_000010_4869606.bak"
 
 $backupFile2 =
-    "WSS_Content_SecuritasPortal2_backup_2017_09_03_000029_3502401.bak"
+    "WSS_Content_SecuritasPortal2_backup_2018_01_14_000010_5338567.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -467,10 +698,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 17 minutes.\
-> RESTORE DATABASE successfully processed 3809341 pages in 198.082 seconds (150.243 MB/sec).\
+> Expect the previous operation to complete in approximately 38 minutes.\
+> RESTORE DATABASE successfully processed 4053939 pages in 840.221 seconds (37.694 MB/sec).\
 > ...\
-> RESTORE DATABASE successfully processed 3738176 pages in 194.225 seconds (150.364 MB/sec).
+> RESTORE DATABASE successfully processed 3991413 pages in 729.528 seconds (42.743 MB/sec).
 
 ```PowerShell
 cls
@@ -495,7 +726,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 4 minutes.
+> Expect the previous operation to complete in approximately 7-1/2 minutes.
 
 ```PowerShell
 cls
@@ -536,9 +767,11 @@ $webApp.Update()
 ### # Import application settings from UAT environment
 
 ```PowerShell
+$build = "4.0.701.0"
+
 Push-Location C:\Shares\Builds\ClientPortal\$build\DeploymentFiles\Scripts
 
-Import-Csv C:\NotBackedUp\Temp\AppSettings-UAT_2017-06-06.csv |
+Import-Csv C:\NotBackedUp\Temp\AppSettings-UAT_2018-01-19.csv |
     foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
@@ -546,7 +779,7 @@ Import-Csv C:\NotBackedUp\Temp\AppSettings-UAT_2017-06-06.csv |
 Pop-Location
 ```
 
-### # DEV - Add Branch Managers domain group to Post Orders template sites
+### # DEV - TODO: Add Branch Managers domain group to Post Orders template sites
 
 ```PowerShell
 Enable-SharePointCmdlets
@@ -582,9 +815,13 @@ cls
 ```PowerShell
 Push-Location C:\Shares\Builds\ClientPortal\$build\DeploymentFiles\Scripts
 
+#$claim = New-SPClaimsPrincipal `
+#    -Identity "EXTRANET\SharePoint Admins (DEV)" `
+#    -IdentityType WindowsSecurityGroupName
+
 $claim = New-SPClaimsPrincipal `
-    -Identity "EXTRANET\SharePoint Admins (DEV)" `
-    -IdentityType WindowsSecurityGroupName
+    -Identity "EXTRANET\setup-sharepoint-dev" `
+    -IdentityType WindowsSamAccountName
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -610,7 +847,22 @@ Pop-Location
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 56 minutes.
+> Attempting to use **EXTRANET\\SharePoint Admins (DEV)** results in the following error:
+>
+> ```PowerShell
+> C:\Shares\Builds\ClientPortal\4.0.701.0\DeploymentFiles\Scripts\Set-SiteAdministrator.ps1 : Exception calling "EnsureUser" with "1" argument(s): "The specified user c:0+.w|s-1-5-21-224930944-1780242101-1199596236-2127 could not be found."
+> At line:1 char:1
+> + .\Set-SiteAdministrator.ps1 $env:SECURITAS_CLIENT_PORTAL_URL -Claim $claim
+> + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>     + CategoryInfo          : NotSpecified: (:) [Set-SiteAdministrator.ps1], MethodInvocationException
+>     + FullyQualifiedErrorId : SPException,Set-SiteAdministrator.ps1
+> ```
+>
+> To avoid this error, the site collection administrator is set to **EXTRANET\\setup-sharepoint-dev**.
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 1 hour and 5 minutes.
 
 ```PowerShell
 cls
@@ -644,12 +896,12 @@ cls
 #### # Copy C&C build from TFS drop location
 
 ```PowerShell
-$build = "2.0.125.0"
+$build = "2.0.131.0"
 
-$sourcePath = "\\TT-FS01\Builds\Securitas\CloudPortal\$build"
-$destPath = "\\EXT-FOOBAR2\Builds\CloudPortal\$build"
+$source = "\\TT-FS01\Builds\Securitas\CloudPortal\$build"
+$destination = "\\EXT-FOOBAR8\Builds\CloudPortal\$build"
 
-robocopy $sourcePath $destPath /E
+robocopy $source $destination /E
 ```
 
 ---
@@ -661,7 +913,7 @@ cls
 #### # Rebuild web application
 
 ```PowerShell
-$build = "2.0.125.0"
+$build = "2.0.131.0"
 
 $peoplePickerCredentials = @(
     (Get-Credential "EXTRANET\s-web-cloud-dev"),
@@ -732,18 +984,18 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "WSS_Content_CloudPortal_backup_2017_09_03_000029_3502401.bak"
+$backupFile = "WSS_Content_CloudPortal_backup_2018_01_14_000010_5494577.bak"
 
-$sourcePath = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destPath = "\\EXT-FOOBAR2\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL" `
-    + "\Backup\Full"
+$source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
+$destination = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
+    + "\MSSQL\Backup\Full"
 
-robocopy $sourcePath $destPath $backupFile
+robocopy $source $destination $backupFile
 ```
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 20 minutes.
+> Expect the previous operation to complete in approximately 31 minutes.
 
 ---
 
@@ -765,7 +1017,7 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL |
 ##### # Restore database backup
 
 ```PowerShell
-$backupFile = "WSS_Content_CloudPortal_backup_2017_09_03_000029_3502401.bak"
+$backupFile = "WSS_Content_CloudPortal_backup_2018_01_14_000010_5494577.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -794,8 +1046,8 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 48 minutes.\
-> RESTORE DATABASE successfully processed 8944387 pages in 2361.866 seconds (29.585 MB/sec).
+> Expect the previous operation to complete in approximately 1 hour and 28 minutes.\
+> RESTORE DATABASE successfully processed 9873502 pages in 4729.027 seconds (16.311 MB/sec).
 
 ```PowerShell
 cls
@@ -816,7 +1068,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 4 seconds.
+> Expect the previous operation to complete in approximately 15 seconds.
 
 ```PowerShell
 cls
@@ -852,6 +1104,37 @@ $policy = $webApp.Policies.Add($claim, $adminGroup)
 $policy.PolicyRoleBindings.Add($policyRole)
 
 $webApp.Update()
+```
+
+```PowerShell
+cls
+```
+
+### # Configure custom sign-in page on Web application
+
+```PowerShell
+Set-SPWebApplication `
+    -Identity $env:SECURITAS_CLOUD_PORTAL_URL `
+    -Zone Default `
+    -SignInRedirectURL "/Pages/Sign-In.aspx"
+```
+
+```PowerShell
+cls
+```
+
+## # Extend web applications to Intranet zone
+
+```PowerShell
+Push-Location 'C:\Shares\Builds\EmployeePortal\1.0.38.0\Deployment Files\Scripts'
+
+& '.\Extend Web Applications.ps1' -SecureSocketsLayer -Confirm:$false -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
 ```
 
 ## # Backup databases and perform full crawl
