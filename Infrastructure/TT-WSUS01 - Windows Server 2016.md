@@ -1373,3 +1373,27 @@ Start-Service WsusService
 Start-Service W3SVC
 Start-Service wuauserv
 ```
+
+---
+
+**FOOBAR11**
+
+```PowerShell
+cls
+```
+
+## # Make virtual machine highly available
+
+```PowerShell
+$vm = Get-SCVirtualMachine -Name TT-WSUS01
+$vmHost = $vm.VMHost
+
+Move-SCVirtualMachine `
+    -VM $vm `
+    -VMHost $vmHost `
+    -HighlyAvailable $true `
+    -Path "\\TT-SOFS01.corp.technologytoolbox.com\VM-Storage-Silver" `
+    -UseDiffDiskOptimization
+```
+
+---
