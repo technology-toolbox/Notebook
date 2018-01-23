@@ -7837,3 +7837,42 @@ cls
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Resume-SPEnterpriseSearchServiceApplication
 ```
+
+# Issue - "Access Denied" error with SharePoint Trace Service
+
+## Symptom
+
+Numerous ULS log entries:
+
+Process: wsstracing.exe\
+Produce: SharePoint Foundation\
+Category: Unified Logging Service\
+EventID: adr4q\
+Level: Unexpected\
+Message: Trace Service encountered an unexpected exception when processing usage event. Detail exception message: Create store file error.. Win32 error code=5.
+
+## Problem
+
+**Local Service** account has **Write** permission on Trace Log folder but does not have **Read** permission:
+
+```PowerShell
+$logsFolder = ("C:\Program Files\Common Files\microsoft shared" `
+    + "\Web Server Extensions\15\LOGS")
+
+icacls $logsFolder
+
+C:\...\15\LOGS BUILTIN\Administrators:(OI)(CI)(F)
+               NT AUTHORITY\LOCAL SERVICE:(OI)(CI)(W,Rc,RD,DC)
+               ...
+```
+
+## Solution
+
+Grant** Local Service** account **Read** permission on Trace Log folder (in addition to **Write** permission):
+
+```PowerShell
+$logsFolder = ("C:\Program Files\Common Files\microsoft shared" `
+    + "\Web Server Extensions\15\LOGS")
+
+icacls $logsFolder /grant "NT AUTHORITY\LOCAL SERVICE:(OI)(CI)(R,W,DC)"
+```
