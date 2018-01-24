@@ -223,7 +223,7 @@ RESTORE DATABASE SecuritasPortal
 GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
 ```

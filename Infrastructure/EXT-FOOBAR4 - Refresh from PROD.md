@@ -16,7 +16,7 @@ cls
 ### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2017_10_01_000021_4616418.bak"
+$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
 
@@ -41,7 +41,7 @@ iisreset /stop
 ### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2017_10_01_000021_4616418.bak"
+$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -84,10 +84,17 @@ Else
 
 [String] $employeePortalHostHeader = $employeePortalUrl.Host
 
+[Uri] $idpUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
+    "client",
+    "idp")
+
+[String] $idpHostHeader = $idpUrl.Host
+
 [String] $farmServiceAccount = "EXTRANET\s-sp-farm-dev"
 [String] $clientPortalServiceAccount = "EXTRANET\s-web-client-dev"
 [String] $cloudPortalServiceAccount = "EXTRANET\s-web-cloud-dev"
 [String[]] $employeePortalAccounts = "IIS APPPOOL\$employeePortalHostHeader"
+[String[]] $idpServiceAccounts = "IIS APPPOOL\$idpHostHeader"
 
 If ($employeePortalHostHeader -eq "employee-qa.securitasinc.com")
 {
@@ -97,6 +104,8 @@ If ($employeePortalHostHeader -eq "employee-qa.securitasinc.com")
     $employeePortalAccounts = @(
         'SEC\784813-UATSPAPP$',
         'SEC\784815-UATSPWFE$')
+
+    $idpServiceAccounts = $employeePortalAccounts
 }
 
 [String] $sqlcmd = @"
@@ -147,7 +156,7 @@ GO
 "@
 
 $employeePortalAccounts |
-    ForEach-Object {
+    foreach {
         $employeePortalAccount = $_
 
         $sqlcmd += [System.Environment]::NewLine
@@ -158,6 +167,31 @@ FOR LOGIN [$employeePortalAccount]
 GO
 ALTER ROLE Employee_FullAccess
 ADD MEMBER [$employeePortalAccount]
+GO
+"@
+    }
+
+$idpServiceAccounts |
+    foreach {
+        $idpServiceAccount = $_
+
+        $sqlcmd += [System.Environment]::NewLine
+
+        $sqlcmd += @"
+CREATE USER [$idpServiceAccount]
+FOR LOGIN [$idpServiceAccount]
+GO
+ALTER ROLE aspnet_Membership_BasicAccess
+ADD MEMBER [$idpServiceAccount]
+
+ALTER ROLE aspnet_Membership_ReportingAccess
+ADD MEMBER [$idpServiceAccount]
+
+ALTER ROLE aspnet_Roles_BasicAccess
+ADD MEMBER [$idpServiceAccount]
+
+ALTER ROLE aspnet_Roles_ReportingAccess
+ADD MEMBER [$idpServiceAccount]
 GO
 "@
     }
