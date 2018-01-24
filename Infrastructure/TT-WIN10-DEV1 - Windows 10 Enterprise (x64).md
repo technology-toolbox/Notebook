@@ -228,7 +228,7 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 $msiPath = "\\TT-FS01\Archive\Clients\Securitas\Check_Point_VPN_client" `
-    + "\Securitas USA VPN E80.62 Build 452.msi"
+    + "\Securitas-USA-VPN_E80.72.msi"
 
 $arguments = "/i `"$msiPath`" /qr"
 
@@ -440,8 +440,6 @@ icacls 'C:\Program Files (x86)\Microsoft Team Foundation Server Integration Tool
 >
 > Repeat until there are no updates available for the computer.
 
-**TODO:**
-
 ## # Enter a product key and activate Windows
 
 ```PowerShell
@@ -460,6 +458,8 @@ slmgr /ato
 
 1. Start Word 2016
 2. Enter product key
+
+**TODO:**
 
 ## Install dependencies for building SharePoint solutions
 

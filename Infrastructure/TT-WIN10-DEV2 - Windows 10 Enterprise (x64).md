@@ -439,7 +439,7 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 $msiPath = "\\TT-FS01\Archive\Clients\Securitas\Check_Point_VPN_client" `
-    + "\Securitas USA VPN E80.62 Build 452.msi"
+    + "\Securitas-USA-VPN_E80.72.msi"
 
 $arguments = "/i `"$msiPath`" /qr"
 
