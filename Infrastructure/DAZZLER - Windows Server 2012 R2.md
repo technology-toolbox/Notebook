@@ -833,3 +833,141 @@ Set-DnsClientServerAddress `
 
 Restart-Computer
 ```
+
+## Upgrade TFS Build server for Employee Portal "v1.0 Sprint-7" release
+
+```Console
+cls
+```
+
+# Upgrade and reconfigure Node.js
+
+#### # Upgrade Node.js
+
+```PowerShell
+Start-Process `
+    -FilePath \\TT-FS01\Products\node.js\node-v8.9.1-x64.msi `
+    -Wait
+```
+
+#### # Change NPM file locations to avoid issues with redirected folders
+
+```PowerShell
+notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
+```
+
+---
+
+**C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
+
+```Text
+;prefix=${APPDATA}\npm
+prefix=${LOCALAPPDATA}\npm
+cache=${LOCALAPPDATA}\npm-cache
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Change NPM "global" locations to shared location for all users
+
+```PowerShell
+npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
+
+npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
+
+icacls "$env:ALLUSERSPROFILE\npm-cache" /grant:r "TECHTOOLBOX\s-tfs-build:(OI)(CI)M" /T
+
+Cls
+```
+
+#### # Configure NPM for TFS Build service account
+
+---
+
+```Console
+runas /USER:TECHTOOLBOX\s-tfs-build PowerShell.exe
+```
+
+##### # Set NPM "global" locations to shared location for all users
+
+```PowerShell
+npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
+
+npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
+```
+
+---
+
+#### # Clear NPM cache
+
+```PowerShell
+npm cache clean --force
+```
+
+```PowerShell
+cls
+```
+
+### # Remove obsolete global NPM packages
+
+```PowerShell
+npm uninstall --global grunt-cli
+
+npm uninstall --global gulp
+
+npm uninstall --global bower
+
+npm uninstall --global karma-cli
+
+npm uninstall --global rimraf
+```
+
+### # Install new global NPM packages
+
+```PowerShell
+npm install --global @angular/cli@1.4.9
+
+npm install --global rimraf@2.6.2
+```
+
+### Install TypeScript 2.6.2 for Visual Studio 2015
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+##### # Copy installer from internal file server
+
+```PowerShell
+$installer = "TypeScript_Dev14Full.exe"
+
+$source = ("\\TT-FS01\Products\Microsoft\Visual Studio 2015" `
+     + "\TypeScript 2.6.2 for Visual Studio 2015")
+
+$destination = '\\EXT-FOOBAR4\C$\NotBackedUp\Temp'
+
+robocopy $source $destination $installer
+```
+
+---
+
+```PowerShell
+cls
+```
+
+##### # Install new version of TypeScript for Visual Studio 2015
+
+```PowerShell
+$setupFile = ("\\TT-FS01\Products\Microsoft\Visual Studio 2015" `
+     + "\TypeScript 2.6.2 for Visual Studio 2015\TypeScript_Dev14Full.exe")
+
+Start-Process -FilePath $setupFile -Wait
+```
