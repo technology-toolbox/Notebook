@@ -674,6 +674,16 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 #### Configure firewall rules for Windows Update
 
+```PowerShell
+cls
+```
+
+#### # Install SQL Server Management Studio
+
+```PowerShell
+& "\\TT-FS01\Products\Microsoft\SQL Server 2017\SSMS-Setup-ENU-14.0.17213.0.exe"
+```
+
 ## Import scheduled task to cleanup WSUS
 
 "C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WSUS Server Cleanup.xml"
