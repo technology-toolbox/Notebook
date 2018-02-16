@@ -1392,4 +1392,67 @@ Remove-Item "C:\NotBackedUp\Temp\System Center 2016" -Recurse
 
 #### Approve manual agent install in Operations Manager
 
+## Deploy federated authentication in SecuritasConnect
+
+### Install and configure identity provider for client users
+
+```PowerShell
+cls
+```
+
+#### # Install and configure token-signing certificate
+
+##### # Install token-signing certificate
+
+```PowerShell
+$certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted for the secure string, type the password for the exported certificate.
+
+```PowerShell
+$newBuild = "4.0.697.0"
+
+Push-Location ("\\EXT-APP02A\Builds\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Certificates")
+
+Import-PfxCertificate `
+    -FilePath "Token-signing - idp.securitasinc.com.pfx" `
+    -CertStoreLocation Cert:\LocalMachine\My `
+    -Password $certPassword
+
+Pop-Location
+```
+
+##### # Configure permissions on token-signing certificate
+
+```PowerShell
+$idpHostHeader = "idp.technologytoolbox.com"
+
+$serviceAccount = "IIS APPPOOL\$idpHostHeader"
+$certThumbprint = "3907EFB9E1B4D549C22200E560D3004778594DDF"
+
+$cert = Get-ChildItem -Path cert:\LocalMachine\My |
+    where { $_.ThumbPrint -eq $certThumbprint }
+
+$keyPath = [System.IO.Path]::Combine(
+    "$env:ProgramData\Microsoft\Crypto\RSA\MachineKeys",
+    $cert.PrivateKey.CspKeyContainerInfo.UniqueKeyContainerName)
+
+$acl = Get-Acl -Path $keyPath
+
+$accessRule = New-Object `
+```
+
+    -TypeName System.Security.AccessControl.FileSystemAccessRule `\
+    -ArgumentList \$serviceAccount, "Read", "Allow"
+
+```PowerShell
+$acl.AddAccessRule($accessRule)
+
+Set-Acl -Path $keyPath -AclObject $acl
+```
+
 **TODO:**

@@ -1189,4 +1189,38 @@ Start-SCVirtualMachine $vmName
 
 ---
 
+## Expand D: (Data01) drive on EXT-SQL02
+
+---
+
+**FOOBAR11**
+
+```PowerShell
+cls
+```
+
+### # Increase the size of "Data01" VHD
+
+```PowerShell
+$vmName = "EXT-SQL02"
+
+Get-SCVirtualDiskDrive -VM $vmName |
+    where { $_.BusType -eq "SCSI" -and $_.Bus -eq 0 -and $_.Lun -eq 0 } |
+    Expand-SCVirtualDiskDrive -VirtualHardDiskSizeGB 235
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend partition
+
+```PowerShell
+$maxSize = (Get-PartitionSupportedSize -DriveLetter D).SizeMax
+
+Resize-Partition -DriveLetter D -Size $maxSize
+```
+
 **TODO:**

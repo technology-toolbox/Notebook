@@ -9,9 +9,9 @@ Tuesday, October 4, 2016
 
 Install SecuritasConnect v4.0
 
-## Deploy and configure the server infrastructure
+# Deploy and configure the server infrastructure
 
-### Install Windows Server 2012 R2
+## Install Windows Server 2012 R2
 
 ---
 
@@ -21,7 +21,7 @@ Install SecuritasConnect v4.0
 cls
 ```
 
-### # Create virtual machine
+## # Create virtual machine
 
 ```PowerShell
 $vmHost = "FORGE"
@@ -54,7 +54,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-## Install custom Windows Server 2012 R2 image
+# Install custom Windows Server 2012 R2 image
 
 - Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
@@ -65,7 +65,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
-#### # Copy latest Toolbox content
+### # Copy latest Toolbox content
 
 ```PowerShell
 net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
@@ -79,7 +79,7 @@ net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
 ```
 
-### # Rename local Administrator account and set password
+## # Rename local Administrator account and set password
 
 ```PowerShell
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -102,15 +102,15 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
-### Login as EXT-WEB02A\\foo
+## Login as EXT-WEB02A\\foo
 
 ```PowerShell
 cls
 ```
 
-### # Configure network settings
+## # Configure network settings
 
-#### # Rename network connections
+### # Rename network connections
 
 ```PowerShell
 Get-NetAdapter -Physical | select Name, InterfaceDescription
@@ -120,13 +120,13 @@ Get-NetAdapter `
     Rename-NetAdapter -NewName "Production"
 ```
 
-#### # Configure "Production" network adapter
+### # Configure "Production" network adapter
 
 ```PowerShell
 $interfaceAlias = "Production"
 ```
 
-##### # Configure IPv4 DNS servers
+#### # Configure IPv4 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
@@ -134,7 +134,7 @@ Set-DNSClientServerAddress `
     -ServerAddresses 192.168.10.209,192.168.10.210
 ```
 
-##### # Configure IPv6 DNS servers
+#### # Configure IPv6 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
@@ -142,7 +142,7 @@ Set-DNSClientServerAddress `
     -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
 ```
 
-##### # Enable jumbo frames
+#### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
@@ -159,7 +159,7 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
-### # Join member server to domain
+## # Join member server to domain
 
 ```PowerShell
 Add-Computer `
@@ -168,7 +168,7 @@ Add-Computer `
     -Restart
 ```
 
-#### Move computer to "SharePoint Servers" OU
+### Move computer to "SharePoint Servers" OU
 
 ---
 
@@ -186,15 +186,15 @@ Restart-Computer $computerName
 
 ---
 
-### Login as EXTRANET\\setup-sharepoint
+## Login as EXTRANET\\setup-sharepoint
 
-### # Set MaxPatchCacheSize to 0 (Recommended)
+## # Set MaxPatchCacheSize to 0 (Recommended)
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
-### # Select "High performance" power scheme
+## # Select "High performance" power scheme
 
 ```PowerShell
 powercfg.exe /L
@@ -204,7 +204,7 @@ powercfg.exe /S SCHEME_MIN
 powercfg.exe /L
 ```
 
-### # Change drive letter for DVD-ROM
+## # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -218,19 +218,19 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
-### # Enable PowerShell remoting
+## # Enable PowerShell remoting
 
 ```PowerShell
 Enable-PSRemoting -Confirm:$false
 ```
 
-### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
-### # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbose
@@ -240,19 +240,19 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbos
 cls
 ```
 
-### # Install and configure System Center Operations Manager
+## # Install and configure System Center Operations Manager
 
-#### # Create certificate for Operations Manager
+### # Create certificate for Operations Manager
 
-##### # Create request for Operations Manager certificate
+#### # Create request for Operations Manager certificate
 
 ```PowerShell
 & "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
 ```
 
-##### # Submit certificate request to Certification Authority
+#### # Submit certificate request to Certification Authority
 
-###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
 
 ```PowerShell
 $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
@@ -281,7 +281,7 @@ Start-Process $adcsUrl.AbsoluteUri
 cls
 ```
 
-##### # Import the certificate into the certificate store
+#### # Import the certificate into the certificate store
 
 ```PowerShell
 $certFile = "C:\Users\setup-sharepoint\Downloads\certnew.cer"
@@ -291,7 +291,7 @@ CertReq.exe -Accept $certFile
 Remove-Item $certFile
 ```
 
-#### # Install SCOM agent
+### # Install SCOM agent
 
 ---
 
@@ -301,7 +301,7 @@ Remove-Item $certFile
 cls
 ```
 
-##### # Mount the Operations Manager installation media
+#### # Mount the Operations Manager installation media
 
 ```PowerShell
 $imagePath = `
@@ -326,7 +326,7 @@ msiexec.exe /i $msiPath `
 cls
 ```
 
-#### # Import the certificate into Operations Manager using MOMCertImport
+### # Import the certificate into Operations Manager using MOMCertImport
 
 ```PowerShell
 $hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
@@ -348,7 +348,7 @@ Pop-Location
 cls
 ```
 
-#### # Remove the Operations Manager installation media
+### # Remove the Operations Manager installation media
 
 ```PowerShell
 Set-VMDvdDrive -ComputerName FORGE -VMName EXT-WEB02A -Path $null
@@ -356,9 +356,9 @@ Set-VMDvdDrive -ComputerName FORGE -VMName EXT-WEB02A -Path $null
 
 ---
 
-#### # Approve manual agent install in Operations Manager
+### # Approve manual agent install in Operations Manager
 
-### # Enter a product key and activate Windows
+## # Enter a product key and activate Windows
 
 ```PowerShell
 slmgr /ipk {product key}
@@ -372,7 +372,7 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
-## Configure VM storage
+# Configure VM storage
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
@@ -388,7 +388,7 @@ slmgr /ato
 cls
 ```
 
-### # Create Data01 and Log01 VHDs
+## # Create Data01 and Log01 VHDs
 
 ```PowerShell
 $vmHost = "FORGE"
@@ -422,9 +422,9 @@ Add-VMHardDiskDrive `
 cls
 ```
 
-### # Initialize disks and format volumes
+## # Initialize disks and format volumes
 
-#### # Format Data01 drive
+### # Format Data01 drive
 
 ```PowerShell
 Get-Disk 1 |
@@ -436,7 +436,7 @@ Get-Disk 1 |
         -Confirm:$false
 ```
 
-#### # Format Log01 drive
+### # Format Log01 drive
 
 ```PowerShell
 Get-Disk 2 |
@@ -448,11 +448,11 @@ Get-Disk 2 |
         -Confirm:$false
 ```
 
-### Install latest service pack and updates
+## Install latest service pack and updates
 
-## Install and configure SharePoint Server 2013
+# Install and configure SharePoint Server 2013
 
-### Install SharePoint 2013 prerequisites on farm servers
+## Install SharePoint 2013 prerequisites on farm servers
 
 ---
 
@@ -462,7 +462,7 @@ Get-Disk 2 |
 cls
 ```
 
-#### # Mount SharePoint Server 2013 installation media
+### # Mount SharePoint Server 2013 installation media
 
 ```PowerShell
 $vmHost = "FORGE"
@@ -513,7 +513,7 @@ robocopy $sourcePath $prereqPath /E
 Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 ```
 
-### # Install SharePoint Server 2013 on farm servers
+## # Install SharePoint Server 2013 on farm servers
 
 ```PowerShell
 & X:\setup.exe
@@ -531,7 +531,7 @@ Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 cls
 ```
 
-#### # Dismount SharePoint Server 2013 installation media
+### # Dismount SharePoint Server 2013 installation media
 
 ```PowerShell
 $vmHost = "FORGE"
@@ -542,7 +542,7 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 
 ---
 
-### # Add SharePoint bin folder to PATH environment variable
+## # Add SharePoint bin folder to PATH environment variable
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
@@ -557,9 +557,9 @@ exit
 >
 > Restart PowerShell for environment variable change to take effect.
 
-### # Install Cumulative Update for SharePoint Server 2013
+## # Install Cumulative Update for SharePoint Server 2013
 
-#### # Download update
+### # Download update
 
 ```PowerShell
 net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
@@ -580,7 +580,7 @@ $destPath = "C:\NotBackedUp\Temp\$patch"
 robocopy $sourcePath $destPath /E
 ```
 
-#### # Install update
+### # Install update
 
 ```PowerShell
 & "$destPath\*.exe"
@@ -595,9 +595,9 @@ cls
 Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 ```
 
-### # Install Cumulative Update for AppFabric 1.1
+## # Install Cumulative Update for AppFabric 1.1
 
-#### # Download update
+### # Download update
 
 ```PowerShell
 $patch = "Cumulative Update 7"
@@ -610,7 +610,7 @@ $destPath = "C:\NotBackedUp\Temp\$patch"
 robocopy $sourcePath $destPath /E
 ```
 
-#### # Install update
+### # Install update
 
 ```PowerShell
 & "$destPath\*.exe"
@@ -625,7 +625,7 @@ cls
 Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 ```
 
-#### # Enable nonblocking garbage collection for Distributed Cache Service
+### # Enable nonblocking garbage collection for Distributed Cache Service
 
 ```PowerShell
 Notepad ($env:ProgramFiles `
@@ -648,9 +648,9 @@ Notepad ($env:ProgramFiles `
 cls
 ```
 
-## # Install and configure additional software
+# # Install and configure additional software
 
-### # Install Prince on front-end Web servers
+## # Install Prince on front-end Web servers
 
 ```PowerShell
 & "\\ICEMAN\Products\Prince\prince-7.1-setup.exe"
@@ -664,7 +664,7 @@ cls
 cls
 ```
 
-#### # Configure Prince license
+### # Configure Prince license
 
 ```PowerShell
 Copy-Item `
@@ -679,15 +679,15 @@ Copy-Item `
    3. Verify the license information and then click **Close**.
 3. Close the Prince application.
 
-### Install additional service packs and updates
+## Install additional service packs and updates
 
 > **Important**
 >
 > Wait for the updates to be installed and restart the server (if necessary).
 
-### Add Web servers to the farm
+## Add Web servers to the farm
 
-### # Grant permissions on DCOM applications for SharePoint
+## # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
 $tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
@@ -706,9 +706,9 @@ Remove-Item $tempScript
 cls
 ```
 
-### # Configure People Picker to support searches across one-way trust
+## # Configure People Picker to support searches across one-way trust
 
-#### # Set application password used for encrypting credentials
+### # Set application password used for encrypting credentials
 
 ```PowerShell
 $appPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
@@ -725,7 +725,7 @@ $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
 stsadm -o setapppassword -password $plainPassword
 ```
 
-#### # Modify permissions on registry key where encrypted credentials are stored
+### # Modify permissions on registry key where encrypted credentials are stored
 
 ```PowerShell
 $regPath = `
@@ -748,7 +748,7 @@ Set-Acl -Path $regPath -AclObject $acl
 cls
 ```
 
-### # Map Web application to loopback address in Hosts file
+## # Map Web application to loopback address in Hosts file
 
 ```PowerShell
 & C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
@@ -757,7 +757,7 @@ cls
     -Verbose
 ```
 
-### # Allow specific host names mapped to 127.0.0.1
+## # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 & C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostNames.ps1 `
@@ -769,9 +769,9 @@ cls
 cls
 ```
 
-### # Configure SSL on Internet zone
+## # Configure SSL on Internet zone
 
-#### # Install SSL certificate
+### # Install SSL certificate
 
 ```PowerShell
 net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
@@ -796,13 +796,13 @@ Import-PfxCertificate `
     -Password $certPassword
 ```
 
-#### Add HTTPS binding to site in IIS
+### Add HTTPS binding to site in IIS
 
 ```PowerShell
 cls
 ```
 
-### # Enable disk-based caching for Web application
+## # Enable disk-based caching for Web application
 
 ```PowerShell
 Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
@@ -821,7 +821,7 @@ Pop-Location
 cls
 ```
 
-### # Configure logging
+## # Configure logging
 
 ```PowerShell
 $tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
@@ -840,7 +840,7 @@ Remove-Item $tempScript
 cls
 ```
 
-### # Configure claims-based authentication
+## # Configure claims-based authentication
 
 ```PowerShell
 Push-Location "C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\15\WebServices\SecurityToken"
@@ -890,11 +890,11 @@ notepad web.config
 Pop-Location
 ```
 
-## Create and configure media website
+# Create and configure media website
 
-### Install IIS Media Services 4.1
+## Install IIS Media Services 4.1
 
-#### Download Web Platform Installer
+### Download Web Platform Installer
 
 (skipped)
 
@@ -902,7 +902,7 @@ Pop-Location
 cls
 ```
 
-#### # Install IIS Media Services
+### # Install IIS Media Services
 
 ```PowerShell
 net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
@@ -921,9 +921,9 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 cls
 ```
 
-### # Install Web Deploy 3.6
+## # Install Web Deploy 3.6
 
-#### # Install Web Deploy
+### # Install Web Deploy
 
 ```PowerShell
 & ("\\ICEMAN\Products\Microsoft" `
@@ -934,9 +934,9 @@ cls
 cls
 ```
 
-### # Create media website on front-end Web servers
+## # Create media website on front-end Web servers
 
-#### # Create media website on first front-end Web server
+### # Create media website on first front-end Web server
 
 ```PowerShell
 $tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
@@ -951,13 +951,13 @@ Get-Content $sourceScript | Out-File $tempScript
 Remove-Item $tempScript
 ```
 
-#### Configure SSL bindings on media website
+### Configure SSL bindings on media website
 
 ```PowerShell
 cls
 ```
 
-#### # Create media website on other web servers in farm
+### # Create media website on other web servers in farm
 
 ```PowerShell
 Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
@@ -981,9 +981,9 @@ cls
 Pop-Location
 ```
 
-### # Copy media website to front-end Web servers
+## # Copy media website to front-end Web servers
 
-#### # Copy media website content from Production
+### # Copy media website content from Production
 
 ```PowerShell
 net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
@@ -1005,7 +1005,7 @@ robocopy `
 cls
 ```
 
-#### # Copy media website content to other front-end Web server in farm
+### # Copy media website content to other front-end Web server in farm
 
 ```PowerShell
 $websiteName = "media-test.securitasinc.com"
@@ -1021,17 +1021,17 @@ Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
 Pop-Location
 ```
 
-## Create and configure the Cloud Portal Web application
+# Create and configure the Cloud Portal Web application
 
-### Configure SSL on the Internet zone
+## Configure SSL on the Internet zone
 
-#### Add HTTPS binding to site in IIS
+### Add HTTPS binding to site in IIS
 
 ```PowerShell
 cls
 ```
 
-### # Enable disk-based caching for Web application
+## # Enable disk-based caching for Web application
 
 ```PowerShell
 Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
@@ -1050,7 +1050,7 @@ Pop-Location
 cls
 ```
 
-### # Configure logging
+## # Configure logging
 
 ```PowerShell
 $tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
@@ -1071,15 +1071,15 @@ cls
 
 # Install Employee Portal
 
-## # Extend SecuritasConnect and Cloud Portal web applications
+# # Extend SecuritasConnect and Cloud Portal web applications
 
 ```PowerShell
 cls
 ```
 
-### # Enable disk-based caching for "intranet" websites
+## # Enable disk-based caching for "intranet" websites
 
-#### # Enable disk-based caching for SecuritasConnect "intranet" website
+### # Enable disk-based caching for SecuritasConnect "intranet" website
 
 ```PowerShell
 Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
@@ -1094,7 +1094,7 @@ C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
 Pop-Location
 ```
 
-#### # Enable disk-based caching for Cloud Portal "intranet" website
+### # Enable disk-based caching for Cloud Portal "intranet" website
 
 ```PowerShell
 Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
@@ -1113,23 +1113,23 @@ Pop-Location
 cls
 ```
 
-### # Map intranet URLs to loopback address in Hosts file
+## # Map intranet URLs to loopback address in Hosts file
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
     127.0.0.1 client2-test.securitasinc.com, cloud2-test.securitasinc.com
 ```
 
-### # Allow specific host names mapped to 127.0.0.1
+## # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
     client2-test.securitasinc.com, cloud2-test.securitasinc.com
 ```
 
-## Install Web Deploy 3.6
+# Install Web Deploy 3.6
 
-### Install Web Deploy
+## Install Web Deploy
 
 (skipped -- since this was completed earlier)
 
@@ -1137,9 +1137,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 cls
 ```
 
-## # Install .NET Framework 4.5
+# # Install .NET Framework 4.5
 
-### # Download .NET Framework 4.5.2 installer
+## # Download .NET Framework 4.5.2 installer
 
 ```PowerShell
 net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
@@ -1156,7 +1156,7 @@ Copy-Item `
     C:\NotBackedUp\Temp
 ```
 
-### # Install .NET Framework 4.5.2
+## # Install .NET Framework 4.5.2
 
 ```PowerShell
 & C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
@@ -1170,15 +1170,15 @@ Copy-Item `
 Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
 ```
 
-### Install updates
+## Install updates
 
 > **Important**
 >
 > When prompted, restart the computer to complete the process of installing the updates.
 
-## # Upgrade to System Center Operations Manager 2016
+# # Upgrade to System Center Operations Manager 2016
 
-### # Uninstall SCOM 2012 R2 agent
+## # Uninstall SCOM 2012 R2 agent
 
 ```PowerShell
 msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
@@ -1186,7 +1186,7 @@ msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
 Restart-Computer
 ```
 
-### # Install SCOM 2016 agent
+## # Install SCOM 2016 agent
 
 ```PowerShell
 net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
@@ -1210,11 +1210,11 @@ msiexec.exe /i $msiPath `
 >
 > Wait for the installation to complete.
 
-### Approve manual agent install in Operations Manager
+## Approve manual agent install in Operations Manager
 
-## # Move VM to extranet VLAN
+# # Move VM to extranet VLAN
 
-### # Enable DHCP
+## # Enable DHCP
 
 ```PowerShell
 $interfaceAlias = Get-NetAdapter `
@@ -1253,7 +1253,7 @@ $interfaceAlias = Get-NetAdapter `
 }
 ```
 
-### # Rename network connection
+## # Rename network connection
 
 ```PowerShell
 $interfaceAlias = "Extranet"
@@ -1263,7 +1263,7 @@ Get-NetAdapter `
     Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-### # Disable jumbo frames
+## # Disable jumbo frames
 
 ```PowerShell
 Set-NetAdapterAdvancedProperty `
@@ -1282,7 +1282,7 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 cls
 ```
 
-### # Configure static IP address using VMM
+## # Configure static IP address using VMM
 
 ```PowerShell
 $vmName = "EXT-WEB02A"
@@ -1325,7 +1325,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-## Issue - Error accessing SharePoint sites (e.g. http://client-test.securitasinc.com)
+# Issue - Error accessing SharePoint sites (e.g. http://client-test.securitasinc.com)
 
 Log Name:      Application\
 Source:        ASP.NET 4.0.30319.0\
@@ -1392,7 +1392,7 @@ Thread information:\
    at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()\
    at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)\
 
-### References
+## References
 
 **Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)**\
 From <[http://blog.bugrapostaci.com/2017/02/08/loading-this-assembly-would-produce-a-different-grant-set-from-other-instances-exception-from-hresult-0x80131401/](http://blog.bugrapostaci.com/2017/02/08/loading-this-assembly-would-produce-a-different-grant-set-from-other-instances-exception-from-hresult-0x80131401/)>
@@ -1409,23 +1409,23 @@ From <[http://kevingreeneitblog.blogspot.ie/2017/03/scom-2016-agent-crashing-leg
 **APM feature in SCOM 2016 Agent may cause a crash for the IIS Application Pool running under .NET 2.0 runtime**\
 From <[https://blogs.technet.microsoft.com/momteam/2017/03/21/apm-feature-in-scom-2016-agent-may-cause-a-crash-for-the-iis-application-pool-running-under-net-2-0-runtime/](https://blogs.technet.microsoft.com/momteam/2017/03/21/apm-feature-in-scom-2016-agent-may-cause-a-crash-for-the-iis-application-pool-running-under-net-2-0-runtime/)>
 
-### Solution
+## Solution
 
 Remove SCOM agent and reinstall without Application Performance Monitoring (APM).
 
-#### Remove SCOM agent
+### Remove SCOM agent
 
 > **Note**
 >
 > When prompted, restart the server.
 
-#### # Clean up SCOM agent folder
+### # Clean up SCOM agent folder
 
 ```PowerShell
 Remove-Item "C:\Program Files\Microsoft Monitoring Agent" -Recurse -Force
 ```
 
-#### Install SCOM agent without Application Performance Monitoring (APM)
+### Install SCOM agent without Application Performance Monitoring (APM)
 
 ---
 
@@ -1435,7 +1435,7 @@ Remove-Item "C:\Program Files\Microsoft Monitoring Agent" -Recurse -Force
 cls
 ```
 
-##### # Copy SCOM agent setup files from file server
+#### # Copy SCOM agent setup files from file server
 
 ```PowerShell
 $source = "\\TT-FS01.corp.technologytoolbox.com\Products\Microsoft" `
@@ -1459,7 +1459,7 @@ robocopy $source $destination /E /MIR
 cls
 ```
 
-##### # Install SCOM agent
+#### # Install SCOM agent
 
 ```PowerShell
 $msiPath = "C:\NotBackedUp\Temp\System Center 2016\SCOM\agent\AMD64\MOMAgent.msi"
@@ -1475,12 +1475,275 @@ msiexec.exe /i $msiPath `
 cls
 ```
 
-##### # Delete SCOM agent setup files
+#### # Delete SCOM agent setup files
 
 ```PowerShell
 Remove-Item "C:\NotBackedUp\Temp\System Center 2016" -Recurse
 ```
 
-#### Approve manual agent install in Operations Manager
+### Approve manual agent install in Operations Manager
+
+# Deploy federated authentication in SecuritasConnect
+
+## Install and configure identity provider for client users
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Configure name resolution for identity provider website
+
+```PowerShell
+Add-DnsServerResourceRecordA `
+    -ComputerName TT-DC04 `
+    -Name idp `
+    -IPv4Address 10.1.20.121 `
+    -ZoneName technologytoolbox.com
+```
+
+---
+
+### Deploy identity provider website to front-end web servers
+
+#### Install certificate for secure communication with idp.technologytoolbox.com
+
+##### # Create request for Web Server certificate
+
+```PowerShell
+$hostname = "idp.technologytoolbox.com"
+
+& "C:\NotBackedUp\Public\Toolbox\PowerShell\New-CertificateRequest.ps1" `
+    -Subject ("CN=$hostname,OU=IT,O=Technology Toolbox,L=Parker,S=CO,C=US") `
+    -SANs $hostname
+```
+
+##### # Submit certificate request to the Certification Authority
+
+###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns $adcsUrl.AbsoluteUri
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
+**To submit the certificate request to an enterprise CA:**
+
+1. Start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the appropriate certificate template (**Technology Toolbox Web Server - Exportable**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+##### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+Remove-Item $certFile
+```
+
+#### # Deploy identity provider website to first front-end web server
+
+```PowerShell
+$newBuild = "4.0.697.0"
+
+Push-Location "\\EXT-APP02A\Builds\ClientPortal\$newBuild\DeploymentFiles\Scripts"
+
+[Uri] $idpUrl = [Uri] "http://idp.technologytoolbox.com"
+
+Set-ExecutionPolicy Bypass -Scope Process
+
+& '.\Configure Identity Provider Website.ps1' `
+    -SiteName $idpUrl.Host `
+    -Confirm:$false
+
+Pop-Location
+```
+
+##### # Add HTTPS binding to identity provider website
+
+```PowerShell
+New-WebBinding `
+    -Name $idpUrl.Host `
+    -Protocol https `
+    -Port 443 `
+    -HostHeader $idpUrl.Host `
+    -SslFlags 1
+
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=$($idpUrl.Host),*" }
+
+New-Item `
+    -Path ("IIS:\SslBindings\0.0.0.0!443!" + $idpUrl.Host) `
+    -Value $cert `
+    -SSLFlags 1
+```
+
+##### # Deploy content to identity provider website
+
+```PowerShell
+Push-Location ("\\EXT-APP02A\Builds\ClientPortal\$newBuild\Release" `
+    + "\_PublishedWebsites\Securitas.Portal.IdentityProvider_Package")
+
+attrib -r .\Securitas.Portal.IdentityProvider.SetParameters.xml
+
+$config = Get-Content Securitas.Portal.IdentityProvider.SetParameters.xml
+
+$config = $config -replace `
+    "Default Web Site/Securitas.Portal.IdentityProvider_deploy", $idpUrl.Host
+
+$config = $config -replace `
+    "Server=.; Database=SecuritasPortal", "Server=EXT-SQL02; Database=SecuritasPortal"
+
+$configXml = [xml] $config
+
+$configXml.Save(($PWD.ProviderPath +
+    "\Securitas.Portal.IdentityProvider.SetParameters.xml"))
+
+.\Securitas.Portal.IdentityProvider.deploy.cmd /t
+
+.\Securitas.Portal.IdentityProvider.deploy.cmd /y
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Deploy identity provider website to second web server in farm
+
+```PowerShell
+Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
+
+$websiteName = "idp.technologytoolbox.com"
+
+.\msdeploy.exe -verb:sync `
+    -source:apppoolconfig="$websiteName" `
+    -dest:apppoolconfig="$websiteName"`,computername=EXT-WEB02B
+
+.\msdeploy.exe -verb:sync `
+    -source:apphostconfig="$websiteName" `
+    -dest:apphostconfig="$websiteName"`,computername=EXT-WEB02B
+
+$contentPath = "C:\inetpub\wwwroot\$websiteName"
+
+.\msdeploy.exe -verb:sync `
+    -source:contentPath="$contentPath" `
+    -dest:contentPath="$contentPath"`,computername=EXT-WEB02B
+
+Pop-Location
+```
+
+---
+
+**EXT-SQL02**
+
+```PowerShell
+cls
+```
+
+### # Configure database permissions for identity provider website
+
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+EXEC sp_addrolemember 'aspnet_Membership_BasicAccess', 'EXTRANET\EXT-WEB02A$'
+EXEC sp_addrolemember 'aspnet_Membership_ReportingAccess', 'EXTRANET\EXT-WEB02A$'
+EXEC sp_addrolemember 'aspnet_Roles_BasicAccess', 'EXTRANET\EXT-WEB02A$'
+EXEC sp_addrolemember 'aspnet_Roles_ReportingAccess', 'EXTRANET\EXT-WEB02A$'
+
+EXEC sp_addrolemember 'aspnet_Membership_BasicAccess', 'EXTRANET\EXT-WEB02B$'
+EXEC sp_addrolemember 'aspnet_Membership_ReportingAccess', 'EXTRANET\EXT-WEB02B$'
+EXEC sp_addrolemember 'aspnet_Roles_BasicAccess', 'EXTRANET\EXT-WEB02B$'
+EXEC sp_addrolemember 'aspnet_Roles_ReportingAccess', 'EXTRANET\EXT-WEB02B$'
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Install and configure token-signing certificate
+
+#### # Install token-signing certificate
+
+```PowerShell
+$certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted for the secure string, type the password for the exported certificate.
+
+```PowerShell
+Push-Location ("\\EXT-APP02A\Builds\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Certificates")
+
+Import-PfxCertificate `
+    -FilePath "Token-signing - idp.securitasinc.com.pfx" `
+    -CertStoreLocation Cert:\LocalMachine\My `
+    -Password $certPassword
+
+Pop-Location
+```
+
+#### # Configure permissions on token-signing certificate
+
+```PowerShell
+$idpHostHeader = "idp.technologytoolbox.com"
+
+$serviceAccount = "IIS APPPOOL\$idpHostHeader"
+$certThumbprint = "3907EFB9E1B4D549C22200E560D3004778594DDF"
+
+$cert = Get-ChildItem -Path cert:\LocalMachine\My |
+    where { $_.ThumbPrint -eq $certThumbprint }
+
+$keyPath = [System.IO.Path]::Combine(
+    "$env:ProgramData\Microsoft\Crypto\RSA\MachineKeys",
+    $cert.PrivateKey.CspKeyContainerInfo.UniqueKeyContainerName)
+
+$acl = Get-Acl -Path $keyPath
+
+$accessRule = New-Object `
+```
+
+    -TypeName System.Security.AccessControl.FileSystemAccessRule `\
+    -ArgumentList \$serviceAccount, "Read", "Allow"
+
+```PowerShell
+$acl.AddAccessRule($accessRule)
+
+Set-Acl -Path $keyPath -AclObject $acl
+```
 
 **TODO:**

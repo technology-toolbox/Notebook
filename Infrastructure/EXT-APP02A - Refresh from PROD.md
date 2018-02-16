@@ -1,7 +1,7 @@
 ﻿# Refresh from PROD
 
-Wednesday, July 5, 2017
-8:21 AM
+Wednesday, February 14, 2018
+7:23 AM
 
 ```Console
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -22,12 +22,12 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Suspend-SPEnterpriseSearchServiceApplication
 ```
 
-### # Remove old database backups
+### Remove old database backups
+
+(skipped)
 
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Remove-OldBackups.ps1' `
-    -NumberOfDaysToKeep 0 `
-    -BackupFileExtensions .bak, .trn
+cls
 ```
 
 ## # Refresh SecuritasConnect from Production
@@ -69,7 +69,8 @@ cls
 $build = "4.0.701.0"
 
 $source = "\\TT-FS01\Builds\Securitas\ClientPortal\$build"
-$destination = "\\EXT-FOOBAR2\Builds\ClientPortal\$build"
+$destination = "\\EXT-APP02A.extranet.technologytoolbox.com\Builds" `
+    + "\ClientPortal\$build"
 
 robocopy $source $destination /E
 ```
@@ -86,7 +87,7 @@ cls
 $build = "4.0.701.0"
 
 $peoplePickerCredentials = @(
-    (Get-Credential "EXTRANET\s-web-client-dev"),
+    (Get-Credential "EXTRANET\s-web-client"),
     (Get-Credential "TECHTOOLBOX\svc-sp-ups"))
 
 Push-Location C:\Shares\Builds\ClientPortal\$build\DeploymentFiles\Scripts
@@ -167,9 +168,85 @@ New-WebBinding `
     -SslFlags 0
 ```
 
+---
+
+**EXT-WEB02A**
+
+```PowerShell
+cls
+```
+
+#### # Add HTTPS binding to site in IIS
+
+```PowerShell
+[String] $clientPortalHostHeader = "client-test.securitasinc.com"
+
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=`*.securitasinc.com,*" }
+
+New-WebBinding `
+    -Name ("SharePoint - $clientPortalHostHeader" + "80") `
+    -Protocol https `
+    -Port 443 `
+    -HostHeader $clientPortalHostHeader `
+    -SslFlags 0
+```
+
+---
+
+---
+
+**EXT-WEB02B**
+
+```PowerShell
+cls
+```
+
+#### # Add HTTPS binding to site in IIS
+
+```PowerShell
+[String] $clientPortalHostHeader = "client-test.securitasinc.com"
+
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=`*.securitasinc.com,*" }
+
+New-WebBinding `
+    -Name ("SharePoint - $clientPortalHostHeader" + "80") `
+    -Protocol https `
+    -Port 443 `
+    -HostHeader $clientPortalHostHeader `
+    -SslFlags 0
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend web application to Intranet zone
+
+```PowerShell
+$intranetHostHeader = $clientPortalHostHeader -replace "client", "client2"
+
+$webApp = Get-SPWebApplication -Identity $clientPortalUrl.AbsoluteUri
+
+$windowsAuthProvider = New-SPAuthenticationProvider
+
+$webAppName = "SharePoint - " + $intranetHostHeader + "443"
+
+$webApp | New-SPWebApplicationExtension `
+    -Name $webAppName `
+    -Zone Intranet `
+    -AuthenticationProvider $windowsAuthProvider `
+    -HostHeader $intranetHostHeader `
+    -Port 443 `
+    -SecureSocketsLayer
+```
+
 ### Configure Google Analytics on SecuritasConnect Web application
 
-Tracking ID: **UA-25949832-4**
+Tracking ID: **UA-25899478-2**
 
 ### Restore SecuritasPortal database backup
 
@@ -184,31 +261,34 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
+$backupFile = "SecuritasPortal_backup_2018_02_18_000021_6715020.bak"
+$computerName = "EXT-SQL02.extranet.technologytoolbox.com"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destination = "\\EXT-FOOBAR2\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
-    + "\MSSQL\Backup\Full"
+$destination = "\\$computerName\Z$" `
+    + "\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
 
 robocopy $source $destination $backupFile
 ```
 
 ---
 
+#### Stop IIS
+
+(skipped)
+
+---
+
+**EXT-SQL02**
+
 ```PowerShell
 cls
-```
-
-#### # Stop IIS
-
-```PowerShell
-iisreset /stop
 ```
 
 #### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
+$backupFile = "SecuritasPortal_backup_2018_02_18_000021_6715020.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -223,7 +303,7 @@ RESTORE DATABASE SecuritasPortal
 GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
 ```
@@ -233,9 +313,9 @@ Set-Location C:
 ```PowerShell
 [Uri] $clientPortalUrl = $null
 
-If ($env:COMPUTERNAME -eq "784816-UATSQL")
+If ($env:COMPUTERNAME -eq "EXT-SQL02")
 {
-    $clientPortalUrl = [Uri] "http://client-qa.securitasinc.com"
+    $clientPortalUrl = [Uri] "http://client-test.securitasinc.com"
 }
 Else
 {
@@ -251,26 +331,27 @@ Else
 
 [String] $employeePortalHostHeader = $employeePortalUrl.Host
 
-[Uri] $idpUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
+[Uri] $idpUrl = [Uri] $clientPortalUrl.AbsoluteUri.Replace(
     "client",
     "idp")
 
 [String] $idpHostHeader = $idpUrl.Host
 
-[String] $farmServiceAccount = "EXTRANET\s-sp-farm-dev"
-[String] $clientPortalServiceAccount = "EXTRANET\s-web-client-dev"
-[String] $cloudPortalServiceAccount = "EXTRANET\s-web-cloud-dev"
+[String] $farmServiceAccount = "EXTRANET\s-sp-farm"
+[String] $clientPortalServiceAccount = "EXTRANET\s-web-client"
+[String] $cloudPortalServiceAccount = "EXTRANET\s-web-cloud"
 [String[]] $employeePortalAccounts = "IIS APPPOOL\$employeePortalHostHeader"
 [String[]] $idpServiceAccounts = "IIS APPPOOL\$idpHostHeader"
 
-If ($employeePortalHostHeader -eq "employee-qa.securitasinc.com")
+If ($employeePortalHostHeader -eq "employee-test.securitasinc.com")
 {
-    $farmServiceAccount = "SEC\s-sp-farm-qa"
-    $clientPortalServiceAccount = "SEC\s-web-client-qa"
-    $cloudPortalServiceAccount = "SEC\s-web-cloud-qa"
+    $farmServiceAccount = "EXTRANET\s-sp-farm"
+    $clientPortalServiceAccount = "EXTRANET\s-web-client"
+    $cloudPortalServiceAccount = "EXTRANET\s-web-cloud"
     $employeePortalAccounts = @(
-        'SEC\784813-UATSPAPP$',
-        'SEC\784815-UATSPWFE$')
+        'EXTRANET\EXT-APP02A$',
+        'EXTRANET\EXT-WEB02A$',
+        'EXTRANET\EXT-WEB02B$')
 
     $idpServiceAccounts = $employeePortalAccounts
 }
@@ -385,11 +466,47 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose
 Set-Location C:
 ```
 
-#### # Start IIS
+#### # Associate users to TECHTOOLBOX\\jjameson
 
 ```PowerShell
-iisreset /start
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+INSERT INTO Customer.BranchManagerAssociatedUsers
+SELECT 'jjameson@technologytoolbox.com', AssociatedUserName
+FROM Customer.BranchManagerAssociatedUsers
+WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
 ```
+
+#### # Replace shortcuts for PNKUS\\jjameson
+
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+INSERT INTO Customer.BranchManagerAssociatedUsers
+SELECT 'jjameson@technologytoolbox.com', AssociatedUserName
+FROM Customer.BranchManagerAssociatedUsers
+WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+---
+
+#### Start IIS
+
+(skipped)
 
 ```PowerShell
 cls
@@ -563,6 +680,14 @@ $tokenIssuer.ClaimProviderName = "Securitas ADFS Claim Provider"
 $tokenIssuer.Update()
 ```
 
+---
+
+**EXT-SQL02**
+
+```PowerShell
+cls
+```
+
 #### # Associate users to TECHTOOLBOX\\smasters
 
 ```PowerShell
@@ -583,13 +708,15 @@ Set-Location C:
 
 ---
 
+---
+
 **WOLVERINE**
 
 #### Configure SSO credentials for users
 
 ##### Configure TrackTik credentials for Branch Manager
 
-[https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 Branch Manager: **smasters@technologytoolbox.com**\
 TrackTik username:** opanduro2m**
@@ -618,21 +745,21 @@ cls
 
 ```PowerShell
 $backupFile1 =
-    "WSS_Content_SecuritasPortal_backup_2018_01_14_000010_4869606.bak"
+    "WSS_Content_SecuritasPortal_backup_2018_02_13_053955_4308109.bak"
 
 $backupFile2 =
-    "WSS_Content_SecuritasPortal2_backup_2018_01_14_000010_5338567.bak"
+    "WSS_Content_SecuritasPortal2_backup_2018_02_13_053955_4464040.bak"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destination = "\\EXT-FOOBAR2\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
-    + "\MSSQL\Backup\Full"
+$destination = "\\EXT-SQL02.extranet.technologytoolbox.com\Z$" `
+    + "\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
 
 robocopy $source $destination $backupFile1 $backupFile2
 ```
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 8-1/2 minutes.
+> Expect the previous operation to complete in approximately 7-1/2 minutes.
 
 ---
 
@@ -655,14 +782,22 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
     Remove-SPContentDatabase -Confirm:$false -Force
 ```
 
+---
+
+**EXT-SQL02**
+
+```PowerShell
+cls
+```
+
 ##### # Restore database backups
 
 ```PowerShell
 $backupFile1 =
-    "WSS_Content_SecuritasPortal_backup_2018_01_14_000010_4869606.bak"
+    "WSS_Content_SecuritasPortal_backup_2018_02_13_053955_4308109.bak"
 
 $backupFile2 =
-    "WSS_Content_SecuritasPortal2_backup_2018_01_14_000010_5338567.bak"
+    "WSS_Content_SecuritasPortal2_backup_2018_02_13_053955_4464040.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -698,10 +833,12 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 51 minutes.\
-> RESTORE DATABASE successfully processed 4053939 pages in 1062.855 seconds (29.798 MB/sec).\
+> Expect the previous operation to complete in approximately 1 hour and 40 minutes.\
+> RESTORE DATABASE successfully processed 4136619 pages in 1286.118 seconds (25.127 MB/sec).\
 > ...\
-> RESTORE DATABASE successfully processed 3991413 pages in 896.711 seconds (34.774 MB/sec).
+> RESTORE DATABASE successfully processed 4038557 pages in 1304.904 seconds (24.178 MB/sec).
+
+---
 
 ```PowerShell
 cls
@@ -726,7 +863,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 9-1/2 minutes.
+> Expect the previous operation to complete in approximately 7-1/2  minutes.
 
 ```PowerShell
 cls
@@ -742,6 +879,10 @@ cls
 If ($clientPortalUrl.Host -eq "client-qa.securitasinc.com")
 {
     $adminGroup = "SEC\SharePoint Admins (QA)"
+}
+ElseIf ($clientPortalUrl.Host -eq "client-test.securitasinc.com")
+{
+    $adminGroup = "EXTRANET\SharePoint Admins"
 }
 Else
 {
@@ -788,13 +929,9 @@ cls
 ```PowerShell
 Push-Location C:\Shares\Builds\ClientPortal\$build\DeploymentFiles\Scripts
 
-#$claim = New-SPClaimsPrincipal `
-#    -Identity "EXTRANET\SharePoint Admins (DEV)" `
-#    -IdentityType WindowsSecurityGroupName
-
 $claim = New-SPClaimsPrincipal `
-    -Identity "EXTRANET\setup-sharepoint-dev" `
-    -IdentityType WindowsSamAccountName
+    -Identity "EXTRANET\SharePoint Admins" `
+    -IdentityType WindowsSecurityGroupName
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -820,22 +957,7 @@ Pop-Location
 
 > **Note**
 >
-> Attempting to use **EXTRANET\\SharePoint Admins (DEV)** results in the following error:
->
-> ```PowerShell
-> C:\Shares\Builds\ClientPortal\4.0.701.0\DeploymentFiles\Scripts\Set-SiteAdministrator.ps1 : Exception calling "EnsureUser" with "1" argument(s): "The specified user c:0+.w|s-1-5-21-224930944-1780242101-1199596236-2127 could not be found."
-> At line:1 char:1
-> + .\Set-SiteAdministrator.ps1 $env:SECURITAS_CLIENT_PORTAL_URL -Claim $claim
-> + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->     + CategoryInfo          : NotSpecified: (:) [Set-SiteAdministrator.ps1], MethodInvocationException
->     + FullyQualifiedErrorId : SPException,Set-SiteAdministrator.ps1
-> ```
->
-> To avoid this error, the site collection administrator is set to **EXTRANET\\setup-sharepoint-dev**.
-
-> **Note**
->
-> Expect the previous operation to complete in approximately 40 minutes.
+> Expect the previous operation to complete in approximately 56 minutes.
 
 ```PowerShell
 cls
@@ -872,7 +994,8 @@ cls
 $build = "2.0.131.0"
 
 $source = "\\TT-FS01\Builds\Securitas\CloudPortal\$build"
-$destination = "\\EXT-FOOBAR2\Builds\CloudPortal\$build"
+$destination = "\\EXT-APP02A.extranet.technologytoolbox.com\Builds" `
+    + "\CloudPortal\$build"
 
 robocopy $source $destination /E
 ```
@@ -889,7 +1012,7 @@ cls
 $build = "2.0.131.0"
 
 $peoplePickerCredentials = @(
-    (Get-Credential "EXTRANET\s-web-cloud-dev"),
+    (Get-Credential "EXTRANET\s-web-cloud"),
     (Get-Credential "TECHTOOLBOX\svc-sp-ups"),
     (Get-Credential "FABRIKAM\s-sp-ups"))
 
@@ -940,15 +1063,67 @@ New-WebBinding `
     -SslFlags 0
 ```
 
+---
+
+**EXT-WEB02A**
+
+```PowerShell
+cls
+```
+
+#### # Add HTTPS binding to site in IIS
+
+```PowerShell
+[String] $cloudPortalHostHeader = "cloud-test.securitasinc.com"
+
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=`*.securitasinc.com,*" }
+
+New-WebBinding `
+    -Name ("SharePoint - $cloudPortalHostHeader" + "80") `
+    -Protocol https `
+    -Port 443 `
+    -HostHeader $cloudPortalHostHeader `
+    -SslFlags 0
+```
+
+---
+
+---
+
+**EXT-WEB02B**
+
+```PowerShell
+cls
+```
+
+#### # Add HTTPS binding to site in IIS
+
+```PowerShell
+[String] $cloudPortalHostHeader = "cloud-test.securitasinc.com"
+
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=`*.securitasinc.com,*" }
+
+New-WebBinding `
+    -Name ("SharePoint - $cloudPortalHostHeader" + "80") `
+    -Protocol https `
+    -Port 443 `
+    -HostHeader $cloudPortalHostHeader `
+    -SslFlags 0
+```
+
+---
+
 #### Configure Google Analytics on Cloud Portal Web application
 
-Tracking ID: **UA-25949832-5**
+Tracking ID: **UA-25899478-3**
 
 ### Restore content database backup from Production
 
 ---
 
-**WOLVERINE**
+**TT-FS01**
 
 ```PowerShell
 cls
@@ -957,18 +1132,18 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "WSS_Content_CloudPortal_backup_2018_01_14_000010_5494577.bak"
+$backupFile = "WSS_Content_CloudPortal_backup_2018_02_13_053955_4464040.bak"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destination = "\\EXT-FOOBAR2\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
-    + "\MSSQL\Backup\Full"
+$destination = "\\EXT-SQL02.extranet.technologytoolbox.com\Z$" `
+    + "\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
 
 robocopy $source $destination $backupFile
 ```
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 32 minutes.
+> Expect the previous operation to complete in approximately 29 minutes.
 
 ---
 
@@ -987,10 +1162,18 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL |
     Remove-SPContentDatabase -Confirm:$false -Force
 ```
 
+---
+
+**EXT-SQL02**
+
+```PowerShell
+cls
+```
+
 ##### # Restore database backup
 
 ```PowerShell
-$backupFile = "WSS_Content_CloudPortal_backup_2018_01_14_000010_5494577.bak"
+$backupFile = "WSS_Content_CloudPortal_backup_2018_02_13_053955_4464040.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -1019,8 +1202,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 1 hour and 20 minutes.\
-> RESTORE DATABASE successfully processed 9873502 pages in 3822.642 seconds (20.178 MB/sec).
+> Expect the previous operation to complete in approximately 1 hour and 29 minutes.\
+> RESTORE DATABASE successfully processed 10013905 pages in 4178.661 seconds (18.722 MB/sec).
+
+---
 
 ```PowerShell
 cls
@@ -1041,7 +1226,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 13 seconds.
+> Expect the previous operation to complete in approximately 15 seconds.
 
 ```PowerShell
 cls
@@ -1054,9 +1239,13 @@ cls
 
 [String] $adminGroup
 
-If ($clientPortalUrl.Host -eq "cloud-qa.securitasinc.com")
+If ($cloudPortalUrl.Host -eq "cloud-qa.securitasinc.com")
 {
     $adminGroup = "SEC\SharePoint Admins (QA)"
+}
+ElseIf ($cloudPortalUrl.Host -eq "cloud-test.securitasinc.com")
+{
+    $adminGroup = "EXTRANET\SharePoint Admins"
 }
 Else
 {
@@ -1083,17 +1272,110 @@ $webApp.Update()
 cls
 ```
 
-## # Extend web applications to Intranet zone
+### # Replace permissions for "Domain Users" on Cloud Portal sites
 
 ```PowerShell
-Push-Location 'C:\Shares\Builds\EmployeePortal\1.0.38.0\Deployment Files\Scripts'
+[Uri] $cloudPortalUrl = [Uri] $env:SECURITAS_CLOUD_PORTAL_URL
 
-& '.\Extend Web Applications.ps1' -SecureSocketsLayer -Confirm:$false -Verbose
+Get-SPSite -WebApplication $cloudPortalUrl.AbsoluteUri -Limit All |
+    foreach {
+        $site = $_
 
-Pop-Location
+        $site.RootWeb.Groups |
+            foreach {
+                $group = $_
+
+                $group.Users |
+                    foreach {
+                        $user = $_
+
+                        If ($user.DisplayName -eq "PNKCAN\Domain Users")
+                        {
+                            Write-Host ("Replacing group ($($user.DisplayName))" `
+                                + " on site ($($site.Url))...")
+
+                            $fabrikamUsers = New-SPClaimsPrincipal `
+                                -Identity "FABRIKAM\Domain Users" `
+                                -IdentityType WindowsSecurityGroupName
+
+                            $group.AddUser(
+                                $fabrikamUsers.ToEncodedString(),
+                                $null,
+                                "FABRIKAM\Domain Users",
+                                $null)
+
+                            $group.Users.Remove($user)
+                        }
+                        ElseIf ($user.DisplayName -eq "PNKUS\Domain Users")
+                        {
+                            Write-Host ("Replacing group ($($user.DisplayName))" `
+                                + " on site ($($site.Url))...")
+
+                            $techtoolboxUsers = New-SPClaimsPrincipal `
+                                -Identity "TECHTOOLBOX\Domain Users" `
+                                -IdentityType WindowsSecurityGroupName
+
+                            $group.AddUser(
+                                $techtoolboxUsers.ToEncodedString(),
+                                $null,
+                                "TECHTOOLBOX\Domain Users",
+                                $null)
+
+                            $group.Users.Remove($user)
+                        }
+                    }
+            }
+
+        $site.Dispose()
+    }
 ```
 
-## # Backup databases and perform full crawl
+```PowerShell
+cls
+```
+
+### # Configure custom sign-in page on Web application
+
+```PowerShell
+Set-SPWebApplication `
+    -Identity $env:SECURITAS_CLOUD_PORTAL_URL `
+    -Zone Default `
+    -SignInRedirectURL "/Pages/Sign-In.aspx"
+```
+
+```PowerShell
+cls
+```
+
+### # Extend web application to Intranet zone
+
+```PowerShell
+$intranetHostHeader = $cloudPortalUrl.Host -replace "cloud", "cloud2"
+
+$webApp = Get-SPWebApplication -Identity $cloudPortalUrl.AbsoluteUri
+
+$windowsAuthProvider = New-SPAuthenticationProvider
+
+$webAppName = "SharePoint - " + $intranetHostHeader + "443"
+
+$webApp | New-SPWebApplicationExtension `
+    -Name $webAppName `
+    -Zone Intranet `
+    -AuthenticationProvider $windowsAuthProvider `
+    -HostHeader $intranetHostHeader `
+    -Port 443 `
+    -SecureSocketsLayer
+```
+
+## Backup databases and perform full crawl
+
+---
+
+**EXT-SQL02**
+
+```PowerShell
+cls
+```
 
 ### # Backup databases
 
@@ -1134,6 +1416,8 @@ while ($job.CurrentRunStatus -eq "Executing") {
 
 Write-Host
 ```
+
+---
 
 ### # Reset search index and perform full crawl
 

@@ -4152,4 +4152,982 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**TODO:**
+TODO:
+
+## Deploy federated authentication in SecuritasConnect
+
+### Login as EXTRANET\\setup-sharepoint-dev
+
+### # Pause Search Service Application
+
+```PowerShell
+Enable-SharePointCmdlets
+
+Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
+    Suspend-SPEnterpriseSearchServiceApplication
+```
+
+### Configure SSL in development environments
+
+(skipped)
+
+---
+
+**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Configure relying party in AD FS for SecuritasConnect
+
+#### # Create relying party in AD FS
+
+```PowerShell
+$clientPortalUrl = [Uri] "http://client-test.securitasinc.com"
+
+$relyingPartyDisplayName = $clientPortalUrl.Host
+$wsFedEndpointUrl = "https://" + $clientPortalUrl.Host + "/_trust/"
+$additionalIdentifier = "urn:sharepoint:securitas:" `
+    + ($clientPortalUrl.Host -split '\.' | select -First 1)
+
+$identifiers = $wsFedEndpointUrl, $additionalIdentifier
+
+Add-AdfsRelyingPartyTrust `
+    -Name $relyingPartyDisplayName `
+    -Identifier $identifiers `
+    -WSFedEndpoint $wsFedEndpointUrl `
+    -AccessControlPolicyName "Permit everyone"
+```
+
+#### # Configure claim issuance policy for relying party
+
+```PowerShell
+$relyingPartyDisplayName = $clientPortalUrl.Host
+
+$claimRules = `
+'@RuleTemplate = "LdapClaims"
+@RuleName = "Active Directory Claims"
+c:[Type ==
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname",
+  Issuer == "AD AUTHORITY"]
+=> issue(
+  store = "Active Directory",
+  types = (
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+    "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid",
+    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"),
+  query = ";mail,displayName,userPrincipalName,objectSid,tokenGroups;{0}",
+  param = c.Value);
+
+@RuleTemplate = "PassThroughClaims"
+@RuleName = "Pass through E-mail Address"
+c:[Type ==
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]
+=> issue(claim = c);
+
+@RuleTemplate = "PassThroughClaims"
+@RuleName = "Pass through Branch Managers Role"
+c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
+  Value =~ "^(?i)Branch\ Managers$"]
+=> issue(claim = c);'
+
+$tempFile = [System.IO.Path]::GetTempFileName()
+
+Set-Content -Value $claimRules -LiteralPath $tempFile
+
+Set-AdfsRelyingPartyTrust `
+    -TargetName $relyingPartyDisplayName `
+    -IssuanceTransformRulesFile $tempFile
+```
+
+### # Configure trust relationship from SharePoint farm to AD FS farm
+
+#### # Export token-signing certificate from AD FS farm
+
+```PowerShell
+$serviceCert = Get-AdfsCertificate -CertificateType Token-Signing
+
+$certBytes = $serviceCert.Certificate.Export(
+    [System.Security.Cryptography.X509Certificates.X509ContentType]::Cert)
+
+$certName = $serviceCert.Certificate.Subject.Replace("CN=", "")
+
+[System.IO.File]::WriteAllBytes(
+    "C:\" + $certName + ".cer",
+    $certBytes)
+```
+
+#### # Copy token-signing certificate to SharePoint server
+
+```PowerShell
+$source = "C:\ADFS Signing - fs.technologytoolbox.com.cer"
+$destination = "\\EXT-APP02A.extranet.technologytoolbox.com\C$"
+
+Copy-Item $source $destination
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Import token-signing certificate to SharePoint farm
+
+```PowerShell
+If ((Get-PSSnapin Microsoft.SharePoint.PowerShell `
+    -ErrorAction SilentlyContinue) -eq $null)
+{
+    Write-Debug "Adding snapin (Microsoft.SharePoint.PowerShell)..."
+
+    $ver = $host | select version
+
+    If ($ver.Version.Major -gt 1)
+    {
+        $Host.Runspace.ThreadOptions = "ReuseThread"
+    }
+
+    Add-PSSnapin Microsoft.SharePoint.PowerShell
+}
+
+$certPath = "C:\ADFS Signing - fs.technologytoolbox.com.cer"
+
+$cert = `
+    New-Object System.Security.Cryptography.X509Certificates.X509Certificate2(
+        $certPath)
+
+$certName = $cert.Subject.Replace("CN=", "")
+
+New-SPTrustedRootAuthority -Name $certName -Certificate $cert
+```
+
+#### # Create authentication provider for AD FS
+
+##### # Define claim mappings and unique identifier claim
+
+```PowerShell
+$emailClaimMapping = New-SPClaimTypeMapping `
+    -IncomingClaimType `
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" `
+    -IncomingClaimTypeDisplayName "EmailAddress" `
+    -SameAsIncoming
+
+$nameClaimMapping = New-SPClaimTypeMapping `
+    -IncomingClaimType `
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name" `
+    -IncomingClaimTypeDisplayName "Name" `
+    -LocalClaimType `
+        "http://schemas.securitasinc.com/ws/2017/01/identity/claims/name"
+
+$sidClaimMapping = New-SPClaimTypeMapping `
+    -IncomingClaimType `
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid" `
+    -IncomingClaimTypeDisplayName "SID" `
+    -SameAsIncoming
+
+$upnClaimMapping = New-SPClaimTypeMapping `
+    -IncomingClaimType `
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn" `
+    -IncomingClaimTypeDisplayName "UPN" `
+    -SameAsIncoming
+
+$roleClaimMapping = New-SPClaimTypeMapping `
+    -IncomingClaimType `
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" `
+    -IncomingClaimTypeDisplayName "Role" `
+    -SameAsIncoming
+
+$claimsMappings = @(
+    $emailClaimMapping,
+    $nameClaimMapping,
+    $sidClaimMapping,
+    $upnClaimMapping,
+    $roleClaimMapping)
+
+$identifierClaim = $emailClaimMapping.InputClaimType
+```
+
+##### # Create authentication provider for AD FS
+
+```PowerShell
+$realm = "urn:sharepoint:securitas"
+$signInURL = "https://fs.technologytoolbox.com/adfs/ls"
+
+$cert = Get-SPTrustedRootAuthority |
+    where { $_.Name -eq "ADFS Signing - fs.technologytoolbox.com" } |
+    select -ExpandProperty Certificate
+
+$authProvider = New-SPTrustedIdentityTokenIssuer `
+    -Name "ADFS" `
+    -Description "Active Directory Federation Services provider" `
+    -Realm $realm `
+    -ImportTrustCertificate $cert `
+    -ClaimsMappings $claimsMappings `
+    -SignInUrl $signInURL `
+    -IdentifierClaim $identifierClaim
+```
+
+#### # Configure AD FS authentication provider for SecuritasConnect
+
+```PowerShell
+$clientPortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
+
+$secureClientPortalUrl = "https://" + $clientPortalUrl.Host
+
+$realm = "urn:sharepoint:securitas:" `
+    + ($clientPortalUrl.Host -split '\.' | select -First 1)
+
+$authProvider.ProviderRealms.Add($secureClientPortalUrl, $realm)
+$authProvider.Update()
+```
+
+### # Configure SecuritasConnect to use AD FS trusted identity provider
+
+```PowerShell
+$clientPortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
+
+$trustedIdentityProvider = Get-SPTrustedIdentityTokenIssuer -Identity ADFS
+
+Set-SPWebApplication `
+    -Identity $clientPortalUrl.AbsoluteUri `
+    -Zone Default `
+    -AuthenticationProvider $trustedIdentityProvider `
+    -SignInRedirectURL ""
+
+$webApp = Get-SPWebApplication $clientPortalUrl.AbsoluteUri
+
+$defaultZone = [Microsoft.SharePoint.Administration.SPUrlZone]::Default
+
+$webApp.IisSettings[$defaultZone].AllowAnonymous = $false
+$webApp.Update()
+```
+
+### # Upgrade to "v4.0 Sprint-29" build
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+#### # Copy new build from TFS drop location
+
+```PowerShell
+$newBuild = "4.0.697.0"
+
+$sourcePath = "\\TT-FS01\Builds\Securitas\ClientPortal\$newBuild"
+
+$destPath = "\\EXT-APP02A.extranet.technologytoolbox.com\Builds" `
+    + "\ClientPortal\$newBuild"
+
+robocopy $sourcePath $destPath /E /NP
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Remove previous versions of SecuritasConnect WSPs
+
+```PowerShell
+$oldBuild = "4.0.681.1"
+
+Push-Location ("C:\Shares\Builds\ClientPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Deactivate Features.ps1' -Verbose
+
+& '.\Retract Solutions.ps1' -Verbose
+
+& '.\Delete Solutions.ps1' -Verbose
+
+Pop-Location
+```
+
+#### # Install new versions of SecuritasConnect WSPs
+
+```PowerShell
+$newBuild = "4.0.697.0"
+
+Push-Location ("C:\Shares\Builds\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+```
+
+> **Important**
+>
+> If an error occurs when activating the **Securitas.Portal.Web_ClaimsAuthenticationConfiguration** feature, restart the SharePoint services to reload the ADFS claims provider from the new version of **Securitas.Portal.Web** assembly:
+>
+> ```PowerShell
+> & 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Restart SharePoint Services.cmd'
+> ```
+>
+> After restarting the services, activate the features again:
+>
+> ```PowerShell
+> & '.\Activate Features.ps1' -Verbose
+> ```
+
+```PowerShell
+Pop-Location
+```
+
+#### # Delete old build
+
+```PowerShell
+Remove-Item C:\Shares\Builds\ClientPortal\4.0.681.1 `
+   -Recurse -Force
+```
+
+### Install and configure identity provider for client users
+
+#### Deploy identity provider website to front-end web servers
+
+---
+
+**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Configure claims provider trust in AD FS for identity provider
+
+##### # Create claims provider trust in AD FS
+
+```PowerShell
+$idpHostHeader = "idp.technologytoolbox.com"
+
+Add-AdfsClaimsProviderTrust `
+    -Name $idpHostHeader `
+    -MetadataURL "https://$idpHostHeader/core/wsfed/metadata" `
+    -MonitoringEnabled $true `
+    -AutoUpdateEnabled $true `
+    -SignatureAlgorithm http://www.w3.org/2000/09/xmldsig#rsa-sha1
+```
+
+##### # Configure claim acceptance rules for claims provider trust
+
+```PowerShell
+$claimsProviderTrustName = $idpHostHeader
+
+$claimRules = `
+'@RuleTemplate = "PassThroughClaims"
+@RuleName = "Pass through E-mail Address"
+c:[Type ==
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]
+=> issue(claim = c);
+
+@RuleTemplate = "PassThroughClaims"
+@RuleName = "Pass through Role"
+c:[Type ==
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
+=> issue(claim = c);'
+
+$tempFile = [System.IO.Path]::GetTempFileName()
+
+Set-Content -Value $claimRules -LiteralPath $tempFile
+
+Set-AdfsClaimsProviderTrust `
+    -TargetName $claimsProviderTrustName `
+    -AcceptanceTransformRulesFile $tempFile
+```
+
+---
+
+### Associate client email domains with claims provider trust
+
+#### Update email addresses for non-Production environments
+
+(skipped)
+
+---
+
+**EXT-SQL02**
+
+```PowerShell
+cls
+```
+
+#### # Create configuration file for AD FS claims provider trust
+
+```PowerShell
+$sqlcmd = @"
+USE SecuritasPortal
+GO
+
+SELECT DISTINCT
+  LOWER(
+    REVERSE(
+      SUBSTRING(
+        REVERSE(Email),
+        0,
+        CHARINDEX('@', REVERSE(Email))))) AS OrganizationalAccountSuffix,
+  'idp.technologytoolbox.com' AS TargetName
+FROM
+  dbo.aspnet_Membership
+WHERE
+  Email NOT LIKE '%securitasinc.com'
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false |
+    Export-Csv C:\NotBackedUp\Temp\ADFS-Claims-Provider-Trust-Configuration.csv
+
+Set-Location C:
+
+Notepad C:\NotBackedUp\Temp\ADFS-Claims-Provider-Trust-Configuration.csv
+```
+
+---
+
+---
+
+**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Set organizational account suffixes on AD FS claims provider trust
+
+```PowerShell
+$configFile = "ADFS-Claims-Provider-Trust-Configuration.csv"
+$source = ("\\EXT-SQL02A.extranet.technologytoolbox.com\C$" `
+    + "\NotBackedUp\Temp")
+
+$destination = "C:\NotBackedUp\Temp"
+
+If ((Test-Path $destination) -eq $false)
+{
+    New-Item -ItemType Directory -Path $destination
+}
+
+Push-Location $destination
+
+copy "$source\$configFile" .
+
+$claimsProviderTrustName = Import-Csv -Path ".\$configFile" |
+    select -First 1 -ExpandProperty TargetName
+
+$orgAccountSuffixes = `
+    Import-Csv ".\$configFile" |
+        where { $_.TargetName -eq $claimsProviderTrustName } |
+        select -ExpandProperty OrganizationalAccountSuffix
+
+Set-AdfsClaimsProviderTrust `
+    -TargetName $claimsProviderTrustName `
+    -OrganizationalAccountSuffix $orgAccountSuffixes
+
+Pop-Location
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Migrate users
+
+#### # Backup content database for Cloud Portal
+
+```PowerShell
+$sqlcmd = @"
+-- Create copy-only database backup
+
+DECLARE @databaseName VARCHAR(50) = 'WSS_Content_CloudPortal'
+
+DECLARE @backupDirectory VARCHAR(255)
+
+EXEC master.dbo.xp_instance_regread
+    N'HKEY_LOCAL_MACHINE'
+    , N'Software\Microsoft\MSSQLServer\MSSQLServer'
+    , N'BackupDirectory'
+    , @backupDirectory OUTPUT
+
+DECLARE @backupFilePath VARCHAR(255) =
+    @backupDirectory + '\Full\' + @databaseName + '.bak'
+
+DECLARE @backupName VARCHAR(100) = @databaseName + '-Full Database Backup'
+
+BACKUP DATABASE @databaseName
+    TO DISK = @backupFilePath
+    WITH COMPRESSION
+        , COPY_ONLY
+        , FORMAT
+        , INIT
+        , NAME = @backupName
+        , STATS = 5
+
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+#### # Migrate users in SharePoint to AD FS trusted identity provider
+
+```PowerShell
+Push-Location C:\Shares\Builds\ClientPortal\$newBuild\DeploymentFiles\Scripts
+
+$stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
+
+& '.\Migrate Users.ps1' -Verbose
+
+$stopwatch.Stop()
+C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
+```
+
+> **Note**
+>
+> Expect the previous operation to complete in approximately 1 hour.
+
+> **Important**
+>
+> Restart PowerShell to ensure database connections are closed.
+
+```Console
+exit
+```
+
+#### # Restore content database for Cloud Portal
+
+##### # Stop SharePoint services
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Stop SharePoint Services.cmd'
+```
+
+##### # Restore content database
+
+```PowerShell
+$sqlcmd = @"
+DECLARE @databaseName VARCHAR(50) = 'WSS_Content_CloudPortal'
+
+DECLARE @backupDirectory VARCHAR(255)
+
+EXEC master.dbo.xp_instance_regread
+    N'HKEY_LOCAL_MACHINE'
+    , N'Software\Microsoft\MSSQLServer\MSSQLServer'
+    , N'BackupDirectory'
+    , @backupDirectory OUTPUT
+
+DECLARE @backupFilePath VARCHAR(255) =
+    @backupDirectory + '\Full\' + @databaseName + '.bak'
+
+RESTORE DATABASE @databaseName
+    FROM DISK = @backupFilePath
+    WITH REPLACE
+        , STATS = 5
+
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+##### # Start SharePoint services
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Start SharePoint Services.cmd'
+```
+
+```PowerShell
+cls
+```
+
+#### # Update user names in SecuritasPortal database
+
+```PowerShell
+Push-Location ("C:\Shares\Builds\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Update SecuritasPortal UserNames.ps1'
+
+& "C:\Program Files (x86)\Microsoft SQL Server\120\Tools\Binn\ManagementStudio\Ssms.exe" '.\Update SecuritasPortal UserNames.sql'
+```
+
+> **Note**
+>
+> Execute the SQL script to update the user names in the database.
+
+```Console
+cls
+Pop-Location
+```
+
+### # Update permissions on template sites
+
+```PowerShell
+$clientPortalUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+
+$sites = @(
+    "/Template-Sites/Post-Orders-en-US",
+    "/Template-Sites/Post-Orders-en-CA",
+    "/Template-Sites/Post-Orders-fr-CA")
+
+$sites |
+    % {
+        $siteUrl = $clientPortalUrl + $_
+
+        $site = Get-SPSite -Identity $siteUrl
+
+        $group = $site.RootWeb.AssociatedVisitorGroup
+
+        $group.Users | % { $group.Users.Remove($_) }
+
+        $group.AddUser(
+            "c:0-.t|adfs|Branch Managers",
+            $null,
+            "Branch Managers",
+            $null)
+    }
+```
+
+### # Configure AD FS claim provider
+
+```PowerShell
+$tokenIssuer = Get-SPTrustedIdentityTokenIssuer -Identity ADFS
+$tokenIssuer.ClaimProviderName = "Securitas ADFS Claim Provider"
+$tokenIssuer.Update()
+```
+
+---
+
+**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Customize AD FS login pages
+
+#### # Customize text and image on login pages for SecuritasConnect relying party
+
+```PowerShell
+$clientPortalUrl = [Uri] "http://client-test.securitasinc.com"
+
+$idpHostHeader = "idp.technologytoolbox.com"
+
+$relyingPartyDisplayName = $clientPortalUrl.Host
+
+Set-AdfsRelyingPartyWebContent `
+    -TargetRelyingPartyName $relyingPartyDisplayName `
+    -CompanyName "SecuritasConnect®" `
+    -OrganizationalNameDescriptionText `
+        "Enter your Securitas e-mail address and password below." `
+    -SignInPageDescription $null `
+    -HomeRealmDiscoveryOtherOrganizationDescriptionText `
+        "Enter your e-mail address below."
+
+$tempFile = [System.Io.Path]::GetTempFileName()
+$tempFile = $tempFile.Replace(".tmp", ".jpg")
+
+Invoke-WebRequest `
+    -Uri https://$idpHostHeader/images/illustration.jpg `
+    -OutFile $tempFile
+
+Set-AdfsRelyingPartyWebTheme `
+    -TargetRelyingPartyName $relyingPartyDisplayName `
+    -Illustration @{ path = $tempFile }
+
+Remove-Item $tempFile
+```
+
+#### # Configure custom CSS and JavaScript files for additional customizations
+
+```PowerShell
+$relyingPartyDisplayName = $clientPortalUrl.Host
+
+$tempCssFile = [System.Io.Path]::GetTempFileName()
+$tempCssFile = $tempCssFile.Replace(".tmp", ".css")
+
+$tempJsFile = [System.Io.Path]::GetTempFileName()
+$tempJsFile = $tempJsFile.Replace(".tmp", ".js")
+
+Invoke-WebRequest `
+    -Uri https://$idpHostHeader/css/styles.css `
+    -OutFile $tempCssFile
+
+Invoke-WebRequest `
+    -Uri https://$idpHostHeader/js/onload.js `
+    -OutFile $tempJsFile
+
+Set-AdfsRelyingPartyWebTheme `
+    -TargetRelyingPartyName $relyingPartyDisplayName `
+    -OnLoadScriptPath $tempJsFile `
+    -StyleSheet @{ path = $tempCssFile }
+
+Remove-Item $tempCssFile
+Remove-Item $tempJsFile
+```
+
+---
+
+### # Upgrade Cloud Portal to "v2.0 Sprint-21" release
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+#### # Copy new build from TFS drop location
+
+```PowerShell
+$newBuild = "2.0.125.0"
+
+$sourcePath = "\\TT-FS01\Builds\Securitas\CloudPortal\$newBuild"
+
+$destPath = "\\EXT-FOOBAR2.extranet.technologytoolbox.com\Builds" `
+    + "\CloudPortal\$newBuild"
+
+robocopy $sourcePath $destPath /E /NP
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Remove previous versions of Cloud Portal WSP
+
+```PowerShell
+$oldBuild = "2.0.122.0"
+
+Push-Location ("C:\Shares\Builds\CloudPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Deactivate Features.ps1' -Verbose
+
+& '.\Retract Solutions.ps1' -Verbose
+
+& '.\Delete Solutions.ps1' -Verbose
+
+Pop-Location
+```
+
+#### # Install new versions of Cloud Portal WSP
+
+```PowerShell
+$newBuild = "2.0.125.0"
+
+Push-Location ("C:\Shares\Builds\CloudPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Delete old build
+
+```PowerShell
+Remove-Item C:\Shares\Builds\CloudPortal\2.0.122.0 `
+   -Recurse -Force
+```
+
+### # Upgrade Employee Portal to "v1.0 Sprint-6" release
+
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Copy new build from TFS drop location
+
+```PowerShell
+$build = "1.0.38.0"
+
+$sourcePath = "\\TT-FS01\Builds\Securitas\EmployeePortal\$build"
+
+$destPath = "\\EXT-APP02A.extranet.technologytoolbox.com\Builds" `
+    + "\EmployeePortal\$build"
+
+robocopy $sourcePath $destPath /E
+```
+
+---
+
+```PowerShell
+$build = "1.0.38.0"
+```
+
+#### # Backup Employee Portal Web.config file
+
+```PowerShell
+[Uri] $employeePortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
+    "client",
+    "employee")
+
+[String] $employeePortalHostHeader = $employeePortalUrl.Host
+
+Copy-Item C:\inetpub\wwwroot\$employeePortalHostHeader\Web.config `
+    "C:\NotBackedUp\Temp\Web - $employeePortalHostHeader.config"
+```
+
+#### # Deploy Employee Portal website on Central Administration server
+
+```PowerShell
+Push-Location ("C:\Shares\Builds\EmployeePortal\$build" `
+    + "\Release\_PublishedWebsites\Web_Package")
+
+attrib -r .\Web.SetParameters.xml
+
+$config = Get-Content Web.SetParameters.xml
+
+$config = $config -replace `
+    "Default Web Site/Web_deploy", $employeePortalHostHeader
+
+$config = $config -replace `
+    "Server=.; Database=SecuritasPortal",
+    "Server=EXT-SQL02; Database=SecuritasPortal"
+
+$config = $config -replace `
+    "Data Source=.; Initial Catalog=SecuritasPortal",
+    "Data Source=EXT-SQL02; Initial Catalog=SecuritasPortal"
+
+$configXml = [xml] $config
+
+$configXml.Save("$pwd\Web.SetParameters.xml")
+
+.\Web.deploy.cmd /t
+
+.\Web.deploy.cmd /y
+
+Pop-Location
+```
+
+#### # Configure application settings and web service URLs
+
+```PowerShell
+Push-Location ("C:\inetpub\wwwroot\" + $employeePortalHostHeader)
+
+(Get-Content Web.config) `
+    -replace '<add key="Environment" value="Local" />',
+        '<add key="Environment" value="Test" />' `
+    -replace '<add key="GoogleAnalytics.TrackingId" value="" />',
+        '<add key="GoogleAnalytics.TrackingId" value="UA-25899478-4" />' `
+    -replace 'https://client-local', 'https://client-test' `
+    -replace 'https://cloud2-local', 'https://cloud2-test' `
+    -replace 'smtpServer="technologytoolbox-com.mail.protection.outlook.com"',
+        'smtpServer="smtp-test.technologytoolbox.com"' |
+    Set-Content Web.config
+
+Pop-Location
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\x64\sgdm.exe `
+    "C:\NotBackedUp\Temp\Web - $employeePortalHostHeader.config" `
+    C:\inetpub\wwwroot\$employeePortalHostHeader\Web.config
+```
+
+```PowerShell
+cls
+```
+
+#### # Deploy Employee Portal website content to other web servers in farm
+
+```PowerShell
+Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
+
+$websiteName = "employee-test.securitasinc.com"
+
+.\msdeploy.exe -verb:sync `
+    -source:contentPath="C:\inetpub\wwwroot\$websiteName" `
+    -dest:contentPath="C:\inetpub\wwwroot\$websiteName"`,computername=EXT-WEB02A
+
+.\msdeploy.exe -verb:sync `
+    -source:contentPath="C:\inetpub\wwwroot\$websiteName" `
+    -dest:contentPath="C:\inetpub\wwwroot\$websiteName"`,computername=EXT-WEB02B
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Update Post Orders URLs in Employee Portal
+
+##### # Update Post Orders URL in Employee Portal SharePoint site
+
+```PowerShell
+Start-Process ($env:SECURITAS_CLOUD_PORTAL_URL `
+```
+
+    + "/sites/Employee-Portal/Lists/Shortcuts")
+
+```PowerShell
+cls
+```
+
+##### # Update Post Orders URLs in SecuritasPortal database
+
+```PowerShell
+$clientPortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
+
+$secureClientPortalUrl = "https://" + $clientPortalUrl.Host
+
+$newPostOrdersUrl = "$secureClientPortalUrl/Branch-Management/Post-Orders"
+
+$sqlcmd = @"
+USE SecuritasPortal
+GO
+
+UPDATE Employee.UserShortcuts
+SET UrlValue = '$newPostOrdersUrl'
+WHERE UrlValue =
+    'https://client2.securitasinc.com/Branch-Management/Post-Orders'
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+#### # Delete old build
+
+```PowerShell
+Remove-Item C:\Shares\Builds\EmployeePortal\1.0.32.0 -Recurse -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Resume Search Service Application
+
+```PowerShell
+Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
+    Resume-SPEnterpriseSearchServiceApplication
+```

@@ -1083,6 +1083,68 @@ $webApp.Update()
 cls
 ```
 
+### # Replace permissions for "Domain Users" on Cloud Portal sites
+
+```PowerShell
+[Uri] $cloudPortalUrl = [Uri] $env:SECURITAS_CLOUD_PORTAL_URL
+
+Get-SPSite -WebApplication $cloudPortalUrl.AbsoluteUri -Limit All |
+    foreach {
+        $site = $_
+
+        $site.RootWeb.Groups |
+            foreach {
+                $group = $_
+
+                $group.Users |
+                    foreach {
+                        $user = $_
+
+                        If ($user.DisplayName -eq "PNKCAN\Domain Users")
+                        {
+                            Write-Host ("Replacing group ($($user.DisplayName))" `
+                                + " on site ($($site.Url))...")
+
+                            $fabrikamUsers = New-SPClaimsPrincipal `
+                                -Identity "FABRIKAM\Domain Users" `
+                                -IdentityType WindowsSecurityGroupName
+
+                            $group.AddUser(
+                                $fabrikamUsers.ToEncodedString(),
+                                $null,
+                                "FABRIKAM\Domain Users",
+                                $null)
+
+                            $group.Users.Remove($user)
+                        }
+                        ElseIf ($user.DisplayName -eq "PNKUS\Domain Users")
+                        {
+                            Write-Host ("Replacing group ($($user.DisplayName))" `
+                                + " on site ($($site.Url))...")
+
+                            $techtoolboxUsers = New-SPClaimsPrincipal `
+                                -Identity "TECHTOOLBOX\Domain Users" `
+                                -IdentityType WindowsSecurityGroupName
+
+                            $group.AddUser(
+                                $techtoolboxUsers.ToEncodedString(),
+                                $null,
+                                "TECHTOOLBOX\Domain Users",
+                                $null)
+
+                            $group.Users.Remove($user)
+                        }
+                    }
+            }
+
+        $site.Dispose()
+    }
+```
+
+```PowerShell
+cls
+```
+
 ### # Configure custom sign-in page on Web application
 
 ```PowerShell
