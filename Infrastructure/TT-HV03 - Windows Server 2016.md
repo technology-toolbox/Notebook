@@ -1383,3 +1383,38 @@ $productionServer = 'TT-HV03'
 ```
 
 ---
+
+## Issue - Poor write performance on D: drive (tiered storage pool)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/92AD79946E869E7EE199D69FF682AC28D3950627.png)
+
+Screen clipping taken: 2/16/2018 3:21 PM
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/5FE0D64D7B2E7DFEAC548790049D3EE07C151F93.png)
+
+Screen clipping taken: 2/16/2018 3:22 PM
+
+PNP Device ID	PCI\\VEN_8086&DEV_1E02&SUBSYS_84CA1043&REV_04\\3&11583659&0&FA
+
+Driver	c:\\windows\\system32\\drivers\\storahci.sys (10.0.14393.953, 127.84 KB (130,912 bytes), 3/21/2017 10:05 AM)
+
+#### Update AHCI drivers
+
+1. Download the latest AHCI drivers from the Intel website:\
+   **Intel® Rapid Storage Technology (Intel® RST) User Interface and Driver**\
+   From <[https://downloadcenter.intel.com/download/23496/Intel-Rapid-Storage-Technology-Intel-RST-User-Interface-and-Driver](https://downloadcenter.intel.com/download/23496/Intel-Rapid-Storage-Technology-Intel-RST-User-Interface-and-Driver)>
+2. Extract the drivers (**[\\\\TT-FS01\\Public\\Download\\Drivers\\Intel\\RST](\\TT-FS01\Public\Download\Drivers\Intel\RST) Driver for ASUS P8Z77-V**) and copy the files to a temporary location on the server:
+3. Install the drivers for the **Intel(R) 7 Series/C216 Chipset Family SATA AHCI Controller (PCI\\VEN_8086&DEV_1E02&...)**:
+4. Restart the server.
+
+> **Note**
+>
+> Version 12.x contains the drivers for the Intel C216 chipset (a.k.a. "1E02") -- newer versions do not.
+
+```Console
+    robocopy "\\TT-FS01\Public\Download\Drivers\Intel\RST Driver for ASUS P8Z77-V"  '\\TT-HV03\C$\NotBackedUp\Temp\Drivers\Intel\RST' /E
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\RST\iaAHCIC.inf
+```
