@@ -1,7 +1,7 @@
 ﻿# FOOBAR10 - Windows 10 Enterprise (x64)
 
-Sunday, December 24, 2017
-5:47 AM
+Monday, February 19, 2018
+1:24 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -20,9 +20,9 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02C"
+$vmHost = "WOLVERINE"
 $vmName = "FOOBAR10"
-$vmPath = "D:\NotBackedUp\VMs"
+$vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
@@ -33,11 +33,12 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 50GB `
     -MemoryStartupBytes 2GB `
-    -SwitchName "Embedded Team Switch"
+    -SwitchName "Management"
 
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
+    -AutomaticCheckpointsEnabled $false `
     -ProcessorCount 2 `
     -DynamicMemory `
     -MemoryMinimumBytes 2GB `
@@ -59,6 +60,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
     - **Adobe Reader 8.3.1**
     - **Chrome (64-bit)**
     - **Firefox (64-bit)**
+    - **Thunderbird**
   - Click **Next**.
 
 > **Note**
@@ -93,7 +95,7 @@ cls
 ### # Set first boot device to hard drive
 
 ```PowerShell
-$vmHost = "TT-HV02C"
+$vmHost = "WOLVERINE"
 
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
@@ -163,6 +165,14 @@ $source = "\\TT-FS01\Public\Toolbox"
 $destination = "C:\NotBackedUp\Public\Toolbox"
 
 robocopy $source $destination /E /XD "Microsoft SDKs"
+```
+
+### # Set MaxPatchCacheSize to 0 (recommended)
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
 ### # Configure networking
@@ -244,25 +254,6 @@ cls
 Enable-NetFirewallRule -DisplayGroup "Remote Volume Management"
 ```
 
-## # Install Microsoft .NET Framework 3.5
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-Enable-WindowsOptionalFeature `
-    -Online `
-    -FeatureName NetFx3 `
-    -All `
-    -LimitAccess `
-    -Source "\\TT-FS01\Products\Microsoft\Windows 10\Sources\SxS"
-```
-
 ## # Install Microsoft Report Viewer 2012 (for WSUS console)
 
 #### # Install Microsoft System CLR Types for SQL Server 2012 (dependency for Report Viewer 2012)
@@ -301,7 +292,7 @@ Start-Process `
     -Wait
 ```
 
-## # Install SQL Server 2016 Management Studio
+## # Install SQL Server 2017 Management Studio
 
 ```PowerShell
 net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
@@ -312,8 +303,8 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\SQL Server 2016" `
-    + "\SSMS-Setup-ENU-13.0.16106.4.exe"
+$installerPath = "\\TT-FS01\Products\Microsoft\SQL Server 2017" `
+    + "\SSMS-Setup-ENU-14.0.17213.0.exe"
 
 Start-Process `
     -FilePath $installerPath `
@@ -504,67 +495,21 @@ Start-Process `
 logoff
 ```
 
-## Install Visual Studio 2017
-
-### Login as .\\foo
-
-### # Launch Visual Studio 2017 setup
+#### # Remove setup account from local Administrators group
 
 ```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+$domain = "TECHTOOLBOX"
+$username = "setup-systemcenter"
+
+([ADSI]"WinNT://./Administrators,group").Remove(
+    "WinNT://$domain/$username,user")
 ```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-cls
-$installerPath = "\\TT-FS01\Products\Microsoft\Visual Studio 2017\Enterprise" `
-    + "\vs_setup.exe"
-
-Start-Process `
-    -FilePath $installerPath `
-    -Wait
-```
-
-Select the following workloads:
-
-- **.NET desktop development**
-- **ASP.NET and web development**
-- **Office/SharePoint development**
 
 ## Install updates using Windows Update
 
 > **Note**
 >
 > Repeat until there are no updates available for the computer.
-
-## Make virtual machine highly available
-
----
-
-**TT-VMM01A**
-
-```PowerShell
-$vm = Get-SCVirtualMachine -Name "FOOBAR10"
-$vmHost = Get-SCVMHost -ComputerName "TT-HV02C.corp.technologytoolbox.com"
-
-Stop-SCVirtualMachine -VM $vm
-
-Move-SCVirtualMachine `
-    -VM $vm `
-    -VMHost $vmHost `
-    -HighlyAvailable $true `
-    -Path "\\TT-SOFS01.corp.technologytoolbox.com\VM-Storage-Silver" `
-    -UseDiffDiskOptimization
-
-Start-SCVirtualMachine -VM $vm
-```
-
----
-
-## Add virtual machine to Hyper-V protection group in DPM
 
 **TODO:**
 
