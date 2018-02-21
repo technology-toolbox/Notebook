@@ -422,6 +422,16 @@ robocopy \\TT-FS01\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 C:\NotBackedUp\Public\Toolbox\cmder\Cmder.exe /REGISTER ALL
 ```
 
+### # Configure symbolic link (e.g. for bash shell)
+
+```PowerShell
+Push-Location C:\NotBackedUp\Public\Toolbox\cmder\vendor
+
+cmd /c mklink /J git-for-windows "C:\Program Files\Git"
+
+Pop-Location
+```
+
 ### # Enable PowerShell remoting
 
 ```PowerShell
