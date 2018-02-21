@@ -1501,6 +1501,34 @@ $productionServer = 'WOLVERINE'
 
 ---
 
+## # Install Remote Server Administration Tools for Windows 10
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+& "\\TT-FS01\Public\Download\Microsoft\Remote Server Administration Tools for Windows 10\WindowsTH-RSAT_WS2016-x64.msu"
+```
+
+> **Note**
+>
+> If prompted to restart the computer, click **Restart now**.
+
+```PowerShell
+cls
+```
+
+## # Enable firewall rules for Disk Management
+
+```PowerShell
+Enable-NetFirewallRule -DisplayGroup "Remote Volume Management"
+```
+
 **TODO:**
 
 ## Disk Cleanup
