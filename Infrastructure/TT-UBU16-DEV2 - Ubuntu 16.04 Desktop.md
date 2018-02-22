@@ -1,7 +1,7 @@
-﻿# TT-UBU16-DEV1 - Ubuntu 16.04 Desktop
+﻿# TT-UBU16-DEV2 - Ubuntu 16.04 Desktop
 
-Tuesday, February 20, 2018
-4:32 AM
+Wednesday, February 21, 2018
+11:24 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -20,7 +20,7 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmName = "TT-UBU16-DEV1"
+$vmName = "TT-UBU16-DEV2"
 $vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -75,12 +75,6 @@ sudo unattended-upgrade -v
 reboot
 ```
 
-### # Check IP address
-
-```Shell
-ifconfig | grep "inet addr"
-```
-
 ### # Enable SSH
 
 ```Shell
@@ -99,7 +93,7 @@ cls
 
 ```PowerShell
 $checkpointName = "Baseline Ubuntu Desktop 16.04"
-$vmName = "TT-UBU16-DEV1"
+$vmName = "TT-UBU16-DEV2"
 
 Stop-VM -Name $vmName
 
@@ -128,6 +122,28 @@ From <[https://help.ubuntu.com/lts/serverguide/sssd-ad.html](https://help.ubuntu
 **Realmd and SSSD Active Directory Authentication**\
 From <[http://outsideit.net/realmd-sssd-ad-authentication/](http://outsideit.net/realmd-sssd-ad-authentication/)>
 
+### # Check IP address
+
+```Shell
+ifconfig | grep "inet addr"
+```
+
+---
+
+**WOLVERINE**
+
+```Shell
+clear
+```
+
+#### # Connect to machine using SSH
+
+```Shell
+ssh local-admin@192.168.10.94
+```
+
+---
+
 ```Shell
 clear
 ```
@@ -154,34 +170,7 @@ dig -t SRV _ldap._tcp.corp.technologytoolbox.com
 ; <<>> DiG 9.10.3-P4-Ubuntu <<>> -t SRV _ldap._tcp.corp.technologytoolbox.com
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 9127
-;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
-
-;; OPT PSEUDOSECTION:
-; EDNS: version: 0, flags:; udp: 4096
-;; QUESTION SECTION:
-;_ldap._tcp.corp.technologytoolbox.com. IN SRV
-
-;; AUTHORITY SECTION:
-technologytoolbox.com.  3521    IN      SOA     dns079.a.register.com. root.register.com. 2000030318 10800 86400 604800 3600
-
-;; Query time: 0 msec
-;; SERVER: 127.0.1.1#53(127.0.1.1)
-;; WHEN: Wed Feb 21 08:59:33 MST 2018
-;; MSG SIZE  rcvd: 125
-```
-
-Hmmm...seems to be querying local DNS cache (bypassing the DNS server). Force it to query the DNS server:
-
-```Shell
-clear
-dig @192.168.10.103 -t SRV _ldap._tcp.corp.technologytoolbox.com
-
-; <<>> DiG 9.10.3-P4-Ubuntu <<>> @192.168.10.103 -t SRV _ldap._tcp.corp.technologytoolbox.com
-; (1 server found)
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 943
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 49756
 ;; flags: qr aa rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 5
 
 ;; OPT PSEUDOSECTION:
@@ -190,31 +179,34 @@ dig @192.168.10.103 -t SRV _ldap._tcp.corp.technologytoolbox.com
 ;_ldap._tcp.corp.technologytoolbox.com. IN SRV
 
 ;; ANSWER SECTION:
-_ldap._tcp.corp.technologytoolbox.com. 600 IN SRV 0 100 389 tt-dc05.corp.technologytoolbox.com.
-_ldap._tcp.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC04.corp.technologytoolbox.com.
+_ldap._tcp.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC06.corp.technologytoolbox.com.
+_ldap._tcp.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC07.corp.technologytoolbox.com.
 
 ;; ADDITIONAL SECTION:
-tt-dc05.corp.technologytoolbox.com. 3600 IN A   192.168.10.104
-tt-dc05.corp.technologytoolbox.com. 3600 IN AAAA 2603:300b:802:89e0::104
-TT-DC04.corp.technologytoolbox.com. 3600 IN A   192.168.10.103
-TT-DC04.corp.technologytoolbox.com. 3600 IN AAAA 2603:300b:802:89e0::103
+TT-DC06.corp.technologytoolbox.com. 3600 IN A   192.168.10.103
+TT-DC06.corp.technologytoolbox.com. 3600 IN AAAA 2603:300b:802:89e0::103
+TT-DC07.corp.technologytoolbox.com. 3600 IN A   192.168.10.104
+TT-DC07.corp.technologytoolbox.com. 3600 IN AAAA 2603:300b:802:89e0::104
 
 ;; Query time: 0 msec
-;; SERVER: 192.168.10.103#53(192.168.10.103)
-;; WHEN: Wed Feb 21 08:46:14 MST 2018
+;; SERVER: 127.0.1.1#53(127.0.1.1)
+;; WHEN: Thu Feb 22 09:18:23 MST 2018
 ;; MSG SIZE  rcvd: 262
+```
+
+```Shell
+clear
 ```
 
 ##### # Validate domain controller SRV records
 
 ```Shell
-dig @192.168.10.103 -t SRV _ldap._tcp.dc._msdcs.corp.technologytoolbox.com
+dig -t SRV _ldap._tcp.dc._msdcs.corp.technologytoolbox.com
 
-; <<>> DiG 9.10.3-P4-Ubuntu <<>> @192.168.10.103 -t SRV _ldap._tcp.dc._msdcs.corp.technologytoolbox.com
-; (1 server found)
+; <<>> DiG 9.10.3-P4-Ubuntu <<>> -t SRV _ldap._tcp.dc._msdcs.corp.technologytoolbox.com
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 43825
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 31989
 ;; flags: qr aa rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 5
 
 ;; OPT PSEUDOSECTION:
@@ -223,18 +215,18 @@ dig @192.168.10.103 -t SRV _ldap._tcp.dc._msdcs.corp.technologytoolbox.com
 ;_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. IN SRV
 
 ;; ANSWER SECTION:
-_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC04.corp.technologytoolbox.com.
-_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC05.corp.technologytoolbox.com.
+_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC06.corp.technologytoolbox.com.
+_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC07.corp.technologytoolbox.com.
 
 ;; ADDITIONAL SECTION:
-TT-DC04.corp.technologytoolbox.com. 3600 IN A   192.168.10.103
-TT-DC04.corp.technologytoolbox.com. 3600 IN AAAA 2603:300b:802:89e0::103
-TT-DC05.corp.technologytoolbox.com. 3600 IN A   192.168.10.104
-TT-DC05.corp.technologytoolbox.com. 3600 IN AAAA 2603:300b:802:89e0::104
+TT-DC06.corp.technologytoolbox.com. 3600 IN A   192.168.10.103
+TT-DC06.corp.technologytoolbox.com. 3600 IN AAAA 2603:300b:802:89e0::103
+TT-DC07.corp.technologytoolbox.com. 3600 IN A   192.168.10.104
+TT-DC07.corp.technologytoolbox.com. 3600 IN AAAA 2603:300b:802:89e0::104
 
 ;; Query time: 0 msec
-;; SERVER: 192.168.10.103#53(192.168.10.103)
-;; WHEN: Wed Feb 21 09:03:37 MST 2018
+;; SERVER: 127.0.1.1#53(127.0.1.1)
+;; WHEN: Thu Feb 22 09:19:50 MST 2018
 ;; MSG SIZE  rcvd: 272
 ```
 
@@ -273,6 +265,7 @@ os-name = Linux (Ubuntu Desktop)
 os-version = 16.04
 
 [corp.technologytoolbox.com]
+computer-ou = OU=Workstations,OU=Resources,OU=Development,DC=corp,DC=technologytoolbox,DC=com
 fully-qualified-names = no
 ```
 
@@ -298,7 +291,7 @@ sudoedit /etc/hostname
 **/etc/hostname**
 
 ```Text
-TT-UBU16-DEV1.corp.technologytoolbox.com
+TT-UBU16-DEV2.corp.technologytoolbox.com
 ```
 
 ---
