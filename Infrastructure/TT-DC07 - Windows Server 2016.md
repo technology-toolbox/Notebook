@@ -1,7 +1,7 @@
-﻿# TT-DC05 - Windows Server 2016
+﻿# TT-DC07 - Windows Server 2016
 
-Friday, March 31, 2017
-10:01 AM
+Wednesday, February 21, 2018
+1:43 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Friday, March 31, 2017
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -21,13 +21,14 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV02B"
-$vmName = "TT-DC05"
-$vmPath = "D:\NotBackedUp\VMs"
+$vmName = "TT-DC07"
+$vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
+    -Generation 2 `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
@@ -38,14 +39,9 @@ Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
     -DynamicMemory `
-    -MemoryMinimumBytes 512MB `
+    -MemoryMinimumBytes 1GB `
     -MemoryMaximumBytes 2GB `
     -ProcessorCount 2
-
-Set-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Path C:\NotBackedUp\Products\Microsoft\MDT-Deploy-x64.iso
 
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
@@ -56,28 +52,9 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-DC05**.
+  - In the **Computer name** box, type **TT-DC07**.
   - Click **Next**.
 - On the **Applications** step, do not select any applications, and click **Next**.
-
----
-
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-### # Remove disk from virtual CD/DVD drive
-
-```PowerShell
-$vmHost = "TT-HV02B"
-$vmName = "TT-DC05"
-
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
-```
-
----
 
 ### # Rename local Administrator account and set password
 
@@ -163,6 +140,15 @@ cls
 
 #### # Configure static IP addresses
 
+##### # Disable DHCP and router discovery
+
+```PowerShell
+Set-NetIPInterface `
+    -InterfaceAlias $interfaceAlias `
+    -Dhcp Disabled `
+    -RouterDiscovery Disabled
+```
+
 ##### # Configure static IPv4 address
 
 ```PowerShell
@@ -186,7 +172,7 @@ Set-DNSClientServerAddress `
 ##### # Configure static IPv6 address
 
 ```PowerShell
-$ipAddress = "2603:300b:802:8900::104"
+$ipAddress = "2603:300b:802:89e0::104"
 
 New-NetIPAddress `
     -InterfaceAlias $interfaceAlias `
@@ -199,7 +185,7 @@ New-NetIPAddress `
 ```PowerShell
 Set-DNSClientServerAddress `
     -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 2603:300b:802:8900::103
+    -ServerAddresses 2603:300b:802:89e0::103
 ```
 
 ### Configure storage
@@ -209,37 +195,23 @@ Set-DNSClientServerAddress `
 | 0    | C:           | 32 GB       | 4K                   | OSDisk       |
 | 1    | D:           | 5 GB        | 4K                   | Data01       |
 
-```PowerShell
-cls
-```
-
-#### # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
 #### Configure separate VHD for Active Directory data
 
 ---
 
-**FOOBAR10**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
 
 ##### # Add disk for Active Directory data
 
 ```PowerShell
 $vmHost = "TT-HV02B"
-$vmName = "TT-DC05"
+$vmName = "TT-DC07"
 
-$vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 5GB
@@ -260,12 +232,24 @@ cls
 
 ```PowerShell
 Get-Disk 1 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
+    Initialize-Disk -PartitionStyle GPT -PassThru |
     New-Partition -UseMaximumSize -DriveLetter D |
     Format-Volume `
         -FileSystem NTFS `
         -NewFileSystemLabel "Data01" `
         -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+### # Configure Windows Update
+
+#### # Add machine to security group for Windows Update schedule
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "TT-DC07$"
 ```
 
 ## Configure domain controller
@@ -303,6 +287,28 @@ Install-ADDSDomainController `
 >
 > When prompted, specify the password for the administrator account when the computer is started in Safe Mode or a variant of Safe Mode, such as Directory Services Restore Mode.
 
+### Disable DNS on IPv6 link-local address
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/CB853A6283B6A3A1E3E48E7C4D6D8BB20C3E92D1.png)
+
+### # Configure firewall for cross-forest trust (EXTRANET --> TECHTOOLBOX)
+
+```PowerShell
+reg add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters `
+```
+
+    /v "TCP/IP Port" /t REG_DWORD /d 58349
+
+```PowerShell
+reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters `
+```
+
+    /v DCTcpipPort /t REG_DWORD /d 51164
+
+```PowerShell
+Restart-Computer
+```
+
 ## Configure backups
 
 ### # Add Windows Server Backup feature (DPM dependency for System State backups)
@@ -311,16 +317,54 @@ Install-ADDSDomainController `
 Add-WindowsFeature Windows-Server-Backup
 ```
 
+```PowerShell
+cls
+```
+
 ### # Install DPM agent
 
 ```PowerShell
-$installer = "\\TT-FS01\Products\Microsoft\System Center 2016\DPM\Agents" `
-    + "\DPMAgentInstaller_x64.exe"
+$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
 
-& $installer TT-DPM01.corp.technologytoolbox.com
+& $installer TT-DPM02.corp.technologytoolbox.com
 ```
 
-### Attach DPM agent
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
+
+- Exception for DPMRA.exe in all profiles
+- Exception for Windows Management Instrumentation service
+- Exception for RemoteAdmin service
+- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
+
+#### Reference
+
+**Installing Protection Agents Manually**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
+
+---
+
+**FOOBAR11 - DPM Management Shell**
+
+```PowerShell
+cls
+```
+
+### # Attach DPM agent
+
+```PowerShell
+$productionServer = 'TT-DC07'
+
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName TT-DPM02 `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
+```
+
+---
 
 ## Configure monitoring
 
@@ -355,6 +399,8 @@ Restart-Service HealthService
 **Deploying SCOM 2016 Agents to Domain controllers - some assembly required**\
 From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/](https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/)>
 
+**TODO:**
+
 ```PowerShell
 cls
 ```
@@ -372,56 +418,3 @@ slmgr /ipk {product key}
 ```Console
 slmgr /ato
 ```
-
-## # Resolve low disk space on C
-
-### # Clean up WinSxS folder
-
-```PowerShell
-Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
-```
-
-### # Clean up Windows Update files
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-
-Start-Service wuauserv
-```
-
-## Configure firewall for cross-forest trust (EXTRANET --> TECHTOOLBOX)
-
-```PowerShell
-reg add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters `
-```
-
-    /v "TCP/IP Port" /t REG_DWORD /d 58349
-
-```PowerShell
-reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters `
-```
-
-    /v DCTcpipPort /t REG_DWORD /d 51164
-
-```PowerShell
-Restart-Computer
-```
-
-## Rebuild DPM 2016 server (replace TT-DPM01 with TT-DPM02)
-
-### Uninstall previous version of DPM agent
-
-Restart the server to complete the removal.
-
-### # Install new version of DPM agent
-
-```PowerShell
-$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
-    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
-
-& $installer TT-DPM02.corp.technologytoolbox.com
-```
-
-**TODO:**
