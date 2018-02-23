@@ -1048,3 +1048,93 @@ $productionServer = 'TT-SOFS01A'
 ```
 
 ---
+
+## Enable CSV cache
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Increase RAM on cluster nodes
+
+#### # Increase RAM on node "B"
+
+```PowerShell
+$vmHost = "TT-HV03"
+$vmName = "TT-SOFS01B"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Set-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -StaticMemory `
+    -MemoryStartupBytes 4GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+```PowerShell
+cls
+```
+
+#### # Increase RAM on node "A"
+
+```PowerShell
+$vmHost = "TT-HV03"
+$vmName = "TT-SOFS01A"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Set-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -StaticMemory `
+    -MemoryStartupBytes 4GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+```PowerShell
+cls
+```
+
+### # Configure CSV cache
+
+```PowerShell
+(Get-Cluster TT-SOFS01-FC).BlockCacheSize = 1024
+```
+
+```PowerShell
+cls
+```
+
+### # Restart cluster nodes
+
+#### # Restart node "B"
+
+```PowerShell
+$vmHost = "TT-HV03"
+$vmName = "TT-SOFS01B"
+
+Restart-VM -ComputerName $vmHost -Name $vmName
+```
+
+```PowerShell
+cls
+```
+
+#### # Restart node "A"
+
+```PowerShell
+$vmHost = "TT-HV03"
+$vmName = "TT-SOFS01A"
+
+Restart-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
