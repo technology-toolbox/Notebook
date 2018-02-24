@@ -1,7 +1,7 @@
-﻿# TT-WSUS01 - Windows Server 2016
+﻿# TT-WSUS02 - Windows Server 2016
 
-Wednesday, December 20, 2017
-10:51 AM
+Friday, February 23, 2018
+2:12 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -19,26 +19,24 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 | Setting          | Value                                  |
 | ---------------- | -------------------------------------- |
 | Content location | [\\\\TT-FS01\\WSUS\$](\\TT-FS01\WSUS$) |
-| Current size     | 81.6 GB (7,820 files, 260 folders)     |
+| Current size     | 40.4 GB (3,705 files, 258 folders)     |
 
 ### Deploy and configure the server infrastructure
 
-#### Install Windows Server 2016
-
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-##### # Create virtual machine
+#### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02A"
-$vmName = "TT-WSUS01"
-$vmPath = "C:\NotBackedUp\VMs"
+$vmHost = "TT-HV02C"
+$vmName = "TT-WSUS02"
+$vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
@@ -54,25 +52,25 @@ New-VM `
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
-    -ProcessorCount 2 `
     -DynamicMemory `
     -MemoryMinimumBytes 2GB `
-    -MemoryMaximumBytes 4GB
+    -MemoryMaximumBytes 4GB `
+    -ProcessorCount 2
 
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
 
-##### Install custom Windows Server 2016 image
+#### Install custom Windows Server 2016 image
 
 - On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-WSUS01**.
+  - In the **Computer name** box, type **TT-WSUS02**.
   - Click **Next**.
 - On the **Applications** step, do not select any applications, and click **Next**.
 
-#### # Rename local Administrator account and set password
+### # Rename local Administrator account and set password
 
 ```PowerShell
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -95,30 +93,9 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
----
+### Login as .\\foo
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-#### # Move computer to different OU
-
-```PowerShell
-$vmName = "TT-WSUS01"
-
-$targetPath = "OU=Servers,OU=Resources,OU=IT" `
-    + ",DC=corp,DC=technologytoolbox,DC=com"
-
-Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
-```
-
----
-
-#### Login as .\\foo
-
-#### # Copy Toolbox content
+### # Copy Toolbox content
 
 ```PowerShell
 net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
@@ -135,19 +112,50 @@ $destination = "C:\NotBackedUp\Public\Toolbox"
 robocopy $source $destination /E /XD "Microsoft SDKs"
 ```
 
-#### # Enable PowerShell remoting
+### # Set MaxPatchCacheSize to 0 (recommended)
 
 ```PowerShell
-Enable-PSRemoting -Confirm:$false
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
-#### # Configure networking
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Set first boot device to hard drive
+
+```PowerShell
+$vmHost = "TT-HV02C"
+$vmName = "TT-WSUS02"
+
+$vmHardDiskDrive = Get-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName |
+    where { $_.ControllerType -eq "SCSI" `
+        -and $_.ControllerNumber -eq 0 `
+        -and $_.ControllerLocation -eq 0 }
+
+Set-VMFirmware `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -FirstBootDevice $vmHardDiskDrive
+```
+
+---
+
+### # Configure networking
 
 ```PowerShell
 $interfaceAlias = "Management"
 ```
 
-##### # Rename network connections
+#### # Rename network connections
 
 ```PowerShell
 Get-NetAdapter -Physical | select InterfaceDescription
@@ -156,7 +164,7 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-##### # Enable jumbo frames
+#### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
@@ -169,9 +177,11 @@ Start-Sleep -Seconds 5
 ping TT-FS01 -f -l 8900
 ```
 
+#### Configure static IP address
+
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -180,7 +190,7 @@ cls
 ##### # Configure static IP address using VMM
 
 ```PowerShell
-$vmName = "TT-WSUS01"
+$vmName = "TT-WSUS02"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
 $vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
 $macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
@@ -213,40 +223,67 @@ Set-SCVirtualNetworkAdapter `
 Start-SCVirtualMachine $vmName
 ```
 
+---
+
+### Configure storage
+
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | C:           | 32 GB       | 4K                   | OSDisk       |
+| 1    | D:           | 80 GB       | 4K                   | Data01       |
+
+#### Configure separate VHD for WSUS content
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
 cls
 ```
 
-#### # Set first boot device to hard drive
+##### # Add disk for WSUS content
 
 ```PowerShell
-$vmHost = "TT-HV02A"
-$vmName = "TT-WSUS01"
+$vmHost = "TT-HV02C"
+$vmName = "TT-WSUS02"
 
-$vmHardDiskDrive = Get-VMHardDiskDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName |
-    where { $_.ControllerType -eq "SCSI" `
-        -and $_.ControllerNumber -eq 0 `
-        -and $_.ControllerLocation -eq 0 }
+$vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+    + $vmName + "_Data01.vhdx"
 
-Set-VMFirmware `
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 80GB
+Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
-    -FirstBootDevice $vmHardDiskDrive
+    -Path $vhdPath `
+    -ControllerType SCSI
 ```
 
 ---
 
-#### Add virtual machine to Hyper-V protection group in DPM
-
 ```PowerShell
 cls
 ```
 
-### # Install and configure prerequisites for WSUS
+##### # Initialize disks and format volumes
 
-#### # Install System CLR Types for SQL Server 2012
+```PowerShell
+Get-Disk 1 |
+    Initialize-Disk -PartitionStyle GPT -PassThru |
+    New-Partition -UseMaximumSize -DriveLetter D |
+    Format-Volume `
+        -FileSystem NTFS `
+        -NewFileSystemLabel "Data01" `
+        -Confirm:$false
+```
+
+### Configure backup
+
+#### Add virtual machine to Hyper-V protection group in DPM
+
+### Install and configure prerequisites for WSUS
+
+#### Install System CLR Types for SQL Server 2012
 
 > **Note**
 >
@@ -266,78 +303,6 @@ cls
 ```PowerShell
 & "\\TT-FS01\Products\Microsoft\Report Viewer 2012 Runtime\ReportViewer.msi"
 ```
-
-#### Create service account for WSUS
-
----
-
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
-
-#### # Create WSUS service account
-
-```PowerShell
-$displayName = "Service account for Windows Server Update Services"
-$defaultUserName = "s-wsus"
-
-$cred = Get-Credential -Message $displayName -UserName $defaultUserName
-
-$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
-$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
-
-New-ADUser `
-    -Name $displayName `
-    -DisplayName $displayName `
-    -SamAccountName $cred.UserName `
-    -AccountPassword $cred.Password `
-    -UserPrincipalName $userPrincipalName `
-    -Path $orgUnit `
-    -Enabled:$true `
-    -CannotChangePassword:$true `
-    -PasswordNeverExpires:$true
-```
-
----
-
-#### Create share for WSUS content
-
----
-
-**TT-FS01**
-
-#### # Create and share folder for WSUS content
-
-```PowerShell
-$wsusFolderPath = 'D:\Shares\WSUS$'
-
-New-Item -Path $wsusFolderPath -ItemType Directory
-
-New-SmbShare `
-    -Name 'WSUS$' `
-    -Path $wsusFolderPath `
-    -CachingMode None `
-    -ChangeAccess Everyone
-```
-
-##### # Remove "BUILTIN\\Users" permissions
-
-```PowerShell
-icacls $wsusFolderPath /inheritance:d
-icacls $wsusFolderPath /remove:g "BUILTIN\Users"
-```
-
-##### # Grant WSUS computer account modify access to WSUS share
-
-```PowerShell
-icacls $wsusFolderPath /grant 'TT-WSUS01$:(OI)(CI)(M)'
-```
-
-##### # Grant WSUS service account read access to WSUS share
-
-```PowerShell
-icacls $wsusFolderPath /grant 'TECHTOOLBOX\s-wsus:(OI)(CI)(RX)'
-```
-
----
 
 ### Install WSUS
 
@@ -370,7 +335,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
    4. Click **Next**.
 9. On the **Content location selection** page:
    1. Ensure the **Store updates in the following location **checkbox is selected.
-   2. In the location box, type **[\\\\TT-FS01\\WSUS\$](\\TT-FS01\WSUS$)**.
+   2. In the location box, type **D:\\WSUS**.
    3. Click **Next**.
 10. On the **Database Instance Selection** page:
     1. In the **Specify an existing database server** box, type **HAVOK**.
@@ -406,52 +371,49 @@ MODIFY FILE ( NAME = N'SUSDB', FILEGROWTH = 102400KB )
 
 ---
 
-#### Fix path for "Content" virtual directory
+#### Configure memory limit for WSUS application pool in IIS
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/24/56E28B97ADA2E7B8DBADAAA4DFD38338F7846724.png)
+Modify the properties for **WsusPool** to increase the **Private Memory Limit (KB)** to **2500000**.
 
-```PowerShell
-Import-Module WebAdministration
+##### Issue - WSUS crashing due to memory constraint
 
-Set-ItemProperty `
-    "IIS:\Sites\WSUS Administration\Content" `
-    -Name physicalPath `
-    -Value "\\TT-FS01\WSUS$\WsusContent\"
-```
+Windows Update failing on clients:
 
-```PowerShell
-cls
-```
+- HRESULT: 0x80244022
+- HRESULT: 0x8024400A
 
-#### # Set credentials for accessing WSUS content on file share
+###### Troubleshooting
 
-```PowerShell
-$displayName = "Service account for Windows Server Update Services"
-$defaultUserName = "TECHTOOLBOX\s-wsus"
+Log Name:      System\
+Source:        Microsoft-Windows-WAS\
+Date:          10/14/2016 9:32:42 AM\
+Event ID:      5117\
+Task Category: None\
+Level:         Information\
+Keywords:      Classic\
+User:          N/A\
+Computer:      COLOSSUS.corp.technologytoolbox.com\
+Description:\
+A worker process serving application pool 'WsusPool' has requested a recycle because it reached its private bytes memory limit.
 
-$cred = Get-Credential -Message $displayName -UserName $defaultUserName
-
-$password = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-    [Runtime.InteropServices.Marshal]::SecureStringToBSTR(
-        $cred.Password))
-
-Set-ItemProperty `
-    "IIS:\Sites\WSUS Administration\Content" `
-    -Name userName `
-    -Value $cred.UserName
-
-Set-ItemProperty `
-    "IIS:\Sites\WSUS Administration\Content" `
-    -Name password `
-    -Value $password
-```
+Log Name:      System\
+Source:        Microsoft-Windows-WAS\
+Date:          10/14/2016 9:33:42 AM\
+Event ID:      5002\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      COLOSSUS.corp.technologytoolbox.com\
+Description:\
+Application pool 'WsusPool' is being automatically disabled due to a series of failures in the process(es) serving that application pool.
 
 ### Configure WSUS by using the WSUS Configuration Wizard
 
 **To configure WSUS:**
 
 1. In the **Server Manager** navigation pane, select **WSUS**.
-2. In the servers list, right-click the WSUS server (**TT-WSUS01**) and then click **Windows Server Update Services**. The **Windows Server Update Services Wizard** opens.
+2. In the servers list, right-click the WSUS server (**TT-WSUS02**) and then click **Windows Server Update Services**. The **Windows Server Update Services Wizard** opens.
 3. On the **Before You Begin** page, review the information, and then click **Next**.
 4. On the **Join the Microsoft Update Improvement Program** page, click **Next**.
 5. On the **Choose Upstream Server** page, ensure the **Synchronize from Microsoft Update** option is selected and click **Next**.
@@ -483,8 +445,7 @@ Set-ItemProperty `
        **System Center 2016 - Virtual Machine Manager**\
        **Windows**
     2. Click **Next**.
-12. On the **Choose Classifications** page:
-13. On the **Choose Classifications **page:
+12. On the **Choose Classifications **page:
     1. Select the following classifications:\
        **All Classifications**\
        **Critical Updates**\
@@ -499,14 +460,14 @@ Set-ItemProperty `
        **Updates**\
        **Upgrades**
     2. Click **Next**.
-14. On the **Set Sync Schedule** page:
+13. On the **Set Sync Schedule** page:
     1. Select the **Synchronize automatically** option.
     2. In the **First synchronization** box, specify **11:10:00 PM**.
     3. Click **Next**.
-15. On the **Finished** page:
+14. On the **Finished** page:
     1. Select the **Begin initial synchronization** checkbox.
     2. Click **Finish**. The WSUS Management Console appears.
-    3. Wait for the initial synchronization to complete before proceeding.
+    3. ~~Wait for the initial synchronization to complete before proceeding.~~
 
 ### Configure WSUS computer groups
 
@@ -547,14 +508,14 @@ Computers
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 Add-DNSServerResourceRecordCName `
-    -ComputerName TT-DC04 `
+    -ComputerName TT-DC06 `
     -ZoneName technologytoolbox.com `
     -Name wsus `
-    -HostNameAlias TT-WSUS01.corp.technologytoolbox.com
+    -HostNameAlias TT-WSUS02.corp.technologytoolbox.com
 ```
 
 ---
@@ -589,19 +550,30 @@ Pop-Location
 
 #### Validate SSL configuration
 
-[http://wsus.technologytoolbox.com:8530/Content/00/DAB142DAEF6CECF893FAF70D14A33A5526FF2000.txt](http://wsus.technologytoolbox.com:8530/Content/00/DAB142DAEF6CECF893FAF70D14A33A5526FF2000.txt)
+[http://wsus.technologytoolbox.com:8530/Content/anonymousCheckFile.txt](http://wsus.technologytoolbox.com:8530/Content/anonymousCheckFile.txt)
 
-[https://wsus.technologytoolbox.com:8531/Content/00/DAB142DAEF6CECF893FAF70D14A33A5526FF2000.txt](https://wsus.technologytoolbox.com:8531/Content/00/DAB142DAEF6CECF893FAF70D14A33A5526FF2000.txt)
+[https://wsus.technologytoolbox.com:8531/Content/anonymousCheckFile.txt](https://wsus.technologytoolbox.com:8531/Content/anonymousCheckFile.txt)
+
+### WSUS database maintenance (rebuild/reorganize indexes)
+
+C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql
 
 ```PowerShell
 cls
 ```
 
-### # Decline superseded updates
+### # Decline unwanted updates
 
 ```PowerShell
-Get-WsusUpdate -Approval AnyExceptDeclined -Classification All -Status Any |
-    Where-Object -Property UpdatesSupersedingThisUpdate -NE -Value 'None' |
+Get-WsusUpdate -Approval AnyExceptDeclined |
+    where {
+        # Superseded updates
+        ($_.UpdatesSupersedingThisUpdate -ne 'None') -or `
+        # Language Packs
+        ($_.Products -match 'Language Interface Packs') -or `
+        ($_.Products -match 'Language Packs')
+
+    } |
     Deny-WsusUpdate -Verbose
 ```
 
@@ -674,16 +646,6 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 #### Configure firewall rules for Windows Update
 
-```PowerShell
-cls
-```
-
-#### # Install SQL Server Management Studio
-
-```PowerShell
-& "\\TT-FS01\Products\Microsoft\SQL Server 2017\SSMS-Setup-ENU-14.0.17213.0.exe"
-```
-
 ## Import scheduled task to cleanup WSUS
 
 "C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WSUS Server Cleanup.xml"
@@ -707,6 +669,8 @@ Steps:
     - Recurs every: **1 week on Sunday**
   - Daily frequency:
     - Occurs once at: **10:00 AM**
+
+**TODO:**
 
 ```PowerShell
 cls
@@ -742,108 +706,6 @@ msiexec.exe /i $msiPath `
 ```
 
 ## # Approve manual agent install in Operations Manager
-
-## Issue: Windows Update (KB3159706) broke WSUS console
-
-### Issue
-
-WSUS clients started failing with error 0x8024401C
-
-Attempting to open WSUS console generated errors, which led to the discovery of the following errors in the event log:
-
-Log Name:      Application\
-Source:        Windows Server Update Services\
-Date:          5/13/2016 8:39:56 AM\
-Event ID:      507\
-Task Category: 1\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      COLOSSUS.corp.technologytoolbox.com\
-Description:\
-Update Services failed its initialization and stopped.
-
-Log Name:      System\
-Source:        Service Control Manager\
-Date:          5/13/2016 8:39:56 AM\
-Event ID:      7031\
-Task Category: None\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      COLOSSUS.corp.technologytoolbox.com\
-Description:\
-The WSUS Service service terminated unexpectedly.  It has done this 1 time(s).  The following corrective action will be taken in 300000 milliseconds: Restart the service.
-
-### References
-
-**Update enables ESD decryption provision in WSUS in Windows Server 2012 and Windows Server 2012 R2**\
-From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
-
-**The long-term fix for KB3148812 issues**\
-From <[https://blogs.technet.microsoft.com/wsus/2016/05/05/the-long-term-fix-for-kb3148812-issues/](https://blogs.technet.microsoft.com/wsus/2016/05/05/the-long-term-fix-for-kb3148812-issues/)>
-
-### Solution
-
-Manual steps required to complete the installation of this update
-
-1. Open an elevated Command Prompt window, and then run the following command (case sensitive, assume "C" as the system volume):
-"C:\\Program Files\\Update Services\\Tools\\wsusutil.exe" postinstall /servicing
-2. Select **HTTP Activation **under **.NET Framework 4.5 Features** in the Server Manager Add Roles and Features wizard.
-3. Restart the WSUS service.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/06E6407CAFFDA2F33739002CABD4137317C46E7D.jpg)
-
-From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
-
-## Issue - WSUS crashing due to memory constraint
-
-Windows Update failing on clients:
-
-- HRESULT: 0x80244022
-- HRESULT: 0x8024400A
-
-### Troubleshooting
-
-Log Name:      System\
-Source:        Microsoft-Windows-WAS\
-Date:          10/14/2016 9:32:42 AM\
-Event ID:      5117\
-Task Category: None\
-Level:         Information\
-Keywords:      Classic\
-User:          N/A\
-Computer:      COLOSSUS.corp.technologytoolbox.com\
-Description:\
-A worker process serving application pool 'WsusPool' has requested a recycle because it reached its private bytes memory limit.
-
-Log Name:      System\
-Source:        Microsoft-Windows-WAS\
-Date:          10/14/2016 9:33:42 AM\
-Event ID:      5002\
-Task Category: None\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      COLOSSUS.corp.technologytoolbox.com\
-Description:\
-Application pool 'WsusPool' is being automatically disabled due to a series of failures in the process(es) serving that application pool.
-
-### Solution
-
-Modify the properties for **WsusPool** to increase the **Private Memory Limit (KB)** from **1258015** to **2500000**.
-
-## Upgrade to System Center Operations Manager 2016
-
-### Uninstall SCOM 2012 R2 agent
-
-```Console
-msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
-
-Restart-Computer
-```
-
-### Install SCOM 2016 agent (using Operations Console)
 
 ## Move WSUS database from HAVOK to TT-SQL01
 
@@ -970,7 +832,7 @@ GO
 USE master
 GO
 
-CREATE LOGIN [TECHTOOLBOX\TT-WSUS01$] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\TT-WSUS02$] FROM WINDOWS
 WITH DEFAULT_DATABASE=master, DEFAULT_LANGUAGE=us_english
 GO
 ```
@@ -1037,7 +899,7 @@ GO
 USE master
 GO
 
-CREATE LOGIN [TECHTOOLBOX\TT-WSUS01$] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\TT-WSUS02$] FROM WINDOWS
 WITH DEFAULT_DATABASE=master, DEFAULT_LANGUAGE=us_english
 GO
 ```
@@ -1395,7 +1257,7 @@ cls
 ## # Make virtual machine highly available
 
 ```PowerShell
-$vm = Get-SCVirtualMachine -Name TT-WSUS01
+$vm = Get-SCVirtualMachine -Name TT-WSUS02
 $vmHost = $vm.VMHost
 
 Move-SCVirtualMachine `
@@ -1407,3 +1269,117 @@ Move-SCVirtualMachine `
 ```
 
 ---
+
+## WSUS update approvals
+
+```PowerShell
+Get-WsusUpdate -Approval AnyExceptDeclined |
+    #select -First 5 |
+    foreach {
+        New-Object -TypeName PSObject -Property @{
+          'UpdateId' = $_.UpdateId;
+          'Title' = $_.Update.Title;
+          'Classification' = $_.Classification;
+          'Approved' = $_.Approved;
+        }
+    } |
+    Export-Csv `
+        -Path C:\NotBackedUp\Temp\WSUS-Updates.csv `
+        -NoTypeInformation `
+        -Encoding UTF8
+
+Get-WsusUpdate -Approval Declined |
+    #select -First 5 |
+    foreach {
+        New-Object -TypeName PSObject -Property @{
+          'UpdateId' = $_.UpdateId;
+          'Title' = $_.Update.Title;
+          'Classification' = $_.Classification;
+          'Approved' = $_.Approved;
+        }
+    } |
+    Export-Csv `
+        -Path C:\NotBackedUp\Temp\WSUS-Updates.csv `
+        -NoTypeInformation `
+        -Encoding UTF8 `
+        -Append
+
+
+$wsusServer = Get-WsusServer
+
+$wsusServer.GetComputerTargetGroups() |
+    foreach {
+        $computerGroup = $_
+
+        $updateScope = New-Object Microsoft.UpdateServices.Administration.UpdateScope
+
+        $updateScope.ApprovedStates = "Any"
+        $updateScope.ApprovedComputerTargetGroups.Add($computerGroup) | Out-Null
+
+        $wsusServer.GetUpdateApprovals($updateScope) |
+            foreach {
+                New-Object -TypeName PSObject -Property @{
+                    'ComputerGroup' = $computerGroup.Name;
+                    'UpdateId' = $_.Id;
+                    'Action' = $_.Action;
+                }
+            }
+    } |
+    Export-Csv `
+        -Path C:\NotBackedUp\Temp\WSUS-Updates-By-Computer-Group.csv `
+        -NoTypeInformation `
+        -Encoding UTF8
+```
+
+## Issue: Windows Update (KB3159706) broke WSUS console
+
+### Issue
+
+WSUS clients started failing with error 0x8024401C
+
+Attempting to open WSUS console generated errors, which led to the discovery of the following errors in the event log:
+
+Log Name:      Application\
+Source:        Windows Server Update Services\
+Date:          5/13/2016 8:39:56 AM\
+Event ID:      507\
+Task Category: 1\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      COLOSSUS.corp.technologytoolbox.com\
+Description:\
+Update Services failed its initialization and stopped.
+
+Log Name:      System\
+Source:        Service Control Manager\
+Date:          5/13/2016 8:39:56 AM\
+Event ID:      7031\
+Task Category: None\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      COLOSSUS.corp.technologytoolbox.com\
+Description:\
+The WSUS Service service terminated unexpectedly.  It has done this 1 time(s).  The following corrective action will be taken in 300000 milliseconds: Restart the service.
+
+### References
+
+**Update enables ESD decryption provision in WSUS in Windows Server 2012 and Windows Server 2012 R2**\
+From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
+
+**The long-term fix for KB3148812 issues**\
+From <[https://blogs.technet.microsoft.com/wsus/2016/05/05/the-long-term-fix-for-kb3148812-issues/](https://blogs.technet.microsoft.com/wsus/2016/05/05/the-long-term-fix-for-kb3148812-issues/)>
+
+### Solution
+
+Manual steps required to complete the installation of this update
+
+1. Open an elevated Command Prompt window, and then run the following command (case sensitive, assume "C" as the system volume):
+"C:\\Program Files\\Update Services\\Tools\\wsusutil.exe" postinstall /servicing
+2. Select **HTTP Activation **under **.NET Framework 4.5 Features** in the Server Manager Add Roles and Features wizard.
+3. Restart the WSUS service.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/06E6407CAFFDA2F33739002CABD4137317C46E7D.jpg)
+
+From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
