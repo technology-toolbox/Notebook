@@ -1276,7 +1276,7 @@ Get-StoragePool "Pool 1" |
     New-VirtualDisk `
         -FriendlyName "Bronze01" `
         -ResiliencySettingName Mirror `
-        -Size 2.7TB `
+        -Size 2.72TB `
         -WriteCacheSize 4GB
 ```
 
@@ -1298,13 +1298,21 @@ Get-VirtualDisk "Bronze01"| Get-Disk |
 
 Initialize-Volume `
     -DriveLetter "F" `
-    -FileSystem NTFS `
+    -FileSystem ReFS `
     -NewFileSystemLabel "Bronze01" `
     -Confirm:$false
 ```
 
-### Baseline storage performance
+```PowerShell
+cls
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E5/E8E0874465A8CD764B05EB0F6F04082BC7B8C3E5.png)
+### # Baseline storage performance
 
-Screen clipping taken: 2/28/2018 6:03 AM
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\ATTO Disk Benchmark\Bench32.exe'
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E4/A261E8946E546AF236D9C4308CB552B8FE1BBBE4.png)
+
+Screen clipping taken: 2/28/2018 7:54 AM
