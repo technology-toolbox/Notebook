@@ -1232,3 +1232,79 @@ Set-DnsClientServerAddress `
 
 Restart-Computer
 ```
+
+## Configure additional storage
+
+```PowerShell
+Get-PhysicalDisk | select DeviceId, Model, SerialNumber, CanPool | sort DeviceId
+```
+
+```PowerShell
+cls
+```
+
+### # Reset disks
+
+```PowerShell
+Get-PhysicalDisk -SerialNumber WD-******357156 | Reset-PhysicalDisk
+
+Get-PhysicalDisk -SerialNumber WD-******FV469C | Reset-PhysicalDisk
+```
+
+```PowerShell
+cls
+```
+
+### # Add disks to storage pool
+
+```PowerShell
+$physicalDisks = @(
+    (Get-PhysicalDisk -SerialNumber WD-******357156),
+    (Get-PhysicalDisk -SerialNumber WD-******FV469C))
+
+Get-StoragePool "Pool 1" | Add-PhysicalDisk -PhysicalDisks $physicalDisks
+```
+
+```PowerShell
+cls
+```
+
+### # Create virtual disk
+
+```PowerShell
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
+        -FriendlyName "Bronze01" `
+        -ResiliencySettingName Mirror `
+        -Size 2.7TB `
+        -WriteCacheSize 4GB
+```
+
+```PowerShell
+cls
+```
+
+### # Create partition and volume
+
+```PowerShell
+Get-VirtualDisk "Bronze01" | Get-Disk | Set-Disk -IsReadOnly 0
+
+Get-VirtualDisk "Bronze01"| Get-Disk | Set-Disk -IsOffline 0
+
+Get-VirtualDisk "Bronze01"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+
+Get-VirtualDisk "Bronze01"| Get-Disk |
+    New-Partition -DriveLetter "F" -UseMaximumSize
+
+Initialize-Volume `
+    -DriveLetter "F" `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Bronze01" `
+    -Confirm:$false
+```
+
+### Baseline storage performance
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E5/E8E0874465A8CD764B05EB0F6F04082BC7B8C3E5.png)
+
+Screen clipping taken: 2/28/2018 6:03 AM
