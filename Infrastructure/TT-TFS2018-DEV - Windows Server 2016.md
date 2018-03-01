@@ -399,3 +399,5 @@ icacls D:\Shares\Builds /grant '"TECHTOOLBOX\s-tfs-build":(OI)(CI)(M)'
 ```PowerShell
 icacls D:\Shares\Builds /grant '"TECHTOOLBOX\All Developers":(OI)(CI)(RX)'
 ```
+
+## Install Team Foundation Server 2018 Update 1
