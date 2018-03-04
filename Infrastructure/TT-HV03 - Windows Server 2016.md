@@ -757,7 +757,8 @@ New-IscsiVirtualDisk `
 
 New-IscsiVirtualDisk `
     -Path ("D:\iSCSIVirtualDisks\" + $iScsiTargetName + "_CSV01.vhdx") `
-    -SizeBytes 2TB
+    -SizeBytes 2.5TB `
+    -UseFixed
 ```
 
 ##### # Map iSCSI disks to target
@@ -1418,3 +1419,84 @@ Driver	c:\\windows\\system32\\drivers\\storahci.sys (10.0.14393.953, 127.84 KB (
 ```Console
     pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\RST\iaAHCIC.inf
 ```
+
+### Reconfigure storage
+
+```PowerShell
+cls
+```
+
+#### # Create storage tiers
+
+```PowerShell
+Get-StoragePool "Pool 1" |
+    New-StorageTier -FriendlyName "SSD Tier" -MediaType SSD
+
+Get-StoragePool "Pool 1" |
+    New-StorageTier -FriendlyName "HDD Tier" -MediaType HDD
+```
+
+#### # Create storage spaces
+
+```PowerShell
+$ssdTier = Get-StorageTier -FriendlyName "SSD Tier"
+$hddTier = Get-StorageTier -FriendlyName "HDD Tier"
+
+Get-StoragePool "Pool 1" |
+    New-VirtualDisk `
+        -FriendlyName "Data01" `
+        -ResiliencySettingName Mirror `
+        -ProvisioningType Fixed `
+        -StorageTiers $ssdTier, $hddTier `
+        -StorageTierSizes 470GB, 3724GB `
+        -WriteCacheSize 5GB
+```
+
+```PowerShell
+cls
+```
+
+#### # Create partitions and volumes
+
+##### # Create volume "D" on Data01
+
+```PowerShell
+Get-VirtualDisk "Data01" | Get-Disk | Set-Disk -IsReadOnly 0
+
+Get-VirtualDisk "Data01"| Get-Disk | Set-Disk -IsOffline 0
+
+Get-VirtualDisk "Data01"| Get-Disk | Initialize-Disk -PartitionStyle GPT
+
+Get-VirtualDisk "Data01"| Get-Disk |
+    New-Partition -DriveLetter "D" -UseMaximumSize
+
+Initialize-Volume `
+    -DriveLetter "D" `
+    -FileSystem ReFS `
+    -NewFileSystemLabel "Data01" `
+    -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+#### # Benchmark storage performance
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\ATTO Disk Benchmark\Bench32.exe'
+```
+
+##### C: (HDD - Western Digital 640 GB)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/4E4FF1D27A05B6573DC99739EB15379BBBE64C1C.png)
+
+Screen clipping taken: 3/3/2018 10:48 AM
+
+##### D: (Mirror SSD/HDD storage space)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/22/CE52951231D7017E63D6FF0775C2FCB3EA0B4F22.png)
+
+Screen clipping taken: 3/3/2018 10:57 AM
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/0981D178ECB7617FC6E16B930C70AF20EA3D11B6.png)
