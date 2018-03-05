@@ -356,11 +356,91 @@ cls
 
 #### # Enable Storage Spaces Direct
 
-```PowerShell
+```Text
+PS C:\Users\jjameson-fabric> Enable-ClusterStorageSpacesDirect -AutoConfig $false
+WARNING: 2018/03/04-18:17:41.359 Node TT-HV02C: Disks not claimed - 017aa60c-fe20-309b-1852-17e40dae68a7
+WARNING: 2018/03/04-18:17:41.359 Node TT-HV02C: Disks not claimed - 0ecfcf83-774a-0d6c-8b78-0ca9a1f9cdc3
+WARNING: 2018/03/04-18:17:41.406 Disk number 5 ({9ee47151-12fc-2b70-7fd9-682d1b61f561}, friendly name 'ATA WDC WD1001FALS-0') on node TT-HV02C has unsupported media type
+WARNING: 2018/03/04-18:17:41.406 Disk number 6 ({36b79ee2-2735-ee17-3e4a-055c4a3204f7}, friendly name 'ATA WDC WD1002FAEX-0') on node TT-HV02C has unsupported media type
+Enable-ClusterStorageSpacesDirect : Disk eligibility failed. Review the List All Disks for Storage Spaces Direct test and verify all disks are of a supported Media Type of SSD or HDD. Run cluster validation, including the Storage Spaces Direct tests, to verify the configuration
+At line:1 char:1
++ Enable-ClusterStorageSpacesDirect -AutoConfig $false
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (MSCluster_StorageSpacesDirect:root/MSCLUSTER/...ageSpacesDirect) [Enable-ClusterStorageSpacesDirect], CimException
+    + FullyQualifiedErrorId : HRESULT 0x80070032,Enable-ClusterStorageSpacesDirect
+
+Enable-ClusterStorageSpacesDirect : Failed to run CIM method EnableStorageSpacesDirect on the root/MSCLUSTER/MSCluster_StorageSpacesDirect CIM object.  The CIM method returned the following error code: 50
+At line:1 char:1
++ Enable-ClusterStorageSpacesDirect -AutoConfig $false
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidResult: (MSCluster_StorageSpacesDirect:String) [Enable-ClusterStorageSpacesDirect
+   ], CimJobException
+    + FullyQualifiedErrorId : CimJob_EnableStorageSpacesDirect_50,Enable-ClusterStorageSpacesDirect
+
 Enable-ClusterStorageSpacesDirect -AutoConfig $false -SkipEligibilityChecks
 
-WARNING: 2018/02/28-13:08:12.860 Node TT-SOFS02A: No disks found to be used for cache
-WARNING: 2018/02/28-13:08:12.876 C:\Windows\Cluster\Reports\Enable-ClusterS2D on 2018.02.28-13.08.12.860.htm
+Confirm
+Are you sure you want to perform this action?
+Performing operation 'Enable Cluster Storage Spaces Direct' on Target 'TT-HV02-FC'.
+[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "Y"):
+WARNING: 2018/03/04-18:18:28.254 Failed to obtain disk count from node 'TT-HV02B'
+Enable-ClusterStorageSpacesDirect : Operation did not complete in time while 'Waiting until all physical disks are
+reported by clustered storage subsystem'. Run cluster validation, including the Storage Spaces Direct tests, to verify
+the configuration
+At line:1 char:1
++ Enable-ClusterStorageSpacesDirect -AutoConfig $false -SkipEligibility ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationTimeout: (MSCluster_StorageSpacesDirect:root/MSCLUSTER/...ageSpacesDirect) [Ena
+   ble-ClusterStorageSpacesDirect], CimException
+    + FullyQualifiedErrorId : HRESULT 0x800705b4,Enable-ClusterStorageSpacesDirect
+
+Enable-ClusterStorageSpacesDirect : Failed to run CIM method EnableStorageSpacesDirect on the
+root/MSCLUSTER/MSCluster_StorageSpacesDirect CIM object.  The CIM method returned the following error code: 1460
+At line:1 char:1
++ Enable-ClusterStorageSpacesDirect -AutoConfig $false -SkipEligibility ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidResult: (MSCluster_StorageSpacesDirect:String) [Enable-ClusterStorageSpacesDirect
+   ], CimJobException
+    + FullyQualifiedErrorId : CimJob_EnableStorageSpacesDirect_1460,Enable-ClusterStorageSpacesDirect
+
+Get-ClusterStorageSpacesDirect
+WARNING: 2018/03/04-20:21:20.342 Node TT-HV02C: No disks found to be used for cache
+WARNING: 2018/03/04-20:21:20.357 Node TT-HV02A: No disks found to be used for cache
+
+
+CacheMetadataReserveBytes : 34359738368
+CacheModeHDD              : ReadWrite
+CacheModeSSD              : WriteOnly
+CachePageSizeKBytes       : 16
+CacheState                : Enabled
+State                     : Enabled
+
+Set-ClusterStorageSpacesDirect -CacheState Disabled -SkipEligibilityChecks -Verbose
+```
+
+```Console
+cls
+```
+
+#### # Create storage pool
+
+```PowerShell
+$storageSubSystemName = "Clustered Windows Storage on TT-HV02-FC"
+
+$storageSubSystemUniqueId = `
+    Get-StorageSubSystem -FriendlyName $storageSubSystemName |
+    select -ExpandProperty UniqueId
+
+$physicalDisks = @(
+    (Get-PhysicalDisk -SerialNumber *****03Y),
+    (Get-PhysicalDisk -SerialNumber *****0RY),
+    (Get-PhysicalDisk -SerialNumber WD-******786376),
+    (Get-PhysicalDisk -SerialNumber WD-******234344))
+
+New-StoragePool `
+    -FriendlyName "S2D on TT-HV02-FC" `
+    -StorageSubSystemUniqueId $storageSubSystemUniqueId `
+    -PhysicalDisks $physicalDisks
 ```
 
 ```PowerShell
@@ -370,27 +450,59 @@ cls
 #### # Check media type configuration
 
 ```PowerShell
-Get-StoragePool "S2D on TT-SOFS02-FC" |
+Get-StoragePool "S2D on TT-HV02-FC" |
     Get-PhysicalDisk |
     Sort Size |
     ft FriendlyName, Size, MediaType, HealthStatus, OperationalStatus -AutoSize
+```
+
+> **Important**
+>
+> Ensure the **MediaType** property for the drives is set to **HDD**.
+
+```PowerShell
+Get-PhysicalDisk -SerialNumber WD-******786376 | Set-PhysicalDisk -MediaType HDD
+Get-PhysicalDisk -SerialNumber WD-******234344 | Set-PhysicalDisk -MediaType HDD
 ```
 
 ```PowerShell
 cls
 ```
 
-#### # Change fault domain awareness (required for single node cluster)
+#### # Create storage tiers
+
+```PowerShell
+Get-StoragePool "S2D on TT-HV02-FC" |
+    New-StorageTier -FriendlyName "Performance" -MediaType SSD
+
+Get-StoragePool "S2D on TT-HV02-FC" |
+    New-StorageTier -FriendlyName "Capacity" -MediaType HDD
+```
+
+```PowerShell
+cls
+```
+
+#### # Enable cache in Storage Spaces Direct
+
+```PowerShell
+Set-ClusterStorageSpacesDirect -CacheState Enabled -SkipEligibilityChecks -Verbose
+
+Update-StorageProviderCache -DiscoveryLevel Full -WhatIf
+```
+
+```PowerShell
+cls
+```
+
+#### # Change fault domain awareness (required for mirrored volume across two disks in one server)
 
 ```PowerShell
 Set-StoragePool `
 ```
 
-    -FriendlyName "S2D on TT-SOFS02-FC" `\
+    -FriendlyName "S2D on TT-HV02-FC" `\
     -FaultDomainAwarenessDefault PhysicalDisk
-
-**Deploying Storage Spaces Direct on a Single Node SOFS Cluster**\
-From <[https://www.danielstechblog.info/deploying-storage-spaces-direct-on-a-single-node-sofs-cluster/](https://www.danielstechblog.info/deploying-storage-spaces-direct-on-a-single-node-sofs-cluster/)>
 
 ```PowerShell
 cls
@@ -402,11 +514,11 @@ cls
 New-Volume `
 ```
 
-    -FriendlyName "Volume1" `\
+    -FriendlyName "S2D-Bronze-01" `\
     -FileSystem CSVFS_ReFS `\
-    -StoragePoolFriendlyName S2D* `\
-    -UseMaximumSize `\
-    -ResiliencySettingName Parity
+    -StoragePoolFriendlyName "S2D on TT-HV02-FC" `\
+    -Size 3TB `\
+    -ResiliencySettingName Mirror
 
 #### Update AHCI drivers
 
