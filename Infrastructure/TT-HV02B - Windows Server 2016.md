@@ -1774,3 +1774,35 @@ Set-DnsClientServerAddress `
 
 Restart-Computer
 ```
+
+### Update AHCI drivers
+
+1. Download the latest AHCI drivers from the Intel website:\
+   **Intel® RSTe AHCI & SCU Software RAID Driver for Windows**\
+   From <[https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t](https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t)>
+2. Extract the drivers (**[\\\\TT-FS01\\Public\\Download\\Drivers\\Intel\\RSTe](\\TT-FS01\Public\Download\Drivers\Intel\RSTe) AHCI & SCU Software RAID driver for Windows**) and copy the files to a temporary location on the server:
+3. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA AHCI Controller (PCI\\VEN_8086&DEV_8D02&...)**:
+4. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA AHCI Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+5. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA AHCI Controller (PCI\\VEN_8086&DEV_8D02&...)**:
+6. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA AHCI Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+7. Restart the server.
+
+robocopy `\
+    "[\\\\TT-FS01\\Public\\Download\\Drivers\\Intel\\RSTe AHCI & SCU Software RAID driver for Windows\\Drivers\\x64\\AHCI\\Win8_Win10_2K12_2K16](\\TT-FS01\Public\Download\Drivers\Intel\RSTe AHCI & SCU Software RAID driver for Windows\Drivers\x64\AHCI\Win8_Win10_2K12_2K16)" `\
+'[\\\\TT-HV02B\\C\$\\NotBackedUp\\Temp\\Drivers\\Intel\\x64\\AHCI\\Win8_Win10_2K12_2K16](\\TT-HV02B\C$\NotBackedUp\Temp\Drivers\Intel\x64\AHCI\Win8_Win10_2K12_2K16)' /E
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\AHCI\Win8_Win10_2K12_2K16\iaAHCI.inf
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\AHCI\Win8_Win10_2K12_2K16\iaAHCIB.inf
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\AHCI\Win8_Win10_2K12_2K16\iaStorA.inf
+```
+
+```Console
+    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\x64\AHCI\Win8_Win10_2K12_2K16\iaStorB.inf
+```
