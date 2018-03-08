@@ -169,6 +169,56 @@ Set-NetAdapterAdvancedProperty -Name "Storage 2" `
 ping TT-FS01 -f -l 8900
 ```
 
+```PowerShell
+cls
+```
+
+#### # Configure storage network adapters
+
+##### # Configure static IPv4 addresses
+
+```PowerShell
+$interfaceAlias = "Storage 1"
+$ipAddress = "10.1.4.1"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+
+$interfaceAlias = "Storage 2"
+$ipAddress = "10.1.4.2"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+```
+
+#### # Disable DHCPv6 on storage network adapters
+
+```PowerShell
+$interfaceAliases = @(
+    "Storage 1",
+    "Storage 2")
+
+$interfaceAliases |
+    % {
+        Set-NetIPInterface `
+            -InterfaceAlias $_ `
+            -Dhcp Disabled `
+            -RouterDiscovery Disabled
+    }
+```
+
+> **Important**
+>
+> If IPv6 addresses are assigned, failover clustering combines the different network adapters into a single cluster network.
+
+```Console
+ipconfig /registerdns
+```
+
 ### Configure storage
 
 #### Physical disks
@@ -970,6 +1020,197 @@ New-Volume `
     -StorageTierfriendlyNames Capacity `
     -StorageTierSizes 2TB
 ```
+
+```PowerShell
+cls
+```
+
+### # Enable CSV cache
+
+#### # Configure CSV cache
+
+```PowerShell
+(Get-Cluster TT-HV04-FC).BlockCacheSize = 1024
+```
+
+#### Restart cluster nodes
+
+##### Reference
+
+**Taking a Storage Spaces Direct server offline for maintenance**\
+From <[https://docs.microsoft.com/en-us/windows-server/storage/storage-spaces/maintain-servers](https://docs.microsoft.com/en-us/windows-server/storage/storage-spaces/maintain-servers)>
+
+---
+
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+
+```Console
+cls
+```
+
+_# Verify it is safe to take server offline_
+
+```PowerShell
+$failoverClusterName = "TT-HV04-FC"
+
+Invoke-Command -ComputerName $failoverClusterName -Command {
+    Get-VirtualDisk | select FriendlyName, OperationalStatus, HealthStatus | ft
+}
+
+FriendlyName OperationalStatus HealthStatus
+------------ ----------------- ------------
+S2D-Silver01 OK                Healthy
+S2D-Silver02 OK                Healthy
+```
+
+```PowerShell
+cls
+```
+
+##### # Restart node "A"
+
+```PowerShell
+$clusterNode = "TT-HV04A"
+
+Suspend-ClusterNode -Cluster $failoverClusterName -Name $clusterNode -Drain
+
+Name                 ID    State
+----                 --    -----
+TT-HV04A             2     Paused
+```
+
+```PowerShell
+cls
+```
+
+##### # Restart cluster node
+
+```PowerShell
+Restart-Computer $clusterNode
+```
+
+```PowerShell
+cls
+```
+
+##### # Resume cluster node
+
+```PowerShell
+Resume-ClusterNode -Cluster $failoverClusterName -Name $clusterNode -Failback Immediate
+```
+
+```PowerShell
+cls
+```
+
+_# Verify it is safe to take server offline_
+
+```PowerShell
+Invoke-Command -ComputerName $failoverClusterName -Command {
+    Get-VirtualDisk | select FriendlyName, OperationalStatus, HealthStatus | ft
+}
+
+FriendlyName OperationalStatus HealthStatus
+------------ ----------------- ------------
+S2D-Silver01 OK                Healthy
+S2D-Silver02 OK                Healthy
+```
+
+```PowerShell
+cls
+```
+
+##### # Restart node "B"
+
+```PowerShell
+$clusterNode = "TT-HV04B"
+
+Suspend-ClusterNode -Cluster $failoverClusterName -Name $clusterNode -Drain
+
+Name                 ID    State
+----                 --    -----
+TT-HV04B             1     Paused
+```
+
+```PowerShell
+cls
+```
+
+##### # Restart cluster node
+
+```PowerShell
+Restart-Computer $clusterNode
+```
+
+```PowerShell
+cls
+```
+
+##### # Resume cluster node
+
+```PowerShell
+Resume-ClusterNode -Cluster $failoverClusterName -Name $clusterNode -Failback Immediate
+```
+
+---
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Increase RAM on cluster nodes
+
+```PowerShell
+cls
+```
+
+##### # Increase RAM on node "A"
+
+```PowerShell
+$vmHost = "TT-HV02A"
+$vmName = "TT-SOFS02A"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Set-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -StaticMemory `
+    -MemoryStartupBytes 4GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+```PowerShell
+cls
+```
+
+#### # Configure CSV cache
+
+```PowerShell
+(Get-Cluster TT-SOFS02-FC).BlockCacheSize = 1024
+```
+
+```PowerShell
+cls
+```
+
+#### # Restart cluster nodes
+
+##### # Restart node "A"
+
+```PowerShell
+$vmHost = "TT-HV02A"
+$vmName = "TT-SOFS02A"
+
+Restart-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
 
 ```PowerShell
 cls

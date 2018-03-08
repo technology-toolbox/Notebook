@@ -143,6 +143,56 @@ Set-NetAdapterAdvancedProperty -Name "Storage 2" `
 ping TT-FS01 -f -l 8900
 ```
 
+```PowerShell
+cls
+```
+
+#### # Configure storage network adapters
+
+##### # Configure static IPv4 addresses
+
+```PowerShell
+$interfaceAlias = "Storage 1"
+$ipAddress = "10.1.4.3"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+
+$interfaceAlias = "Storage 2"
+$ipAddress = "10.1.4.4"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24
+```
+
+#### # Disable DHCPv6 on storage network adapters
+
+```PowerShell
+$interfaceAliases = @(
+    "Storage 1",
+    "Storage 2")
+
+$interfaceAliases |
+    % {
+        Set-NetIPInterface `
+            -InterfaceAlias $_ `
+            -Dhcp Disabled `
+            -RouterDiscovery Disabled
+    }
+```
+
+> **Important**
+>
+> If IPv6 addresses are assigned, failover clustering combines the different network adapters into a single cluster network.
+
+```Console
+ipconfig /registerdns
+```
+
 ### Configure storage
 
 #### Physical disks
