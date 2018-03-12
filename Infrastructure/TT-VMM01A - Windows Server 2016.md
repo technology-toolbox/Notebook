@@ -2286,6 +2286,113 @@ New-SCLogicalSwitchVirtualNetworkAdapter `
     }
 ```
 
+## Configure NAS server (nas01.technologytoolbox.com)
+
+### Create second storage VLAN
+
+##### # Create network site for storage traffic
+
+```PowerShell
+$logicalNetwork = Get-SCLogicalNetwork -Name "Datacenter"
+
+$hostGroups = @()
+$hostGroups += Get-SCVMHostGroup -Name "All Hosts"
+
+$subnetVlans = @()
+$subnetVlans += New-SCSubnetVLan -Subnet "10.1.13.0/24" -VLanID 13
+
+New-SCLogicalNetworkDefinition `
+    -Name "Storage 2 - VLAN 13" `
+    -LogicalNetwork $logicalNetwork `
+    -VMHostGroup $hostGroups `
+    -SubnetVLan $subnetVlans
+```
+
+##### # Add logical network definition to "Trunk Uplink" and "Storage Uplink" port profiles
+
+```PowerShell
+$logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
+    -Name "Storage 2 - VLAN 13"
+
+$portProfile = Get-SCNativeUplinkPortProfile -Name "Trunk Uplink"
+
+Set-SCNativeUplinkPortProfile `
+    -NativeUplinkPortProfile $portProfile `
+    -AddLogicalNetworkDefinition $logicalNetworkDefinition
+
+$portProfile = Get-SCNativeUplinkPortProfile -Name "Storage Uplink"
+
+Set-SCNativeUplinkPortProfile `
+    -NativeUplinkPortProfile $portProfile `
+    -AddLogicalNetworkDefinition $logicalNetworkDefinition
+```
+
+#### # Create VM network for storage traffic
+
+```PowerShell
+$vmNetwork = New-SCVMNetwork `
+    -Name "Storage 2 VM Network" `
+    -IsolationType VLANNetwork `
+    -LogicalNetwork $logicalNetwork
+
+$logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
+    -Name "Storage 2 - VLAN 13"
+
+$subnetVLANs = @()
+$subnetVLANs += (New-SCSubnetVLan -Subnet "10.1.13.0/24" -VLanID 13)
+
+$vmSubnet = New-SCVMSubnet `
+    -Name "Storage 2 VM Network_0" `
+    -LogicalNetworkDefinition $logicalNetworkDefinition `
+    -SubnetVLan $subnetVLANs `
+    -VMNetwork $vmNetwork
+```
+
+#### # Create IP address pool for storage network
+
+```PowerShell
+$logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
+```
+
+    -Name "Storage 2 - VLAN 13"
+
+```PowerShell
+$addressPoolName = "Storage 2 Address Pool"
+
+$ipAddressRangeStart = "10.1.13.20"
+$ipAddressRangeEnd = "10.1.13.254"
+
+$reservedAddresses = @()
+
+$reservedAddressSet = $reservedAddresses -join ","
+
+$subnet = "10.1.13.0/24"
+
+$networkRoutes = @()
+
+$gateways = @()
+
+$dnsServers = @("192.168.10.103", "192.168.10.104")
+
+$dnsSuffix = ""
+$dnsSearchSuffixes = @()
+
+$winsServers = @()
+
+New-SCStaticIPAddressPool `
+    -Name $addressPoolName `
+    -LogicalNetworkDefinition $logicalNetworkDefinition `
+    -Subnet $subnet `
+    -IPAddressRangeStart $ipAddressRangeStart `
+    -IPAddressRangeEnd $ipAddressRangeEnd `
+    -DefaultGateway $gateways `
+    -DNSServer $dnsServers `
+    -DNSSuffix $dnsSuffix `
+    -DNSSearchSuffix $dnsSearchSuffixes `
+    -NetworkRoute $networkRoutes `
+    -IPAddressReservedSet $reservedAddressSet
+```
+
 **TODO:**
 
 #### # Associate network adapters with logical network
