@@ -1196,6 +1196,26 @@ $productionServer = 'TT-HV05C'
 cls
 ```
 
+## # Configure monitoring using System Center Operations Manager
+
+### # Install SCOM agent
+
+```PowerShell
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64" `
+    + "\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01 `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+### Approve manual agent install in Operations Manager
+
+```PowerShell
+cls
+```
+
 ## # Enter a product key and activate Windows
 
 ```PowerShell
@@ -1210,29 +1230,87 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
-```Console
+## Configure shared storage
+
+### Configure iSCSI client
+
+#### Reference
+
+**Configuring multiple ISCSI Connections for Multipath IO using PowerShell.**\
+From <[https://chinnychukwudozie.com/2013/11/11/configuring-multipath-io-with-multiple-iscsi-connections-using-powershell/](https://chinnychukwudozie.com/2013/11/11/configuring-multipath-io-with-multiple-iscsi-connections-using-powershell/)>
+
+```PowerShell
 cls
 ```
 
-## # Configure monitoring using System Center Operations Manager
-
-### # Install SCOM agent
+#### # Start iSCSI service
 
 ```PowerShell
-$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016\Agents\SCOM\AMD64" `
-    + "\MOMAgent.msi"
+Set-Service msiscsi -StartupType Automatic
 
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=TT-SCOM01 `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
+Start-Service msiscsi
 ```
 
-### Approve manual agent install in Operations Manager
+#### # Configure MPIO settings
 
-```Text
-FriendlyName         SerialNumber
-------------         ------------
-ATA ST4000NM0033-9ZM *****5AY
-ATA ST4000NM0033-9ZM *****EHB
+##### # Enable automatic claiming of all iSCSI volumes
+
+```PowerShell
+Enable-MSDSMAutomaticClaim -BusType iSCSI
+```
+
+##### # Set default load balancing policy
+
+```PowerShell
+Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy RR
+```
+
+##### # Configure disk timeout
+
+```PowerShell
+Set-MPIOSetting -NewDiskTimeout 60
+
+Restart-Computer
+```
+
+### Login as fabric administrator account
+
+```Console
+PowerShell
+```
+
+#### # Connect to iSCSI portal (using multiple paths)
+
+```PowerShell
+New-IscsiTargetPortal `
+    -TargetPortalAddress 10.1.10.5 `
+    -InitiatorPortalAddress 10.1.10.4
+
+New-IscsiTargetPortal `
+    -TargetPortalAddress 10.1.13.5 `
+    -InitiatorPortalAddress 10.1.13.4
+
+Start-Sleep 30
+```
+
+#### # Connect first path to iSCSI target
+
+```PowerShell
+Connect-IscsiTarget `
+    -NodeAddress "iqn.2005-10.org.freenas.ctl:tt-hv05-fc" `
+    -TargetPortalAddress 10.1.10.5 `
+    -InitiatorPortalAddress 10.1.10.4 `
+    -IsMultipathEnabled $true `
+    -IsPersistent $true
+```
+
+#### # Connect additional paths to iSCSI target
+
+```PowerShell
+Connect-IscsiTarget `
+    -NodeAddress "iqn.2005-10.org.freenas.ctl:tt-hv05-fc" `
+    -TargetPortalAddress 10.1.13.5 `
+    -InitiatorPortalAddress 10.1.13.4 `
+    -IsMultipathEnabled $true `
+    -IsPersistent $true
 ```
