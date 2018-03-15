@@ -221,3 +221,98 @@ reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters `
 ```PowerShell
 Restart-Computer
 ```
+
+## Configure NTP
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Disable Hyper-V time synchronization service
+
+```PowerShell
+$vmHost = "TT-HV05B"
+$vmName = "FAB-DC02"
+
+Disable-VMIntegrationService `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Name "Time Synchronization"
+```
+
+---
+
+### # Configure NTP settings
+
+```PowerShell
+w32tm /config /syncfromflags:DOMHIER /update
+
+Restart-service w32time
+```
+
+#### # Change the server type to NTP
+
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:SYSTEM\CurrentControlSet\Services\W32Time\Parameters `
+    -Name Type `
+    -Value NTP
+```
+
+#### # Set AnnounceFlags to 5
+
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:SYSTEM\CurrentControlSet\Services\W32Time\Config `
+    -Name AnnounceFlags `
+    -Value 5
+```
+
+#### # Enable NTPServer
+
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpServer `
+    -Name Enabled `
+    -Value 1
+```
+
+#### # Specify the time sources
+
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:SYSTEM\CurrentControlSet\Services\W32Time\Parameters `
+    -Name NtpServer `
+    -Value "ntp.extranet.technologytoolbox.com,0x1 time.windows.com,0x1"
+```
+
+#### # Set poll interval to every 15 minutes (900 seconds)
+
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpClient `
+    -Name SpecialPollInterval `
+    -Value 900
+```
+
+#### # Configure time correction settings
+
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config `
+    -Name MaxPosPhaseCorrection `
+    -Value 3600
+
+Set-ItemProperty `
+    -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config `
+    -Name MaxNegPhaseCorrection `
+    -Value 3600
+
+Restart-Service w32time
+
+w32tm /resync /rediscover
+```

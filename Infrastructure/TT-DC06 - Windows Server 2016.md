@@ -322,7 +322,7 @@ cls
 ### # Disable Hyper-V time synchronization service
 
 ```PowerShell
-$vmHost = "TT-HV02A"
+$vmHost = "TT-HV05A"
 $vmName = "TT-DC06"
 
 Disable-VMIntegrationService `
@@ -333,127 +333,74 @@ Disable-VMIntegrationService `
 
 ---
 
-### Configure NTP
+### # Configure NTP settings
 
-```Text
-PS C:\windows\system32> cd HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\DateTime
-PS HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DateTime> dir
-
-
-    Hive: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\DateTime
-
-
-Name                           Property
-----                           --------
-Servers                        (default) : 1
-                               1         : time.windows.com
-                               2         : time.nist.gov
-```
-
-**How to configure an authoritative time server in Windows Server**\
-Pasted from <[http://support.microsoft.com/kb/816042](http://support.microsoft.com/kb/816042)>
-
-**Synchronize the Time Server for the Domain Controller with an External Source**\
-Pasted from <[http://technet.microsoft.com/en-us/library/cc784553(v=ws.10).aspx](http://technet.microsoft.com/en-us/library/cc784553(v=ws.10).aspx)>
-
-**Configuring an authoritative time source for your Windows domain**\
-Pasted from <[http://windowshell.wordpress.com/2012/01/02/configuring-an-authoritative-time-source-for-your-windows-domain/](http://windowshell.wordpress.com/2012/01/02/configuring-an-authoritative-time-source-for-your-windows-domain/)>
-
-**Configuring Time Synchronization for all Computers in a Windows domain**\
-Pasted from <[http://www.altaro.com/hyper-v/configuring-time-synchronization-for-all-computers-in-windows-domain/](http://www.altaro.com/hyper-v/configuring-time-synchronization-for-all-computers-in-windows-domain/)>
-
-**How to configure your virtual Domain Controllers and avoid simple mistakes with resulting big problems**\
-Pasted from <[http://www.sole.dk/how-to-configure-your-virtual-domain-controllers-and-avoid-simple-mistakes-with-resulting-big-problems/](http://www.sole.dk/how-to-configure-your-virtual-domain-controllers-and-avoid-simple-mistakes-with-resulting-big-problems/)>
-
-**Configure a time server for Active Directory domain controllers**\
-Pasted from <[http://www.techrepublic.com/blog/the-enterprise-cloud/configure-a-time-server-for-active-directory-domain-controllers/](http://www.techrepublic.com/blog/the-enterprise-cloud/configure-a-time-server-for-active-directory-domain-controllers/)>
-
-**Setting a Domain Controller to Sync with External NTP Server**\
-Pasted from <[http://seanofarrelll.blogspot.com/2010/04/setting-domain-controller-to-sync-with.html](http://seanofarrelll.blogspot.com/2010/04/setting-domain-controller-to-sync-with.html)>
-
-**Time Synchronization in Hyper-V**\
-From <[http://blogs.msdn.com/b/virtual_pc_guy/archive/2010/11/19/time-synchronization-in-hyper-v.aspx](http://blogs.msdn.com/b/virtual_pc_guy/archive/2010/11/19/time-synchronization-in-hyper-v.aspx)>
-
-```Console
-reg add HKLM\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\VMICTimeProvider /v Enabled /t reg_dword /d 0
-```
-
-When prompted to overwrite the value, type **yes**.
-
-```Console
+```PowerShell
 w32tm /config /syncfromflags:DOMHIER /update
 
-net stop w32time
-net start w32time
-
-w32tm /resync /force
-
-w32tm /query /source
+Restart-service w32time
 ```
 
-NtpServer: time.windows.com,0x1 time-nw.nist.gov,0x1 time-b.nist.gov,0x1 time.nist.gov,0x1 time-a.nist.gov,0x1\
-SpecialPollInterval: 900\
-MaxPosPhaseCorrection: 3600 Decimal\
-MaxNegPhaseCorrection: 3600 Decimal
+#### # Change the server type to NTP
 
-**To configure an internal time server to synchronize with an external time source, follow these steps:**
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:SYSTEM\CurrentControlSet\Services\W32Time\Parameters `
+    -Name Type `
+    -Value NTP
+```
 
-1. Change the server type to NTP. To do this, follow these steps:
-   1. Click **Start**, click **Run**, type **regedit**, and then click **OK**.
-   2. Locate and then click the following registry subkey:
-**HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\W32Time\\Parameters\\Type**
-   3. In the pane on the right, right-click **Type**, and then click **Modify**.
-   4. In **Edit Value**, type **NTP** in the **Value data** box, and then click **OK**.
-2. Set AnnounceFlags to 5. To do this, follow these steps:
-   1. Locate and then click the following registry subkey:
-**HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\W32Time\\Config\\AnnounceFlags**
-   2. In the pane on the right, right-click **AnnounceFlags**, and then click **Modify**.
-   3. In **Edit DWORD Value**, type **5** in the **Value data** box, and then click **OK**.
+#### # Set AnnounceFlags to 5
 
-**Notes**
-      - If an authoritative time server that is configured to use an AnnounceFlag value of 0x5 does not synchronize with an upstream time server, a client server may not correctly synchronize with the authoritative time server when the time synchronization between the authoritative time server and the upstream time server resumes. Therefore, if you have a poor network connection or other concerns that may cause time synchronization failure of the authoritative server to an upstream server, set the AnnounceFlag value to 0xA instead of to 0x5.
-      - If an authoritative time server that is configured to use an AnnounceFlag value of 0x5 and to synchronize with an upstream time server at a fixed interval that is specified in SpecialPollInterval, a client server may not correctly synchronize with the authoritative time server after the authoritative time server restarts. Therefore, if you configure your authoritative time server to synchronize with an upstream NTP server at a fixed interval that is specified in SpecialPollInterval, set the AnnounceFlag value to 0xA instead of 0x5.
-3. Enable NTPServer. To do this, follow these steps:
-   1. Locate and then click the following registry subkey:
-**HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\W32Time\\TimeProviders\\NtpServer**
-   2. In the pane on the right, right-click **Enabled**, and then click **Modify**.
-   3. In **Edit DWORD Value**, type **1** in the **Value data** box, and then click **OK**.
-4. Specify the time sources. To do this, follow these steps:
-   1. Locate and then click the following registry subkey:
-**HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\W32Time\\Parameters**
-   2. In the pane on the right, right-click **NtpServer**, and then click **Modify**.
-   3. In **Edit Value**, type Peers in the **Value data** box, and then click **OK**.
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:SYSTEM\CurrentControlSet\Services\W32Time\Config `
+    -Name AnnounceFlags `
+    -Value 5
+```
 
-**Note **Peers is a placeholder for a space-delimited list of peers from which your computer obtains time stamps. Each DNS name that is listed must be unique. You must append **,0x1** to the end of each DNS name. If you do not append **,0x1** to the end of each DNS name, the changes that you make in step 5 will not take effect.
-5. Select the poll interval. To do this, follow these steps:
-   1. Locate and then click the following registry subkey:
-**HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\W32Time\\TimeProviders\\NtpClient\\SpecialPollInterval**
-   2. In the pane on the right, right-click **SpecialPollInterval**, and then click **Modify**.
-   3. In **Edit DWORD Value**, type TimeInSeconds in the **Value data** box, and then click **OK**. 
+#### # Enable NTPServer
 
-**Note **TimeInSeconds is a placeholder for the number of seconds that you want between each poll. A recommended value is 900 Decimal. This value configures the Time Server to poll every 15 minutes.
-6. Configure the time correction settings. To do this, follow these steps:
-   1. Locate and then click the following registry subkey:
-**HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\W32Time\\Config\\MaxPosPhaseCorrection**
-   2. In the pane on the right, right-click **MaxPosPhaseCorrection**, and then click **Modify**.
-   3. In **Edit DWORD Value**, click to select **Decimal** in the **Base** box.
-   4. In **Edit DWORD Value**, type TimeInSeconds in the **Value data** box, and then click **OK**. 
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpServer `
+    -Name Enabled `
+    -Value 1
+```
 
-**Note **TimeInSeconds is a placeholder for a reasonable value, such as 1 hour (3600) or 30 minutes (1800). The value that you select will depend on the poll interval, network condition, and external time source.
-   5. Locate and then click the following registry subkey: 
-**HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\W32Time\\Config\\MaxNegPhaseCorrection**
-   6. In the pane on the right, right-click **MaxNegPhaseCorrection**, and then click **Modify**.
-   7. In **Edit DWORD Value**, click to select **Decimal** in the **Base** box.
-   8. In **Edit DWORD Value**, type TimeInSeconds in the **Value data** box, and then click **OK**. 
+#### # Specify the time sources
 
-**Note **TimeInSeconds is a placeholder for a reasonable value, such as 1 hour (3600) or 30 minutes (1800). The value that you select will depend on the poll interval, network condition, and external time source.
-7. Close Registry Editor.
-8. At the command prompt, type the following command to restart the Windows Time service, and then press Enter:
-**net stop w32time && net start w32time**
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:SYSTEM\CurrentControlSet\Services\W32Time\Parameters `
+    -Name NtpServer `
+    -Value "ntp.extranet.technologytoolbox.com,0x1 time.windows.com,0x1"
+```
 
-Pasted from <[http://support.microsoft.com/kb/816042](http://support.microsoft.com/kb/816042)>
+#### # Set poll interval to every 15 minutes (900 seconds)
 
-```Console
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpClient `
+    -Name SpecialPollInterval `
+    -Value 900
+```
+
+#### # Configure time correction settings
+
+```PowerShell
+Set-ItemProperty `
+    -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config `
+    -Name MaxPosPhaseCorrection `
+    -Value 3600
+
+Set-ItemProperty `
+    -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config `
+    -Name MaxNegPhaseCorrection `
+    -Value 3600
+
+Restart-Service w32time
+
 w32tm /resync /rediscover
 ```
 
