@@ -1,7 +1,7 @@
-﻿# TT-WSUS02 - Windows Server 2016
+﻿# TT-WSUS03 - Windows Server 2016 Standard Edition
 
-Friday, February 23, 2018
-2:12 PM
+Thursday, March 22, 2018
+4:00 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -34,9 +34,9 @@ cls
 #### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02C"
-$vmName = "TT-WSUS02"
-$vmPath = "D:\NotBackedUp\VMs"
+$vmHost = "TT-HV05C"
+$vmName = "TT-WSUS03"
+$vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
@@ -66,7 +66,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-WSUS02**.
+  - In the **Computer name** box, type **TT-WSUS03**.
   - Click **Next**.
 - On the **Applications** step, do not select any applications, and click **Next**.
 
@@ -120,19 +120,39 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
+### # Enable performance counters for Server Manager
+
+```PowerShell
+$taskName = "\Microsoft\Windows\PLA\Server Manager Performance Monitor"
+
+Enable-ScheduledTask -TaskName $taskName
+
+logman start "Server Manager Performance Monitor"
+```
+
 ---
 
 **FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
+
+$vmName = "TT-WSUS03"
+```
+
+### # Move computer to different OU
+
+```PowerShell
+$targetPath = ("OU=Servers,OU=Resources,OU=IT" `
+    + ",DC=corp,DC=technologytoolbox,DC=com")
+
+Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 ```
 
 ### # Set first boot device to hard drive
 
 ```PowerShell
-$vmHost = "TT-HV02C"
-$vmName = "TT-WSUS02"
+$vmHost = "TT-HV05C"
 
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
@@ -145,6 +165,14 @@ Set-VMFirmware `
     -ComputerName $vmHost `
     -VMName $vmName `
     -FirstBootDevice $vmHardDiskDrive
+```
+
+### # Configure Windows Update
+
+##### # Add machine to security group for Windows Update schedule
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 9" -Members ($vmName + '$')
 ```
 
 ---
@@ -190,7 +218,7 @@ cls
 ##### # Configure static IP address using VMM
 
 ```PowerShell
-$vmName = "TT-WSUS02"
+$vmName = "TT-WSUS03"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
 $vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
 $macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
@@ -245,8 +273,8 @@ cls
 ##### # Add disk for WSUS content
 
 ```PowerShell
-$vmHost = "TT-HV02C"
-$vmName = "TT-WSUS02"
+$vmHost = "TT-HV05C"
+$vmName = "TT-WSUS03"
 
 $vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data01.vhdx"
@@ -290,8 +318,12 @@ Get-Disk 1 |
 > Report Viewer 2012 requires System CLR Types for SQL Server 2012.
 
 ```PowerShell
-& ("\\TT-FS01\Products\Microsoft\System Center 2012 R2" `
-    + "\Microsoft System CLR Types for SQL Server 2012\SQLSysClrTypes.msi")
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2012 R2" `
+    + "\Microsoft System CLR Types for SQL Server 2012\SQLSysClrTypes.msi"
+
+Start-Process `
+    -FilePath $installerPath `
+    -Wait
 ```
 
 ```PowerShell
@@ -301,7 +333,15 @@ cls
 #### # Install Report Viewer 2012
 
 ```PowerShell
-& "\\TT-FS01\Products\Microsoft\Report Viewer 2012 Runtime\ReportViewer.msi"
+$installerPath = "\\TT-FS01\Products\Microsoft\Report Viewer 2012 Runtime" `
+```
+
+    + "\\ReportViewer.msi"
+
+```PowerShell
+Start-Process `
+    -FilePath $installerPath `
+    -Wait
 ```
 
 ### Install WSUS
@@ -413,7 +453,7 @@ Application pool 'WsusPool' is being automatically disabled due to a series of f
 **To configure WSUS:**
 
 1. In the **Server Manager** navigation pane, select **WSUS**.
-2. In the servers list, right-click the WSUS server (**TT-WSUS02**) and then click **Windows Server Update Services**. The **Windows Server Update Services Wizard** opens.
+2. In the servers list, right-click the WSUS server (**TT-WSUS03**) and then click **Windows Server Update Services**. The **Windows Server Update Services Wizard** opens.
 3. On the **Before You Begin** page, review the information, and then click **Next**.
 4. On the **Join the Microsoft Update Improvement Program** page, click **Next**.
 5. On the **Choose Upstream Server** page, ensure the **Synchronize from Microsoft Update** option is selected and click **Next**.
@@ -469,6 +509,10 @@ Application pool 'WsusPool' is being automatically disabled due to a series of f
     2. Click **Finish**. The WSUS Management Console appears.
     3. ~~Wait for the initial synchronization to complete before proceeding.~~
 
+> **Note**
+>
+> The initial synchronization should complete in approximately 26 minutes.
+
 ### Configure WSUS computer groups
 
 **To create a computer group:**
@@ -515,7 +559,7 @@ Add-DNSServerResourceRecordCName `
     -ComputerName TT-DC06 `
     -ZoneName technologytoolbox.com `
     -Name wsus `
-    -HostNameAlias TT-WSUS02.corp.technologytoolbox.com
+    -HostNameAlias TT-WSUS03.corp.technologytoolbox.com
 ```
 
 ---
@@ -572,7 +616,6 @@ Get-WsusUpdate -Approval AnyExceptDeclined |
         # Language Packs
         ($_.Products -match 'Language Interface Packs') -or `
         ($_.Products -match 'Language Packs')
-
     } |
     Deny-WsusUpdate -Verbose
 ```
@@ -646,66 +689,100 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 #### Configure firewall rules for Windows Update
 
-## Import scheduled task to cleanup WSUS
+---
 
-"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WSUS Server Cleanup.xml"
-
-## Create SQL job for WSUS database maintenance
-
-Name: **WsusDBMaintenance**\
-Steps:
-
-- Step 1
-  - Step name: **Defragment database and update statistics**
-  - Type: **Transact-SQL script (T-SQL)**
-  - Command: (click **Open...** and then select script - **"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql"**)
-  - Database: **SUSDB**\
-    Schedule:
-
-- Schedule 1
-  - Name: **Weekly**
-  - Frequency:
-    - Occurs: **Weekly**
-    - Recurs every: **1 week on Sunday**
-  - Daily frequency:
-    - Occurs once at: **10:00 AM**
-
-**TODO:**
+**FOOBAR11**
 
 ```PowerShell
 cls
 ```
 
-## # Enter a product key and activate Windows
+## # Make virtual machine highly available
+
+### # Migrate VM to shared storage
 
 ```PowerShell
-slmgr /ipk {product key}
+$vmName = "TT-WSUS03"
+
+$vm = Get-SCVirtualMachine -Name $vmName
+$vmHost = $vm.VMHost
+
+Move-SCVirtualMachine `
+    -VM $vm `
+    -VMHost $vmHost `
+    -HighlyAvailable $true `
+    -Path "C:\ClusterStorage\iscsi01-Silver-02" `
+    -UseDiffDiskOptimization
 ```
 
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-## # Install SCOM agent
+### # Allow migration to host with different processor version
 
 ```PowerShell
-$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+Stop-SCVirtualMachine -VM $vmName
 
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
+Set-SCVirtualMachine -VM $vmName -CPULimitForMigration $true
 
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
+Start-SCVirtualMachine -VM $vmName
 ```
 
-## # Approve manual agent install in Operations Manager
+---
+
+```PowerShell
+cls
+```
+
+## # Configure monitoring
+
+### # Install Operations Manager agent
+
+```PowerShell
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64" `
+    + "\MOMAgent.msi"
+
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=TT-SCOM03" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
+```
+
+### Approve manual agent install in Operations Manager
+
+## Issue - Synchronizations view in WSUS console hangs (then requires console reset)
+
+### Problem
+
+**spSearchUpdates** sproc returns more than 24,000 rows
+
+### Solution
+
+---
+
+**HAVOK - SQL Server Management Studio**
+
+#### -- Clear the synchronization history
+
+```SQL
+USE SUSDB
+GO
+
+DELETE FROM tbEventInstance
+WHERE EventNamespaceID = '2'
+    AND EventID IN ('381', '382', '384', '386', '387', '389')
+```
+
+---
+
+### References
+
+**Synchronization Tab crashes the WSUS console**\
+From <[https://conexiva.wordpress.com/2016/02/23/synchronization-tab-crashes-the-wsus-console/](https://conexiva.wordpress.com/2016/02/23/synchronization-tab-crashes-the-wsus-console/)>
+
+**Clearing the Synchronization history in the WSUS console**\
+From <[https://blogs.technet.microsoft.com/sus/2009/03/04/clearing-the-synchronization-history-in-the-wsus-console/](https://blogs.technet.microsoft.com/sus/2009/03/04/clearing-the-synchronization-history-in-the-wsus-console/)>
 
 ## Move WSUS database from HAVOK to TT-SQL01
 
@@ -832,7 +909,7 @@ GO
 USE master
 GO
 
-CREATE LOGIN [TECHTOOLBOX\TT-WSUS02$] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\TT-WSUS03$] FROM WINDOWS
 WITH DEFAULT_DATABASE=master, DEFAULT_LANGUAGE=us_english
 GO
 ```
@@ -891,6 +968,25 @@ GO
 
 ---
 
+**TT-SQL01B**
+
+```PowerShell
+cls
+```
+
+#### # Copy backup file
+
+```PowerShell
+$source = "\\TT-SQL01A\SQL-Backups"
+$destination = "Z:\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\Backup"
+
+robocopy $source $destination SUSDB.bak
+```
+
+---
+
+---
+
 **SQL Server Management Studio (TT-SQL01B)**
 
 #### -- Create login used by WSUS database
@@ -899,7 +995,7 @@ GO
 USE master
 GO
 
-CREATE LOGIN [TECHTOOLBOX\TT-WSUS02$] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\TT-WSUS03$] FROM WINDOWS
 WITH DEFAULT_DATABASE=master, DEFAULT_LANGUAGE=us_english
 GO
 ```
@@ -908,7 +1004,7 @@ GO
 
 ```SQL
 DECLARE @backupFilePath VARCHAR(255) =
-    '\\TT-SQL01A\SQL-Backups\SUSDB.bak'
+    'Z:\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\Backup\SUSDB.bak'
 
 RESTORE DATABASE SUSDB
     FROM DISK = @backupFilePath
@@ -989,210 +1085,6 @@ GO
 
 ---
 
-**SQL Server Management Studio (TT-SQL01)**
-
-### -- Create SQL job for WSUS database maintenance
-
-```Console
-USE [msdb]
-GO
-
-/****** Object:  Job [WsusDBMaintenance]    Script Date: 8/15/2017 9:40:04 AM ******/
-BEGIN TRANSACTION
-DECLARE @ReturnCode INT
-SELECT @ReturnCode = 0
-/****** Object:  JobCategory [[Uncategorized (Local)]]    Script Date: 8/15/2017 9:40:04 AM ******/
-IF NOT EXISTS (SELECT name FROM msdb.dbo.syscategories WHERE name=N'[Uncategorized (Local)]' AND category_class=1)
-BEGIN
-EXEC @ReturnCode = msdb.dbo.sp_add_category @class=N'JOB', @type=N'LOCAL', @name=N'[Uncategorized (Local)]'
-IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
-
-END
-
-DECLARE @jobId BINARY(16)
-EXEC @ReturnCode =  msdb.dbo.sp_add_job @job_name=N'WsusDBMaintenance',
-    @enabled=1,
-    @notify_level_eventlog=0,
-    @notify_level_email=0,
-    @notify_level_netsend=0,
-    @notify_level_page=0,
-    @delete_level=0,
-    @description=N'No description available.',
-    @category_name=N'[Uncategorized (Local)]',
-    @owner_login_name=N'TECHTOOLBOX\jjameson-admin', @job_id = @jobId OUTPUT
-IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
-/****** Object:  Step [Defragment database and update statistics]    Script Date: 8/15/2017 9:40:04 AM ******/
-EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'Defragment database and update statistics',
-    @step_id=1,
-    @cmdexec_success_code=0,
-    @on_success_action=1,
-    @on_success_step_id=0,
-    @on_fail_action=2,
-    @on_fail_step_id=0,
-    @retry_attempts=0,
-    @retry_interval=0,
-    @os_run_priority=0, @subsystem=N'TSQL',
-    @command=N'/******************************************************************************
-This sample T-SQL script performs basic maintenance tasks on SUSDB
-1. Identifies indexes that are fragmented and defragments them. For certain
-   tables, a fill-factor is set in order to improve insert performance.
-   Based on MSDN sample at http://msdn2.microsoft.com/en-us/library/ms188917.aspx
-   and tailored for SUSDB requirements
-2. Updates potentially out-of-date table statistics.
-******************************************************************************/
-
-USE SUSDB;
-GO
-SET NOCOUNT ON;
-
--- Rebuild or reorganize indexes based on their fragmentation levels
-DECLARE @work_to_do TABLE (
-    objectid int
-    , indexid int
-    , pagedensity float
-    , fragmentation float
-    , numrows int
-)
-
-DECLARE @objectid int;
-DECLARE @indexid int;
-DECLARE @schemaname nvarchar(130);
-DECLARE @objectname nvarchar(130);
-DECLARE @indexname nvarchar(130);
-DECLARE @numrows int
-DECLARE @density float;
-DECLARE @fragmentation float;
-DECLARE @command nvarchar(4000);
-DECLARE @fillfactorset bit
-DECLARE @numpages int
-
--- Select indexes that need to be defragmented based on the following
--- * Page density is low
--- * External fragmentation is high in relation to index size
-PRINT ''Estimating fragmentation: Begin. '' + convert(nvarchar, getdate(), 121)
-INSERT @work_to_do
-SELECT
-    f.object_id
-    , index_id
-    , avg_page_space_used_in_percent
-    , avg_fragmentation_in_percent
-    , record_count
-FROM
-    sys.dm_db_index_physical_stats (DB_ID(), NULL, NULL , NULL, ''SAMPLED'') AS f
-WHERE
-    (f.avg_page_space_used_in_percent < 85.0 and f.avg_page_space_used_in_percent/100.0 * page_count < page_count - 1)
-    or (f.page_count > 50 and f.avg_fragmentation_in_percent > 15.0)
-    or (f.page_count > 10 and f.avg_fragmentation_in_percent > 80.0)
-
-PRINT ''Number of indexes to rebuild: '' + cast(@@ROWCOUNT as nvarchar(20))
-
-PRINT ''Estimating fragmentation: End. '' + convert(nvarchar, getdate(), 121)
-
-SELECT @numpages = sum(ps.used_page_count)
-FROM
-    @work_to_do AS fi
-    INNER JOIN sys.indexes AS i ON fi.objectid = i.object_id and fi.indexid = i.index_id
-    INNER JOIN sys.dm_db_partition_stats AS ps on i.object_id = ps.object_id and i.index_id = ps.index_id
-
--- Declare the cursor for the list of indexes to be processed.
-DECLARE curIndexes CURSOR FOR SELECT * FROM @work_to_do
-
--- Open the cursor.
-OPEN curIndexes
-
--- Loop through the indexes
-WHILE (1=1)
-BEGIN
-    FETCH NEXT FROM curIndexes
-    INTO @objectid, @indexid, @density, @fragmentation, @numrows;
-    IF @@FETCH_STATUS < 0 BREAK;
-
-    SELECT
-        @objectname = QUOTENAME(o.name)
-        , @schemaname = QUOTENAME(s.name)
-    FROM
-        sys.objects AS o
-        INNER JOIN sys.schemas as s ON s.schema_id = o.schema_id
-    WHERE
-        o.object_id = @objectid;
-
-    SELECT
-        @indexname = QUOTENAME(name)
-        , @fillfactorset = CASE fill_factor WHEN 0 THEN 0 ELSE 1 END
-    FROM
-        sys.indexes
-    WHERE
-        object_id = @objectid AND index_id = @indexid;
-
-    IF ((@density BETWEEN 75.0 AND 85.0) AND @fillfactorset = 1) OR (@fragmentation < 30.0)
-        SET @command = N''ALTER INDEX '' + @indexname + N'' ON '' + @schemaname + N''.'' + @objectname + N'' REORGANIZE'';
-    ELSE IF @numrows >= 5000 AND @fillfactorset = 0
-        SET @command = N''ALTER INDEX '' + @indexname + N'' ON '' + @schemaname + N''.'' + @objectname + N'' REBUILD WITH (FILLFACTOR = 90)'';
-    ELSE
-        SET @command = N''ALTER INDEX '' + @indexname + N'' ON '' + @schemaname + N''.'' + @objectname + N'' REBUILD'';
-    PRINT convert(nvarchar, getdate(), 121) + N'' Executing: '' + @command;
-    EXEC (@command);
-    PRINT convert(nvarchar, getdate(), 121) + N'' Done.'';
-END
-
--- Close and deallocate the cursor.
-CLOSE curIndexes;
-DEALLOCATE curIndexes;
-
-
-IF EXISTS (SELECT * FROM @work_to_do)
-BEGIN
-    PRINT ''Estimated number of pages in fragmented indexes: '' + cast(@numpages as nvarchar(20))
-    SELECT @numpages = @numpages - sum(ps.used_page_count)
-    FROM
-        @work_to_do AS fi
-        INNER JOIN sys.indexes AS i ON fi.objectid = i.object_id and fi.indexid = i.index_id
-        INNER JOIN sys.dm_db_partition_stats AS ps on i.object_id = ps.object_id and i.index_id = ps.index_id
-
-    PRINT ''Estimated number of pages freed: '' + cast(@numpages as nvarchar(20))
-END
-GO
-
-
---Update all statistics
-PRINT ''Updating all statistics.'' + convert(nvarchar, getdate(), 121)
-EXEC sp_updatestats
-PRINT ''Done updating statistics.'' + convert(nvarchar, getdate(), 121)
-GO',
-    @database_name=N'SUSDB',
-    @flags=0
-IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
-EXEC @ReturnCode = msdb.dbo.sp_update_job @job_id = @jobId, @start_step_id = 1
-IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
-EXEC @ReturnCode = msdb.dbo.sp_add_jobschedule @job_id=@jobId, @name=N'Weekly',
-    @enabled=1,
-    @freq_type=8,
-    @freq_interval=1,
-    @freq_subday_type=1,
-    @freq_subday_interval=0,
-    @freq_relative_interval=0,
-    @freq_recurrence_factor=1,
-    @active_start_date=20161217,
-    @active_end_date=99991231,
-    @active_start_time=100000,
-    @active_end_time=235959,
-    @schedule_uid=N'e0a9c6bf-b402-47df-97c8-c70aeeb6d42b'
-IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
-EXEC @ReturnCode = msdb.dbo.sp_add_jobserver @job_id = @jobId, @server_name = N'(local)'
-IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
-COMMIT TRANSACTION
-GOTO EndSave
-QuitWithRollback:
-    IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION
-EndSave:
-
-GO
-```
-
----
-
----
-
 **HAVOK - SQL Server Management Studio**
 
 ### -- Delete database on source server
@@ -1201,17 +1093,6 @@ GO
 USE master
 GO
 DROP DATABASE SUSDB
-GO
-```
-
-### -- Delete SQL job for WSUS database maintenance
-
-```SQL
-USE msdb
-GO
-EXEC msdb.dbo.sp_delete_job @job_name=N'WsusDBMaintenance',
-    @delete_unused_schedule=1
-
 GO
 ```
 
@@ -1246,29 +1127,47 @@ Start-Service W3SVC
 Start-Service wuauserv
 ```
 
----
+## Import scheduled task to cleanup WSUS
 
-**FOOBAR11**
+"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WSUS Server Cleanup.xml"
+
+**TODO:**
+
+## Create SQL job for WSUS database maintenance
+
+Name: **WsusDBMaintenance**\
+Steps:
+
+- Step 1
+  - Step name: **Defragment database and update statistics**
+  - Type: **Transact-SQL script (T-SQL)**
+  - Command: (click **Open...** and then select script - **"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql"**)
+  - Database: **SUSDB**\
+    Schedule:
+
+- Schedule 1
+  - Name: **Weekly**
+  - Frequency:
+    - Occurs: **Weekly**
+    - Recurs every: **1 week on Sunday**
+  - Daily frequency:
+    - Occurs once at: **10:00 AM**
 
 ```PowerShell
 cls
 ```
 
-## # Make virtual machine highly available
+## # Enter a product key and activate Windows
 
 ```PowerShell
-$vm = Get-SCVirtualMachine -Name TT-WSUS02
-$vmHost = $vm.VMHost
-
-Move-SCVirtualMachine `
-    -VM $vm `
-    -VMHost $vmHost `
-    -HighlyAvailable $true `
-    -Path "\\TT-SOFS01.corp.technologytoolbox.com\VM-Storage-Silver" `
-    -UseDiffDiskOptimization
+slmgr /ipk {product key}
 ```
 
----
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
 
 ## WSUS update approvals
 
@@ -1330,56 +1229,3 @@ $wsusServer.GetComputerTargetGroups() |
         -NoTypeInformation `
         -Encoding UTF8
 ```
-
-## Issue: Windows Update (KB3159706) broke WSUS console
-
-### Issue
-
-WSUS clients started failing with error 0x8024401C
-
-Attempting to open WSUS console generated errors, which led to the discovery of the following errors in the event log:
-
-Log Name:      Application\
-Source:        Windows Server Update Services\
-Date:          5/13/2016 8:39:56 AM\
-Event ID:      507\
-Task Category: 1\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      COLOSSUS.corp.technologytoolbox.com\
-Description:\
-Update Services failed its initialization and stopped.
-
-Log Name:      System\
-Source:        Service Control Manager\
-Date:          5/13/2016 8:39:56 AM\
-Event ID:      7031\
-Task Category: None\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      COLOSSUS.corp.technologytoolbox.com\
-Description:\
-The WSUS Service service terminated unexpectedly.  It has done this 1 time(s).  The following corrective action will be taken in 300000 milliseconds: Restart the service.
-
-### References
-
-**Update enables ESD decryption provision in WSUS in Windows Server 2012 and Windows Server 2012 R2**\
-From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
-
-**The long-term fix for KB3148812 issues**\
-From <[https://blogs.technet.microsoft.com/wsus/2016/05/05/the-long-term-fix-for-kb3148812-issues/](https://blogs.technet.microsoft.com/wsus/2016/05/05/the-long-term-fix-for-kb3148812-issues/)>
-
-### Solution
-
-Manual steps required to complete the installation of this update
-
-1. Open an elevated Command Prompt window, and then run the following command (case sensitive, assume "C" as the system volume):
-"C:\\Program Files\\Update Services\\Tools\\wsusutil.exe" postinstall /servicing
-2. Select **HTTP Activation **under **.NET Framework 4.5 Features** in the Server Manager Add Roles and Features wizard.
-3. Restart the WSUS service.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/06E6407CAFFDA2F33739002CABD4137317C46E7D.jpg)
-
-From <[https://support.microsoft.com/en-us/kb/3159706](https://support.microsoft.com/en-us/kb/3159706)>
