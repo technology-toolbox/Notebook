@@ -419,3 +419,41 @@ Add-ADGroupMember -Identity "Windows Update - Slot 17" -Members "CON-DC1$"
 Add-ADGroupMember -Identity "Windows Update - Slot 21" -Members "CON-DC2$"
 Add-ADGroupMember -Identity "Windows Update - Slot 22" -Members "CON-ADFS1$"
 ```
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Make virtual machine highly available
+
+### # Migrate VM to shared storage
+
+```PowerShell
+$vmName = "CON-DC1"
+
+$vm = Get-SCVirtualMachine -Name $vmName
+$vmHost = $vm.VMHost
+
+Move-SCVirtualMachine `
+    -VM $vm `
+    -VMHost $vmHost `
+    -HighlyAvailable $true `
+    -Path "C:\ClusterStorage\iscsi01-Gold-01" `
+    -UseDiffDiskOptimization
+```
+
+### # Allow migration to host with different processor version
+
+```PowerShell
+Stop-SCVirtualMachine -VM $vmName
+
+Set-SCVirtualMachine -VM $vmName -CPULimitForMigration $true
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---

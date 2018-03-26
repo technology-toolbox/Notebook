@@ -578,3 +578,60 @@ Settings:
 Security Filtering:
 
 - Name: Windows Update - Slot 0
+
+```PowerShell
+cls
+```
+
+### # Export Windows Update configuration
+
+```PowerShell
+$scriptPath = "C:\NotBackedUp\Public\Toolbox\PowerShell\Get-WindowsUpdateSettings.ps1"
+
+$computers = Get-ADComputer -Filter * |
+    where { $_.Name -notin
+        @('EXCHANGE-CAS') } |
+    select -ExpandProperty Name
+
+$computers |
+    foreach { Invoke-Command -ComputerName $_ -FilePath $scriptPath } |
+    Export-Csv tmp.csv
+```
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Make virtual machine highly available
+
+### # Migrate VM to shared storage
+
+```PowerShell
+$vmName = "FAB-DC01"
+
+$vm = Get-SCVirtualMachine -Name $vmName
+$vmHost = $vm.VMHost
+
+Move-SCVirtualMachine `
+    -VM $vm `
+    -VMHost $vmHost `
+    -HighlyAvailable $true `
+    -Path "C:\ClusterStorage\iscsi01-Gold-01" `
+    -UseDiffDiskOptimization
+```
+
+### # Allow migration to host with different processor version
+
+```PowerShell
+Stop-SCVirtualMachine -VM $vmName
+
+Set-SCVirtualMachine -VM $vmName -CPULimitForMigration $true
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---

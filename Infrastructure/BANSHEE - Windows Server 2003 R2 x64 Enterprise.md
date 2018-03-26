@@ -284,3 +284,41 @@ Start-SCVirtualMachine $vmName
 ```
 
 ---
+
+---
+
+**FOOBAR11**
+
+```PowerShell
+cls
+```
+
+## # Make virtual machine highly available
+
+### # Migrate VM to shared storage
+
+```PowerShell
+$vmName = "BANSHEE"
+
+$vm = Get-SCVirtualMachine -Name $vmName
+$vmHost = $vm.VMHost
+
+Move-SCVirtualMachine `
+    -VM $vm `
+    -VMHost $vmHost `
+    -HighlyAvailable $true `
+    -Path "\\TT-SOFS01.corp.technologytoolbox.com\VM-Storage-Silver" `
+    -UseDiffDiskOptimization
+```
+
+### # Allow migration to host with different processor version
+
+```PowerShell
+Stop-SCVirtualMachine -VM $vmName
+
+Set-SCVirtualMachine -VM $vmName -CPULimitForMigration $true
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---
