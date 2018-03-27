@@ -1,7 +1,7 @@
-﻿# EXT-SQL02 - Windows Server 2012 R2 Standard
+﻿# EXT-SQL03 - Windows Server 2012 R2 Standard
 
-Tuesday, October 4, 2016
-5:12 AM
+Monday, March 26, 2018
+1:50 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -19,7 +19,7 @@ Install SecuritasConnect v4.0
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -28,29 +28,25 @@ cls
 #### # Create virtual machine
 
 ```PowerShell
-$vmHost = "FORGE"
-$vmName = "EXT-SQL02"
-
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vmHost = "TT-HV05C"
+$vmName = "EXT-SQL03"
+$vmPath = "E:\NotBackedUp\VMs\$vmName"
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
-    -Path E:\NotBackedUp\VMs `
+    -Generation 2 `
+    -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
     -MemoryStartupBytes 8GB `
-    -SwitchName "Production"
+    -SwitchName "Embedded Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
     -ProcessorCount 4
-
-Set-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
 
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
@@ -59,32 +55,13 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 #### Install custom Windows Server 2012 R2 image
 
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **EXT-SQL02**.
+  - In the **Computer name** box, type **EXT-SQL03**.
   - Select **Join a workgroup**.
   - In the **Workgroup **box, type **WORKGROUP**.
   - Click **Next**.
-- On the **Applications** step, ensure no items are selected and click **Next**.
-
-```PowerShell
-cls
-```
-
-#### # Copy latest Toolbox content
-
-```PowerShell
-net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```Console
-robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
-```
+- On the **Applications** step, do not select any applications, and click **Next**.
 
 ### # Rename local Administrator account and set password
 
@@ -109,57 +86,283 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
-### Login as EXT-SQL02\\foo
+### Login as .\\foo
+
+### # Copy Toolbox content
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$source = "\\TT-FS01\Public\Toolbox"
+$destination = "C:\NotBackedUp\Public\Toolbox"
+
+robocopy $source $destination /E /XD "Microsoft SDKs" /MIR
+```
+
+### # Set MaxPatchCacheSize to 0 (recommended)
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+```
+
+### # Enable performance counters for Server Manager
+
+```PowerShell
+$taskName = "\Microsoft\Windows\PLA\Server Manager Performance Monitor"
+
+Enable-ScheduledTask -TaskName $taskName
+
+logman start "Server Manager Performance Monitor"
+```
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Configure network settings
+### # Set first boot device to hard drive
+
+```PowerShell
+$vmHost = "TT-HV05C"
+$vmName = "EXT-SQL03"
+
+$vmHardDiskDrive = Get-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName |
+    where { $_.ControllerType -eq "SCSI" `
+        -and $_.ControllerNumber -eq 0 `
+        -and $_.ControllerLocation -eq 0 }
+
+Set-VMFirmware `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -FirstBootDevice $vmHardDiskDrive
+```
+
+---
+
+### # Configure networking
+
+```PowerShell
+$interfaceAlias = "Extranet-20"
+```
 
 #### # Rename network connections
 
 ```PowerShell
-Get-NetAdapter -Physical | select Name, InterfaceDescription
+Get-NetAdapter -Physical | select InterfaceDescription
 
-Get-NetAdapter `
-    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "Production"
+Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-#### # Configure "Production" network adapter
-
-```PowerShell
-$interfaceAlias = "Production"
-```
-
-##### # Configure IPv4 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.209,192.168.10.210
-```
-
-##### # Configure IPv6 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
-```
-
-##### # Enable jumbo frames
+#### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
+Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-ping ICEMAN -f -l 8900
+Start-Sleep -Seconds 5
+
+ping TT-FS01 -f -l 8900
+```
+
+#### Configure static IP address
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+##### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "EXT-SQL03"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Extranet-20 VM Network"
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+### Configure storage
+
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | C:           | 32 GB       | 4K                   | OSDisk       |
+| 1    | D:           | 235 GB      | 64K                  | Data01       |
+| 2    | L:           | 25 GB       | 64K                  | Log01        |
+| 3    | T:           | 4 GB        | 64K                  | Temp01       |
+| 4    | Z:           | 450 GB      | 4K                   | Backup01     |
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Configure storage for the SQL Server
+
+```PowerShell
+$vmHost = "TT-HV05C"
+$vmName = "EXT-SQL03"
+$vmPath = "E:\NotBackedUp\VMs\$vmName"
+```
+
+##### # Add "Data01" VHD
+
+```PowerShell
+$vhdPath = $vmPath + "\Virtual Hard Disks\$vmName" + "_Data01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 235GB
+Add-VMHardDiskDrive `
+  -ComputerName $vmHost `
+  -VMName $vmName `
+  -Path $vhdPath `
+  -ControllerType SCSI
+```
+
+##### # Add "Log01" VHD
+
+```PowerShell
+$vhdPath = $vmPath + "\Virtual Hard Disks\$vmName" + "_Log01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 25GB
+Add-VMHardDiskDrive `
+  -ComputerName $vmHost `
+  -VMName $vmName `
+  -Path $vhdPath `
+  -ControllerType SCSI
+```
+
+##### # Add "Temp01" VHD
+
+```PowerShell
+$vhdPath = $vmPath + "\Virtual Hard Disks\$vmName" + "_Temp01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 4GB
+Add-VMHardDiskDrive `
+  -ComputerName $vmHost `
+  -VMName $vmName `
+  -Path $vhdPath `
+  -ControllerType SCSI
+```
+
+##### # Add "Backup01" VHD
+
+```PowerShell
+$vhdPath = $vmPath + "\Virtual Hard Disks\$vmName" + "_Backup01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 450GB
+Add-VMHardDiskDrive `
+  -ComputerName $vmHost `
+  -VMName $vmName `
+  -Path $vhdPath `
+  -ControllerType SCSI
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Initialize disks and format volumes
+
+##### # Format Data01 drive
+
+```PowerShell
+Get-Disk 1 |
+  Initialize-Disk -PartitionStyle GPT -PassThru |
+  New-Partition -DriveLetter D -UseMaximumSize |
+  Format-Volume `
+    -AllocationUnitSize 64KB `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Data01" `
+    -Confirm:$false
+```
+
+##### # Format Log01 drive
+
+```PowerShell
+Get-Disk 2 |
+  Initialize-Disk -PartitionStyle GPT -PassThru |
+  New-Partition -DriveLetter L -UseMaximumSize |
+  Format-Volume `
+    -AllocationUnitSize 64KB `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Log01" `
+    -Confirm:$false
+```
+
+##### # Format Temp01 drive
+
+```PowerShell
+Get-Disk 3 |
+  Initialize-Disk -PartitionStyle GPT -PassThru |
+  New-Partition -DriveLetter T -UseMaximumSize |
+  Format-Volume `
+    -AllocationUnitSize 64KB `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Temp01" `
+    -Confirm:$false
+```
+
+##### # Format Backup01 drive
+
+```PowerShell
+Get-Disk 4 |
+  Initialize-Disk -PartitionStyle GPT -PassThru |
+  New-Partition -DriveLetter Z -UseMaximumSize |
+  Format-Volume `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Backup01" `
+    -Confirm:$false
 ```
 
 ```PowerShell
@@ -175,311 +378,33 @@ Add-Computer `
     -Restart
 ```
 
-#### Move computer to "SQL Servers" OU
-
 ---
 
-**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
 
 ```PowerShell
-$computerName = "EXT-SQL02"
+cls
+```
+
+##### # Move computer to different OU
+
+```PowerShell
+$computerName = "EXT-SQL03"
+
 $targetPath = ("OU=SQL Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=extranet,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
-
-Restart-Computer $computerName
 ```
 
----
+##### # Configure Windows Update
 
----
-
-**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
-
-### # Create and configure setup account for SQL Server
-
-#### # Create setup account for SQL Server
+###### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
-$displayName = "Setup account for SQL Server"
-$defaultUserName = "setup-sql"
+$domainGroupName = "Windows Update - Slot 3"
 
-$cred = Get-Credential -Message $displayName -UserName $defaultUserName
-
-$userPrincipalName = $cred.UserName + "@extranet.technologytoolbox.com"
-$orgUnit = "OU=Setup Accounts,OU=IT,DC=extranet,DC=technologytoolbox,DC=com"
-
-New-ADUser `
-    -Name $displayName `
-    -DisplayName $displayName `
-    -SamAccountName $cred.UserName `
-    -AccountPassword $cred.Password `
-    -UserPrincipalName $userPrincipalName `
-    -Path $orgUnit `
-    -Enabled:$true `
-    -CannotChangePassword:$true
-```
-
-#### # Add setup account to SQL Server Admins domain group
-
-```PowerShell
-Add-ADGroupMember `
-    -Identity "SQL Server Admins" `
-    -Members "setup-sql"
-```
-
----
-
-### Login as EXTRANET\\setup-sql
-
-### # Set MaxPatchCacheSize to 0 (Recommended)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
-```
-
-### # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-### # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-### # Enable PowerShell remoting
-
-```PowerShell
-Enable-PSRemoting -Confirm:$false
-```
-
-### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
-```
-
-### # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbose
-```
-
-```PowerShell
-cls
-```
-
-### # Install and configure System Center Operations Manager
-
-#### # Create certificate for Operations Manager
-
-##### # Create request for Operations Manager certificate
-
-```PowerShell
-& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
-```
-
-##### # Submit certificate request to the Certification Authority
-
-###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
-
-```PowerShell
-$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
-
-C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
-    -Zone LocalIntranet `
-    -Patterns $adcsUrl.AbsoluteUri
-
-Start-Process $adcsUrl.AbsoluteUri
-```
-
-> **Note**
->
-> Copy the certificate request to the clipboard.
-
-**To submit the certificate request to an enterprise CA:**
-
-1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
-2. On the **Welcome** page, click **Request a certificate**.
-3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
-4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
-5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
-6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
-
-```PowerShell
-cls
-```
-
-##### # Import the certificate into the certificate store
-
-```PowerShell
-$certFile = "C:\Users\setup-sql\Downloads\certnew.cer"
-
-CertReq.exe -Accept $certFile
-
-Remove-Item $certFile
-```
-
-#### # Install SCOM agent
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-##### # Mount the Operations Manager installation media
-
-```PowerShell
-$imagePath = `
-    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-Set-VMDvdDrive -ComputerName FORGE -VMName EXT-SQL02 -Path $imagePath
-```
-
----
-
-```PowerShell
-$msiPath = 'X:\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-```PowerShell
-cls
-```
-
-#### # Import the certificate into Operations Manager using MOMCertImport
-
-```PowerShell
-$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
-
-$certImportToolPath = 'X:\SupportTools\AMD64'
-
-Push-Location "$certImportToolPath"
-
-.\MOMCertImport.exe /SubjectName $hostName
-
-Pop-Location
-```
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-#### # Remove the Operations Manager installation media
-
-```PowerShell
-Set-VMDvdDrive -ComputerName FORGE -VMName EXT-SQL02 -Path $null
-```
-
----
-
-#### # Approve manual agent install in Operations Manager
-
-### # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-> **Note**
->
-> When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-## Configure VM storage
-
-| Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 32 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 150 GB      | Fixed    | 64K                  | Data01       |
-| 2    | L:           | 25 GB       | Fixed    | 64K                  | Log01        |
-| 3    | T:           | 4 GB        | Fixed    | 64K                  | Temp01       |
-| 4    | Z:           | 400GB       | Dynamic  | 4K                   | Backup01     |
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-### # Create Data01, Log01, and Backup01 VHDs
-
-```PowerShell
-$vmHost = "FORGE"
-$vmName = "EXT-SQL02"
-
-$vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Data01.vhdx"
-
-New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 150GB
-Add-VMHardDiskDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -ControllerType SCSI `
-    -Path $vhdPath
-
-$vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Log01.vhdx"
-
-New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 25GB
-Add-VMHardDiskDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -ControllerType SCSI `
-    -Path $vhdPath
-
-$vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Temp01.vhdx"
-
-New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 4GB
-Add-VMHardDiskDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -ControllerType SCSI `
-    -Path $vhdPath
-
-$vhdPath = "F:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
-    + "_Backup01.vhdx"
-
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 400GB
-Add-VMHardDiskDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -ControllerType SCSI `
-    -Path $vhdPath
+Add-ADGroupMember -Identity $domainGroupName -Members ($computerName + '$')
 ```
 
 ---
@@ -488,62 +413,35 @@ Add-VMHardDiskDrive `
 cls
 ```
 
-### # Initialize disks and format volumes
+### # Install and configure SQL Server 2014
 
-#### # Format Data01 drive
+#### # Prepare server for SQL Server installation
 
-```PowerShell
-Get-Disk 1 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter D -UseMaximumSize |
-    Format-Volume `
-        -AllocationUnitSize 64KB `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Data01" `
-        -Confirm:$false
-```
-
-#### # Format Log01 drive
+##### # Add SQL Server administrators domain group to local Administrators group
 
 ```PowerShell
-Get-Disk 2 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter L -UseMaximumSize |
-    Format-Volume `
-        -AllocationUnitSize 64KB `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Log01" `
-        -Confirm:$false
+$domain = "EXTRANET"
+$groupName = "SQL Server Admins"
+
+([ADSI]"WinNT://./Administrators,group").Add(
+    "WinNT://$domain/$groupName,group")
 ```
 
-#### # Format Temp01 drive
+---
+
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
 
 ```PowerShell
-Get-Disk 3 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter T -UseMaximumSize |
-    Format-Volume `
-        -AllocationUnitSize 64KB `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Temp01" `
-        -Confirm:$false
+cls
 ```
 
-#### # Format Backup01 drive
+##### # Enable setup account for SQL Server
 
 ```PowerShell
-Get-Disk 4 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter Z -UseMaximumSize |
-    Format-Volume `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Backup01" `
-        -Confirm:$false
+Enable-ADAccount -Identity setup-sql
 ```
 
-### Install latest service pack and updates
-
-### Install SQL Server 2014
+---
 
 > **Important**
 >
@@ -551,7 +449,7 @@ Get-Disk 4 |
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -560,18 +458,38 @@ cls
 #### # Mount SQL Server 2014 installation media
 
 ```PowerShell
-$vmHost = "FORGE"
-$vmName = "EXT-SQL02"
-$imagePath = "\\ICEMAN\Products\Microsoft\SQL Server 2014" `
-    + "\en_sql_server_2014_developer_edition_with_service_pack_2_x64_dvd_8967821.iso"
+$vmHost = "TT-HV05C"
+$vmName = "EXT-SQL03"
+$isoName = "en_sql_server_2014_developer_edition_with_service_pack_2_x64_dvd_8967821.iso"
+```
 
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
+##### # Add virtual DVD drive
+
+```PowerShell
+Add-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName
+```
+
+##### # Refresh virtual machine in VMM
+
+```PowerShell
+Read-SCVirtualMachine -VM $vmName
+```
+
+##### # Mount installation media in virtual DVD drive
+
+```PowerShell
+$iso = Get-SCISO | where { $_.Name -eq $isoName }
+
+Get-SCVirtualDVDDrive -VM $vmName |
+    Set-SCVirtualDVDDrive -ISO $iso -Link
 ```
 
 ---
 
 ```PowerShell
-& X:\setup.exe
+& E:\setup.exe
 ```
 
 > **Important**
@@ -580,7 +498,7 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -589,8 +507,8 @@ cls
 #### # Dismount SQL Server 2014 installation media
 
 ```PowerShell
-$vmHost = "FORGE"
-$vmName = "EXT-SQL02"
+$vmHost = "TT-HV05C"
+$vmName = "EXT-SQL03"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 ```
@@ -704,6 +622,10 @@ GO
 ```
 
 ---
+
+```PowerShell
+cls
+```
 
 ### # Configure firewall rule for SQL Server
 
@@ -820,8 +742,8 @@ Recurs every: <strong>1</strong> day</p>
 Recurs every: <strong>1</strong> day</p>
 </td>
 <td valign='top'>
-<p>Occurs every: <strong>1 hour</strong><br />
-Starting at:<strong> 12:55:00 AM</strong><br />
+<p>Occurs every: <strong>5 minutes</strong><br />
+Starting at:<strong> 12:05:00 AM</strong><br />
 Ending at:<strong> 11:59:59 PM</strong></p>
 </td>
 <td valign='top'>
@@ -918,11 +840,11 @@ Ending at:<strong> 11:59:59 PM</strong></p>
 <p>Occurs: <strong>Weekly</strong><br />
 Recurs every: <strong>1</strong> week on</p>
 <ul>
-<li><strong>Sunday</strong></li>
+<li><strong>Saturday</strong></li>
 </ul>
 </td>
 <td valign='top'>
-<p>Occurs once at: <strong>12:45:00 AM</strong></p>
+<p>Occurs once at: <strong>11:55:00 PM</strong></p>
 </td>
 <td valign='top'>
 <p><strong>First Task (Remove Full and Differential Backups)</strong></p>
@@ -943,7 +865,7 @@ Recurs every: <strong>1</strong> week on</p>
 <p><strong>File age:</strong></p>
 <ul>
 <li><strong>Delete files based on the age of the file at task run time</strong></li>
-<li><strong>Delete files older than the following: 3  Week(s)</strong></li>
+<li><strong>Delete files older than the following: 2  Week(s)</strong></li>
 </ul>
 <p><strong>Second Task (Remove Transaction Log Backups)</strong></p>
 <p><strong>Delete files of the following type:</strong></p>
@@ -963,8 +885,16 @@ Recurs every: <strong>1</strong> week on</p>
 <p><strong>File age:</strong></p>
 <ul>
 <li><strong>Delete files based on the age of the file at task run time</strong></li>
-<li><strong>Delete files older than the following: 3  Week(s)</strong></li>
+<li><strong>Delete files older than the following: 2  Week(s)</strong></li>
 </ul>
+<p><strong>Third Task (History Cleanup Task)</strong></p>
+<p><strong>Historical data to delete:</strong></p>
+<ul>
+<li><strong>Backup and restore history</strong></li>
+<li><strong>SQL Server Agent job history</strong></li>
+<li><strong>Maintenance plan history</strong></li>
+</ul>
+<p><strong>Remove historical data older than 4 Week(s).</strong></p>
 </td>
 </tr>
 </table>
@@ -1011,6 +941,9 @@ Recurs every: <strong>1</strong> week on</p>
       2. In the **File extension **box, type **trn**.
       3. In the **File age** section, configure the settings to delete files older than **3 Week(s)**.
       4. Click **OK**.
+   8. Use the **Toolbox** to add a new **History Cleanup Task**.
+   9. Right-click the new task and click **Edit...**
+   10. In the **History Cleanup Task **window, click **OK**.
 4. On the **File** menu, click **Save Selected Items**.
 
 ### Execute maintenance plan - Full Backup of All Databases
@@ -1040,187 +973,97 @@ to the user NT SERVICE\\SQLSERVERAGENT SID (S-1-5-80-344959196-2060754871-230248
 & 'C:\NotBackedUp\Public\Toolbox\SQL\Configure DCOM Permissions.ps1'
 ```
 
-## # Upgrade to System Center Operations Manager 2016
+---
 
-### # Uninstall SCOM 2012 R2 agent
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
 
 ```PowerShell
-msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
-
-Restart-Computer
+cls
 ```
 
-### # Install SCOM 2016 agent
+### # Disable setup account for SQL Server
 
 ```PowerShell
-net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+Disable-ADAccount -Identity setup-sql
 ```
 
-> **Note**
->
-> When prompted, type the password to connect to the file share.
+---
+
+**TODO:**
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
-$msiPath = "\\tt-fs01.corp.technologytoolbox.com\Products\Microsoft" `
-    + "\System Center 2016\Agents\SCOM\AMD64\MOMAgent.msi"
+cls
+```
+
+## # Make virtual machine highly available
+
+### # Migrate VM to shared storage
+
+```PowerShell
+$vmName = "EXT-SQL03"
+
+$vm = Get-SCVirtualMachine -Name $vmName
+$vmHost = $vm.VMHost
+
+Move-SCVirtualMachine `
+    -VM $vm `
+    -VMHost $vmHost `
+    -HighlyAvailable $true `
+    -Path "C:\ClusterStorage\iscsi01-Silver-01" `
+    -UseDiffDiskOptimization
+```
+
+### # Allow migration to host with different processor version
+
+```PowerShell
+Stop-SCVirtualMachine -VM $vmName
+
+Set-SCVirtualMachine -VM $vmName -CPULimitForMigration $true
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---
+
+### Configure backup
+
+#### Add virtual machine to Hyper-V protection group in DPM
+
+## # Install SCOM agent
+
+```PowerShell
+$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
+    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
 
 msiexec.exe /i $msiPath `
     MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=tt-scom01.corp.technologytoolbox.com `
+    MANAGEMENT_SERVER_DNS=JUBILEE `
     ACTIONS_USE_COMPUTER_ACCOUNT=1
 ```
 
-> **Important**
->
-> Wait for the installation to complete.
-
-### Approve manual agent install in Operations Manager
-
-## # Move VM to extranet VLAN
-
-### # Enable DHCP
-
-```PowerShell
-$interfaceAlias = Get-NetAdapter `
-    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    select -ExpandProperty Name
-
-@("IPv4", "IPv6") | ForEach-Object {
-    $addressFamily = $_
-
-    $interface = Get-NetAdapter $interfaceAlias |
-        Get-NetIPInterface -AddressFamily $addressFamily
-
-    If ($interface.Dhcp -eq "Disabled")
-    {
-        # Remove existing gateway
-        $ipConfig = $interface | Get-NetIPConfiguration
-
-        If ($addressFamily -eq "IPv4" -and $ipConfig.Ipv4DefaultGateway)
-        {
-            $interface |
-                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
-        }
-
-        If ($addressFamily -eq "IPv6" -and $ipConfig.Ipv6DefaultGateway)
-        {
-            $interface |
-                Remove-NetRoute -AddressFamily $addressFamily -Confirm:$false
-        }
-
-        # Enable DHCP
-        $interface | Set-NetIPInterface -DHCP Enabled
-
-        # Configure the  DNS Servers automatically
-        $interface | Set-DnsClientServerAddress -ResetServerAddresses
-    }
-}
-```
-
-### # Rename network connection
-
-```PowerShell
-$interfaceAlias = "Extranet"
-
-Get-NetAdapter `
-    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName $interfaceAlias
-```
-
-### # Disable jumbo frames
-
-```PowerShell
-Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 1514
-
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-```
-
----
-
-**TT-VMM01A**
+## # Approve manual agent install in Operations Manager
 
 ```PowerShell
 cls
 ```
 
-### # Configure static IP address using VMM
+## # Enter a product key and activate Windows
 
 ```PowerShell
-$vmName = "EXT-SQL02"
-
-$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
-
-$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
-
-$ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
-
-$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
-    ? { $_.SlotId -eq 0 }
-
-Stop-SCVirtualMachine $vmName
-
-$macAddress = Grant-SCMACAddress `
-    -MACAddressPool $macAddressPool `
-    -Description $vmName `
-    -VirtualNetworkAdapter $networkAdapter
-
-Set-SCVirtualNetworkAdapter `
-    -VirtualNetworkAdapter $networkAdapter `
-    -MACAddressType Static `
-    -MACAddress $macAddress
-
-$ipAddress = Grant-SCIPAddress `
-    -GrantToObjectType VirtualNetworkAdapter `
-    -GrantToObjectID $networkAdapter.ID `
-    -StaticIPAddressPool $ipPool `
-    -Description $vmName
-
-Set-SCVirtualNetworkAdapter `
-    -VirtualNetworkAdapter $networkAdapter `
-    -VMNetwork $vmNetwork `
-    -IPv4AddressType Static `
-    -IPv4Addresses $IPAddress.Address
-
-Start-SCVirtualMachine $vmName
+slmgr /ipk {product key}
 ```
 
----
+**Note:** When notified that the product key was set successfully, click **OK**.
 
-## Expand D: (Data01) drive on EXT-SQL02
-
----
-
-**FOOBAR11**
-
-```PowerShell
-cls
+```Console
+slmgr /ato
 ```
-
-### # Increase the size of "Data01" VHD
-
-```PowerShell
-$vmName = "EXT-SQL02"
-
-Get-SCVirtualDiskDrive -VM $vmName |
-    where { $_.BusType -eq "SCSI" -and $_.Bus -eq 0 -and $_.Lun -eq 0 } |
-    Expand-SCVirtualDiskDrive -VirtualHardDiskSizeGB 235
-```
-
----
-
-```PowerShell
-cls
-```
-
-### # Extend partition
-
-```PowerShell
-$maxSize = (Get-PartitionSupportedSize -DriveLetter D).SizeMax
-
-Resize-Partition -DriveLetter D -Size $maxSize
-```
-
-**TODO:**
