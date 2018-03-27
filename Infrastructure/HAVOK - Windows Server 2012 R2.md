@@ -1124,3 +1124,64 @@ Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/23/116AFC969938D10DCACA70A3EB8FE69BDB023723.png)
 
 Screen clipping taken: 11/18/2017 2:52 PM
+
+## Expand C: drive to 34 GB
+
+### Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/849BD17720CFF9CDDD9D8BBF000D5D66661DFE8D.png)
+
+Screen clipping taken: 3/27/2018 5:51 AM
+
+---
+
+**FOOBAR11**
+
+```PowerShell
+cls
+```
+
+### # Increase size of VHD
+
+```PowerShell
+$vmName = "HAVOK"
+$vmHost = "TT-HV05A"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\$vmName.vhdx"
+
+Resize-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 34GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/2C9CE6418BF1348A4A5E8AF6F78E77F78D99EB88.png)
+
+Screen clipping taken: 3/27/2018 5:56 AM

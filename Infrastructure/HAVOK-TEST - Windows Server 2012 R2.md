@@ -984,6 +984,32 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 & $installer TT-DPM02.corp.technologytoolbox.com
 ```
 
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Make virtual machine highly available
+
+```PowerShell
+$vmName = "HAVOK-TEST"
+
+$vm = Get-SCVirtualMachine -Name $vmName
+$vmHost = $vm.VMHost
+
+Move-SCVirtualMachine `
+    -VM $vm `
+    -VMHost $vmHost `
+    -HighlyAvailable $true `
+    -Path "\\TT-SOFS01.corp.technologytoolbox.com\VM-Storage-Silver" `
+    -UseDiffDiskOptimization
+```
+
+---
+
 ## Expand C: drive
 
 ---
@@ -1157,3 +1183,65 @@ Start-SCVirtualMachine -VM $vmName
 ```
 
 ---
+
+## Expand C: drive to 34 GB
+
+### Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FD/64BA619418419BFEB13B2FEA54FE602F1A0725FD.png)
+
+Screen clipping taken: 3/27/2018 5:45 AM
+
+---
+
+**FOOBAR11**
+
+```PowerShell
+cls
+```
+
+### # Increase size of VHD
+
+```PowerShell
+$vmName = "HAVOK-TEST"
+
+# Note: VHD is stored on SOFS -- so expand using VMM cmdlet
+
+Stop-SCVirtualMachine -VM $vmName
+
+Get-SCVirtualDiskDrive -VM $vmName |
+    where { $_.BusType -eq "IDE" -and $_.Bus -eq 0 } |
+    Expand-SCVirtualDiskDrive -VirtualHardDiskSizeGB 34
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/69E07321F070A57523E3AE1A9FCBE498B21C457F.png)
+
+Screen clipping taken: 3/27/2018 5:49 AM
