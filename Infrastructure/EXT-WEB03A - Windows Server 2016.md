@@ -1,7 +1,7 @@
-﻿# EXT-WEB02B - Windows Server 2012 R2 Standard
+﻿# EXT-WEB03A
 
-Tuesday, October 4, 2016
-5:13 AM
+Monday, March 26, 2018
+4:03 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,75 +9,55 @@ Tuesday, October 4, 2016
 
 Install SecuritasConnect v4.0
 
-## Deploy and configure the server infrastructure
+## Deploy and configure server infrastructure
 
 ### Install Windows Server 2012 R2
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Create virtual machine
+#### # Create virtual machine
 
 ```PowerShell
-$vmHost = "STORM"
-$vmName = "EXT-WEB02B"
-$vmPath = "E:\NotBackedUp\VMs"
-
-$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vmHost = "TT-HV05A"
+$vmName = "EXT-WEB03A"
+$vmPath = "E:\NotBackedUp\VMs\$vmName"
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
+    -Generation 2 `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 45GB `
     -MemoryStartupBytes 12GB `
-    -SwitchName "Production"
+    -SwitchName "Embedded Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
     -ProcessorCount 4
 
-Set-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
-
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
 
-## Install custom Windows Server 2012 R2 image
+#### Install custom Windows Server 2012 R2 image
 
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **EXT-WEB02B**.
+  - In the **Computer name** box, type **EXT-WEB03A**.
   - Select **Join a workgroup**.
   - In the **Workgroup **box, type **WORKGROUP**.
   - Click **Next**.
-- On the **Applications** step, ensure no items are selected and click **Next**.
-
-#### # Copy latest Toolbox content
-
-```PowerShell
-net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```Console
-robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
-```
+- On the **Applications** step, do not select any applications, and click **Next**.
 
 ### # Rename local Administrator account and set password
 
@@ -102,61 +82,232 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
-### Login as EXT-WEB02B\\foo
+### Login as .\\foo
+
+### # Copy Toolbox content
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$source = "\\TT-FS01\Public\Toolbox"
+$destination = "C:\NotBackedUp\Public\Toolbox"
+
+robocopy $source $destination /E /XD "Microsoft SDKs" /MIR
+```
+
+### # Set MaxPatchCacheSize to 0 (recommended)
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+```
+
+### # Enable performance counters for Server Manager
+
+```PowerShell
+$taskName = "\Microsoft\Windows\PLA\Server Manager Performance Monitor"
+
+Enable-ScheduledTask -TaskName $taskName
+
+logman start "Server Manager Performance Monitor"
+```
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Configure network settings
+### # Set first boot device to hard drive
+
+```PowerShell
+$vmHost = "TT-HV05A"
+$vmName = "EXT-WEB03A"
+
+$vmHardDiskDrive = Get-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName |
+    where { $_.ControllerType -eq "SCSI" `
+        -and $_.ControllerNumber -eq 0 `
+        -and $_.ControllerLocation -eq 0 }
+
+Set-VMFirmware `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -FirstBootDevice $vmHardDiskDrive
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Configure networking
+
+```PowerShell
+$interfaceAlias = "Extranet-20"
+```
 
 #### # Rename network connections
 
 ```PowerShell
-Get-NetAdapter -Physical | select Name, InterfaceDescription
+Get-NetAdapter -Physical | select InterfaceDescription
 
-Get-NetAdapter `
-    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "Production"
+Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-#### # Configure "Production" network adapter
-
-```PowerShell
-$interfaceAlias = "Production"
-```
-
-##### # Configure IPv4 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.209,192.168.10.210
-```
-
-##### # Configure IPv6 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 2601:282:4201:e500::209,2601:282:4201:e500::210
-```
-
-##### # Enable jumbo frames
+#### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
-Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
+Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
 
-ping ICEMAN -f -l 8900
+Start-Sleep -Seconds 5
+
+ping TT-FS01 -f -l 8900
 ```
+
+#### Configure static IP address
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
+```
+
+##### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "EXT-WEB03A"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Extranet-20 VM Network"
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+### Configure storage
+
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | C:           | 45 GB       | 4K                   | OSDisk       |
+| 1    | D:           | 40 GB       | 4K                   | Data01       |
+| 2    | L:           | 20 GB       | 4K                   | Log01        |
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Configure storage for the SQL Server
+
+```PowerShell
+$vmHost = "TT-HV05A"
+$vmName = "EXT-WEB03A"
+$vmPath = "E:\NotBackedUp\VMs\$vmName"
+```
+
+##### # Add "Data01" VHD
+
+```PowerShell
+$vhdPath = $vmPath + "\Virtual Hard Disks\$vmName" + "_Data01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 40GB
+Add-VMHardDiskDrive `
+  -ComputerName $vmHost `
+  -VMName $vmName `
+  -Path $vhdPath `
+  -ControllerType SCSI
+```
+
+##### # Add "Log01" VHD
+
+```PowerShell
+$vhdPath = $vmPath + "\Virtual Hard Disks\$vmName" + "_Log01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 20GB
+Add-VMHardDiskDrive `
+  -ComputerName $vmHost `
+  -VMName $vmName `
+  -Path $vhdPath `
+  -ControllerType SCSI
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Initialize disks and format volumes
+
+##### # Format Data01 drive
+
+```PowerShell
+Get-Disk 1 |
+  Initialize-Disk -PartitionStyle GPT -PassThru |
+  New-Partition -DriveLetter D -UseMaximumSize |
+  Format-Volume `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Data01" `
+    -Confirm:$false
+```
+
+##### # Format Log01 drive
+
+```PowerShell
+Get-Disk 2 |
+  Initialize-Disk -PartitionStyle GPT -PassThru |
+  New-Partition -DriveLetter L -UseMaximumSize |
+  Format-Volume `
+    -FileSystem NTFS `
+    -NewFileSystemLabel "Log01" `
+    -Confirm:$false
 ```
 
 ### # Join member server to domain
@@ -168,295 +319,70 @@ Add-Computer `
     -Restart
 ```
 
-#### Move computer to "SharePoint Servers" OU
-
 ---
 
-**EXT-DC01**
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
 
 ```PowerShell
-$computerName = "EXT-WEB02B"
+cls
+```
+
+##### # Move computer to different OU
+
+```PowerShell
+$computerName = "EXT-WEB03A"
+
 $targetPath = ("OU=SharePoint Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=extranet,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+```
 
-Restart-Computer $computerName
+##### # Configure Windows Update
+
+###### # Add machine to security group for Windows Update schedule
+
+```PowerShell
+$domainGroupName = "Windows Update - Slot 0"
+
+Add-ADGroupMember -Identity $domainGroupName -Members ($computerName + '$')
 ```
 
 ---
-
-### Login as EXTRANET\\setup-sharepoint
-
-### # Set MaxPatchCacheSize to 0 (Recommended)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
-```
-
-### # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-### # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-### # Enable PowerShell remoting
-
-```PowerShell
-Enable-PSRemoting -Confirm:$false
-```
-
-### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
-```
-
-### # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbose
-```
-
-```PowerShell
-cls
-```
-
-### # Install and configure System Center Operations Manager
-
-#### # Create certificate for Operations Manager
-
-##### # Create request for Operations Manager certificate
-
-```PowerShell
-& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
-```
-
-##### # Submit certificate request to Certification Authority
-
-###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
-
-```PowerShell
-$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
-
-C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
-    -Zone LocalIntranet `
-    -Patterns $adcsUrl.AbsoluteUri
-
-Start-Process $adcsUrl.AbsoluteUri
-```
-
-> **Note**
->
-> Copy the certificate request to the clipboard.
-
-**To submit the certificate request to an enterprise CA:**
-
-1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
-2. On the **Welcome** page, click **Request a certificate**.
-3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
-4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
-5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
-6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
-
-```PowerShell
-cls
-```
-
-##### # Import the certificate into the certificate store
-
-```PowerShell
-$certFile = "C:\Users\setup-sharepoint\Downloads\certnew.cer"
-
-CertReq.exe -Accept $certFile
-
-Remove-Item $certFile
-```
-
-#### # Install SCOM agent
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-##### # Mount the Operations Manager installation media
-
-```PowerShell
-$imagePath = `
-    '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-Set-VMDvdDrive -ComputerName STORM -VMName EXT-WEB02B -Path $imagePath
-```
-
----
-
-```PowerShell
-$msiPath = 'X:\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=jubilee.corp.technologytoolbox.com `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-```PowerShell
-cls
-```
-
-#### # Import the certificate into Operations Manager using MOMCertImport
-
-```PowerShell
-$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
-
-$certImportToolPath = 'X:\SupportTools\AMD64'
-
-Push-Location "$certImportToolPath"
-
-.\MOMCertImport.exe /SubjectName $hostName
-
-Pop-Location
-```
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-#### # Remove the Operations Manager installation media
-
-```PowerShell
-Set-VMDvdDrive -ComputerName STORM -VMName EXT-WEB02B -Path $null
-```
-
----
-
-#### # Approve manual agent install in Operations Manager
-
-### # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-> **Note**
->
-> When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-## Configure VM storage
-
-| Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 45 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 40 GB       | Dynamic  | 4K                   | Data01       |
-| 2    | L:           | 20 GB       | Dynamic  | 4K                   | Log01        |
-
----
-
-**FOOBAR8**
-
-```PowerShell
-cls
-```
-
-### # Create Data01 and Log01 VHDs
-
-```PowerShell
-$vmHost = "STORM"
-$vmName = "EXT-WEB02B"
-$vmPath = "E:\NotBackedUp\VMs\$vmName"
-
-$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
-    + "_Data01.vhdx"
-
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 40GB
-Add-VMHardDiskDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -ControllerType SCSI `
-    -Path $vhdPath
-
-$vhdPath = "$vmPath\Virtual Hard Disks\$vmName" `
-    + "_Log01.vhdx"
-
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 20GB
-Add-VMHardDiskDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -ControllerType SCSI `
-    -Path $vhdPath
-```
-
----
-
-```PowerShell
-cls
-```
-
-### # Initialize disks and format volumes
-
-#### # Format Data01 drive
-
-```PowerShell
-Get-Disk 1 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter D -UseMaximumSize |
-    Format-Volume `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Data01" `
-        -Confirm:$false
-```
-
-#### # Format Log01 drive
-
-```PowerShell
-Get-Disk 2 |
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -DriveLetter L -UseMaximumSize |
-    Format-Volume `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Log01" `
-        -Confirm:$false
-```
 
 ### Install latest service pack and updates
 
-## Install and configure SharePoint Server 2013
+```PowerShell
+cls
+```
 
-### Install SharePoint 2013 prerequisites on farm servers
+## # Install and configure SharePoint Server 2013
+
+### # Temporarily enable firewall rule to allow files to be copied to server
+
+```PowerShell
+Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-in)"
+```
+
+### # Install SharePoint 2013 prerequisites on farm servers
+
+#### # Add SQL Server administrators domain group to local Administrators group
+
+```PowerShell
+$domain = "EXTRANET"
+$groupName = "SharePoint Admins"
+
+([ADSI]"WinNT://./Administrators,group").Add(
+    "WinNT://$domain/$groupName,group")
+```
+
+> **Important**
+>
+> Login as **EXTRANET\\setup-sharepoint** to install SharePoint.
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -465,33 +391,54 @@ cls
 #### # Mount SharePoint Server 2013 installation media
 
 ```PowerShell
-$vmHost = "STORM"
-$vmName = "EXT-WEB02B"
-$imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
-    + "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
+$vmHost = "TT-HV05A"
+$vmName = "EXT-WEB03A"
+$isoName = "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
+```
 
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
+##### # Add virtual DVD drive
+
+```PowerShell
+Add-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName
+```
+
+##### # Refresh virtual machine in VMM
+
+```PowerShell
+Read-SCVirtualMachine -VM $vmName
+```
+
+##### # Mount installation media in virtual DVD drive
+
+```PowerShell
+$iso = Get-SCISO | where { $_.Name -eq $isoName }
+
+Get-SCVirtualDVDDrive -VM $vmName |
+    Set-SCVirtualDVDDrive -ISO $iso -Link
+```
+
+#### # Copy SharePoint Server 2013 prerequisite files to SharePoint server
+
+```PowerShell
+$source = "\\TT-FS01\Products\Microsoft\SharePoint 2013" `
+    + "\PrerequisiteInstallerFiles_SP1"
+
+$destination = '\\EXT-WEB03A.extranet.technologytoolbox.com' `
+    + '\C$\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1'
+
+robocopy $source $destination /E
 ```
 
 ---
 
-```Console
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
+#### # Install SharePoint Server 2013 prerequisites
 
 ```PowerShell
-$sourcePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013" `
-    + "\PrerequisiteInstallerFiles_SP1"
-
 $prereqPath = "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1"
 
-robocopy $sourcePath $prereqPath /E
-
-& X:\PrerequisiteInstaller.exe `
+& E:\PrerequisiteInstaller.exe `
     /SQLNCli:"$prereqPath\sqlncli.msi" `
     /PowerShell:"$prereqPath\Windows6.1-KB2506143-x64.msu" `
     /NETFX:"$prereqPath\dotNetFx45_Full_setup.exe" `
@@ -516,7 +463,7 @@ Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 ### # Install SharePoint Server 2013 on farm servers
 
 ```PowerShell
-& X:\setup.exe
+& E:\setup.exe
 ```
 
 > **Important**
@@ -534,8 +481,8 @@ cls
 #### # Dismount SharePoint Server 2013 installation media
 
 ```PowerShell
-$vmHost = "STORM"
-$vmName = "EXT-WEB02B"
+$vmHost = "TT-HV05A"
+$vmName = "EXT-WEB03A"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 ```
@@ -557,33 +504,42 @@ exit
 >
 > Restart PowerShell for environment variable change to take effect.
 
-### # Install Cumulative Update for SharePoint Server 2013
+### Install Cumulative Update for SharePoint Server 2013
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
 
 #### # Download update
 
 ```PowerShell
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
 $patch = "15.0.4833.1000 - SharePoint 2013 June 2016 CU"
 
-$sourcePath = ("\\ICEMAN\Products\Microsoft\SharePoint 2013" `
+$source = ("\\TT-FS01\Products\Microsoft\SharePoint 2013" `
     + "\Patches\$patch")
 
-$destPath = "C:\NotBackedUp\Temp\$patch"
+$destination = "\\EXT-WEB03A.extranet.technologytoolbox.com" `
+    + "\C`$\NotBackedUp\Temp\$patch"
 
-robocopy $sourcePath $destPath /E
+robocopy $source $destination /E
+```
+
+---
+
+```PowerShell
+cls
 ```
 
 #### # Install update
 
 ```PowerShell
-& "$destPath\*.exe"
+$patch = "15.0.4833.1000 - SharePoint 2013 June 2016 CU"
+
+& "C:\NotBackedUp\Temp\$patch\*.exe"
 ```
 
 > **Important**
@@ -597,23 +553,40 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 
 ### # Install Cumulative Update for AppFabric 1.1
 
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
 #### # Download update
 
 ```PowerShell
 $patch = "Cumulative Update 7"
 
-$sourcePath = ("\\ICEMAN\Products\Microsoft\AppFabric 1.1" `
+$source = ("\\TT-FS01\Products\Microsoft\AppFabric 1.1" `
     + "\Patches\$patch")
 
-$destPath = "C:\NotBackedUp\Temp\$patch"
+$destination = "\\EXT-WEB03A.extranet.technologytoolbox.com" `
+    + "\C`$\NotBackedUp\Temp\$patch"
 
-robocopy $sourcePath $destPath /E
+robocopy $source $destination /E
+```
+
+---
+
+```PowerShell
+cls
 ```
 
 #### # Install update
 
 ```PowerShell
-& "$destPath\*.exe"
+$patch = "Cumulative Update 7"
+
+& "C:\NotBackedUp\Temp\$patch\*.exe"
 ```
 
 > **Important**
@@ -652,8 +625,35 @@ cls
 
 ### # Install Prince on front-end Web servers
 
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
-& "\\ICEMAN\Products\Prince\prince-7.1-setup.exe"
+cls
+```
+
+#### # Copy installation files
+
+```PowerShell
+$source = "\\TT-FS01\Products\Prince"
+
+$destination = "\\EXT-WEB03A.extranet.technologytoolbox.com" `
+    + "\C`$\NotBackedUp\Temp\Prince"
+
+robocopy $source $destination /E
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Install Prince
+
+```PowerShell
+& "C:\NotBackedUp\Temp\Prince\prince-7.1-setup.exe"
 ```
 
 > **Important**
@@ -668,16 +668,36 @@ cls
 
 ```PowerShell
 Copy-Item `
-    \\ICEMAN\Products\Prince\Prince-license.dat `
+    C:\NotBackedUp\Temp\Prince\Prince-license.dat `
     'C:\Program Files (x86)\Prince\Engine\license\license.dat'
 ```
 
 1. In the **Prince** window, click the **Help** menu and then click **License**.
 2. In the **Prince License** window:
-   1. Click **Open** and then locate the license file (**[\\\\ICEMAN\\Products\\Prince\\Prince-license.dat](\\ICEMAN\Products\Prince\Prince-license.dat)**).
+   1. Click **Open** and then locate the license file (**C:\\NotBackedUp\\Temp\\Prince\\Prince-license.dat**).
    2. Click **Accept** to save the license information.
    3. Verify the license information and then click **Close**.
 3. Close the Prince application.
+
+```PowerShell
+cls
+```
+
+#### # Remove installation files
+
+```PowerShell
+Remove-Item "C:\NotBackedUp\Temp\Prince" -Recurse
+```
+
+```PowerShell
+cls
+```
+
+### # Disable firewall rule previously enabled to allow files to be copied to server
+
+```PowerShell
+Disable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-in)"
+```
 
 ### Install additional service packs and updates
 
@@ -687,12 +707,16 @@ Copy-Item `
 
 ### Add Web servers to the farm
 
+```PowerShell
+cls
+```
+
 ### # Grant permissions on DCOM applications for SharePoint
 
 ```PowerShell
 $tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
 
-$sourceScript = "\\EXT-APP02A\Builds\ClientPortal\4.0.675.0" `
+$sourceScript = "\\EXT-APP03A\Builds\ClientPortal\4.0.701.0" `
     + "\DeploymentFiles\Scripts\Configure DCOM Permissions.ps1"
 
 Get-Content $sourceScript | Out-File $tempScript
@@ -765,21 +789,29 @@ cls
     -Verbose
 ```
 
+### # Configure SSL on Internet zone
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
 cls
 ```
 
-### # Configure SSL on Internet zone
-
-#### # Install SSL certificate
+#### # Copy SSL certificate to SharePoint 2013 server
 
 ```PowerShell
-net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
+$source = "\\TT-FS01\Archive\Clients\Securitas\securitasinc.com.pfx"
+$destination = "\\EXT-WEB03A.extranet.technologytoolbox.com" `
+    + "\C`$\Users\setup-sharepoint\Desktop"
+
+Copy-Item $source $destination
 ```
 
-> **Note**
->
-> When prompted, type the password to connect to the file share.
+---
+
+#### # Install SSL certificate
 
 ```PowerShell
 $certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
@@ -791,7 +823,7 @@ $certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
 
 ```PowerShell
 Import-PfxCertificate `
-    -FilePath "\\ICEMAN\Archive\Clients\Securitas\securitasinc.com.pfx" `
+    -FilePath "C:\Users\setup-sharepoint\Desktop\securitasinc.com.pfx" `
     -CertStoreLocation Cert:\LocalMachine\My `
     -Password $certPassword
 ```
@@ -810,8 +842,8 @@ Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
 
 copy web.config "web - Copy.config"
 
-C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
-    '\\EXT-APP02A\C$\inetpub\wwwroot\wss\VirtualDirectories\client-test.securitasinc.com80\web.config' `
+C:\NotBackedUp\Public\Toolbox\DiffMerge\x64\sgdm.exe `
+    '\\EXT-APP03A\C$\inetpub\wwwroot\wss\VirtualDirectories\client-test.securitasinc.com80\web.config' `
     .\web.config
 
 Pop-Location
@@ -826,7 +858,7 @@ cls
 ```PowerShell
 $tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
 
-$sourceScript = "\\EXT-APP02A\Builds\ClientPortal\4.0.675.0" `
+$sourceScript = "\\EXT-APP03A\Builds\ClientPortal\4.0.701.0" `
     + "\DeploymentFiles\Scripts\Add Event Log Sources.ps1"
 
 Get-Content $sourceScript | Out-File $tempScript
@@ -843,50 +875,21 @@ cls
 ### # Configure claims-based authentication
 
 ```PowerShell
-Push-Location "C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\15\WebServices\SecurityToken"
+$target = "C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions" `
+    + "\15\WebServices\SecurityToken\web.config"
 
-copy .\web.config ".\web - Copy.config"
+$targetItem = Get-Item $target
 
-notepad web.config
-```
+Push-Location $targetItem.Directory
 
----
+Copy-Item `
+    -Path $targetItem.Name `
+    -Destination ($targetItem.BaseName + " - Copy" + $targetItem.Extension)
 
-**Web.config**
+C:\NotBackedUp\Public\Toolbox\DiffMerge\x64\sgdm.exe `
+    $target.Replace("C:\", "\\EXT-APP03A\C`$\") `
+    $target
 
-```XML
-  <connectionStrings>
-    <add
-      name="SecuritasPortal"
-      connectionString="Server=EXT-SQL02;Database=SecuritasPortal;Integrated Security=true" />
-  </connectionStrings>
-
-  <system.web>
-    <membership>
-      <providers>
-        <add
-          name="SecuritasSqlMembershipProvider"
-          type="System.Web.Security.SqlMembershipProvider, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
-          applicationName="Securitas Portal"
-          connectionStringName="SecuritasPortal"
-          passwordFormat="Hashed" />
-      </providers>
-    </membership>
-    <roleManager>
-      <providers>
-        <add
-          name="SecuritasSqlRoleProvider"
-          type="System.Web.Security.SqlRoleProvider, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
-          applicationName="Securitas Portal"
-          connectionStringName="SecuritasPortal" />
-      </providers>
-    </roleManager>
-  </system.web>
-```
-
----
-
-```PowerShell
 Pop-Location
 ```
 
@@ -894,9 +897,27 @@ Pop-Location
 
 ### Install IIS Media Services 4.1
 
-#### Download Web Platform Installer
+---
 
-(skipped)
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Download Web Platform Installer
+
+```PowerShell
+$source = "\\TT-FS01\Products\Microsoft\Web Platform Installer 5.0" `
+    + "\wpilauncher.exe"
+
+$destination = "\\EXT-WEB03A.extranet.technologytoolbox.com" `
+    + "\C`$\NotBackedUp\Temp"
+
+Copy-Item $source $destination
+```
+
+---
 
 ```PowerShell
 cls
@@ -905,16 +926,7 @@ cls
 #### # Install IIS Media Services
 
 ```PowerShell
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-& ('\\ICEMAN\Products\Microsoft' `
-    + '\Web Platform Installer 5.0\wpilauncher.exe')
+& "C:\NotBackedUp\Temp\wpilauncher.exe"
 ```
 
 ```PowerShell
@@ -926,8 +938,117 @@ cls
 #### # Install Web Deploy
 
 ```PowerShell
-& ("\\ICEMAN\Products\Microsoft" `
-    + "\Web Platform Installer 5.0\wpilauncher.exe")
+& "C:\NotBackedUp\Temp\wpilauncher.exe"
+```
+
+```PowerShell
+cls
+```
+
+### # Create media website on front-end Web servers
+
+```PowerShell
+$websiteName = "media-test.securitasinc.com"
+```
+
+#### # Create media website on first front-end Web server
+
+```PowerShell
+$tempScript = [Io.Path]::GetTempFileName().Replace(".tmp", ".ps1")
+
+$sourceScript = "\\EXT-APP03A\Builds\ClientPortal\4.0.701.0" `
+    + "\DeploymentFiles\Scripts\Configure Media Website.ps1"
+
+Get-Content $sourceScript | Out-File $tempScript
+
+& $tempScript -SiteName $websiteName -Verbose
+
+Remove-Item $tempScript
+```
+
+#### # Configure SSL bindings on media website
+
+```PowerShell
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=`*.securitasinc.com,*" }
+
+New-WebBinding `
+    -Name $websiteName `
+    -Protocol https `
+    -Port 443 `
+    -HostHeader $websiteName `
+    -SslFlags 0
+
+(Get-WebBinding `
+    -Name $websiteName `
+    -Protocol https).AddSslCertificate($cert.Thumbprint, "my")
+```
+
+```PowerShell
+cls
+```
+
+#### # Create media website on other web servers in farm
+
+```PowerShell
+Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
+
+.\msdeploy.exe -verb:sync `
+    -source:apppoolconfig="$websiteName" `
+    -dest:apppoolconfig="$websiteName"`,computername=EXT-WEB03B
+```
+
+.\\msdeploy.exe -verb:sync `
+
+```PowerShell
+    -source:apphostconfig="$websiteName" `
+    -dest:apphostconfig="$websiteName"`,computername=EXT-WEB03B
+
+Pop-Location
+```
+
+### # Copy media website to front-end Web servers
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Copy media website content from Production
+
+```PowerShell
+$websiteName = "media-test.securitasinc.com"
+$source = "\\TT-FS01\Archive\Clients\Securitas\Media"
+$destination = "\\EXT-WEB03A.extranet.technologytoolbox.com" `
+```
+
+    + "\\C`\$\\inetpub\\wwwroot\\\$websiteName"
+
+```Console
+robocopy $source $destination /E /NP
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Copy media website content to other front-end Web server in farm
+
+```PowerShell
+$contentPath = "C:\inetpub\wwwroot\$websiteName"
+
+Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
+
+.\msdeploy.exe -verb:sync `
+    -source:contentPath="$contentPath" `
+    -dest:contentPath="$contentPath"`,computername=EXT-WEB03B
+
+Pop-Location
 ```
 
 ## Create and configure the Cloud Portal Web application
@@ -1194,7 +1315,7 @@ cls
 ### # Configure static IP address using VMM
 
 ```PowerShell
-$vmName = "EXT-WEB02B"
+$vmName = "EXT-WEB03A"
 
 $macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
 
@@ -1238,32 +1359,32 @@ Start-SCVirtualMachine $vmName
 
 Log Name:      Application\
 Source:        ASP.NET 4.0.30319.0\
-Date:          5/18/2017 11:06:29 AM\
+Date:          5/18/2017 10:25:38 AM\
 Event ID:      1309\
 Task Category: Web Event\
 Level:         Warning\
 Keywords:      Classic\
 User:          N/A\
-Computer:      EXT-WEB02B.extranet.technologytoolbox.com\
+Computer:      EXT-WEB02A.extranet.technologytoolbox.com\
 Description:\
 Event code: 3005\
 Event message: An unhandled exception has occurred.\
-Event time: 5/18/2017 11:06:29 AM\
-Event time (UTC): 5/18/2017 5:06:29 PM\
-Event ID: 0fd660226e724958bba36b1cb4e17992\
+Event time: 5/18/2017 10:25:38 AM\
+Event time (UTC): 5/18/2017 4:25:38 PM\
+Event ID: 53a12e3e19af46f19c73e78673fc5163\
 Event sequence: 8\
 Event occurrence: 1\
 Event detail code: 0\
 \
 Application information:\
-    Application domain: /LM/W3SVC/762047535/ROOT-1-131396007128500689\
+    Application domain: /LM/W3SVC/762047535/ROOT-1-131395983088891094\
     Trust level: Full\
     Application Virtual Path: /\
     Application Path: C:\\inetpub\\wwwroot\\wss\\VirtualDirectories\\client-test.securitasinc.com80\\\
-    Machine name: EXT-WEB02B\
+    Machine name: EXT-WEB02A\
 \
 Process information:\
-    Process ID: 4496\
+    Process ID: 6056\
     Process name: w3wp.exe\
     Account name: EXTRANET\\s-web-client\
 \
@@ -1290,7 +1411,7 @@ Request information:\
     Thread account name: EXTRANET\\s-web-client\
 \
 Thread information:\
-    Thread ID: 20\
+    Thread ID: 18\
     Thread account name: EXTRANET\\s-web-client\
     Is impersonating: False\
     Stack trace:    at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)\
@@ -1353,7 +1474,7 @@ $source = "\\TT-FS01.corp.technologytoolbox.com\Products\Microsoft" `
     + "\\System Center 2016\\SCOM\\agent\\AMD64"
 
 ```PowerShell
-$destination = "\\EXT-WEB02B.extranet.technologytoolbox.com\C$\NotBackedUp\Temp" `
+$destination = "\\EXT-WEB03A.extranet.technologytoolbox.com\C$\NotBackedUp\Temp" `
 ```
 
     + "\\System Center 2016\\SCOM\\agent\\AMD64"
@@ -1396,6 +1517,293 @@ Remove-Item "C:\NotBackedUp\Temp\System Center 2016" -Recurse
 
 ### Install and configure identity provider for client users
 
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Configure name resolution for identity provider website
+
+```PowerShell
+Add-DnsServerResourceRecordA `
+    -ComputerName TT-DC06 `
+    -Name idp `
+    -IPv4Address 10.1.20.152 `
+    -ZoneName technologytoolbox.com
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Deploy identity provider website to front-end web servers
+
+##### # Install certificate for secure communication with idp.technologytoolbox.com
+
+---
+
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson**
+
+```PowerShell
+cls
+```
+
+###### # Copy certificate from internal file server
+
+```PowerShell
+$computerName = "EXT-WEB03A.extranet.technologytoolbox.com"
+$certFile = "idp.technologytoolbox.com.pfx"
+
+$source = "\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC" `
+    + "\Certificates\Internal"
+
+$destination = "\\$computerName\C$\NotBackedUp\Temp"
+
+net use "\\$computerName\C`$" /USER:EXTRANET\jjameson-admin
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```Console
+robocopy $source $destination $certFile
+```
+
+---
+
+```PowerShell
+cls
+```
+
+###### # Install certificate
+
+```PowerShell
+$certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted for the secure string, type the password for the exported certificate.
+
+```PowerShell
+cls
+```
+
+###### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\NotBackedUp\Temp\idp.technologytoolbox.com.pfx"
+
+Import-PfxCertificate `
+    -FilePath $certFile `
+    -CertStoreLocation Cert:\LocalMachine\My `
+    -Password $certPassword
+
+If ($? -eq $true)
+{
+    Remove-Item $certFile -Verbose
+}
+```
+
+```PowerShell
+cls
+```
+
+##### # Install .NET Framework 4.5
+
+---
+
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson**
+
+```PowerShell
+cls
+```
+
+###### # Download .NET Framework 4.5.2 installer
+
+```PowerShell
+$computerName = "EXT-WEB03A.extranet.technologytoolbox.com"
+
+$source = "\\TT-FS01\Products\Microsoft\.NET Framework 4.5\.NET Framework 4.5.2\" `
+        + "NDP452-KB2901907-x86-x64-AllOS-ENU.exe"
+
+$destination = "\\$computerName\C$\NotBackedUp\Temp"
+
+net use "\\$computerName\C`$" /USER:EXTRANET\jjameson-admin
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+Copy-Item $source $destination
+```
+
+---
+
+```PowerShell
+cls
+```
+
+###### # Install .NET Framework 4.5.2
+
+```PowerShell
+& C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
+```
+
+> **Important**
+>
+> When prompted, restart the computer to complete the installation.
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
+```
+
+###### Install updates
+
+> **Important**
+>
+> When prompted, restart the computer to complete the process of installing the updates.
+
+```PowerShell
+cls
+```
+
+##### # Deploy identity provider website to first front-end web server
+
+```PowerShell
+$newBuild = "4.0.701.0"
+
+Push-Location "\\EXT-APP03A\Builds\ClientPortal\$newBuild\DeploymentFiles\Scripts"
+
+[Uri] $idpUrl = [Uri] "http://idp.technologytoolbox.com"
+
+Set-ExecutionPolicy Bypass -Scope Process
+
+& '.\Configure Identity Provider Website.ps1' `
+    -SiteName $idpUrl.Host `
+    -Confirm:$false
+
+Pop-Location
+```
+
+###### # Add HTTPS binding to identity provider website
+
+```PowerShell
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=`idp.technologytoolbox.com,*" }
+
+$websiteName = $idpUrl.Host
+
+New-WebBinding `
+    -Name $websiteName `
+    -Protocol https `
+    -Port 443 `
+    -HostHeader $websiteName `
+    -SslFlags 0
+
+(Get-WebBinding `
+    -Name $websiteName `
+    -Protocol https).AddSslCertificate($cert.Thumbprint, "my")
+```
+
+###### # Deploy content to identity provider website
+
+```PowerShell
+Push-Location ("\\EXT-APP03A\Builds\ClientPortal\$newBuild\Release" `
+    + "\_PublishedWebsites\Securitas.Portal.IdentityProvider_Package")
+
+attrib -r .\Securitas.Portal.IdentityProvider.SetParameters.xml
+
+$config = Get-Content Securitas.Portal.IdentityProvider.SetParameters.xml
+
+$config = $config -replace `
+    "Default Web Site/Securitas.Portal.IdentityProvider_deploy", $idpUrl.Host
+
+$config = $config -replace `
+    "Server=.; Database=SecuritasPortal", "Server=EXT-SQL03; Database=SecuritasPortal"
+
+$configXml = [xml] $config
+
+$configXml.Save(($PWD.ProviderPath +
+    "\Securitas.Portal.IdentityProvider.SetParameters.xml"))
+
+.\Securitas.Portal.IdentityProvider.deploy.cmd /t
+
+.\Securitas.Portal.IdentityProvider.deploy.cmd /y
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+##### # Deploy identity provider website to second web server in farm
+
+```PowerShell
+Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
+
+$websiteName = "idp.technologytoolbox.com"
+
+.\msdeploy.exe -verb:sync `
+    -source:apppoolconfig="$websiteName" `
+    -dest:apppoolconfig="$websiteName"`,computername=EXT-WEB03B
+
+.\msdeploy.exe -verb:sync `
+    -source:apphostconfig="$websiteName" `
+    -dest:apphostconfig="$websiteName"`,computername=EXT-WEB03B
+
+$contentPath = "C:\inetpub\wwwroot\$websiteName"
+
+.\msdeploy.exe -verb:sync `
+    -source:contentPath="$contentPath" `
+    -dest:contentPath="$contentPath"`,computername=EXT-WEB03B
+
+Pop-Location
+```
+
+---
+
+**EXT-SQL03**
+
+```PowerShell
+cls
+```
+
+#### # Configure database permissions for identity provider website
+
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+EXEC sp_addrolemember 'aspnet_Membership_BasicAccess', 'EXTRANET\EXT-WEB03A$'
+EXEC sp_addrolemember 'aspnet_Membership_ReportingAccess', 'EXTRANET\EXT-WEB03A$'
+EXEC sp_addrolemember 'aspnet_Roles_BasicAccess', 'EXTRANET\EXT-WEB03A$'
+EXEC sp_addrolemember 'aspnet_Roles_ReportingAccess', 'EXTRANET\EXT-WEB03A$'
+
+EXEC sp_addrolemember 'aspnet_Membership_BasicAccess', 'EXTRANET\EXT-WEB03B$'
+EXEC sp_addrolemember 'aspnet_Membership_ReportingAccess', 'EXTRANET\EXT-WEB03B$'
+EXEC sp_addrolemember 'aspnet_Roles_BasicAccess', 'EXTRANET\EXT-WEB03B$'
+EXEC sp_addrolemember 'aspnet_Roles_ReportingAccess', 'EXTRANET\EXT-WEB03B$'
+GO
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+---
+
 ```PowerShell
 cls
 ```
@@ -1413,9 +1821,7 @@ $certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
 > When prompted for the secure string, type the password for the exported certificate.
 
 ```PowerShell
-$newBuild = "4.0.697.0"
-
-Push-Location ("\\EXT-APP02A\Builds\ClientPortal\$newBuild" `
+Push-Location ("\\EXT-APP03A\Builds\ClientPortal\$newBuild" `
     + "\DeploymentFiles\Certificates")
 
 Import-PfxCertificate `
