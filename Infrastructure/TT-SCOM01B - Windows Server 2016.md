@@ -1,7 +1,7 @@
-﻿# TT-SCOM01 - Windows Server 2016
+﻿# TT-SCOM01B - Windows Server 2016
 
-Wednesday, March 22, 2017
-2:25 PM
+Wednesday, March 28, 2018
+5:12 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,55 +9,36 @@ Wednesday, March 22, 2017
 
 ## Deploy and configure the server infrastructure
 
+### Create domain group for SCOM administrators
+
+(skipped -- since this was done previously)
+
+### Add SCOM administrators to group
+
+(skipped -- since this was done previously)
+
+### Install Windows Server 2016
+
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Create domain group for SCOM administrators
+#### # Create virtual machine
 
 ```PowerShell
-$scomAdminsGroup = "Operations Manager Admins"
-$orgUnit = "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
-
-New-ADGroup `
-    -Name $scomAdminsGroup `
-    -Description ("Complete and unrestricted access to System Center " `
-        + "Operations Manager") `
-    -GroupScope Global `
-    -Path $orgUnit
-```
-
-### # Add SCOM administrators to group
-
-```PowerShell
-Add-ADGroupMember -Identity $scomAdminsGroup -Members jjameson-fabric
-```
-
----
-
----
-
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-### # Create virtual machine
-
-```PowerShell
-$vmHost = "TT-HV02C"
-$vmName = "TT-SCOM01"
-$vmPath = "D:\NotBackedUp\VMs"
-$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vmHost = "TT-HV05C"
+$vmName = "TT-SCOM01B"
+$vmPath = "E:\NotBackedUp\VMs\$vmName"
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
+    -Generation 2 `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
@@ -69,11 +50,6 @@ Set-VM `
     -Name $vmName `
     -ProcessorCount 4
 
-Set-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Path \\TT-FS01\Products\Microsoft\MDT-Deploy-x64.iso
-
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
@@ -83,7 +59,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-SCOM01**.
+  - In the **Computer name** box, type **TT-SCOM01B**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
@@ -112,7 +88,7 @@ logoff
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -121,7 +97,7 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "TT-SCOM01"
+$vmName = "TT-SCOM01B"
 
 $targetPath = ("OU=System Center Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
@@ -131,45 +107,57 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ---
 
-#### Login as .\\foo
+### Login as .\\foo
 
-#### # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-#### # Set time zone
+### # Set MaxPatchCacheSize to 0 (recommended)
 
 ```PowerShell
-tzutil /s "Mountain Standard Time"
-```
+Set-ExecutionPolicy Bypass -Scope Process -Force
 
-#### # Copy Toolbox content
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$source = "\\TT-FS01\Public\Toolbox"
-$destination = "C:\NotBackedUp\Public\Toolbox"
-
-robocopy $source $destination /E /XD "Microsoft SDKs"
-```
-
-#### # Set MaxPatchCacheSize to 0 (recommended)
-
-```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+```
+
+### # Enable performance counters for Server Manager
+
+```PowerShell
+$taskName = "\Microsoft\Windows\PLA\Server Manager Performance Monitor"
+
+Enable-ScheduledTask -TaskName $taskName
+
+logman start "Server Manager Performance Monitor"
+```
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Set first boot device to hard drive
+
+```PowerShell
+$vmHost = "TT-HV05C"
+$vmName = "TT-SCOM01B"
+
+$vmHardDiskDrive = Get-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName |
+    where { $_.ControllerType -eq "SCSI" `
+        -and $_.ControllerNumber -eq 0 `
+        -and $_.ControllerLocation -eq 0 }
+
+Set-VMFirmware `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -FirstBootDevice $vmHardDiskDrive
+```
+
+---
+
+```PowerShell
+cls
 ```
 
 ### # Configure networking
@@ -200,17 +188,86 @@ Start-Sleep -Seconds 5
 ping TT-FS01 -f -l 8900
 ```
 
+#### Configure static IP address
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+##### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "TT-SCOM01B"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+$ipPool = Get-SCStaticIPAddressPool -Name "Management Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
 ### Configure storage
 
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------------------- | ------------ |
 | 0    | C:           | 32 GB       | 4K                   | OSDisk       |
 
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
 cls
 ```
 
-### # Change drive letter for DVD-ROM
+##### # Add virtual DVD drive
+
+```PowerShell
+$vmHost = "TT-HV05C"
+$vmName = "TT-SCOM01B"
+
+Add-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Change drive letter for DVD-ROM
 
 ```PowerShell
 $cdrom = Get-WmiObject -Class Win32_CDROMDrive
@@ -224,6 +281,8 @@ mountvol $driveLetter /D
 mountvol X: $volumeId
 ```
 
+### Add virtual machine to Hyper-V protection group in DPM
+
 ## Prepare for SCOM installation
 
 ### Reference
@@ -233,107 +292,23 @@ From <[https://technet.microsoft.com/en-us/system-center-docs/om/plan/system-req
 
 ### Create SCOM service accounts
 
----
-
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
-
-#### # Create service account for "Management server action account"
+(skipped -- since this was done previously)
 
 ```PowerShell
-$displayName = 'Service account for Operations Manager "action account" (SCOM01)'
-$defaultUserName = 's-scom01-action'
-
-$cred = Get-Credential -Message $displayName -UserName $defaultUserName
-
-$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
-$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
-
-New-ADUser `
-    -Name $displayName `
-    -DisplayName $displayName `
-    -SamAccountName $cred.UserName `
-    -AccountPassword $cred.Password `
-    -UserPrincipalName $userPrincipalName `
-    -Path $orgUnit `
-    -Enabled:$true `
-    -CannotChangePassword:$true `
-    -PasswordNeverExpires:$true
+cls
 ```
 
-#### # Create service account for "System Center Configuration service and System Center Data Access service"
+### # Add System Center setup account to local Administrators group
 
 ```PowerShell
-$displayName =
-    'Service account for Operations Manager "Data Access" (SCOM01)'
+$domain = "TECHTOOLBOX"
+$username = "setup-systemcenter"
 
-$defaultUserName = "s-scom01-das"
-
-$cred = Get-Credential -Message $displayName -UserName $defaultUserName
-
-$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
-$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
-
-New-ADUser `
-    -Name $displayName `
-    -DisplayName $displayName `
-    -SamAccountName $cred.UserName `
-    -AccountPassword $cred.Password `
-    -UserPrincipalName $userPrincipalName `
-    -Path $orgUnit `
-    -Enabled:$true `
-    -CannotChangePassword:$true `
-    -PasswordNeverExpires:$true
+([ADSI]"WinNT://./Administrators,group").Add(
+    "WinNT://$domain/$username,user")
 ```
 
-#### # Create service account for "Data Reader account"
-
-```PowerShell
-$displayName = 'Service account for Operations Manager "Data Reader" (SCOM01)'
-$defaultUserName = "s-scom01-data-reader"
-
-$cred = Get-Credential -Message $displayName -UserName $defaultUserName
-
-$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
-$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
-
-New-ADUser `
-    -Name $displayName `
-    -DisplayName $displayName `
-    -SamAccountName $cred.UserName `
-    -AccountPassword $cred.Password `
-    -UserPrincipalName $userPrincipalName `
-    -Path $orgUnit `
-    -Enabled:$true `
-    -CannotChangePassword:$true `
-    -PasswordNeverExpires:$true
-```
-
-#### # Create service account for "Data Writer account"
-
-```PowerShell
-$displayName = 'Service account for Operations Manager "Data Writer" (SCOM01)'
-$defaultUserName = "s-scom01-data-writer"
-
-$cred = Get-Credential -Message $displayName -UserName $defaultUserName
-
-$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
-$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
-
-New-ADUser `
-    -Name $displayName `
-    -DisplayName $displayName `
-    -SamAccountName $cred.UserName `
-    -AccountPassword $cred.Password `
-    -UserPrincipalName $userPrincipalName `
-    -Path $orgUnit `
-    -Enabled:$true `
-    -CannotChangePassword:$true `
-    -PasswordNeverExpires:$true
-```
-
----
-
-### Login as TECHTOOLBOX\\jjameson-fabric
+### Login as TECHTOOLBOX\\setup-systemcenter
 
 ### # Add SCOM "Data Access" service account to local Administrators group
 
@@ -343,10 +318,6 @@ $serviceAccount = "s-scom01-das"
 
 ([ADSI]"WinNT://./Administrators,group").Add(
     "WinNT://$domain/$serviceAccount,user")
-```
-
-```PowerShell
-cls
 ```
 
 ### # Add SCOM administrators domain group to local Administrators group
@@ -359,8 +330,75 @@ $domainGroup = "Operations Manager Admins"
     "WinNT://$domain/$domainGroup,group")
 ```
 
+---
+
+**FOOBAR11 - TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
 cls
+```
+
+### # Configure name resolution for TFS 2018 URLs
+
+```PowerShell
+Add-DnsServerResourceRecordCName `
+    -ZoneName "technologytoolbox.com" `
+    -Name "tfs" `
+    -HostNameAlias "TT-TFS02.corp.technologytoolbox.com" `
+    -ComputerName TT-DC06
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Install SSL certificate
+
+#### # Create request for Web Server certificate
+
+```PowerShell
+$hostname = "scom01.corp.technologytoolbox.com"
+$altHostname1 = "systemcenter.technologytoolbox.com"
+$altHostname2 = "systemcenter"
+
+& "C:\NotBackedUp\Public\Toolbox\PowerShell\New-CertificateRequest.ps1" `
+    -Subject ("CN=$hostname,OU=IT" `
+        + ",O=Technology Toolbox,L=Parker,S=CO,C=US") `
+    -SANs $hostname, $altHostname1, $altHostname2
+```
+
+#### # Submit certificate request to Certification Authority
+
+```PowerShell
+Start-Process "https://cipher01.corp.technologytoolbox.com"
+```
+
+**To submit the certificate request to an enterprise CA:**
+
+1. Start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the appropriate certificate template (**Technology Toolbox Web Server - Exportable**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+#### # Import certificate into certificate store
+
+```PowerShell
+$certFile = "C:\Users\Administrator\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+If ($? -eq $true)
+{
+    Remove-Item $certFile
+}
 ```
 
 ### # Install and configure SQL Server Reporting Services
@@ -388,40 +426,40 @@ On the **Server Configuration** step, on the **Service Accounts** tab:
 
 ---
 
-**SQL Server Management Studio - TT-SQL01A**
+**TT-SQL01 - SQL Server Management Studio - Database Engine**
 
-#### -- Temporarily add SCOM installation account to sysadmin role in SQL Server
+#### -- Temporarily grant administrator permissions in SQL Server to System Center setup account
 
 ```SQL
-USE [master]
+CREATE LOGIN [TECHTOOLBOX\setup-systemcenter]
+FROM WINDOWS
+WITH DEFAULT_DATABASE=master
 GO
-CREATE LOGIN [TECHTOOLBOX\jjameson-fabric]
-FROM WINDOWS WITH DEFAULT_DATABASE=[master]
-GO
-ALTER SERVER ROLE [sysadmin]
-ADD MEMBER [TECHTOOLBOX\jjameson-fabric]
-GO
+
+ALTER SERVER ROLE sysadmin
+ADD MEMBER [TECHTOOLBOX\setup-systemcenter]
 ```
 
 ---
 
-#### Configure SQL Server Reporting Services
+#### Configure SQL Server Reporting Services (using existing database)
 
 1. Start **Reporting Services Configuration Manager**. If prompted by User Account Control to allow the program to make changes to the computer, click **Yes**.
-2. In the **Reporting Services Configuration Connection** dialog box, ensure the name of the server and SQL Server instance are both correct, and then click **Connect**.
+2. In the **Reporting Services Configuration Connection** dialog box, ensure the name of the server and Report Server instance are both correct, and then click **Connect**.
 3. In the **Report Server Status** pane, click **Start** if the server is not already started.
 4. In the navigation pane, click **Service Account**.
 5. In the **Service Account** pane, ensure **Use built-in account** is selected and the account is set to **Network Service**.
 6. In the navigation pane, click **Web Service URL**.
 7. In the **Web Service URL **pane:
    1. Confirm the following warning message appears:
-   2. Click **Apply**.
+   2. In the **Report Server Web Service Site identification** section, in the **HTTPS Certificate** dropdown list, select the SSL certificate installed previously for System Center (**scom01.corp.technologytoolbox.com**).
+   3. Click **Apply**.
 8. In the navigation pane, click **Database**.
 9. In the **Report Server Database** pane, click **Change Database**.
 10. In the **Report Server Database Configuration Wizard** window:
-    1. In the **Action** pane, ensure **Create a new report server database** is selected, and then click **Next**.
+    1. In the **Action** pane, select **Choose and existing report server database**, and then click **Next**.
     2. In the **Database Server** pane, type the name of the database server (**TT-SQL01**) in the **Server Name** box, click **Test Connection** and confirm the test succeeded, and then click **Next**.
-    3. In the **Database **pane, type the name of the database (**ReportServer_SCOM01**) in the **Database Name** box and then click **Next**.
+    3. In the **Database** pane, in the **Report Server Database** list, select the Report Server database for System Center Operations Manager (**ReportServer_SCOM01**) and then click **Next**.
     4. In the **Credentials **pane, ensure **Authentication Type** is set to **Service Credentials** and then click **Next**.
     5. On the **Summary** page, verify the information is correct, and then click **Next**.
     6. Click **Finish** to close the wizard.
@@ -595,7 +633,7 @@ GO
 USE [master]
 GO
 
-CREATE LOGIN [TECHTOOLBOX\TT-SCOM01$] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\TT-SCOM01B$] FROM WINDOWS
 WITH DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english]
 GO
 ```
@@ -605,13 +643,13 @@ GO
 ```SQL
 USE [master]
 GO
-CREATE USER [TECHTOOLBOX\TT-SCOM01$] FOR LOGIN [TECHTOOLBOX\TT-SCOM01$]
-ALTER ROLE [RSExecRole] ADD MEMBER [TECHTOOLBOX\TT-SCOM01$]
+CREATE USER [TECHTOOLBOX\TT-SCOM01B$] FOR LOGIN [TECHTOOLBOX\TT-SCOM01B$]
+ALTER ROLE [RSExecRole] ADD MEMBER [TECHTOOLBOX\TT-SCOM01B$]
 GO
 USE [msdb]
 GO
-CREATE USER [TECHTOOLBOX\TT-SCOM01$] FOR LOGIN [TECHTOOLBOX\TT-SCOM01$]
-ALTER ROLE [RSExecRole] ADD MEMBER [TECHTOOLBOX\TT-SCOM01$]
+CREATE USER [TECHTOOLBOX\TT-SCOM01B$] FOR LOGIN [TECHTOOLBOX\TT-SCOM01B$]
+ALTER ROLE [RSExecRole] ADD MEMBER [TECHTOOLBOX\TT-SCOM01B$]
 GO
 ```
 
@@ -880,14 +918,20 @@ $cert |
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 Add-DNSServerResourceRecordCName `
-    -ComputerName XAVIER1 `
+    -ComputerName TT-DC06 `
     -ZoneName corp.technologytoolbox.com `
+    -Name scom01 `
+    -HostNameAlias TT-SCOM01B.corp.technologytoolbox.com
+
+Add-DNSServerResourceRecordCName `
+    -ComputerName TT-DC06 `
+    -ZoneName technologytoolbox.com `
     -Name systemcenter `
-    -HostNameAlias TT-SCOM01.corp.technologytoolbox.com
+    -HostNameAlias TT-SCOM01B.corp.technologytoolbox.com
 ```
 
 ---
@@ -1618,7 +1662,7 @@ cls
 #### # Insert DPM 2016 installation media
 
 ```PowerShell
-$vmName = "TT-SCOM01"
+$vmName = "TT-SCOM01B"
 $isoName = "mu_system_center_2016_data_protection_manager_x64_dvd_9231242.iso"
 
 $dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
@@ -1653,7 +1697,7 @@ cls
 #### # Remove DPM 2016 installation media
 
 ```PowerShell
-$vmName = "TT-SCOM01"
+$vmName = "TT-SCOM01B"
 
 $dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
 Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -NoMedia
@@ -1827,7 +1871,7 @@ Task Category: None\
 Level:         Error\
 Keywords:      Classic\
 User:          N/A\
-Computer:      TT-SCOM01.corp.technologytoolbox.com\
+Computer:      TT-SCOM01B.corp.technologytoolbox.com\
 Description:\
 The Open Procedure for service "BITS" in DLL "C:\\Windows\\System32\\bitsperf.dll" failed. Performance data for this service will not be available. The first four bytes (DWORD) of the Data section contains the error code.
 
@@ -2016,8 +2060,8 @@ cls
 ## # Register Service Principal Name for System Center Operations Manager
 
 ```PowerShell
-setspn -A MSOMSdkSvc/TT-SCOM01 s-scom01-das
-setspn -A MSOMSdkSvc/TT-SCOM01.corp.technologytoolbox.com s-scom01-das
+setspn -A MSOMSdkSvc/TT-SCOM01B s-scom01-das
+setspn -A MSOMSdkSvc/TT-SCOM01B.corp.technologytoolbox.com s-scom01-das
 ```
 
 ### Reference
@@ -2053,7 +2097,7 @@ Task Category: None\
 Level:         Warning\
 Keywords:      Classic\
 User:          N/A\
-Computer:      TT-SCOM01.corp.technologytoolbox.com\
+Computer:      TT-SCOM01B.corp.technologytoolbox.com\
 Description:\
 Data Access Layer rejected retry on SqlError:\
  Request: MaintenanceScheduleList -- (IsAdmin=True), (CurrentUser=TECHTOOLBOX\\jjameson-fabric), (RETURN_VALUE=1)\
@@ -2109,8 +2153,8 @@ From <[https://blogs.technet.microsoft.com/kevinholman/2016/10/22/enabling-sched
 **TT-VMM01A**
 
 ```PowerShell
-$vm = Get-SCVirtualMachine -Name "TT-SCOM01"
-$vmHost = Get-SCVMHost -ComputerName "TT-HV02C.corp.technologytoolbox.com"
+$vm = Get-SCVirtualMachine -Name "TT-SCOM01B"
+$vmHost = Get-SCVMHost -ComputerName "TT-HV05C.corp.technologytoolbox.com"
 
 Move-SCVirtualMachine `
     -VM $vm `
@@ -2144,7 +2188,7 @@ Set-DnsClientServerAddress `
 Restart-Computer
 ```
 
-## Issue - Extranet servers unable to communicate to SCOM through firewall due to new IP address assigned to TT-SCOM01
+## Issue - Extranet servers unable to communicate to SCOM through firewall due to new IP address assigned to TT-SCOM01B
 
 #### # Configure static IP addresses
 
