@@ -1,7 +1,7 @@
-﻿# EXT-ADFS02B - Windows Server 2016
+﻿# EXT-ADFS03B - Windows Server 2016
 
-Tuesday, February 14, 2017
-2:22 PM
+Wednesday, March 28, 2018
+8:45 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -9,25 +9,28 @@ Tuesday, February 14, 2017
 
 ## Deploy and configure the server infrastructure
 
+### Install Windows Server 2016
+
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Create virtual machine
+#### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02B"
-$vmName = "EXT-ADFS02B"
-$vmPath = "E:\NotBackedUp\VMs"
-$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vmHost = "TT-HV05B"
+$vmName = "EXT-ADFS03B"
+$vmPath = "E:\NotBackedUp\VMs\$vmName"
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
+    -Generation 2 `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 32GB `
@@ -42,17 +45,12 @@ Set-VM `
     -MemoryMaximumBytes 4GB `
     -ProcessorCount 2
 
-Set-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Path C:\NotBackedUp\Products\Microsoft\MDT-Deploy-x64.iso
-
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
 
-##### Install custom Windows Server 2016 image
+#### Install custom Windows Server 2016 image
 
 - On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
 - On the **Computer Details** step:
@@ -62,26 +60,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
----
-
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-##### # Remove disk from virtual CD/DVD drive
-
-```PowerShell
-$vmHost = "TT-HV02B"
-$vmName = "EXT-ADFS02B"
-
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
-```
-
----
-
-##### # Rename local Administrator account and set password
+#### # Rename local Administrator account and set password
 
 ```PowerShell
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -104,7 +83,9 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
-##### Configure networking
+### Configure networking
+
+#### Configure static IP address
 
 ---
 
@@ -114,16 +95,16 @@ logoff
 cls
 ```
 
-###### # Configure static IP address using VMM
+##### # Configure static IP address using VMM
 
 ```PowerShell
-$vmName = "EXT-ADFS02B"
+$vmName = "EXT-ADFS03B"
 
 $macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
 
-$vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
+$vmNetwork = Get-SCVMNetwork -Name "Extranet-20 VM Network"
 
-$ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
 
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
     ? { $_.SlotId -eq 0 }
@@ -157,12 +138,12 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-###### Login as .\\foo
+#### Login as .\\foo
 
-###### # Rename network connections
+#### # Rename network connections
 
 ```PowerShell
-$interfaceAlias = "Extranet"
+$interfaceAlias = "Extranet-20"
 
 Get-NetAdapter -Physical | select InterfaceDescription
 
@@ -170,11 +151,7 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-```PowerShell
-cls
-```
-
-#### # Join servers to domain
+### # Join servers to domain
 
 ```PowerShell
 $cred = Get-Credential EXTRANET\jjameson-admin
@@ -184,70 +161,50 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Credential $cred -Resta
 
 ---
 
-**EXT-DC04 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Move computer to different OU
+##### # Move computer to different OU
 
 ```PowerShell
-$vmName = "EXT-ADFS02B"
+$computerName = "EXT-ADFS03B"
 
 $targetPath = ("OU=Servers,OU=Resources,OU=IT" `
     + ",DC=extranet,DC=technologytoolbox,DC=com")
 
-Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
+Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+```
+
+##### # Configure Windows Update
+
+###### # Add machine to security group for Windows Update schedule
+
+```PowerShell
+$domainGroupName = "Windows Update - Slot 7"
+
+Add-ADGroupMember -Identity $domainGroupName -Members ($computerName + '$')
 ```
 
 ---
 
+### Configure backup
+
+#### Add virtual machine to Hyper-V protection group in DPM
+
 ```PowerShell
 cls
 ```
 
-#### # Configure storage
+## # Install and configure AD FS
 
-##### # Change drive letter for DVD-ROM
+### # Import certificate for secure communication with AD FS
 
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
+#### # Copy certificate
 
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-##### # Copy Toolbox content
-
-```PowerShell
-$source = "\\TT-FS01\Public\Toolbox"
-$destination = "C:\NotBackedUp\Public\Toolbox"
-
-net use $source /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```Console
-cls
-robocopy $source $destination /E /XD "Microsoft SDKs"
-```
-
-##### # Set MaxPatchCacheSize to 0 (recommended)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
-```
-
-#### # Import certificate for secure communication with AD FS
+##### # Temporarily enable firewall rule for copying files to server
 
 ```PowerShell
 Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
@@ -255,7 +212,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**WOLVERINE**
+**WOLVERINE - Run as TECHTOOLBOX\\jjameson**
 
 ```PowerShell
 cls
@@ -264,14 +221,15 @@ cls
 ##### # Copy certificate from internal file server
 
 ```PowerShell
-$vmName = "EXT-ADFS02B.extranet.technologytoolbox.com"
+$computerName = "EXT-ADFS03B.extranet.technologytoolbox.com"
 $certFile = "fs.technologytoolbox.com.pfx"
 
-$sourcePath = "\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC\Certificates"
+$source = "\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC" `
+    + "\Certificates\Internal"
 
-$destPath = "\\$vmName\C$\NotBackedUp\Temp"
+$destination = "\\$computerName\C$\NotBackedUp\Temp"
 
-net use \\$vmName\C$ /USER:EXTRANET\jjameson-admin
+net use "\\$computerName\C`$" /USER:EXTRANET\jjameson-admin
 ```
 
 > **Note**
@@ -279,17 +237,22 @@ net use \\$vmName\C$ /USER:EXTRANET\jjameson-admin
 > When prompted, type the password to connect to the file share.
 
 ```Console
-robocopy $sourcePath $destPath $certFile
+robocopy $source $destination $certFile
 ```
 
 ---
 
-```Console
+```PowerShell
 cls
+```
+
+#### # Disable firewall rule for copying files to server
+
+```PowerShell
 Disable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 ```
 
-##### # Install certificate
+#### # Install certificate
 
 ```PowerShell
 $certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
@@ -317,7 +280,7 @@ If ($? -eq $true)
 cls
 ```
 
-#### # Add AD FS server role
+### # Add AD FS server role
 
 ```PowerShell
 Install-WindowsFeature ADFS-Federation -IncludeManagementTools
@@ -327,7 +290,7 @@ Install-WindowsFeature ADFS-Federation -IncludeManagementTools
 cls
 ```
 
-#### # Add second federation server to AD FS farm
+### # Add second federation server to AD FS farm
 
 ```PowerShell
 $cert = Get-ChildItem -Path Cert:\LocalMachine\My |
@@ -349,7 +312,7 @@ $serviceAccountCredential = Get-Credential TECHTOOLBOX\s-adfs
 > When prompted, type the password for the service account.
 
 ```PowerShell
-$databaseHostName = "EXT-SQL02"
+$databaseHostName = "EXT-SQL03"
 
 Import-Module ADFS
 
