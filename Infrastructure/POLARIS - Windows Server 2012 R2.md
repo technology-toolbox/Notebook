@@ -1590,21 +1590,21 @@ Restart-Computer
 Remove-Item "C:\Program Files\Microsoft Monitoring Agent" -Recurse -Force
 ```
 
-```PowerShell
-cls
-```
-
 #### # Install SCOM agent without Application Performance Monitoring (APM)
 
 ```PowerShell
-$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\agent\AMD64" `
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64" `
     + "\MOMAgent.msi"
 
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=TT-SCOM01 `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1 `
-    NOAPM=1
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=TT-SCOM03" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1" `
+    + " NOAPM=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
 ```
 
 #### Approve manual agent install in Operations Manager

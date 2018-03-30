@@ -98,6 +98,14 @@ $targetPath = "OU=Team Foundation Servers,OU=Servers" `
 Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 ```
 
+#### # Configure Windows Update
+
+##### # Add machine to security group for Windows Update schedule
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members ($vmName + '$')
+```
+
 ---
 
 ### Login as .\\foo
@@ -834,3 +842,45 @@ Start-SCVirtualMachine -VM $vmName
 ```
 
 ---
+
+```PowerShell
+cls
+```
+
+## # Configure monitoring
+
+### # Install Operations Manager agent
+
+```PowerShell
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64" `
+    + "\MOMAgent.msi"
+
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=TT-SCOM03" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
+```
+
+### Approve manual agent install in Operations Manager
+
+**TODO:**
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```

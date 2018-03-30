@@ -697,24 +697,29 @@ Start-SCVirtualMachine -VM $vmName
 
 #### Add virtual machine to Hyper-V protection group in DPM
 
-## # Install SCOM agent
-
 ```PowerShell
-$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
+cls
 ```
 
-## # Approve manual agent install in Operations Manager
+## # Configure monitoring
+
+### # Install Operations Manager agent
+
+```PowerShell
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64" `
+    + "\MOMAgent.msi"
+
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=TT-SCOM03" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
+```
+
+### Approve manual agent install in Operations Manager
 
 **TODO:**
 

@@ -252,6 +252,179 @@ Add-ADGroupMember -Identity $domainGroupName -Members ($computerName + '$')
 
 #### Add virtual machine to Hyper-V protection group in DPM
 
+```PowerShell
+cls
+```
+
+### # Configure monitoring
+
+#### # Create certificate for Operations Manager
+
+##### # Create request for Operations Manager certificate
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+##### # Submit certificate request to the Certification Authority
+
+###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+[Uri] $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone TrustedSites `
+    -Patterns $adcsUrl.AbsoluteUri
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+###### # Submit the certificate request to an enterprise CA
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
+**To submit the certificate request to an enterprise CA:**
+
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+##### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+```
+
+```PowerShell
+cls
+```
+
+##### # Delete the certificate file
+
+```PowerShell
+Remove-Item $certFile
+```
+
+#### # Copy SCOM agent installation files
+
+##### # Temporarily enable firewall rule for copying files to server
+
+```PowerShell
+Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
+```
+
+---
+
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+##### # Copy SCOM agent installation files from internal file server
+
+```PowerShell
+$computerName = "EXT-ADFS03A.extranet.technologytoolbox.com"
+
+net use "\\$computerName\C`$" /USER:EXTRANET\jjameson-admin
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$source = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\SCOM\Agent\AMD64"
+
+robocopy $source $destination /E
+
+$source = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM" `
+    + "\SupportTools\AMD64"
+
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\SCOM\SupportTools\AMD64"
+
+robocopy $source $destination /E
+```
+
+---
+
+```PowerShell
+cls
+```
+
+##### # Disable firewall rule for copying files to server
+
+```PowerShell
+Disable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
+```
+
+#### # Install SCOM agent
+
+```PowerShell
+$installerPath = "C:\NotBackedUp\Temp\SCOM\Agent\AMD64\MOMAgent.msi"
+
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=tt-scom03.corp.technologytoolbox.com" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1" `
+    + " NOAPM=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = "C:\NotBackedUp\Temp\SCOM\SupportTools\AMD64"
+
+Push-Location "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName $hostName
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Remove Operations Manager installation files
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\SCOM -Recurse
+```
+
+#### Approve manual agent install in Operations Manager
+
+```PowerShell
+cls
+```
+
 ## # Install and configure AD FS
 
 ### # Import certificate for secure communication with AD FS
@@ -430,6 +603,49 @@ WITH NOFORMAT, NOINIT,
     NAME = N'AdfsConfigurationV3-Full Database Backup',
     SKIP, NOREWIND, NOUNLOAD,  STATS = 10
 
+GO
+```
+
+---
+
+#### Resolve issue with ADFS configuration due to one-way trust between Active Directory forests
+
+##### Issue
+
+Log Name:      Application\
+Source:        MSSQLSERVER\
+Event ID:      28005\
+Task Category: Server\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      EXT-SQL03.extranet.technologytoolbox.com\
+Description:\
+An exception occurred while enqueueing a message in the target queue. Error: 15404, State: 19. Could not obtain information about Windows NT group/user 'TECHTOOLBOX\\s-adfs', error code 0x5.
+
+##### Solution
+
+---
+
+**EXT-SQL03 - SQL Server Management Studio**
+
+```SQL
+USE [AdfsConfigurationV3]
+GO
+ALTER AUTHORIZATION ON SCHEMA::[IdentityServerPolicy] TO [dbo]
+GO
+GRANT ALTER ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT CONTROL ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT CREATE SEQUENCE ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT DELETE ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT EXECUTE ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT INSERT ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT REFERENCES ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT SELECT ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT TAKE OWNERSHIP ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT UPDATE ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT VIEW CHANGE TRACKING ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
+GRANT VIEW DEFINITION ON SCHEMA::[IdentityServerPolicy] TO [TECHTOOLBOX\s-adfs]
 GO
 ```
 

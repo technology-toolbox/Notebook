@@ -461,7 +461,9 @@ cls
 ### # Copy SCOM agent installation files
 
 ```PowerShell
-net use \\EXT-DC09.extranet.technologytoolbox.com\C$ /USER:EXTRANET\jjameson-admin
+$computerName = "EXT-DC09.extranet.technologytoolbox.com"
+
+net use "\\$computerName\IPC`$" /USER:EXTRANET\jjameson-admin
 ```
 
 > **Note**
@@ -470,14 +472,14 @@ net use \\EXT-DC09.extranet.technologytoolbox.com\C$ /USER:EXTRANET\jjameson-adm
 
 ```PowerShell
 $source = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64"
-$destination = "\\EXT-DC09.extranet.technologytoolbox.com\C`$\NotBackedUp\Temp" `
-    + "\SCOM\Agent"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\SCOM\Agent\AMD64"
 
 robocopy $source $destination /E
 
-$source = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\SupportTools\AMD64"
-$destination = "\\EXT-DC09.extranet.technologytoolbox.com\C`$\NotBackedUp\Temp" `
-    + "\SCOM\SupportTools"
+$source = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM" `
+    + "\SupportTools\AMD64"
+
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\SCOM\SupportTools\AMD64"
 
 robocopy $source $destination /E
 ```
@@ -491,12 +493,16 @@ cls
 ### # Install SCOM agent
 
 ```PowerShell
-$msiPath = "C:\NotBackedUp\Temp\SCOM\agent\MOMAgent.msi"
+$installerPath = "C:\NotBackedUp\Temp\SCOM\Agent\AMD64\MOMAgent.msi"
 
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=tt-scom01.corp.technologytoolbox.com `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=tt-scom03.corp.technologytoolbox.com" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
 ```
 
 > **Important**
@@ -512,7 +518,7 @@ cls
 ```PowerShell
 $hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
 
-$certImportToolPath = "C:\NotBackedUp\Temp\SCOM\SupportTools"
+$certImportToolPath = "C:\NotBackedUp\Temp\SCOM\SupportTools\AMD64"
 
 Push-Location "$certImportToolPath"
 

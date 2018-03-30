@@ -2131,8 +2131,6 @@ Set-Acl -Path $regPath -AclObject $acl
 
 ### # Configure SSL on Internet zone
 
-**TODO:**
-
 ---
 
 **FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
@@ -2647,8 +2645,11 @@ cls
 
 ```PowerShell
 $source = "\\TT-FS01\Archive\Clients\Securitas\Configuration" `
+```
+
     + "\\AppSettings-UAT_2018-01-19.csv"
 
+```PowerShell
 $destination = "\\EXT-APP03A.extranet.technologytoolbox.com" `
     + "\C`$\Users\setup-sharepoint\Desktop"
 
@@ -2754,8 +2755,6 @@ cls
 ### Create team collaboration site (optional)
 
 ### Create blog site (optional)
-
-**TODO:**
 
 ```PowerShell
 cls
@@ -2955,6 +2954,8 @@ Set-Location C:
 
 ---
 
+**TODO:**
+
 ---
 
 **WOLVERINE**
@@ -2963,18 +2964,18 @@ Set-Location C:
 
 ##### Configure TrackTik credentials for Branch Manager
 
-[https://client-test.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 Branch Manager: **smasters@technologytoolbox.com**\
 TrackTik username:** opanduro2m**
 
 ##### HACK: Update TrackTik password for Angela.Parks
 
-[https://client-local-2.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ##### HACK: Update TrackTik password for bbarthelemy-demo
 
-[https://client-local-2.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ---
 
@@ -2992,7 +2993,7 @@ cls
 
 ```PowerShell
 $backupFile1 =
->  "WSS_Content_SecuritasPortal_backup_2018_02_13_053955_4308109.bak"
+    "WSS_Content_SecuritasPortal_backup_2018_02_13_053955_4308109.bak"
 
 $backupFile2 =
     "WSS_Content_SecuritasPortal2_backup_2018_02_13_053955_4464040.bak"
@@ -3066,7 +3067,7 @@ RESTORE DATABASE WSS_Content_SecuritasPortal2
   FROM DISK = @backupFilePath
   WITH
     STATS = 5
->
+
 GO
 "@
 
@@ -3096,7 +3097,7 @@ cls
 ```PowerShell
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
->unt-SPContentDatabase `
+Mount-SPContentDatabase `
     -Name WSS_Content_SecuritasPortal `
     -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL
 
@@ -3110,7 +3111,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 7-1/2 minutes.
+> Expect the previous operation to complete in approximately 7-1/2  minutes.
 
 ```PowerShell
 cls
@@ -3190,7 +3191,7 @@ Get-SPSite -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL -Limit ALL |
     Export-Csv -Path $tempFileName -Encoding UTF8 -NoTypeInformation
 
 Import-Csv $tempFileName |
->  select -ExpandProperty Url |
+    select -ExpandProperty Url |
     C:\NotBackedUp\Public\Toolbox\PowerShell\Run-CommandMultiThreaded.ps1 `
         -Command '.\Set-SiteAdministrator.ps1' `
         -AddParam @{"Claim" = $claim} `
@@ -4350,14 +4351,8 @@ Disable-ADAccount -Identity setup-sql
 
 ---
 
-## # Upgrade to System Center Operations Manager 2016
-
-### # Uninstall SCOM 2012 R2 agent
-
 ```PowerShell
-msiexec /x `{786970C5-E6F6-4A41-B238-AE25D4B91EEA`}
-
-Restart-Computer
+cls
 ```
 
 ## # Configure monitoring
@@ -4367,7 +4362,74 @@ Restart-Computer
 #### # Create request for Operations Manager certificate
 
 ```PowerShell
-net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+#### # Submit certificate request to the Certification Authority
+
+##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+[Uri] $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone TrustedSites `
+    -Patterns $adcsUrl.AbsoluteUri
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+##### # Submit the certificate request to an enterprise CA
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
+**To submit the certificate request to an enterprise CA:**
+
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+```
+
+```PowerShell
+cls
+```
+
+#### # Delete the certificate file
+
+```PowerShell
+Remove-Item $certFile
+```
+
+---
+
+**FOOBAR11**
+
+```PowerShell
+cls
+```
+
+### # Copy SCOM agent installation files
+
+```PowerShell
+$computerName = "EXT-APP03A.extranet.technologytoolbox.com"
+
+net use "\\$computerName\IPC`$" /USER:EXTRANET\jjameson-admin
 ```
 
 > **Note**
@@ -4375,107 +4437,74 @@ net use \\tt-fs01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$msiPath = "\\tt-fs01.corp.technologytoolbox.com\Products\Microsoft" `
-    + "\System Center 2016\Agents\SCOM\AMD64\MOMAgent.msi"
+$source = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\SCOM\Agent\AMD64"
 
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=tt-scom01.corp.technologytoolbox.com `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
+robocopy $source $destination /E
+
+$source = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM" `
+    + "\SupportTools\AMD64"
+
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\SCOM\SupportTools\AMD64"
+
+robocopy $source $destination /E
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Install SCOM agent
+
+```PowerShell
+$installerPath = "C:\NotBackedUp\Temp\SCOM\Agent\AMD64\MOMAgent.msi"
+
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=tt-scom03.corp.technologytoolbox.com" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1" `
+    + " NOAPM=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
 ```
 
 > **Important**
 >
 > Wait for the installation to complete.
 
-### Approve manual agent install in Operations Manager
+```PowerShell
+cls
+```
 
-## Issue - Error accessing SharePoint sites (e.g. http://client-test.securitasinc.com)
-
-Log Name: Application\
-Source: ASP.NET 4.0.30319.0\
-Date: 4/19/2017 5:56:51 PM\
-Event ID: 1325\
-Task Category: None\
-Level: Error\
-Keywords: Classic\
-User: N/A\
-Computer: EXT-APP03A.extranet.technologytoolbox.com\
-Description:\
-An unhandled exception occurred and the process was terminated.
-
-Application ID: /LM/W3SVC/762047535/ROOT
-
-Process ID: 6000
-
-Exception: System.IO.FileLoadException
-
-Message: Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)
-
-StackTrace: at System.Linq.Enumerable.Sum(IEnumerable`1 source)\
- at System.Web.Caching.SRefMultiple.get_ApproximateSize()\
- at System.Web.Caching.CacheMemorySizePressure.GetCurrentPressure()\
- at System.Web.Caching.CacheMemoryPressure.Update()\
- at System.Web.Caching.CacheCommon.CacheManagerThread(Int32 minPercent)\
- at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)\
- at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)\
- at System.Threading.TimerQueueTimer.CallCallback()\
- at System.Threading.TimerQueueTimer.Fire()\
- at System.Threading.TimerQueue.FireNextTimers()
-
-### References
-
-**Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)**\
-From <[http://blog.bugrapostaci.com/2017/02/08/loading-this-assembly-would-produce-a-different-grant-set-from-other-instances-exception-from-hresult-0x80131401/](http://blog.bugrapostaci.com/2017/02/08/loading-this-assembly-would-produce-a-different-grant-set-from-other-instances-exception-from-hresult-0x80131401/)>
-
-**Monitoring SharePoint 2010 Applications in System Center 2012 SP1**\
-From <[https://technet.microsoft.com/en-us/library/jj614617.aspx?tduid=(1dfb939b69d4a5ed09b44f51992a8b97)(256380)(2459594)(TnL5HPStwNw-v0X_tBOK3jzpbtaadMW8RA)()](https://technet.microsoft.com/en-us/library/jj614617.aspx?tduid=(1dfb939b69d4a5ed09b44f51992a8b97)(256380)(2459594)(TnL5HPStwNw-v0X_tBOK3jzpbtaadMW8RA)())>
-
-**SCOM 2016 Sharepoint 2013 PerfMon64.dll crash W3wp.exe**\
-From <[https://social.technet.microsoft.com/Forums/en-US/24b4d768-57a2-42c9-8e18-1ef8c075913a/scom-2016-sharepoint-2013-perfmon64dll-crash-w3wpexe?forum=scomapm](https://social.technet.microsoft.com/Forums/en-US/24b4d768-57a2-42c9-8e18-1ef8c075913a/scom-2016-sharepoint-2013-perfmon64dll-crash-w3wpexe?forum=scomapm)>
-
-**SCOM 2016 Agent Crashing Legacy IIS Application Pools**\
-From <[http://kevingreeneitblog.blogspot.ie/2017/03/scom-2016-agent-crashing-legacy-iis.html](http://kevingreeneitblog.blogspot.ie/2017/03/scom-2016-agent-crashing-legacy-iis.html)>
-
-**APM feature in SCOM 2016 Agent may cause a crash for the IIS Application Pool running under .NET 2.0 runtime**\
-From <[https://blogs.technet.microsoft.com/momteam/2017/03/21/apm-feature-in-scom-2016-agent-may-cause-a-crash-for-the-iis-application-pool-running-under-net-2-0-runtime/](https://blogs.technet.microsoft.com/momteam/2017/03/21/apm-feature-in-scom-2016-agent-may-cause-a-crash-for-the-iis-application-pool-running-under-net-2-0-runtime/)>
-
-### Solution
-
-Remove SCOM agent and reinstall without Application Performance Monitoring (APM).
-
-#### Remove SCOM agent
-
-> **Note**
->
-> When prompted, restart the server.
-
-#### # Clean up SCOM agent folder
+### # Import the certificate into Operations Manager using MOMCertImport
 
 ```PowerShell
-Remove-Item "C:\Program Files\Microsoft Monitoring Agent" -Recurse -Force
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = "C:\NotBackedUp\Temp\SCOM\SupportTools\AMD64"
+
+Push-Location "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName $hostName
+
+Pop-Location
 ```
 
 ```PowerShell
 cls
 ```
 
-#### # Install SCOM agent without Application Performance Monitoring (APM)
+#### # Remove Operations Manager installation files
 
 ```PowerShell
-net use \\TT-FS01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
-
-$msiPath = "\\TT-FS01.corp.technologytoolbox.com\Products\Microsoft" `
-    + "\System Center 2016\SCOM\agent\AMD64\MOMAgent.msi"
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=TT-SCOM01 `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1 `
-    NOAPM=1
+Remove-Item C:\NotBackedUp\Temp\SCOM -Recurse
 ```
 
-#### Approve manual agent install in Operations Manager
+### Approve manual agent install in Operations Manager
 
 ## Deploy federated authentication in SecuritasConnect
 

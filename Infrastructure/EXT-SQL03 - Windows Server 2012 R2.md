@@ -989,6 +989,164 @@ Disable-ADAccount -Identity setup-sql
 
 ---
 
+### Configure backup
+
+#### Add virtual machine to Hyper-V protection group in DPM
+
+```PowerShell
+cls
+```
+
+## # Configure monitoring
+
+### # Create certificate for Operations Manager
+
+#### # Create request for Operations Manager certificate
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+#### # Submit certificate request to the Certification Authority
+
+##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+[Uri] $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns $adcsUrl.AbsoluteUri
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+##### # Submit the certificate request to an enterprise CA
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
+**To submit the certificate request to an enterprise CA:**
+
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+```
+
+```PowerShell
+cls
+```
+
+#### # Delete the certificate file
+
+```PowerShell
+Remove-Item $certFile
+```
+
+---
+
+**FOOBAR11**
+
+```PowerShell
+cls
+```
+
+### # Copy SCOM agent installation files
+
+```PowerShell
+$computerName = "EXT-SQL03.extranet.technologytoolbox.com"
+
+net use "\\$computerName\IPC`$" /USER:EXTRANET\jjameson-admin
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$source = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\SCOM\Agent\AMD64"
+
+robocopy $source $destination /E
+
+$source = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM" `
+    + "\SupportTools\AMD64"
+
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\SCOM\SupportTools\AMD64"
+
+robocopy $source $destination /E
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Install SCOM agent
+
+```PowerShell
+$installerPath = "C:\NotBackedUp\Temp\SCOM\Agent\AMD64\MOMAgent.msi"
+
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=tt-scom03.corp.technologytoolbox.com" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = "C:\NotBackedUp\Temp\SCOM\SupportTools\AMD64"
+
+Push-Location "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName $hostName
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Remove Operations Manager installation files
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\SCOM -Recurse
+```
+
+### Approve manual agent install in Operations Manager
+
 **TODO:**
 
 ---
@@ -1028,29 +1186,6 @@ Start-SCVirtualMachine -VM $vmName
 ```
 
 ---
-
-### Configure backup
-
-#### Add virtual machine to Hyper-V protection group in DPM
-
-## # Install SCOM agent
-
-```PowerShell
-$imagePath = '\\ICEMAN\Products\Microsoft\System Center 2012 R2' `
-    + '\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso'
-
-$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
-    Get-Volume).DriveLetter
-
-$msiPath = $imageDriveLetter + ':\agent\AMD64\MOMAgent.msi'
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=JUBILEE `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-## # Approve manual agent install in Operations Manager
 
 ```PowerShell
 cls

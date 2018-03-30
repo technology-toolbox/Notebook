@@ -322,3 +322,69 @@ Start-SCVirtualMachine -VM $vmName
 ```
 
 ---
+
+## Rebuild System Center Operations Manager 2016 server
+
+### Uninstall SCOM 2012 R2 agent
+
+```Console
+msiexec /x {786970C5-E6F6-4A41-B238-AE25D4B91EEA}
+```
+
+Restart the server
+
+### Install SCOM 2012 R2 agent
+
+---
+
+**FOOBAR11**
+
+```PowerShell
+cls
+```
+
+#### # Insert SCOM 2012 R2 installation media
+
+```PowerShell
+$vmName = "BANSHEE"
+$isoName = "en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso"
+
+$dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
+
+$iso = Get-SCISO | where {$_.Name -eq $isoName}
+
+Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -ISO $iso -Link
+```
+
+---
+
+#### REM Install Microsoft Monitoring Agent
+
+```Console
+msiexec.exe /i D:\agent\AMD64\MOMAgent.msi ^
+  MANAGEMENT_GROUP=HQ ^
+  MANAGEMENT_SERVER_DNS=TT-SCOM03 ^
+  ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+---
+
+**TT-VMM01A**
+
+```PowerShell
+cls
+```
+
+#### # Remove SCOM 2012 R2 installation media
+
+```PowerShell
+$vmName = "BANSHEE"
+
+$dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
+
+Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -NoMedia
+```
+
+---
+
+### Approve manual agent install in Operations Manager

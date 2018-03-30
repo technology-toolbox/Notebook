@@ -1,7 +1,7 @@
-﻿# TT-SCOM01B - Windows Server 2016
+﻿# TT-SCOM03 - Windows Server 2016
 
 Wednesday, March 28, 2018
-5:12 AM
+5:29 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -31,7 +31,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05C"
-$vmName = "TT-SCOM01B"
+$vmName = "TT-SCOM03"
 $vmPath = "E:\NotBackedUp\VMs\$vmName"
 $vhdPath = "$vmPath\Virtual Hard Disks\$vmName.vhdx"
 
@@ -59,7 +59,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-SCOM01B**.
+  - In the **Computer name** box, type **TT-SCOM03**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
@@ -97,7 +97,7 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "TT-SCOM01B"
+$vmName = "TT-SCOM03"
 
 $targetPath = ("OU=System Center Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
@@ -139,7 +139,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05C"
-$vmName = "TT-SCOM01B"
+$vmName = "TT-SCOM03"
 
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
@@ -201,7 +201,7 @@ cls
 ##### # Configure static IP address using VMM
 
 ```PowerShell
-$vmName = "TT-SCOM01B"
+$vmName = "TT-SCOM03"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
 $vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
 $macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
@@ -254,7 +254,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05C"
-$vmName = "TT-SCOM01B"
+$vmName = "TT-SCOM03"
 
 Add-VMDvdDrive `
     -ComputerName $vmHost `
@@ -292,7 +292,111 @@ From <[https://technet.microsoft.com/en-us/system-center-docs/om/plan/system-req
 
 ### Create SCOM service accounts
 
-(skipped -- since this was done previously)
+---
+
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Create service account for "Management server action account"
+
+```PowerShell
+$displayName = 'Service account for Operations Manager "action account"'
+$defaultUserName = 's-scom-action'
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+#### # Create service account for "System Center Configuration service and System Center Data Access service"
+
+```PowerShell
+$displayName =
+    'Service account for Operations Manager "Data Access"'
+
+$defaultUserName = "s-scom-das"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+#### # Create service account for "Data Reader account"
+
+```PowerShell
+$displayName = 'Service account for Operations Manager "Data Reader"'
+$defaultUserName = "s-scom-data-reader"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+#### # Create service account for "Data Writer account"
+
+```PowerShell
+$displayName = 'Service account for Operations Manager "Data Writer"'
+$defaultUserName = "s-scom-data-writer"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+---
+
+### Login as local administrator
 
 ```PowerShell
 cls
@@ -301,54 +405,35 @@ cls
 ### # Add System Center setup account to local Administrators group
 
 ```PowerShell
+$localGroup = "Administrators"
 $domain = "TECHTOOLBOX"
-$username = "setup-systemcenter"
+$serviceAccount = "setup-systemcenter"
 
-([ADSI]"WinNT://./Administrators,group").Add(
-    "WinNT://$domain/$username,user")
+([ADSI]"WinNT://./$localGroup,group").Add(
+    "WinNT://$domain/$serviceAccount,user")
 ```
-
-### Login as TECHTOOLBOX\\setup-systemcenter
 
 ### # Add SCOM "Data Access" service account to local Administrators group
 
 ```PowerShell
+$localGroup = "Administrators"
 $domain = "TECHTOOLBOX"
-$serviceAccount = "s-scom01-das"
+$serviceAccount = "s-scom-das"
 
-([ADSI]"WinNT://./Administrators,group").Add(
+([ADSI]"WinNT://./$localGroup,group").Add(
     "WinNT://$domain/$serviceAccount,user")
 ```
 
 ### # Add SCOM administrators domain group to local Administrators group
 
 ```PowerShell
+$localGroup = "Administrators"
 $domain = "TECHTOOLBOX"
 $domainGroup = "Operations Manager Admins"
 
-([ADSI]"WinNT://./Administrators,group").Add(
+([ADSI]"WinNT://./$localGroup,group").Add(
     "WinNT://$domain/$domainGroup,group")
 ```
-
----
-
-**FOOBAR11 - TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-### # Configure name resolution for TFS 2018 URLs
-
-```PowerShell
-Add-DnsServerResourceRecordCName `
-    -ZoneName "technologytoolbox.com" `
-    -Name "tfs" `
-    -HostNameAlias "TT-TFS02.corp.technologytoolbox.com" `
-    -ComputerName TT-DC06
-```
-
----
 
 ```PowerShell
 cls
@@ -356,42 +441,75 @@ cls
 
 ### # Install SSL certificate
 
-#### # Create request for Web Server certificate
+#### # Create certificate for Reporting Services and Operations Manager web console
+
+##### # Create certificate request
 
 ```PowerShell
-$hostname = "scom01.corp.technologytoolbox.com"
-$altHostname1 = "systemcenter.technologytoolbox.com"
-$altHostname2 = "systemcenter"
+$hostname = "systemcenter.technologytoolbox.com"
+$altHostname = "systemcenter"
 
 & "C:\NotBackedUp\Public\Toolbox\PowerShell\New-CertificateRequest.ps1" `
     -Subject ("CN=$hostname,OU=IT" `
         + ",O=Technology Toolbox,L=Parker,S=CO,C=US") `
-    -SANs $hostname, $altHostname1, $altHostname2
+    -SANs $hostname, $altHostname
 ```
 
-#### # Submit certificate request to Certification Authority
+---
+
+**PowerShell - Run as TECHTOOLBOX\\jjameson-admin**
+
+##### # Submit certificate request to Certification Authority
+
+###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
 
 ```PowerShell
-Start-Process "https://cipher01.corp.technologytoolbox.com"
+$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns $adcsUrl.AbsoluteUri
+
+Start-Process $adcsUrl.AbsoluteUri
 ```
+
+---
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
 
 **To submit the certificate request to an enterprise CA:**
 
-1. Start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
 2. On the **Welcome** page, click **Request a certificate**.
 3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
 4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
-5. In the **Certificate Template** section, select the appropriate certificate template (**Technology Toolbox Web Server - Exportable**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+5. In the **Certificate Template** section, select the certificate template (**Technology Toolbox Web Server - Exportable**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
 6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+---
+
+**PowerShell - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-#### # Import certificate into certificate store
+##### # Import the certificate into the certificate store
 
 ```PowerShell
-$certFile = "C:\Users\Administrator\Downloads\certnew.cer"
+Start-Process $PSHOME\powershell.exe `
+    -ArgumentList "-Command Start-Process PowerShell.exe -Verb Runas" `
+    -Wait
+```
+
+---
+
+**Administrator: PowerShell - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
 
 CertReq.exe -Accept $certFile
 
@@ -399,6 +517,22 @@ If ($? -eq $true)
 {
     Remove-Item $certFile
 }
+
+Exit
+```
+
+---
+
+```Console
+Exit
+```
+
+---
+
+### Login as TECHTOOLBOX\\setup-systemcenter
+
+```PowerShell
+cls
 ```
 
 ### # Install and configure SQL Server Reporting Services
@@ -426,40 +560,41 @@ On the **Server Configuration** step, on the **Service Accounts** tab:
 
 ---
 
-**TT-SQL01 - SQL Server Management Studio - Database Engine**
+**SQL Server Management Studio - TT-SQL01**
 
-#### -- Temporarily grant administrator permissions in SQL Server to System Center setup account
+#### -- Temporarily add SCOM installation account to sysadmin role in SQL Server
 
 ```SQL
-CREATE LOGIN [TECHTOOLBOX\setup-systemcenter]
-FROM WINDOWS
-WITH DEFAULT_DATABASE=master
+USE [master]
 GO
-
-ALTER SERVER ROLE sysadmin
+CREATE LOGIN [TECHTOOLBOX\setup-systemcenter]
+FROM WINDOWS WITH DEFAULT_DATABASE=[master]
+GO
+ALTER SERVER ROLE [sysadmin]
 ADD MEMBER [TECHTOOLBOX\setup-systemcenter]
+GO
 ```
 
 ---
 
-#### Configure SQL Server Reporting Services (using existing database)
+#### Configure SQL Server Reporting Services
 
 1. Start **Reporting Services Configuration Manager**. If prompted by User Account Control to allow the program to make changes to the computer, click **Yes**.
-2. In the **Reporting Services Configuration Connection** dialog box, ensure the name of the server and Report Server instance are both correct, and then click **Connect**.
+2. In the **Reporting Services Configuration Connection** dialog box, ensure the name of the server and SQL Server instance are both correct, and then click **Connect**.
 3. In the **Report Server Status** pane, click **Start** if the server is not already started.
 4. In the navigation pane, click **Service Account**.
 5. In the **Service Account** pane, ensure **Use built-in account** is selected and the account is set to **Network Service**.
 6. In the navigation pane, click **Web Service URL**.
 7. In the **Web Service URL **pane:
    1. Confirm the following warning message appears:
-   2. In the **Report Server Web Service Site identification** section, in the **HTTPS Certificate** dropdown list, select the SSL certificate installed previously for System Center (**scom01.corp.technologytoolbox.com**).
+   2. In the **Report Server Web Service Site identification** section, in the **HTTPS Certificate** dropdown list, select the SSL certificate installed previously for System Center (**systemcenter.technologytoolbox.com**).
    3. Click **Apply**.
 8. In the navigation pane, click **Database**.
 9. In the **Report Server Database** pane, click **Change Database**.
 10. In the **Report Server Database Configuration Wizard** window:
-    1. In the **Action** pane, select **Choose and existing report server database**, and then click **Next**.
+    1. In the **Action** pane, ensure **Create a new report server database** is selected, and then click **Next**.
     2. In the **Database Server** pane, type the name of the database server (**TT-SQL01**) in the **Server Name** box, click **Test Connection** and confirm the test succeeded, and then click **Next**.
-    3. In the **Database** pane, in the **Report Server Database** list, select the Report Server database for System Center Operations Manager (**ReportServer_SCOM01**) and then click **Next**.
+    3. In the **Database **pane, type the name of the database (**ReportServer_SCOM**) in the **Database Name** box and then click **Next**.
     4. In the **Credentials **pane, ensure **Authentication Type** is set to **Service Credentials** and then click **Next**.
     5. On the **Summary** page, verify the information is correct, and then click **Next**.
     6. Click **Finish** to close the wizard.
@@ -483,7 +618,7 @@ The Web Portal virtual directory name is not configured. To configure the direct
 >
 > Store the key on a separate computer from the one that is running Reporting Services.
 
-**C:\\NotBackedUp\\Temp\\Reporting Services - TT-SCOM01.snk**
+**C:\\NotBackedUp\\Temp\\Reporting Services - SCOM.snk**
 
 ---
 
@@ -492,7 +627,7 @@ The Web Portal virtual directory name is not configured. To configure the direct
 #### # Move encryption key backup to file server
 
 ```PowerShell
-copy "C:\NotBackedUp\Temp\Reporting Services - TT-SCOM01.snk" `
+copy "C:\NotBackedUp\Temp\Reporting Services - SCOM.snk" `
     \\TT-FS01\Users$\jjameson-admin\Documents
 ```
 
@@ -500,7 +635,7 @@ copy "C:\NotBackedUp\Temp\Reporting Services - TT-SCOM01.snk" `
 
 ---
 
-**SQL Server Management Studio - TT-SQL01A**
+**SQL Server Management Studio - TT-SQL01**
 
 #### -- Remove SCOM installation account from sysadmin role in SQL Server
 
@@ -508,7 +643,7 @@ copy "C:\NotBackedUp\Temp\Reporting Services - TT-SCOM01.snk" `
 USE [master]
 GO
 ALTER SERVER ROLE [sysadmin]
-DROP MEMBER [TECHTOOLBOX\jjameson-fabric]
+DROP MEMBER [TECHTOOLBOX\setup-systemcenter]
 GO
 ```
 
@@ -535,7 +670,7 @@ Dismount-DiskImage -ImagePath $imagePath
 ```SQL
 USE [master]
 GO
-ALTER DATABASE [ReportServer_SCOM01TempDB] SET RECOVERY FULL WITH NO_WAIT
+ALTER DATABASE [ReportServer_SCOMTempDB] SET RECOVERY FULL WITH NO_WAIT
 GO
 ```
 
@@ -544,17 +679,17 @@ GO
 ```Console
 DECLARE @backupFilePath VARCHAR(255) =
     'Z:\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\Backup\'
-        + 'ReportServer_SCOM01.bak'
+        + 'ReportServer_SCOM.bak'
 
-BACKUP DATABASE ReportServer_SCOM01
+BACKUP DATABASE ReportServer_SCOM
     TO DISK = @backupFilePath
     WITH FORMAT, INIT, SKIP, REWIND, NOUNLOAD, COMPRESSION,  STATS = 5
 
 SET @backupFilePath =
     'Z:\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\Backup\'
-        + 'ReportServer_SCOM01TempDB.bak'
+        + 'ReportServer_SCOMTempDB.bak'
 
-BACKUP DATABASE ReportServer_SCOM01TempDB
+BACKUP DATABASE ReportServer_SCOMTempDB
     TO DISK = @backupFilePath
     WITH FORMAT, INIT, SKIP, REWIND, NOUNLOAD, COMPRESSION,  STATS = 5
 
@@ -566,17 +701,17 @@ GO
 ```Console
 DECLARE @backupFilePath VARCHAR(255) =
     'Z:\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\Backup\'
-        + 'ReportServer_SCOM01.trn'
+        + 'ReportServer_SCOM.trn'
 
-BACKUP LOG ReportServer_SCOM01
+BACKUP LOG ReportServer_SCOM
     TO DISK = @backupFilePath
     WITH NOFORMAT, NOINIT, NOSKIP, REWIND, NOUNLOAD, COMPRESSION,  STATS = 5
 
 SET @backupFilePath =
     'Z:\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\Backup\'
-        + 'ReportServer_SCOM01TempDB.trn'
+        + 'ReportServer_SCOMTempDB.trn'
 
-BACKUP LOG ReportServer_SCOM01TempDB
+BACKUP LOG ReportServer_SCOMTempDB
     TO DISK = @backupFilePath
     WITH NOFORMAT, NOINIT, NOSKIP, REWIND, NOUNLOAD, COMPRESSION,  STATS = 5
 
@@ -586,8 +721,8 @@ GO
 ##### -- Add Reporting Services databases to Availability Group
 
 ```SQL
-ALTER AVAILABILITY GROUP [TT-SQL01] ADD DATABASE ReportServer_SCOM01
-ALTER AVAILABILITY GROUP [TT-SQL01] ADD DATABASE ReportServer_SCOM01TempDB
+ALTER AVAILABILITY GROUP [TT-SQL01] ADD DATABASE ReportServer_SCOM
+ALTER AVAILABILITY GROUP [TT-SQL01] ADD DATABASE ReportServer_SCOMTempDB
 GO
 ```
 
@@ -633,7 +768,7 @@ GO
 USE [master]
 GO
 
-CREATE LOGIN [TECHTOOLBOX\TT-SCOM01B$] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\TT-SCOM03$] FROM WINDOWS
 WITH DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english]
 GO
 ```
@@ -643,13 +778,13 @@ GO
 ```SQL
 USE [master]
 GO
-CREATE USER [TECHTOOLBOX\TT-SCOM01B$] FOR LOGIN [TECHTOOLBOX\TT-SCOM01B$]
-ALTER ROLE [RSExecRole] ADD MEMBER [TECHTOOLBOX\TT-SCOM01B$]
+CREATE USER [TECHTOOLBOX\TT-SCOM03$] FOR LOGIN [TECHTOOLBOX\TT-SCOM03$]
+ALTER ROLE [RSExecRole] ADD MEMBER [TECHTOOLBOX\TT-SCOM03$]
 GO
 USE [msdb]
 GO
-CREATE USER [TECHTOOLBOX\TT-SCOM01B$] FOR LOGIN [TECHTOOLBOX\TT-SCOM01B$]
-ALTER ROLE [RSExecRole] ADD MEMBER [TECHTOOLBOX\TT-SCOM01B$]
+CREATE USER [TECHTOOLBOX\TT-SCOM03$] FOR LOGIN [TECHTOOLBOX\TT-SCOM03$]
+ALTER ROLE [RSExecRole] ADD MEMBER [TECHTOOLBOX\TT-SCOM03$]
 GO
 ```
 
@@ -657,16 +792,16 @@ GO
 
 ```Console
 DECLARE @backupFilePath VARCHAR(255) =
-    '\\TT-SQL01A\SQL-Backups\ReportServer_SCOM01.bak'
+    '\\TT-SQL01A\SQL-Backups\ReportServer_SCOM.bak'
 
-RESTORE DATABASE ReportServer_SCOM01
+RESTORE DATABASE ReportServer_SCOM
     FROM DISK = @backupFilePath
     WITH  NORECOVERY,  NOUNLOAD,  STATS = 5
 
 SET @backupFilePath =
-    '\\TT-SQL01A\SQL-Backups\ReportServer_SCOM01TempDB.bak'
+    '\\TT-SQL01A\SQL-Backups\ReportServer_SCOMTempDB.bak'
 
-RESTORE DATABASE ReportServer_SCOM01TempDB
+RESTORE DATABASE ReportServer_SCOMTempDB
     FROM DISK = @backupFilePath
     WITH  NORECOVERY,  NOUNLOAD,  STATS = 5
 
@@ -677,16 +812,16 @@ GO
 
 ```Console
 DECLARE @backupFilePath VARCHAR(255) =
-    '\\TT-SQL01A\SQL-Backups\ReportServer_SCOM01.trn'
+    '\\TT-SQL01A\SQL-Backups\ReportServer_SCOM.trn'
 
-RESTORE DATABASE ReportServer_SCOM01
+RESTORE DATABASE ReportServer_SCOM
     FROM DISK = @backupFilePath
     WITH  NORECOVERY,  NOUNLOAD,  STATS = 5
 
 SET @backupFilePath =
-    '\\TT-SQL01A\SQL-Backups\ReportServer_SCOM01TempDB.trn'
+    '\\TT-SQL01A\SQL-Backups\ReportServer_SCOMTempDB.trn'
 
-RESTORE DATABASE ReportServer_SCOM01TempDB
+RESTORE DATABASE ReportServer_SCOMTempDB
     FROM DISK = @backupFilePath
     WITH  NORECOVERY,  NOUNLOAD,  STATS = 5
 
@@ -744,8 +879,11 @@ begin catch
 end catch
 GO
 
-ALTER DATABASE [ReportServer_SCOM01] SET HADR AVAILABILITY GROUP = [TT-SQL01]
-ALTER DATABASE [ReportServer_SCOM01TempDB] SET HADR AVAILABILITY GROUP = [TT-SQL01]
+USE [master]
+GO
+
+ALTER DATABASE [ReportServer_SCOM] SET HADR AVAILABILITY GROUP = [TT-SQL01]
+ALTER DATABASE [ReportServer_SCOMTempDB] SET HADR AVAILABILITY GROUP = [TT-SQL01]
 GO
 ```
 
@@ -792,92 +930,6 @@ cls
 
 ### # Configure website for Operations Manager web console
 
-#### # Create certificate for Operations Manager web console
-
-##### # Create certificate request
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\New-CertificateRequest.ps1 `
-    -Subject ("CN=systemcenter.corp.technologytoolbox.com,OU=IT," `
-        + "O=Technology Toolbox,L=Denver,S=CO,C=US") `
-    -SANs systemcenter
-```
-
----
-
-**PowerShell - Run as TECHTOOLBOX\\jjameson-admin**
-
-##### # Submit certificate request to Certification Authority
-
-###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
-
-```PowerShell
-$adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
-
-C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
-    -Zone LocalIntranet `
-    -Patterns $adcsUrl.AbsoluteUri
-
-Start-Process $adcsUrl.AbsoluteUri
-```
-
----
-
-> **Note**
->
-> Copy the certificate request to the clipboard.
-
-**To submit the certificate request to an enterprise CA:**
-
-1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
-2. On the **Welcome** page, click **Request a certificate**.
-3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
-4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
-5. In the **Certificate Template** section, select the certificate template (**Technology Toolbox Web Server**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
-6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
-
----
-
-**PowerShell - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-##### # Import the certificate into the certificate store
-
-```PowerShell
-Start-Process $PSHOME\powershell.exe `
-    -ArgumentList "-Command Start-Process PowerShell.exe -Verb Runas" `
-    -Wait
-```
-
----
-
-**Administrator: PowerShell - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
-
-CertReq.exe -Accept $certFile
-
-Remove-Item $certFile
-
-Exit
-```
-
----
-
-```Console
-Exit
-```
-
----
-
-```PowerShell
-cls
-```
-
 #### # Create IIS website for Operations Manager web console
 
 ```PowerShell
@@ -909,9 +961,9 @@ New-WebBinding `
     -HostHeader systemcenter `
     -SslFlags 0
 
-$cert |
-    New-Item `
-        -Path ("IIS:\SslBindings\0.0.0.0!443!" + $hostHeader)
+(Get-WebBinding `
+    -Name $siteName `
+    -Protocol https).AddSslCertificate($cert.Thumbprint, "my")
 ```
 
 #### Configure name resolution for Operations Manager web console
@@ -923,15 +975,9 @@ $cert |
 ```PowerShell
 Add-DNSServerResourceRecordCName `
     -ComputerName TT-DC06 `
-    -ZoneName corp.technologytoolbox.com `
-    -Name scom01 `
-    -HostNameAlias TT-SCOM01B.corp.technologytoolbox.com
-
-Add-DNSServerResourceRecordCName `
-    -ComputerName TT-DC06 `
     -ZoneName technologytoolbox.com `
     -Name systemcenter `
-    -HostNameAlias TT-SCOM01B.corp.technologytoolbox.com
+    -HostNameAlias TT-SCOM03.corp.technologytoolbox.com
 ```
 
 ---
@@ -1003,20 +1049,25 @@ Pasted from <[http://social.technet.microsoft.com/Forums/systemcenter/en-US/6c3d
 
 **TT-SQL01A**
 
+```PowerShell
+cls
+```
+
 #### # Temporarily add SCOM installation account to local Administrators group on SQL Server
 
 ```PowerShell
+$localGroup = "Administrators"
 $domain = "TECHTOOLBOX"
-$domainUser = "jjameson-fabric"
+$domainUser = "setup-systemcenter"
 
-([ADSI]"WinNT://./Administrators,group").Add(
+([ADSI]"WinNT://./$localGroup,group").Add(
     "WinNT://$domain/$domainUser,user")
 ```
 
 ---
 
-[08:19:16]:	Error:	:GetRemoteOSVersion(): Threw Exception.Type: System.UnauthorizedAccessException, Exception Error Code: 0x80070005, Exception.Message: Access is denied. (Exception from HRESULT: 0x80070005 (E_ACCESSDENIED))\
-[08:19:16]:	Error:	:StackTrace:   at System.Runtime.InteropServices.Marshal.ThrowExceptionForHRInternal(Int32 errorCode, IntPtr errorInfo)\
+[08:19:16]:        Error:        :GetRemoteOSVersion(): Threw Exception.Type: System.UnauthorizedAccessException, Exception Error Code: 0x80070005, Exception.Message: Access is denied. (Exception from HRESULT: 0x80070005 (E_ACCESSDENIED))\
+[08:19:16]:        Error:        :StackTrace:   at System.Runtime.InteropServices.Marshal.ThrowExceptionForHRInternal(Int32 errorCode, IntPtr errorInfo)\
    at System.Management.ManagementScope.InitializeGuts(Object o)\
    at System.Management.ManagementScope.Initialize()\
    at System.Management.ManagementObjectSearcher.Initialize()\
@@ -1033,7 +1084,7 @@ $domainUser = "jjameson-fabric"
 USE [master]
 GO
 ALTER SERVER ROLE [sysadmin]
-ADD MEMBER [TECHTOOLBOX\jjameson-fabric]
+ADD MEMBER [TECHTOOLBOX\setup-systemcenter]
 GO
 ```
 
@@ -1101,7 +1152,7 @@ Press Tab to connect to the database server.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/42/BDD86267724895435905AB5B73E1B21625451742.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/1D692A4FCA4A4BB577FA8F1051FADD1AAE43815E.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/D83A8C4D32577085F6D16902EAC307101432BF7F.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/43E9FB6C4372CC12E40B2D523237F8B70EE5C96A.png)
 
@@ -1111,15 +1162,15 @@ Press Tab to connect to the database server.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A8/1DAE864F8AE18BAE15571A15A69F00700C9D43A8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FA/F7F42E2E39BA0B860491CEAF55D065B8D78EA3FA.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/EB/0B13C8030662C4C687FA78EC0BF0904E9C0B6DEB.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/52/2E63667BF93752EF3324A55D801B31EA9FABC252.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8B/4D9599EF58C5DA5DEE6981AB22A9DFBD761B038B.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/79/EFFC118244371048B0EFD36473A51C6F8C238D79.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/8E0E567ACA08E6950C3020298A1E00A785AFEB2C.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/2300D5ED1DEEE9F65F04859FBD31B33BEF92D1B8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/94CA767BD24779213BBFB0FE6CAB95D34F4AD8D9.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AA/CC2176092C4FBFFDCFDA1BD826FEDC8E9BF4CBAA.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/24/E151888D81919732C5AF0EF34BCCC65B9A0FA124.png)
 
@@ -1145,10 +1196,11 @@ Disable-NetFirewallRule -Name "SCOM 2016 Installation - UDP"
 #### # Remove SCOM installation account from local Administrators group on SQL Server
 
 ```PowerShell
+$localGroup = "Administrators"
 $domain = "TECHTOOLBOX"
-$domainUser = "jjameson-fabric"
+$domainUser = "setup-systemcenter"
 
-([ADSI]"WinNT://./Administrators,group").Remove(
+([ADSI]"WinNT://./$localGroup,group").Remove(
     "WinNT://$domain/$domainUser,user")
 ```
 
@@ -1164,7 +1216,7 @@ $domainUser = "jjameson-fabric"
 USE [master]
 GO
 ALTER SERVER ROLE [sysadmin]
-DROP MEMBER [TECHTOOLBOX\jjameson-fabric]
+DROP MEMBER [TECHTOOLBOX\setup-systemcenter]
 GO
 ```
 
@@ -1230,7 +1282,7 @@ BACKUP LOG OperationsManagerDW
 GO
 ```
 
-##### -- Add Reporting Services databases to Availability Group
+##### -- Add SCOM databases to Availability Group
 
 ```SQL
 USE master
@@ -1252,16 +1304,16 @@ GO
 USE master
 GO
 
-CREATE LOGIN [TECHTOOLBOX\s-scom01-action] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\s-scom-action] FROM WINDOWS
 WITH DEFAULT_DATABASE=master
 
-CREATE LOGIN [TECHTOOLBOX\s-scom01-das] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\s-scom-das] FROM WINDOWS
 WITH DEFAULT_DATABASE=master
 
-CREATE LOGIN [TECHTOOLBOX\s-scom01-data-reader] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\s-scom-data-reader] FROM WINDOWS
 WITH DEFAULT_DATABASE=master
 
-CREATE LOGIN [TECHTOOLBOX\s-scom01-data-writer] FROM WINDOWS
+CREATE LOGIN [TECHTOOLBOX\s-scom-data-writer] FROM WINDOWS
 WITH DEFAULT_DATABASE=master
 
 GO
@@ -1272,21 +1324,21 @@ GO
 ```SQL
 USE master
 GO
-CREATE USER [TECHTOOLBOX\s-scom01-data-reader]
-FOR LOGIN [TECHTOOLBOX\s-scom01-data-reader]
+CREATE USER [TECHTOOLBOX\s-scom-data-reader]
+FOR LOGIN [TECHTOOLBOX\s-scom-data-reader]
 
-ALTER ROLE RSExecRole ADD MEMBER [TECHTOOLBOX\s-scom01-data-reader]
+ALTER ROLE RSExecRole ADD MEMBER [TECHTOOLBOX\s-scom-data-reader]
 GO
 
 USE msdb
 GO
-CREATE USER [TECHTOOLBOX\s-scom01-data-reader]
-FOR LOGIN [TECHTOOLBOX\s-scom01-data-reader]
+CREATE USER [TECHTOOLBOX\s-scom-data-reader]
+FOR LOGIN [TECHTOOLBOX\s-scom-data-reader]
 
-ALTER ROLE RSExecRole ADD MEMBER [TECHTOOLBOX\s-scom01-data-reader]
-ALTER ROLE SQLAgentOperatorRole ADD MEMBER [TECHTOOLBOX\s-scom01-data-reader]
-ALTER ROLE SQLAgentReaderRole ADD MEMBER [TECHTOOLBOX\s-scom01-data-reader]
-ALTER ROLE SQLAgentUserRole ADD MEMBER [TECHTOOLBOX\s-scom01-data-reader]
+ALTER ROLE RSExecRole ADD MEMBER [TECHTOOLBOX\s-scom-data-reader]
+ALTER ROLE SQLAgentOperatorRole ADD MEMBER [TECHTOOLBOX\s-scom-data-reader]
+ALTER ROLE SQLAgentReaderRole ADD MEMBER [TECHTOOLBOX\s-scom-data-reader]
+ALTER ROLE SQLAgentUserRole ADD MEMBER [TECHTOOLBOX\s-scom-data-reader]
 GO
 ```
 
@@ -1449,9 +1501,9 @@ GO
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/28/03F46301CF3B2E420B8C2E4137B377D0C9BA9D28.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6B/236A955D8F00775A42D5D26CE13670A3A875176B.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/F303578B50EF831A0DC3C78E23C5CBA3914DB227.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EA/6DFE280CF334E7C860E1BA2537910F30AA50BEEA.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1D/71682F3913FE0135D4051E072871786EFEB3741D.png)
 
 ## Create SMTP Channel
 
@@ -1603,8 +1655,11 @@ In the **Management packs in the catalog** list, expand **Microsoft Corporation*
       - Windows Server Operating System Library
       - Windows Server Operating System Reports
     - Core OS 2016
-      - Windows Server 2016 Operating System (Discovery)
-      - Windows Server 2016 Operating System (Monitoring)
+      - Windows Server 2016 and 1709+ Operating System (Discovery)
+      - Windows Server 2016 and 1709+ Operating System (Monitoring)
+      - Windows Server Cluster Disks Monitoring
+      - Windows Server Operating System Library
+      - Windows Server Operating System Reports
     - ~~DHCP Server~~
       - ~~Microsoft Windows Server DHCP 2012 R2~~
       - ~~Microsoft Windows Server DHCP Library~~
@@ -1626,6 +1681,7 @@ In the **Management packs in the catalog** list, expand **Microsoft Corporation*
       - Windows Server Internet Information Services Library
     - IIS 2016
       - Microsoft Windows Server 2016 Internet Information Services 9
+      - Windows Server Internet Information Services Library
     - Windows Server Cluster 2016
       - Windows Cluster Management Library
       - Windows Cluster Management Monitoring
@@ -1651,84 +1707,20 @@ Repeat the previous steps the remaining warnings.
 
 ### Import DPM management packs
 
----
-
-**TT-VMM01A**
-
-```PowerShell
-cls
-```
-
-#### # Insert DPM 2016 installation media
-
-```PowerShell
-$vmName = "TT-SCOM01B"
-$isoName = "mu_system_center_2016_data_protection_manager_x64_dvd_9231242.iso"
-
-$dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
-
-$iso = Get-SCISO | where {$_.Name -eq $isoName}
-
-Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -ISO $iso -Link
-```
-
----
-
-```PowerShell
-cls
-```
-
-#### # Extract DPM setup files
-
-```PowerShell
-X:\SC2016_SCDPM.EXE
-```
-
-Destination location: **C:\\NotBackedUp\\Temp\\System Center 2016 Data Protection Manager**
-
----
-
-**TT-VMM01A**
-
-```PowerShell
-cls
-```
-
-#### # Remove DPM 2016 installation media
-
-```PowerShell
-$vmName = "TT-SCOM01B"
-
-$dvdDrive = Get-SCVirtualDVDDrive -VM $vmName
-Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -NoMedia
-```
-
----
-
 #### Import management packs
 
-Import the following management packs from **C:\\NotBackedUp\\Temp\\System Center 2016 Data Protection Manager\\ManagementPacks\\en-US**:
+Download updated MP:
 
-- **Microsoft.SystemCenter.DataProtectionManager.2016.Discovery.mp**
-- **Microsoft.SystemCenter.DataProtectionManager.2016.Library.mp**
-- **Microsoft.SystemCenter.DataProtectionManager.2016.Reporting.mp**
-
-Ugh...looks like the RTM management packs have a bug:
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/201A0C35909CCEA7C085A65F10766D550F6B7B3D.png)
-
-Download updated MPs:
-
-**New MP: System Center Management Packs for Data Protection Manager 2016 Reporting, Discovery and Monitoring**\
-From <[https://blogs.technet.microsoft.com/allthat/2016/10/14/new-mp-system-center-management-packs-for-data-protection-manager-2016-reporting-discovery-and-monitoring/](https://blogs.technet.microsoft.com/allthat/2016/10/14/new-mp-system-center-management-packs-for-data-protection-manager-2016-reporting-discovery-and-monitoring/)>
+**System Center Management Packs for Data Protection Manager Reporting, Discovery and Monitoring**\
+From <[https://www.microsoft.com/en-us/download/details.aspx?id=56560](https://www.microsoft.com/en-us/download/details.aspx?id=56560)>
 
 Import the following management packs from **C:\\Program Files (x86)\\System Center Management Packs\\Microsoft System Center Management Pack for DPM 2016 (ENG)**:
 
-- **Microsoft.SystemCenter.DataProtectionManager.2016.Discovery.mp**
-- **Microsoft.SystemCenter.DataProtectionManager.2016.Library.mp**
-- **Microsoft.SystemCenter.DataProtectionManager.2016.Reporting.mp**
+- **Microsoft.SystemCenter.DataProtectionManager.Discovery.mp**
+- **Microsoft.SystemCenter.DataProtectionManager.Library.mp**
+- **Microsoft.SystemCenter.DataProtectionManager.Reporting.mp**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/40/89DDA5321E3365C1AFF80944F2B7E1DEF8057640.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/084734430C83C06BE8886EBE48A866DA0B2663AF.png)
 
 ### Import Hyper-V management packs
 
@@ -1841,7 +1833,7 @@ cls
 $hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
 
 $certImportToolPath = "\\TT-FS01\Products\Microsoft" `
-    + "\System Center 2016\SupportTools\SCOM\AMD64\MOMCertImport.exe"
+    + "\System Center 2016\SCOM\SupportTools\AMD64\MOMCertImport.exe"
 
 & $certImportToolPath /SubjectName $hostName
 ```
@@ -1871,7 +1863,7 @@ Task Category: None\
 Level:         Error\
 Keywords:      Classic\
 User:          N/A\
-Computer:      TT-SCOM01B.corp.technologytoolbox.com\
+Computer:      TT-SCOM03.corp.technologytoolbox.com\
 Description:\
 The Open Procedure for service "BITS" in DLL "C:\\Windows\\System32\\bitsperf.dll" failed. Performance data for this service will not be available. The first four bytes (DWORD) of the Data section contains the error code.
 
@@ -1927,93 +1919,6 @@ Filter Manager failed to attach to volume '\\Device\\Harddisk7\\DR3862'.  This v
 
 ## Install SCOM agent on computers to manage
 
-## Issue - Errors with SCOM 2016 agent on domain controllers
-
-Log Name:      Operations Manager\
-Source:        HealthService\
-Date:          3/24/2017 8:17:22 AM\
-Event ID:      7017\
-Task Category: Health Service\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      XAVIER2.corp.technologytoolbox.com\
-Description:\
-The health service blocked access to the windows credential NT AUTHORITY\\SYSTEM because it is not authorized on management group HQ.  You can run the HSLockdown tool to change which credentials are authorized.
-
-### Solution
-
----
-
-**XAVIER1**
-
-```PowerShell
-cls
-```
-
-#### # Enable SCOM agent to run as LocalSystem on domain controller
-
-```PowerShell
-Push-Location "C:\Program Files\Microsoft Monitoring Agent\Agent"
-
-.\HSLockdown.exe HQ /R "NT AUTHORITY\SYSTEM"
-
-Pop-Location
-
-Restart-Service HealthService
-```
-
----
-
----
-
-**XAVIER2**
-
-```PowerShell
-cls
-```
-
-#### # Enable SCOM agent to run as LocalSystem on domain controller
-
-```PowerShell
-Push-Location "C:\Program Files\Microsoft Monitoring Agent\Agent"
-
-.\HSLockdown.exe HQ /R "NT AUTHORITY\SYSTEM"
-
-Pop-Location
-
-Restart-Service HealthService
-```
-
----
-
----
-
-**EXT-DC06**
-
-```PowerShell
-cls
-```
-
-#### # Enable SCOM agent to run as LocalSystem on domain controller
-
-```PowerShell
-Push-Location "C:\Program Files\Microsoft Monitoring Agent\Agent"
-
-.\HSLockdown.exe HQ /R "NT AUTHORITY\SYSTEM"
-
-Pop-Location
-
-Restart-Service HealthService
-```
-
----
-
-### Reference
-
-**Deploying SCOM 2016 Agents to Domain controllers - some assembly required**\
-From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/](https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/)>
-
 ```PowerShell
 cls
 ```
@@ -2060,14 +1965,91 @@ cls
 ## # Register Service Principal Name for System Center Operations Manager
 
 ```PowerShell
-setspn -A MSOMSdkSvc/TT-SCOM01B s-scom01-das
-setspn -A MSOMSdkSvc/TT-SCOM01B.corp.technologytoolbox.com s-scom01-das
+setspn -A MSOMSdkSvc/TT-SCOM03 s-scom-das
+setspn -A MSOMSdkSvc/TT-SCOM03.corp.technologytoolbox.com s-scom-das
 ```
 
 ### Reference
 
 **OpsMgr 2012: What should the SPN’s look like?**\
 From <[https://blogs.technet.microsoft.com/kevinholman/2011/08/08/opsmgr-2012-what-should-the-spns-look-like/](https://blogs.technet.microsoft.com/kevinholman/2011/08/08/opsmgr-2012-what-should-the-spns-look-like/)>
+
+## Issue - EXECUTE permission was denied on the object 'sp_help_jobactivity'
+
+Log Name:      Operations Manager\
+Source:        DataAccessLayer\
+Date:          3/23/2017 9:21:50 AM\
+Event ID:      33333\
+Task Category: None\
+Level:         Warning\
+Keywords:      Classic\
+User:          N/A\
+Computer:      TT-SCOM03.corp.technologytoolbox.com\
+Description:\
+Data Access Layer rejected retry on SqlError:\
+ Request: MaintenanceScheduleList -- (IsAdmin=True), (CurrentUser=TECHTOOLBOX\\jjameson-fabric), (RETURN_VALUE=1)\
+ Class: 14\
+ Number: 229\
+ Message: The EXECUTE permission was denied on the object 'sp_help_jobactivity', database 'msdb', schema 'dbo'.
+
+### Solution
+
+---
+
+**SQL Server Management Studio - TT-SQL01A**
+
+#### -- Fix permissions for SCOM "Data Access Service" account
+
+```SQL
+USE msdb
+GO
+CREATE USER [TECHTOOLBOX\s-scom-das] FOR LOGIN [TECHTOOLBOX\s-scom-das]
+GO
+ALTER ROLE SQLAgentReaderRole ADD MEMBER [TECHTOOLBOX\s-scom-das]
+GO
+```
+
+---
+
+---
+
+**SQL Server Management Studio - TT-SQL01B**
+
+#### -- Fix permissions for SCOM "Data Access Service" account
+
+```SQL
+USE msdb
+GO
+CREATE USER [TECHTOOLBOX\s-scom-das] FOR LOGIN [TECHTOOLBOX\s-scom-das]
+GO
+ALTER ROLE SQLAgentReaderRole ADD MEMBER [TECHTOOLBOX\s-scom-das]
+GO
+```
+
+---
+
+### Reference
+
+**Enabling Scheduled Maintenance in SCOM 2016 UR1**\
+From <[https://blogs.technet.microsoft.com/kevinholman/2016/10/22/enabling-scheduled-maintenance-in-scom-2016-ur1/](https://blogs.technet.microsoft.com/kevinholman/2016/10/22/enabling-scheduled-maintenance-in-scom-2016-ur1/)>
+
+## Enter product key for System Center Operations Manager
+
+**To upgrade from the evaluation version of Operations Manager to a licensed version:**
+
+1. On a management server, click **Start**, click **All Programs**, click **Microsoft System Center 2016**, and then run **Operations Manager Shell** as administrator.
+2. In the **Operations Manager Command Shell**, type the following command:
+3. Restart the System Center Data Access Service. You can use the Microsoft Management Console to restart services.
+4. Restart the System Center Data Access Service on all management servers in the management group.
+
+```PowerShell
+    Set-SCOMLicense {license key}
+```
+
+### Reference
+
+**How to Upgrade from the Evaluation Version of Operations Manager**\
+From <[https://technet.microsoft.com/en-us/library/hh966734(v=sc.12).aspx](https://technet.microsoft.com/en-us/library/hh966734(v=sc.12).aspx)>
 
 ```PowerShell
 cls
@@ -2087,64 +2069,167 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
-## Issue - EXECUTE permission was denied on the object 'sp_help_jobactivity'
+## Complete post-installation tasks
 
-Log Name:      Operations Manager\
-Source:        DataAccessLayer\
-Date:          3/23/2017 9:21:50 AM\
-Event ID:      33333\
-Task Category: None\
-Level:         Warning\
-Keywords:      Classic\
-User:          N/A\
-Computer:      TT-SCOM01B.corp.technologytoolbox.com\
-Description:\
-Data Access Layer rejected retry on SqlError:\
- Request: MaintenanceScheduleList -- (IsAdmin=True), (CurrentUser=TECHTOOLBOX\\jjameson-fabric), (RETURN_VALUE=1)\
- Class: 14\
- Number: 229\
- Message: The EXECUTE permission was denied on the object 'sp_help_jobactivity', database 'msdb', schema 'dbo'.
+### Login as TECHTOOLBOX\\jjameson-admin
 
-### Solution
+```PowerShell
+cls
+```
 
----
+### # Remove System Center setup account from local Administrators group
 
-**SQL Server Management Studio - TT-SQL01A**
+```PowerShell
+$localGroup = "Administrators"
+$domain = "TECHTOOLBOX"
+$serviceAccount = "setup-systemcenter"
 
-#### -- Fix permissions for SCOM "Data Access Service" account
-
-```SQL
-USE msdb
-GO
-CREATE USER [TECHTOOLBOX\s-scom01-das] FOR LOGIN [TECHTOOLBOX\s-scom01-das]
-GO
-ALTER ROLE SQLAgentReaderRole ADD MEMBER [TECHTOOLBOX\s-scom01-das]
-GO
+([ADSI]"WinNT://./$localGroup,group").Remove(
+    "WinNT://$domain/$serviceAccount,user")
 ```
 
 ---
 
----
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
-**SQL Server Management Studio - TT-SQL01B**
+```PowerShell
+cls
+```
 
-#### -- Fix permissions for SCOM "Data Access Service" account
+### # Disable setup account for System Center
 
-```SQL
-USE msdb
-GO
-CREATE USER [TECHTOOLBOX\s-scom01-das] FOR LOGIN [TECHTOOLBOX\s-scom01-das]
-GO
-ALTER ROLE SQLAgentReaderRole ADD MEMBER [TECHTOOLBOX\s-scom01-das]
-GO
+```PowerShell
+Disable-ADAccount -Identity setup-systemcenter
 ```
 
 ---
 
-### Reference
+## Set Resolution State to Acknowledged for "noise" alerts
 
-**Enabling Scheduled Maintenance in SCOM 2016 UR1**\
-From <[https://blogs.technet.microsoft.com/kevinholman/2016/10/22/enabling-scheduled-maintenance-in-scom-2016-ur1/](https://blogs.technet.microsoft.com/kevinholman/2016/10/22/enabling-scheduled-maintenance-in-scom-2016-ur1/)>
+---
+
+**FOOBAR16**
+
+```PowerShell
+cls
+Import-Module -Name OperationsManager
+
+$resolutionStateNew = 0
+$resolutionStateAcknowledged = 249
+```
+
+#### # Source: DCOM
+
+#### # Event ID: 10016
+
+#### #
+
+#### # Event Description: The application-specific permission settings do not grant Local Activation permission...
+
+#### # to the user NT AUTHORITY\\SYSTEM SID (S-1-5-18)...
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "System Event Log Error" |
+    where { $_.Description.Contains("Source: DCOM") } |
+    where { $_.Description.Contains("Event ID: 10016") } |
+    where { $_.Description.Contains(
+"Event Description: The application-specific permission settings do not grant Local Activation permission") } |
+    where { $_.Description.Contains(
+"to the user NT AUTHORITY\SYSTEM SID (S-1-5-18)") } |
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
+#### # Source: Microsoft-Windows-CAPI2
+
+#### # Event ID: 513
+
+#### #
+
+#### # Event Description: Cryptographic Services failed while processing the OnIdentity() call in the System Writer Object
+
+#### # ...
+
+#### # AddLegacyDriverFiles: Unable to back up image of binary Microsoft Link-Layer Discovery Protocol
+
+#### #
+
+#### # Reference: https://support.microsoft.com/en-us/help/3209092/event-id-513-when-running-vss-in-windows-server-2016
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "Application Event Log Error" |
+    where { $_.Description.Contains("Source: Microsoft-Windows-CAPI2") } |
+    where { $_.Description.Contains("Event ID: 513") } |
+    where { $_.Description.Contains(
+"Event Description: Cryptographic Services failed while processing the OnIdentity() call in the System Writer Object.") } |
+    where { $_.Description.Contains("AddLegacyDriverFiles: Unable to back up image of binary Microsoft Link-Layer Discovery Protocol.") } |
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
+#### # Source: Software Protection Platform Service
+
+#### # Event ID: 8198
+
+#### #
+
+#### # Event Description: License Activation (slui.exe) failed with the following error code
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "Application Event Log Error" |
+    where { $_.Description.Contains("Source: Software Protection Platform Service") } |
+    where { $_.Description.Contains("Event ID: 8198") } |
+    where { $_.Description.Contains(
+"Event Description: License Activation (slui.exe) failed with the following error code:") } |
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
+#### # Source: Service Control Manager
+
+#### # Event ID: 7023
+
+#### #
+
+#### # Event Description: The Data Sharing Service service terminated with the following error...
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "System Event Log Error" |
+    where { $_.Description.Contains("Source: Service Control Manager") } |
+    where { $_.Description.Contains("Event ID: 7023") } |
+    where { $_.Description.Contains(
+"Event Description: The Data Sharing Service service terminated with the following error") }|
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
+---
+
+**TODO:**
 
 ## Make virtual machine highly available
 
@@ -2153,8 +2238,8 @@ From <[https://blogs.technet.microsoft.com/kevinholman/2016/10/22/enabling-sched
 **TT-VMM01A**
 
 ```PowerShell
-$vm = Get-SCVirtualMachine -Name "TT-SCOM01B"
-$vmHost = Get-SCVMHost -ComputerName "TT-HV05C.corp.technologytoolbox.com"
+$vm = Get-SCVirtualMachine -Name "TT-SCOM03"
+$vmHost = Get-SCVMHost -ComputerName "TT-HV02C.corp.technologytoolbox.com"
 
 Move-SCVirtualMachine `
     -VM $vm `
@@ -2166,78 +2251,37 @@ Move-SCVirtualMachine `
 
 ---
 
-## Issue - Incorrect IPv6 DNS server assigned by Comcast router
+---
 
-```Text
-PS C:\Users\jjameson-admin> nslookup
-Default Server:  cdns01.comcast.net
-Address:  2001:558:feed::1
-```
-
-> **Note**
->
-> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on the Comcast router -- and subsequently restarting the VM -- the incorrect DNS server is assigned to the network adapter.
-
-### Solution
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
-Set-DnsClientServerAddress `
-    -InterfaceAlias Management `
-    -ServerAddresses 2603:300b:802:8900::103, 2603:300b:802:8900::104
-
-Restart-Computer
+cls
 ```
 
-## Issue - Extranet servers unable to communicate to SCOM through firewall due to new IP address assigned to TT-SCOM01B
-
-#### # Configure static IP addresses
+## # Move VM to new Production VM network
 
 ```PowerShell
-$interfaceAlias = "Management"
+$vmName = "TT-SCOM03"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+$ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $ipAddress.Address
+
+Start-SCVirtualMachine $vmName
 ```
 
-##### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "192.168.10.119"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-```
-
-##### # Configure IPv4 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.104, 192.168.10.104
-```
-
-##### # Update DNS
-
-```PowerShell
-ipconfig /registerdns
-```
-
-## Enter product key for System Center Operations Manager
-
-**To upgrade from the evaluation version of Operations Manager to a licensed version:**
-
-1. On a management server, click **Start**, click **All Programs**, click **Microsoft System Center 2012**, click **Operations Manager**, and then run **Operations Manager Command Shell** as administrator.
-2. In the **Operations Manager Command Shell**, type the following command:
-3. Restart the System Center Data Access Service. You can use the Microsoft Management Console to restart services.
-4. Restart the System Center Data Access Service on all management servers in the management group.
-
-```PowerShell
-    Set-SCOMLicense {license key}
-```
-
-### Reference
-
-**How to Upgrade from the Evaluation Version of Operations Manager**\
-From <[https://technet.microsoft.com/en-us/library/hh966734(v=sc.12).aspx](https://technet.microsoft.com/en-us/library/hh966734(v=sc.12).aspx)>
-
-**TODO:**
+---
