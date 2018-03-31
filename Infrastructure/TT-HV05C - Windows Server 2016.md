@@ -1314,3 +1314,47 @@ Connect-IscsiTarget `
     -IsMultipathEnabled $true `
     -IsPersistent $true
 ```
+
+## Configure additional shared storage
+
+### Login as fabric administrator account
+
+```Console
+PowerShell
+```
+
+#### # Connect to iSCSI portal (using multiple paths)
+
+```PowerShell
+New-IscsiTargetPortal `
+    -TargetPortalAddress 10.1.10.6 `
+    -InitiatorPortalAddress 10.1.10.4
+
+New-IscsiTargetPortal `
+    -TargetPortalAddress 10.1.13.6 `
+    -InitiatorPortalAddress 10.1.13.4
+
+Start-Sleep 30
+```
+
+#### # Connect first path to iSCSI target
+
+```PowerShell
+Connect-IscsiTarget `
+    -NodeAddress "iqn.2005-10.org.freenas.ctl:tt-hv05-fc" `
+    -TargetPortalAddress 10.1.10.6 `
+    -InitiatorPortalAddress 10.1.10.4 `
+    -IsMultipathEnabled $true `
+    -IsPersistent $true
+```
+
+#### # Connect additional paths to iSCSI target
+
+```PowerShell
+Connect-IscsiTarget `
+    -NodeAddress "iqn.2005-10.org.freenas.ctl:tt-hv05-fc" `
+    -TargetPortalAddress 10.1.13.6 `
+    -InitiatorPortalAddress 10.1.13.4 `
+    -IsMultipathEnabled $true `
+    -IsPersistent $true
+```
