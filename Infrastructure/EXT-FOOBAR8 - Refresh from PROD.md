@@ -184,10 +184,11 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_01_000009_1928906.bak"
+$computerName = "EXT-FOOBAR8"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destination = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
+$destination = "\\$computerName\Z`$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
     + "\MSSQL\Backup\Full"
 
 robocopy $source $destination $backupFile
@@ -208,7 +209,7 @@ iisreset /stop
 #### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_01_000009_1928906.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -223,7 +224,7 @@ RESTORE DATABASE SecuritasPortal
 GO
 "@
 
-Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
 ```
@@ -251,9 +252,9 @@ Else
 
 [String] $employeePortalHostHeader = $employeePortalUrl.Host
 
-[Uri] $idpUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
-    "client",
-    "idp")
+[Uri] $idpUrl = [Uri] `
+    $env:SECURITAS_CLIENT_PORTAL_URL.Replace("client", "idp").Replace( `
+        "securitasinc.com", "technologytoolbox.com")
 
 [String] $idpHostHeader = $idpUrl.Host
 
@@ -381,6 +382,56 @@ GO
 "@
 
 Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose
+
+Set-Location C:
+```
+
+#### # Associate users to TECHTOOLBOX\\jjameson
+
+```PowerShell
+$sqlcmd = @"
+USE SecuritasPortal
+GO
+
+INSERT INTO Customer.BranchManagerAssociatedUsers
+SELECT 'jjameson@technologytoolbox.com', AssociatedUserName
+FROM Customer.BranchManagerAssociatedUsers
+WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+#### # Replace shortcuts for PNKUS\\jjameson
+
+```PowerShell
+$sqlcmd = @"
+USE SecuritasPortal
+GO
+
+UPDATE Employee.PortalUsers
+SET UserName = 'TECHTOOLBOX\jjameson'
+WHERE UserName = 'PNKUS\jjameson'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+#### # Issue - Owner is not set on database after restore (e.g. cannot create database diagrams)
+
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+EXEC dbo.sp_changedbowner @loginame = N'sa', @map = false
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 
 Set-Location C:
 ```
@@ -1104,6 +1155,68 @@ $policy = $webApp.Policies.Add($claim, $adminGroup)
 $policy.PolicyRoleBindings.Add($policyRole)
 
 $webApp.Update()
+```
+
+```PowerShell
+cls
+```
+
+### # Replace permissions for "Domain Users" on Cloud Portal sites
+
+```PowerShell
+[Uri] $cloudPortalUrl = [Uri] $env:SECURITAS_CLOUD_PORTAL_URL
+
+Get-SPSite -WebApplication $cloudPortalUrl.AbsoluteUri -Limit All |
+    foreach {
+        $site = $_
+
+        $site.RootWeb.Groups |
+            foreach {
+                $group = $_
+
+                $group.Users |
+                    foreach {
+                        $user = $_
+
+                        If ($user.DisplayName -eq "PNKCAN\Domain Users")
+                        {
+                            Write-Host ("Replacing group ($($user.DisplayName))" `
+                                + " on site ($($site.Url))...")
+
+                            $fabrikamUsers = New-SPClaimsPrincipal `
+                                -Identity "FABRIKAM\Domain Users" `
+                                -IdentityType WindowsSecurityGroupName
+
+                            $group.AddUser(
+                                $fabrikamUsers.ToEncodedString(),
+                                $null,
+                                "FABRIKAM\Domain Users",
+                                $null)
+
+                            $group.Users.Remove($user)
+                        }
+                        ElseIf ($user.DisplayName -eq "PNKUS\Domain Users")
+                        {
+                            Write-Host ("Replacing group ($($user.DisplayName))" `
+                                + " on site ($($site.Url))...")
+
+                            $techtoolboxUsers = New-SPClaimsPrincipal `
+                                -Identity "TECHTOOLBOX\Domain Users" `
+                                -IdentityType WindowsSecurityGroupName
+
+                            $group.AddUser(
+                                $techtoolboxUsers.ToEncodedString(),
+                                $null,
+                                "TECHTOOLBOX\Domain Users",
+                                $null)
+
+                            $group.Users.Remove($user)
+                        }
+                    }
+            }
+
+        $site.Dispose()
+    }
 ```
 
 ```PowerShell

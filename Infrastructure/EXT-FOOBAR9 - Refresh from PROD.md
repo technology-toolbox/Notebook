@@ -7,58 +7,6 @@ Wednesday, July 5, 2017
 
 ---
 
-**784811-SQL1**
-
-```PowerShell
-cls
-```
-
-### # Create copy-only database backup
-
-```PowerShell
-$sqlcmd = @"
-DECLARE @databaseName VARCHAR(50) = 'SecuritasPortal'
-
-DECLARE @backupDirectory VARCHAR(255)
-
-EXEC master.dbo.xp_instance_regread
-    N'HKEY_LOCAL_MACHINE'
-    , N'Software\Microsoft\MSSQLServer\MSSQLServer'
-    , N'BackupDirectory'
-    , @backupDirectory OUTPUT
-
-DECLARE @backupFilePath VARCHAR(255) =
-    @backupDirectory + '\Full\' + @databaseName + '.bak'
-
-DECLARE @backupName VARCHAR(100) = @databaseName + '-Full Database Backup'
-
-BACKUP DATABASE @databaseName
-    TO DISK = @backupFilePath
-    WITH COMPRESSION
-        , COPY_ONLY
-        , INIT
-        , NAME = @backupName
-        , STATS = 10
-
-GO
-"@
-
-Invoke-Sqlcmd `
-    -Query $sqlcmd `
-    -QueryTimeout 0 `
-    -ServerInstance 784837-SQLCLUS1 `
-    -Verbose `
-    -Debug:$false
-
-Set-Location C:
-```
-
----
-
-## Restore SecuritasPortal database backup
-
----
-
 **WOLVERINE**
 
 ```PowerShell
@@ -68,12 +16,12 @@ cls
 ### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_01_000009_1928906.bak"
+$computerName = "EXT-FOOBAR9"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-
-$destination = "\\EXT-FOOBAR9.extranet.technologytoolbox.com\Z$" `
-    + "\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
+$destination = "\\$computerName\Z`$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
+    + "\MSSQL\Backup\Full"
 
 robocopy $source $destination $backupFile
 ```
@@ -93,7 +41,7 @@ iisreset /stop
 ### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_01_000009_1928906.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -136,10 +84,17 @@ Else
 
 [String] $employeePortalHostHeader = $employeePortalUrl.Host
 
+[Uri] $idpUrl = [Uri] `
+    $env:SECURITAS_CLIENT_PORTAL_URL.Replace("client", "idp").Replace( `
+        "securitasinc.com", "technologytoolbox.com")
+
+[String] $idpHostHeader = $idpUrl.Host
+
 [String] $farmServiceAccount = "EXTRANET\s-sp-farm-dev"
 [String] $clientPortalServiceAccount = "EXTRANET\s-web-client-dev"
 [String] $cloudPortalServiceAccount = "EXTRANET\s-web-cloud-dev"
 [String[]] $employeePortalAccounts = "IIS APPPOOL\$employeePortalHostHeader"
+[String[]] $idpServiceAccounts = "IIS APPPOOL\$idpHostHeader"
 
 If ($employeePortalHostHeader -eq "employee-qa.securitasinc.com")
 {
@@ -149,6 +104,8 @@ If ($employeePortalHostHeader -eq "employee-qa.securitasinc.com")
     $employeePortalAccounts = @(
         'SEC\784813-UATSPAPP$',
         'SEC\784815-UATSPWFE$')
+
+    $idpServiceAccounts = $employeePortalAccounts
 }
 
 [String] $sqlcmd = @"
@@ -199,7 +156,7 @@ GO
 "@
 
 $employeePortalAccounts |
-    ForEach-Object {
+    foreach {
         $employeePortalAccount = $_
 
         $sqlcmd += [System.Environment]::NewLine
@@ -210,6 +167,31 @@ FOR LOGIN [$employeePortalAccount]
 GO
 ALTER ROLE Employee_FullAccess
 ADD MEMBER [$employeePortalAccount]
+GO
+"@
+    }
+
+$idpServiceAccounts |
+    foreach {
+        $idpServiceAccount = $_
+
+        $sqlcmd += [System.Environment]::NewLine
+
+        $sqlcmd += @"
+CREATE USER [$idpServiceAccount]
+FOR LOGIN [$idpServiceAccount]
+GO
+ALTER ROLE aspnet_Membership_BasicAccess
+ADD MEMBER [$idpServiceAccount]
+
+ALTER ROLE aspnet_Membership_ReportingAccess
+ADD MEMBER [$idpServiceAccount]
+
+ALTER ROLE aspnet_Roles_BasicAccess
+ADD MEMBER [$idpServiceAccount]
+
+ALTER ROLE aspnet_Roles_ReportingAccess
+ADD MEMBER [$idpServiceAccount]
 GO
 "@
     }
@@ -236,10 +218,39 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose
 Set-Location C:
 ```
 
-### # Start IIS
+### # Associate users to TECHTOOLBOX\\jjameson
 
 ```PowerShell
-iisreset /start
+$sqlcmd = @"
+USE SecuritasPortal
+GO
+
+INSERT INTO Customer.BranchManagerAssociatedUsers
+SELECT 'jjameson@technologytoolbox.com', AssociatedUserName
+FROM Customer.BranchManagerAssociatedUsers
+WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+### # Replace shortcuts for PNKUS\\jjameson
+
+```PowerShell
+$sqlcmd = @"
+USE SecuritasPortal
+GO
+
+UPDATE Employee.PortalUsers
+SET UserName = 'TECHTOOLBOX\jjameson'
+WHERE UserName = 'PNKUS\jjameson'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
 ```
 
 ### # Issue - Owner is not set on database after restore (e.g. cannot create database diagrams)
@@ -257,22 +268,10 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### # Associate users to TECHTOOLBOX\\smasters
+### # Start IIS
 
 ```PowerShell
-$sqlcmd = @"
-USE [SecuritasPortal]
-GO
-
-INSERT INTO Customer.BranchManagerAssociatedUsers
-SELECT 'smasters@technologytoolbox.com', AssociatedUserName
-FROM Customer.BranchManagerAssociatedUsers
-WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
-"@
-
-Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
-
-Set-Location C:
+iisreset /start
 ```
 
 ---

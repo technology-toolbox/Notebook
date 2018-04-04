@@ -16,12 +16,12 @@ cls
 ### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_01_000009_1928906.bak"
+$computerName = "EXT-FOOBAR4"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-
-$destination = "\\EXT-FOOBAR4.extranet.technologytoolbox.com\Z$" `
-    + "\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Backup\Full"
+$destination = "\\$computerName\Z`$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
+    + "\MSSQL\Backup\Full"
 
 robocopy $source $destination $backupFile
 ```
@@ -41,7 +41,7 @@ iisreset /stop
 ### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_01_14_000010_5338567.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_01_000009_1928906.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -84,9 +84,9 @@ Else
 
 [String] $employeePortalHostHeader = $employeePortalUrl.Host
 
-[Uri] $idpUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
-    "client",
-    "idp")
+[Uri] $idpUrl = [Uri] `
+    $env:SECURITAS_CLIENT_PORTAL_URL.Replace("client", "idp").Replace( `
+        "securitasinc.com", "technologytoolbox.com")
 
 [String] $idpHostHeader = $idpUrl.Host
 
@@ -218,10 +218,39 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose
 Set-Location C:
 ```
 
-### # Start IIS
+### # Associate users to TECHTOOLBOX\\jjameson
 
 ```PowerShell
-iisreset /start
+$sqlcmd = @"
+USE SecuritasPortal
+GO
+
+INSERT INTO Customer.BranchManagerAssociatedUsers
+SELECT 'jjameson@technologytoolbox.com', AssociatedUserName
+FROM Customer.BranchManagerAssociatedUsers
+WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+### # Replace shortcuts for PNKUS\\jjameson
+
+```PowerShell
+$sqlcmd = @"
+USE SecuritasPortal
+GO
+
+UPDATE Employee.PortalUsers
+SET UserName = 'TECHTOOLBOX\jjameson'
+WHERE UserName = 'PNKUS\jjameson'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
 ```
 
 ### # Issue - Owner is not set on database after restore (e.g. cannot create database diagrams)
@@ -239,22 +268,10 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### # Associate users to TECHTOOLBOX\\smasters
+### # Start IIS
 
 ```PowerShell
-$sqlcmd = @"
-USE [SecuritasPortal]
-GO
-
-INSERT INTO Customer.BranchManagerAssociatedUsers
-SELECT 'smasters@technologytoolbox.com', AssociatedUserName
-FROM Customer.BranchManagerAssociatedUsers
-WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
-"@
-
-Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
-
-Set-Location C:
+iisreset /start
 ```
 
 ---
