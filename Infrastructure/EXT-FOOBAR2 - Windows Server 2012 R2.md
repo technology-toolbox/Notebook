@@ -2115,7 +2115,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 >
 > Expect the previous operation to complete in approximately 37 minutes.\
 > RESTORE DATABASE successfully processed 3720520 pages in 958.230 seconds (30.333 MB/sec).\
-> ...\
+> …\
 > RESTORE DATABASE successfully processed 3606878 pages in 1154.382 seconds (24.410 MB/sec).
 
 #### Install SecuritasConnect v3.0 solution
@@ -2767,7 +2767,7 @@ Ending at:<strong> 11:59:59 PM</strong></p>
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Full Backup of All Databases**.
-      2. In the **Schedule** section, click **Change...**
+      2. In the **Schedule** section, click **Change…**
       3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
    3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Full)**, and click **Next**.
@@ -2788,7 +2788,7 @@ Ending at:<strong> 11:59:59 PM</strong></p>
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Differential Backup of All Databases**.
-      2. In the **Schedule** section, click **Change...**
+      2. In the **Schedule** section, click **Change…**
       3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
    3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Differential)**, and click **Next**.
@@ -2809,7 +2809,7 @@ Ending at:<strong> 11:59:59 PM</strong></p>
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Transaction Log Backup of All Databases**.
-      2. In the **Schedule** section, click **Change...**
+      2. In the **Schedule** section, click **Change…**
       3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
    3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Transaction Log)**, and click **Next**.
@@ -2906,7 +2906,7 @@ Recurs every: <strong>1</strong> week on</p>
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Remove Old Database Backups**.
-      2. In the **Schedule** section, click **Change...**
+      2. In the **Schedule** section, click **Change…**
       3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
    3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Maintenance Cleanup Task**, and click **Next**.
@@ -2934,7 +2934,7 @@ Recurs every: <strong>1</strong> week on</p>
    5. In the **Properties** window:
       1. If necessary, expand the **Identification** section.
       2. In the **Name** box, type **Remove Transaction Log Backups**.
-   6. Right-click the **Remove Transaction Log Backups** task and click **Edit...**
+   6. Right-click the **Remove Transaction Log Backups** task and click **Edit…**
    7. In the **Maintenance Cleanup Task** window:
       1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
       2. In the **File extension **box, type **trn**.
@@ -4475,10 +4475,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 >
 > Expect the previous operation to complete in approximately 41 minutes.\
 > RESTORE DATABASE successfully processed 4001436 pages in 433.263 seconds (72.152 MB/sec).\
-> ...\
+> …\
 > RESTORE DATABASE successfully processed 3396484 pages in 852.291 seconds (31.133 MB/sec).
 
-```PowerShell
+``...PowerShell
 cls
 ```
 
@@ -4921,6 +4921,7 @@ Notepad .\Web.SetParameters.xml
 
 ---
 
+
 **Web.SetParameters.xml**
 
 ```XML
@@ -4940,6 +4941,7 @@ Notepad .\Web.SetParameters.xml
 ```
 
 ---
+
 
 ```PowerShell
 .\Web.deploy.cmd /t
@@ -4996,6 +4998,7 @@ Remove-Item C:\Shares\Builds\EmployeePortal\1.0.29.0 -Recurse -Force
 
 ---
 
+
 **FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
@@ -5016,6 +5019,7 @@ robocopy $sourcePath $destPath /E
 ```
 
 ---
+
 
 ```PowerShell
 cls
@@ -5110,7 +5114,7 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### # Configure permissions for SecuritasPortal database
+### #  Configure permissions for SecuritasPortal database
 
 ```PowerShell
 [string] $employeePortalUrl = $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
@@ -5176,7 +5180,7 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### # Associate users to TECHTOOLBOX\\smasters
+### #  Associate users to TECHTOOLBOX\\smasters
 
 ```PowerShell
 $sqlcmd = @"
@@ -5206,6 +5210,7 @@ Set-Location C:
 
 ---
 
+
 **FOOBAR10**
 
 ## # Expand primary VHD for virtual machine
@@ -5224,6 +5229,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
+
 
 ## # Expand C: partition
 
@@ -5297,6 +5303,7 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 ---
 
+
 **TT-VMM01A**
 
 ```PowerShell
@@ -5346,9 +5353,11 @@ Start-SCVirtualMachine $vmName
 
 ---
 
+
 # Upgrade SecuritasConnect to "v4.0 Sprint-28" QFE release
 
 ---
+
 
 **FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
@@ -5370,6 +5379,7 @@ robocopy $sourcePath $destPath /E
 ```
 
 ---
+
 
 ```PowerShell
 cls
@@ -5403,6 +5413,7 @@ Remove-Item C:\Shares\Builds\ClientPortal\4.0.681.0 `
 
 ---
 
+
 **FOOBAR10**
 
 ```PowerShell
@@ -5423,6 +5434,7 @@ Resize-VHD `
 ```
 
 ---
+
 
 ```PowerShell
 cls
@@ -5454,6 +5466,7 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 ---
 
+
 **WOLVERINE**
 
 ```PowerShell
@@ -5474,6 +5487,7 @@ robocopy $sourcePath $destPath $backupFile
 ```
 
 ---
+
 
 ```PowerShell
 cls
@@ -5519,7 +5533,7 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### # Configure permissions for SecuritasPortal database
+### #  Configure permissions for SecuritasPortal database
 
 ```PowerShell
 [string] $employeePortalUrl = $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
@@ -5585,7 +5599,7 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### # Associate users to TECHTOOLBOX\\smasters
+### #  Associate users to TECHTOOLBOX\\smasters
 
 ```PowerShell
 $sqlcmd = @"
@@ -5628,6 +5642,7 @@ TrackTik username:** opanduro2m**
 
 ---
 
+
 **WOLVERINE**
 
 ```PowerShell
@@ -5648,6 +5663,7 @@ robocopy $sourcePath $destPath $backupFiles
 ```
 
 ---
+
 
 ```PowerShell
 cls
@@ -5727,10 +5743,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 >
 > Expect the previous operation to complete in approximately 28 minutes.\
 > RESTORE DATABASE successfully processed 3904847 pages in 229.149 seconds (133.130 MB/sec).\
-> ...\
+> …\
 > RESTORE DATABASE successfully processed 3679300 pages in 825.713 seconds (34.811 MB/sec).
 
-```PowerShell
+``...PowerShell
 cls
 ```
 
@@ -7799,3 +7815,324 @@ $logsFolder = ("C:\Program Files\Common Files\microsoft shared" `
 
 icacls $logsFolder /grant "NT AUTHORITY\LOCAL SERVICE:(OI)(CI)(R,W,DC)"
 ```
+
+# Upgrade SecuritasConnect to "v4.0 Sprint-31" release
+
+## # Remove missing features from SharePoint sites
+
+```PowerShell
+Enable-SharePointCmdlets
+
+Function CreateOutputObject($FeatureId, $SPObject, $Action) {
+    $result = New-Object -TypeName PSObject
+
+    $result | Add-Member `
+        -MemberType NoteProperty `
+        -Name FeatureId `
+        -Value $FeatureId
+
+    $result | Add-Member `
+        -MemberType NoteProperty `
+        -Name Url `
+        -Value $SPObject.Url
+
+    $type = $SPObject.GetType()
+
+    $result | Add-Member `
+        -MemberType NoteProperty `
+        -Name Type `
+        -Value $type.Name
+
+    If ($type.Name -eq "SPWeb")
+    {
+        $result | Add-Member `
+            -MemberType NoteProperty `
+            -Name CompatibilityLevel `
+            -Value $SPObject.Site.CompatibilityLevel
+    }
+    Else
+    {
+        $result | Add-Member `
+            -MemberType NoteProperty `
+            -Name CompatibilityLevel `
+            -Value $SPObject.CompatibilityLevel
+    }
+
+    $result | Add-Member `
+        -MemberType NoteProperty `
+        -Name Action `
+        -Value $Action
+
+    $result
+}
+
+$clientPortalUrl = $env:SECURITAS_CLIENT_PORTAL_URL
+$cloudPortalUrl = $env:SECURITAS_CLOUD_PORTAL_URL
+
+If ([string]::IsNullOrEmpty($clientPortalUrl) -eq $true)
+{
+    # default to Production
+    $clientPortalUrl = "http://client.securitasinc.com"
+}
+
+If ([string]::IsNullOrEmpty($cloudPortalUrl) -eq $true)
+{
+    # default to Production
+    $cloudPortalUrl = "http://cloud.securitasinc.com"
+}
+
+# Deactivate deprecated feature ("Securitas.CloudPortal.Web_EnsureEwikiSiteFeatures")
+$featureId = "d4199cf7-e11c-4adf-a300-eb0785a8a9f0"
+
+@(
+    "$cloudPortalUrl/sites/2020-Collaboration/Wiki",
+    "$cloudPortalUrl/sites/Cloud-Demo/DemoWiki",
+    "$cloudPortalUrl/sites/Healthcare/Special Projects Wiki",
+    "$cloudPortalUrl/sites/Hyperion-Planning/Wiki",
+    "$cloudPortalUrl/sites/IT-Systems-Training-And-Support/enterprisewiki",
+    "$cloudPortalUrl/sites/IT-Web-Test/ourwiki",
+    "$cloudPortalUrl/sites/My-Training/My Training Wiki",
+    "$cloudPortalUrl/sites/Online-Provisioning/Wiki",
+    "$cloudPortalUrl/sites/Turning-Point-Solutions/Wiki"
+) |
+    foreach {
+        $web = Get-SPWeb -Identity $_ -ErrorAction SilentlyContinue
+
+        If ($web)
+        {
+            $feature = $web.Features[$featureId]
+
+            If ($feature)
+            {
+                CreateOutputObject $featureId $web "Report"
+
+                $web.Features.Remove($featureId, $true)
+
+                CreateOutputObject $featureId $web "Remove"
+            }
+
+            $web.Dispose()
+        }
+    }
+
+# Deactivate Boost site collection feature
+# ("Brandysoft.SharePoint.ListCollection") on "Compatibility Level 14" sites
+
+$featureId = "a6204a2f-00c2-40a2-b2dd-fb06c9f87b78"
+
+@(
+    "$clientPortalUrl/Template-Sites/Post-Orders-en-CA",
+    "$clientPortalUrl/Template-Sites/Post-Orders-en-US",
+    "$clientPortalUrl/Template-Sites/Post-Orders-fr-CA"
+) |
+    foreach {
+        $site = Get-SPSite -Identity $_ -ErrorAction SilentlyContinue
+
+        If ($site)
+        {
+            $feature = $site.Features[$featureId]
+
+            If ($feature)
+            {
+                CreateOutputObject $featureId $site "Report"
+
+                $site.Features.Remove($featureId, $true)
+
+                CreateOutputObject $featureId $site "Remove"
+            }
+
+            $site.Dispose()
+        }
+    }
+
+# Deactivate Boost site (SPWeb) features on "Compatibility Level 14" sites
+
+$webFeatures = @(
+    "3e56c540-af03-4111-a734-f8ff8d903d12",
+    "6d9369be-f0ee-429f-b400-5d6be257bc6b"
+)
+
+@(
+    "$clientPortalUrl/Template-Sites/Post-Orders-en-CA",
+    "$clientPortalUrl/Template-Sites/Post-Orders-en-CA/search",
+    "$clientPortalUrl/Template-Sites/Post-Orders-en-US",
+    "$clientPortalUrl/Template-Sites/Post-Orders-en-US/search",
+    "$clientPortalUrl/Template-Sites/Post-Orders-fr-CA",
+    "$clientPortalUrl/Template-Sites/Post-Orders-fr-CA/search"
+) |
+    foreach {
+        $web = Get-SPWeb -Identity $_ -ErrorAction SilentlyContinue
+
+        If ($web)
+        {
+            $webFeatures |
+                foreach {
+                    $featureId = $_
+
+                    $feature = $web.Features[$featureId]
+
+                    If ($feature)
+                    {
+                        CreateOutputObject $featureId $web "Report"
+
+                        $web.Features.Remove($featureId, $true)
+
+                        CreateOutputObject $featureId $web "Remove"
+                    }
+                }
+
+            $web.Dispose()
+        }
+    }
+```
+
+## Install September 12, 2017, cumulative update for SharePoint Server 2013
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Download update
+
+```PowerShell
+$patch = "15.0.4963.1001 - SharePoint 2013 September 2017 CU"
+$computerName = "EXT-FOOBAR2.extranet.technologytoolbox.com"
+
+$sourcePath = "\\TT-FS01\Products\Microsoft\SharePoint 2013\Patches\$patch"
+$destPath = "\\$computerName\C`$\NotBackedUp\Temp\$patch"
+
+robocopy $sourcePath $destPath /E
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Install update
+
+```PowerShell
+$patch = "15.0.4963.1001 - SharePoint 2013 September 2017 CU"
+
+Push-Location "C:\NotBackedUp\Temp\$patch"
+
+& "C:\NotBackedUp\Temp\$patch\Install.ps1"
+```
+
+> **Note**
+>
+> When prompted, type **1** to pause the Search Service Application.
+
+> **Important**
+>
+> Wait for the update to be installed.
+
+```PowerShell
+Pop-Location
+```
+
+```PowerShell
+cls
+Push-Location ("C:\Program Files\Common Files\microsoft shared" `
+```
+
+    + "\\Web Server Extensions\\15\\BIN")
+
+```PowerShell
+.\PSConfig.exe `
+     -cmd upgrade `
+     -inplace b2b `
+     -wait `
+     -cmd applicationcontent `
+     -install `
+     -cmd installfeatures `
+     -cmd secureresources
+
+Pop-Location
+```
+
+```PowerShell
+cls
+Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
+```
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+## # Copy new build from TFS drop location
+
+```PowerShell
+$newBuild = "4.0.705.0"
+$computerName = "EXT-FOOBAR2.extranet.technologytoolbox.com"
+
+$sourcePath = "\\TT-FS01\Builds\Securitas\ClientPortal\$newBuild"
+$destPath = "\\$computerName\Builds\ClientPortal\$newBuild"
+
+robocopy $sourcePath $destPath /E
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Remove previous versions of SecuritasConnect WSPs
+
+```PowerShell
+$oldBuild = "4.0.701.0"
+
+Push-Location ("C:\Shares\Builds\ClientPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Deactivate Features.ps1' -Verbose
+
+& '.\Retract Solutions.ps1' -Verbose
+
+& '.\Delete Solutions.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+## # Install new versions of SecuritasConnect WSPs
+
+```PowerShell
+$newBuild = "4.0.705.0"
+
+Push-Location ("C:\Shares\Builds\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+## # Delete old build
+
+```PowerShell
+Remove-Item C:\Shares\Builds\ClientPortal\4.0.701.0 -Recurse -Force
+```
+
+## Install September 12, 2017, security update for Office Web Apps Server 2013
