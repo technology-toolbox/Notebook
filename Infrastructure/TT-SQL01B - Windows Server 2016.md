@@ -958,3 +958,75 @@ cls
 $size = (Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2)
 Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
 ```
+
+## Configure SQL Server maintenance plans
+
+### Create cleanup maintenance plan
+
+<table>
+<thead>
+<th>
+<p><strong>Name</strong></p>
+</th>
+<th>
+<p><strong>Frequency</strong></p>
+</th>
+<th>
+<p><strong>Daily Frequency</strong></p>
+</th>
+<th>
+<p><strong>Maintenance Cleanup Task Settings</strong></p>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Remove Old Database Backups</p>
+</td>
+<td valign='top'>
+<p>Occurs: <strong>Weekly</strong><br />
+Recurs every: <strong>1</strong> week on</p>
+<ul>
+<li><strong>Saturday</strong></li>
+</ul>
+</td>
+<td valign='top'>
+<p>Occurs once at: <strong>11:55:00 AM</strong></p>
+</td>
+<td valign='top'>
+<p><strong>History Cleanup Task</strong></p>
+<p><strong>Delete historical data:</strong></p>
+<ul>
+<li><strong>Backup and restore history</strong></li>
+<li><strong>SQL Server Agent job history</strong></li>
+<li><strong>Maintenance plan history</strong></li>
+</ul>
+<p><strong>Remove historical data older than: 4 Week(s)</strong></p>
+</td>
+</tr>
+</table>
+
+#### Create maintenance plan to remove old historical data
+
+1. Open **SQL Server Management Studio**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
+3. In the **Maintenance Plan Wizard** window:
+   1. On the starting page, click **Next**.
+   2. On the **Select Plan Properties** page:
+      1. In the **Name** box, type **History Cleanup**.
+      2. In the **Schedule** section, click **Change...**
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
+      4. Click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Clean Up History**, and click **Next**.
+   4. On the **Select Maintenance Task Order** page, click **Next**.
+   5. On the **Define History Cleanup Task** window:
+      1. Ensure the **Backup and restore history** checkbox is selected.
+      2. Ensure the **SQL Server Agent job history** checkbox is selected.
+      3. Ensure the **Maintenance plan history** checkbox is selected.
+      4. Ensure the default timespan -- **4 Week(s)** -- is specified.
+      5. Click **Next**.
+   6. On the **Select Report Options **page, click **Next**.
+   7. On the **Complete the Wizard **page, click **Finish**.
+
+### Execute maintenance plan to remove historical data
+
+Right-click **History Cleanup** and click **Execute**.
