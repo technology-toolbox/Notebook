@@ -16,7 +16,7 @@ cls
 ### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_04_01_000009_1928906.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_08_075408_3594374.bak"
 $computerName = "EXT-FOOBAR4"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
@@ -41,7 +41,7 @@ iisreset /stop
 ### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_04_01_000009_1928906.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_08_075408_3594374.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -261,6 +261,24 @@ USE [SecuritasPortal]
 GO
 
 EXEC dbo.sp_changedbowner @loginame = N'sa', @map = false
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+### # Associate users to TECHTOOLBOX\\smasters
+
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+INSERT INTO Customer.BranchManagerAssociatedUsers
+SELECT 'smasters@technologytoolbox.com', AssociatedUserName
+FROM Customer.BranchManagerAssociatedUsers
+WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
 "@
 
 Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false

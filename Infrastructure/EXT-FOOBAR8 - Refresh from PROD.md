@@ -66,10 +66,11 @@ cls
 #### # Copy SecuritasConnect build from TFS drop location
 
 ```PowerShell
-$build = "4.0.701.0"
+$build = "4.0.705.0"
+$computerName = "EXT-FOOBAR8"
 
 $source = "\\TT-FS01\Builds\Securitas\ClientPortal\$build"
-$destination = "\\EXT-FOOBAR8\Builds\ClientPortal\$build"
+$destination = "\\$computerName\Builds\ClientPortal\$build"
 
 robocopy $source $destination /E
 ```
@@ -83,7 +84,7 @@ cls
 #### # Rebuild web application
 
 ```PowerShell
-$build = "4.0.701.0"
+$build = "4.0.705.0"
 
 $peoplePickerCredentials = @(
     (Get-Credential "EXTRANET\s-web-client-dev"),
@@ -184,7 +185,7 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_04_01_000009_1928906.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_08_075408_3594374.bak"
 $computerName = "EXT-FOOBAR8"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
@@ -209,7 +210,7 @@ iisreset /stop
 #### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_04_01_000009_1928906.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_08_075408_3594374.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
@@ -436,6 +437,24 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
+#### # Associate users to TECHTOOLBOX\\smasters
+
+```PowerShell
+$sqlcmd = @"
+USE [SecuritasPortal]
+GO
+
+INSERT INTO Customer.BranchManagerAssociatedUsers
+SELECT 'smasters@technologytoolbox.com', AssociatedUserName
+FROM Customer.BranchManagerAssociatedUsers
+WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
+"@
+
+Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
+
+Set-Location C:
+```
+
 #### # Start IIS
 
 ```PowerShell
@@ -614,24 +633,6 @@ $tokenIssuer.ClaimProviderName = "Securitas ADFS Claim Provider"
 $tokenIssuer.Update()
 ```
 
-#### # Associate users to TECHTOOLBOX\\smasters
-
-```PowerShell
-$sqlcmd = @"
-USE [SecuritasPortal]
-GO
-
-INSERT INTO Customer.BranchManagerAssociatedUsers
-SELECT 'smasters@technologytoolbox.com', AssociatedUserName
-FROM Customer.BranchManagerAssociatedUsers
-WHERE BranchManagerUserName = 'Jeremy.Jameson@securitasinc.com'
-"@
-
-Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
-
-Set-Location C:
-```
-
 ---
 
 **WOLVERINE**
@@ -659,7 +660,7 @@ TrackTik username:** opanduro2m**
 
 ---
 
-**WOLVERINE**
+**TT-FS01**
 
 ```PowerShell
 cls
@@ -669,13 +670,15 @@ cls
 
 ```PowerShell
 $backupFile1 =
-    "WSS_Content_SecuritasPortal_backup_2018_01_14_000010_4869606.bak"
+    "WSS_Content_SecuritasPortal_backup_2018_04_08_075408_3594374.bak"
 
 $backupFile2 =
-    "WSS_Content_SecuritasPortal2_backup_2018_01_14_000010_5338567.bak"
+    "WSS_Content_SecuritasPortal2_backup_2018_04_08_075408_3750790.bak"
 
-$source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destination = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
+$computerName = "EXT-FOOBAR8.extranet.technologytoolbox.com"
+
+$source = "E:\Shares\Archive\Clients\Securitas\Backups"
+$destination = "\\$computerName\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
     + "\MSSQL\Backup\Full"
 
 robocopy $source $destination $backupFile1 $backupFile2
@@ -710,10 +713,10 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
 
 ```PowerShell
 $backupFile1 =
-    "WSS_Content_SecuritasPortal_backup_2018_01_14_000010_4869606.bak"
+    "WSS_Content_SecuritasPortal_backup_2018_04_08_075408_3594374.bak"
 
 $backupFile2 =
-    "WSS_Content_SecuritasPortal2_backup_2018_01_14_000010_5338567.bak"
+    "WSS_Content_SecuritasPortal2_backup_2018_04_08_075408_3750790.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -749,10 +752,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 38 minutes.\
-> RESTORE DATABASE successfully processed 4053939 pages in 840.221 seconds (37.694 MB/sec).\
+> Expect the previous operation to complete in approximately 50 minutes.\
+> RESTORE DATABASE successfully processed 4278197 pages in 1220.276 seconds (27.390 MB/sec).\
 > ...\
-> RESTORE DATABASE successfully processed 3991413 pages in 729.528 seconds (42.743 MB/sec).
+> RESTORE DATABASE successfully processed 4152626 pages in 1180.927 seconds (27.471 MB/sec).
 
 ```PowerShell
 cls
@@ -818,7 +821,7 @@ $webApp.Update()
 ### # Import application settings from UAT environment
 
 ```PowerShell
-$build = "4.0.701.0"
+$build = "4.0.705.0"
 
 Push-Location C:\Shares\Builds\ClientPortal\$build\DeploymentFiles\Scripts
 
@@ -901,7 +904,7 @@ Pop-Location
 > Attempting to use **EXTRANET\\SharePoint Admins (DEV)** results in the following error:
 >
 > ```PowerShell
-> C:\Shares\Builds\ClientPortal\4.0.701.0\DeploymentFiles\Scripts\Set-SiteAdministrator.ps1 : Exception calling "EnsureUser" with "1" argument(s): "The specified user c:0+.w|s-1-5-21-224930944-1780242101-1199596236-2127 could not be found."
+> C:\Shares\Builds\ClientPortal\4.0.705.0\DeploymentFiles\Scripts\Set-SiteAdministrator.ps1 : Exception calling "EnsureUser" with "1" argument(s): "The specified user c:0+.w|s-1-5-21-224930944-1780242101-1199596236-2127 could not be found."
 > At line:1 char:1
 > + .\Set-SiteAdministrator.ps1 $env:SECURITAS_CLIENT_PORTAL_URL -Claim $claim
 > + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -913,7 +916,7 @@ Pop-Location
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 1 hour and 5 minutes.
+> Expect the previous operation to complete in approximately 1 hour and 20 minutes.
 
 ```PowerShell
 cls
@@ -948,9 +951,10 @@ cls
 
 ```PowerShell
 $build = "2.0.131.0"
+$computerName = "EXT-FOOBAR8"
 
 $source = "\\TT-FS01\Builds\Securitas\CloudPortal\$build"
-$destination = "\\EXT-FOOBAR8\Builds\CloudPortal\$build"
+$destination = "\\$computerName\Builds\CloudPortal\$build"
 
 robocopy $source $destination /E
 ```
@@ -983,7 +987,7 @@ Pop-Location
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 8 minutes.
+> Expect the previous operation to complete in approximately 13 minutes.
 
 ```PowerShell
 cls
@@ -1026,7 +1030,7 @@ Tracking ID: **UA-25949832-5**
 
 ---
 
-**WOLVERINE**
+**TT-FS01**
 
 ```PowerShell
 cls
@@ -1035,10 +1039,11 @@ cls
 #### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "WSS_Content_CloudPortal_backup_2018_01_14_000010_5494577.bak"
+$backupFile = "WSS_Content_CloudPortal_backup_2018_04_08_075408_3750790.bak"
+$computerName = "EXT-FOOBAR8.extranet.technologytoolbox.com"
 
-$source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
-$destination = "\\EXT-FOOBAR8\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
+$source = "E:\Shares\Archive\Clients\Securitas\Backups"
+$destination = "\\$computerName\Z$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
     + "\MSSQL\Backup\Full"
 
 robocopy $source $destination $backupFile
@@ -1068,7 +1073,7 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL |
 ##### # Restore database backup
 
 ```PowerShell
-$backupFile = "WSS_Content_CloudPortal_backup_2018_01_14_000010_5494577.bak"
+$backupFile = "WSS_Content_CloudPortal_backup_2018_04_08_075408_3750790.bak"
 
 $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
@@ -1097,8 +1102,8 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 1 hour and 28 minutes.\
-> RESTORE DATABASE successfully processed 9873502 pages in 4729.027 seconds (16.311 MB/sec).
+> Expect the previous operation to complete in approximately 1 hour and 16 minutes.\
+> RESTORE DATABASE successfully processed 10627701 pages in 3894.686 seconds (21.318 MB/sec).
 
 ```PowerShell
 cls
@@ -1119,7 +1124,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 15 seconds.
+> Expect the previous operation to complete in approximately 8 seconds.
 
 ```PowerShell
 cls
