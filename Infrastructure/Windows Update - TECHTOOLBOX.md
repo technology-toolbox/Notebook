@@ -563,7 +563,7 @@ cls
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'FOOBAR'; VMHost = 'TT-HV05B'; },
+    #[PSCustomObject] @{ VMName = 'FOOBAR'; VMHost = 'TT-HV05B'; },
     #[PSCustomObject] @{ VMName = 'TT-WIN10-DEV3'; VMHost = 'WOLVERINE'; },
     [PSCustomObject] @{ VMName = 'TT-WIN7-TEST1'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'TT-WIN7-TEST2'; VMHost = 'TT-HV05B'; },
