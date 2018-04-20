@@ -1165,6 +1165,7 @@ $ipAddress = "10.1.10.2"
 New-NetIPAddress `
     -InterfaceAlias $interfaceAlias `
     -IPAddress $ipAddress `
+    -DefaultGateway 10.1.10.1 `
     -PrefixLength 24
 ```
 
@@ -1199,6 +1200,7 @@ $ipAddress = "10.1.13.2"
 New-NetIPAddress `
     -InterfaceAlias $interfaceAlias `
     -IPAddress $ipAddress `
+    -DefaultGateway 10.1.13.1 `
     -PrefixLength 24
 ```
 

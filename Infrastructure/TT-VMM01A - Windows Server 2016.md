@@ -1207,7 +1207,7 @@ $logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
 ```PowerShell
 $addressPoolName = "Storage Address Pool"
 
-$ipAddressRangeStart = "10.1.10.1"
+$ipAddressRangeStart = "10.1.10.20"
 $ipAddressRangeEnd = "10.1.10.254"
 
 $reservedAddresses = @()
@@ -1219,6 +1219,7 @@ $subnet = "10.1.10.0/24"
 $networkRoutes = @()
 
 $gateways = @()
+$gateways += New-SCDefaultGateway -IPAddress "10.1.10.1" -Automatic
 
 $dnsServers = @("192.168.10.103", "192.168.10.104")
 
@@ -1276,7 +1277,7 @@ $logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
 ```PowerShell
 $addressPoolName = "Live Migration Address Pool"
 
-$ipAddressRangeStart = "10.1.11.1"
+$ipAddressRangeStart = "10.1.11.20"
 $ipAddressRangeEnd = "10.1.11.254"
 
 $reservedAddresses = @()
@@ -1288,6 +1289,7 @@ $subnet = "10.1.11.0/24"
 $networkRoutes = @()
 
 $gateways = @()
+$gateways += New-SCDefaultGateway -IPAddress "10.1.11.1" -Automatic
 
 $dnsServers = @("192.168.10.103", "192.168.10.104")
 
@@ -2371,6 +2373,7 @@ $subnet = "10.1.13.0/24"
 $networkRoutes = @()
 
 $gateways = @()
+$gateways += New-SCDefaultGateway -IPAddress "10.1.13.1" -Automatic
 
 $dnsServers = @("192.168.10.103", "192.168.10.104")
 
