@@ -1,7 +1,7 @@
-﻿# FOOBAR11 - Windows 10 Enterprise (x64)
+﻿# FOOBAR17 - Windows 10 Enterprise (x64)
 
-Saturday, December 23, 2017
-6:00 AM
+Sunday, April 22, 2018
+9:51 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Saturday, December 23, 2017
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02C"
-$vmName = "FOOBAR11"
+$vmHost = "TT-HV05B"
+$vmName = "FOOBAR17"
 $vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -31,7 +31,7 @@ New-VM `
     -Generation 2 `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
-    -NewVHDSizeBytes 50GB `
+    -NewVHDSizeBytes 60GB `
     -MemoryStartupBytes 2GB `
     -SwitchName "Embedded Team Switch"
 
@@ -52,7 +52,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **FOOBAR11**.
+  - In the **Computer name** box, type **FOOBAR17**.
   - Click **Next**.
 - On the **Applications** step:
   - Select the following applications:
@@ -69,21 +69,47 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
+
+$vmName = "FOOBAR17"
 ```
 
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "FOOBAR11"
-
 $targetPath = ("OU=Workstations,OU=Resources,OU=Development" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
+```
+
+### # Set first boot device to hard drive
+
+```PowerShell
+$vmHost = "TT-HV05B"
+
+$vmHardDiskDrive = Get-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName |
+    where { $_.ControllerType -eq "SCSI" `
+        -and $_.ControllerNumber -eq 0 `
+        -and $_.ControllerLocation -eq 0 }
+
+Set-VMFirmware `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -FirstBootDevice $vmHardDiskDrive
+```
+
+### # Configure Windows Update
+
+##### # Add machine to security group for Windows Update schedule
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 0" -Members ($vmName + '$')
 ```
 
 ---
@@ -190,7 +216,13 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-& "\\TT-FS01\Public\Download\Microsoft\Remote Server Administration Tools for Windows 10\WindowsTH-RSAT_WS2016-x64.msu"
+$installerPath = "\\TT-FS01\Public\Download\Microsoft" `
+    + "\Remote Server Administration Tools for Windows 10" `
+    + "\WindowsTH-RSAT_WS2016-x64.msu"
+
+Start-Process `
+    -FilePath $installerPath `
+    -Wait
 ```
 
 > **Note**
@@ -262,10 +294,10 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$msiPath = "\\TT-FS01\Products\Microsoft\SQL Server 2012\Feature Pack" `
+$installerPath = "\\TT-FS01\Products\Microsoft\SQL Server 2012\Feature Pack" `
     + "\System CLR Types for SQL Server 2012\x64\SQLSysClrTypes.msi"
 
-$arguments = "/i `"$msiPath`" /qr"
+$arguments = "/i `"$installerPath`" /qr"
 
 Start-Process `
     -FilePath 'msiexec.exe' `
@@ -276,10 +308,10 @@ Start-Process `
 #### # Install Microsoft Report Viewer 2012
 
 ```PowerShell
-$msiPath = '\\TT-FS01\Products\Microsoft\Report Viewer 2012 Runtime' `
+$installerPath = '\\TT-FS01\Products\Microsoft\Report Viewer 2012 Runtime' `
     + '\ReportViewer.msi'
 
-$arguments = "/i `"$msiPath`" /qr"
+$arguments = "/i `"$installerPath`" /qr"
 
 Start-Process `
     -FilePath 'msiexec.exe' `
@@ -325,10 +357,10 @@ cls
 #### # Install Microsoft System CLR Types for SQL Server 2014
 
 ```PowerShell
-$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016" `
     + "\Microsoft CLR Types for SQL Server 2014\SQLSysClrTypes.msi"
 
-$arguments = "/i `"$msiPath`" /qr"
+$arguments = "/i `"$installerPath`" /qr"
 
 Start-Process `
     -FilePath 'msiexec.exe' `
@@ -339,10 +371,10 @@ Start-Process `
 #### # Install Microsoft Report Viewer 2015 Runtime
 
 ```PowerShell
-$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016" `
     + "\Microsoft Report Viewer 2015 Runtime\ReportViewer.msi"
 
-$arguments = "/i `"$msiPath`" /qr"
+$arguments = "/i `"$installerPath`" /qr"
 
 Start-Process `
     -FilePath 'msiexec.exe' `
@@ -399,45 +431,6 @@ Start-Process `
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/1B4982EC38A2F66781A20AA9CF06F7BE9446B13B.png)
 
-#### Create domain account for System Center setup
-
----
-
-**FOOBAR10**
-
-##### # Create OU for setup accounts
-
-```PowerShell
-New-ADOrganizationalUnit `
-    -Name "Setup Accounts" `
-    -Path "OU=IT,DC=corp,DC=technologytoolbox,DC=com"
-```
-
-##### # Create setup account
-
-```PowerShell
-$displayName = "Setup account for Microsoft System Center"
-$defaultUserName = "setup-systemcenter"
-
-$cred = Get-Credential -Message $displayName -UserName $defaultUserName
-
-$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
-$orgUnit = "OU=Setup Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
-
-New-ADUser `
-    -Name $displayName `
-    -DisplayName $displayName `
-    -SamAccountName $cred.UserName `
-    -AccountPassword $cred.Password `
-    -UserPrincipalName $userPrincipalName `
-    -Path $orgUnit `
-    -Enabled:$true `
-    -CannotChangePassword:$true `
-    -PasswordNeverExpires:$true
-```
-
----
-
 ```PowerShell
 cls
 ```
@@ -450,7 +443,25 @@ $username = "setup-systemcenter"
 
 ([ADSI]"WinNT://./Administrators,group").Add(
     "WinNT://$domain/$username,user")
+
+logoff
 ```
+
+---
+
+**FOOBAR11**
+
+```PowerShell
+cls
+```
+
+##### # Enable domain account for System Center setup
+
+```PowerShell
+Enable-ADAccount setup-systemcenter
+```
+
+---
 
 #### Login as TECHTOOLBOX\\setup-systemcenter
 
@@ -466,10 +477,10 @@ Start-Process `
     -ArgumentList $arguments `
     -Wait
 
-logoff
+# logoff
 ```
 
-#### Login as .\\foo
+#### # Login as .\\foo
 
 ### Install Virtual Machine Manager console
 
@@ -490,6 +501,22 @@ Start-Process `
 logoff
 ```
 
+---
+
+**FOOBAR11**
+
+```PowerShell
+cls
+```
+
+##### # Disable domain account for System Center setup
+
+```PowerShell
+Disable-ADAccount setup-systemcenter
+```
+
+---
+
 ## Install Visual Studio 2017
 
 ### Login as .\\foo
@@ -507,7 +534,7 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 ```PowerShell
 cls
 $installerPath = "\\TT-FS01\Products\Microsoft\Visual Studio 2017\Enterprise" `
-    + "\vs_enterprise__989546332.1514038833.exe"
+    + "\vs_enterprise__118076627.1524070032.exe"
 
 Start-Process `
     -FilePath $installerPath `
@@ -530,19 +557,19 @@ Select the following workloads:
 
 ---
 
-**TT-VMM01A**
+**FOOBAR11**
 
 ```PowerShell
-$vm = Get-SCVirtualMachine -Name "FOOBAR11"
-$vmHost = Get-SCVMHost -ComputerName "TT-HV02C.corp.technologytoolbox.com"
+cls
+$vm = Get-SCVirtualMachine -Name "FOOBAR17"
 
 Stop-SCVirtualMachine -VM $vm
 
 Move-SCVirtualMachine `
     -VM $vm `
-    -VMHost $vmHost `
+    -VMHost $vm.HostName `
     -HighlyAvailable $true `
-    -Path "\\TT-SOFS01.corp.technologytoolbox.com\VM-Storage-Silver" `
+    -Path "C:\ClusterStorage\iscsi02-Silver-03" `
     -UseDiffDiskOptimization
 
 Start-SCVirtualMachine -VM $vm
