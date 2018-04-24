@@ -104,6 +104,10 @@ cls
 
 ## # Configure network settings
 
+```PowerShell
+$interfaceAlias = "Extranet-20"
+```
+
 ### # Rename network connections
 
 ```PowerShell
@@ -111,18 +115,14 @@ Get-NetAdapter -Physical | select Name, InterfaceDescription
 
 Get-NetAdapter `
     -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "Production"
+    Rename-NetAdapter -NewName $interfaceAlias
 ```
 
 ```PowerShell
 cls
 ```
 
-### # Configure "Production" network adapter
-
-```PowerShell
-$interfaceAlias = "Production"
-```
+### # Configure "Extranet-20" network adapter
 
 #### # Configure static IPv4 address
 
@@ -941,5 +941,82 @@ Start-SCVirtualMachine $vmName
 ```
 
 ---
+
+## # Replace expired SSL certificate
+
+### # Create request for Web Server certificate
+
+```PowerShell
+$hostname = "wac.fabrikam.com"
+
+& "C:\NotBackedUp\Public\Toolbox\PowerShell\New-CertificateRequest.ps1" `
+    -Subject ("CN=$hostname,OU=IT" `
+        + ",O=Fabrikam Technologies,L=Denver,S=Colorado,C=US") `
+    -SANs $hostname
+```
+
+### # Submit certificate request to Certification Authority
+
+```PowerShell
+Start-Process "https://cipher01.corp.technologytoolbox.com"
+```
+
+**To submit the certificate request to an enterprise CA:**
+
+1. Start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the appropriate certificate template (**Technology Toolbox Web Server**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+### # Remove expired certificate
+
+```PowerShell
+Get-ChildItem cert:\LocalMachine\My |
+    Where-Object { $_.Subject -like "CN=wac.fabrikam.com,*" } |
+    Remove-Item
+```
+
+```PowerShell
+cls
+```
+
+### # Import certificate into certificate store
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+Remove-Item $certFile
+```
+
+```PowerShell
+cls
+```
+
+### # Set friendly name for imported certificate
+
+```PowerShell
+$cert = Get-ChildItem cert:\LocalMachine\My |
+    Where-Object { $_.Subject -like "CN=wac.fabrikam.com,*" }
+
+$cert.FriendlyName = "OfficeWebApps Certificate"
+```
+
+```PowerShell
+cls
+```
+
+### # Restart server
+
+```PowerShell
+Restart-Computer
+```
 
 **TODO:**
