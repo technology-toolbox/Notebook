@@ -332,7 +332,6 @@ Get-Disk 4 |
     New-Partition -UseMaximumSize -DriveLetter Z |
     Format-Volume `
         -FileSystem NTFS `
-        -AllocationUnitSize 64KB `
         -NewFileSystemLabel "Backup01" `
         -Confirm:$false
 ```
@@ -750,6 +749,42 @@ Click **Use Microsoft Update when I check for updates (recommended)** and then c
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/EDCCEA126A77238ED8639F6F409F2C2627092D3B.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/DC/43FCF34E6D6BE1F8E193D1C236AD7F27B0923CDC.png)
+
+```PowerShell
+cls
+```
+
+### # Configure antivirus on DPM server
+
+#### # Disable real-time monitoring by Windows Defender for DPM server
+
+```PowerShell
+$excludeFolders = `
+    "$env:ProgramFiles\Microsoft System Center 2016\DPM\DPM\Temp\MTA",
+    "$env:ProgramFiles\Microsoft System Center 2016\DPM\DPM\XSD"
+
+$excludeProcesses = "csc.exe", "dpmra.exe"
+
+Set-MpPreference -ExclusionPath $excludeFolders
+Set-MpPreference -ExclusionProcess $excludeProcesses
+```
+
+#### # Configure antivirus software to delete infected files
+
+```PowerShell
+Set-MpPreference -LowThreatDefaultAction Remove
+Set-MpPreference -ModerateThreatDefaultAction Remove
+Set-MpPreference -HighThreatDefaultAction Remove
+Set-MpPreference -SevereThreatDefaultAction Remove
+```
+
+#### References
+
+**Run antivirus software on the DPM server**\
+From <[https://technet.microsoft.com/en-us/library/hh757911](https://technet.microsoft.com/en-us/library/hh757911)>
+
+**Configure Data Protection Manager 2016 AntiVirus Exclusions on Windows Server 2016**\
+From <[https://www.normanbauer.com/2018/02/28/configure-data-protection-manager-2016-antivirus-exclusions-on-windows-server-2016/](https://www.normanbauer.com/2018/02/28/configure-data-protection-manager-2016-antivirus-exclusions-on-windows-server-2016/)>
 
 ```PowerShell
 cls
