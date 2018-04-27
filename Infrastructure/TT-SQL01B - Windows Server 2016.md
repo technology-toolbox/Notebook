@@ -1030,3 +1030,28 @@ Recurs every: <strong>1</strong> week on</p>
 ### Execute maintenance plan to remove historical data
 
 Right-click **History Cleanup** and click **Execute**.
+
+## Configure DCOM permissions for SQL Server
+
+### Issue
+
+Source: DCOM\
+Event ID: 10016\
+Event Category: 0\
+User: NT SERVICE\\SQLSERVERAGENT\
+Computer: TT-SQL01B.corp.technologytoolbox.com\
+Event Description: The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID\
+{2DC39BD2-9CFF-405D-A2FE-D246C976278C}\
+and APPID\
+{DB336D8E-32E5-42B9-B14B-58AAA87CEB06}\
+to the user NT SERVICE\\SQLSERVERAGENT SID (S-1-5-80-344959196-2060754871-2302487193-2804545603-1466107430) from address LocalHost (Using LRPC) running in the application container Unavailable SID (Unavailable). This security permission can be modified using the Component Services administrative tool.
+
+> **Note**
+>
+> **DB336D8E-32E5-42B9-B14B-58AAA87CEB06** is the ID for **Microsoft SQL Server Integration Services 13.0**.
+
+### Solution
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\SQL\Configure DCOM Permissions.ps1'
+```
