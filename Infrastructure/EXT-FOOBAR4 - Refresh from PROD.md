@@ -16,7 +16,7 @@ cls
 ### # Copy database backup from Production
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_04_08_075408_3594374.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_29_000036_4884416.bak"
 $computerName = "EXT-FOOBAR4"
 
 $source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
@@ -41,7 +41,7 @@ iisreset /stop
 ### # Restore database backup
 
 ```PowerShell
-$backupFile = "SecuritasPortal_backup_2018_04_08_075408_3594374.bak"
+$backupFile = "SecuritasPortal_backup_2018_04_29_000036_4884416.bak"
 
 $sqlcmd = @"
 DECLARE @backupFilePath VARCHAR(255) =
