@@ -1,7 +1,7 @@
-﻿# EXT-FOOBAR2 - Windows Server 2012 R2 Standard
+﻿# EXT-FOOBAR2
 
-Wednesday, October 12, 2016
-4:27 AM
+Tuesday, May 1, 2018
+5:41 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -19,39 +19,34 @@ Install SecuritasConnect v4.0
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-## # Create virtual machine
+### # Create virtual machine
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV05A"
 $vmName = "EXT-FOOBAR2"
-$vmPath = "E:\NotBackedUp\VMs"
-
-$vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
+$vmPath = "E:\NotBackedUp\VMs\$vmName"
+$vhdPath = "$vmPath\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
     -ComputerName $vmHost `
     -Name $vmName `
+    -Generation 2 `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
-    -NewVHDSizeBytes 60GB `
+    -NewVHDSizeBytes 80GB `
     -MemoryStartupBytes 24GB `
-    -SwitchName "Production"
+    -SwitchName "Embedded Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
-    -ProcessorCount 4
-
-Set-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Path \\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso
+    -ProcessorCount 2
 
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
@@ -60,7 +55,6 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ### Install custom Windows Server 2012 R2 image
 
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-FOOBAR2**.
@@ -69,21 +63,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
-### # Copy latest Toolbox content
-
-```PowerShell
-net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```Console
-robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /MIR
-```
-
-### # Rename local Administrator account and set password
+## # Rename local Administrator account and set password
 
 ```PowerShell
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -106,9 +86,9 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
-### Login as EXT-FOOBAR2\\foo
+## Login as .\\foo
 
-### # Select "High performance" power scheme
+## # Select "High performance" power scheme
 
 ```PowerShell
 powercfg.exe /L
@@ -118,78 +98,121 @@ powercfg.exe /S SCHEME_MIN
 powercfg.exe /L
 ```
 
-### # Enable PowerShell remoting
+## # Enable PowerShell remoting
 
 ```PowerShell
 Enable-PSRemoting -Confirm:$false
 ```
 
-```PowerShell
-cls
-```
+## Set MaxPatchCacheSize to 0 (recommended)
 
-### # Configure network settings
+(skipped -- since this is configured in the custom Windows Server 2012 R2 image)
 
-#### # Rename network connections
+## # Enable performance counters for Server Manager
 
 ```PowerShell
-Get-NetAdapter -Physical | select Name, InterfaceDescription
+$taskName = "\Microsoft\Windows\PLA\Server Manager Performance Monitor"
 
-Get-NetAdapter `
-    -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "Production"
+Enable-ScheduledTask -TaskName $taskName
+
+logman start "Server Manager Performance Monitor"
 ```
 
-#### # Configure "Production" network adapter
+---
 
-```PowerShell
-$interfaceAlias = "Production"
-```
-
-##### # Configure static IPv4 address
-
-```PowerShell
-$ipAddress = "192.168.10.216"
-
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress $ipAddress `
-    -PrefixLength 24 `
-    -DefaultGateway 192.168.10.1
-```
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-##### # Configure IPv4 DNS servers
+## # Set first boot device to hard drive
 
 ```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 192.168.10.209,192.168.10.210
+$vmHost = "TT-HV05A"
+$vmName = "EXT-FOOBAR2"
+
+$vmHardDiskDrive = Get-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName |
+    where { $_.ControllerType -eq "SCSI" `
+        -and $_.ControllerNumber -eq 0 `
+        -and $_.ControllerLocation -eq 0 }
+
+Set-VMFirmware `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -FirstBootDevice $vmHardDiskDrive
 ```
 
-##### # Configure IPv6 DNS servers
+---
 
 ```PowerShell
-Set-DnsClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 2603:300b:802:8900::209, 2603:300b:802:8900::210
+cls
 ```
 
-##### # Enable jumbo frames
+## # Configure networking
 
 ```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
-
-ping iceman.corp.technologytoolbox.com -f -l 8900
+$interfaceAlias = "Extranet-20"
 ```
+
+### # Rename network connections
+
+```PowerShell
+Get-NetAdapter -Physical | select InterfaceDescription
+
+Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
+```
+
+### Configure static IP address
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Configure static IP address using VMM
+
+```PowerShell
+$vmName = "EXT-FOOBAR2"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Extranet-20 VM Network"
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+$ipPool = Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $IPAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---
 
 ```PowerShell
 cls
@@ -206,11 +229,15 @@ Add-Computer `
     -Restart
 ```
 
-### Move computer to "SharePoint Servers" OU
-
 ---
 
-**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move computer to different OU
 
 ```PowerShell
 $computerName = "EXT-FOOBAR2"
@@ -218,54 +245,31 @@ $targetPath = "OU=SharePoint Servers,OU=Servers,OU=Resources,OU=Development" `
     + ",DC=extranet,DC=technologytoolbox,DC=com"
 
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+```
 
-Restart-Computer $computerName
+## # Configure Windows Update
 
-Restart-Computer : Failed to restart the computer EXT-FOOBAR2 with the following error message: The RPC server is unavailable. (Exception from HRESULT: 0x800706BA).
-At line:1 char:1
-+ Restart-Computer $computerName
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : OperationStopped: (EXT-FOOBAR2:String) [Restart-Computer], InvalidOperationException
-    + FullyQualifiedErrorId : RestartcomputerFailed,Microsoft.PowerShell.Commands.RestartComputerCommand
+### # Add machine to security group for Windows Update schedule
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members ($computerName + '$')
 ```
 
 ---
-
-## Login as EXTRANET\\setup-sharepoint-dev
-
-## # Set MaxPatchCacheSize to 0 (Recommended)
-
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
-```
 
 # DEV - Configure VM storage, processors, and memory
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 60 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 150 GB      | Dynamic  | 64K                  | Data01       |
-| 2    | L:           | 25 GB       | Dynamic  | 64K                  | Log01        |
-| 3    | T:           | 4 GB        | Dynamic  | 64K                  | Temp01       |
+| 0    | C:           | 80 GB       | Dynamic  | 4K                   | OSDisk       |
+| 1    | D:           | 210 GB      | Fixed    | 64K                  | Data01       |
+| 2    | L:           | 25 GB       | Fixed    | 64K                  | Log01        |
+| 3    | T:           | 4 GB        | Fixed    | 64K                  | Temp01       |
 | 4    | Z:           | 150 GB      | Dynamic  | 4K                   | Backup01     |
-
-## # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -274,39 +278,38 @@ cls
 ## # Create Data01, Log01, Temp01, and Backup01 VHDs
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV05A"
 $vmName = "EXT-FOOBAR2"
-$silverVmStoragePath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
-$bronzeVmStoragePath = "F:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
+$vmStoragePath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
 
-$vhdPath = "$silverVmStoragePath\$vmName" + "_Data01.vhdx"
+$vhdPath = "$vmStoragePath\$vmName" + "_Data01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 150GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 210GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "$silverVmStoragePath\$vmName" + "_Log01.vhdx"
+$vhdPath = "$vmStoragePath\$vmName" + "_Log01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 25GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 25GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "$silverVmStoragePath\$vmName" + "_Temp01.vhdx"
+$vhdPath = "$vmStoragePath\$vmName" + "_Temp01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 4GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 4GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
     -ControllerType SCSI `
     -Path $vhdPath
 
-$vhdPath = "$bronzeVmStoragePath\$vmName" + "_Backup01.vhdx"
+$vhdPath = "$vmStoragePath\$vmName" + "_Backup01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -SizeBytes 150GB
 Add-VMHardDiskDrive `
@@ -385,13 +388,33 @@ Get-Disk 4 |
 
 (skipped)
 
-## Install and configure SQL Server 2014
+```PowerShell
+cls
+```
+
+## # Install and configure SQL Server 2014
+
+### # Prepare server for SQL Server installation
+
+#### # Add SharePoint setup account to local Administrators group
+
+```PowerShell
+$domain = "EXTRANET"
+$username = "setup-sharepoint-dev"
+
+([ADSI]"WinNT://./Administrators,group").Add(
+    "WinNT://$domain/$username,user")
+```
 
 ### Install SQL Server 2014
 
+> **Important**
+>
+> Login as **EXTRANET\\setup-sharepoint-dev **to install SQL Server.
+
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -400,24 +423,62 @@ cls
 ### # Mount SQL Server 2014 installation media
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV05A"
 $vmName = "EXT-FOOBAR2"
-$imagePath = "\\ICEMAN\Products\Microsoft\SQL Server 2014" `
-    + "\en_sql_server_2014_developer_edition_with_service_pack_2_x64_dvd_8967821.iso"
+$isoName = "en_sql_server_2014_developer_edition_with_service_pack_2_x64_dvd_8967821.iso"
+```
 
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
+#### # Add virtual DVD drive
+
+```PowerShell
+Add-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName
+```
+
+#### # Refresh virtual machine in VMM
+
+```PowerShell
+Read-SCVirtualMachine -VM $vmName
+```
+
+#### # Mount installation media in virtual DVD drive
+
+```PowerShell
+$iso = Get-SCISO | where { $_.Name -eq $isoName }
+
+Get-SCVirtualDVDDrive -VM $vmName |
+    Set-SCVirtualDVDDrive -ISO $iso -Link
 ```
 
 ---
 
 ```PowerShell
-cls
-& X:\setup.exe
+& E:\setup.exe
 ```
 
 > **Important**
 >
-> Wait for the installation to complete.
+> Wait for the installation to complete and restart the computer (if necessary).
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Dismount SQL Server 2014 installation media
+
+```PowerShell
+$vmHost = "TT-HV05A"
+$vmName = "EXT-FOOBAR2"
+
+Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
+```
+
+---
 
 ```PowerShell
 cls
@@ -552,11 +613,47 @@ GO
 
 (skipped - since this was completed previously)
 
-## Install SharePoint 2013 prerequisites on farm servers
+```PowerShell
+cls
+```
+
+## # Install SharePoint 2013 prerequisites on farm servers
+
+### # Copy SharePoint Server 2013 prerequisite files to SharePoint server
+
+#### # Temporarily enable firewall rule to allow files to be copied to server
+
+```PowerShell
+Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-in)"
+```
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Copy SharePoint Server 2013 prerequisite files
+
+```PowerShell
+$computerName = "EXT-FOOBAR2.extranet.technologytoolbox.com"
+
+$source = "\\TT-FS01\Products\Microsoft\SharePoint 2013" `
+    + "\PrerequisiteInstallerFiles_SP1"
+
+$destination = "\\$computerName" `
+    + "\C`$\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1"
+
+robocopy $source $destination /E
+```
+
+---
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -565,39 +662,23 @@ cls
 ### # Mount SharePoint Server 2013 installation media
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV05A"
 $vmName = "EXT-FOOBAR2"
-$imagePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013\" `
-    + "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
+$isoName = "en_sharepoint_server_2013_with_sp1_x64_dvd_3823428.iso"
 
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
+$iso = Get-SCISO | where { $_.Name -eq $isoName }
+
+Get-SCVirtualDVDDrive -VM $vmName |
+    Set-SCVirtualDVDDrive -ISO $iso -Link
 ```
 
 ---
 
 ```PowerShell
 cls
-```
-
-### # Copy SharePoint Server 2013 prerequisite files to SharePoint server
-
-```PowerShell
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$sourcePath = "\\ICEMAN\Products\Microsoft\SharePoint 2013" `
-    + "\PrerequisiteInstallerFiles_SP1"
-
 $prereqPath = "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1"
 
-robocopy $sourcePath $prereqPath /E
-
-& X:\PrerequisiteInstaller.exe `
+& E:\PrerequisiteInstaller.exe `
     /SQLNCli:"$prereqPath\sqlncli.msi" `
     /PowerShell:"$prereqPath\Windows6.1-KB2506143-x64.msu" `
     /NETFX:"$prereqPath\dotNetFx45_Full_setup.exe" `
@@ -621,7 +702,7 @@ Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -630,7 +711,7 @@ cls
 ### # Checkpoint VM
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV05A"
 $vmName = "EXT-FOOBAR2"
 $snapshotName = "Before - Install SharePoint Server 2013 on farm servers"
 
@@ -678,7 +759,7 @@ cls
 ## # Install SharePoint Server 2013 on farm servers
 
 ```PowerShell
-& X:\setup.exe
+& E:\setup.exe
 ```
 
 > **Important**
@@ -687,7 +768,7 @@ cls
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -696,7 +777,7 @@ cls
 #### # Dismount SharePoint Server 2013 installation media
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV05A"
 $vmName = "EXT-FOOBAR2"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
@@ -735,7 +816,7 @@ exit
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -744,7 +825,7 @@ cls
 ## # Update VM snapshot
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV05A"
 $vmName = "EXT-FOOBAR2"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
@@ -788,33 +869,40 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-## # Install Cumulative Update for SharePoint Server 2013
+## Install Cumulative Update for SharePoint Server 2013
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
 
 ### # Download update
 
 ```PowerShell
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
+$patch = "15.0.4963.1001 - SharePoint 2013 September 2017 CU"
+$computerName = "EXT-FOOBAR2.extranet.technologytoolbox.com"
+
+$source = "\\TT-FS01\Products\Microsoft\SharePoint 2013\Patches\$patch"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\$patch"
+
+robocopy $source $destination /E
 ```
 
-> **Note**
->
-> When prompted, type the password to connect to the file share.
+---
 
 ```PowerShell
-$patch = "15.0.4833.1000 - SharePoint 2013 June 2016 CU"
-
-$sourcePath = ("\\ICEMAN\Products\Microsoft\SharePoint 2013" `
-    + "\Patches\$patch")
-
-$destPath = "C:\NotBackedUp\Temp\$patch"
-
-robocopy $sourcePath $destPath /E
+cls
 ```
 
 ### # Install update
 
 ```PowerShell
-& "$destPath\*.exe"
+$patch = "15.0.4963.1001 - SharePoint 2013 September 2017 CU"
+
+& "C:\NotBackedUp\Temp\$patch\*.exe"
 ```
 
 > **Important**
@@ -828,23 +916,34 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 
 ## # Install Cumulative Update for AppFabric 1.1
 
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
 ### # Download update
 
 ```PowerShell
 $patch = "Cumulative Update 7"
+$computerName = "EXT-FOOBAR2.extranet.technologytoolbox.com"
 
-$sourcePath = ("\\ICEMAN\Products\Microsoft\AppFabric 1.1" `
-    + "\Patches\$patch")
+$source = "\\TT-FS01\Products\Microsoft\AppFabric 1.1\Patches\$patch"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\$patch"
 
-$destPath = "C:\NotBackedUp\Temp\$patch"
-
-robocopy $sourcePath $destPath /E
+robocopy $source $destination /E
 ```
+
+---
 
 ### # Install update
 
 ```PowerShell
-& "$destPath\*.exe"
+$patch = "Cumulative Update 7"
+
+& "C:\NotBackedUp\Temp\$patch\*.exe"
 ```
 
 > **Important**
@@ -883,8 +982,29 @@ cls
 
 ## # Install Prince on front-end Web servers
 
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
-& "\\ICEMAN\Products\Prince\prince-7.1-setup.exe"
+cls
+```
+
+### # Copy Prince installation files
+
+```PowerShell
+$computerName = "EXT-FOOBAR2.extranet.technologytoolbox.com"
+
+$source = "\\TT-FS01\Products\Prince"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp\Prince"
+
+robocopy $source $destination /E
+```
+
+---
+
+```PowerShell
+& "C:\NotBackedUp\Temp\Prince\prince-7.1-setup.exe"
 ```
 
 > **Important**
@@ -899,42 +1019,53 @@ cls
 
 ```PowerShell
 Copy-Item `
-    \\ICEMAN\Products\Prince\Prince-license.dat `
+    C:\NotBackedUp\Temp\Prince\Prince-license.dat `
     'C:\Program Files (x86)\Prince\Engine\license\license.dat'
 ```
 
 1. In the **Prince** window, click the **Help** menu and then click **License**.
 2. In the **Prince License** window:
-   1. Click **Open** and then locate the license file (**[\\\\ICEMAN\\Products\\Prince\\Prince-license.dat](\\ICEMAN\Products\Prince\Prince-license.dat)**).
+   1. Click **Open** and then locate the license file (**C:\\NotBackedUp\\Temp\\Prince\\Prince-license.dat**).
    2. Click **Accept** to save the license information.
    3. Verify the license information and then click **Close**.
 3. Close the Prince application.
-
-## DEV - Install Visual Studio 2015 with Update 3
-
----
-
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Mount Visual Studio 2015 installation media
+### # Remove Prince installation files
 
 ```PowerShell
-$vmHost = "FORGE"
-$vmName = "EXT-FOOBAR2"
-$imagePath = "\\ICEMAN\Products\Microsoft\Visual Studio 2015" `
-    + "\en_visual_studio_enterprise_2015_with_update_3_x86_x64_dvd_8923288.iso"
+Remove-Item "C:\NotBackedUp\Temp\Prince" -Recurse
+```
 
-Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
+## DEV - Install Visual Studio 2015 with Update 3
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Mount SharePoint Server 2013 installation media
+
+```PowerShell
+$vmName = "EXT-FOOBAR2"
+$isoName = "en_visual_studio_enterprise_2015_with_update_3_x86_x64_dvd_8923288.iso"
+
+$iso = Get-SCISO | where { $_.Name -eq $isoName }
+
+Get-SCVirtualDVDDrive -VM $vmName |
+    Set-SCVirtualDVDDrive -ISO $iso -Link
 ```
 
 ---
 
 ```PowerShell
-& X:\vs_enterprise.exe
+& E:\vs_enterprise.exe
 ```
 
 **Custom** installation option:
@@ -946,6 +1077,8 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
 > **Important**
 >
 > Wait for the installation to complete and restart the computer if prompted to do so.
+
+TODO:
 
 ## DEV - Enter product key for Visual Studio
 
@@ -959,12 +1092,12 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $imagePath
 
 > **Note**
 >
-> # Add **[https://www.microsoft.com](https://www.microsoft.com)** to **Trusted sites** zone:
+> # Add **[https://www.microsoft.com](https://www.microsoft.com)** and **[https://webpihandler.azurewebsites.net](https://webpihandler.azurewebsites.net)** to **Trusted sites** zone:
 >
 > ```PowerShell
 > C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
 >     -Zone TrustedSites `
->     -Patterns https://www.microsoft.com
+>     -Patterns https://www.microsoft.com, https://webpihandler.azurewebsites.net
 > ```
 
 Update:** Microsoft Office Developer Tools Update 2 for Visual Studio 2015**\
@@ -1003,62 +1136,145 @@ File: **SSDTSetup.exe**
 
 (skipped)
 
+## DEV - Install additional browsers and software (Recommended)
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
 cls
 ```
 
-## # DEV - Install additional browsers and software (Recommended)
+### # Copy installation files
+
+```PowerShell
+$computerName = "EXT-FOOBAR2.extranet.technologytoolbox.com"
+```
+
+#### # Copy installation files for Mozilla Firefox
+
+```PowerShell
+$filter = "Firefox Setup 59.0.2.exe"
+$source = "\\TT-FS01\Products\Mozilla\Firefox\x64"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp"
+
+robocopy $source $destination $filter /E
+```
+
+#### # Copy installation files for Google Chrome
+
+```PowerShell
+$filter = "GoogleChromeStandaloneEnterprise64.msi"
+$source = "\\TT-FS01\Products\Google\Chrome\GoogleChromeEnterpriseBundle64" `
+    + "\Installers"
+
+$destination = "\\$computerName\C`$\NotBackedUp\Temp"
+
+robocopy $source $destination $filter /E
+```
+
+#### # Copy installation files for Adobe Reader
+
+```PowerShell
+$filter = "AdbeRdr*83*"
+$source = "\\TT-FS01\Products\Adobe"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp"
+
+robocopy $source $destination $filter /E
+```
+
+#### # Copy installation files for Microsoft Message Analyzer
+
+```PowerShell
+$filter = "MessageAnalyzer64.msi"
+$source = "\\TT-FS01\Products\Microsoft\Message Analyzer 1.4"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp"
+
+robocopy $source $destination $filter /E
+```
+
+---
+
+```PowerShell
+cls
+```
 
 ### # Install Mozilla Firefox
 
 ```PowerShell
-net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
-```
+$installerPath = "C:\NotBackedUp\Temp\Firefox Setup 59.0.2.exe"
+$installerArguments = "-ms"
 
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-& "\\ICEMAN\Products\Mozilla\Firefox\Firefox Setup 49.0.1.exe"
-```
-
-```PowerShell
-cls
+Start-Process `
+    -FilePath $installerPath `
+    -ArgumentList $installerArguments `
+    -Wait
 ```
 
 ### # Install Google Chrome
 
 ```PowerShell
-& "\\ICEMAN\Products\Google\Chrome\googlechromestandaloneenterprise64.msi"
-```
+$installerPath = "C:\NotBackedUp\Temp" `
+    + "\GoogleChromeStandaloneEnterprise64.msi"
 
-```PowerShell
-cls
+$installerArguments = "/q"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
 ```
 
 ### # Install Adobe Reader
 
+#### # Install Adobe Reader 8.3
+
 ```PowerShell
-& "\\ICEMAN\Products\Adobe\AdbeRdr830_en_US.msi"
+$installerPath = "C:\NotBackedUp\Temp\AdbeRdr830_en_US.msi"
+$installerArguments = "/q"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
 ```
 
-> **Important**
->
-> Wait for the software to be installed.
+#### # Install Adobe Reader 8.3.1 Update
 
 ```PowerShell
-& "\\ICEMAN\Products\Adobe\AdbeRdrUpd831_all_incr.msp"
-```
+$installerPath = "C:\NotBackedUp\Temp\AdbeRdrUpd831_all_incr.msp"
+$installerArguments = "/q"
 
-```PowerShell
-cls
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/update `"$installerPath`" $installerArguments" `
+    -Wait
 ```
 
 ### # Install Microsoft Message Analyzer
 
 ```PowerShell
-& "\\ICEMAN\Products\Microsoft\Message Analyzer 1.4\MessageAnalyzer64.msi"
+$installerPath = "C:\NotBackedUp\Temp\MessageAnalyzer64.msi"
+$installerArguments = "/q"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
+```
+
+```PowerShell
+cls
+```
+
+### # Remove installation files
+
+```PowerShell
+Remove-Item "C:\NotBackedUp\Temp\Firefox Setup 59.0.2.exe"
+Remove-Item C:\NotBackedUp\Temp\GoogleChromeStandaloneEnterprise64.msi
+Remove-Item C:\NotBackedUp\Temp\AdbeRdr*83*
+Remove-Item C:\NotBackedUp\Temp\MessageAnalyzer64.msi
 ```
 
 ## Install additional service packs and updates
@@ -1075,23 +1291,9 @@ Stop-Service wuauserv
 Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
 
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-> **Note**
->
-> When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -1100,7 +1302,7 @@ cls
 ## # Eject media from virtual DVD drive
 
 ```PowerShell
-$vmHost = "FORGE"
+$vmHost = "TT-HV05A"
 $vmName = "EXT-FOOBAR2"
 
 Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
@@ -1146,8 +1348,6 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-# Move VM from FORGE to BEAST
-
 # # Create and configure SharePoint farm
 
 ## # Copy SecuritasConnect build to SharePoint server
@@ -1166,29 +1366,32 @@ New-SmbShare `
 New-Item -ItemType Directory -Path C:\Shares\Builds\ClientPortal
 ```
 
-### # Copy build to SharePoint server
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
-net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
+cls
 ```
 
-> **Note**
->
-> When prompted, type the password to connect to the file share.
+### # Copy build from TFS drop location
 
 ```PowerShell
-$build = "4.0.675.0"
+$newBuild = "4.0.705.0"
+$computerName = "EXT-FOOBAR2.extranet.technologytoolbox.com"
 
-$sourcePath = "\\ICEMAN\Builds\Securitas\ClientPortal\$build"
-$destPath = "C:\Shares\Builds\ClientPortal\$build"
+$sourcePath = "\\TT-FS01\Builds\Securitas\ClientPortal\$newBuild"
+$destPath = "\\$computerName\Builds\ClientPortal\$newBuild"
 
 robocopy $sourcePath $destPath /E
 ```
 
+---
+
 ## # Create SharePoint farm
 
 ```PowerShell
-cd C:\Shares\Builds\ClientPortal\4.0.675.0\DeploymentFiles\Scripts
+cd C:\Shares\Builds\ClientPortal\4.0.705.0\DeploymentFiles\Scripts
 
 $currentUser = whoami
 
@@ -1234,6 +1437,21 @@ Get-SPDatabase |
 ```PowerShell
 & '.\Configure DCOM Permissions.ps1' -Verbose
 ```
+
+& "C:\\NotBackedUp\\Public\\Toolbox\\DcomPerm\\x64\\dcomperm.exe" `\
+    -al "IIS WAMREG admin Service" `\
+    set (\$env:COMPUTERNAME + "\\WSS_ADMIN_WPG") `\
+    permit level:ll,la
+
+& "C:\\NotBackedUp\\Public\\Toolbox\\DcomPerm\\x64\\dcomperm.exe" `\
+    -al "IIS WAMREG admin Service" `\
+    set (\$env:COMPUTERNAME + "\\WSS_WPG") `\
+    permit level:ll,la
+
+& "C:\\NotBackedUp\\Public\\Toolbox\\DcomPerm\\x64\\dcomperm.exe" `\
+    -al "{000C101C-0000-0000-C000-000000000046}" `\
+    set (\$env:COMPUTERNAME + "\\WSS_ADMIN_WPG") `\
+    permit level:ll,la
 
 ## # Configure diagnostic logging
 
@@ -1304,17 +1522,40 @@ Set-SPWOPIZone -zone external-https
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
-    -IPAddress 192.168.10.216 `
+    -IPAddress 10.1.20.158 `
     -Hostnames EXT-FOOBAR2, client-local-2.securitasinc.com
 ```
 
 ---
 
-# Backup SharePoint 2010 environment
+# Backup SharePoint databases
 
-## Backup databases in SharePoint 2010 environment
+## Backup databases in Production environment
 
-(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups))
+(Download backup files from PROD to [\\\\TT-FS01\\Archive\\Clients\\Securitas\\Backups](\\TT-FS01\Archive\Clients\Securitas\Backups))
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Copy database backup from Production
+
+```PowerShell
+$backupFile = "SecuritasPortal_backup_2018_04_08_075408_3594374.bak"
+$computerName = "EXT-FOOBAR2"
+
+$source = "\\TT-FS01\Archive\Clients\Securitas\Backups"
+$destination = "\\$computerName\Z`$\Microsoft SQL Server\MSSQL12.MSSQLSERVER" `
+    + "\MSSQL\Backup\Full"
+
+robocopy $source $destination $backupFile
+```
+
+---
 
 ```PowerShell
 cls
@@ -1981,7 +2222,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -2115,7 +2356,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 >
 > Expect the previous operation to complete in approximately 37 minutes.\
 > RESTORE DATABASE successfully processed 3720520 pages in 958.230 seconds (30.333 MB/sec).\
-> …\
+> ...\
 > RESTORE DATABASE successfully processed 3606878 pages in 1154.382 seconds (24.410 MB/sec).
 
 #### Install SecuritasConnect v3.0 solution
@@ -2767,7 +3008,7 @@ Ending at:<strong> 11:59:59 PM</strong></p>
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Full Backup of All Databases**.
-      2. In the **Schedule** section, click **Change…**
+      2. In the **Schedule** section, click **Change...**
       3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
    3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Full)**, and click **Next**.
@@ -2788,7 +3029,7 @@ Ending at:<strong> 11:59:59 PM</strong></p>
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Differential Backup of All Databases**.
-      2. In the **Schedule** section, click **Change…**
+      2. In the **Schedule** section, click **Change...**
       3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
    3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Differential)**, and click **Next**.
@@ -2809,7 +3050,7 @@ Ending at:<strong> 11:59:59 PM</strong></p>
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Transaction Log Backup of All Databases**.
-      2. In the **Schedule** section, click **Change…**
+      2. In the **Schedule** section, click **Change...**
       3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
    3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Transaction Log)**, and click **Next**.
@@ -2906,7 +3147,7 @@ Recurs every: <strong>1</strong> week on</p>
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Remove Old Database Backups**.
-      2. In the **Schedule** section, click **Change…**
+      2. In the **Schedule** section, click **Change...**
       3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
    3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Maintenance Cleanup Task**, and click **Next**.
@@ -2934,7 +3175,7 @@ Recurs every: <strong>1</strong> week on</p>
    5. In the **Properties** window:
       1. If necessary, expand the **Identification** section.
       2. In the **Name** box, type **Remove Transaction Log Backups**.
-   6. Right-click the **Remove Transaction Log Backups** task and click **Edit…**
+   6. Right-click the **Remove Transaction Log Backups** task and click **Edit...**
    7. In the **Maintenance Cleanup Task** window:
       1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
       2. In the **File extension **box, type **trn**.
@@ -4475,10 +4716,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 >
 > Expect the previous operation to complete in approximately 41 minutes.\
 > RESTORE DATABASE successfully processed 4001436 pages in 433.263 seconds (72.152 MB/sec).\
-> …\
+> ...\
 > RESTORE DATABASE successfully processed 3396484 pages in 852.291 seconds (31.133 MB/sec).
 
-``...PowerShell
+```PowerShell
 cls
 ```
 
@@ -4921,7 +5162,6 @@ Notepad .\Web.SetParameters.xml
 
 ---
 
-
 **Web.SetParameters.xml**
 
 ```XML
@@ -4941,7 +5181,6 @@ Notepad .\Web.SetParameters.xml
 ```
 
 ---
-
 
 ```PowerShell
 .\Web.deploy.cmd /t
@@ -4998,7 +5237,6 @@ Remove-Item C:\Shares\Builds\EmployeePortal\1.0.29.0 -Recurse -Force
 
 ---
 
-
 **FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
@@ -5019,7 +5257,6 @@ robocopy $sourcePath $destPath /E
 ```
 
 ---
-
 
 ```PowerShell
 cls
@@ -5114,7 +5351,7 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### #  Configure permissions for SecuritasPortal database
+### # Configure permissions for SecuritasPortal database
 
 ```PowerShell
 [string] $employeePortalUrl = $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
@@ -5180,7 +5417,7 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### #  Associate users to TECHTOOLBOX\\smasters
+### # Associate users to TECHTOOLBOX\\smasters
 
 ```PowerShell
 $sqlcmd = @"
@@ -5210,7 +5447,6 @@ Set-Location C:
 
 ---
 
-
 **FOOBAR10**
 
 ## # Expand primary VHD for virtual machine
@@ -5229,7 +5465,6 @@ Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
-
 
 ## # Expand C: partition
 
@@ -5303,7 +5538,6 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 ---
 
-
 **TT-VMM01A**
 
 ```PowerShell
@@ -5353,11 +5587,9 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-
 # Upgrade SecuritasConnect to "v4.0 Sprint-28" QFE release
 
 ---
-
 
 **FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
@@ -5379,7 +5611,6 @@ robocopy $sourcePath $destPath /E
 ```
 
 ---
-
 
 ```PowerShell
 cls
@@ -5413,7 +5644,6 @@ Remove-Item C:\Shares\Builds\ClientPortal\4.0.681.0 `
 
 ---
 
-
 **FOOBAR10**
 
 ```PowerShell
@@ -5434,7 +5664,6 @@ Resize-VHD `
 ```
 
 ---
-
 
 ```PowerShell
 cls
@@ -5466,7 +5695,6 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 ---
 
-
 **WOLVERINE**
 
 ```PowerShell
@@ -5487,7 +5715,6 @@ robocopy $sourcePath $destPath $backupFile
 ```
 
 ---
-
 
 ```PowerShell
 cls
@@ -5533,7 +5760,7 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### #  Configure permissions for SecuritasPortal database
+### # Configure permissions for SecuritasPortal database
 
 ```PowerShell
 [string] $employeePortalUrl = $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
@@ -5599,7 +5826,7 @@ Invoke-Sqlcmd $sqlcmd -QueryTimeout 0 -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### #  Associate users to TECHTOOLBOX\\smasters
+### # Associate users to TECHTOOLBOX\\smasters
 
 ```PowerShell
 $sqlcmd = @"
@@ -5642,7 +5869,6 @@ TrackTik username:** opanduro2m**
 
 ---
 
-
 **WOLVERINE**
 
 ```PowerShell
@@ -5663,7 +5889,6 @@ robocopy $sourcePath $destPath $backupFiles
 ```
 
 ---
-
 
 ```PowerShell
 cls
@@ -5743,10 +5968,10 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 >
 > Expect the previous operation to complete in approximately 28 minutes.\
 > RESTORE DATABASE successfully processed 3904847 pages in 229.149 seconds (133.130 MB/sec).\
-> …\
+> ...\
 > RESTORE DATABASE successfully processed 3679300 pages in 825.713 seconds (34.811 MB/sec).
 
-``...PowerShell
+```PowerShell
 cls
 ```
 
@@ -8136,3 +8361,17 @@ Remove-Item C:\Shares\Builds\ClientPortal\4.0.701.0 -Recurse -Force
 ```
 
 ## Install September 12, 2017, security update for Office Web Apps Server 2013
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+> **Note**
+>
+> When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
