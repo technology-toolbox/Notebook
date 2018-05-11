@@ -1131,6 +1131,60 @@ Start-Service wuauserv
 
 "C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WSUS Server Cleanup.xml"
 
+## Expand D: (Data01) drive
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C9/A27048AE900ECB08EF24C0D23F50EEA94B5EAEC9.png)
+
+Screen clipping taken: 5/11/2018 6:29 AM
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Increase the size of "Data01" VHD
+
+```PowerShell
+$vmName = "TT-WSUS03"
+
+# Note: VHD is stored on Cluster Shared Volume -- so expand using VMM cmdlet
+
+Stop-SCVirtualMachine -VM $vmName
+
+Get-SCVirtualDiskDrive -VM $vmName |
+    where { $_.BusType -eq "SCSI" -and $_.Bus -eq 0 -and $_.Lun -eq 1 } |
+    Expand-SCVirtualDiskDrive -VirtualHardDiskSizeGB 100
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend partition
+
+```PowerShell
+$driveLetter = "D"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
 **TODO:**
 
 ## Create SQL job for WSUS database maintenance
