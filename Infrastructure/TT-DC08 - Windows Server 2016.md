@@ -1,7 +1,7 @@
-﻿# TT-DC06 - Windows Server 2016
+﻿# TT-DC08 - Windows Server 2016
 
-Wednesday, February 21, 2018
-1:43 PM
+Thursday, May 17, 2018
+5:39 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02A"
-$vmName = "TT-DC06"
+$vmHost = "TT-HV05A"
+$vmName = "TT-DC08"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -52,7 +52,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-DC06**.
+  - In the **Computer name** box, type **TT-DC08**.
   - Click **Next**.
 - On the **Applications** step, do not select any applications, and click **Next**.
 
@@ -134,11 +134,53 @@ Start-Sleep -Seconds 5
 ping TT-FS01 -f -l 8900
 ```
 
+---
+
+**TT-DC06 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Remove old domain controller
+
+##### # Demote domain controller
+
+```PowerShell
+Import-Module ADDSDeployment
+
+Uninstall-ADDSDomainController `
+    -DemoteOperationMasterRole:$true `
+    -RemoveDnsDelegation:$true
+```
+
+> **Note**
+>
+> When prompted, specify the password for the local administrator account.
+
+##### Remove Active Directory Domain Services and DNS roles
+
+> **Note**
+>
+> Restart the computer to complete the removal of the roles.
+
+##### # Stop server
+
+```PowerShell
+Stop-Computer
+```
+
+---
+
 ```PowerShell
 cls
 ```
 
 #### # Configure static IP addresses
+
+```PowerShell
+$interfaceAlias = "Management"
+```
 
 ##### # Disable DHCP and router discovery
 
@@ -199,7 +241,7 @@ Set-DNSClientServerAddress `
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -208,8 +250,8 @@ cls
 ##### # Add disk for Active Directory data
 
 ```PowerShell
-$vmHost = "TT-HV02A"
-$vmName = "TT-DC06"
+$vmHost = "TT-HV05A"
+$vmName = "TT-DC08"
 
 $vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data01.vhdx"
@@ -240,6 +282,10 @@ Get-Disk 1 |
         -Confirm:$false
 ```
 
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
 cls
 ```
@@ -249,8 +295,10 @@ cls
 #### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
-Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "TT-DC06$"
+Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members "TT-DC08$"
 ```
+
+---
 
 ## Configure domain controller
 
@@ -289,7 +337,7 @@ Install-ADDSDomainController `
 
 ### Disable DNS on IPv6 link-local address
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A1/59E0906A2726FFD2DBB4983F9EF41B663AC1F6A1.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/07/82B083A942F21B34AE744DA187F1C4EFCD30BF07.png)
 
 ### # Configure firewall for cross-forest trust (EXTRANET --> TECHTOOLBOX)
 
@@ -313,7 +361,7 @@ Restart-Computer
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -323,7 +371,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05A"
-$vmName = "TT-DC06"
+$vmName = "TT-DC08"
 
 Disable-VMIntegrationService `
     -ComputerName $vmHost `
@@ -404,7 +452,11 @@ Restart-Service w32time
 w32tm /resync /rediscover
 ```
 
-## Configure backups
+```PowerShell
+cls
+```
+
+## # Configure backups
 
 ### # Add Windows Server Backup feature (DPM dependency for System State backups)
 
@@ -419,10 +471,15 @@ cls
 ### # Install DPM agent
 
 ```PowerShell
-$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016" `
     + "\DPM\Agents\DPMAgentInstaller_x64.exe"
 
-& $installer TT-DPM02.corp.technologytoolbox.com
+$installerArguments = "TT-DPM02.corp.technologytoolbox.com"
+
+Start-Process `
+    -FilePath $installerPath `
+    -ArgumentList "$installerArguments" `
+    -Wait
 ```
 
 Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
@@ -441,7 +498,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**FOOBAR11 - DPM Management Shell**
+**FOOBAR16 - DPM Management Shell**
 
 ```PowerShell
 cls
@@ -450,7 +507,7 @@ cls
 ### # Attach DPM agent
 
 ```PowerShell
-$productionServer = 'TT-DC06'
+$productionServer = 'TT-DC08'
 
 .\Attach-ProductionServer.ps1 `
     -DPMServerName TT-DPM02 `
