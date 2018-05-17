@@ -1,7 +1,7 @@
-﻿# TT-DC07 - Windows Server 2016
+﻿# TT-DC09 - Windows Server 2016
 
-Wednesday, February 21, 2018
-1:43 PM
+Thursday, May 17, 2018
+5:42 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV02B"
-$vmName = "TT-DC07"
+$vmHost = "TT-HV05B"
+$vmName = "TT-DC09"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -52,7 +52,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-DC07**.
+  - In the **Computer name** box, type **TT-DC09**.
   - Click **Next**.
 - On the **Applications** step, do not select any applications, and click **Next**.
 
@@ -134,11 +134,53 @@ Start-Sleep -Seconds 5
 ping TT-FS01 -f -l 8900
 ```
 
+---
+
+**TT-DC07 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Remove old domain controller
+
+##### # Demote domain controller
+
+```PowerShell
+Import-Module ADDSDeployment
+
+Uninstall-ADDSDomainController `
+    -DemoteOperationMasterRole:$true `
+    -RemoveDnsDelegation:$true
+```
+
+> **Note**
+>
+> When prompted, specify the password for the local administrator account.
+
+##### Remove Active Directory Domain Services and DNS roles
+
+> **Note**
+>
+> Restart the computer to complete the removal of the roles.
+
+##### # Stop server
+
+```PowerShell
+Stop-Computer
+```
+
+---
+
 ```PowerShell
 cls
 ```
 
 #### # Configure static IP addresses
+
+```PowerShell
+$interfaceAlias = "Management"
+```
 
 ##### # Disable DHCP and router discovery
 
@@ -208,8 +250,8 @@ cls
 ##### # Add disk for Active Directory data
 
 ```PowerShell
-$vmHost = "TT-HV02B"
-$vmName = "TT-DC07"
+$vmHost = "TT-HV05B"
+$vmName = "TT-DC09"
 
 $vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data01.vhdx"
@@ -240,6 +282,10 @@ Get-Disk 1 |
         -Confirm:$false
 ```
 
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
 cls
 ```
@@ -249,8 +295,10 @@ cls
 #### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
-Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "TT-DC07$"
+Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "TT-DC09$"
 ```
+
+---
 
 ## Configure domain controller
 
@@ -289,7 +337,7 @@ Install-ADDSDomainController `
 
 ### Disable DNS on IPv6 link-local address
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/CB853A6283B6A3A1E3E48E7C4D6D8BB20C3E92D1.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/20/8591B7770BABBFE1DE1F6BD89EABE2A1ECD80B20.png)
 
 ### # Configure firewall for cross-forest trust (EXTRANET --> TECHTOOLBOX)
 
@@ -324,10 +372,15 @@ cls
 ### # Install DPM agent
 
 ```PowerShell
-$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016" `
     + "\DPM\Agents\DPMAgentInstaller_x64.exe"
 
-& $installer TT-DPM02.corp.technologytoolbox.com
+$installerArguments = "TT-DPM02.corp.technologytoolbox.com"
+
+Start-Process `
+    -FilePath $installerPath `
+    -ArgumentList "$installerArguments" `
+    -Wait
 ```
 
 Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
@@ -355,7 +408,7 @@ cls
 ### # Attach DPM agent
 
 ```PowerShell
-$productionServer = 'TT-DC07'
+$productionServer = 'TT-DC09'
 
 .\Attach-ProductionServer.ps1 `
     -DPMServerName TT-DPM02 `
