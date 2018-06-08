@@ -8307,7 +8307,8 @@ cls
 ```PowerShell
 $oldBuild = "4.0.705.0"
 
-Push-Location C:\Shares\Builds\ClientPortal\$oldBuild\DeploymentFiles\Scripts
+Push-Location ("C:\NotBackedUp\Builds\Securitas\ClientPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
 
 & '.\Deactivate Features.ps1' -Verbose
 & '.\Retract Solutions.ps1' -Verbose
@@ -8316,40 +8317,199 @@ Push-Location C:\Shares\Builds\ClientPortal\$oldBuild\DeploymentFiles\Scripts
 Pop-Location
 ```
 
+```PowerShell
+cls
+```
+
 ### # Install new versions of SecuritasConnect WSPs
 
 ```PowerShell
 $newBuild = "4.0.711.0"
 
-Push-Location C:\Shares\Builds\ClientPortal\$newBuild\DeploymentFiles\Scripts
+Push-Location ("C:\NotBackedUp\Builds\Securitas\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
 
 & '.\Add Solutions.ps1' -Verbose
 
 & '.\Deploy Solutions.ps1' -Verbose
 
 & '.\Activate Features.ps1' -Verbose
+
+Pop-Location
 ```
 
-> **Important**
->
-> If an error occurs when activating the **Securitas.Portal.Web_ClaimsAuthenticationConfiguration** feature, restart the SharePoint services to reload the ADFS claims provider from the new version of **Securitas.Portal.Web** assembly:
->
-> ```PowerShell
-> & 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Restart SharePoint Services.cmd'
-> ```
->
-> After restarting the services, activate the features again:
->
-> ```PowerShell
-> & '.\Activate Features.ps1' -Verbose
-> ```
-
 ```PowerShell
-Pop-Location
+cls
 ```
 
 ### # Delete old build
 
 ```PowerShell
-Remove-Item C:\Shares\Builds\ClientPortal\4.0.705.0 -Recurse -Force
+Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.705.0 `
 ```
+
+    -Recurse -Force
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Update VM baseline
+
+```PowerShell
+$vmHost = "WOLVERINE"
+$vmName = "EXT-FOOBAR4"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -Confirm:$false
+
+$newSnapshotName = ("Baseline Client Portal 4.0.711.0" `
+```
+
+    + " / Cloud Portal 2.0.131.0" `\
+    + " / Employee Portal 1.0.58.0")
+
+```PowerShell
+Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
+    Rename-VMSnapshot -NewName $newSnapshotName
+```
+
+---
+
+## Upgrade SecuritasConnect to "v4.0 Sprint-33" release
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Copy new build from TFS drop location
+
+```PowerShell
+$newBuild = "4.0.714.0"
+$computerName = "EXT-FOOBAR4.extranet.technologytoolbox.com"
+
+$sourcePath = "\\TT-FS01\Builds\Securitas\ClientPortal\$newBuild"
+
+$destPath = "\\$computerName\C$" `
+    + "\NotBackedUp\Builds\Securitas\ClientPortal\$newBuild"
+
+robocopy $sourcePath $destPath /E
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Upgrade SecuritasPortal database
+
+```PowerShell
+$newBuild = "4.0.714.0"
+
+Push-Location ("C:\NotBackedUp\Builds\Securitas\ClientPortal\$newBuild\Release")
+
+.\Securitas.Portal.AdminConsole.exe
+
+Pop-Location
+```
+
+### Import Business Unit data
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Remove previous versions of SecuritasConnect WSPs
+
+```PowerShell
+$oldBuild = "4.0.711.0"
+
+Push-Location ("C:\NotBackedUp\Builds\Securitas\ClientPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Deactivate Features.ps1' -Verbose
+& '.\Retract Solutions.ps1' -Verbose
+& '.\Delete Solutions.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Install new versions of SecuritasConnect WSPs
+
+```PowerShell
+$env:SECURITAS_BUILD_CONFIGURATION = "Release"
+
+Push-Location ("C:\NotBackedUp\Builds\Securitas\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Delete old build
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.711.0 `
+```
+
+    -Recurse -Force
+
+### Configure "Business Unit" dimension in Google Analytics
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Update VM baseline
+
+```PowerShell
+$vmHost = "WOLVERINE"
+$vmName = "EXT-FOOBAR4"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -Confirm:$false
+
+$newSnapshotName = ("Baseline Client Portal 4.0.714.0" `
+```
+
+    + " / Cloud Portal 2.0.131.0" `\
+    + " / Employee Portal 1.0.58.0")
+
+```PowerShell
+Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
+    Rename-VMSnapshot -NewName $newSnapshotName
+```
+
+---

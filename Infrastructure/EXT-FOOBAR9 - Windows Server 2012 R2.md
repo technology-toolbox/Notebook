@@ -8255,3 +8255,135 @@ Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
 ```
 
 ---
+
+## Upgrade SecuritasConnect to "v4.0 Sprint-33" release
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Copy new build from TFS drop location
+
+```PowerShell
+$newBuild = "4.0.712.0"
+$computerName = "EXT-FOOBAR9.extranet.technologytoolbox.com"
+
+$sourcePath = "\\TT-FS01\Builds\Securitas\ClientPortal\$newBuild"
+
+$destPath = "\\$computerName\C$" `
+    + "\NotBackedUp\Builds\Securitas\ClientPortal\$newBuild"
+
+robocopy $sourcePath $destPath /E
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Upgrade SecuritasPortal database
+
+```PowerShell
+$newBuild = "4.0.712.0"
+
+Push-Location ("C:\NotBackedUp\Builds\Securitas\ClientPortal\$newBuild\Release")
+
+.\Securitas.Portal.AdminConsole.exe
+
+Pop-Location
+```
+
+### Import Business Unit data
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Remove previous versions of SecuritasConnect WSPs
+
+```PowerShell
+$oldBuild = "4.0.711.0"
+
+Push-Location ("C:\NotBackedUp\Builds\Securitas\ClientPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Deactivate Features.ps1' -Verbose
+& '.\Retract Solutions.ps1' -Verbose
+& '.\Delete Solutions.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Install new versions of SecuritasConnect WSPs
+
+```PowerShell
+$env:SECURITAS_BUILD_CONFIGURATION = "Release"
+
+Push-Location ("C:\NotBackedUp\Builds\Securitas\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Delete old build
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.711.0 `
+```
+
+    -Recurse -Force
+
+### Configure "Business Unit" dimension in Google Analytics
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Update VM baseline
+
+```PowerShell
+$vmHost = "WOLVERINE"
+$vmName = "EXT-FOOBAR9"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -Confirm:$false
+
+$newSnapshotName = ("Baseline Client Portal 4.0.712.0" `
+```
+
+    + " / Cloud Portal 2.0.131.0" `\
+    + " / Employee Portal 1.0.58.0")
+
+```PowerShell
+Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
+    Rename-VMSnapshot -NewName $newSnapshotName
+```
+
+---
