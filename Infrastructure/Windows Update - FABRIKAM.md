@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**FOOBAR10**
+**FOOBAR16**
 
 ```PowerShell
 cls
@@ -26,7 +26,7 @@ $activity = "Prepare development and test VMs for patching"
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'FAB-FOOBAR4'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'FAB-FOOBAR4'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'FAB-TEST1'; VMHost = 'WOLVERINE'; })
 ```
 
@@ -128,9 +128,10 @@ $computers = Get-ADComputer -Filter * |
     select Name
 
 $computers | ForEach-Object {
-    $dest = '\\' + $_.Name + '\C$\NotBackedUp\Public\Toolbox'
+    $destination = '\\' + $_.Name + '\C$\NotBackedUp\Public\Toolbox'
 
-    robocopy $source $dest /E /MIR /XD "Microsoft SDKs" /R:1 /W:1
+    robocopy $source $destination `
+        /E /MIR /XD git-for-windows "Microsoft SDKs" /R:1 /W:1
 }
 ```
 
@@ -178,7 +179,7 @@ Get-Content "C:\Users\jjameson-admin\Desktop\Computer list for Windows Update.tx
 
 ---
 
-**FOOBAR10**
+**FOOBAR16**
 
 ```PowerShell
 cls
@@ -188,7 +189,7 @@ cls
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'FAB-FOOBAR4'; VMHost = 'TT-HV05B'; },
+    [PSCustomObject] @{ VMName = 'FAB-FOOBAR4'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'FAB-TEST1'; VMHost = 'WOLVERINE'; })
 ```
 
