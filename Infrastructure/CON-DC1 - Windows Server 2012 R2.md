@@ -283,6 +283,13 @@ Add-DnsServerPrimaryZone `
     -ReplicationScope Forest
 ```
 
+## Configure conditional forwarder in DNS
+
+**DNS Domain: technologytoolbox.com**\
+**IP Addresses: 192.168.10.103, 192.168.10.104**\
+**Store this conditional forwarder in Active Directory, and replicate is as follows: Yes (checked)**\
+**All DNS servers in this forest**
+
 ```PowerShell
 cls
 ```
