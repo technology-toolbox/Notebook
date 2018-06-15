@@ -125,7 +125,7 @@ net use $source /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```Console
-robocopy $source $destination  /E /XD "Microsoft SDKs"
+robocopy $source $destination  /E /XD git-for-windows "Microsoft SDKs"
 ```
 
 ### # Set MaxPatchCacheSize to 0 (recommended)
@@ -143,7 +143,7 @@ cls
 ### # Configure WSUS intranet location
 
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\WSUS\WSUS - colossus.reg'
+& 'C:\NotBackedUp\Public\Toolbox\WSUS\WSUS - wsus.technologytoolbox.com.reg'
 ```
 
 > **Note**
@@ -198,7 +198,7 @@ Copy VM before running SysPrep (to avoid issues with running SysPrep multiple ti
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -257,7 +257,7 @@ C:\Windows\System32\Sysprep\sysprep.exe /generalize /oobe /shutdown
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
