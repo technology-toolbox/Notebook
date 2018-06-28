@@ -1,7 +1,7 @@
-﻿# TT-WIN10-DEV3 - Windows 10 Enterprise (x64)
+﻿# TT-WIN10-DEV5 - Windows 10 Enterprise (x64)
 
-Thursday, February 1, 2018
-8:59 AM
+Thursday, June 21, 2018
+1:35 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Thursday, February 1, 2018
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -20,13 +20,11 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "WOLVERINE"
-$vmName = "TT-WIN10-DEV3"
+$vmName = "TT-WIN10-DEV5"
 $vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
-    -ComputerName $vmHost `
     -Name $vmName `
     -Generation 2 `
     -Path $vmPath `
@@ -36,11 +34,11 @@ New-VM `
     -SwitchName "Management"
 
 Set-VM `
-    -ComputerName $vmHost `
     -Name $vmName `
-    -ProcessorCount 2
+    -ProcessorCount 4 `
+    -AutomaticCheckpointsEnabled $false
 
-Start-VM -ComputerName $vmHost -Name $vmName
+Start-VM -Name $vmName
 ```
 
 ---
@@ -49,19 +47,25 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-WIN10-DEV3**.
+  - In the **Computer name** box, type **TT-WIN10-DEV5**.
   - Click **Next**.
 - On the **Applications** step:
   - Select the following applications:
-    - **Adobe Reader 8.3.1**
-    - **Chrome (64-bit)**
-    - **Firefox (64-bit)**
-    - **Thunderbird**
+    - **Adobe**
+      - **Adobe Reader 8.3.1**
+    - **Chrome**
+      - **Chrome (64-bit)**
+    - **Microsoft**
+      - **Remote Server Administration Tools for Windows 10**
+      - **SQL Server 2017 Management Studio**
+    - **Mozilla**
+      - **Firefox (64-bit)**
+      - **Thunderbird**
   - Click **Next**.
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -70,7 +74,7 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "TT-WIN10-DEV3"
+$vmName = "TT-WIN10-DEV5"
 
 $targetPath = ("OU=Workstations,OU=Resources,OU=Development" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
@@ -132,7 +136,7 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 $source = "\\TT-FS01\Public\Toolbox"
 $destination = "C:\NotBackedUp\Public\Toolbox"
 
-robocopy $source $destination /E /XD "Microsoft SDKs"
+robocopy $source $destination /E /XD git-for-windows "Microsoft SDKs"
 ```
 
 ### # Enable PowerShell remoting
@@ -214,6 +218,99 @@ Select the following workloads:
 cls
 ```
 
+## # Install Git
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Git\Git-2.16.2-64-bit.exe"
+
+Start-Process `
+    -FilePath $setupPath `
+    -Wait
+```
+
+```PowerShell
+cls
+```
+
+## # Install Visual Studio Code
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio Code" `
+    + "\VSCodeSetup-x64-1.24.1.exe"
+
+$arguments = "/silent" `
+    + " /mergetasks='!runcode,addcontextmenufiles,addcontextmenufolders,addtopath'"
+
+Start-Process `
+    -FilePath $setupPath `
+    -ArgumentList $arguments `
+    -Wait
+```
+
+### Issue
+
+**Installer doesn't disable launch of VScode even when installing with /mergetasks=!runcode**\
+From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Microsoft/vscode/issues/46350)>
+
+```PowerShell
+cls
+```
+
+## # Install Ruby
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Ruby\rubyinstaller-devkit-2.4.4-1-x64.exe"
+
+Start-Process `
+    -FilePath $setupPath `
+    -Wait
+```
+
+```PowerShell
+cls
+```
+
+## # Install Ruby dependencies for debugging in Visual Studio Code
+
+```Shell
+gem install ruby-debug-ide
+
+gem install debase
+```
+
+### Reference
+
+**VS Code Ruby Extension**\
+From <[https://github.com/rubyide/vscode-ruby#install-ruby-dependencies](https://github.com/rubyide/vscode-ruby#install-ruby-dependencies)>
+
+```PowerShell
+cls
+```
+
 ## # Install Check Point VPN client
 
 ```PowerShell
@@ -253,7 +350,7 @@ cls
 ## # Back up virtual machine
 
 ```PowerShell
-$vmName = "TT-WIN10-DEV3"
+$vmName = "TT-WIN10-DEV5"
 
 Stop-VM $vmName
 
