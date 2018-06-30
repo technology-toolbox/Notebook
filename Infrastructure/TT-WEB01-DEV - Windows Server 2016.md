@@ -270,9 +270,37 @@ Start-SCVirtualMachine $vmName
 cls
 ```
 
-## # Install Visual Studio 2017
+## # Install and configure IIS
 
-### # Launch Visual Studio 2017 setup
+### # Enable role - Web Server (IIS)
+
+```PowerShell
+Enable-WindowsOptionalFeature `
+    -Online `
+    -FeatureName `
+        IIS-CommonHttpFeatures,
+        IIS-DefaultDocument,
+        IIS-DirectoryBrowsing,
+        IIS-HealthAndDiagnostics,
+        IIS-HttpCompressionStatic,
+        IIS-HttpErrors,
+        IIS-HttpLogging,
+        IIS-ManagementConsole,
+        IIS-Performance,
+        IIS-RequestFiltering,
+        IIS-Security,
+        IIS-StaticContent,
+        IIS-WebServer,
+        IIS-WebServerManagementTools,
+        IIS-WebServerRole,
+        IIS-WindowsAuthentication
+```
+
+```PowerShell
+cls
+```
+
+## # Install Visual Studio 2017
 
 ```PowerShell
 net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
@@ -300,3 +328,124 @@ Select the following workloads:
 > **Note**
 >
 > When prompted, restart the computer to complete the installation.
+
+```PowerShell
+cls
+```
+
+## # Install and configure Securitas Client Portal web service
+
+```PowerShell
+Add-WindowsFeature NET-Framework-Core `
+    -Source "\\TT-FS01\Products\Microsoft\Windows Server 2016\Sources\SxS"
+
+Enable-WindowsOptionalFeature `
+    -Online `
+    -FeatureName `
+        IIS-ASPNET,
+        IIS-ISAPIExtensions,
+        IIS-ISAPIFilter,
+        IIS-NetFxExtensibility,
+        WAS-ConfigurationAPI,
+        WAS-NetFxEnvironment,
+        WAS-ProcessModel,
+        WAS-WindowsActivationService,
+        WCF-HTTP-Activation,
+        WCF-HTTP-Activation
+
+$hostHeader = "clientportalws-dev.securitasinc.com"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 127.0.0.1 `
+    -Hostnames $hostHeader
+
+
+Import-Module WebAdministration
+
+$appPoolName = $hostHeader
+
+New-WebAppPool -Name $appPoolName
+
+$appPool = Get-Item IIS:\AppPools\$appPoolName
+
+$appPool.processModel.identityType = "NetworkService"
+$appPool | Set-Item
+
+Set-ItemProperty IIS:\AppPools\$appPoolName managedRuntimeVersion v2.0
+
+New-Item -ItemType Directory -Path "C:\inetpub\wwwroot\$hostHeader"
+
+$site = New-WebSite `
+    -name $hostHeader `
+    -PhysicalPath "C:\inetpub\wwwroot\$hostHeader" `
+    -HostHeader $hostHeader `
+    -ApplicationPool $appPoolName
+```
+
+```PowerShell
+cls
+```
+
+### # Configure SSL
+
+#### # Install certificate for secure communication
+
+##### # Copy certificate
+
+```PowerShell
+$certFile = "securitasinc.com.pfx"
+
+$sourcePath = "\\TT-FS01\Archive\Clients\Securitas"
+
+$destPath = "C:\NotBackedUp\Temp"
+
+New-Item -ItemType Directory -Path $destPath
+
+Copy-Item "$sourcePath\$certFile" $destPath
+```
+
+##### # Install certificate
+
+```PowerShell
+$certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted for the secure string, type the password for the exported certificate.
+
+```PowerShell
+$certFile = "C:\NotBackedUp\Temp\securitasinc.com.pfx"
+
+Import-PfxCertificate `
+    -FilePath $certFile `
+    -CertStoreLocation Cert:\LocalMachine\My `
+    -Password $certPassword
+
+If ($? -eq $true)
+{
+    Remove-Item $certFile -Verbose
+}
+```
+
+```PowerShell
+cls
+```
+
+#### # Add HTTPS binding to IIS website
+
+```PowerShell
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+    Where { $_.Subject -like "CN=`*.securitasinc.com,*" }
+
+New-WebBinding `
+    -Name $hostHeader `
+    -Protocol https `
+    -Port 443 `
+    -HostHeader $hostHeader `
+    -SslFlags 0
+
+$cert |
+    New-Item `
+        -Path ("IIS:\SslBindings\0.0.0.0!443!" + $hostHeader)
+```
