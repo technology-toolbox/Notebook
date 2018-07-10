@@ -8713,3 +8713,51 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
 ```
 
 ---
+
+## Upgrade SharePoint after installing latest patches using Windows Update
+
+```PowerShell
+cls
+Push-Location ("C:\Program Files\Common Files\microsoft shared" `
+    + "\Web Server Extensions\15\BIN")
+
+.\PSConfig.exe `
+```
+
+    -cmd upgrade -inplace b2b `\
+    -wait `\
+    -cmd applicationcontent -install `\
+    -cmd installfeatures `\
+    -cmd secureresources `\
+    -cmd services -install
+
+```PowerShell
+Pop-Location
+```
+
+### Reference
+
+**Why I prefer PSCONFIGUI.EXE over PSCONFIG.EXE**\
+From <[https://blogs.technet.microsoft.com/stefan_gossner/2015/08/20/why-i-prefer-psconfigui-exe-over-psconfig-exe/](https://blogs.technet.microsoft.com/stefan_gossner/2015/08/20/why-i-prefer-psconfigui-exe-over-psconfig-exe/)>
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Update VM baseline
+
+```PowerShell
+$vmHost = "WOLVERINE"
+$vmName = "EXT-FOOBAR4"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -Confirm:$false
+```
+
+---
