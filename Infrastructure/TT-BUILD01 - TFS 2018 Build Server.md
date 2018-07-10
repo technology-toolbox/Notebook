@@ -688,6 +688,35 @@ Disable-ADAccount -Identity setup-tfs
 
 ---
 
+```PowerShell
+cls
+```
+
+### # Install TypeScript 2.7.2 for Visual Studio 2017
+
+##### # Copy installer from internal file server
+
+```PowerShell
+$installer = "TypeScript_SDK.exe"
+
+$source = ("\\TT-FS01\Products\Microsoft\Visual Studio 2017" `
+     + "\TypeScript 2.7.2 for Visual Studio 2017")
+
+$destination = 'C:\NotBackedUp\Temp'
+
+robocopy $source $destination $installer
+```
+
+##### # Install new version of TypeScript for Visual Studio 2017
+
+```PowerShell
+Start-Process `
+    -FilePath C:\NotBackedUp\Temp\TypeScript_SDK.exe `
+    -Wait
+```
+
+**TODO:**
+
 ---
 
 **FOOBAR11**

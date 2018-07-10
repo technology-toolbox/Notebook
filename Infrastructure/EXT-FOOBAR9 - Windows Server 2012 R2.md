@@ -8387,3 +8387,203 @@ Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
 ```
 
 ---
+
+## Upgrade Employee Portal to "v1.0 Sprint-11" release
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Copy new build from TFS drop location
+
+```PowerShell
+$newBuild = "1.0.86.0"
+$computerName = "EXT-FOOBAR9.extranet.technologytoolbox.com"
+
+$sourcePath = "\\TT-FS01\Builds\Securitas\EmployeePortal\$newBuild"
+
+$destPath = "\\$computerName\C$" `
+    + "\NotBackedUp\Builds\Securitas\EmployeePortal\$newBuild"
+
+robocopy $sourcePath $destPath /E
+```
+
+---
+
+```PowerShell
+$newBuild = "1.0.86.0"
+```
+
+### # Backup Employee Portal Web.config file
+
+```PowerShell
+[Uri] $employeePortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
+    "client",
+    "employee")
+
+[String] $employeePortalHostHeader = $employeePortalUrl.Host
+
+Copy-Item C:\inetpub\wwwroot\$employeePortalHostHeader\Web.config `
+    "C:\NotBackedUp\Temp\Web - $employeePortalHostHeader.config"
+```
+
+### # Deploy Employee Portal website on Central Administration server
+
+```PowerShell
+Push-Location ("C:\NotBackedUp\Builds\Securitas\EmployeePortal\$newBuild" `
+    + "\Release")
+
+attrib -r .\Web.SetParameters.xml
+
+$config = Get-Content Web.SetParameters.xml
+
+$config = $config -replace `
+    "Default Web Site/Web_deploy", $employeePortalHostHeader
+
+$configXml = [xml] $config
+
+$configXml.Save("$pwd\Web.SetParameters.xml")
+
+.\Web.deploy.cmd /t
+
+.\Web.deploy.cmd /y
+
+Pop-Location
+```
+
+### # Configure application settings and web service URLs
+
+```PowerShell
+Push-Location ("C:\inetpub\wwwroot\" + $employeePortalHostHeader)
+
+(Get-Content Web.config) `
+    -replace '<add key="GoogleAnalytics.TrackingId" value="" />',
+        '<add key="GoogleAnalytics.TrackingId" value="UA-25949832-3" />' `
+    -replace 'https://client-local', 'https://client-local-9' `
+    -replace 'https://cloud2-local', 'https://cloud2-local-9' `
+    -replace 'https://clientportalwsdev', 'https://clientportalws-dev' |
+    Set-Content Web.config
+
+Pop-Location
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\x64\sgdm.exe `
+    "C:\NotBackedUp\Temp\Web - $employeePortalHostHeader.config" `
+    C:\inetpub\wwwroot\$employeePortalHostHeader\Web.config
+```
+
+### Deploy website content to other web servers in the farm
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Configure name resolution for Client Portal web service
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 192.168.10.172 `
+    -Hostnames TT-WEB01-DEV, clientportalws-dev.securitasinc.com
+```
+
+### # Delete old build
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.58.0 -Recurse -Force
+```
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Update VM baseline
+
+```PowerShell
+$vmHost = "WOLVERINE"
+$vmName = "EXT-FOOBAR9"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -Confirm:$false
+
+$newSnapshotName = ("Baseline Client Portal 4.0.714.0" `
+```
+
+    + " / Cloud Portal 2.0.131.0" `\
+    + " / Employee Portal 1.0.86.0")
+
+```PowerShell
+Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
+    Rename-VMSnapshot -NewName $newSnapshotName
+```
+
+---
+
+### DEV - Install TypeScript 2.7.2 for Visual Studio 2015
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+##### # Copy installer from internal file server
+
+```PowerShell
+$installer = "TypeScript_Dev14Full.exe"
+
+$source = ("\\TT-FS01\Products\Microsoft\Visual Studio 2015" `
+     + "\TypeScript 2.7.2 for Visual Studio 2015")
+
+$destination = '\\EXT-FOOBAR9\C$\NotBackedUp\Temp'
+
+robocopy $source $destination $installer
+```
+
+---
+
+```PowerShell
+cls
+```
+
+##### # Install new version of TypeScript for Visual Studio 2015
+
+```PowerShell
+Start-Process `
+    -FilePath C:\NotBackedUp\Temp\TypeScript_Dev14Full.exe `
+    -Wait
+```
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Update VM baseline
+
+```PowerShell
+$vmHost = "WOLVERINE"
+$vmName = "EXT-FOOBAR9"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -Confirm:$false
+```
+
+---
