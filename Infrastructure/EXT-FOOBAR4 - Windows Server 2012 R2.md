@@ -113,6 +113,10 @@ cls
 
 #### # Configure network settings
 
+```PowerShell
+$interfaceAlias = "Extranet-20"
+```
+
 ##### # Rename network connections
 
 ```PowerShell
@@ -120,14 +124,10 @@ Get-NetAdapter -Physical | select Name, InterfaceDescription
 
 Get-NetAdapter `
     -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName "Production"
+    Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-##### # Configure "Production" network adapter
-
-```PowerShell
-$interfaceAlias = "Production"
-```
+##### # Configure "Extranet-20" network adapter
 
 ###### # Disable DHCP
 
@@ -3893,7 +3893,7 @@ Remove-NetIPAddress 2601:282:4201:e500::218 -Confirm:$false
 ### # Enable DHCP on IPv6 interface
 
 ```PowerShell
-$interfaceAlias = "Production"
+$interfaceAlias = "Extranet-20"
 
 @("IPv6") | ForEach-Object {
     $addressFamily = $_
@@ -8758,6 +8758,327 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -ComputerName $vmHost `
     -Name $vmName `
     -Confirm:$false
+```
+
+---
+
+## Upgrade SecuritasConnect to "v4.0 Sprint-34" release
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Copy new build from TFS drop location
+
+```PowerShell
+$newBuild = "4.0.716.0"
+$computerName = "EXT-FOOBAR4.extranet.technologytoolbox.com"
+
+$sourcePath = "\\TT-FS01\Builds\Securitas\ClientPortal\$newBuild"
+
+$destPath = "\\$computerName\C$" `
+    + "\NotBackedUp\Builds\Securitas\ClientPortal\$newBuild"
+
+robocopy $sourcePath $destPath /E
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Remove previous versions of SecuritasConnect WSPs
+
+```PowerShell
+$oldBuild = "4.0.714.0"
+
+Push-Location ("C:\NotBackedUp\Builds\Securitas\ClientPortal\$oldBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Deactivate Features.ps1' -Verbose
+& '.\Retract Solutions.ps1' -Verbose
+& '.\Delete Solutions.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Install new versions of SecuritasConnect WSPs
+
+```PowerShell
+$newBuild = "4.0.716.0"
+
+$env:SECURITAS_BUILD_CONFIGURATION = "Release"
+
+Push-Location ("C:\NotBackedUp\Builds\Securitas\ClientPortal\$newBuild" `
+    + "\DeploymentFiles\Scripts")
+
+& '.\Add Solutions.ps1' -Verbose
+
+& '.\Deploy Solutions.ps1' -Verbose
+
+& '.\Activate Features.ps1' -Verbose
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Delete old build
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.714.0 `
+```
+
+    -Recurse -Force
+
+### # Prepare VM for snapshot
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Prepare for Snapshot.cmd'
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Clear-EventLogs.ps1
+```
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Update VM baseline
+
+```PowerShell
+$vmHost = "WOLVERINE"
+$vmName = "EXT-FOOBAR4"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -Confirm:$false
+
+$newSnapshotName = ("Baseline Client Portal 4.0.716.0" `
+```
+
+    + " / Cloud Portal 2.0.131.0" `\
+    + " / Employee Portal 1.0.86.0")
+
+```PowerShell
+Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
+    Rename-VMSnapshot -NewName $newSnapshotName
+```
+
+---
+
+## Upgrade Employee Portal to "v1.0 Sprint-12" release
+
+---
+
+**WOLVERINE**
+
+```PowerShell
+cls
+```
+
+### # Copy new build from TFS drop location
+
+```PowerShell
+$newBuild = "1.0.91.0"
+$computerName = "EXT-FOOBAR4.extranet.technologytoolbox.com"
+
+$sourcePath = "\\TT-FS01\Builds\Securitas\EmployeePortal\$newBuild"
+
+$destPath = "\\$computerName\C$" `
+    + "\NotBackedUp\Builds\Securitas\EmployeePortal\$newBuild"
+
+robocopy $sourcePath $destPath /E
+```
+
+---
+
+```PowerShell
+$newBuild = "1.0.91.0"
+```
+
+### # Backup Employee Portal Web.config file
+
+```PowerShell
+[Uri] $employeePortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
+    "client",
+    "employee")
+
+[String] $employeePortalHostHeader = $employeePortalUrl.Host
+
+Copy-Item C:\inetpub\wwwroot\$employeePortalHostHeader\Web.config `
+    "C:\NotBackedUp\Temp\Web - $employeePortalHostHeader.config"
+```
+
+### # Deploy Employee Portal website on Central Administration server
+
+```PowerShell
+Push-Location ("C:\NotBackedUp\Builds\Securitas\EmployeePortal\$newBuild" `
+    + "\Release")
+
+attrib -r .\Web.SetParameters.xml
+
+$config = Get-Content Web.SetParameters.xml
+
+$config = $config -replace `
+    "Default Web Site/Web_deploy", $employeePortalHostHeader
+
+$configXml = [xml] $config
+
+$configXml.Save("$pwd\Web.SetParameters.xml")
+
+.\Web.deploy.cmd /t
+
+.\Web.deploy.cmd /y
+
+Pop-Location
+```
+
+### # Configure application settings and web service URLs
+
+```PowerShell
+Push-Location ("C:\inetpub\wwwroot\" + $employeePortalHostHeader)
+
+(Get-Content Web.config) `
+    -replace '<add key="GoogleAnalytics.TrackingId" value="" />',
+        '<add key="GoogleAnalytics.TrackingId" value="UA-25949832-3" />' `
+    -replace 'https://client-local', 'https://client-local-4' `
+    -replace 'https://cloud2-local', 'https://cloud2-local-4' `
+    -replace 'https://clientportalwsdev', 'https://clientportalws-dev' |
+    Set-Content Web.config
+
+Pop-Location
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\x64\sgdm.exe `
+    "C:\NotBackedUp\Temp\Web - $employeePortalHostHeader.config" `
+    C:\inetpub\wwwroot\$employeePortalHostHeader\Web.config
+```
+
+### Deploy website content to other web servers in the farm
+
+(skipped)
+
+```PowerShell
+cls
+```
+
+### # Update Cloud Portal to support "preview" feature in search results
+
+```PowerShell
+$websiteName = "cloud-local-4.securitasinc.com80"
+cd "C:\inetpub\wwwroot\wss\VirtualDirectories\$websiteName"
+
+copy .\web.config `
+    "C:\NotBackedUp\Temp\Web - $websiteName.config"
+
+Notepad .\web.config
+```
+
+---
+
+**Web.config**
+
+```XML
+...
+  <system.webServer>
+    <httpProtocol>
+      <customHeaders>
+      ...        <add name="Content-Security-Policy" value="frame-ancestors 'self' http://*.securitasinc.com https://*.securitasinc.com;" />
+      </customHeaders>
+    </httpProtocol>
+...
+```
+
+---
+
+```PowerShell
+$websiteName = "cloud2-local-4.securitasinc.com443"
+cd "C:\inetpub\wwwroot\wss\VirtualDirectories\$websiteName"
+
+copy .\web.config `
+    "C:\NotBackedUp\Temp\Web - $websiteName.config"
+
+Notepad .\web.config
+```
+
+---
+
+**Web.config**
+
+```XML
+...
+  <system.webServer>
+    <httpProtocol>
+      <customHeaders>
+      ...        <add name="Content-Security-Policy" value="frame-ancestors 'self' http://*.securitasinc.com https://*.securitasinc.com;" />
+      </customHeaders>
+    </httpProtocol>
+...
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Delete old build
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.86.0 -Recurse -Force
+```
+
+### # Prepare VM for snapshot
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts\Prepare for Snapshot.cmd'
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Clear-EventLogs.ps1
+```
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Update VM baseline
+
+```PowerShell
+$vmHost = "WOLVERINE"
+$vmName = "EXT-FOOBAR4"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -Confirm:$false
+
+$newSnapshotName = ("Baseline Client Portal 4.0.716.0" `
+```
+
+    + " / Cloud Portal 2.0.131.0" `\
+    + " / Employee Portal 1.0.91.0")
+
+```PowerShell
+Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
+    Rename-VMSnapshot -NewName $newSnapshotName
 ```
 
 ---
