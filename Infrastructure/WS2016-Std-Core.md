@@ -104,7 +104,7 @@ net use $source /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```Console
-robocopy $source $destination  /E /XD "Microsoft SDKs" /NP
+robocopy $source $destination  /E /XD git-for-windows "Microsoft SDKs" /NP
 ```
 
 ### # Set MaxPatchCacheSize to 0 (recommended)
@@ -122,7 +122,7 @@ cls
 ### # Configure WSUS intranet location
 
 ```PowerShell
-& 'C:\NotBackedUp\Public\Toolbox\WSUS\WSUS - colossus.reg'
+& 'C:\NotBackedUp\Public\Toolbox\WSUS\WSUS - wsus.technologytoolbox.com.reg'
 ```
 
 > **Note**
