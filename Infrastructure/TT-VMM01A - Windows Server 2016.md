@@ -2396,6 +2396,105 @@ New-SCStaticIPAddressPool `
     -IPAddressReservedSet $reservedAddressSet
 ```
 
+## Configure Software Defined Networking (SDN)
+
+### Create new VLAN for core infrastructure servers (e.g. domain controllers)
+
+This is necessary because the current **Management** logical network was created with network virtualization enabled (and this cannot be disabled after a logical network is created). During the process of deploying SDN, errors occur due to the loss of connectivity to critical services (e.g. Active Directory) because VMs connected to the **Management** VM Network lose network connectivity after the **Microsoft Azure VFP Switch Extension** is enabled on the VM switches on the Hyper-V servers.
+
+```PowerShell
+cls
+```
+
+##### # Create network site for Production - VLAN 15 traffic
+
+```PowerShell
+$logicalNetwork = Get-SCLogicalNetwork -Name "Datacenter"
+
+$hostGroups = @()
+$hostGroups += Get-SCVMHostGroup -Name "All Hosts"
+
+$subnetVlans = @()
+$subnetVlans += New-SCSubnetVLan -Subnet "10.1.15.0/24" -VLanID 15
+
+New-SCLogicalNetworkDefinition `
+    -Name "Production - VLAN 15" `
+    -LogicalNetwork $logicalNetwork `
+    -VMHostGroup $hostGroups `
+    -SubnetVLan $subnetVlans
+```
+
+##### # Add logical network definition to "Trunk Uplink" port profile
+
+```PowerShell
+$logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
+    -Name "Production - VLAN 15"
+
+$portProfile = Get-SCNativeUplinkPortProfile -Name "Trunk Uplink"
+
+Set-SCNativeUplinkPortProfile `
+    -NativeUplinkPortProfile $portProfile `
+    -AddLogicalNetworkDefinition $logicalNetworkDefinition
+```
+
+#### # Create VM network for storage traffic
+
+```PowerShell
+$vmNetwork = New-SCVMNetwork `
+    -Name "Production VM Network" `
+    -IsolationType VLANNetwork `
+    -LogicalNetwork $logicalNetwork
+
+$subnetVLANs = @()
+$subnetVLANs += (New-SCSubnetVLan -Subnet "10.1.15.0/24" -VLanID 15)
+
+$vmSubnet = New-SCVMSubnet `
+    -Name "Production VM Network_0" `
+    -LogicalNetworkDefinition $logicalNetworkDefinition `
+    -SubnetVLan $subnetVLANs `
+    -VMNetwork $vmNetwork
+```
+
+#### # Create IP address pool for storage network
+
+```PowerShell
+$addressPoolName = "Production-15 Address Pool"
+
+$ipAddressRangeStart = "10.1.15.20"
+$ipAddressRangeEnd = "10.1.15.254"
+
+$reservedAddresses = @()
+
+$reservedAddressSet = $reservedAddresses -join ","
+
+$subnet = "10.1.15.0/24"
+
+$networkRoutes = @()
+
+$gateways = @()
+$gateways += New-SCDefaultGateway -IPAddress "10.1.15.1" -Automatic
+
+$dnsServers = @("192.168.10.103", "192.168.10.104")
+
+$dnsSuffix = "corp.technologytoolbox.com"
+$dnsSearchSuffixes = @()
+
+$winsServers = @()
+
+New-SCStaticIPAddressPool `
+    -Name $addressPoolName `
+    -LogicalNetworkDefinition $logicalNetworkDefinition `
+    -Subnet $subnet `
+    -IPAddressRangeStart $ipAddressRangeStart `
+    -IPAddressRangeEnd $ipAddressRangeEnd `
+    -DefaultGateway $gateways `
+    -DNSServer $dnsServers `
+    -DNSSuffix $dnsSuffix `
+    -DNSSearchSuffix $dnsSearchSuffixes `
+    -NetworkRoute $networkRoutes `
+    -IPAddressReservedSet $reservedAddressSet
+```
+
 **TODO:**
 
 #### # Associate network adapters with logical network
