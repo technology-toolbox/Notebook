@@ -307,3 +307,45 @@ Start-SCVirtualMachine -VM $vmName
 ```
 
 ---
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Contoso VM network
+
+```PowerShell
+$vmName = "CON-DC2"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Contoso VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork
+
+Start-SCVirtualMachine $vmName
+```
+
+### Update IP addresses
+
+#### IPv4
+
+IP address: **10.1.60.3**\
+Subnet mask: **255.255.255.0**\
+Default gateway: **10.1.60.1**
+
+DNS servers: **10.1.60.2, 127.0.0.1**
+
+#### IPv6
+
+IP address: **Obtain an IPv6 address automatically**
+
+DNS servers: **Obtain DNS server address automatically**
+
+---

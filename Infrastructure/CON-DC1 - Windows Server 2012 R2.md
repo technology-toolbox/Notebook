@@ -464,3 +464,73 @@ Start-SCVirtualMachine -VM $vmName
 ```
 
 ---
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Contoso VM network
+
+```PowerShell
+$vmName = "CON-DC1"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Contoso VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork
+
+Start-SCVirtualMachine $vmName
+```
+
+### Update IP addresses
+
+#### IPv4
+
+IP address: **10.1.60.2**\
+Subnet mask: **255.255.255.0**\
+Default gateway: **10.1.60.1**
+
+DNS servers: **10.1.60.3, 127.0.0.1**
+
+#### IPv6
+
+IP address: **Obtain an IPv6 address automatically**
+
+DNS servers: **Obtain DNS server address automatically**
+
+---
+
+## Update conditional forwarder in DNS
+
+**DNS Domain: technologytoolbox.com**\
+**IP Addresses: 10.1.30.2, 10.1.30.3**
+
+## Configure group policies
+
+### Configure group policy - "Enable Remote Desktop Policy"
+
+- Computer Configuration
+  - Policies
+    - Windows Settings
+      - Security Settings
+        - Windows Firewall with Advanced Security
+        - Inbound Rules
+          - Predefined - Remote Desktop
+            - Remote Desktop -Shadow (TCP-In)
+            - Remote Desktop - User Mode (TCP-In)
+            - Remote Desktop - User Mode (UDP-In)
+    - Administrative Templates
+      - Windows Components/Remote Desktop Services/Remote Desktop Session Host/Connections
+        - Allow users to connect remotely by using Remote Desktop Services: Enabled
+      - Windows Components/Remote Desktop Services/Remote Desktop Session Host/Security
+        - Require secure RPC communication: Enabled
+        - Require user authentication for remote connections by using Network Level Authentication: Enabled
+        - Set client connection encryption level: Enabled
+          - Encryption Level: High Level
