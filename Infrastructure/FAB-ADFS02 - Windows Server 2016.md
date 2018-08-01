@@ -1010,3 +1010,40 @@ Set-AdfsClaimsProviderTrust `
 
 **Customize the Home Realm Discovery page to ask for UPN right away**\
 From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/](https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/)>
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Fabrikam VM network
+
+```PowerShell
+$vmName = "FAB-ADFS02"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Fabrikam VM Network"
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+$ipAddressPool= Get-SCStaticIPAddressPool -Name "Fabrikam-40 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Static `
+    -MACAddress $macAddress `
+    -IPv4AddressType Static `
+    -IPv4AddressPools $ipAddressPool
+
+Start-SCVirtualMachine $vmName
+```
+
+---
