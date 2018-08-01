@@ -1191,3 +1191,34 @@ EXEC msdb.dbo.sp_add_jobschedule
 
 GO
 ```
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Production VM network
+
+```PowerShell
+$vmName = "TT-SQL01B"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 0 }
+
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+$ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+Start-SCVirtualMachine $vmName
+```
+
+---

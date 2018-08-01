@@ -1634,3 +1634,38 @@ Pop-Location
 
 **Why I prefer PSCONFIGUI.EXE over PSCONFIG.EXE**\
 From <[https://blogs.technet.microsoft.com/stefan_gossner/2015/08/20/why-i-prefer-psconfigui-exe-over-psconfig-exe/](https://blogs.technet.microsoft.com/stefan_gossner/2015/08/20/why-i-prefer-psconfigui-exe-over-psconfig-exe/)>
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Production VM network
+
+```PowerShell
+$vmName = "POLARIS"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+$ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $ipAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---

@@ -867,6 +867,64 @@ Start-Process `
 
 ### Approve manual agent install in Operations Manager
 
+## Issue - Error installing Windows Server 2016 CU using Windows Update
+
+There were some problems installing updates, but we'll try again later. If you keep seeing this and want to search the web or contact support for information, this may help: (0x800705b4)
+
+### Solution
+
+```PowerShell
+cls
+```
+
+#### # Shutdown TFS services
+
+```PowerShell
+& "C:\Program Files\Microsoft Team Foundation Server 2018\Tools\TfsServiceControl.exe" `
+    quiesce
+
+Stop-Service elasticsearch-service-x64
+```
+
+#### Install CU
+
+#### Restart computer
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Production VM network
+
+```PowerShell
+$vmName = "TT-TFS02"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+$ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $ipAddress.Address
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
 **TODO:**
 
 ```PowerShell

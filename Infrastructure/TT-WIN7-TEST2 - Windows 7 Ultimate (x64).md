@@ -253,7 +253,7 @@ Stop-Computer
 
 ### Snapshot VM - "Baseline"
 
-Windows 7 Ultimate (x86)\
+Windows 7 Ultimate (x64)\
 Microsoft Office Professional Plus 2013 (x86)\
 Adobe Reader 8.3.1\
 Google Chrome\
@@ -262,3 +262,45 @@ Mozilla Thunderbird\
 Remote Server Administration Tools for Windows 7 SP1\
 Microsoft Security Essentials\
 Internet Explorer 10
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Production VM network
+
+```PowerShell
+$vmName = "TT-WIN7-TEST2"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+$ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -MACAddressType Static `
+    -MACAddress $macAddress
+
+$ipAddress = Grant-SCIPAddress `
+    -GrantToObjectType VirtualNetworkAdapter `
+    -GrantToObjectID $networkAdapter.ID `
+    -StaticIPAddressPool $ipPool `
+    -Description $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressType Static `
+    -IPv4Addresses $ipAddress.Address
+```
+
+---

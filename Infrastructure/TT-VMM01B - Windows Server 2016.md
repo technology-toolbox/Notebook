@@ -564,4 +564,86 @@ Set-DnsClientServerAddress `
 Restart-Computer
 ```
 
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Production VM network
+
+```PowerShell
+$vmName = "TT-VMM01B"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 0 }
+
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+$ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+Start-Sleep -Seconds 60
+```
+
+> **Important**
+>
+> Verify the **TT-VMM01** cluster role fails over to **TT-VMM01A**.
+
+```PowerShell
+Read-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+
+$vm = Get-SCVirtualMachine $vmName
+
+New-SCVirtualNetworkAdapter `
+    -VM $vm `
+    -VMNetwork $vmNetwork `
+    -Synthetic
+
+Start-SCVirtualMachine $vmName
+```
+
+### Update cluster resources
+
+Change networks on IP Addresses for **TT-VMM01** and **TT-VMM01-FC**  to **10.1.15.0/24**.
+
+```PowerShell
+cls
+```
+
+### # Remove temporary VM network adapter
+
+```PowerShell
+$vmName = "TT-VMM01B"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 3 }
+
+Stop-SCVirtualMachine $vmName
+
+Start-Sleep -Seconds 60
+```
+
+> **Important**
+>
+> Verify the **TT-VMM01** cluster role fails over to **TT-VMM01A**.
+
+```PowerShell
+Read-SCVirtualMachine $vmName
+
+Remove-SCVirtualNetworkAdapter $networkAdapter
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
 **TODO:**

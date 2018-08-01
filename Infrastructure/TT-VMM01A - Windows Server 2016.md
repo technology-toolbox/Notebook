@@ -2461,7 +2461,7 @@ $vmSubnet = New-SCVMSubnet `
 $addressPoolName = "Production-15 Address Pool"
 
 $ipAddressRangeStart = "10.1.15.20"
-$ipAddressRangeEnd = "10.1.15.254"
+$ipAddressRangeEnd = "10.1.15.200"
 
 $reservedAddresses = @()
 
@@ -2494,6 +2494,192 @@ New-SCStaticIPAddressPool `
     -NetworkRoute $networkRoutes `
     -IPAddressReservedSet $reservedAddressSet
 ```
+
+---
+
+**FOOBAR16**
+
+```PowerShell
+cls
+```
+
+#### # Create reverse lookup zones in DNS
+
+```PowerShell
+Add-DnsServerPrimaryZone `
+    -ComputerName TT-DC08 `
+    -NetworkID "10.1.15.0/24" `
+    -ReplicationScope Forest
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Create new VLAN for Fabrikam servers
+
+##### # Create network site for Fabrikam - VLAN 40 traffic
+
+```PowerShell
+$logicalNetwork = Get-SCLogicalNetwork -Name "Datacenter"
+
+$hostGroups = @()
+$hostGroups += Get-SCVMHostGroup -Name "All Hosts"
+
+$subnetVlans = @()
+$subnetVlans += New-SCSubnetVLan -Subnet "10.1.40.0/24" -VLanID 40
+
+New-SCLogicalNetworkDefinition `
+    -Name "Fabrikam - VLAN 40" `
+    -LogicalNetwork $logicalNetwork `
+    -VMHostGroup $hostGroups `
+    -SubnetVLan $subnetVlans
+```
+
+##### # Add logical network definition to "Trunk Uplink" port profile
+
+```PowerShell
+$logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
+    -Name "Fabrikam - VLAN 40"
+
+$portProfile = Get-SCNativeUplinkPortProfile -Name "Trunk Uplink"
+
+Set-SCNativeUplinkPortProfile `
+    -NativeUplinkPortProfile $portProfile `
+    -AddLogicalNetworkDefinition $logicalNetworkDefinition
+```
+
+#### # Create VM network for storage traffic
+
+```PowerShell
+$vmNetwork = New-SCVMNetwork `
+    -Name "Fabrikam VM Network" `
+    -IsolationType VLANNetwork `
+    -LogicalNetwork $logicalNetwork
+
+$subnetVLANs = @()
+$subnetVLANs += (New-SCSubnetVLan -Subnet "10.1.40.0/24" -VLanID 40)
+
+$vmSubnet = New-SCVMSubnet `
+    -Name "Fabrikam VM Network_0" `
+    -LogicalNetworkDefinition $logicalNetworkDefinition `
+    -SubnetVLan $subnetVLANs `
+    -VMNetwork $vmNetwork
+```
+
+#### # Create IP address pool for storage network
+
+```PowerShell
+$addressPoolName = "Fabrikam-40 Address Pool"
+
+$ipAddressRangeStart = "10.1.40.20"
+$ipAddressRangeEnd = "10.1.40.200"
+
+$reservedAddresses = @()
+
+$reservedAddressSet = $reservedAddresses -join ","
+
+$subnet = "10.1.40.0/24"
+
+$networkRoutes = @()
+
+$gateways = @()
+$gateways += New-SCDefaultGateway -IPAddress "10.1.40.1" -Automatic
+
+$dnsServers = @("10.1.40.2", "10.1.40.3")
+
+$dnsSuffix = "corp.fabrikam.com"
+$dnsSearchSuffixes = @()
+
+$winsServers = @()
+
+New-SCStaticIPAddressPool `
+    -Name $addressPoolName `
+    -LogicalNetworkDefinition $logicalNetworkDefinition `
+    -Subnet $subnet `
+    -IPAddressRangeStart $ipAddressRangeStart `
+    -IPAddressRangeEnd $ipAddressRangeEnd `
+    -DefaultGateway $gateways `
+    -DNSServer $dnsServers `
+    -DNSSuffix $dnsSuffix `
+    -DNSSearchSuffix $dnsSearchSuffixes `
+    -NetworkRoute $networkRoutes `
+    -IPAddressReservedSet $reservedAddressSet
+```
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Production VM network
+
+```PowerShell
+$vmName = "TT-VMM01A"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 0 }
+
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+$ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+Start-Sleep -Seconds 60
+```
+
+> **Important**
+>
+> Verify the **TT-VMM01** cluster role fails over to **TT-VMM01B**.
+
+```PowerShell
+Read-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+
+$vm = Get-SCVirtualMachine $vmName
+
+New-SCVirtualNetworkAdapter `
+    -VM $vm `
+    -VMNetwork $vmNetwork `
+    -Synthetic
+
+Start-SCVirtualMachine $vmName
+```
+
+### Update cluster resources
+
+Change networks on IP Addresses for **TT-VMM01** and **TT-VMM01-FC**  to **10.1.15.0/24**.
+
+```PowerShell
+cls
+```
+
+### # Remove temporary VM network adapter
+
+```PowerShell
+$vmName = "TT-VMM01A"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 3 }
+
+Stop-SCVirtualMachine $vmName
+
+Remove-SCVirtualNetworkAdapter $networkAdapter
+
+Start-SCVirtualMachine $vmName
+```
+
+---
 
 **TODO:**
 

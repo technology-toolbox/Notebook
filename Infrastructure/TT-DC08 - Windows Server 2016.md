@@ -11,7 +11,7 @@ Thursday, May 17, 2018
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -550,6 +550,49 @@ Restart-Service HealthService
 
 **Deploying SCOM 2016 Agents to Domain controllers - some assembly required**\
 From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/](https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/)>
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Production VM network
+
+```PowerShell
+$vmName = "TT-DC08"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork
+
+Start-SCVirtualMachine $vmName
+```
+
+### Update IP addresses
+
+#### IPv4
+
+IP address: **10.1.15.2**\
+Subnet mask: **255.255.255.0**\
+Default gateway: **10.1.15.1**
+
+Preferred DNS server: **10.1.15.3**\
+Alternate DNS server: **127.0.0.1**
+
+#### IPv6
+
+IP address: **Obtain an IPv6 address automatically**
+
+DNS servers: **Obtain DNS server address automatically**
+
+---
 
 **TODO:**
 

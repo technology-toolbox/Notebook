@@ -452,6 +452,50 @@ Restart-Service HealthService
 **Deploying SCOM 2016 Agents to Domain controllers - some assembly required**\
 From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/](https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/)>
 
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Production VM network
+
+```PowerShell
+$vmName = "TT-DC09"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork
+
+Start-SCVirtualMachine $vmName
+```
+
+### Update IP addresses
+
+#### IPv4
+
+IP address: **10.1.15.3**\
+Subnet mask: **255.255.255.0**\
+Default gateway: **10.1.15.1**
+
+DNS servers: **10.1.15.2, 127.0.0.1**
+
+#### IPv6
+
+IP address: **Obtain an IPv6 address automatically**
+
+DNS servers: **Obtain DNS server address automatically**
+
+### Configure DNS to listen on all IP addresses
+
+---
+
 **TODO:**
 
 ```PowerShell

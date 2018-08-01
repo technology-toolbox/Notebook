@@ -627,6 +627,34 @@ Start-SCVirtualMachine -VM $vm
 
 ## Add virtual machine to Hyper-V protection group in DPM
 
+---
+
+**FOOBAR17 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Production VM network
+
+```PowerShell
+$vmName = "FOOBAR16"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
 **TODO:**
 
 ## # Enter a product key and activate Windows
