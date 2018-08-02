@@ -812,17 +812,48 @@ $ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
 
 Stop-SCVirtualMachine $vmName
 
-$ipAddress = Grant-SCIPAddress `
-    -GrantToObjectType VirtualNetworkAdapter `
-    -GrantToObjectID $networkAdapter.ID `
-    -StaticIPAddressPool $ipPool `
-    -Description $vmName
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressPools $ipPool `
+    -IPv4AddressType Static
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Management VM network
+
+```PowerShell
+$vmName = "TT-FS01"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Management-30 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
 
 Set-SCVirtualNetworkAdapter `
     -VirtualNetworkAdapter $networkAdapter `
     -VMNetwork $vmNetwork `
-    -IPv4AddressType Static `
-    -IPv4Addresses $ipAddress.Address
+    -MACAddressType Static `
+    -MACAddress $macAddress `
+    -IPv4AddressPools $ipAddressPool `
+    -IPv4AddressType Static
 
 Start-SCVirtualMachine $vmName
 ```

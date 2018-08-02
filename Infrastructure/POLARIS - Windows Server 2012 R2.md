@@ -1653,17 +1653,11 @@ $ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
 
 Stop-SCVirtualMachine $vmName
 
-$ipAddress = Grant-SCIPAddress `
-    -GrantToObjectType VirtualNetworkAdapter `
-    -GrantToObjectID $networkAdapter.ID `
-    -StaticIPAddressPool $ipPool `
-    -Description $vmName
-
 Set-SCVirtualNetworkAdapter `
     -VirtualNetworkAdapter $networkAdapter `
     -VMNetwork $vmNetwork `
-    -IPv4AddressType Static `
-    -IPv4Addresses $ipAddress.Address
+    -IPv4AddressPools $ipPool `
+    -IPv4AddressType Static
 
 Start-SCVirtualMachine $vmName
 ```
