@@ -588,9 +588,12 @@ Alternate DNS server: **127.0.0.1**
 
 #### IPv6
 
-IP address: **Obtain an IPv6 address automatically**
+IP address: **2603:300b:802:89e1::2**\
+Subnet prefix length: **64**\
+Default gateway:** (none)**
 
-DNS servers: **Obtain DNS server address automatically**
+Preferred DNS server: **2603:300b:802:89e1::3**\
+Alternate DNS server: **127.0.0.1**
 
 ---
 
