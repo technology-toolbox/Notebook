@@ -5,13 +5,25 @@ Monday, July 30, 2018
 
 ---
 
-**{SERVER}**
+**FOOBAR16**
 
 ```PowerShell
 cls
 ```
 
-## # Create reverse lookup zones in DNS
+### # Add new subnet to Active Directory site
+
+```PowerShell
+$siteName = "Technology-Toolbox-HQ"
+
+New-ADReplicationSubnet -Name "10.1.15.0/24" -Site $siteName
+```
+
+```PowerShell
+cls
+```
+
+### # Create reverse lookup zones in DNS
 
 ```PowerShell
 Add-DnsServerPrimaryZone `
@@ -33,11 +45,37 @@ Add-DnsServerPrimaryZone `
     -ComputerName TT-DC08 `
     -NetworkID "192.168.50.0/24" `
     -ReplicationScope Forest
+
 Add-DnsServerPrimaryZone `
     -ComputerName TT-DC08 `
     -NetworkID "192.168.51.0/24" `
     -ReplicationScope Forest
 ```
+
+---
+
+---
+
+**FOOBAR16**
+
+```PowerShell
+cls
+```
+
+#### # Disable extension on logical switch in VMM
+
+```PowerShell
+$logicalSwitch = Get-SCLogicalSwitch -Name "Embedded Team Switch"
+
+Set-SCLogicalSwitch -LogicalSwitch $logicalSwitch -VirtualSwitchExtensions @()
+```
+
+#### Reference
+
+Clear the checkbox "Microsoft Window Filtering Platform". New SDN stack uses Virtual Filtering Platform (VFP) from Azure instead of the default Windows Filtering Platform.
+
+**Step-by-step for deploying a SDNv2 using VMM - Part 2**\
+From <[https://blogs.technet.microsoft.com/larryexchange/2016/05/30/step-by-step-for-deploying-a-sdnv2-using-vmm-part-2/](https://blogs.technet.microsoft.com/larryexchange/2016/05/30/step-by-step-for-deploying-a-sdnv2-using-vmm-part-2/)>
 
 ---
 
@@ -116,6 +154,18 @@ $hyperVHosts |
 cls
 ```
 
+#### # Add "HostUsername" account to local Administrators group on Hyper-V nodes
+
+```PowerShell
+$logicalSwitch = Get-SCLogicalSwitch -Name "Embedded Team Switch"
+
+Set-SCLogicalSwitch -LogicalSwitch $logicalSwitch -VirtualSwitchExtensions @()
+```
+
+```PowerShell
+cls
+```
+
 ## # Deploy SDN
 
 ```PowerShell
@@ -133,35 +183,6 @@ cls
 ```
 
 ---
-
-```PowerShell
-cls
-```
-
-#### # Add "HostUsername" account to local Administrators group on Hyper-V nodes
-
-```PowerShell
-$domain = "TECHTOOLBOX"
-$username = "s-nc01-host"
-
-([ADSI]"WinNT://./Administrators,group").Add(
-    "WinNT://$domain/$username,user")
-```
-
-## Issue -
-
-```Text
-PS D:\NotBackedUp\SDN\SDNExpress\scripts> .\SDNExpress.ps1 -ConfigurationDataFile .\FabricConfig.TECHTOOLBOX.psd1 -Verbose
-VERBOSE: Using configuration from file [.\FabricConfig.TECHTOOLBOX.psd1]
-VERBOSE: STAGE 1: Housekeeping
-VERBOSE: Script version is 1.1 and FabricConfig version is 1.2
-The Fabric configuration file which was provided is not compatible with this version of the script. To avoid compatibility issues, please use only the version of FabricConfig.psd1 which came with this version of the SDNExpress.ps1 script
-At D:\NotBackedUp\SDN\SDNExpress\scripts\SDNExpress.ps1:3144 char:9
-+         throw $error
-+         ~~~~~~~~~~~~
-    + CategoryInfo          : OperationStopped: (The Fabric conf...ress.ps1 script:String) [], RuntimeException
-    + FullyQualifiedErrorId : The Fabric configuration file which was provided is not compatible with this version of the script. To avoid compatibility issues, please use only the version of FabricConfig.psd1 which ca   me with this version of the SDNExpress.ps1 script
-```
 
 ## Issue -
 
@@ -362,20 +383,6 @@ Screen clipping taken: 7/30/2018 7:33 AM
 Disable-VMSwitchExtension `
     -VMSwitchName "Embedded Team Switch" `
     -Name "Microsoft Azure VFP Switch Extension"
-```
-
-```PowerShell
-cls
-```
-
-#### # Add "HostUsername" account to local Administrators group on Hyper-V nodes
-
-```PowerShell
-$domain = "TECHTOOLBOX"
-$username = "s-nc01-host"
-
-([ADSI]"WinNT://./Administrators,group").Add(
-    "WinNT://$domain/$username,user")
 ```
 
 ## Issue -
