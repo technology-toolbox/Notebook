@@ -11,12 +11,25 @@ Monday, July 30, 2018
 cls
 ```
 
-### # Add new subnet to Active Directory site
+## # Configure Production-15 network
+
+### # Add new subnets to Active Directory site
 
 ```PowerShell
 $siteName = "Technology-Toolbox-HQ"
 
 New-ADReplicationSubnet -Name "10.1.15.0/24" -Site $siteName
+
+New-ADReplicationSubnet -Name "2603:300b:802:89e1::/64" -Site $siteName
+```
+
+### # Create reverse lookup zones in DNS
+
+```PowerShell
+Add-DnsServerPrimaryZone `
+    -ComputerName TT-DC08 `
+    -NetworkID "2603:300b:802:89e1::/64" `
+    -ReplicationScope Forest
 ```
 
 ```PowerShell
@@ -396,3 +409,10 @@ copy \\TT-FS01\Public\NcHostAgent.reg C:\NotBackedUp\Temp
 
 regedit /S C:\NotBackedUp\Temp\NcHostAgent.reg
 ```
+
+```Text
+(!(*Port in [3389, 1494, 1503])) AND
+((IPv4.Source == 10.1.15.49) OR
+(IPv4.Destination == 10.1.15.49))
+```
+
