@@ -19,13 +19,17 @@ cls
 $siteName = "Technology-Toolbox-HQ"
 
 New-ADReplicationSubnet -Name "10.1.15.0/24" -Site $siteName
-
 New-ADReplicationSubnet -Name "2603:300b:802:89e1::/64" -Site $siteName
 ```
 
 ### # Create reverse lookup zones in DNS
 
 ```PowerShell
+Add-DnsServerPrimaryZone `
+    -ComputerName TT-DC08 `
+    -NetworkID "10.1.15.0/24" `
+    -ReplicationScope Forest
+
 Add-DnsServerPrimaryZone `
     -ComputerName TT-DC08 `
     -NetworkID "2603:300b:802:89e1::/64" `
@@ -167,7 +171,7 @@ $hyperVHosts |
 cls
 ```
 
-#### # Add "HostUsername" account to local Administrators group on Hyper-V nodes
+#### # Remove virtual switch extension on Hyper-V nodes
 
 ```PowerShell
 $logicalSwitch = Get-SCLogicalSwitch -Name "Embedded Team Switch"
