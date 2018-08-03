@@ -10,3 +10,11 @@ cat /tmp/config.xml | sed -e '1d' -e '$d' | base64 -d | openssl enc -d -aes-256-
 ```
 
 From <[https://forum.pfsense.org/index.php?topic=111080.msg621529#msg621529](https://forum.pfsense.org/index.php?topic=111080.msg621529#msg621529)>
+
+```Console
+cat "C:\Users\jjameson\Downloads\config.xml"  | sed -e '1d' -e '$d' | base64 -d | openssl enc -d -aes-256-cbc -out config.xml -k '{password}'
+
+
+
+cls; ipconfig /release; ipconfig /release6; ipconfig /renew; ipconfig /renew6; ipconfig /all
+```
