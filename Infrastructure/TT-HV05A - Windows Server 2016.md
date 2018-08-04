@@ -2151,3 +2151,47 @@ Move-Item Volume3 iscsi02-Silver-01
 
 Pop-Location
 ```
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Configure new Management VM network
+
+```PowerShell
+$vmHostName = "TT-HV05A"
+$networkAdapterName = "Management"
+$vlanID = 30
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Management-30 Address Pool"
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+$logicalSwitch = Get-SCLogicalSwitch -Name "Embedded Team Switch"
+$portClassification = Get-SCPortClassification -Name "Host Management"
+
+$vmHost = Get-SCVMHost -ComputerName $vmHostName
+
+New-SCVirtualNetworkAdapter `
+```
+
+    -VMHost \$vmHost `\
+    -Name \$networkAdapterName `\
+    -VMNetwork \$vmNetwork `\
+    -LogicalSwitch \$logicalSwitch `\
+    -VLanEnabled \$true `\
+    -VLanID \$vlanID `\
+    -PortClassification \$portClassification
+
+```PowerShell
+$networkAdapter = Get-SCVirtualNetworkAdapter -VMHost $vmHost |
+    where { $_.Name -eq $networkAdapterName }
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -IPv4AddressPools $ipAddressPool `
+    -IPv4AddressType Static
+```
+
+---

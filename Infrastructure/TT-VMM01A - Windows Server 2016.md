@@ -2196,6 +2196,10 @@ $addressPoolName = "Extranet Address Pool"
 $ipAddressRangeStart = "10.1.20.101"
 $ipAddressRangeEnd = "10.1.20.254"
 
+$vipAddresses = @("10.1.20.200-10.1.20.254")
+
+$vipAddressSet = $vipAddresses -join ","
+
 $reservedAddresses = @("10.1.20.103", "10.1.20.104")
 
 $reservedAddressSet = $reservedAddresses -join ","
@@ -2225,8 +2229,8 @@ New-SCStaticIPAddressPool `
     -DNSSuffix $dnsSuffix `
     -DNSSearchSuffix $dnsSearchSuffixes `
     -NetworkRoute $networkRoutes `
-    -IPAddressReservedSet $reservedAddressSet `
-    -VIPAddressSet "10.1.20.200-10.1.20.254"
+    -VIPAddressSet $vipAddressSet `
+    -IPAddressReservedSet $reservedAddressSet
 ```
 
 ```PowerShell
@@ -2460,8 +2464,12 @@ $vmSubnet = New-SCVMSubnet `
 ```PowerShell
 $addressPoolName = "Production-15 Address Pool"
 
-$ipAddressRangeStart = "10.1.15.20"
-$ipAddressRangeEnd = "10.1.15.200"
+$ipAddressRangeStart = "10.1.15.101"
+$ipAddressRangeEnd = "10.1.15.254"
+
+$vipAddresses = @("10.1.15.231-10.1.15.254")
+
+$vipAddressSet = $vipAddresses -join ","
 
 $reservedAddresses = @()
 
@@ -2492,6 +2500,7 @@ New-SCStaticIPAddressPool `
     -DNSSuffix $dnsSuffix `
     -DNSSearchSuffix $dnsSearchSuffixes `
     -NetworkRoute $networkRoutes `
+    -VIPAddressSet $vipAddressSet `
     -IPAddressReservedSet $reservedAddressSet
 ```
 
@@ -2518,9 +2527,121 @@ Add-DnsServerPrimaryZone `
 cls
 ```
 
+### # Configure "Management" network
+
+#### # Create logical network for management traffic
+
+```PowerShell
+$logicalNetwork = New-SCLogicalNetwork `
+    -Name "Management" `
+    -LogicalNetworkDefinitionIsolation $false `
+    -EnableNetworkVirtualization $false `
+    -UseGRE $false `
+    -IsPVLAN $false
+```
+
+#### # Create network site for management traffic
+
+```PowerShell
+$hostGroups = @()
+$hostGroups += Get-SCVMHostGroup -Name "All Hosts"
+
+$subnetVlans = @()
+$subnetVlans += New-SCSubnetVLan -Subnet "10.1.30.0/24" -VLanID 30
+
+New-SCLogicalNetworkDefinition `
+    -Name "Management - VLAN 30" `
+    -LogicalNetwork $logicalNetwork `
+    -VMHostGroup $hostGroups `
+    -SubnetVLan $subnetVlans
+```
+
+##### # Add logical network definition to "Trunk Uplink" port profile
+
+```PowerShell
+$logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
+    -Name "Management - VLAN 30"
+
+$portProfile = Get-SCNativeUplinkPortProfile -Name "Trunk Uplink"
+
+Set-SCNativeUplinkPortProfile `
+    -NativeUplinkPortProfile $portProfile `
+    -AddLogicalNetworkDefinition $logicalNetworkDefinition
+```
+
+#### # Create VM network for management traffic
+
+```PowerShell
+New-SCVMNetwork `
+    -Name "Management VM Network" `
+    -IsolationType NoIsolation `
+    -LogicalNetwork $logicalNetwork
+```
+
+```PowerShell
+cls
+```
+
+#### # Create IP address pool for management network
+
+```PowerShell
+$logicalNetwork = Get-SCLogicalNetwork -Name "Management"
+
+$logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
+```
+
+    -Name "Management - VLAN 30"
+
+```PowerShell
+$addressPoolName = "Management-30 Address Pool"
+
+$ipAddressRangeStart = "10.1.30.101"
+$ipAddressRangeEnd = "10.1.30.254"
+
+$vipAddresses = @("10.1.30.231-10.1.30.254")
+
+$vipAddressSet = $vipAddresses -join ","
+
+$reservedAddresses = @()
+
+$reservedAddressSet = $reservedAddresses -join ","
+
+$subnet = "10.1.30.0/24"
+
+$networkRoutes = @()
+
+$gateways = @()
+$gateways += New-SCDefaultGateway -IPAddress "10.1.30.1" -Automatic
+
+$dnsServers = @("10.1.15.2", "10.1.15.3")
+
+$dnsSuffix = "corp.technologytoolbox.com"
+$dnsSearchSuffixes = @()
+
+$winsServers = @()
+
+New-SCStaticIPAddressPool `
+    -Name $addressPoolName `
+    -LogicalNetworkDefinition $logicalNetworkDefinition `
+    -Subnet $subnet `
+    -IPAddressRangeStart $ipAddressRangeStart `
+    -IPAddressRangeEnd $ipAddressRangeEnd `
+    -DefaultGateway $gateways `
+    -DNSServer $dnsServers `
+    -DNSSuffix $dnsSuffix `
+    -DNSSearchSuffix $dnsSearchSuffixes `
+    -NetworkRoute $networkRoutes `
+    -VIPAddressSet $vipAddressSet `
+    -IPAddressReservedSet $reservedAddressSet
+```
+
+```PowerShell
+cls
+```
+
 ### # Create new VLAN for Fabrikam servers
 
-##### # Create network site for Fabrikam - VLAN 40 traffic
+##### # Create network site for Fabrikam traffic
 
 ```PowerShell
 $logicalNetwork = Get-SCLogicalNetwork -Name "Datacenter"
@@ -2551,7 +2672,7 @@ Set-SCNativeUplinkPortProfile `
     -AddLogicalNetworkDefinition $logicalNetworkDefinition
 ```
 
-#### # Create VM network for storage traffic
+#### # Create VM network for Fabrikam traffic
 
 ```PowerShell
 $vmNetwork = New-SCVMNetwork `
@@ -2569,13 +2690,17 @@ $vmSubnet = New-SCVMSubnet `
     -VMNetwork $vmNetwork
 ```
 
-#### # Create IP address pool for storage network
+#### # Create IP address pool for Fabrikam network
 
 ```PowerShell
 $addressPoolName = "Fabrikam-40 Address Pool"
 
-$ipAddressRangeStart = "10.1.40.20"
-$ipAddressRangeEnd = "10.1.40.200"
+$ipAddressRangeStart = "10.1.40.101"
+$ipAddressRangeEnd = "10.1.40.254"
+
+$vipAddresses = @("10.1.40.200-10.1.40.254")
+
+$vipAddressSet = $vipAddresses -join ","
 
 $reservedAddresses = @()
 
@@ -2606,6 +2731,7 @@ New-SCStaticIPAddressPool `
     -DNSSuffix $dnsSuffix `
     -DNSSearchSuffix $dnsSearchSuffixes `
     -NetworkRoute $networkRoutes `
+    -VIPAddressSet $vipAddressSet `
     -IPAddressReservedSet $reservedAddressSet
 ```
 
@@ -2680,6 +2806,268 @@ Start-SCVirtualMachine $vmName
 ```
 
 ---
+
+```PowerShell
+cls
+```
+
+### # Create new VLAN for Contoso servers
+
+##### # Create network site for Contoso traffic
+
+```PowerShell
+$logicalNetwork = Get-SCLogicalNetwork -Name "Datacenter"
+
+$hostGroups = @()
+$hostGroups += Get-SCVMHostGroup -Name "All Hosts"
+
+$subnetVlans = @()
+$subnetVlans += New-SCSubnetVLan -Subnet "10.1.60.0/24" -VLanID 60
+
+New-SCLogicalNetworkDefinition `
+    -Name "Contoso - VLAN 60" `
+    -LogicalNetwork $logicalNetwork `
+    -VMHostGroup $hostGroups `
+    -SubnetVLan $subnetVlans
+```
+
+##### # Add logical network definition to "Trunk Uplink" port profile
+
+```PowerShell
+$logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
+    -Name "Contoso - VLAN 60"
+
+$portProfile = Get-SCNativeUplinkPortProfile -Name "Trunk Uplink"
+
+Set-SCNativeUplinkPortProfile `
+    -NativeUplinkPortProfile $portProfile `
+    -AddLogicalNetworkDefinition $logicalNetworkDefinition
+```
+
+#### # Create VM network for Contoso traffic
+
+```PowerShell
+$vmNetwork = New-SCVMNetwork `
+    -Name "Contoso VM Network" `
+    -IsolationType VLANNetwork `
+    -LogicalNetwork $logicalNetwork
+
+$subnetVLANs = @()
+$subnetVLANs += (New-SCSubnetVLan -Subnet "10.1.60.0/24" -VLanID 60)
+
+$vmSubnet = New-SCVMSubnet `
+    -Name "Contoso VM Network_0" `
+    -LogicalNetworkDefinition $logicalNetworkDefinition `
+    -SubnetVLan $subnetVLANs `
+    -VMNetwork $vmNetwork
+```
+
+#### # Create IP address pool for Contoso network
+
+```PowerShell
+$addressPoolName = "Contoso-60 Address Pool"
+
+$ipAddressRangeStart = "10.1.60.101"
+$ipAddressRangeEnd = "10.1.60.254"
+
+$vipAddresses = @("10.1.60.200-10.1.60.254")
+
+$vipAddressSet = $vipAddresses -join ","
+
+$reservedAddresses = @()
+
+$reservedAddressSet = $reservedAddresses -join ","
+
+$subnet = "10.1.60.0/24"
+
+$networkRoutes = @()
+
+$gateways = @()
+$gateways += New-SCDefaultGateway -IPAddress "10.1.60.1" -Automatic
+
+$dnsServers = @("10.1.60.2", "10.1.60.3")
+
+$dnsSuffix = "corp.contoso.com"
+$dnsSearchSuffixes = @()
+
+$winsServers = @()
+
+New-SCStaticIPAddressPool `
+    -Name $addressPoolName `
+    -LogicalNetworkDefinition $logicalNetworkDefinition `
+    -Subnet $subnet `
+    -IPAddressRangeStart $ipAddressRangeStart `
+    -IPAddressRangeEnd $ipAddressRangeEnd `
+    -DefaultGateway $gateways `
+    -DNSServer $dnsServers `
+    -DNSSuffix $dnsSuffix `
+    -DNSSearchSuffix $dnsSearchSuffixes `
+    -NetworkRoute $networkRoutes `
+    -VIPAddressSet $vipAddressSet `
+    -IPAddressReservedSet $reservedAddressSet
+```
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Management VM network
+
+### # Configure network adapters on first cluster node
+
+```PowerShell
+$vmName = "TT-VMM01A"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 0 }
+
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+
+$vm = Get-SCVirtualMachine $vmName
+
+$networkAdapter = New-SCVirtualNetworkAdapter `
+    -VM $vm `
+    -VMNetwork $vmNetwork `
+    -Synthetic
+
+Start-SCVirtualMachine $vmName
+
+Start-Sleep -Seconds 60
+```
+
+#### Move cluster role
+
+> **Important**
+>
+> Verify the **TT-VMM01** cluster role fails over to **TT-VMM01B**.
+
+### Configure network adapters on second cluster node
+
+### Update cluster resources
+
+Change networks on IP Addresses for **TT-VMM01** and **TT-VMM01-FC**  to **10.1.30.0/24**.
+
+```PowerShell
+cls
+```
+
+### # Clear DNS cache
+
+#### # Clear DNS cache on localhost
+
+```PowerShell
+ipconfig /flushdns
+```
+
+#### # Clear DNS cache on servers
+
+```PowerShell
+$servers =  @(
+    "TT-DPM02",
+    "TT-SCOM03",
+    "TT-VMM01A",
+    "TT-VMM01B",
+    "TT-WSUS03"
+)
+
+$servers |
+    foreach {
+        Invoke-Command -ScriptBlock { ipconfig /flushdns } -ComputerName $_
+    }
+```
+
+### Remove temporary VM network adapters
+
+#### Move cluster role
+
+> **Important**
+>
+> Verify the **TT-VMM01** cluster role fails over to **TT-VMM01B**.
+
+```PowerShell
+cls
+```
+
+#### # Remove temporary VM network adapter on first cluster node
+
+```PowerShell
+$vmName = "TT-VMM01A"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 2 }
+
+Stop-SCVirtualMachine $vmName
+
+Remove-SCVirtualNetworkAdapter $networkAdapter
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Create IP address pool for "Management - VLAN 0" network
+
+```PowerShell
+$logicalNetworkDefinition = Get-SCLogicalNetworkDefinition `
+    -Name "Management - VLAN 0"
+
+$addressPoolName = "Management-0 Address Pool"
+
+$ipAddressRangeStart = "192.168.10.101"
+$ipAddressRangeEnd = "192.168.10.254"
+
+$vipAddresses = @("192.168.10.231-192.168.10.254")
+
+$vipAddressSet = $vipAddresses -join ","
+
+$reservedAddresses = @()
+
+$reservedAddressSet = $reservedAddresses -join ","
+
+$subnet = "192.168.10.0/24"
+
+$networkRoutes = @()
+
+$gateways = @()
+$gateways += New-SCDefaultGateway -IPAddress "192.168.10.1" -Automatic
+
+$dnsServers = @("10.1.30.2", "10.1.30.3")
+
+$dnsSuffix = "corp.technologytoolbox.com"
+$dnsSearchSuffixes = @()
+
+$winsServers = @()
+
+New-SCStaticIPAddressPool `
+    -Name $addressPoolName `
+    -LogicalNetworkDefinition $logicalNetworkDefinition `
+    -Subnet $subnet `
+    -IPAddressRangeStart $ipAddressRangeStart `
+    -IPAddressRangeEnd $ipAddressRangeEnd `
+    -DefaultGateway $gateways `
+    -DNSServer $dnsServers `
+    -DNSSuffix $dnsSuffix `
+    -DNSSearchSuffix $dnsSearchSuffixes `
+    -NetworkRoute $networkRoutes `
+    -VIPAddressSet $vipAddressSet `
+    -IPAddressReservedSet $reservedAddressSet
+```
 
 **TODO:**
 
