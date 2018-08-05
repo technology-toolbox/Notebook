@@ -7443,3 +7443,40 @@ Start-SCVirtualMachine $vmName
 ```
 
 ---
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Management VM network
+
+```PowerShell
+$vmName = "MIMIC"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Management-30 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+$macAddress = Grant-SCMACAddress `
+    -MACAddressPool $macAddressPool `
+    -Description $vmName `
+    -VirtualNetworkAdapter $networkAdapter
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Static `
+    -MACAddress $macAddress `
+    -IPv4AddressPools $ipAddressPool `
+    -IPv4AddressType Static
+
+Start-SCVirtualMachine $vmName
+```
+
+---

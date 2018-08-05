@@ -496,6 +496,113 @@ DNS servers: **Obtain DNS server address automatically**
 
 ---
 
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Management VM network
+
+```PowerShell
+$vmName = "TT-DC09"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork
+
+Start-SCVirtualMachine $vmName
+```
+
+### Update IP addresses
+
+#### IPv4
+
+IP address: **10.1.30.3**\
+Subnet mask: **255.255.255.0**\
+Default gateway: **10.1.30.1**
+
+DNS servers: **10.1.15.2, 127.0.0.1**
+
+```PowerShell
+cls
+```
+
+### # Update DNS on IP address pool in VMM
+
+```PowerShell
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Management-30 Address Pool"
+
+Set-SCStaticIPAddressPool `
+    -StaticIPAddressPool $ipAddressPool `
+    -DNSServer @("10.1.15.2", "10.1.30.3")
+```
+
+```PowerShell
+cls
+```
+
+### # Update DNS settings on Hyper-V hosts
+
+```PowerShell
+$script = [scriptblock] {
+    $interfaceAlias = "vEthernet (Management)"
+
+    Set-DNSClientServerAddress `
+        -InterfaceAlias $interfaceAlias `
+        -ServerAddresses 10.1.15.2, 10.1.30.3
+}
+
+@(
+    "TT-HV05A",
+    "TT-HV05B",
+    "TT-HV05C"
+```
+
+) |
+
+```PowerShell
+    foreach {
+        Write-Host "Updating DNS settings on $_"
+
+        Invoke-Command -ScriptBlock $script -ComputerName $_
+    }
+```
+
+### # Update DNS settings on VMs
+
+```PowerShell
+$script = [scriptblock] {
+    $interfaceAlias = "Management"
+
+    Set-DNSClientServerAddress `
+        -InterfaceAlias $interfaceAlias `
+        -ServerAddresses 10.1.15.2, 10.1.30.3
+}
+
+$managementNetwork = Get-SCVMNetwork "Management VM Network"
+$productionNetwork = Get-SCVMNetwork "Production VM Network"
+
+Get-SCVirtualMachine |
+    Get-SCVirtualNetworkAdapter |
+    where { $_.IPv4AddressType -eq "Static" } |
+    where { $_.VMNetwork -in ($productionNetwork, $managementNetwork) } |
+    select -ExpandProperty Name |
+    foreach {
+        Write-Host "Updating DNS settings on $_"
+
+        Invoke-Command -ScriptBlock $script -ComputerName $_
+    }
+```
+
+---
+
 **TODO:**
 
 ```PowerShell

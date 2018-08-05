@@ -1624,3 +1624,105 @@ Start-SCVirtualMachine $vmName
 ```
 
 ---
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Management VM network
+
+### # Configure network adapters on first cluster node
+
+```PowerShell
+$vmName = "TT-SQL01A"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 0 }
+
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+
+$vm = Get-SCVirtualMachine $vmName
+
+$networkAdapter = New-SCVirtualNetworkAdapter `
+    -VM $vm `
+    -VMNetwork $vmNetwork `
+    -Synthetic
+
+Start-SCVirtualMachine $vmName
+
+Start-Sleep -Seconds 60
+```
+
+#### Move cluster role
+
+> **Important**
+>
+> Verify the **TT-SQL01** cluster role fails over to **TT-SQL01B**.
+
+### Configure network adapters on second cluster node
+
+### Update cluster resources
+
+Change networks on IP Addresses for **TT-SQL01** and **TT-SQL01-FC**  to **10.1.30.0/24**.
+
+```PowerShell
+cls
+```
+
+### # Clear DNS cache
+
+#### # Clear DNS cache on localhost
+
+```PowerShell
+ipconfig /flushdns
+```
+
+#### # Clear DNS cache on servers
+
+```PowerShell
+$servers =  @(
+    "TT-DPM02",
+    "TT-SCOM03",
+    "TT-VMM01A",
+    "TT-VMM01B",
+    "TT-WSUS03"
+)
+
+$servers |
+    foreach {
+        Invoke-Command -ScriptBlock { ipconfig /flushdns } -ComputerName $_
+    }
+```
+
+```PowerShell
+cls
+```
+
+### # Remove temporary VM network adapter
+
+```PowerShell
+$vmName = "TT-SQL01A"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 2 }
+
+Stop-SCVirtualMachine $vmName
+
+Remove-SCVirtualNetworkAdapter $networkAdapter
+
+Start-SCVirtualMachine $vmName
+```
+
+---

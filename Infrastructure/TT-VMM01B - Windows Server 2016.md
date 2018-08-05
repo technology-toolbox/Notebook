@@ -646,4 +646,83 @@ Start-SCVirtualMachine $vmName
 
 ---
 
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+## Move VM to new Management VM network
+
+#### Move cluster role
+
+> **Important**
+>
+> Verify the **TT-VMM01** cluster role fails over to **TT-VMM01A**.
+
+```PowerShell
+cls
+```
+
+### # Configure network adapters on second cluster node
+
+```PowerShell
+$vmName = "TT-VMM01B"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 0 }
+
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+
+$vm = Get-SCVirtualMachine $vmName
+
+$networkAdapter = New-SCVirtualNetworkAdapter `
+    -VM $vm `
+    -VMNetwork $vmNetwork `
+    -Synthetic
+
+Start-SCVirtualMachine $vmName
+
+Start-Sleep -Seconds 60
+```
+
+### Update cluster resources
+
+### Clear DNS cache on servers
+
+### Remove temporary VM network adapters
+
+#### Move cluster role
+
+> **Important**
+>
+> Verify the **TT-VMM01** cluster role fails over to **TT-VMM01A**.
+
+```PowerShell
+cls
+```
+
+#### # Remove temporary VM network adapter on second cluster node
+
+```PowerShell
+$vmName = "TT-VMM01B"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
+    where { $_.SlotId -eq 2 }
+
+Stop-SCVirtualMachine $vmName
+
+Remove-SCVirtualNetworkAdapter $networkAdapter
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
 **TODO:**

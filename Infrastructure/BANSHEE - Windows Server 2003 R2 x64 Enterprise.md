@@ -403,21 +403,44 @@ cls
 $vmName = "BANSHEE"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
 $vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
-$ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
 
 Stop-SCVirtualMachine $vmName
-
-$ipAddress = Grant-SCIPAddress `
-    -GrantToObjectType VirtualNetworkAdapter `
-    -GrantToObjectID $networkAdapter.ID `
-    -StaticIPAddressPool $ipPool `
-    -Description $vmName
 
 Set-SCVirtualNetworkAdapter `
     -VirtualNetworkAdapter $networkAdapter `
     -VMNetwork $vmNetwork `
-    -IPv4AddressType Static `
-    -IPv4Addresses $ipAddress.Address
+    -IPv4AddressPools $ipAddressPool `
+    -IPv4AddressType Static
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Management VM network
+
+```PowerShell
+$vmName = "BANSHEE"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+$ipPool = Get-SCStaticIPAddressPool -Name "Management Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressPools $ipPool `
+    -IPv4AddressType Static
 
 Start-SCVirtualMachine $vmName
 ```

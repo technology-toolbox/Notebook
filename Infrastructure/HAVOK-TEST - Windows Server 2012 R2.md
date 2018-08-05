@@ -1409,3 +1409,31 @@ Start-SCVirtualMachine $vmName
 ```
 
 ---
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Management VM network
+
+```PowerShell
+$vmName = "HAVOK-TEST"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+Start-SCVirtualMachine $vmName
+```
+
+---

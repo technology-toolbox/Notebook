@@ -607,6 +607,34 @@ Start-SCVirtualMachine $vmName
 
 ---
 
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Management VM network
+
+```PowerShell
+$vmName = "FOOBAR17"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MacAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
 **TODO:**
 
 ## # Enter a product key and activate Windows

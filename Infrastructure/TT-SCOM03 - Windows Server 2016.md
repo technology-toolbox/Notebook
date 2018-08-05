@@ -2283,4 +2283,33 @@ Start-SCVirtualMachine $vmName
 
 ---
 
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Move VM to new Management VM network
+
+```PowerShell
+$vmName = "TT-SCOM03"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Management-30 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressPools $ipAddressPool `
+    -IPv4AddressType Static
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
 **TODO:**
