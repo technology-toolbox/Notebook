@@ -19,6 +19,7 @@ cls
 $siteName = "Technology-Toolbox-HQ"
 
 New-ADReplicationSubnet -Name "10.1.15.0/24" -Site $siteName
+New-ADReplicationSubnet -Name "10.1.30.0/24" -Site $siteName
 New-ADReplicationSubnet -Name "2603:300b:802:89e1::/64" -Site $siteName
 ```
 
@@ -34,6 +35,162 @@ Add-DnsServerPrimaryZone `
     -ComputerName TT-DC08 `
     -NetworkID "2603:300b:802:89e1::/64" `
     -ReplicationScope Forest
+```
+
+```PowerShell
+cls
+```
+
+## # Configure SDN prerequisites
+
+```PowerShell
+cls
+```
+
+### # Create SDN service and setup accounts
+
+#### # Create service account for Network Controller Service Fabric cluster
+
+```PowerShell
+$displayName = 'Service account for Network Controller (NC01) cluster'
+$defaultUserName = 's-nc01-cluster'
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+```PowerShell
+cls
+```
+
+#### # Create service account for Network Controller host communication
+
+```PowerShell
+$displayName = 'Service account for Network Controller (NC01) host communication'
+$defaultUserName = 's-nc01-host'
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+```PowerShell
+cls
+```
+
+#### # Create SDN setup account
+
+```PowerShell
+$displayName = 'Setup account for Software Defined Networking'
+$defaultUserName = 'setup-sdn'
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Setup Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+#### # Add setup account for SDN to domain groups
+
+```PowerShell
+Add-ADGroupMember -Identity "DnsAdmins" -Members setup-sdn
+Add-ADGroupMember -Identity "Fabric Admins" -Members setup-sdn
+```
+
+```PowerShell
+cls
+```
+
+### # Create and configure SDN domain groups
+
+#### # Create domain group for Network Controller administrators
+
+```PowerShell
+$ncAdminsGroup = "Network Controller (nc01) Admins"
+$orgUnit = "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name $ncAdminsGroup `
+    -Description "Complete and unrestricted access to Network Controller" `
+    -GroupScope DomainLocal `
+    -Path $orgUnit
+```
+
+#### # Add setup account for SDN to domain group
+
+```PowerShell
+Add-ADGroupMember -Identity $ncAdminsGroup -Members setup-sdn
+```
+
+#### # Create domain group for Network Controller users
+
+```PowerShell
+$ncUsersGroup = "Network Controller (nc01) Users"
+$orgUnit = "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADGroup `
+    -Name $ncUsersGroup `
+    -Description "Access to configure and manage networks through Network Controller" `
+    -GroupScope DomainLocal `
+    -Path $orgUnit
+```
+
+#### # Add setup account for SDN to domain group
+
+```PowerShell
+Add-ADGroupMember -Identity $ncUsersGroup -Members setup-sdn
+```
+
+```PowerShell
+cls
+```
+
+### # Create DNS record for Network Controller
+
+#### # Create A record - "nc01.corp.technologytoolbox.com"
+
+```PowerShell
+Add-DnsServerResourceRecordA `
+    -ComputerName TT-DC08 `
+    -Name "nc01" `
+    -IPv4Address "10.1.30.4" `
+    -ZoneName "corp.technologytoolbox.com"
 ```
 
 ```PowerShell
@@ -98,11 +255,32 @@ From <[https://blogs.technet.microsoft.com/larryexchange/2016/05/30/step-by-step
 
 ---
 
-**TT-DEPLOY-SDN**
+**TT-DEPLOY-SDN - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Add setup account to local Administrators group
+
+```PowerShell
+$localGroup = "Administrators"
+$domain = "TECHTOOLBOX"
+$serviceAccount = "setup-sdn"
+
+([ADSI]"WinNT://./$localGroup,group").Add(
+    "WinNT://$domain/$serviceAccount,user")
+```
+
+---
+
+---
+
+**TT-DEPLOY-SDN - Run as TECHTOOLBOX\\setup-sdn**
 
 ```Console
 cls
-robocopy '\\WOLVERINE\C$\NotBackedUp\GitHub\SDN' C:\NotBackedUp\SDN /E
+robocopy '\\WOLVERINE\SDN' C:\NotBackedUp\SDN /E
 ```
 
 ```Console
@@ -171,21 +349,11 @@ $hyperVHosts |
 cls
 ```
 
-#### # Remove virtual switch extension on Hyper-V nodes
-
-```PowerShell
-$logicalSwitch = Get-SCLogicalSwitch -Name "Embedded Team Switch"
-
-Set-SCLogicalSwitch -LogicalSwitch $logicalSwitch -VirtualSwitchExtensions @()
-```
-
-```PowerShell
-cls
-```
-
 ## # Deploy SDN
 
 ```PowerShell
+robocopy '\\WOLVERINE\SDN' C:\NotBackedUp\SDN /E
+
 Push-Location C:\NotBackedUp\SDN\SDNExpress\scripts
 ```
 
@@ -347,6 +515,10 @@ Get-NetIPConfiguration -InterfaceAlias "vEthernet (Live Migration)" |
     Get-NetConnectionProfile |
     Set-DnsClient -RegisterThisConnectionsAddress:$false -Verbose
 
+Get-NetIPConfiguration -InterfaceAlias "vEthernet (Production)" |
+    Get-NetConnectionProfile |
+    Set-DnsClient -RegisterThisConnectionsAddress:$false -Verbose
+
 ipconfig /registerdns
 ```
 
@@ -397,9 +569,28 @@ Screen clipping taken: 7/30/2018 7:33 AM
 ### Solution
 
 ```PowerShell
+cls
+Get-VMSwitchExtension -VMSwitchName "Embedded Team Switch" | select Name, Enabled
+
 Disable-VMSwitchExtension `
     -VMSwitchName "Embedded Team Switch" `
     -Name "Microsoft Azure VFP Switch Extension"
+
+Get-VMSwitchExtension -VMSwitchName "Embedded Team Switch" | select Name, Enabled
+```
+
+```PowerShell
+cls
+Enable-VMSwitchExtension `
+    -VMSwitchName "Embedded Team Switch" `
+    -Name "Microsoft Azure VFP Switch Extension"
+
+Get-VMSwitchExtension -VMSwitchName "Embedded Team Switch" | select Name, Enabled
+
+$service = Get-Service -Name NCHostAgent
+Stop-Service -InputObject $service -Force
+Set-Service -InputObject $service -StartupType Automatic
+Start-Service -InputObject $service
 ```
 
 ## Issue -
@@ -412,7 +603,15 @@ robocopy \\TT-FS01\Public\NCHostAgent C:\ProgramData\Microsoft\Windows\NcHostAge
 copy \\TT-FS01\Public\NcHostAgent.reg C:\NotBackedUp\Temp
 
 regedit /S C:\NotBackedUp\Temp\NcHostAgent.reg
+
+reg export HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NcHostAgent C:\NotBackedUp\Temp\NcHostAgent-local.reg /y
+
+sgdm '\\TT-HV05C\C$\NotBackedUp\Temp\NcHostAgent.reg' '\\TT-HV05C\C$\NotBackedUp\Temp\NcHostAgent-local.reg'
 ```
+
+g1, g6, g11 - g12, g17 - g18, g20 - g21, g24
+
+From <[http://192.168.10.239/vlanStatus.html](http://192.168.10.239/vlanStatus.html)>
 
 ```Text
 (!(*Port in [3389, 1494, 1503])) AND
@@ -420,3 +619,19 @@ regedit /S C:\NotBackedUp\Temp\NcHostAgent.reg
 (IPv4.Destination == 10.1.15.49))
 ```
 
+## References
+
+**Set up an SDN network controller in the VMM fabric**\
+From <[https://docs.microsoft.com/en-us/system-center/vmm/sdn-controller?view=sc-vmm-1807](https://docs.microsoft.com/en-us/system-center/vmm/sdn-controller?view=sc-vmm-1807)>
+
+**Deploy SDNv2 with SCVMM 2016**\
+From <[https://www.itprotoday.com/management-mobility/deploy-sdnv2-scvmm-2016](https://www.itprotoday.com/management-mobility/deploy-sdnv2-scvmm-2016)>
+
+**Step-by-step for deploying a SDNv2 using VMM - Part 1**\
+From <[https://blogs.technet.microsoft.com/larryexchange/2016/05/30/step-by-step-for-deploying-a-sdnv2-using-vmm-part-1/](https://blogs.technet.microsoft.com/larryexchange/2016/05/30/step-by-step-for-deploying-a-sdnv2-using-vmm-part-1/)>
+
+**Step-by-step for deploying a SDNv2 using VMM - Part 2**\
+From <[https://blogs.technet.microsoft.com/larryexchange/2016/05/30/step-by-step-for-deploying-a-sdnv2-using-vmm-part-2/](https://blogs.technet.microsoft.com/larryexchange/2016/05/30/step-by-step-for-deploying-a-sdnv2-using-vmm-part-2/)>
+
+**Step-by-step for deploying a SDNv2 using VMM - Part 4**\
+From <[https://blogs.technet.microsoft.com/larryexchange/2016/06/01/step-by-step-for-deploying-a-sdnv2-using-vmm-part-4/](https://blogs.technet.microsoft.com/larryexchange/2016/06/01/step-by-step-for-deploying-a-sdnv2-using-vmm-part-4/)>
