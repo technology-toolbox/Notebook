@@ -180,6 +180,19 @@ Set-DNSClientServerAddress `
     -ServerAddresses 10.1.20.103
 ```
 
+#### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty `
+    -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
+
+ping 10.1.20.1 -f -l 8900
+```
+
 ### # Join server to domain
 
 ```PowerShell
