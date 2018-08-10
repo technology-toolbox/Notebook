@@ -516,21 +516,56 @@ DNS servers: **Obtain DNS server address automatically**
 
 ### Configure group policy - "Enable Remote Desktop Policy"
 
-- Computer Configuration
-  - Policies
-    - Windows Settings
-      - Security Settings
-        - Windows Firewall with Advanced Security
-        - Inbound Rules
-          - Predefined - Remote Desktop
-            - Remote Desktop -Shadow (TCP-In)
-            - Remote Desktop - User Mode (TCP-In)
-            - Remote Desktop - User Mode (UDP-In)
-    - Administrative Templates
-      - Windows Components/Remote Desktop Services/Remote Desktop Session Host/Connections
-        - Allow users to connect remotely by using Remote Desktop Services: Enabled
-      - Windows Components/Remote Desktop Services/Remote Desktop Session Host/Security
-        - Require secure RPC communication: Enabled
-        - Require user authentication for remote connections by using Network Level Authentication: Enabled
-        - Set client connection encryption level: Enabled
-          - Encryption Level: High Level
+#### Settings
+
+- **Computer Configuration**
+  - **Policies**
+    - **Windows Settings**
+      - **Security Settings**
+        - **Windows Firewall with Advanced Security**
+        - **Inbound Rules**
+          - **Predefined - Remote Desktop**
+            - **Remote Desktop - User Mode (TCP-In)**
+    - **Administrative Templates**
+      - **Windows Components/Remote Desktop Services/Remote Desktop Session Host/Connections**
+        - **Allow users to connect remotely by using Remote Desktop Services: Enabled**
+      - **Windows Components/Remote Desktop Services/Remote Desktop Session Host/Security**
+        - **Require secure RPC communication: Enabled**
+        - **Require user authentication for remote connections by using Network Level Authentication: Enabled**
+        - **Set client connection encryption level: Enabled**
+          - **Encryption Level: High Level**
+
+#### Security Filtering
+
+- **Authenticated Users**
+- **Domain Computers**
+
+## Issue - Firewall log contains numerous entries for UDP 137 broadcast
+
+### Solution
+
+```PowerShell
+cls
+```
+
+#### # Disable NetBIOS over TCP/IP
+
+```PowerShell
+Get-NetAdapter |
+    foreach {
+        $interfaceAlias = $_.Name
+
+        Write-Host ("Disabling NetBIOS over TCP/IP on interface" `
+            + " ($interfaceAlias)...")
+
+        $adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+            -Filter "NetConnectionId = '$interfaceAlias'"
+
+        $adapterConfig = `
+            Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+                -Filter "Index= '$($adapter.DeviceID)'"
+
+        # Disable NetBIOS over TCP/IP
+        $adapterConfig.SetTcpipNetbios(2)
+    }
+```

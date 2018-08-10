@@ -766,8 +766,6 @@ Add-DnsServerResourceRecordA `
 
 #### Configure Web Application Proxy role
 
-**TODO:**
-
 ```PowerShell
 cls
 ```
@@ -1072,7 +1070,7 @@ Remove-Item $tempJsFile
 #### Disable HRD cookie (due to issue with toggling between "Securitas login" and "Client login")
 
 ```PowerShell
-Set-ADFSWebConfig -HRDCookieEnabled $false
+# Set-ADFSWebConfig -HRDCookieEnabled $false
 ```
 
 ## Configure claims provider trust for Contoso
@@ -1200,11 +1198,32 @@ From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-rea
 
 ### Configure relying party trust to pass through claims from claims providers other than Active Directory
 
-**TODO:**
+## Issue - Firewall log contains numerous entries for UDP 137 broadcast
 
-USE AdfsConfigurationV3\
-GO\
-ALTER AUTHORIZATION ON SCHEMA::IdentityServerPolicy TO dbo\
-GO\
-ALTER ROLE db_owner ADD MEMBER [TECHTOOLBOX\\s-adfs]\
-GO
+### Solution
+
+```PowerShell
+cls
+```
+
+#### # Disable NetBIOS over TCP/IP
+
+```PowerShell
+Get-NetAdapter |
+    foreach {
+        $interfaceAlias = $_.Name
+
+        Write-Host ("Disabling NetBIOS over TCP/IP on interface" `
+            + " ($interfaceAlias)...")
+
+        $adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+            -Filter "NetConnectionId = '$interfaceAlias'"
+
+        $adapterConfig = `
+            Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+                -Filter "Index= '$($adapter.DeviceID)'"
+
+        # Disable NetBIOS over TCP/IP
+        $adapterConfig.SetTcpipNetbios(2)
+    }
+```
