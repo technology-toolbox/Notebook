@@ -844,31 +844,51 @@ $computers |
 
 ### Solution
 
+---
+
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+
 ```PowerShell
 cls
 ```
 
-#### # Disable NetBIOS over TCP/IP
+#### # Disable NetBIOS over TCP/IP on all domain computers
 
 ```PowerShell
-Get-NetAdapter |
+$computers = Get-ADComputer -Filter * |
+    sort Name |
+    select -ExpandProperty Name
+
+$script = [scriptblock] {
+
+    Get-NetAdapter |
+        foreach {
+            $interfaceAlias = $_.Name
+
+            Write-Host ("Disabling NetBIOS over TCP/IP on interface" `
+                + " ($interfaceAlias)...")
+
+            $adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+                -Filter "NetConnectionId = '$interfaceAlias'"
+
+            $adapterConfig = `
+                Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+                    -Filter "Index= '$($adapter.DeviceID)'"
+
+            # Disable NetBIOS over TCP/IP
+            $adapterConfig.SetTcpipNetbios(2)
+        }
+}
+
+$computers |
     foreach {
-        $interfaceAlias = $_.Name
+        Write-Host "Disabling NetBIOS over TCP/IP on $_"
 
-        Write-Host ("Disabling NetBIOS over TCP/IP on interface" `
-            + " ($interfaceAlias)...")
-
-        $adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
-            -Filter "NetConnectionId = '$interfaceAlias'"
-
-        $adapterConfig = `
-            Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
-                -Filter "Index= '$($adapter.DeviceID)'"
-
-        # Disable NetBIOS over TCP/IP
-        $adapterConfig.SetTcpipNetbios(2)
+        Invoke-Command -ScriptBlock $script -ComputerName $_
     }
 ```
+
+---
 
 **TODO:**
 
