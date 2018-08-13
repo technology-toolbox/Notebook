@@ -647,6 +647,102 @@ Get-NetAdapter |
     }
 ```
 
+## Update IP addresses for EXTRANET domain controllers
+
+#### IPv4
+
+IP address: **10.1.20.3**\
+Subnet mask: **255.255.255.0**\
+Default gateway: **10.1.20.1**
+
+DNS servers: **10.1.20.103, 127.0.0.1**
+
+#### IPv6
+
+IP address: **Obtain an IPv6 address automatically**
+
+DNS servers: **Obtain DNS server address automatically**
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Update DNS on IP address pool in VMM
+
+```PowerShell
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
+
+Set-SCStaticIPAddressPool `
+    -StaticIPAddressPool $ipAddressPool `
+    -DNSServer @("10.1.20.103", "10.1.20.3")
+```
+
+```PowerShell
+cls
+```
+
+### # Update DNS settings on VMs
+
+```PowerShell
+$extranetNetwork = Get-SCVMNetwork "Extranet-20 VM Network"
+
+Get-SCVirtualMachine |
+    Get-SCVirtualNetworkAdapter |
+    where { $_.IPv4AddressType -eq "Static" } |
+    where { $_.VMNetwork -in ($extranetNetwork) } |
+    select -ExpandProperty Name
+```
+
+---
+
+---
+
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+
+$computers = @(
+    "EXT-ADFS01A",
+    "EXT-ADFS03A",
+    "EXT-ADFS03B",
+    "EXT-APP03A",
+    "EXT-FOOBAR2",
+    "EXT-FOOBAR3",
+    "EXT-FOOBAR4",
+    "EXT-FOOBAR8",
+    "EXT-FOOBAR9",
+    "EXT-SQL03",
+    "EXT-WAC02A",
+    "EXT-WAP01A",
+    "EXT-WAP03A",
+    "EXT-WAP03B",
+    "EXT-WEB03B",
+    "EXT-WEB03A"
+)
+
+$script = [scriptblock] {
+    $interfaceAlias = "Extranet-20"
+
+    Set-DNSClientServerAddress `
+        -InterfaceAlias $interfaceAlias `
+        -ServerAddresses @("10.1.20.103", "10.1.20.3")
+}
+
+$computers |
+    foreach {
+        Write-Host "Updating DNS settings on $_"
+
+        Invoke-Command -ScriptBlock $script -ComputerName $_
+    }
+```
+
+---
+
 **TODO:**
 
 ```PowerShell
