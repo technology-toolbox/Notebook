@@ -472,9 +472,9 @@ cls
 ```PowerShell
 $vmName = "TT-WIN10-DEV1"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
-$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
 $macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
-$ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Management-30 Address Pool"
 
 Stop-SCVirtualMachine $vmName
 
@@ -485,20 +485,11 @@ $macAddress = Grant-SCMACAddress `
 
 Set-SCVirtualNetworkAdapter `
     -VirtualNetworkAdapter $networkAdapter `
-    -MACAddressType Static `
-    -MACAddress $macAddress
-
-$ipAddress = Grant-SCIPAddress `
-    -GrantToObjectType VirtualNetworkAdapter `
-    -GrantToObjectID $networkAdapter.ID `
-    -StaticIPAddressPool $ipPool `
-    -Description $vmName
-
-Set-SCVirtualNetworkAdapter `
-    -VirtualNetworkAdapter $networkAdapter `
     -VMNetwork $vmNetwork `
+    -MACAddressType Static `
+    -MACAddress $macAddress `
     -IPv4AddressType Static `
-    -IPv4Addresses $ipAddress.Address
+    -IPv4AddressPool $ipAddressPool
 
 Start-SCVirtualMachine $vmName
 ```
