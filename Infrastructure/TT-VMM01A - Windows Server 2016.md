@@ -2419,7 +2419,7 @@ $hostGroups = @()
 $hostGroups += Get-SCVMHostGroup -Name "All Hosts"
 
 $subnetVlans = @()
-$subnetVlans += New-SCSubnetVLan -Subnet "10.1.15.0/24" -VLanID 15
+$subnetVlans += New-SCSubnetVLan -Subnet "10.0.15.0/24" -VLanID 15
 
 New-SCLogicalNetworkDefinition `
     -Name "Production - VLAN 15" `
@@ -2450,7 +2450,7 @@ $vmNetwork = New-SCVMNetwork `
     -LogicalNetwork $logicalNetwork
 
 $subnetVLANs = @()
-$subnetVLANs += (New-SCSubnetVLan -Subnet "10.1.15.0/24" -VLanID 15)
+$subnetVLANs += (New-SCSubnetVLan -Subnet "10.0.15.0/24" -VLanID 15)
 
 $vmSubnet = New-SCVMSubnet `
     -Name "Production VM Network_0" `
@@ -2464,10 +2464,10 @@ $vmSubnet = New-SCVMSubnet `
 ```PowerShell
 $addressPoolName = "Production-15 Address Pool"
 
-$ipAddressRangeStart = "10.1.15.101"
-$ipAddressRangeEnd = "10.1.15.254"
+$ipAddressRangeStart = "10.0.15.101"
+$ipAddressRangeEnd = "10.0.15.254"
 
-$vipAddresses = @("10.1.15.231-10.1.15.254")
+$vipAddresses = @("10.0.15.231-10.0.15.254")
 
 $vipAddressSet = $vipAddresses -join ","
 
@@ -2475,12 +2475,12 @@ $reservedAddresses = @()
 
 $reservedAddressSet = $reservedAddresses -join ","
 
-$subnet = "10.1.15.0/24"
+$subnet = "10.0.15.0/24"
 
 $networkRoutes = @()
 
 $gateways = @()
-$gateways += New-SCDefaultGateway -IPAddress "10.1.15.1" -Automatic
+$gateways += New-SCDefaultGateway -IPAddress "10.0.15.1" -Automatic
 
 $dnsServers = @("192.168.10.103", "192.168.10.104")
 
@@ -2517,7 +2517,7 @@ cls
 ```PowerShell
 Add-DnsServerPrimaryZone `
     -ComputerName TT-DC08 `
-    -NetworkID "10.1.15.0/24" `
+    -NetworkID "10.0.15.0/24" `
     -ReplicationScope Forest
 ```
 
@@ -2650,7 +2650,7 @@ $hostGroups = @()
 $hostGroups += Get-SCVMHostGroup -Name "All Hosts"
 
 $subnetVlans = @()
-$subnetVlans += New-SCSubnetVLan -Subnet "10.1.40.0/24" -VLanID 40
+$subnetVlans += New-SCSubnetVLan -Subnet "10.0.40.0/24" -VLanID 40
 
 New-SCLogicalNetworkDefinition `
     -Name "Fabrikam - VLAN 40" `
@@ -2681,7 +2681,7 @@ $vmNetwork = New-SCVMNetwork `
     -LogicalNetwork $logicalNetwork
 
 $subnetVLANs = @()
-$subnetVLANs += (New-SCSubnetVLan -Subnet "10.1.40.0/24" -VLanID 40)
+$subnetVLANs += (New-SCSubnetVLan -Subnet "10.0.40.0/24" -VLanID 40)
 
 $vmSubnet = New-SCVMSubnet `
     -Name "Fabrikam VM Network_0" `
@@ -2695,10 +2695,10 @@ $vmSubnet = New-SCVMSubnet `
 ```PowerShell
 $addressPoolName = "Fabrikam-40 Address Pool"
 
-$ipAddressRangeStart = "10.1.40.101"
-$ipAddressRangeEnd = "10.1.40.254"
+$ipAddressRangeStart = "10.0.40.101"
+$ipAddressRangeEnd = "10.0.40.254"
 
-$vipAddresses = @("10.1.40.200-10.1.40.254")
+$vipAddresses = @("10.0.40.200-10.0.40.254")
 
 $vipAddressSet = $vipAddresses -join ","
 
@@ -2706,14 +2706,14 @@ $reservedAddresses = @()
 
 $reservedAddressSet = $reservedAddresses -join ","
 
-$subnet = "10.1.40.0/24"
+$subnet = "10.0.40.0/24"
 
 $networkRoutes = @()
 
 $gateways = @()
-$gateways += New-SCDefaultGateway -IPAddress "10.1.40.1" -Automatic
+$gateways += New-SCDefaultGateway -IPAddress "10.0.40.1" -Automatic
 
-$dnsServers = @("10.1.40.2", "10.1.40.3")
+$dnsServers = @("10.0.40.2", "10.0.40.3")
 
 $dnsSuffix = "corp.fabrikam.com"
 $dnsSearchSuffixes = @()
@@ -2822,7 +2822,7 @@ $hostGroups = @()
 $hostGroups += Get-SCVMHostGroup -Name "All Hosts"
 
 $subnetVlans = @()
-$subnetVlans += New-SCSubnetVLan -Subnet "10.1.60.0/24" -VLanID 60
+$subnetVlans += New-SCSubnetVLan -Subnet "10.0.60.0/24" -VLanID 60
 
 New-SCLogicalNetworkDefinition `
     -Name "Contoso - VLAN 60" `
@@ -2853,7 +2853,7 @@ $vmNetwork = New-SCVMNetwork `
     -LogicalNetwork $logicalNetwork
 
 $subnetVLANs = @()
-$subnetVLANs += (New-SCSubnetVLan -Subnet "10.1.60.0/24" -VLanID 60)
+$subnetVLANs += (New-SCSubnetVLan -Subnet "10.0.60.0/24" -VLanID 60)
 
 $vmSubnet = New-SCVMSubnet `
     -Name "Contoso VM Network_0" `
@@ -2867,10 +2867,10 @@ $vmSubnet = New-SCVMSubnet `
 ```PowerShell
 $addressPoolName = "Contoso-60 Address Pool"
 
-$ipAddressRangeStart = "10.1.60.101"
-$ipAddressRangeEnd = "10.1.60.254"
+$ipAddressRangeStart = "10.0.60.101"
+$ipAddressRangeEnd = "10.0.60.254"
 
-$vipAddresses = @("10.1.60.200-10.1.60.254")
+$vipAddresses = @("10.0.60.200-10.0.60.254")
 
 $vipAddressSet = $vipAddresses -join ","
 
@@ -2878,14 +2878,14 @@ $reservedAddresses = @()
 
 $reservedAddressSet = $reservedAddresses -join ","
 
-$subnet = "10.1.60.0/24"
+$subnet = "10.0.60.0/24"
 
 $networkRoutes = @()
 
 $gateways = @()
-$gateways += New-SCDefaultGateway -IPAddress "10.1.60.1" -Automatic
+$gateways += New-SCDefaultGateway -IPAddress "10.0.60.1" -Automatic
 
-$dnsServers = @("10.1.60.2", "10.1.60.3")
+$dnsServers = @("10.0.60.2", "10.0.60.3")
 
 $dnsSuffix = "corp.contoso.com"
 $dnsSearchSuffixes = @()
