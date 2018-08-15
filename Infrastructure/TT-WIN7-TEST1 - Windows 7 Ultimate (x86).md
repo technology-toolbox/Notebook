@@ -279,36 +279,26 @@ Internet Explorer 10
 cls
 ```
 
-## # Move VM to new Production VM network
+## # Move VM to new Management VM network
 
 ```PowerShell
 $vmName = "TT-WIN7-TEST1"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
-$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
-$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
-$ipPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
 
-$macAddress = Grant-SCMACAddress `
-    -MACAddressPool $macAddressPool `
-    -Description $vmName `
-    -VirtualNetworkAdapter $networkAdapter
+$vm = Get-SCVirtualMachine $vmName
 
-Set-SCVirtualNetworkAdapter `
-    -VirtualNetworkAdapter $networkAdapter `
-    -MACAddressType Static `
-    -MACAddress $macAddress
+Get-SCVMCheckpoint -VM $vm | Restore-SCVMCheckpoint
 
-$ipAddress = Grant-SCIPAddress `
-    -GrantToObjectType VirtualNetworkAdapter `
-    -GrantToObjectID $networkAdapter.ID `
-    -StaticIPAddressPool $ipPool `
-    -Description $vmName
+Get-SCVMCheckpoint -VM $vm | Remove-SCVMCheckpoint
 
 Set-SCVirtualNetworkAdapter `
     -VirtualNetworkAdapter $networkAdapter `
     -VMNetwork $vmNetwork `
-    -IPv4AddressType Static `
-    -IPv4Addresses $ipAddress.Address
+    -MACAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+New-SCVMCheckpoint -VM $vm -Name Baseline
 ```
 
 ---
