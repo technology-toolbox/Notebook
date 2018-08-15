@@ -269,7 +269,7 @@ Set-SCVirtualNetworkAdapter `
     -VirtualNetworkAdapter $networkAdapter `
     -VMNetwork $vmNetwork `
     -MACAddressType Static `
-    -MACAddress $macAddress
+    -MACAddress $macAddress `
     -IPv4AddressType Static `
     -IPv4AddressPools $ipAddressPool
 
