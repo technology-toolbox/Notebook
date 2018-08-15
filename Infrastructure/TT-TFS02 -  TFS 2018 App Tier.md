@@ -318,6 +318,30 @@ Get-Disk 1 |
 
 ### Add virtual machine to Hyper-V protection group in DPM
 
+```PowerShell
+cls
+```
+
+### # Configure monitoring
+
+#### # Install Operations Manager agent
+
+```PowerShell
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64" `
+    + "\MOMAgent.msi"
+
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=TT-SCOM03" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
+```
+
+#### Approve manual agent install in Operations Manager
+
 ## Copy data from TFS 2015 environment
 
 ### Copy builds from TFS 2015 to TFS 2018
@@ -842,30 +866,6 @@ Start-SCVirtualMachine -VM $vmName
 ```
 
 ---
-
-```PowerShell
-cls
-```
-
-## # Configure monitoring
-
-### # Install Operations Manager agent
-
-```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64" `
-    + "\MOMAgent.msi"
-
-$installerArguments = "MANAGEMENT_GROUP=HQ" `
-    + " MANAGEMENT_SERVER_DNS=TT-SCOM03" `
-    + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
-
-Start-Process `
-    -FilePath msiexec.exe `
-    -ArgumentList "/i `"$installerPath`" $installerArguments" `
-    -Wait
-```
-
-### Approve manual agent install in Operations Manager
 
 ## Issue - Error installing Windows Server 2016 CU using Windows Update
 

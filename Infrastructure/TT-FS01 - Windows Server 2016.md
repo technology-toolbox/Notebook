@@ -859,3 +859,27 @@ Start-SCVirtualMachine $vmName
 ```
 
 ---
+
+```PowerShell
+cls
+```
+
+## # Configure monitoring
+
+### # Install Operations Manager agent
+
+```PowerShell
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64" `
+    + "\MOMAgent.msi"
+
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=TT-SCOM03" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
+```
+
+### Approve manual agent install in Operations Manager
