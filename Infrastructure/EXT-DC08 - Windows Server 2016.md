@@ -890,6 +890,52 @@ $computers |
 
 ---
 
+## Issue - Firewall log contains numerous entries for UDP 5355 broadcast
+
+### Solution
+
+---
+
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Disable Link-Layer Topology Discovery on all domain computers
+
+```PowerShell
+$computers = Get-ADComputer -Filter * |
+    sort Name |
+    select -ExpandProperty Name
+
+$script = [scriptblock] {
+
+    Get-NetAdapter |
+        foreach {
+            $interfaceAlias = $_.Name
+
+            Write-Host ("Disabling Link-Layer Topology Discovery on interface" `
+                + " ($interfaceAlias)...")
+
+            Disable-NetAdapterBinding -Name $interfaceAlias `
+                -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
+
+            Disable-NetAdapterBinding -Name $interfaceAlias `
+                -DisplayName "Link-Layer Topology Discovery Responder"
+        }
+}
+
+$computers |
+    foreach {
+        Write-Host "Disabling Link-Layer Topology Discovery on $_"
+
+        Invoke-Command -ScriptBlock $script -ComputerName $_
+    }
+```
+
+---
+
 **TODO:**
 
 ```PowerShell
