@@ -202,15 +202,15 @@ cls
 $activity = "Reboot computers"
 ```
 
-#### # Shutdown VMs that depend on EXT-SQL02
+#### # Shutdown VMs that depend on EXT-SQL03
 
 ```PowerShell
 $virtualMachines = @(
-    'EXT-ADFS02B',
-    'EXT-ADFS02A',
-    'EXT-WEB02B',
-    'EXT-WEB02A',
-    'EXT-APP02A')
+    'EXT-ADFS03B',
+    'EXT-ADFS03A',
+    'EXT-WEB03B',
+    'EXT-WEB03A',
+    'EXT-APP03A')
 
 $virtualMachines |
     ForEach-Object {
@@ -230,14 +230,14 @@ $virtualMachines |
 cls
 ```
 
-#### # Reboot EXT-SQL02
+#### # Reboot EXT-SQL03
 
 ```PowerShell
-Get-SCVirtualMachine -Name EXT-SQL02 |
+Get-SCVirtualMachine -Name EXT-SQL03 |
     Stop-SCVirtualMachine |
     select Name, MostRecentTask, MostRecentTaskUIState
 
-Get-SCVirtualMachine -Name EXT-SQL02 |
+Get-SCVirtualMachine -Name EXT-SQL03 |
     Start-SCVirtualMachine |
     select Name, MostRecentTask, MostRecentTaskUIState
 ```
@@ -246,7 +246,7 @@ Get-SCVirtualMachine -Name EXT-SQL02 |
 cls
 ```
 
-#### # Start VMs that depend on EXT-SQL02
+#### # Start VMs that depend on EXT-SQL03
 
 ```PowerShell
 $startupDelayInSeconds = 30
