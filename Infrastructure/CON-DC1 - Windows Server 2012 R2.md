@@ -352,6 +352,8 @@ cls
 
 ## # Configure Active Directory organizational units
 
+### # Configure organizational units for IT department
+
 ```PowerShell
 New-ADOrganizationalUnit -Name IT -Path "DC=corp,DC=contoso,DC=com"
 New-ADOrganizationalUnit `
@@ -382,6 +384,42 @@ New-ADOrganizationalUnit `
     -Path "OU=IT,DC=corp,DC=contoso,DC=com"
 
 New-ADOrganizationalUnit -Name Users -Path "OU=IT,DC=corp,DC=contoso,DC=com"
+```
+
+### # Configure organizational units for Quality Assurance department
+
+```PowerShell
+New-ADOrganizationalUnit `
+    -Name "Quality Assurance" `
+    -Path "DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name Groups `
+    -Path "OU=Quality Assurance,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name Resources `
+    -Path "OU=Quality Assurance,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name Laptops `
+    -Path "OU=Resources,OU=Quality Assurance,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name Servers `
+    -Path "OU=Resources,OU=Quality Assurance,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name Workstations `
+    -Path "OU=Resources,OU=Quality Assurance,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name "Service Accounts" `
+    -Path "OU=Quality Assurance,DC=corp,DC=contoso,DC=com"
+
+New-ADOrganizationalUnit `
+    -Name Users `
+    -Path "OU=Quality Assurance,DC=corp,DC=contoso,DC=com"
 ```
 
 ```PowerShell
