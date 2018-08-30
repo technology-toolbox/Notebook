@@ -1197,3 +1197,104 @@ Set-AdfsClaimsProviderTrust `
 From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/](https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-realm-discovery-page-to-ask-for-upn-right-away/)>
 
 ### Configure relying party trust to pass through claims from claims providers other than Active Directory
+
+## Issue - Numerous errors on ADFS servers due to database schema owner change
+
+### Issue
+
+#### Event log
+
+Log Name:      AD FS/Admin\
+Source:        AD FS\
+Event ID:      356\
+Task Category: None\
+Level:         Error\
+Keywords:      AD FS\
+User:          TECHTOOLBOX\\s-adfs\
+Computer:      EXT-ADFS03A.extranet.technologytoolbox.com\
+Description:\
+Failed to register notification to the SQL database with the connection string Data Source=EXT-SQL03;Initial Catalog=AdfsConfigurationV3;Integrated Security=True;Min Pool Size=20 for cache type 'ServiceStateSummary'. Changes to settings may not take effect until the Federation Service restarts.
+
+Additional Data
+
+Exception details:\
+Cannot find the user 'owner', because it does not exist or you do not have permission.\
+Cannot find the queue 'SqlQueryNotificationService-90ad86ae-721c-47e4-bbbf-e3a897b3f208', because it does not exist or you do not have permission.\
+Invalid object name 'SqlQueryNotificationService-90ad86ae-721c-47e4-bbbf-e3a897b3f208'.
+
+#### Database
+
+##### Stored procedures
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/C2A7E59B3FCA149031BE395C806A513AE149F65E.png)
+
+##### Service queues
+
+SqlQueryNotificationService-7312d3b0-7a70-4523-b16e-8b01967a2562\
+SqlQueryNotificationService-6f07d1d0-ecbe-455f-9e51-9b13c5dfac8a\
+SqlQueryNotificationService-75c2f9ae-df6e-44f4-a5d3-1eb5fbcc7119\
+SqlQueryNotificationService-172c29ac-604b-4b80-ab2f-c107c999cc7f\
+SqlQueryNotificationService-c208e3e3-2880-438a-9bb0-d4f905c60eb2\
+SqlQueryNotificationService-ff3a8640-1784-448b-a5b0-998a31c673f1
+
+### Solution
+
+---
+
+**EXT-SQL03 - SQL Server Management Studio**
+
+```SQL
+USE [AdfsConfigurationV3]
+GO
+GRANT IMPERSONATE ON USER::dbo TO [TECHTOOLBOX\s-adfs]
+GO
+```
+
+---
+
+### References
+
+**Cannot find the queue 'SqlQueryNotificationService-{guid}'**\
+From <[https://social.msdn.microsoft.com/Forums/sqlserver/en-US/bd195da8-93b2-43c6-8f59-674f5fb9d618/cannot-find-the-queue-sqlquerynotificationserviceguid?forum=sqlservicebroker](https://social.msdn.microsoft.com/Forums/sqlserver/en-US/bd195da8-93b2-43c6-8f59-674f5fb9d618/cannot-find-the-queue-sqlquerynotificationserviceguid?forum=sqlservicebroker)>
+
+**SqlDependency Permission issue**\
+From <[https://social.msdn.microsoft.com/Forums/sqlserver/en-US/b6b4d546-f0e8-4ad9-88a7-09833e014159/sqldependency-permission-issue?forum=sqlservicebroker](https://social.msdn.microsoft.com/Forums/sqlserver/en-US/b6b4d546-f0e8-4ad9-88a7-09833e014159/sqldependency-permission-issue?forum=sqlservicebroker)>
+
+**SqlDependency and SQL Service Broker Permissions**\
+From <[http://keithelder.net/2009/01/20/sqldependency-and-sql-service-broker-permissions/](http://keithelder.net/2009/01/20/sqldependency-and-sql-service-broker-permissions/)>
+
+**Once for all right permissions for SQLDependency PLEASE?**\
+From <[https://social.technet.microsoft.com/Forums/exchange/en-US/99321f54-1fef-4860-9fe9-5966a46fe582/once-for-all-right-permissions-for-sqldependency-please?forum=sqlservicebroker](https://social.technet.microsoft.com/Forums/exchange/en-US/99321f54-1fef-4860-9fe9-5966a46fe582/once-for-all-right-permissions-for-sqldependency-please?forum=sqlservicebroker)>
+
+**SqlDependency changes for RTM [Sushil Chordia]**\
+From <[https://blogs.msdn.microsoft.com/dataaccess/2005/09/27/sqldependency-changes-for-rtm-sushil-chordia/](https://blogs.msdn.microsoft.com/dataaccess/2005/09/27/sqldependency-changes-for-rtm-sushil-chordia/)>
+
+## Issue - Numerous errors on ADFS servers due to database permission change
+
+### Issue
+
+Log Name:      Application\
+Source:        MSSQLSERVER\
+Event ID:      28005\
+Task Category: Server\
+Level:         Error\
+Keywords:      Classic\
+User:          N/A\
+Computer:      EXT-SQL03.extranet.technologytoolbox.com\
+Description:\
+An exception occurred while enqueueing a message in the target queue. Error: 15404, State: 19. Could not obtain information about Windows NT group/user 'TECHTOOLBOX\\s-adfs', error code 0x5.
+
+### Solution
+
+---
+
+**EXT-SQL03 - SQL Server Management Studio**
+
+```SQL
+USE [AdfsConfigurationV3]
+GO
+REVOKE IMPERSONATE ON USER::dbo FROM [TECHTOOLBOX\s-adfs]
+GO
+```
+
+---
