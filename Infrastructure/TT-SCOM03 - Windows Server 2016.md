@@ -2179,6 +2179,30 @@ Get-SCOMAlert `
     }
 ```
 
+#### # Source: PerfNet
+
+#### # Event ID: 2004
+
+#### #
+
+#### # Event Description: Unable to open the Server service performance object...
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "Application Event Log Error" |
+    where { $_.Description.Contains("Source: PerfNet") } |
+    where { $_.Description.Contains("Event ID: 2004") } |
+    where { $_.Description.Contains(
+"Event Description: Unable to open the Server service performance object.") } |
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
 #### # Source: Software Protection Platform Service
 
 #### # Event ID: 8198
