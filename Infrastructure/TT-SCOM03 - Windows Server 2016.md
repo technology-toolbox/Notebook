@@ -2243,7 +2243,35 @@ Get-SCOMAlert `
     where { $_.Description.Contains("Source: Service Control Manager") } |
     where { $_.Description.Contains("Event ID: 7023") } |
     where { $_.Description.Contains(
-"Event Description: The Data Sharing Service service terminated with the following error") }|
+"Event Description: The Data Sharing Service service terminated with the following error") } |
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
+#### # Source: MSSQLSERVER
+
+#### # Event ID: 35262
+
+#### #
+
+#### # Event Description: Skipping the default startup of database '...' because the database belongs to
+
+#### # an availability group
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "Application Event Log Error" |
+    where { $_.Description.Contains("Source: MSSQLSERVER") } |
+    where { $_.Description.Contains("Event ID: 35262") } |
+    where { $_.Description.Contains(
+"Event Description: Skipping the default startup of database") } |
+    where { $_.Description.Contains(
+"because the database belongs to an availability group") } |
     foreach {
         $alert = $_
 
