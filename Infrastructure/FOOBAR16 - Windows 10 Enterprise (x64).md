@@ -655,6 +655,27 @@ Start-SCVirtualMachine $vmName
 
 ---
 
+```PowerShell
+cls
+```
+
+## # Install SharePoint Online Management Shell
+
+```PowerShell
+& ("\\TT-FS01\Public\Download\Microsoft\SharePoint\Online" `
+    + "\SharePointOnlineManagementShell_8029-1200_x64_en-us.msi")
+```
+
+```PowerShell
+cls
+```
+
+## # Install Microsoft Teams
+
+```PowerShell
+& "\\TT-FS01\Products\Microsoft\Teams\Teams_windows_x64.exe"
+```
+
 **TODO:**
 
 ## # Enter a product key and activate Windows
