@@ -7480,3 +7480,44 @@ Start-SCVirtualMachine $vmName
 ```
 
 ---
+
+### # Rename network connection
+
+```PowerShell
+$interfaceAlias = "Management"
+
+Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
+```
+
+## Upgrade Azure Active Directory Connect
+
+Download
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E6/16E98AA5E46B1B4495FDE0176A04B7F957A37BE6.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/03/4643EED1C1F1434208E0A03BB494EED94767C303.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/A1DBF1E3AE8BF21D9EB0AA7DE8BA68C30E9166D4.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/1009CB1B7A6446A5AC874DC87EB88667E73EF362.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/97/D3AEB5873F70A365CD0745A119E4FFF178C24E97.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/F67F7AA640308BC779B2702CE1BAF798E8044984.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AC/B01727CF66D3D146A64B7131C628EC5519D933AC.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/ADB8557ECF919D8B61FD07ECB5A78FF0895F00FF.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/54/E87D0A010848FA04D05B3B15F37AB27B14AB4754.png)
+
+Learn more - [https://go.microsoft.com/fwlink/?linkid=850962](https://go.microsoft.com/fwlink/?linkid=850962)
+
+If you have a single forest on-premises, then the attribute you should use is objectGUID. This is also the attribute used when you use express settings in Azure AD Connect and also the attribute used by DirSync.\
+If you have multiple forests and do not move users between forests and domains, then objectGUID is a good attribute to use even in this case.
+
+From <[https://docs.microsoft.com/en-us/azure/active-directory/hybrid/plan-connect-design-concepts](https://docs.microsoft.com/en-us/azure/active-directory/hybrid/plan-connect-design-concepts)>
+
+[https://go.microsoft.com/fwlink/?linkid=862773](https://go.microsoft.com/fwlink/?linkid=862773)\
+smasters@technologytoolbox.com
