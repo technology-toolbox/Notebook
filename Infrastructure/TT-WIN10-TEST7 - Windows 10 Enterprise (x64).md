@@ -118,27 +118,34 @@ From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershel
 cls
 ```
 
+### # Set VM notes
+
+```PowerShell
+$vmHost = "WOLVERINE"
+$vmName = "TT-WIN10-TEST7"
+
+$notes = "Windows 10 Enterprise (x64)
+Microsoft Office Professional Plus 2016 (x86)
+Adobe Reader 8.3.1
+Google Chrome
+Mozilla Firefox
+Thunderbird"
+
+Set-VM -ComputerName $vmHost -VMName $vmName -Notes $notes
+```
+
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "TT-WIN10-TEST7"
-
 $targetPath = ("OU=Workstations,OU=Resources,OU=Quality Assurance" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 ```
 
-```PowerShell
-cls
-```
-
 ### # Enable Secure Boot and set first boot device to hard drive
 
 ```PowerShell
-$vmHost = "WOLVERINE"
-$vmName = "TT-WIN10-TEST7"
-
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName
@@ -158,46 +165,9 @@ Start-VM `
     -VMName $vmName
 ```
 
-```PowerShell
-cls
-```
-
-### # Set VM notes
-
-```PowerShell
-$vmHost = "WOLVERINE"
-$vmName = "TT-WIN10-TEST7"
-
-$notes = "Windows 10 Enterprise (x64)
-Microsoft Office Professional Plus 2016 (x86)
-Adobe Reader 8.3.1
-Google Chrome
-Mozilla Firefox
-Thunderbird"
-
-Set-VM -ComputerName $vmHost -VMName $vmName -Notes $notes
-```
-
 ---
 
 ### Login as .\\foo
-
-### # Copy Toolbox content
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$source = "\\TT-FS01\Public\Toolbox"
-$destination = "C:\NotBackedUp\Public\Toolbox"
-
-robocopy $source $destination /E /XD "Microsoft SDKs"
-```
 
 ### # Set MaxPatchCacheSize to 0 (recommended)
 
@@ -245,9 +215,7 @@ ping TT-FS01 -f -l 8900
 
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 50 GB       | 4K                   | OSDisk       |
-
-## Login as .\\foo
+| 0    | C:           | 32 GB       | 4K                   | OSDisk       |
 
 ## Install updates using Windows Update
 
@@ -257,9 +225,13 @@ ping TT-FS01 -f -l 8900
 
 ## Examine disk usage
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/E3387B3E35E03D7948A5E98A987FCA28E8515055.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8F/03428FEEA3474F470AD7FA038FB6635435F3B88F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/4212A44E45BFC41CAB9CC7CB3913B4A414ED619F.png)
+```Console
+C:\NotBackedUp\Public\Toolbox\Wdu.exe
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/81/04F04E15484B9F568CA9FB3CD37645E0AE190C81.png)
 
 ---
 
@@ -290,61 +262,39 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 **TODO:**
 
-## Add virtual machine to Hyper-V protection group in DPM
+## Allow remote access for all domain users
 
-## # Clean up the WinSxS folder
-
-### Before
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/B5102804865E764F95035C1DBDC89A3DE69603C5.png)
-
-```Console
-Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
-```
-
-### After
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/E5DD31AAC2432F3B070FA53CC499BF3363308ED9.png)
+Add **TECHTOOLBOX\\Domain Users** to Remote Desktop Users
 
 ```PowerShell
 cls
 ```
 
-## # Delete C:\\Windows\\SoftwareDistribution folder (3.2 GB)
-
-### # Before
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/E5DD31AAC2432F3B070FA53CC499BF3363308ED9.png)
+## # Configure name resolution for development environments
 
 ```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
+notepad C:\Windows\system32\drivers\etc\hosts
 ```
 
-### After
+---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F7/0CCCF21AB8382943FD7123C043143A06DCB9ACF7.png)
+**C:\\Windows\\system32\\drivers\\etc\\hosts**
+
+```Text
+...
+
+# Securitas (Development)
+10.1.20.41	ext-foobar9 client-local-9.securitasinc.com client2-local-9.securitasinc.com cloud-local-9.securitasinc.com cloud2-local-9.securitasinc.com employee-local-9.securitasinc.com media-local-9.securitasinc.com
+```
+
+---
 
 ```PowerShell
 cls
 ```
 
-## # Enter a product key and activate Windows
+## # Install Microsoft Teams
 
 ```PowerShell
-slmgr /ipk {product key}
+& "\\TT-FS01\Products\Microsoft\Teams\Teams_windows_x64.exe"
 ```
-
-> **Note**
->
-> When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-## Activate Microsoft Office
-
-1. Start Word 2016
-2. Enter product key
