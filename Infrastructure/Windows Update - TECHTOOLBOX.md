@@ -7,7 +7,7 @@ Saturday, January 11, 2014
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Patch FOOBAR10 (before patching other machines)
+## Patch FOOBAR16 (before patching other machines)
 
 ## Patch remaining TECHTOOLBOX machines
 
@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**FOOBAR10**
+**FOOBAR16**
 
 ```PowerShell
 cls
@@ -95,8 +95,8 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 $scriptBlock = [ScriptBlock]::Create($script)
 
-Get-Content "\\TT-FS01\Users$\jjameson-admin\Desktop\Computer list for Windows Update.txt" |
-    Where-Object { $_ -notin @('BANSHEE', 'FOOBAR10') } |
+Get-Content "\\TT-FS01\Users$\jjameson-admin\My Documents\Computer List for Windows Update.txt" |
+    Where-Object { $_ -notin @('BANSHEE', 'FOOBAR16') } |
     ForEach-Object {
         $computer = $_
 
@@ -194,7 +194,7 @@ $virtualMachines |
 cls
 ```
 
-#### # Shutdown SharePoint 2013 test farm (database VM stored on SOFS)
+#### # Shutdown SharePoint 2013 test farm (database VM stored on NAS)
 
 ```PowerShell
 $sharePointVirtualMachines = @(
@@ -251,19 +251,19 @@ $sharePointVirtualMachines |
 cls
 ```
 
-#### # Shutdown VMs stored on SOFS
+#### # Shutdown VMs stored on NAS
 
 ```PowerShell
 $coreVirtualMachines = @(
-    'EXT-DC04',
-    'EXT-DC05',
+    'EXT-DC08',
+    'EXT-DC09',
     'FOOBAR7',
-    'FOOBAR10',
-    'FOOBAR11',
+    'FOOBAR16',
+    'FOOBAR17',
     'HAVOK-TEST')
 
 Get-SCVirtualMachine |
-    ? { $_.Location -like '\\TT-SOFS01*' } |
+    ? { $_.Location -like 'C:\ClusterStorage\*' } |
     ? { $_.Name -notin $coreVirtualMachines } |
     ? { $_.VirtualMachineState -eq 'Running' } |
     ForEach-Object {
@@ -278,12 +278,12 @@ Get-SCVirtualMachine |
     }
 ```
 
-#### # Shutdown "core" VMs -- except FOOBAR10 and FOOBAR11
+#### # Shutdown "core" VMs -- except FOOBAR16 and FOOBAR17
 
 ```PowerShell
 Get-SCVirtualMachine |
     ? { $_.Name -in $coreVirtualMachines } |
-    ? { $_.Name -notin @('FOOBAR10', 'FOOBAR11') } |
+    ? { $_.Name -notin @('FOOBAR16', 'FOOBAR17') } |
     ? { $_.VirtualMachineState -eq 'Running' } |
     ForEach-Object {
         $vmHost = $_
@@ -404,7 +404,7 @@ $virtualMachines |
 cls
 ```
 
-#### # Start SharePoint 2013 test farm (database VM stored on SOFS)
+#### # Start SharePoint 2013 test farm (database VM stored on NAS)
 
 ```PowerShell
 $startupDelayInSeconds = 30
@@ -479,13 +479,13 @@ $sharePointVirtualMachines |
     }
 ```
 
-#### # Start VMs stored on SOFS
+#### # Start VMs stored on NAS
 
 ```PowerShell
 $startupDelayInSeconds = 15
 
 Get-SCVirtualMachine |
-    ? { $_.Location -like '\\TT-SOFS01*' } |
+    ? { $_.Location -like 'C:\ClusterStorage\*' } |
     ? { $_.Name -notin @(
         'CRYPTID',
         'DEVOPS2012',
@@ -542,7 +542,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 $scriptBlock = [scriptblock]::Create($script)
 
-Get-Content "\\TT-FS01\Users$\jjameson-admin\Desktop\Computer list for Windows Update.txt" |
+Get-Content "\\TT-FS01\Users$\jjameson-admin\My Documents\Computer List for Windows Update.txt" |
     Where-Object { $_ -notin @('BANSHEE') } |
     ForEach-Object {
         $computer = $_
