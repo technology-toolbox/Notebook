@@ -2251,6 +2251,96 @@ Get-SCOMAlert `
     }
 ```
 
+#### # Source: Microsoft-Windows-Defrag
+
+#### # Event ID: 257
+
+#### #
+
+#### # Event Description: The volume ... was not optimized because an error was encountered
+
+#### # This operation is not supported on this filesystem. (0x89000020)
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "Application Event Log Error" |
+    where { $_.Description.Contains("Source: Microsoft-Windows-Defrag") } |
+    where { $_.Description.Contains("Event ID: 257") } |
+    where { $_.Description.Contains(
+"Event Description: The volume ") } |
+    where { $_.Description.Contains(
+"was not optimized because an error was encountered:") } |
+    where { $_.Description.Contains(
+"This operation is not supported on this filesystem. (0x89000020)") } |
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
+#### # Source: Microsoft-Windows-Defrag
+
+#### # Event ID: 257
+
+#### #
+
+#### # Event Description: The volume ... was not optimized because an error was encountered
+
+#### # Neither Slab Consolidation nor Slab Analysis will run if slabs are less than 8 MB. (0x8900002D)
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "Application Event Log Error" |
+    where { $_.Description.Contains("Source: Microsoft-Windows-Defrag") } |
+    where { $_.Description.Contains("Event ID: 257") } |
+    where { $_.Description.Contains(
+"Event Description: The volume ") } |
+    where { $_.Description.Contains(
+"was not optimized because an error was encountered:") } |
+    where { $_.Description.Contains(
+"Neither Slab Consolidation nor Slab Analysis will run if slabs are less than 8 MB. (0x8900002D)") } |
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
+#### # Source: Microsoft-Windows-Defrag
+
+#### # Event ID: 257
+
+#### #
+
+#### # Event Description: The volume ... was not optimized because an error was encountered
+
+#### # The parameter is incorrect. (0x80070057)
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "Application Event Log Error" |
+    where { $_.Description.Contains("Source: Microsoft-Windows-Defrag") } |
+    where { $_.Description.Contains("Event ID: 257") } |
+    where { $_.Description.Contains(
+"Event Description: The volume ") } |
+    where { $_.Description.Contains(
+"was not optimized because an error was encountered:") } |
+    where { $_.Description.Contains(
+"The parameter is incorrect. (0x80070057)") } |
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
 #### # Source: MSSQLSERVER
 
 #### # Event ID: 35262
