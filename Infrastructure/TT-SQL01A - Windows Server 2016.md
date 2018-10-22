@@ -1781,3 +1781,65 @@ Resize-Partition `
     -PartitionNumber $partition.PartitionNumber `
     -Size $size.SizeMax
 ```
+
+## Issue - Not enough free space to install patches using Windows Update
+
+~6 GB of free space, but unable to install **2018-10 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4462917)**.
+
+### Expand C:
+
+---
+
+**FOOBAR16**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV05A"
+$vmName = "TT-SQL01A"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 40GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Get-PartitionSupportedSize : Invalid Parameter
+Activity ID: {69afb1a4-4c1f-4bdd-9c9a-45b6f0df7083}
+At line:1 char:1
++ Get-PartitionSupportedSize -DiskNumber 0 -PartitionNumber 2
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (StorageWMI:ROOT/Microsoft/.../MSFT_Partition) [Get-PartitionSupportedSize], CimException
+    + FullyQualifiedErrorId : StorageWMI 5,Get-PartitionSupportedSize
+```
+
+> **Note**
+>
+> Expand partition using Computer Management console.
