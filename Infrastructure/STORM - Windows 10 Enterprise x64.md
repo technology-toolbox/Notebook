@@ -14,6 +14,7 @@ Monday, July 2, 2018
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **STORM**.
+  - Specify **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step:
   - Select the following applications:
@@ -21,9 +22,6 @@ Monday, July 2, 2018
       - **Adobe Reader 8.3.1**
     - **Chrome**
       - **Chrome (64-bit)**
-    - **Microsoft**
-      - **Remote Server Administration Tools for Windows 10**
-      - **SQL Server 2017 Management Studio**
     - **Mozilla**
       - **Firefox (64-bit)**
       - **Thunderbird**
@@ -48,20 +46,25 @@ $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
 $adminUser = [ADSI] 'WinNT://./Administrator,User'
 $adminUser.Rename('foo')
 $adminUser.SetPassword($plainPassword)
+
+logoff
 ```
 
-### # Enable local Administrator account
+Install DaVinci Resolve
+
+# Rename computer and join domain
 
 ```PowerShell
-$Disabled = 0x0002
-$adminUser.UserFlags.Value = $adminUser.UserFlags.Value -bxor $Disabled
-$adminUser.SetInfo()
+$computerName = "STORM"
+
+Rename-Computer -NewName $computerName -Restart
 ```
 
-#### Reference
+Wait for the VM to restart and then execute the following command to join the **TECHTOOLBOX **domain:
 
-**Managing Local User Accounts with PowerShell**\
-From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershell.aspx](https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershell.aspx)>
+```PowerShell
+Add-Computer -DomainName corp.technologytoolbox.com -Restart
+```
 
 ---
 
@@ -86,6 +89,19 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### Login as local administrator account
 
+### # Install NVIDIA display driver
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Drivers\NVIDIA\GT-1030" `
+    + "\416.34-desktop-win10-64bit-international-whql.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
 ### # Install Intel network drivers
 
 ```PowerShell
@@ -106,7 +122,7 @@ Restart-Computer
 ### # Configure networking
 
 ```PowerShell
-$interfaceAlias = "Management"
+$interfaceAlias = "LAN"
 ```
 
 #### # Rename network connections
@@ -114,7 +130,7 @@ $interfaceAlias = "Management"
 ```PowerShell
 Get-NetAdapter -Physical | select InterfaceDescription
 
-$interfaceDescription = "Intel(R) 82574L Gigabit Network Connection"
+$interfaceDescription = "Intel(R) 82579LM Gigabit Network Connection"
 
 Get-NetAdapter -InterfaceDescription $interfaceDescription |
     Rename-NetAdapter -NewName $interfaceAlias
@@ -262,7 +278,7 @@ Serial number: *********26709R</p>
 <p>1 TB</p>
 </td>
 <td valign='top'>
-<p>D:</p>
+<p>E:</p>
 </td>
 <td valign='top'>
 <p>931 GB</p>
@@ -272,6 +288,117 @@ Serial number: *********26709R</p>
 </td>
 <td valign='top'>
 <p>Gold01</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>2</p>
+</td>
+<td valign='top'>
+<p>Model: WDC WD1001FALS-00E3A0<br />
+Serial number: WD-******283566</p>
+</td>
+<td valign='top'>
+<p>1 TB</p>
+</td>
+<td valign='top'>
+<p>Z:</p>
+</td>
+<td valign='top'>
+<p>931 GB</p>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+<p>Backup01</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>3</p>
+</td>
+<td valign='top'>
+<p>Model: WDC WD1002FAEX-00Y9A0<br />
+Serial number: WD-******201582</p>
+</td>
+<td valign='top'>
+<p>1 TB</p>
+</td>
+<td valign='top'>
+<p>F:</p>
+</td>
+<td valign='top'>
+<p>931 GB</p>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+<p>Bronze01</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>4</p>
+</td>
+<td valign='top'>
+<p>Model: ST1000NM0033-9ZM173<br />
+Serial number: *****EMV</p>
+</td>
+<td valign='top'>
+<p>1 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>5</p>
+</td>
+<td valign='top'>
+<p>Model: ST1000NM0033-9ZM173<br />
+Serial number: *****4YL</p>
+</td>
+<td valign='top'>
+<p>1 TB</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>6</p>
+</td>
+<td valign='top'>
+<p>Model: Samsung SSD 970 PRO 512GB<br />
+Serial number: *********_81B1_6431.</p>
+</td>
+<td valign='top'>
+<p>512 GB</p>
+</td>
+<td valign='top'>
+<p>D:</p>
+</td>
+<td valign='top'>
+</td>
+<td valign='top'>
+<p>4K</p>
+</td>
+<td valign='top'>
+<p>Platinum01</p>
 </td>
 </tr>
 </table>
@@ -298,7 +425,7 @@ Get-Volume -DriveLetter C | Set-Volume -NewFileSystemLabel System
 ##### # Create "Gold01" volume (D:)
 
 ```PowerShell
-Get-PhysicalDisk |    where { $_.SerialNumber -eq '*********26709R' } |    Get-Disk |    Clear-Disk -RemoveData -Confirm:$false -PassThru |    Initialize-Disk -PartitionStyle GPT -PassThru |    New-Partition -DriveLetter "D" -UseMaximumSize |    Format-Volume `        -FileSystem NTFS `        -NewFileSystemLabel "Gold01" `        -Confirm:$false
+Get-PhysicalDisk |    where { $_.SerialNumber -eq '*********26709R' } |    Get-Disk |    Clear-Disk -RemoveData -Confirm:$false -PassThru |    Initialize-Disk -PartitionStyle GPT -PassThru |    New-Partition -DriveLetter "E" -UseMaximumSize |    Format-Volume `        -FileSystem NTFS `        -NewFileSystemLabel "Gold01" `        -Confirm:$false
 ```
 
 ```PowerShell
@@ -342,30 +469,52 @@ mkdir C:\NotBackedUp\Temp
 cls
 ```
 
-### # Set MaxPatchCacheSize to 0
-
-```PowerShell
-reg add HKLM\Software\Policies\Microsoft\Windows\Installer /v MaxPatchCacheSize /t REG_DWORD /d 0 /f
-```
-
-### # Copy Toolbox content
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```Console
-robocopy \\TT-FS01\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
-```
-
 ### # Configure cmder shortcut in Windows Explorer ("Cmder Here")
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\cmder\Cmder.exe /REGISTER ALL
+```
+
+## Install and configure Hyper-V
+
+### Enable Hyper-V
+
+```PowerShell
+cls
+```
+
+### # Configure VM storage
+
+```PowerShell
+mkdir D:\NotBackedUp\VMs
+
+Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
+```
+
+### # Create virtual switches
+
+```PowerShell
+$interfaceAlias = "LAN"
+
+New-VMSwitch `
+    -Name $interfaceAlias `
+    -NetAdapterName $interfaceAlias `
+    -AllowManagementOS $true
+```
+
+### # Enable jumbo frames on virtual switches
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty `
+    -Name "vEthernet ($interfaceAlias)" `
+    -DisplayName "Jumbo Packet" `
+    -RegistryValue 9014
+
+Start-Sleep -Seconds 5
+
+ping TT-FS01 -f -l 8900
 ```
 
 ```PowerShell
@@ -518,106 +667,6 @@ robocopy $source $destination /E
 cls
 ```
 
-## # Install Microsoft InfoPath 2013
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$setupPath = "\\TT-FS01\Products\Microsoft\Office 2013" `
-    + "\infopath_4753-1001_x86_en-us.exe"
-
-Start-Process `
-    -FilePath $setupPath `
-    -Wait
-```
-
-> **Important**
->
-> Wait for the installation to complete.
-
-```PowerShell
-cls
-```
-
-## # Install Paint.NET
-
-```PowerShell
-& "\\TT-FS01\Products\Paint.NET\paint.net.4.0.21.install.zip"
-```
-
-> **Important**
->
-> Wait for the installation to complete.
-
-```PowerShell
-cls
-```
-
-## # Install Microsoft Expression Studio 4
-
-### # Copy installation media from internal file server
-
-```PowerShell
-$isoFile = "en_expression_studio_4_ultimate_x86_dvd_537032.iso"
-
-$source = "\\TT-FS01\Products\Microsoft\Expression Studio"
-
-$destination = "C:\NotBackedUp\Temp"
-
-robocopy $source $destination $isoFile
-```
-
-### Install Expression Studio
-
-Use the "Toolbox" script to install Expression Studio
-
-## Install and configure Hyper-V
-
-### Enable Hyper-V
-
-```PowerShell
-cls
-```
-
-### # Configure VM storage
-
-```PowerShell
-mkdir D:\NotBackedUp\VMs
-
-Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
-```
-
-### # Create virtual switches
-
-```PowerShell
-New-VMSwitch `
-    -Name "Management" `
-    -NetAdapterName "Management" `
-    -AllowManagementOS $true
-```
-
-### # Enable jumbo frames on virtual switches
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name "vEthernet (Management)" `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
-
-ping TT-FS01 -f -l 8900
-```
-
-```PowerShell
-cls
-```
-
 ## # Install and configure Git
 
 ### # Install Git
@@ -631,16 +680,22 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\Git\Git-2.16.2-64-bit.exe"
+$setupPath = "\\TT-FS01\Products\Git\Git-2.19.1-64-bit.exe"
 
 Start-Process -FilePath $setupPath -Wait
 ```
 
+On the **Choosing the default editor used by Git** step, select **Use the Nano editor by default**.
+
 > **Important**
 >
-> Wait for the installation to complete.
+> Wait for the installation to complete and restart PowerShell for environment changes to take effect.
 
-```PowerShell
+```Console
+exit
+```
+
+```Console
 cls
 ```
 
@@ -671,6 +726,30 @@ From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html]
 cls
 ```
 
+## # Install GitHub Desktop
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\GitHub\GitHubDesktopSetup.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
 ## # Install Visual Studio 2017
 
 ### # Launch Visual Studio 2017 setup
@@ -693,17 +772,131 @@ Start-Process -FilePath $setupPath -Wait
 Select the following workloads:
 
 - **.NET desktop development**
+- **Desktop development with C++**
 - **ASP.NET and web development**
 - **Azure development**
 - **Python development**
 - **Node.js development**
 - **Data storage and processing**
+- **Data science and analytical applications**
 - **Office/SharePoint development**
 - **.NET Core cross-platform development**
 
 > **Note**
 >
 > When prompted, restart the computer to complete the installation.
+
+```PowerShell
+cls
+```
+
+## # Install Microsoft SQL Server 2017
+
+### # Create folders for Distributed Replay Client
+
+```PowerShell
+mkdir "D:\NotBackedUp\Microsoft SQL Server\DReplayClient\WorkingDir\"
+mkdir "D:\NotBackedUp\Microsoft SQL Server\DReplayClient\ResultDir\"
+```
+
+### # Install SQL Server
+
+```PowerShell
+net use \\TT-FS01\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$sourcePath = "\\TT-FS01\Products\Microsoft\SQL Server 2017"
+$destPath = "C:\NotBackedUp\Temp"
+$isoFilename = "en_sql_server_2017_developer_x64_dvd_11296168.iso"
+
+robocopy $sourcePath $destPath $isoFilename
+
+$imagePath = "$destPath\$isoFilename"
+
+Function Ensure-MountedDiskImage
+{
+    [CmdletBinding()]
+    Param(
+        [Parameter(Position = 1, Mandatory = $true)]
+        [string] $ImagePath)
+
+    $imageDriveLetter = (Get-DiskImage -ImagePath $ImagePath|
+        Get-Volume).DriveLetter
+
+    If ($imageDriveLetter -eq $null)
+    {
+        Write-Verbose "Mounting disk image ($ImagePath)..."
+        $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
+            Get-Volume).DriveLetter
+    }
+
+    return $imageDriveLetter
+}
+
+$imageDriveLetter = Ensure-MountedDiskImage $imagePath
+
+If ((Get-Process -Name "setup" -ErrorAction SilentlyContinue) -eq $null)
+{
+    $setupPath = $imageDriveLetter + ':\setup.exe'
+
+    Write-Verbose "Starting setup..."
+
+    & $setupPath
+
+    Start-Sleep -Seconds 15
+}
+```
+
+On the **Feature Selection** step, click **Select All** and then clear the checkbox for **PolyBase Query Service for External Data **(since this requires the Java Runtime Environment to be installed).
+
+On the **Server Configuration** page:
+
+- For **SQL Server Database Engine**, change the **Startup Type** to **Manual**.
+- For **SQL Server Analysis Services**, change the **Startup Type** to **Manual**.
+- For **SQL Server Integration Services 14.0**, change the **Startup Type** to **Manual**.
+- For **SQL Server Integration Services Scale Out Master 14.0**, change the **Startup Type** to **Manual**.
+- For **SQL Server Integration Services Scale Out Worker 14.0**, change the **Startup Type** to **Manual**.
+
+On the **Database Engine Configuration** page:
+
+- On the **Server Configuration** tab, click **Add Current User**.
+- On the **Data Directories** tab:
+  - Change the **Data root directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\**
+  - Change the **Backup directory** to **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**
+
+On the **Analysis Services Configuration** page:
+
+- On the **Server Configuration** tab, click **Add Current User**.
+- On the **Data Directories** tab:
+  - Change the **Data directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Data.**
+  - Change the **Log file directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Log.**
+  - Change the **Temp directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Temp.**
+  - Change the **Backup directory** to **Z:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Backup**.
+
+On the **Distributed Replay Controller **page, click **Add Current User**.
+
+On the **Distributed Replay Client **page:
+
+- On the **Server Configuration** tab, click **Add Current User**.
+  - Change the **Working Directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\WorkingDir\\.**
+  - Change the **Result Directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\ResultDir\\.**
+
+```PowerShell
+cls
+```
+
+### # Remove installation media
+
+```PowerShell
+Dismount-DiskImage $imagePath
+
+Remove-Item $imagePath -Confirm:$true
+```
 
 ```PowerShell
 cls
@@ -721,7 +914,7 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 $setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio Code" `
-    + "\VSCodeSetup-x64-1.24.1.exe"
+    + "\VSCodeSetup-x64-1.28.2.exe"
 
 $arguments = "/silent" `
     + " /mergetasks='!runcode,addcontextmenufiles,addcontextmenufolders" `
@@ -759,7 +952,7 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\node.js\node-v8.9.1-x64.msi"
+$setupPath = "\\TT-FS01\Products\node.js\node-v10.13.0-x64.msi"
 
 Start-Process -FilePath $setupPath -Wait
 ```
@@ -855,7 +1048,7 @@ cls
 ### # Install Angular CLI
 
 ```PowerShell
-npm install --global --no-optional @angular/cli@1.4.9
+npm install --global --no-optional @angular/cli@6.2.6
 ```
 
 ```PowerShell
@@ -868,9 +1061,7 @@ cls
 npm install --global rimraf@2.6.2
 ```
 
-**TODO:**
-
-## Configure NPM locations for TECHTOOLBOX\\jjameson account
+## TODO: Configure NPM locations for TECHTOOLBOX\\jjameson account
 
 ---
 
@@ -1043,6 +1234,18 @@ Start-Process `
 **Default Install Path**\
 [https://www.telerik.com/forums/default-install-path#t8qFEfoMnUWlg50zptFlHQ](https://www.telerik.com/forums/default-install-path#t8qFEfoMnUWlg50zptFlHQ)
 
+```PowerShell
+cls
+```
+
+## # Install Microsoft Message Analyzer
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Microsoft\Message Analyzer 1.4\MessageAnalyzer64.msi"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
 > **Important**
 >
 > Wait for the installation to complete.
@@ -1084,19 +1287,41 @@ Start-Process -FilePath $setupPath -Wait
 >
 > Wait for the installation to complete.
 
-## Install software for HP Photosmart 6515
+```PowerShell
+cls
+```
 
-[http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793](http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793)
+## # Install Microsoft Expression Studio 4
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B5/C53FF5F0549B9F389E6E62519EB11652F68F81B5.png)
+### # Copy installation media from internal file server
 
-## Share printer
+```PowerShell
+$isoFile = "en_expression_studio_4_ultimate_x86_dvd_537032.iso"
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/01/2EDCC101189FC9A8E4E5FD9205D12E8EB82B2F01.png)
+$source = "\\TT-FS01\Products\Microsoft\Expression Studio"
 
-Click **Change Sharing Options**.
+$destination = "C:\NotBackedUp\Temp"
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/39D600ED528C73CAE3772FDA8A9E263E29CBF094.png)
+robocopy $source $destination $isoFile
+```
+
+### Install Expression Studio
+
+Use the "Toolbox" script to install Expression Studio
+
+```PowerShell
+cls
+```
+
+## # Install Paint.NET
+
+```PowerShell
+& "\\TT-FS01\Products\Paint.NET\paint.net.4.1.3.install.zip"
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
 
 ```PowerShell
 cls
@@ -1108,131 +1333,39 @@ cls
 Update-Help
 ```
 
-**TODO:**
-
-## Install GitHub Desktop
-
-[https://desktop.github.com/](https://desktop.github.com/)
-
 ```PowerShell
 cls
 ```
 
-## # Install Microsoft SQL Server 2016
+## # Install software for HP Photosmart 6515
 
 ```PowerShell
-net use \\TT-FS01\Products /USER:TECHTOOLBOX\jjameson
+$setupPath = "\\TT-FS01\Products\HP\Photosmart 6515\PS6510_1315-1.exe"
+
+Start-Process -FilePath $setupPath -Wait
 ```
 
-> **Note**
->
-> When prompted, type the password to connect to the file share.
+On the **Software Selections** step:
 
-```PowerShell
-$sourcePath = "\\TT-FS01\Products\Microsoft\SQL Server 2016"
-$destPath = "C:\NotBackedUp\Temp"
-$isoFilename = "en_sql_server_2016_developer_x64_dvd_8777069.iso"
+1. Click **Customize Software Selections**.
+2. Clear the checkboxes for the following items:
+   - **HP Update**
+   - **HP Photosmart 6510 series Product Improvement**
+   - **Bing Bar for HP (includes HP Smart Print)**
+   - **HP Photosmart 6510 series Help**
+   - **HP Photo Creations**
 
-robocopy $sourcePath $destPath $isoFilename
+[http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793](http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793)
 
-$imagePath = "$destPath\$isoFilename"
+**TODO:**\
 
-Function Ensure-MountedDiskImage
-{
-    [CmdletBinding()]
-    Param(
-        [Parameter(Position = 1, Mandatory = $true)]
-        [string] $ImagePath)
+## Share printer
 
-    $imageDriveLetter = (Get-DiskImage -ImagePath $ImagePath|
-        Get-Volume).DriveLetter
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/01/2EDCC101189FC9A8E4E5FD9205D12E8EB82B2F01.png)
 
-    If ($imageDriveLetter -eq $null)
-    {
-        Write-Verbose "Mounting disk image ($ImagePath)..."
-        $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
-            Get-Volume).DriveLetter
-    }
+Click **Change Sharing Options**.
 
-    return $imageDriveLetter
-}
-
-$imageDriveLetter = Ensure-MountedDiskImage $imagePath
-
-If ((Get-Process -Name "setup" -ErrorAction SilentlyContinue) -eq $null)
-{
-    $setupPath = $imageDriveLetter + ':\setup.exe'
-
-    Write-Verbose "Starting setup..."
-
-    & $setupPath
-
-    Start-Sleep -Seconds 15
-}
-```
-
-On the **Feature Selection** step, click **Select All** and then clear the checkbox for **PolyBase Query Service for External Data **(since this requires the Java Runtime Environment to be installed).
-
-On the **Server Configuration** page:
-
-- For **SQL Server Database Engine**, change the **Startup Type** to **Manual**.
-- For **SQL Server Analysis Services**, change the **Startup Type** to **Manual**.
-- For **SQL Server Reporting Services**, change the **Startup Type** to **Manual**.
-- For **SQL Server Integration Services 13.0**, change the **Startup Type** to **Manual**.
-
-On the **Database Engine Configuration** page:
-
-- On the **Server Configuration** tab, click **Add Current User**.
-- On the **Data Directories** tab:
-  - Change the **Data root directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\**
-  - Change the **Backup directory** to **Z:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\MSSQL\\Backup**
-
-On the **Analysis Services Configuration** page:
-
-- On the **Server Configuration** tab, click **Add Current User**.
-- On the **Data Directories** tab:
-  - Change the **Data directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS13.MSSQLSERVER\\OLAP\\Data.**
-  - Change the **Log file directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS13.MSSQLSERVER\\OLAP\\Log.**
-  - Change the **Temp directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS13.MSSQLSERVER\\OLAP\\Temp.**
-  - Change the **Backup directory** to **Z:\\NotBackedUp\\Microsoft SQL Server\\MSAS13.MSSQLSERVER\\OLAP\\Backup**.
-
-On the **Distributed Replay Controller **page, click **Add Current User**.
-
-```PowerShell
-Dismount-DiskImage $imagePath
-```
-
-```PowerShell
-cls
-```
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-## Install updates using Windows Update
-
-**Note:** Repeat until there are no updates available for the computer.
-
-```PowerShell
-cls
-```
-
-### # Delete C:\\Windows\\SoftwareDistribution folder (4.7 GB)
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-```
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/39D600ED528C73CAE3772FDA8A9E263E29CBF094.png)
 
 ## Install DPM agent
 
@@ -1313,12 +1446,38 @@ powercfg.exe /S SCHEME_MIN
 powercfg.exe /L
 ```
 
-## Disk Cleanup
+## Install updates using Windows Update
 
-## # Configure credential helper for Git
+**Note:** Repeat until there are no updates available for the computer.
 
 ```PowerShell
-git config --global credential.helper !"C:\\NotBackedUp\\Public\\Toolbox\\git-credential-winstore.exe"
+cls
+```
+
+### # Delete C:\\Windows\\SoftwareDistribution folder (4.7 GB)
+
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+```
+
+## Disk Cleanup
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+**Note:** When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
 ```
 
 ## # Configure e-mail and name for Git
@@ -1328,7 +1487,40 @@ git config --global user.email "jeremy_jameson@live.com"
 git config --global user.name "Jeremy Jameson"
 ```
 
+## # Configure credential helper for Git
+
+```PowerShell
+git config --global credential.helper !"C:\\NotBackedUp\\Public\\Toolbox\\git-credential-winstore.exe"
+```
+
 ## Other stuff that may need to be done
+
+```PowerShell
+cls
+```
+
+## # Install Microsoft InfoPath 2013
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Microsoft\Office 2013" `
+    + "\infopath_4753-1001_x86_en-us.exe"
+
+Start-Process `
+    -FilePath $setupPath `
+    -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
 
 ### Install Android SDK (for debugging Chrome on Samsung Galaxy)
 
