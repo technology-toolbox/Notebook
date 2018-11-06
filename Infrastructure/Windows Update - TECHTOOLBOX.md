@@ -198,39 +198,14 @@ cls
 
 ```PowerShell
 $sharePointVirtualMachines = @(
-    'EXT-WAP02B',
-    'EXT-WAP02A',
-    'EXT-ADFS02B',
-    'EXT-ADFS02A',
-    'EXT-WEB02B',
-    'EXT-WEB02A',
-    'EXT-APP02A',
-    'EXT-SQL02')
-
-$sharePointVirtualMachines |
-    ForEach-Object {
-        $vmName = $_
-
-        Write-Progress `
-            -Activity $activity `
-            -Status "Stopping virtual machine ($vmName)..."
-
-        Get-SCVirtualMachine -Name $vmName |
-            ? { $_.VirtualMachineState -eq 'Running' } |
-            Stop-SCVirtualMachine |
-            select Name, MostRecentTask, MostRecentTaskUIState
-    }
-```
-
-#### # Shutdown SharePoint 2010 development farm (iSCSI dependency to TT-HV03)
-
-```PowerShell
-$sharePointVirtualMachines = @(
-    'EXT-SQL01B',
-    'EXT-WEB01B',
-    'EXT-WEB01A',
-    'EXT-APP01A',
-    'EXT-SQL01A')
+    'EXT-WAP03B',
+    'EXT-WAP03A',
+    'EXT-ADFS03B',
+    'EXT-ADFS03A',
+    'EXT-WEB03B',
+    'EXT-WEB03A',
+    'EXT-APP03A',
+    'EXT-SQL03')
 
 $sharePointVirtualMachines |
     ForEach-Object {
