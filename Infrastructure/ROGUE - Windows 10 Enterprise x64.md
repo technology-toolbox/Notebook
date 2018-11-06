@@ -1,7 +1,7 @@
-﻿# STORM - Windows 10 Enterprise x64
+﻿# ROGUE - Windows 10 Enterprise x64
 
-Monday, July 2, 2018
-11:20 AM
+Tuesday, November 6, 2018
+7:26 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -13,7 +13,7 @@ Monday, July 2, 2018
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **STORM**.
+  - In the **Computer name** box, type **ROGUE**.
   - Specify **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step:
@@ -55,7 +55,7 @@ Install DaVinci Resolve
 # Rename computer and join domain
 
 ```PowerShell
-$computerName = "STORM"
+$computerName = "ROGUE"
 
 Rename-Computer -NewName $computerName -Restart
 ```
@@ -77,7 +77,7 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "STORM"
+$vmName = "ROGUE"
 
 $targetPath = ("OU=Workstations,OU=Resources,OU=Development" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
@@ -89,7 +89,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### Login as local administrator account
 
-### # Install NVIDIA display driver
+### TODO: # Install NVIDIA display driver
 
 ```PowerShell
 $setupPath = "\\TT-FS01\Products\Drivers\NVIDIA\GT-1030" `
@@ -105,7 +105,7 @@ Start-Process -FilePath $setupPath -Wait
 ### # Install Intel network drivers
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\Drivers\Intel\Network\82579LM" `
+$setupPath = "\\TT-FS01\Products\Drivers\Intel\Network\I217-V" `
     + "\Windows 10\PROWinx64.exe"
 
 Start-Process -FilePath $setupPath -Wait
@@ -144,13 +144,13 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 Set-NetAdapterAdvancedProperty `
     -Name $interfaceAlias `
     -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
+    -RegistryValue 4088
 
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 Start-Sleep -Seconds 5
 
-ping TT-FS01 -f -l 8900
+ping TT-FS01 -f -l 4000
 ```
 
 ```PowerShell
@@ -510,11 +510,11 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 Set-NetAdapterAdvancedProperty `
     -Name "vEthernet ($interfaceAlias)" `
     -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
+    -RegistryValue 4088
 
 Start-Sleep -Seconds 5
 
-ping TT-FS01 -f -l 8900
+ping TT-FS01 -f -l 4000
 ```
 
 ```PowerShell
@@ -610,8 +610,6 @@ Notepad "C:\Users\All Users\Microsoft\Money\17.0\Invoice\2008Invoice.ntd"
 **Sunset Home & Business - Invoice issues**\
 From <[https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices/](https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices/)>
 
-### Install and configure MSMoneyQuotes
-
 ```PowerShell
 cls
 ```
@@ -652,15 +650,6 @@ $pythonPathFolders = 'C:\Python27\', 'C:\Python27\Scripts'
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -Folders $pythonPathFolders `
     -EnvironmentVariableTarget Machine
-```
-
-### # Copy PocketSense files
-
-```PowerShell
-$source = "\\TT-FS01\Users$\jjameson\My Documents\Finances\MS Money\PocketSense"
-$destination = "C:\BackedUp\MS Money\PocketSense"
-
-robocopy $source $destination /E
 ```
 
 ```PowerShell
@@ -1258,6 +1247,22 @@ Start-Process -FilePath $setupPath -Wait
 cls
 ```
 
+## # Install Wireshark
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Wireshark\Wireshark-win64-2.6.4.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
 ## # Install Microsoft Log Parser 2.2
 
 ```PowerShell
@@ -1411,7 +1416,7 @@ cls
 ### # Attach DPM agent
 
 ```PowerShell
-$productionServer = 'STORM'
+$productionServer = 'ROGUE'
 
 .\Attach-ProductionServer.ps1 `
     -DPMServerName TT-DPM02 `
