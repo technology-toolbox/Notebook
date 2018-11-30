@@ -2303,3 +2303,19 @@ ipconfig /registerdns
 
 ipconfig /flushdns
 ```
+
+```PowerShell
+cls
+```
+
+## # Disable routing on Live Migration network
+
+```PowerShell
+$interfaceAlias = "vEthernet (Live Migration)"
+```
+
+##### # Remove default gateway
+
+```PowerShell
+Remove-NetRoute -InterfaceAlias $interfaceAlias -NextHop 10.1.11.1 -Confirm:$false
+```

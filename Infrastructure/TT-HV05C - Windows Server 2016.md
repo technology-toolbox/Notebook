@@ -1405,9 +1405,11 @@ Set-SCVirtualNetworkAdapter `
 
 ---
 
-## # Configure iSCSI network adapters
+## # Disable routing on storage networks
 
-### # Configure Storage-10 network adapter
+### # Configure iSCSI network adapters
+
+#### # Configure Storage-10 network adapter
 
 ```PowerShell
 $interfaceAlias = "Storage-10"
@@ -1437,27 +1439,25 @@ $adapterConfig = Get-WmiObject `
     -Filter "Index= '$($adapter.DeviceID)'"
 ```
 
-#### # Do not register this connection in DNS
+##### # Do not register this connection in DNS
 
 ```PowerShell
 $adapterConfig.SetDynamicDNSRegistration($false)
 ```
 
-#### # Disable NetBIOS over TCP/IP
+##### # Disable NetBIOS over TCP/IP
 
 ```PowerShell
 $adapterConfig.SetTcpipNetbios(2)
 ```
 
-#### # Remove default gateway
+##### # Remove default gateway
 
 ```PowerShell
 Remove-NetRoute -InterfaceAlias $interfaceAlias -NextHop 10.1.10.1 -Confirm:$false
 ```
 
-## # Configure iSCSI network adapters
-
-### # Configure Storage-10 network adapter
+#### # Configure Storage-13 network adapter
 
 ```PowerShell
 $interfaceAlias = "Storage-13"
@@ -1487,20 +1487,68 @@ $adapterConfig = Get-WmiObject `
     -Filter "Index= '$($adapter.DeviceID)'"
 ```
 
-#### # Do not register this connection in DNS
+##### # Do not register this connection in DNS
 
 ```PowerShell
 $adapterConfig.SetDynamicDNSRegistration($false)
 ```
 
-#### # Disable NetBIOS over TCP/IP
+##### # Disable NetBIOS over TCP/IP
 
 ```PowerShell
 $adapterConfig.SetTcpipNetbios(2)
 ```
 
-#### # Remove default gateway
+##### # Remove default gateway
 
 ```PowerShell
 Remove-NetRoute -InterfaceAlias $interfaceAlias -NextHop 10.1.13.1 -Confirm:$false
+```
+
+### # Refresh DNS
+
+```PowerShell
+ipconfig /registerdns
+
+ipconfig /flushdns
+```
+
+```PowerShell
+cls
+```
+
+## # Disable routing on Live Migration network
+
+### # Configure Live Migration network adapter
+
+```PowerShell
+$interfaceAlias = "vEthernet (Live Migration)"
+
+$adapter = Get-WmiObject `
+    -Class "Win32_NetworkAdapter" `
+    -Filter "NetConnectionId = '$interfaceAlias'"
+
+$adapterConfig = Get-WmiObject `
+    -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+```
+
+##### # Do not register this connection in DNS
+
+```PowerShell
+$adapterConfig.SetDynamicDNSRegistration($false)
+```
+
+##### # Remove default gateway
+
+```PowerShell
+Remove-NetRoute -InterfaceAlias $interfaceAlias -NextHop 10.1.11.1 -Confirm:$false
+```
+
+### # Refresh DNS
+
+```PowerShell
+ipconfig /registerdns
+
+ipconfig /flushdns
 ```

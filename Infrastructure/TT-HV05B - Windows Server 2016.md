@@ -1476,3 +1476,43 @@ ipconfig /registerdns
 
 ipconfig /flushdns
 ```
+
+```PowerShell
+cls
+```
+
+## # Disable routing on Live Migration network
+
+### # Configure Live Migration network adapter
+
+```PowerShell
+$interfaceAlias = "vEthernet (Live Migration)"
+
+$adapter = Get-WmiObject `
+    -Class "Win32_NetworkAdapter" `
+    -Filter "NetConnectionId = '$interfaceAlias'"
+
+$adapterConfig = Get-WmiObject `
+    -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+```
+
+##### # Do not register this connection in DNS
+
+```PowerShell
+$adapterConfig.SetDynamicDNSRegistration($false)
+```
+
+##### # Remove default gateway
+
+```PowerShell
+Remove-NetRoute -InterfaceAlias $interfaceAlias -NextHop 10.1.11.1 -Confirm:$false
+```
+
+### # Refresh DNS
+
+```PowerShell
+ipconfig /registerdns
+
+ipconfig /flushdns
+```
