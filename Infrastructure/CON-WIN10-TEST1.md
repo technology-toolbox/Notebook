@@ -68,26 +68,32 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Move computer to different OU
+### # Set first boot device to hard drive
 
 ```PowerShell
-$vmName = "TT-WIN10-DEV1"
+$vmHost = "TT-HV05C"
+$vmName = "CON-WIN10-TEST1"
 
-$targetPath = ("OU=Workstations,OU=Resources,OU=Development" `
-    + ",DC=corp,DC=technologytoolbox,DC=com")
+$vmHardDiskDrive = Get-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName |
+    where { $_.ControllerType -eq "SCSI" `
+        -and $_.ControllerNumber -eq 0 `
+        -and $_.ControllerLocation -eq 0 }
 
-Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
+Set-VMFirmware `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -FirstBootDevice $vmHardDiskDrive
 ```
 
 ---
-
-### Login as TECHTOOLBOX\\jjameson-admin
 
 ### # Rename local Administrator account and set password
 
@@ -108,45 +114,13 @@ $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
 $adminUser = [ADSI] 'WinNT://./Administrator,User'
 $adminUser.Rename('foo')
 $adminUser.SetPassword($plainPassword)
+
+logoff
 ```
-
-### # Enable local Administrator account
-
-```PowerShell
-$Disabled = 0x0002
-$adminUser.UserFlags.Value = $adminUser.UserFlags.Value -bxor $Disabled
-$adminUser.SetInfo()
-```
-
-#### Reference
-
-**Managing Local User Accounts with PowerShell**\
-From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershell.aspx](https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershell.aspx)>
 
 ### Login as .\\foo
 
-### # Copy Toolbox content
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$source = "\\TT-FS01\Public\Toolbox"
-$destination = "C:\NotBackedUp\Public\Toolbox"
-
-robocopy $source $destination /E /XD "Microsoft SDKs"
-```
-
-### # Enable PowerShell remoting
-
-```PowerShell
-Enable-PSRemoting -Confirm:$false
-```
+### Configure networking
 
 ---
 
@@ -156,34 +130,29 @@ Enable-PSRemoting -Confirm:$false
 cls
 ```
 
-#### # Set first boot device to hard drive
+#### # Configure VM network using VMM
 
 ```PowerShell
-$vmHost = "TT-HV05A"
-$vmName = "CON-ADFS01"
+$vmName = "CON-WIN10-TEST1"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Contoso VM Network"
 
-$vmHardDiskDrive = Get-VMHardDiskDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName |
-    where { $_.ControllerType -eq "SCSI" `
-        -and $_.ControllerNumber -eq 0 `
-        -and $_.ControllerLocation -eq 0 }
+Stop-SCVirtualMachine $vmName
 
-Set-VMFirmware `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -FirstBootDevice $vmHardDiskDrive
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork
+
+Start-SCVirtualMachine $vmName
 ```
 
 ---
 
-### # Configure networking
-
 ```PowerShell
-$interfaceAlias = "Management"
+$interfaceAlias = "Contoso-60"
 ```
 
-#### # Rename network connections
+#### # Rename network connection
 
 ```PowerShell
 Get-NetAdapter -Physical | select InterfaceDescription
@@ -202,7 +171,7 @@ Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
 
 Start-Sleep -Seconds 5
 
-ping TT-FS01 -f -l 8900
+ping CON-DC1 -f -l 8900
 ```
 
 ### Configure storage
@@ -211,15 +180,119 @@ ping TT-FS01 -f -l 8900
 | ---- | ------------ | ----------- | -------------------- | ------------ |
 | 0    | C:           | 50 GB       | 4K                   | OSDisk       |
 
-## Add virtual machine to Hyper-V protection group in DPM
+```PowerShell
+cls
+```
 
-## Install updates using Windows Update
+### # Join member server to domain
+
+#### # Add computer to domain
+
+```PowerShell
+Add-Computer `
+    -DomainName corp.contoso.com `
+    -Credential (Get-Credential CONTOSO\Administrator) `
+    -Restart
+```
+
+---
+
+**CON-DC1 - Run as CONTOSO\\Administrator**
+
+```PowerShell
+cls
+```
+
+### # Move computer to different OU
+
+```PowerShell
+$computerName = "CON-WIN10-TEST1"
+$targetPath = "OU=Workstations,OU=Resources,OU=Quality Assurance" `
+    + ",DC=corp,DC=contoso,DC=com"
+
+Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+```
+
+---
+
+### # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+### Add virtual machine to Hyper-V protection group in DPM
+
+### Install updates using Windows Update
 
 > **Note**
 >
 > Repeat until there are no updates available for the computer.
 
-## # Enter a product key and activate Windows
+## Issue - Not enough free space to install patches using Windows Update
+
+1.7 GB of free space, but unable to install **2018-12 Cumulative Update for Windows 10 for x64-based Systems (KB4471324)**.
+
+### Expand C:
+
+---
+
+**FOOBAR16**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV05C"
+$vmName = "CON-WIN10-TEST1"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks" `
+        + "\$vmName" + ".vhdx") `
+    -SizeBytes 37GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Delete "recovery" partition
+
+```PowerShell
+Get-Partition -PartitionNumber 4 | Remove-Partition -Confirm:$false
+```
+
+#### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
+**TODO:**
+
+### # Enter a product key and activate Windows
 
 ```PowerShell
 slmgr /ipk {product key}
@@ -238,164 +311,7 @@ slmgr /ato
 1. Start Word 2016
 2. Enter product key
 
----
-
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-## # Move VM to new Production VM network
-
-```PowerShell
-$vmName = "TT-WIN10-DEV1"
-$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
-$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
-$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
-$ipAddressPool = Get-SCStaticIPAddressPool -Name "Management-30 Address Pool"
-
-Stop-SCVirtualMachine $vmName
-
-$macAddress = Grant-SCMACAddress `
-    -MACAddressPool $macAddressPool `
-    -Description $vmName `
-    -VirtualNetworkAdapter $networkAdapter
-
-Set-SCVirtualNetworkAdapter `
-    -VirtualNetworkAdapter $networkAdapter `
-    -VMNetwork $vmNetwork `
-    -MACAddressType Static `
-    -MACAddress $macAddress `
-    -IPv4AddressType Static `
-    -IPv4AddressPool $ipAddressPool
-
-Start-SCVirtualMachine $vmName
-```
-
----
-
-**TODO:**
-
-### # Configure networking
-
-```PowerShell
-$interfaceAlias = "Production"
-```
-
-#### # Rename network connections
-
-```PowerShell
-Get-NetAdapter -Physical | select InterfaceDescription
-
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName $interfaceAlias
-```
-
-#### # Enable jumbo frames
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" -RegistryValue 9014
-
-Start-Sleep -Seconds 5
-
-ping TT-FS01 -f -l 8900
-```
-
----
-
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
-
-```PowerShell
-cls
-```
-
-#### # Configure static IP address using VMM
-
-```PowerShell
-$vmName = "CON-ADFS01"
-$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
-$vmNetwork = Get-SCVMNetwork -Name "Contoso VM Network"
-$macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
-$ipAddressPool = Get-SCStaticIPAddressPool -Name "Contoso-60 Address Pool"
-
-Stop-SCVirtualMachine $vmName
-
-$macAddress = Grant-SCMACAddress `
-    -MACAddressPool $macAddressPool `
-    -Description $vmName `
-    -VirtualNetworkAdapter $networkAdapter
-
-Set-SCVirtualNetworkAdapter `
-    -VirtualNetworkAdapter $networkAdapter `
-    -VMNetwork $vmNetwork `
-    -MACAddressType Static `
-    -MACAddress $macAddress `
-    -IPv4AddressType Static `
-    -IPv4AddressPools $ipAddressPool
-
-Start-SCVirtualMachine $vmName
-```
-
----
-
 ### Login as .\\foo
-
-### Configure storage
-
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 32 GB       | 4K                   | OSDisk       |
-
-### # Join member server to domain
-
-#### # Add computer to domain
-
-```PowerShell
-Add-Computer `
-    -DomainName corp.contoso.com `
-    -Credential (Get-Credential CONTOSO\Administrator) `
-    -Restart
-```
-
-#### Move computer to different OU
-
----
-
-**CON-DC1 - Run as CONTOSO\\Administrator**
-
-```PowerShell
-$computerName = "CON-ADFS01"
-$targetPath = "OU=Servers,OU=Resources,OU=IT" `
-    + ",DC=corp,DC=contoso,DC=com"
-
-Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
-```
-
----
-
-### Add virtual machine to Hyper-V protection group in DPM
-
----
-
-**CON-DC1 - Run as CONTOSO\\Administrator**
-
-```PowerShell
-cls
-```
-
-### # Configure Windows Update
-
-#### # Add machine to security group for Windows Update schedule
-
-```PowerShell
-Add-ADGroupMember -Identity "Windows Update - Slot 22" -Members "CON-ADFS01$"
-```
-
----
 
 ## Issue - Firewall log contains numerous entries for UDP 137 broadcast
 
