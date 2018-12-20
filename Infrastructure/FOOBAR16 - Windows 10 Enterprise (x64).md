@@ -676,6 +676,70 @@ cls
 & "\\TT-FS01\Products\Microsoft\Teams\Teams_windows_x64.exe"
 ```
 
+## Issue - Not enough free space to install patches using Windows Update
+
+3.6 GB of free space, but unable to install **2018-12 Cumulative Update for Windows 10 for x64-based Systems (KB4471324)**.
+
+### Expand C:
+
+---
+
+**FOOBAR17**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV05C"
+$vmName = "FOOBAR16"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("C:\ClusterStorage\iscsi02-Silver-02\$vmName\$vmName" + ".vhdx") `
+    -SizeBytes 64GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Delete "recovery" partition
+
+```PowerShell
+Get-Partition -PartitionNumber 4 | Remove-Partition -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+#### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
 **TODO:**
 
 ## # Enter a product key and activate Windows
