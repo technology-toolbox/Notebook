@@ -364,6 +364,69 @@ If ((Test-Path $exportPath) -eq $false)
 Get-VM $vmName | Export-VM -Path $exportPath -Verbose
 ```
 
+## Issue - Not enough free space to install patches using Windows Update
+
+3 GB of free space, but unable to install **2018-12 Cumulative Update for Windows 10 for x64-based Systems (KB4471324)**.
+
+### Expand C:
+
+---
+
+**STORM**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmName = "TT-WIN10-DEV5"
+
+Stop-VM -Name $vmName
+
+Resize-VHD `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" `
+        + ".vhdx") `
+    -SizeBytes 55GB
+
+Start-VM -Name $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Delete "recovery" partition
+
+```PowerShell
+Get-Partition -PartitionNumber 4 | Remove-Partition -Confirm:$false
+```
+
+```PowerShell
+cls
+```
+
+#### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
 **TODO:**
 
 ## # Enter a product key and activate Windows
