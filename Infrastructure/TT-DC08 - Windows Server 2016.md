@@ -825,6 +825,25 @@ Resize-Partition `
     -Size $size.SizeMax
 ```
 
+## Issue - RSAT items missing from Windows 10 VMs
+
+IMPORTANT: Starting with Windows 10 October 2018 Update, RSAT is included as a set of "Features on Demand" in Windows 10 itself. See "Install Instructions" below for details, and "Additional Information" for recommendations and troubleshooting. RSAT lets IT admins manage Windows Server roles and features from a Windows 10 PC.
+
+From <[https://www.microsoft.com/en-us/download/details.aspx?id=45520](https://www.microsoft.com/en-us/download/details.aspx?id=45520)>
+
+**Windows 10 Version 1809 October Update - Install RSAT (Remote Server Administration Tools)**\
+From <[https://www.stephenwagner.com/2018/10/05/windows-10-1809-october-update-rsat/](https://www.stephenwagner.com/2018/10/05/windows-10-1809-october-update-rsat/)>
+
+When I ran DSIM I gave the error 0x800F0954, I had to execute the following:\
+1. regedit\
+2. HKEY_LOCAL_MACHINE \\ SOFTWARE \\ Policies \\ Microsoft \\ Windows \\ WindowsUpdate \\ AU\
+3. UseWUServer -> 0\
+4. net stop wuauserv && net start wuauserv from cmd\
+From <[https://www.stephenwagner.com/2018/10/05/windows-10-1809-october-update-rsat/](https://www.stephenwagner.com/2018/10/05/windows-10-1809-october-update-rsat/)>
+
+**Enable Windows Update "Features on Demand" and "Turn Windows features on or off" in WSUS Environments**\
+From <[https://www.stephenwagner.com/2018/10/08/enable-windows-update-features-on-demand-and-turn-windows-features-on-or-off-in-wsus-environments/](https://www.stephenwagner.com/2018/10/08/enable-windows-update-features-on-demand-and-turn-windows-features-on-or-off-in-wsus-environments/)>
+
 **TODO:**
 
 ```PowerShell
