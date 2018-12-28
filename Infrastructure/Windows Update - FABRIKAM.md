@@ -27,7 +27,7 @@ $activity = "Prepare development and test VMs for patching"
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'FAB-FOOBAR4'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'FAB-TEST1'; VMHost = 'WOLVERINE'; })
+    [PSCustomObject] @{ VMName = 'FAB-TEST1'; VMHost = 'STORM'; })
 ```
 
 #### # Revert VMs to most recent checkpoint
@@ -95,7 +95,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 $scriptBlock = [ScriptBlock]::Create($script)
 
-Get-Content "C:\Users\jjameson-admin\Desktop\Computer list for Windows Update.txt" |
+Get-Content "\\FAB-DC01\Users$\jjameson-admin\Documents\Computer List for Windows Update.txt" |
     ForEach-Object {
         $computer = $_
 
@@ -190,7 +190,7 @@ cls
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'FAB-FOOBAR4'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'FAB-TEST1'; VMHost = 'WOLVERINE'; })
+    [PSCustomObject] @{ VMName = 'FAB-TEST1'; VMHost = 'STORM'; })
 ```
 
 #### # Stop VMs after patching and update "Baseline" checkpoints
