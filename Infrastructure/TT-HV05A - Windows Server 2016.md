@@ -2310,12 +2310,707 @@ cls
 
 ## # Disable routing on Live Migration network
 
+### # Configure Live Migration network adapter
+
 ```PowerShell
 $interfaceAlias = "vEthernet (Live Migration)"
+
+$adapter = Get-WmiObject `
+    -Class "Win32_NetworkAdapter" `
+    -Filter "NetConnectionId = '$interfaceAlias'"
+
+$adapterConfig = Get-WmiObject `
+    -Class "Win32_NetworkAdapterConfiguration" `
+    -Filter "Index= '$($adapter.DeviceID)'"
+```
+
+##### # Do not register this connection in DNS
+
+```PowerShell
+$adapterConfig.SetDynamicDNSRegistration($false)
 ```
 
 ##### # Remove default gateway
 
 ```PowerShell
 Remove-NetRoute -InterfaceAlias $interfaceAlias -NextHop 10.1.11.1 -Confirm:$false
+```
+
+### # Refresh DNS
+
+```PowerShell
+ipconfig /registerdns
+
+ipconfig /flushdns
+```
+
+## Issue - Redirected I/O on Cluster Shared Volumes formatted as ReFS
+
+```PowerShell
+Get-ClusterSharedVolumeState | select Name, Node, FileSystemRedirectedIOReason
+
+Name              Node     FileSystemRedirectedIOReason
+----              ----     ----------------------------
+iscsi02-Silver-01 TT-HV05B               FileSystemReFs
+iscsi02-Silver-01 TT-HV05A               FileSystemReFs
+iscsi02-Silver-01 TT-HV05C               FileSystemReFs
+iscsi02-Silver-02 TT-HV05B               FileSystemReFs
+iscsi02-Silver-02 TT-HV05A               FileSystemReFs
+iscsi02-Silver-02 TT-HV05C               FileSystemReFs
+iscsi02-Silver-03 TT-HV05B               FileSystemReFs
+iscsi02-Silver-03 TT-HV05A               FileSystemReFs
+iscsi02-Silver-03 TT-HV05C               FileSystemReFs
+```
+
+### References
+
+**When using ReFS for Cluster Shared Volumes it always runs in file system redirection mode #2051**\
+From <[https://github.com/MicrosoftDocs/windowsserverdocs/issues/2051](https://github.com/MicrosoftDocs/windowsserverdocs/issues/2051)>
+
+**NTFS or ReFS with Cluster Shared Volumes in Windows Server 2016**\
+From <[https://www.itprotoday.com/windows-8/ntfs-or-refs-cluster-shared-volumes-windows-server-2016](https://www.itprotoday.com/windows-8/ntfs-or-refs-cluster-shared-volumes-windows-server-2016)>
+
+Always use NTFS for your Cluster Shared Volumes even though Hyper-V VMs are now supported on ReFS in Windows Server 2016. The only exception is when using Storage Spaces Direct in which case you should use ReFS. A big reason for using NTFS is that when using ReFS for Cluster Shared Volumes it always runs in file system redirection mode which means all I/O is sent over the cluster network to the coordinator node for the volume (this is why RDMA network adapters are recommended with Storage Spaces Direct for the cluster network) rather than nodes using Direct IO to access disks directly.
+
+**Windows Server 2016 Hyper-V ReFS vs NTFS**\
+From <[https://www.vembu.com/blog/windows-server-2016-hyper-v-refs-vs-ntfs/](https://www.vembu.com/blog/windows-server-2016-hyper-v-refs-vs-ntfs/)>
+
+...there is a major reason not to use ReFS in cluster shared volumes. In CSV Hyper-V architecture, you always want to use NTFS as the file system. Why? Even though ReFS is supported in Windows Server 2016 Hyper-V, when it is used for Cluster Shared Volumes it always runs in file system redirection mode which sends all I/O over the cluster network to the coordinator node for the volume. In deployments utilizing NAS or SAN, this can dramatically impact CSV performance. When utilizing cluster shared volumes you want to always make use of NTFS as the preferred file system in production environments in this configuration.
+
+### Reformat Cluster Shared Volume - iscsi02-Silver-03
+
+#### Move all data off Cluster Shared Volume
+
+```PowerShell
+cls
+```
+
+#### # Remove Cluster Shared Volume
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133202 | Get-Partition | Get-Volume
+
+... FileSystem DriveType HealthStatus OperationalStatus SizeRemaining       Size
+... ---------- --------- ------------ ----------------- -------------       ----
+... CSVFS      Fixed     Healthy      OK                   1023.65 GB 1023.87 GB
+
+Get-ClusterSharedVolume -Name iscsi02-Silver-03 | Remove-ClusterSharedVolume
+```
+
+```PowerShell
+cls
+```
+
+#### # Confirm iSCSI disk is formatted as ReFS
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133202 | Get-Partition | Get-Volume
+
+... FileSystem DriveType HealthStatus OperationalStatus SizeRemaining       Size
+... ---------- --------- ------------ ----------------- -------------       ----
+... ReFS       Fixed     Healthy      OK                   1023.65 GB 1023.87 GB
+```
+
+```PowerShell
+cls
+```
+
+#### # Take cluster disk offline
+
+```PowerShell
+Stop-ClusterResource -Name iscsi02-Silver-01
+```
+
+#### # Remove cluster disk
+
+```PowerShell
+Remove-ClusterResource -Name iscsi02-Silver-01 -Force
+```
+
+#### # Format iSCSI disk
+
+```PowerShell
+Get-PhysicalDisk |
+    where { $_.BusType -eq "iSCSI" } |
+    where { $_.SerialNumber -eq "6805ca19133202" } |
+    foreach {
+        $physicalDisk = $_
+
+        $disk = Get-Disk -UniqueId $physicalDisk.UniqueId
+
+        $disk | Set-Disk -IsReadOnly $false
+        $disk | Set-Disk -IsOffline $false
+
+        $disk |
+            where { $_.PartitionStyle -ne "RAW" } |
+            Clear-Disk -RemoveData -RemoveOEM -Confirm:$false -Verbose
+
+        Initialize-Disk -InputObject $disk -PartitionStyle GPT -PassThru |
+            New-Partition -UseMaximumSize |
+            Format-Volume -FileSystem NTFS -Confirm:$false |
+            Out-Null
+    }
+```
+
+```PowerShell
+cls
+```
+
+#### # Confirm iSCSI disk is formatted as NTFS
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133202 | Get-Partition | Get-Volume
+
+... FileSystem DriveType HealthStatus OperationalStatus SizeRemaining       Size
+... ---------- --------- ------------ ----------------- -------------       ----
+... NTFS       Fixed     Healthy      OK                   1023.65 GB 1023.87 GB
+```
+
+```PowerShell
+cls
+```
+
+#### # Set file system label for iSCSI disk
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133202 |
+    Get-Partition |
+    Get-Volume |
+    Set-Volume -NewFileSystemLabel iscsi02-Silver-03
+```
+
+```PowerShell
+cls
+```
+
+#### # Add cluster disk for CSV
+
+```PowerShell
+Get-ClusterAvailableDisk | Add-ClusterDisk
+```
+
+#### # Add Cluster Shared Volume
+
+```PowerShell
+Add-ClusterSharedVolume -Name "Cluster Disk 1"
+```
+
+```PowerShell
+cls
+```
+
+#### # Rename Cluster Shared Volume ("Cluster Disk 1" --> "iscsi02-Silver-03")
+
+```PowerShell
+Get-ClusterSharedVolume -Name "Cluster Disk 1" |
+    foreach {
+        $csv = $_
+
+        $diskGuid = $csv |
+            Get-ClusterParameter |
+            where { $_.Name -eq "DiskGuid" } |
+            select -ExpandProperty Value
+
+        $physicalDisk = Get-PhysicalDisk -ObjectId "*$diskGuid*"
+
+        $disk = Get-Disk -UniqueId $physicalDisk.UniqueId
+
+        $volume = $disk | Get-Partition | Get-Volume
+
+        Write-Host ("$($csv.Name) - $($physicalDisk.SerialNumber)" `
+            + " - $($volume.FileSystemLabel)")
+
+        $csv.Name = $volume.FileSystemLabel
+    }
+```
+
+```PowerShell
+cls
+```
+
+#### # Rename CSV junction point ("C:\\ClusterStorage\\Volume1" --> "C:\\ClusterStorage\\iscsi02-Silver-03")
+
+```PowerShell
+Push-Location C:\ClusterStorage
+
+Move-Item Volume1 iscsi02-Silver-03
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Confirm CSV is no longer using redirected I/O
+
+```PowerShell
+Get-ClusterSharedVolumeState | select Name, Node, FileSystemRedirectedIOReason
+
+Name              Node     FileSystemRedirectedIOReason
+----              ----     ----------------------------
+iscsi02-Silver-01 TT-HV05B               FileSystemReFs
+iscsi02-Silver-01 TT-HV05A               FileSystemReFs
+iscsi02-Silver-01 TT-HV05C               FileSystemReFs
+iscsi02-Silver-02 TT-HV05B               FileSystemReFs
+iscsi02-Silver-02 TT-HV05A               FileSystemReFs
+iscsi02-Silver-02 TT-HV05C               FileSystemReFs
+iscsi02-Silver-03 TT-HV05B      NotFileSystemRedirected
+iscsi02-Silver-03 TT-HV05A      NotFileSystemRedirected
+iscsi02-Silver-03 TT-HV05C      NotFileSystemRedirected
+```
+
+### Reformat Cluster Shared Volume - iscsi02-Silver-01
+
+#### Move all data off Cluster Shared Volume
+
+---
+
+**FOOBAR18**
+
+```PowerShell
+cls
+```
+
+##### # Move VMs from iscsi02-Silver-01 to iscsi02-Silver-03
+
+```PowerShell
+Get-SCVirtualMachine |
+    where { $_.Location -like "C:\ClusterStorage\iscsi02-Silver-01\*" } |
+    foreach {
+        $vm = $_
+
+        Get-SCVirtualMachine -Name $vm.Name |
+            where { $_.VirtualMachineState -eq 'Running' } |
+            Stop-SCVirtualMachine |
+            select Name, MostRecentTask, MostRecentTaskUIState
+
+        Move-SCVirtualMachine `
+            -VM $vm `
+            -VMHost $vm.HostName `
+            -HighlyAvailable $true `
+            -Path "C:\ClusterStorage\iscsi02-Silver-03" `
+            -UseDiffDiskOptimization `
+            -UseLAN
+    }
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Remove Cluster Shared Volume
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133200 | Get-Partition | Get-Volume
+
+... FileSystem DriveType HealthStatus OperationalStatus SizeRemaining       Size
+... ---------- --------- ------------ ----------------- -------------       ----
+... CSVFS      Fixed     Healthy      OK                   1012.21 GB 1023.81 GB
+
+Get-ClusterSharedVolume -Name iscsi02-Silver-01 | Remove-ClusterSharedVolume
+```
+
+```PowerShell
+cls
+```
+
+#### # Confirm iSCSI disk is formatted as ReFS
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133200 | Get-Partition | Get-Volume
+
+... FileSystem DriveType HealthStatus OperationalStatus SizeRemaining       Size
+... ---------- --------- ------------ ----------------- -------------       ----
+... ReFS       Fixed     Healthy      OK                   1012.21 GB 1023.81 GB
+```
+
+```PowerShell
+cls
+```
+
+#### # Take cluster disk offline
+
+```PowerShell
+Stop-ClusterResource -Name iscsi02-Silver-01
+```
+
+#### # Remove cluster disk
+
+```PowerShell
+Remove-ClusterResource -Name iscsi02-Silver-01 -Force
+```
+
+#### # Format iSCSI disk
+
+```PowerShell
+Get-PhysicalDisk |
+    where { $_.BusType -eq "iSCSI" } |
+    where { $_.SerialNumber -eq "6805ca19133200" } |
+    foreach {
+        $physicalDisk = $_
+
+        $disk = Get-Disk -UniqueId $physicalDisk.UniqueId
+
+        $disk | Set-Disk -IsReadOnly $false
+        $disk | Set-Disk -IsOffline $false
+
+        $disk |
+            where { $_.PartitionStyle -ne "RAW" } |
+            Clear-Disk -RemoveData -RemoveOEM -Confirm:$false -Verbose
+
+        Initialize-Disk -InputObject $disk -PartitionStyle GPT -PassThru |
+            New-Partition -UseMaximumSize |
+            Format-Volume -FileSystem NTFS -Confirm:$false |
+            Out-Null
+    }
+```
+
+```PowerShell
+cls
+```
+
+#### # Confirm iSCSI disk is formatted as NTFS
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133200 | Get-Partition | Get-Volume
+
+... FileSystem DriveType HealthStatus OperationalStatus SizeRemaining       Size
+... ---------- --------- ------------ ----------------- -------------       ----
+... NTFS       Fixed     Healthy      OK                   1023.67 GB 1023.87 GB
+```
+
+```PowerShell
+cls
+```
+
+#### # Set file system label for iSCSI disk
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133200 |
+    Get-Partition |
+    Get-Volume |
+    Set-Volume -NewFileSystemLabel iscsi02-Silver-01
+```
+
+```PowerShell
+cls
+```
+
+#### # Add cluster disk for CSV
+
+```PowerShell
+Get-ClusterAvailableDisk | Add-ClusterDisk
+```
+
+```PowerShell
+cls
+```
+
+#### # Add Cluster Shared Volume
+
+```PowerShell
+Add-ClusterSharedVolume -Name "Cluster Disk 1"
+```
+
+```PowerShell
+cls
+```
+
+#### # Rename Cluster Shared Volume ("Cluster Disk 1" --> "iscsi02-Silver-01")
+
+```PowerShell
+Get-ClusterSharedVolume -Name "Cluster Disk 1" |
+    foreach {
+        $csv = $_
+
+        $diskGuid = $csv |
+            Get-ClusterParameter |
+            where { $_.Name -eq "DiskGuid" } |
+            select -ExpandProperty Value
+
+        $physicalDisk = Get-PhysicalDisk -ObjectId "*$diskGuid*"
+
+        $disk = Get-Disk -UniqueId $physicalDisk.UniqueId
+
+        $volume = $disk | Get-Partition | Get-Volume
+
+        Write-Host ("$($csv.Name) - $($physicalDisk.SerialNumber)" `
+            + " - $($volume.FileSystemLabel)")
+
+        $csv.Name = $volume.FileSystemLabel
+    }
+```
+
+```PowerShell
+cls
+```
+
+#### # Rename CSV junction point ("C:\\ClusterStorage\\Volume1" --> "C:\\ClusterStorage\\iscsi02-Silver-01")
+
+```PowerShell
+Push-Location C:\ClusterStorage
+
+Move-Item Volume1 iscsi02-Silver-01
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Confirm CSV is no longer using redirected I/O
+
+```PowerShell
+Get-ClusterSharedVolumeState | select Name, Node, FileSystemRedirectedIOReason
+
+Name              Node     FileSystemRedirectedIOReason
+----              ----     ----------------------------
+iscsi02-Silver-01 TT-HV05B      NotFileSystemRedirected
+iscsi02-Silver-01 TT-HV05A      NotFileSystemRedirected
+iscsi02-Silver-01 TT-HV05C      NotFileSystemRedirected
+iscsi02-Silver-02 TT-HV05B               FileSystemReFs
+iscsi02-Silver-02 TT-HV05A               FileSystemReFs
+iscsi02-Silver-02 TT-HV05C               FileSystemReFs
+iscsi02-Silver-03 TT-HV05B      NotFileSystemRedirected
+iscsi02-Silver-03 TT-HV05A      NotFileSystemRedirected
+iscsi02-Silver-03 TT-HV05C      NotFileSystemRedirected
+```
+
+### Reformat Cluster Shared Volume - iscsi02-Silver-02
+
+#### Move all data off Cluster Shared Volume
+
+---
+
+**FOOBAR18**
+
+```PowerShell
+cls
+```
+
+##### # Move VMs from iscsi02-Silver-02 to iscsi02-Silver-01
+
+```PowerShell
+Get-SCVirtualMachine |
+    where { $_.Location -like "C:\ClusterStorage\iscsi02-Silver-02\*" } |
+    where { $_.Name -ne "FOOBAR18" } |
+    foreach {
+        $vm = $_
+
+        Get-SCVirtualMachine -Name $vm.Name |
+            where { $_.VirtualMachineState -eq 'Running' } |
+            Stop-SCVirtualMachine |
+            select Name, MostRecentTask, MostRecentTaskUIState |
+            Format-List
+
+        Move-SCVirtualMachine `
+            -VM $vm `
+            -VMHost $vm.HostName `
+            -HighlyAvailable $true `
+            -Path "C:\ClusterStorage\iscsi02-Silver-01" `
+            -UseDiffDiskOptimization `
+            -UseLAN |
+            select Name, MostRecentTask, MostRecentTaskUIState |
+            Format-List
+    }
+```
+
+```PowerShell
+cls
+
+Get-SCVirtualMachine -Name "FOOBAR18" |
+    foreach {
+        $vm = $_
+
+        Move-SCVirtualMachine `
+            -VM $vm `
+            -VMHost $vm.HostName `
+            -HighlyAvailable $true `
+            -Path "C:\ClusterStorage\iscsi02-Silver-01" `
+            -UseDiffDiskOptimization `
+            -UseLAN |
+            select Name, MostRecentTask, MostRecentTaskUIState |
+            Format-List
+    }
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Remove Cluster Shared Volume
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133201 | Get-Partition | Get-Volume
+
+... FileSystem DriveType HealthStatus OperationalStatus SizeRemaining       Size
+... ---------- --------- ------------ ----------------- -------------       ----
+... CSVFS      Fixed     Healthy      OK                   1012.18 GB 1023.81 GB
+
+Get-ClusterSharedVolume -Name iscsi02-Silver-02 | Remove-ClusterSharedVolume
+```
+
+```PowerShell
+cls
+```
+
+#### # Confirm iSCSI disk is formatted as ReFS
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133201 | Get-Partition | Get-Volume
+
+... FileSystem DriveType HealthStatus OperationalStatus SizeRemaining       Size
+... ---------- --------- ------------ ----------------- -------------       ----
+... ReFS       Fixed     Healthy      OK                   1012.18 GB 1023.81 GB
+```
+
+```PowerShell
+cls
+```
+
+#### # Take cluster disk offline
+
+```PowerShell
+Stop-ClusterResource -Name iscsi02-Silver-02
+```
+
+#### # Remove cluster disk
+
+```PowerShell
+Remove-ClusterResource -Name iscsi02-Silver-02 -Force
+```
+
+#### # Format iSCSI disk
+
+```PowerShell
+Get-PhysicalDisk |
+    where { $_.BusType -eq "iSCSI" } |
+    where { $_.SerialNumber -eq "6805ca19133201" } |
+    foreach {
+        $physicalDisk = $_
+
+        $disk = Get-Disk -UniqueId $physicalDisk.UniqueId
+
+        $disk | Set-Disk -IsReadOnly $false
+        $disk | Set-Disk -IsOffline $false
+
+        $disk |
+            where { $_.PartitionStyle -ne "RAW" } |
+            Clear-Disk -RemoveData -RemoveOEM -Confirm:$false -Verbose
+
+        Initialize-Disk -InputObject $disk -PartitionStyle GPT -PassThru |
+            New-Partition -UseMaximumSize |
+            Format-Volume -FileSystem NTFS -Confirm:$false |
+            Out-Null
+    }
+```
+
+```PowerShell
+cls
+```
+
+#### # Confirm iSCSI disk is formatted as NTFS
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133201 | Get-Partition | Get-Volume
+
+... FileSystem DriveType HealthStatus OperationalStatus SizeRemaining       Size
+... ---------- --------- ------------ ----------------- -------------       ----
+... NTFS       Fixed     Healthy      OK                   1023.67 GB 1023.87 GB
+```
+
+```PowerShell
+cls
+```
+
+#### # Set file system label for iSCSI disk
+
+```PowerShell
+Get-Disk -SerialNumber 6805ca19133201 |
+    Get-Partition |
+    Get-Volume |
+    Set-Volume -NewFileSystemLabel iscsi02-Silver-02
+```
+
+#### # Add cluster disk for CSV
+
+```PowerShell
+Get-ClusterAvailableDisk | Add-ClusterDisk
+```
+
+#### # Add Cluster Shared Volume
+
+```PowerShell
+Add-ClusterSharedVolume -Name "Cluster Disk 1"
+```
+
+```PowerShell
+cls
+```
+
+#### # Rename Cluster Shared Volume ("Cluster Disk 1" --> "iscsi02-Silver-02")
+
+```PowerShell
+Get-ClusterSharedVolume -Name "Cluster Disk 1" |
+    foreach {
+        $csv = $_
+
+        $diskGuid = $csv |
+            Get-ClusterParameter |
+            where { $_.Name -eq "DiskGuid" } |
+            select -ExpandProperty Value
+
+        $physicalDisk = Get-PhysicalDisk -ObjectId "*$diskGuid*"
+
+        $disk = Get-Disk -UniqueId $physicalDisk.UniqueId
+
+        $volume = $disk | Get-Partition | Get-Volume
+
+        Write-Host ("$($csv.Name) - $($physicalDisk.SerialNumber)" `
+            + " - $($volume.FileSystemLabel)")
+
+        $csv.Name = $volume.FileSystemLabel
+    }
+```
+
+```PowerShell
+cls
+```
+
+#### # Rename CSV junction point ("C:\\ClusterStorage\\Volume1" --> "C:\\ClusterStorage\\iscsi02-Silver-02")
+
+```PowerShell
+Push-Location C:\ClusterStorage
+
+Move-Item Volume1 iscsi02-Silver-02
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+#### # Confirm CSV is no longer using redirected I/O
+
+```PowerShell
+Get-ClusterSharedVolumeState | select Name, Node, FileSystemRedirectedIOReason
+
+Name              Node     FileSystemRedirectedIOReason
+----              ----     ----------------------------
+iscsi02-Silver-01 TT-HV05B      NotFileSystemRedirected
+iscsi02-Silver-01 TT-HV05A      NotFileSystemRedirected
+iscsi02-Silver-01 TT-HV05C      NotFileSystemRedirected
+iscsi02-Silver-02 TT-HV05B      NotFileSystemRedirected
+iscsi02-Silver-02 TT-HV05A      NotFileSystemRedirected
+iscsi02-Silver-02 TT-HV05C      NotFileSystemRedirected
+iscsi02-Silver-03 TT-HV05B      NotFileSystemRedirected
+iscsi02-Silver-03 TT-HV05A      NotFileSystemRedirected
+iscsi02-Silver-03 TT-HV05C      NotFileSystemRedirected
 ```
