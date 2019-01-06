@@ -2062,3 +2062,208 @@ Start-SCVirtualMachine $vmName
 ```
 
 ---
+
+### # Rename network connection
+
+```PowerShell
+$interfaceAlias = "Management"
+
+Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
+```
+
+## Resolve issue with Active Directory Certificate Services
+
+### Alert
+
+Log Name:      Application\
+Source:        Microsoft-Windows-CertificationAuthority\
+Date:          1/6/2019 6:08:16 AM\
+Event ID:      100\
+Task Category: None\
+Level:         Error\
+Keywords:\
+User:          SYSTEM\
+Computer:      CIPHER01.corp.technologytoolbox.com\
+Description:\
+Active Directory Certificate Services did not start: Could not load or verify the current CA certificate.  Technology Toolbox Issuing Certificate Authority 01 The revocation function was unable to check revocation because the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE).
+
+### Solution
+
+#### Update CRL on root CA
+
+---
+
+**TT-HV05A**
+
+##### # Start root CA (CRYPTID)
+
+```PowerShell
+Start-VM CRYPTID
+```
+
+---
+
+---
+
+**CRYPTID**
+
+##### # Republish the CRL
+
+```PowerShell
+certutil -CRL
+```
+
+---
+
+#### Copy the CRL to removable media
+
+---
+
+**TT-HV05A**
+
+##### # Create virtual floppy disk on Hyper-V host
+
+```PowerShell
+$vmName = "CRYPTID"
+$vmPath = "F:\NotBackedUp\VMs\$vmName"
+
+mkdir "$vmPath\Virtual Floppy Disks"
+
+$vfdPath = "$vmPath\Virtual Floppy Disks\$vmName.vfd"
+
+New-VFD -Path $vfdPath
+
+Set-VMFloppyDiskDrive -VMName $vmName -Path $vfdPath
+```
+
+---
+
+---
+
+**CRYPTID**
+
+##### # Format virtual floppy disk
+
+```PowerShell
+format A:
+```
+
+> **Note**
+>
+> When prompted for the volume label, press Enter.
+>
+> When prompted to format another disk, type **N** and then press Enter.
+
+##### # Copy the CRL to floppy disk
+
+```PowerShell
+copy C:\Windows\system32\CertSrv\CertEnroll\*.crl A:\
+```
+
+##### # Verify the CRL was copied to the floppy disk
+
+```PowerShell
+dir A:\
+```
+
+---
+
+#### Distribute the CRL for the root CA
+
+---
+
+**TT-HV05A**
+
+```PowerShell
+cls
+```
+
+##### # Remove virtual floppy disk from root CA
+
+```PowerShell
+$vmName = "CRYPTID"
+
+Set-VMFloppyDiskDrive -VMName $vmName -Path $null
+```
+
+##### # Shutdown root CA (CRYPTID)
+
+```PowerShell
+Stop-VM $vmName
+```
+
+##### # Copy virtual floppy disk to intermediate CA
+
+```PowerShell
+$vmName = "CIPHER01"
+
+copy $vfdPath "C:\ClusterStorage\iscsi02-Silver-01\$vmName"
+```
+
+```PowerShell
+cls
+```
+
+##### # Configure virtual floppy disk containing CRL from root CA
+
+```PowerShell
+$vmHost = "TT-HV05C"
+
+$vfdPath = "C:\ClusterStorage\iscsi02-Silver-01\$vmName" `
+    + "\CRYPTID.vfd"
+
+Set-VMFloppyDiskDrive -ComputerName $vmHost -VMName $vmName -Path $vfdPath
+```
+
+---
+
+##### # Publish CRL for root CA to Active Directory
+
+```PowerShell
+A:
+
+certutil -addstore -f `
+    root "Technology Toolbox Root Certificate Authority.crl"
+```
+
+##### # Copy CRL for root CA to PKI website
+
+```PowerShell
+Copy-Item `
+    "A:\Technology Toolbox Root Certificate Authority.crl" `
+    "\\CIPHER01\PKI$\crl"
+```
+
+```PowerShell
+cls
+```
+
+#### # Restart the server and ensure Active Directory Certificate Services starts successfully
+
+```PowerShell
+Restart-Computer
+```
+
+---
+
+**TT-HV05C**
+
+```PowerShell
+cls
+```
+
+##### # Delete virtual floppy disk containing CRL from root CA
+
+```PowerShell
+$vmName = "CIPHER01"
+
+Set-VMFloppyDiskDrive -VMName $vmName -Path $null
+
+$vfdPath = "C:\ClusterStorage\iscsi02-Silver-01\$vmName" `
+    + "\CRYPTID.vfd"
+
+del $vfdPath
+```
+
+---
