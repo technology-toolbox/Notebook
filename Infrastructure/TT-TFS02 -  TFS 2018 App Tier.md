@@ -1087,6 +1087,106 @@ Resize-Partition `
     -Size $size.SizeMax
 ```
 
+## Upgrade to Team Foundation Server 2018 Update 3.1
+
+```PowerShell
+cls
+```
+
+### # Install Team Foundation Server 2018 Update 3.1
+
+```PowerShell
+$imagePath = ("\\TT-FS01\Products\Microsoft\Team Foundation Server 2018" `
+    + "\mu_team_foundation_server_2018_update_3.1_x64_dvd_2bf84f42.iso")
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
+    Get-Volume).DriveLetter
+```
+
+& ("\$imageDriveLetter" + ":\\Tfs2018.3.1.exe")
+
+```PowerShell
+cls
+```
+
+### # Upgrade Elasticsearch
+
+```PowerShell
+Push-Location "C:\Program Files\Microsoft Team Foundation Server 2018\Search\zip"
+
+.\Configure-TFSSearch.ps1 -Operation update -User elasticuser -Password {password}
+```
+
+> **Note**
+>
+> When prompted to continue, type **Y** and press **Enter**.
+
+```PowerShell
+Pop-Location
+```
+
+### Upgrade Team Foundation Server 2018
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B4/7B6D1CBD2C19B51003FBD95CB42F5746255C67B4.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/96/87F9537C67E51072B267648E285275E47A50E096.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/B77E501BCF3F0C553B856C3906EE1E5EC763DA0E.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/D21FF8038A7BB5D628EBFB7FF0063A96458A9BB1.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/08625E85F9F5E76945844C194A038C25E6F7443D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B5/DC625A045CA3985949FE4BA331E50C2F75C3B4B5.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/2433F6C51D019301BA1A511D7D142D14E74722B6.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A0/A1C54B4D7B2CF14B52C34749572D03B5729676A0.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/AD6801931D6F8D505116E70965B0AD7522193112.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FD/FFC70967F41E187BBDB8C493A5B621D400784AFD.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/C696A1E4117EA711F772FDC1423214B5D9334ADF.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A3/D907DBA8FCD3901E0FB194160D3C816503BC34A3.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/1162CFBC05E4E21286D627C176AA5B135B078569.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/04/56272E5E7CFC6C7CF4C7F0F966D6C994DD18F504.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/60/6D820ABAF78E9997E6269539B15147312C27B160.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/33/72093A1AB7492E89BD7BFEAC95FE364629E1E733.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/5D27BE40722E3DB933FC69FCCA8D14A05C77CB5F.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/84964D2E74A66B508FD40C3892ACC395389D7B2C.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/1C8893713FBD811558E07EFB6F7FCC7DF1D4E4E1.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/22/848E53D606E5045DC0A31D23C44F3D7BA1233222.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B4/0E323053BD244F73542440CADFF31AFEECCAA2B4.png)
+
+### Issue - Error searching work items and code
+
+We encountered an unexpected error when processing your request
+
+From <[https://tfs.technologytoolbox.com/DefaultCollection/_search?type=work%20item&lp=apps-workitems-Collection&text=generation&_a=search](https://tfs.technologytoolbox.com/DefaultCollection/_search?type=work%20item&lp=apps-workitems-Collection&text=generation&_a=search)>
+
+#### Reference
+
+**Search reports unexpected error after installing 2018 Update 3**\
+From <[https://developercommunity.visualstudio.com/content/problem/377940/search-reports-unexpected-error-after-installing-2.html](https://developercommunity.visualstudio.com/content/problem/377940/search-reports-unexpected-error-after-installing-2.html)>
+
+#### Solution - Download and install patch
+
+Download patch - [https://aka.ms/tfs2018.3patch](https://aka.ms/tfs2018.3patch)
+
+Install patch
+
+
 **TODO:**
 
 ```PowerShell
