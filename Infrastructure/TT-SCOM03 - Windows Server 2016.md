@@ -2146,6 +2146,38 @@ Get-SCOMAlert `
     }
 ```
 
+#### # Source: DCOM
+
+#### # Event ID: 10016
+
+#### #
+
+#### # Event Description: The application-specific permission settings do not grant Local Activation permission
+
+#### # for the COM Server application with CLSID {D63B10C5-BB46-4990-A94F-E40B9D520160} and APPID
+
+#### # {9CA88EE3-ACB7-47C8-AFC4-AB702511C276} ...
+
+#### #
+
+#### # Reference: https://support.microsoft.com/en-us/help/4022522/dcom-event-id-10016-is-logged-in-windows-10-windows-server
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "System Event Log Error" |
+    where { $_.Description.Contains("Source: DCOM") } |
+    where { $_.Description.Contains("Event ID: 10016") } |
+    where { $_.Description.Contains("D63B10C5-BB46-4990-A94F-E40B9D520160") } |
+    where { $_.Description.Contains("9CA88EE3-ACB7-47C8-AFC4-AB702511C276") } |
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
 #### # Source: Microsoft-Windows-CAPI2
 
 #### # Event ID: 513
