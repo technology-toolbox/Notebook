@@ -170,7 +170,7 @@ $computers = Get-ADComputer -Filter * |
 $computers | ForEach-Object {
     $destination = '\\' + $_.Name + '\C$\NotBackedUp\Public\Toolbox'
 
-    robocopy $source $destination /E /MIR /XD "Microsoft SDKs" /R:1 /W:1
+    robocopy $source $destination /E /MIR /XD git-for-windows "Microsoft SDKs" /R:1 /W:1
 }
 ```
 
