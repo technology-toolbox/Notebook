@@ -56,6 +56,8 @@ Start-SCVirtualMachine -VM $vmName
 
 ### Install Windows Server 2003 R2 Enterprise
 
+When prompted to format the partition, select **NTFS (Quick)**.
+
 ---
 
 **FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
@@ -95,7 +97,8 @@ cls
 
 ```PowerShell
 $vmName = "WS2003-R2-Ent"
-$isoName = "vmguest-6.3.9600.18692.iso"
+#$isoName = "vmguest-6.3.9600.18692.iso"
+$isoName = "vmguest.iso"
 
 $iso = Get-SCISO | where {$_.Name -eq $isoName}
 
@@ -147,7 +150,7 @@ xcopy \\TT-FS01\Public\Toolbox\robocopy.exe C:\NotBackedUp\Public\Toolbox
 
 pushd C:\NotBackedUp\Public\Toolbox
 
-robocopy \\TT-FS01\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /XD git-for-windows "Microsoft SDKs"
+robocopy \\TT-FS01\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /XD git-for-windows "Microsoft SDKs" /NP
 ```
 
 ## REM Install latest patches
@@ -216,10 +219,11 @@ wuauclt /detectnow
 
 > **Note**
 >
-> Restart the computer to complete the installation and repeat until there are not more updates available.
+> Restart the computer to complete the installation and repeat until there are no more updates available.
 
 ### Install optional updates using Windows Update
 
+- ~~Microsoft .NET Framework 4 for Windows Server 2003 x64-based Systems (KB982671)~~
 - ~~Microsoft .NET Framework 3.5 Service Pack 1 and .NET Framework 3.5 Family Update (KB951847) x64~~
 - Remote Desktop Connection (Terminal Services Client 6.0) for Windows Server 2003 x64 Edition (KB925876)
 - Update for Internet Explorer 8 Compatibility View List for Windows Server 2003 x64 Edition (KB982632)
@@ -228,6 +232,7 @@ wuauclt /detectnow
 - Update for Windows Server 2003 x64 Edition (KB3013410)
 - Update for Windows Server 2003 x64 Edition (KB3020338)
 - ~~Windows Search 4.0 for Windows Server 2003 x64 Edition (KB940157)~~
+- ~~Microsoft Silverlight (KB3056819)~~
 
 > **Note**
 >
@@ -422,17 +427,6 @@ Invoke-Command -ComputerName $vmHost -ScriptBlock $scriptBlock
 
 ---
 
-## Create SysPrep VHD
-
-### Remove password for Administrator account
-
-> **Important**
->
-> This is necessary to avoid a bug in Sysprep where the Administrator password specified during mini-setup is ignored.\
-> Reference:\
-> **Microsoft’s Greatest Glitches: Sysprep Admin Passwords**\
-> From <[https://mcpmag.com/articles/2006/05/09/microsofts-greatest-glitches-sysprep-admin-passwords.aspx](https://mcpmag.com/articles/2006/05/09/microsofts-greatest-glitches-sysprep-admin-passwords.aspx)>
-
 ---
 
 **FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
@@ -454,7 +448,7 @@ $destination = "F:\NotBackedUp\VMs\$vmName"
 $script = "
     Write-Host `"Copying VM ($vmName)...`"
 
-    robocopy `"$source`" `"$destination`" /E /NP
+    robocopy `"$source`" `"$destination`" /E /MIR /NP
 "
 
 $scriptBlock = [ScriptBlock]::Create($script)
