@@ -629,6 +629,46 @@ From <[https://dotnet.microsoft.com/download/linux-package-manager/ubuntu18-04/s
 clear
 ```
 
+## # Install SourceGear DiffMerge
+
+### # Download updated version of SourceGear DiffMerge
+
+```Shell
+cd /tmp
+
+wget -c https://drive.google.com/file/d/1sj_6QHV15tIzQBIGJaopMsogyds0pxD9/view?usp=sharing
+```
+
+```Shell
+clear
+```
+
+### # Install libcurl (dependency)
+
+```Shell
+sudo apt-get install libcurl4-openssl-dev
+```
+
+```Shell
+clear
+```
+
+### # Install SourceGear DiffMerge
+
+```Shell
+sudo dpkg -i diffmerge_4.2.1.*.deb
+```
+
+#### Reference
+
+diffmerge: error while loading shared libraries: libpng12.so.0: cannot open shared object file: No such file or directory
+
+From <[https://support.sourcegear.com/viewtopic.php?f=33&t=22981](https://support.sourcegear.com/viewtopic.php?f=33&t=22981)>
+
+```Shell
+clear
+```
+
 ## # Install Wireshark
 
 ```Shell
@@ -861,6 +901,81 @@ Get-VMSnapshot -VMName $vmName |
 ---
 
 **TODO:**
+
+```Shell
+clear
+```
+
+## # Install Subversion client
+
+```Shell
+sudo apt-get update
+```
+
+```Shell
+clear
+sudo apt-get install subversion
+```
+
+```Shell
+clear
+sudo apt-get install libapache2-svn
+
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+E: Unable to locate package libapache2-svn
+```
+
+### Reference
+
+**Apache Subversion Binary Packages**\
+From <[https://subversion.apache.org/packages.html](https://subversion.apache.org/packages.html)>
+
+```Shell
+clear
+```
+
+## # Install Java
+
+### # Install OpenJDK 10
+
+```Shell
+sudo apt-get update
+```
+
+```Shell
+clear
+sudo apt-get install default-jdk
+```
+
+### Reference
+
+**How to install Java on Ubuntu 18.04**\
+From <[https://linuxize.com/post/install-java-on-ubuntu-18-04/](https://linuxize.com/post/install-java-on-ubuntu-18-04/)>
+
+```Shell
+clear
+```
+
+## # Install Apache NetBeans
+
+### # Download Apache NetBeans
+
+```PowerShell
+cd /tmp
+
+wget -c https://www-us.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-10.0/incubating-netbeans-10.0-bin.zip
+
+unzip incubating-netbeans-10.0-bin.zip -d ~/
+```
+
+### Reference
+
+**How to install Java on Ubuntu 18.04**\
+From <[https://linuxize.com/post/install-java-on-ubuntu-18-04/](https://linuxize.com/post/install-java-on-ubuntu-18-04/)>
+
+## Miscellaneous
 
 ```Shell
 clear
