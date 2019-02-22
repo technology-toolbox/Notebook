@@ -936,6 +936,42 @@ From <[https://subversion.apache.org/packages.html](https://subversion.apache.or
 clear
 ```
 
+## # Install SmartSVN
+
+### # Download SmartSVN
+
+```Shell
+cd /tmp
+
+wget -c https://www.smartsvn.com/downloads/smartsvn/smartsvn-linux-11_0_0.tar.gz
+```
+
+### # Install SmartSVN
+
+```Shell
+sudo tar xvzf smartsvn-linux-11_0_0.tar.gz -C /usr/share
+```
+
+```Shell
+clear
+```
+
+### # Remove install file
+
+```Shell
+rm /tmp/smartsvn-linux-11_0_0.tar.gz
+```
+
+### # Add menu item for SmartSVN
+
+```Shell
+/usr/share/smartsvn/bin/add-menuitem.sh
+```
+
+```Shell
+clear
+```
+
 ## # Install Java
 
 ### # Install OpenJDK 10
@@ -953,6 +989,56 @@ sudo apt-get install default-jdk
 
 **How to install Java on Ubuntu 18.04**\
 From <[https://linuxize.com/post/install-java-on-ubuntu-18-04/](https://linuxize.com/post/install-java-on-ubuntu-18-04/)>
+
+```Shell
+clear
+```
+
+## # Install Maven
+
+```Shell
+sudo apt-get update
+```
+
+```Shell
+clear
+sudo apt-get install maven
+```
+
+### Reference
+
+**How to install Apache Maven on Ubuntu 18.04**\
+From <[https://linuxize.com/post/how-to-install-apache-maven-on-ubuntu-18-04/](https://linuxize.com/post/how-to-install-apache-maven-on-ubuntu-18-04/)>
+
+```Shell
+clear
+```
+
+## # Install DBeaver
+
+### # Download DBeaver
+
+```Shell
+cd /tmp
+
+wget https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb
+```
+
+### # Install DBeaver
+
+```Shell
+sudo dpkg -i dbeaver-ce_latest_amd64.deb
+```
+
+```Shell
+clear
+```
+
+### # Remove install file
+
+```Shell
+rm /tmp/dbeaver-ce_latest_amd64.deb
+```
 
 ```Shell
 clear
