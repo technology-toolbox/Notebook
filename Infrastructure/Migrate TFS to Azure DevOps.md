@@ -1,4 +1,4 @@
-﻿# Migrate TFS to Azure DevOps - v2
+﻿# Migrate TFS to Azure DevOps - v3
 
 Wednesday, February 6, 2019
 12:25 PM
@@ -144,7 +144,7 @@ From <[https://blogs.msdn.microsoft.com/tfssetup/2015/09/16/configuring-the-epic
 cls
 ```
 
-#### # Upgrade projects based on MSF v4.0 and MSF v5.0 process templates
+#### # Upgrade projects based on old Agile process templates
 
 ```PowerShell
 $witAdmin = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Enterprise" `
@@ -154,18 +154,10 @@ $witAdmin = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Enterprise" `
 $tfsCollectionUrl = "https://tfs.technologytoolbox.com/DefaultCollection"
 ```
 
-```PowerShell
-cls
-```
-
 ##### # Clear TFS cache
 
 ```PowerShell
 Remove-Item "$env:LOCALAPPDATA\Microsoft\Team Foundation" -Recurse
-```
-
-```PowerShell
-cls
 ```
 
 ##### # Rename system fields
@@ -226,7 +218,7 @@ $projects |
 
 [https://tfs.technologytoolbox.com/DefaultCollection/_admin/_process](https://tfs.technologytoolbox.com/DefaultCollection/_admin/_process)
 
-Export **MSF for Agile Software Development 6.0**
+Export **Agile**
 
 ```PowerShell
 cls
@@ -235,11 +227,16 @@ cls
 ##### # Import link types
 
 ```PowerShell
-& $witAdmin importlinktype /collection:"$tfsCollectionUrl" `
-    /f:"C:\NotBackedUp\Temp\MSF for Agile Software Development 6.0\WorkItem Tracking\LinkTypes\SharedStep.xml"
+$processExportPath = "C:\NotBackedUp\Temp\Agile"
 
 & $witAdmin importlinktype /collection:"$tfsCollectionUrl" `
-    /f:"C:\NotBackedUp\Temp\MSF for Agile Software Development 6.0\WorkItem Tracking\LinkTypes\TestedBy.xml"
+    /f:"$processExportPath\WorkItem Tracking\LinkTypes\SharedParameterLink.xml"
+
+& $witAdmin importlinktype /collection:"$tfsCollectionUrl" `
+    /f:"$processExportPath\WorkItem Tracking\LinkTypes\SharedStep.xml"
+
+& $witAdmin importlinktype /collection:"$tfsCollectionUrl" `
+    /f:"$processExportPath\WorkItem Tracking\LinkTypes\TestedBy.xml"
 ```
 
 ##### (Optional) Apply as needed customizations
@@ -256,27 +253,12 @@ cls
 Remove-Item "$env:LOCALAPPDATA\Microsoft\Team Foundation" -Recurse
 ```
 
-```PowerShell
-cls
-```
-
 ##### # Import work item types
 
 ```PowerShell
-$workItemTypes = @(
-    "Bug",
-    "CodeReviewRequest",
-    "CodeReviewResponse",
-    "FeedbackRequest",
-    "FeedbackResponse",
-    "Issue",
-    "SharedStep",
-    "Task",
-    "TestCase",
-    "UserStory")
-
 $projects = @(
     "AdventureWorks",
+    "Caelum",
     "CommunityServer",
     "CommunitySite",
     "Demo",
@@ -290,6 +272,7 @@ $projects = @(
     "KPMG",
     "Northwind",
     "Sagacity",
+    "Securitas ClientPortal",
     "Securitas CloudPortal",
     "Securitas EmployeePortal",
     "Subtext",
@@ -297,6 +280,25 @@ $projects = @(
     "Tugboat",
     "WebSites",
     "Youbiquitous")
+
+$processExportPath = "C:\NotBackedUp\Temp\Agile"
+
+$workItemTypes = @(
+    "Bug",
+    "CodeReviewRequest",
+    "CodeReviewResponse",
+    "Epic",
+    "Feature",
+    "FeedbackRequest",
+    "FeedbackResponse",
+    "Issue",
+    "SharedParameter",
+    "SharedStep",
+    "Task",
+    "TestCase",
+    "TestPlan",
+    "TestSuite",
+    "UserStory")
 
 $projects |
     foreach {
@@ -310,8 +312,7 @@ $projects |
 
                 Write-Host "Importing work item type ($workItemType)..."
 
-                $filename = ("C:\NotBackedUp\Temp" `
-                    + "\MSF for Agile Software Development 6.0" `
+                $filename = ("$processExportPath" `
                     + "\WorkItem Tracking\TypeDefinitions\$workItemType.xml")
 
                 & $witAdmin importwitd /collection:"$tfsCollectionUrl" `
@@ -334,6 +335,7 @@ cls
 ```PowerShell
 $projects = @(
     "AdventureWorks",
+    "Caelum",
     "CommunityServer",
     "CommunitySite",
     "Demo",
@@ -347,6 +349,7 @@ $projects = @(
     "KPMG",
     "Northwind",
     "Sagacity",
+    "Securitas ClientPortal",
     "Securitas CloudPortal",
     "Securitas EmployeePortal",
     "Subtext",
@@ -355,9 +358,8 @@ $projects = @(
     "WebSites",
     "Youbiquitous")
 
-$filename = ("C:\NotBackedUp\Temp" `
-    + "\MSF for Agile Software Development 6.0" `
-    + "\WorkItem Tracking\categories.xml")
+$processExportPath = "C:\NotBackedUp\Temp\Agile"
+$filename = "$processExportPath\WorkItem Tracking\categories.xml"
 
 $projects |
     foreach {
@@ -379,6 +381,7 @@ cls
 ```PowerShell
 $projects = @(
     "AdventureWorks",
+    "Caelum",
     "CommunityServer",
     "CommunitySite",
     "Demo",
@@ -392,6 +395,7 @@ $projects = @(
     "KPMG",
     "Northwind",
     "Sagacity",
+    "Securitas ClientPortal",
     "Securitas CloudPortal",
     "Securitas EmployeePortal",
     "Subtext",
@@ -400,24 +404,16 @@ $projects = @(
     "WebSites",
     "Youbiquitous")
 
+$processExportPath = "C:\NotBackedUp\Temp\Agile"
+$filename = "$processExportPath\WorkItem Tracking\Process\ProcessConfiguration.xml"
+
 $projects |
     foreach {
         $projectName = $_
 
         Write-Host "Processing project ($projectName)..."
 
-        $filename = ("C:\NotBackedUp\Temp" `
-            + "\MSF for Agile Software Development 6.0" `
-            + "\WorkItem Tracking\Process\CommonConfiguration.xml")
-
-        & $witAdmin importcommonprocessconfig /collection:"$tfsCollectionUrl" `
-            /p:"$projectName" /f:"$filename"
-
-        $filename = ("C:\NotBackedUp\Temp" `
-            + "\MSF for Agile Software Development 6.0" `
-            + "\WorkItem Tracking\Process\AgileConfiguration.xml")
-
-        & $witAdmin importagileprocessconfig /collection:"$tfsCollectionUrl" `
+        & $witAdmin importprocessconfig /collection:"$tfsCollectionUrl" `
             /p:"$projectName" /f:"$filename"
     }
 ```
@@ -495,8 +491,10 @@ cls
 ##### # Import link types
 
 ```PowerShell
+$processExportPath = "C:\NotBackedUp\Temp\MSF for CMMI Process Improvement 2013.4"
+
 & $witAdmin importlinktype /collection:"$tfsCollectionUrl" `
-    /f:"C:\NotBackedUp\Temp\MSF for CMMI Process Improvement 2013.4\WorkItem Tracking\LinkTypes\Affects.xml"
+    /f:"$processExportPath\WorkItem Tracking\LinkTypes\Affects.xml"
 ```
 
 ##### (Optional) Apply as needed customizations
@@ -513,13 +511,13 @@ cls
 Remove-Item "$env:LOCALAPPDATA\Microsoft\Team Foundation" -Recurse
 ```
 
-```PowerShell
-cls
-```
-
 ##### # Import work item types
 
 ```PowerShell
+$projects = @("foobarCMMI")
+
+$processExportPath = "C:\NotBackedUp\Temp\MSF for CMMI Process Improvement 2013.4"
+
 $workItemTypes = @(
     "Bug",
     "ChangeRequest",
@@ -539,8 +537,6 @@ $workItemTypes = @(
     "TestPlan",
     "TestSuite")
 
-$projects = @("foobarCMMI")
-
 $projects |
     foreach {
         $projectName = $_
@@ -553,8 +549,7 @@ $projects |
 
                 Write-Host "Importing work item type ($workItemType)..."
 
-                $filename = ("C:\NotBackedUp\Temp" `
-                    + "\MSF for CMMI Process Improvement 2013.4" `
+                $filename = ("$processExportPath" `
                     + "\WorkItem Tracking\TypeDefinitions\$workItemType.xml")
 
                 & $witAdmin importwitd /collection:"$tfsCollectionUrl" `
@@ -572,9 +567,9 @@ cls
 ```PowerShell
 $projects = @("foobarCMMI")
 
-$filename = ("C:\NotBackedUp\Temp" `
-    + "\MSF for CMMI Process Improvement 2013.4" `
-    + "\WorkItem Tracking\categories.xml")
+$processExportPath = "C:\NotBackedUp\Temp\MSF for CMMI Process Improvement 2013.4"
+
+$filename = "$processExportPath\WorkItem Tracking\categories.xml"
 
 $projects |
     foreach {
@@ -596,10 +591,7 @@ cls
 ```PowerShell
 $projects = @("foobarCMMI")
 
-$filename = ("C:\NotBackedUp\Temp" `
-    + "\MSF for CMMI Process Improvement 2013.4" `
-    + "\WorkItem Tracking\Process\ProcessConfiguration.xml")
-
+$filename = "$processExportPath\WorkItem Tracking\Process\ProcessConfiguration.xml"
 
 $projects |
     foreach {
@@ -610,318 +602,6 @@ $projects |
         & $witAdmin importprocessconfig /collection:"$tfsCollectionUrl" `
             /p:"$projectName" /f:"$filename"
     }
-```
-
-##### Verify access to new features
-
-#### Add Epic work item type to projects based on MSF for Agile 4.0/5.0 process templates
-
-```Console
-cd "%programfiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-```
-
-##### Download the latest version of Agile process template
-
-[https://tfs.technologytoolbox.com/DefaultCollection/_admin/_process](https://tfs.technologytoolbox.com/DefaultCollection/_admin/_process)
-
-Export **Agile**
-
-##### Backup TFS databases
-
-```Console
-cls
-```
-
-##### REM Clear TFS cache
-
-```Console
-rmdir "C:\Users\jjameson-admin\AppData\Local\Microsoft\Team Foundation" /s /q
-```
-
-```Console
-cls
-```
-
-##### REM Import Epic work item type
-
-```Console
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Demo ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:DinnerNow ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Dow ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Dow Collaboration" ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Dow FORCE" ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:FabrikamSamples ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:foobar ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Northwind ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Sagacity ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Securitas CloudPortal" ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Securitas EmployeePortal" ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Subtext^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Toolbox ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Tugboat ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:WebSites ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-
-witadmin importwitd /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Youbiquitous ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\TypeDefinitions\Epic.xml"
-```
-
-```Console
-cls
-```
-
-##### REM Import the categories file
-
-```Console
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:AdventureWorks ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:CommunityServer ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:CommunitySite ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Demo ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:DinnerNow ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Dow ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Dow Collaboration" ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Dow FORCE" ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:FabrikamSamples ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:foobar ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Frontier ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:KPMG ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Northwind ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Sagacity ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Securitas CloudPortal" ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Securitas EmployeePortal" ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Subtext ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Toolbox ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Tugboat ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:WebSites ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-
-witadmin importcategories /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Youbiquitous ^
-    /f:"C:\NotBackedUp\Temp\Agile\WorkItem Tracking\categories.xml"
-```
-
-```Console
-cls
-```
-
-##### REM Update process configuration file
-
-###### REM Export process template for project based on "MSF for Agile Software Development - v4.0" process template
-
-```Console
-witadmin exportprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:AdventureWorks ^
-    /f:"C:\NotBackedUp\Temp\AdventureWorks\WorkItem Tracking\Process\ProcessConfiguration.xml"
-```
-
-###### REM Export process template for project based on "MSF for Agile Software Development v5.0" process template
-
-```Console
-witadmin exportprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:foobar ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-```
-
-###### Update process configuration files to add Epic portfolio backlog
-
-Use DiffMerge to compare/merge changes from Agile process configuration file
-
-```Console
-cls
-```
-
-###### REM Import process configuration file for projects based on "MSF for Agile Software Development - v4.0" process template
-
-```Console
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:AdventureWorks ^
-    /f:"C:\NotBackedUp\Temp\AdventureWorks\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:CommunityServer ^
-    /f:"C:\NotBackedUp\Temp\AdventureWorks\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:CommunitySite ^
-    /f:"C:\NotBackedUp\Temp\AdventureWorks\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:FabrikamSamples ^
-    /f:"C:\NotBackedUp\Temp\AdventureWorks\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Frontier ^
-    /f:"C:\NotBackedUp\Temp\AdventureWorks\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:KPMG ^
-    /f:"C:\NotBackedUp\Temp\AdventureWorks\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Sagacity ^
-    /f:"C:\NotBackedUp\Temp\AdventureWorks\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Toolbox ^
-    /f:"C:\NotBackedUp\Temp\AdventureWorks\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:WebSites ^
-    /f:"C:\NotBackedUp\Temp\AdventureWorks\WorkItem Tracking\Process\ProcessConfiguration.xml"
-```
-
-###### REM Import process configuration file for projects based on "MSF for Agile Software Development v5.0" process template
-
-```Console
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Demo ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:DinnerNow ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Dow ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Dow Collaboration" ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Dow FORCE" ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:foobar ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Northwind ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Securitas CloudPortal" ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:"Securitas EmployeePortal" ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Subtext ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Tugboat ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
-
-witadmin importprocessconfig /collection:https://tfs.technologytoolbox.com/DefaultCollection ^
-    /p:Youbiquitous ^
-    /f:"C:\NotBackedUp\Temp\foobar\WorkItem Tracking\Process\ProcessConfiguration.xml"
 ```
 
 ##### Verify access to new features
@@ -1034,11 +714,12 @@ From <[https://docs.microsoft.com/en-us/azure/devops/articles/migration-troubles
 
 Add the following sites to the Trusted Sites zone in Internet Explorer:
 
+- [https://aadcdn.msftauth.net](https://aadcdn.msftauth.net)
 - [https://login.microsoftonline.com](https://login.microsoftonline.com)
 - [https://secure.aadcdn.microsoftonline-p.com](https://secure.aadcdn.microsoftonline-p.com)
 
 ```Console
-TfsMigrator Prepare /collection:https://tfs.technologytoolbox.com/DefaultCollection /tenantDomainName:contoso.com /region:CUS
+.\TfsMigrator.exe Prepare /collection:https://tfs.technologytoolbox.com/DefaultCollection /tenantDomainName:technologytoolbox.com /region:CUS
 ```
 
 **Task:** Generate import settings and related files using the TfsMigrator prepare command.
@@ -1212,7 +893,7 @@ From <[https://storageexplorer.com/](https://storageexplorer.com/)>
 
 ---
 
-**TT-SQL02**
+**STORM - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -1302,26 +983,3 @@ cls
 cls
 & 'C:\Program Files\Microsoft Team Foundation Server 2018\Tools\TfsServiceControl.exe' unquiesce
 ```
-
-### Restore TFS backup
-
-USE [master]\
-BACKUP LOG [Tfs_Configuration] TO  DISK = N'Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Tfs_Configuration_LogBackup_2019-02-09_05-13-08.bak' WITH NOFORMAT, NOINIT,  NAME = N'Tfs_Configuration_LogBackup_2019-02-09_05-13-08', NOSKIP, NOREWIND, NOUNLOAD,  NORECOVERY ,  STATS = 5\
-RESTORE DATABASE [Tfs_Configuration] FROM  DISK = N'Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Tfs_Configuration_9860223407007970802F.bak' WITH  FILE = 1,  NOUNLOAD,  REPLACE,  STATS = 5
-
-GO
-
-BACKUP LOG [Tfs_DefaultCollection] TO  DISK = N'Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Tfs_DefaultCollection_LogBackup_2019-02-09_05-14-31.bak' WITH NOFORMAT, NOINIT,  NAME = N'Tfs_DefaultCollection_LogBackup_2019-02-09_05-14-31', NOSKIP, NOREWIND, NOUNLOAD,  NORECOVERY ,  STATS = 5\
-RESTORE DATABASE [Tfs_DefaultCollection] FROM  DISK = N'Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Tfs_DefaultCollection_9860223407007970802F.bak' WITH  FILE = 1,  NOUNLOAD,  REPLACE,  STATS = 5
-
-GO
-
-BACKUP LOG [Tfs_TestCollection] TO  DISK = N'Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Tfs_TestCollection_LogBackup_2019-02-09_05-14-54.bak' WITH NOFORMAT, NOINIT,  NAME = N'Tfs_TestCollection_LogBackup_2019-02-09_05-14-54', NOSKIP, NOREWIND, NOUNLOAD,  NORECOVERY ,  STATS = 5\
-RESTORE DATABASE [Tfs_TestCollection] FROM  DISK = N'Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Tfs_TestCollection_9860223407007970802F.bak' WITH  FILE = 1,  NOUNLOAD,  REPLACE,  STATS = 5
-
-GO
-
-BACKUP LOG [Tfs_Warehouse] TO  DISK = N'Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Tfs_Warehouse_LogBackup_2019-02-09_05-15-13.bak' WITH NOFORMAT, NOINIT,  NAME = N'Tfs_Warehouse_LogBackup_2019-02-09_05-15-13', NOSKIP, NOREWIND, NOUNLOAD,  NORECOVERY ,  STATS = 5\
-RESTORE DATABASE [Tfs_Warehouse] FROM  DISK = N'Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Tfs_Warehouse_9860223407007970802F.bak' WITH  FILE = 1,  NOUNLOAD,  REPLACE,  STATS = 5
-
-GO
