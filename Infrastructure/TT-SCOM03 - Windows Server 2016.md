@@ -2401,6 +2401,29 @@ Get-SCOMAlert `
     }
 ```
 
+#### # Source: Virtual Disk Service
+
+#### # Event ID: 6
+
+#### #
+
+#### # Event Description: VDS fails to claim a disk...
+
+```PowerShell
+Get-SCOMAlert `
+    -ComputerName TT-SCOM03 `
+    -ResolutionState $resolutionStateNew `
+    -Name "System Event Log Error" |
+    where { $_.Description.Contains("Source: Virtual Disk Service") } |
+    where { $_.Description.Contains("Event ID: 6") } |
+    where { $_.Description.Contains("Event Description: VDS fails to claim a disk") } |
+    foreach {
+        $alert = $_
+
+        Set-SCOMAlert -Alert $alert -ResolutionState $resolutionStateAcknowledged
+    }
+```
+
 ---
 
 ## Make virtual machine highly available
