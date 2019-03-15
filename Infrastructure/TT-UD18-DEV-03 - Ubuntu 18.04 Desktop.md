@@ -481,6 +481,16 @@ exit
 clear
 ```
 
+#### # Add domain user to "sudo" group
+
+```Shell
+sudo usermod -aG sudo jjameson
+```
+
+```Shell
+clear
+```
+
 ## # Install Google Chrome
 
 ### # Download Google Chrome
@@ -874,6 +884,218 @@ From <[https://eshlox.net/2017/08/10/how-to-install-powerline-for-bash-on-fedora
 
 **Powerline broken symbols in VSCode integrated terminal**\
 From <[https://github.com/oh-my-fish/theme-bobthefish/issues/125](https://github.com/oh-my-fish/theme-bobthefish/issues/125)>
+
+## Install Docker CE
+
+### Reference
+
+**Get Docker CE for Ubuntu**\
+From <[https://docs.docker.com/install/linux/docker-ce/ubuntu/#prerequisites](https://docs.docker.com/install/linux/docker-ce/ubuntu/#prerequisites)>
+
+```Shell
+clear
+```
+
+### # Set up repository
+
+#### # Update apt package index
+
+```Shell
+sudo apt-get update
+```
+
+```Shell
+clear
+```
+
+#### # Install packages to allow apt to use repository over HTTPS
+
+```Shell
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+```
+
+```Shell
+clear
+```
+
+#### # Add Docker's official GPG key
+
+```Shell
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+```
+
+```Shell
+clear
+```
+
+#### # Verify key with fingerprint 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
+
+```Shell
+sudo apt-key fingerprint 0EBFCD88
+
+pub   rsa4096 2017-02-22 [SCEA]
+      9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88
+uid           [ unknown] Docker Release (CE deb) <docker@docker.com>
+sub   rsa4096 2017-02-22 [S]
+```
+
+```Shell
+clear
+```
+
+#### # Set up stable repository
+
+```Shell
+sudo add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) \
+    stable"
+
+# Note: The lsb_release -cs sub-command returns the name of your Ubuntu distribution, such as xenial.
+```
+
+```Shell
+clear
+```
+
+### # Install Docker
+
+#### # Update the apt package index
+
+```Shell
+sudo apt-get update
+```
+
+```Shell
+clear
+```
+
+#### # Install the latest version of Docker CE and containerd
+
+```Shell
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+```
+
+```Shell
+clear
+```
+
+#### # Verify Docker is installed correctly by running hello-world image
+
+```Shell
+sudo docker run hello-world
+```
+
+## Install Docker Compose
+
+### Reference
+
+**Install Docker Compose**\
+From <[https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)>
+
+```Shell
+clear
+```
+
+### # Download current stable release of Docker Compose
+
+```Shell
+sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
+
+```Shell
+clear
+```
+
+### # Apply executable permissions to the binary
+
+```Shell
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+## Install PowerShell Core
+
+### Reference
+
+**Installing PowerShell Core on Linux**\
+From <[https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-6](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-6)>
+
+```Shell
+clear
+```
+
+### # Install via package repository
+
+#### # Download Microsoft repository GPG keys
+
+```Shell
+wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
+```
+
+```Shell
+clear
+```
+
+#### # Register Microsoft repository GPG keys
+
+```Shell
+sudo dpkg -i packages-microsoft-prod.deb
+```
+
+```Shell
+clear
+```
+
+#### # Update list of products
+
+```Shell
+sudo apt-get update
+```
+
+```Shell
+clear
+```
+
+#### # Install PowerShell
+
+```Shell
+sudo apt-get install -y powershell
+```
+
+```Shell
+clear
+```
+
+#### # Start PowerShell
+
+```Shell
+pwsh
+```
+
+```PowerShell
+clear
+```
+
+#### # Update help
+
+```PowerShell
+Update-Help
+```
+
+```PowerShell
+clear
+```
+
+#### # Exit PowerShell
+
+```PowerShell
+exit
+```
 
 ---
 
