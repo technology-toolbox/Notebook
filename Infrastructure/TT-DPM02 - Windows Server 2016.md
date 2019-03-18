@@ -1977,3 +1977,63 @@ Start-SCVirtualMachine $vmName
 ```
 
 ---
+
+## Issue - Not enough free space to install patches using Windows Update
+
+9 GB of free space, but unable to install **2019-03 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4489882)**.
+
+### Expand C:
+
+---
+
+**FOOBAR18**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV05C"
+$vmName = "TT-DPM02"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + ".vhdx") `
+    -SizeBytes 55GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Get-PartitionSupportedSize : Invalid Parameter
+Activity ID: {7a4aae7d-d73e-4c1b-b545-7c5847c58621}
+At line:1 char:10
++ $size = (Get-PartitionSupportedSize `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (StorageWMI:ROOT/Microsoft/.../MSFT_Partition) [Get-PartitionSupportedSize], CimException
+    + FullyQualifiedErrorId : StorageWMI 5,Get-PartitionSupportedSize
+```
+
+HACK: Expand partition using Disk Management
