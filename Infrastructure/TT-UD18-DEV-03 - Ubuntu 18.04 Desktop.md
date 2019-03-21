@@ -1268,20 +1268,59 @@ clear
 
 ## # Install Apache NetBeans
 
-### # Download Apache NetBeans
-
-```PowerShell
-cd /tmp
-
-wget -c https://www-us.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-10.0/incubating-netbeans-10.0-bin.zip
-
-unzip incubating-netbeans-10.0-bin.zip -d ~/
+```Shell
+sudo snap install netbeans --classic
 ```
 
 ### Reference
 
-**How to install Java on Ubuntu 18.04**\
-From <[https://linuxize.com/post/install-java-on-ubuntu-18-04/](https://linuxize.com/post/install-java-on-ubuntu-18-04/)>
+**How to Install Netbeans on Ubuntu 18.04**\
+From <[https://linuxize.com/post/how-to-install-netbeans-on-ubuntu-18-04/](https://linuxize.com/post/how-to-install-netbeans-on-ubuntu-18-04/)>
+
+```Shell
+clear
+```
+
+## # Clone and build Jackcess
+
+### # Clone Jackcess repository
+
+```Shell
+mkdir ~/SourceForge
+mkdir ~/SourceForge/jackcess
+
+cd ~/SourceForge/jackcess
+
+svn checkout https://svn.code.sf.net/p/jackcess/code/jackcess/trunk
+```
+
+### # Build Jackcess
+
+```Shell
+cd ~/SourceForge/jackcess/trunk
+
+mvn install
+```
+
+## # Clone and build Jackcess Encrypt
+
+### # Clone Jackcess Encrypt repository
+
+```Shell
+mkdir ~/SourceForge/jackcessencrypt
+
+cd ~/SourceForge/jackcessencrypt
+
+svn checkout https://svn.code.sf.net/p/jackcessencrypt/code/trunk
+```
+
+### # Build Jackcess Encrypt
+
+```Shell
+cd ~/SourceForge/jackcessencrypt/trunk
+
+mvn install
+```
 
 ## Miscellaneous
 
