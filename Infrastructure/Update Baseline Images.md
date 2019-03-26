@@ -127,9 +127,11 @@ cls
 
 ```PowerShell
 cls
-cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
+Push-Location C:\NotBackedUp\techtoolbox\Infrastructure\Main\Scripts
 
 & '.\Update Deployment Images.ps1'
+
+Pop-Location
 ```
 
 ---
