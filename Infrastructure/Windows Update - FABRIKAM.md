@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**FOOBAR16**
+**FOOBAR18**
 
 ```PowerShell
 cls
@@ -163,7 +163,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 $scriptBlock = [scriptblock]::Create($script)
 
-Get-Content "C:\Users\jjameson-admin\Desktop\Computer list for Windows Update.txt" |
+Get-Content "\\FAB-DC01\Users$\jjameson-admin\Documents\Computer List for Windows Update.txt" |
     ForEach-Object {
         $computer = $_
 
@@ -179,7 +179,7 @@ Get-Content "C:\Users\jjameson-admin\Desktop\Computer list for Windows Update.tx
 
 ---
 
-**FOOBAR16**
+**FOOBAR18**
 
 ```PowerShell
 cls
