@@ -1297,6 +1297,113 @@ Resize-Partition `
     -Size $size.SizeMax
 ```
 
+## Issue - Slow cleanup and removal of expired updates
+
+### Create additional indexes in SUSDB database
+
+---
+
+**SQL Server Management Studio - TT-SQL01**
+
+```Console
+USE [SUSDB];
+
+DECLARE @BatchSize int = NULL; -- NULL = do all;  <<-- Control batches here
+
+SET NOCOUNT ON;
+
+-- Check to see if the delete indexes exist; if not don't try to run the script:
+DECLARE @IndexRetry bit = 1;
+IndexRetry:
+IF INDEXPROPERTY(OBJECT_ID(N'tbRevisionSupersedesUpdate'),N'IX_tbRevisionSupersedesUpdate',N'IndexID') IS NULL
+   OR INDEXPROPERTY(OBJECT_ID(N'tbLocalizedPropertyForRevision'),N'IX_tbLocalizedPropertyForRevision',N'IndexID') IS NULL
+GOTO NeedIndexes;
+
+-- Create tables/variables:
+DROP TABLE IF EXISTS #Results; -- This will only work on newer versions of SQL Server 2016+
+DECLARE  @UpdateId int
+        ,@CurUpdate int
+        ,@TotalToDelete int
+        ,@Msg varchar(2000);
+CREATE TABLE #Results (RowNum int IDENTITY(1,1) PRIMARY KEY CLUSTERED NOT NULL, UpdateId int NOT NULL);
+INSERT INTO #Results (UpdateId)
+EXECUTE dbo.spGetObsoleteUpdatesToCleanup;
+
+-- If a batch size was provided update the table so we only take care of that many items during this run:
+IF @BatchSize IS NOT NULL
+DELETE #Results
+ WHERE RowNum > @BatchSize;
+
+-- Assign working variables:
+SELECT @TotalToDelete = MAX(RowNum)
+  FROM #Results;
+--
+SELECT @Msg = 'Total Updates to Delete: '+CONVERT(varchar(10),@TotalToDelete);
+RAISERROR (@Msg,0,1) WITH NOWAIT;
+
+-- Create the loop to delete the updates one at a time:
+WHILE EXISTS (SELECT * FROM #Results)
+BEGIN
+    -- Grab the "current" item:
+    SELECT  TOP 1 @CurUpdate = RowNum
+           ,@UpdateId = UpdateId
+      FROM #Results
+     ORDER BY RowNum;
+
+    -- Provide some info during the script runtime:
+    SELECT @Msg = CONVERT(varchar(30),GETDATE(),20) + ': Deleting ' + CONVERT(varchar(5),@CurUpdate) + '/' + CONVERT(varchar(5),@TotalToDelete) + ' = ' + CONVERT(varchar(10), @UpdateId);
+    RAISERROR(@Msg,0,1) WITH NOWAIT;
+
+    -- Delete the current update from the DB:
+    EXECUTE dbo.spDeleteUpdate @localUpdateID = @UpdateId;
+
+    -- Delete the current update from the table so we can get the next item:
+    DELETE #Results
+     WHERE RowNum = @CurUpdate;
+END;
+GOTO EndScript;
+
+NeedIndexes:
+-- If the indexes don't exist we'll try to create them and start over or end if we already tried once:
+IF @IndexRetry = 0
+BEGIN
+    PRINT N'Indexes Required to run this script do not exist! Create them and re-run for optimal performance!';
+    GOTO EndScript;
+END;
+ELSE
+BEGIN
+    IF INDEXPROPERTY(OBJECT_ID(N'tbRevisionSupersedesUpdate'),N'IX_tbRevisionSupersedesUpdate',N'IndexID') IS NULL
+    BEGIN
+        SELECT @Msg = CONVERT(varchar(30),GETDATE(),20) + ': Index "IX_tbRevisionSupersedesUpdate" does not exist; Creating it...';
+        RAISERROR(@Msg,0,1) WITH NOWAIT;
+        EXECUTE (N'USE [SUSDB]; CREATE NONCLUSTERED INDEX IX_tbRevisionSupersedesUpdate ON dbo.tbRevisionSupersedesUpdate(SupersededUpdateID);');
+        SELECT @Msg = CONVERT(varchar(30),GETDATE(),20) + ': ..."IX_tbRevisionSupersedesUpdate" created.';
+        RAISERROR(@Msg,0,1) WITH NOWAIT;
+    END;
+    IF INDEXPROPERTY(OBJECT_ID(N'tbLocalizedPropertyForRevision'),N'IX_tbLocalizedPropertyForRevision',N'IndexID') IS NULL
+    BEGIN
+        SELECT @Msg = CONVERT(varchar(30),GETDATE(),20) + ': Index "IX_tbLocalizedPropertyForRevision" does not exist; Creating it...';
+        RAISERROR(@Msg,0,1) WITH NOWAIT;
+        EXECUTE (N'USE [SUSDB]; CREATE NONCLUSTERED INDEX IX_tbLocalizedPropertyForRevision ON dbo.tbLocalizedPropertyForRevision(LocalizedPropertyID);');
+        SELECT @Msg = CONVERT(varchar(30),GETDATE(),20) + ': ..."IX_tbLocalizedPropertyForRevision" created.';
+        RAISERROR(@Msg,0,1) WITH NOWAIT;
+    END;
+
+    SET @IndexRetry = 0;
+    GOTO IndexRetry;
+END;
+
+EndScript:
+DROP TABLE IF EXISTS #Results;
+```
+
+---
+
+### Reference
+
+**Enhancing WSUS database cleanup performance SQL script**\
+From <[https://stevethompsonmvp.wordpress.com/2018/05/01/enhancing-wsus-database-cleanup-performance-sql-script/](https://stevethompsonmvp.wordpress.com/2018/05/01/enhancing-wsus-database-cleanup-performance-sql-script/)>
+
 **TODO:**
 
 ## Create SQL job for WSUS database maintenance
