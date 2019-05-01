@@ -1,7 +1,7 @@
-﻿# ROGUE - Windows 10 Enterprise x64
+﻿# STORM - Windows 10 Enterprise x64
 
-Tuesday, November 6, 2018
-7:26 AM
+Monday, July 2, 2018
+11:20 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -13,7 +13,7 @@ Tuesday, November 6, 2018
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **ROGUE**.
+  - In the **Computer name** box, type **STORM**.
   - Specify **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step:
@@ -55,7 +55,7 @@ Install DaVinci Resolve
 # Rename computer and join domain
 
 ```PowerShell
-$computerName = "ROGUE"
+$computerName = "STORM"
 
 Rename-Computer -NewName $computerName -Restart
 ```
@@ -77,7 +77,7 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "ROGUE"
+$vmName = "STORM"
 
 $targetPath = ("OU=Workstations,OU=Resources,OU=Development" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
@@ -89,7 +89,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### Login as local administrator account
 
-### TODO: # Install NVIDIA display driver
+### # Install NVIDIA display driver
 
 ```PowerShell
 $setupPath = "\\TT-FS01\Products\Drivers\NVIDIA\GT-1030" `
@@ -105,7 +105,7 @@ Start-Process -FilePath $setupPath -Wait
 ### # Install Intel network drivers
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\Drivers\Intel\Network\I217-V" `
+$setupPath = "\\TT-FS01\Products\Drivers\Intel\Network\82579LM" `
     + "\Windows 10\PROWinx64.exe"
 
 Start-Process -FilePath $setupPath -Wait
@@ -144,13 +144,13 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 Set-NetAdapterAdvancedProperty `
     -Name $interfaceAlias `
     -DisplayName "Jumbo Packet" `
-    -RegistryValue 4088
+    -RegistryValue 9014
 
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 Start-Sleep -Seconds 5
 
-ping TT-FS01 -f -l 4000
+ping TT-FS01 -f -l 8900
 ```
 
 ```PowerShell
@@ -510,11 +510,11 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 Set-NetAdapterAdvancedProperty `
     -Name "vEthernet ($interfaceAlias)" `
     -DisplayName "Jumbo Packet" `
-    -RegistryValue 4088
+    -RegistryValue 9014
 
 Start-Sleep -Seconds 5
 
-ping TT-FS01 -f -l 4000
+ping TT-FS01 -f -l 8900
 ```
 
 ```PowerShell
@@ -610,6 +610,8 @@ Notepad "C:\Users\All Users\Microsoft\Money\17.0\Invoice\2008Invoice.ntd"
 **Sunset Home & Business - Invoice issues**\
 From <[https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices/](https://microsoftmoneyoffline.wordpress.com/sunset-home-business-invoices/)>
 
+### Install and configure MSMoneyQuotes
+
 ```PowerShell
 cls
 ```
@@ -650,6 +652,15 @@ $pythonPathFolders = 'C:\Python27\', 'C:\Python27\Scripts'
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -Folders $pythonPathFolders `
     -EnvironmentVariableTarget Machine
+```
+
+### # Copy PocketSense files
+
+```PowerShell
+$source = "\\TT-FS01\Users$\jjameson\My Documents\Finances\MS Money\PocketSense"
+$destination = "C:\BackedUp\MS Money\PocketSense"
+
+robocopy $source $destination /E
 ```
 
 ```PowerShell
@@ -903,7 +914,7 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 $setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio Code" `
-    + "\VSCodeSetup-x64-1.28.2.exe"
+    + "\VSCodeSetup-x64-1.31.1.exe"
 
 $arguments = "/silent" `
     + " /mergetasks='!runcode,addcontextmenufiles,addcontextmenufolders" `
@@ -923,6 +934,75 @@ Start-Process `
 
 **Installer doesn't disable launch of VScode even when installing with /mergetasks=!runcode**\
 From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Microsoft/vscode/issues/46350)>
+
+### Modify Visual Studio Code shortcut to use custom extension and user data locations
+
+```Console
+"C:\Program Files\Microsoft VS Code\Code.exe" --extensions-dir "C:\NotBackedUp\vscode-data\extensions" --user-data-dir "C:\NotBackedUp\vscode-data\user-data"
+```
+
+### Install Visual Studio Code extensions
+
+#### Install extension: Azure Resource Manager Tools
+
+#### Install extension: Beautify
+
+#### Install extension: C#
+
+#### Install extension: Debugger for Chrome
+
+#### Install extension: ESLint
+
+#### Install extension: GitLens - Git supercharged
+
+#### Install extension: markdownlint
+
+#### Install extension: Prettier - Code formatter
+
+#### Install extension: TSLint
+
+#### Install extension: vscode-icons
+
+---
+
+**Notes**
+
+Potential issue when using both Beautify and Prettier extensions:\
+**Prettier & Beautify**\
+From <[https://css-tricks.com/prettier-beautify/](https://css-tricks.com/prettier-beautify/)>
+
+HTML formatting issue with Prettier:
+
+**Add the missing option to disable crappy Prettier VSCode HTML formatter #636**\
+From <[https://github.com/prettier/prettier-vscode/issues/636](https://github.com/prettier/prettier-vscode/issues/636)>
+
+---
+
+#### Configure Visual Studio Code settings
+
+1. Press **Ctrl+Shift+P**
+2. Select **Preferences: Open Settings (JSON)**
+
+---
+
+**settings.json**
+
+```Console
+{
+    "editor.formatOnSave": true,
+    "editor.renderWhitespace": "boundary",
+    "editor.rulers": [80],
+    "files.trimTrailingWhitespace": true,
+    "git.autofetch": true,
+    "html.format.wrapLineLength": 80,
+    "prettier.disableLanguages": ["html"],
+    "terminal.integrated.shell.windows":
+        "C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "workbench.iconTheme": "vscode-icons"
+}
+```
+
+---
 
 ```PowerShell
 cls
@@ -1362,6 +1442,204 @@ On the **Software Selections** step:
 
 [http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793](http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793)
 
+```PowerShell
+cls
+```
+
+## # Install SharePoint Online Management Shell
+
+```PowerShell
+$installerPath = "\\TT-FS01\Public\Download\Microsoft\SharePoint\Online" `
+    + "\SharePointOnlineManagementShell_8316-1200_x64_en-us.msi"
+
+$arguments = "/i `"$installerPath`""
+
+Start-Process `
+    -FilePath 'msiexec.exe' `
+    -ArgumentList $arguments `
+    -Wait
+```
+
+```PowerShell
+cls
+```
+
+## # Configure name resolution for development environments
+
+```PowerShell
+notepad C:\Windows\system32\drivers\etc\hosts
+```
+
+---
+
+**C:\\Windows\\system32\\drivers\\etc\\hosts**
+
+```Text
+...
+
+# Securitas (Development)
+10.1.20.41	ext-foobar9 client-local-9.securitasinc.com client2-local-9.securitasinc.com cloud-local-9.securitasinc.com cloud2-local-9.securitasinc.com employee-local-9.securitasinc.com media-local-9.securitasinc.com
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Install NuGet package provider
+
+```PowerShell
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+```
+
+```PowerShell
+cls
+```
+
+## # Install SharePoint PnP cmdlets
+
+```PowerShell
+Install-Module SharePointPnPPowerShellOnline
+```
+
+## Disable background apps
+
+1. Open **Windows Settings**.
+2. In the **Windows Setttings** window, select **Privacy**.
+3. On the **Privacy** page, select **Background apps**.
+4. On the **Background apps** page, disable the following apps from running in the background:
+   - **3D Viewer**
+   - **Calculator**
+   - **Camera**
+   - **Feedback Hub**
+   - **Get Help**
+   - **Maps**
+   - **Microsoft Photos**
+   - **Microsoft Solitaire Collection**
+   - **Microsoft Store**
+   - **Mobile Plans**
+   - **Movies & TV**
+   - **Office**
+   - **OneNote**
+   - **Paint 3D**
+   - **People**
+   - **Print 3D**
+   - **Snip & Sketch**
+   - **Sticky Notes**
+   - **Tips**
+   - **Voice Recorder**
+   - **Xbox**
+   - **Your Phone**
+
+### Issue: Photos app consumes high CPU
+
+```PowerShell
+cls
+```
+
+## # Install Visual Studio 2019
+
+### # Launch Visual Studio 2019 setup
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio 2019\Enterprise" `
+    + "\vs_setup.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+Select the following workloads:
+
+- **ASP.NET and web development**
+- **Azure development**
+- **Python development**
+- **Node.js development**
+- **.NET desktop development**
+- **Desktop development with C++**
+- **Universal Windows Platform development**
+- **Data storage and processing**
+- **Data science and analytical applications**
+- **Office/SharePoint development**
+- **.NET Core cross-platform development**
+
+> **Note**
+>
+> When prompted, restart the computer to complete the installation.
+
+```PowerShell
+cls
+```
+
+## # Upgrade Angular CLI
+
+### # Remove old version of Angular CLI
+
+```PowerShell
+npm uninstall --global @angular/cli
+```
+
+### # Install Angular CLI
+
+```PowerShell
+npm install --global --no-optional @angular/cli@7.3.8
+```
+
+```PowerShell
+cls
+```
+
+## # Install SQL Server Management Studio
+
+```PowerShell
+& "\\TT-FS01\Products\Microsoft\SQL Server 2017\SSMS-Setup-ENU-14.0.17289.0.exe"
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+## # Create and configure Caelum website
+
+### # Set environment variables
+
+```PowerShell
+[Environment]::SetEnvironmentVariable(
+  "CAELUM_URL",
+  "http://www-local.technologytoolbox.com",
+  "Machine")
+```
+
+> **Important**
+>
+> Restart PowerShell for environment variable to be available.
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 127.0.0.1 `
+    -Hostnames www-local.technologytoolbox.com
+```
+
+### # Rebuild website
+
+```PowerShell
+cd "C:\NotBackedUp\techtoolbox\Caelum\Main\Source\Deployment Files\Scripts"
+
+& '.\Rebuild Website.ps1'
+```
+
 **TODO:**\
 
 ## Share printer
@@ -1416,7 +1694,7 @@ cls
 ### # Attach DPM agent
 
 ```PowerShell
-$productionServer = 'ROGUE'
+$productionServer = 'STORM'
 
 .\Attach-ProductionServer.ps1 `
     -DPMServerName TT-DPM02 `
@@ -1488,7 +1766,7 @@ slmgr /ato
 ## # Configure e-mail and name for Git
 
 ```PowerShell
-git config --global user.email "jeremy_jameson@live.com"
+git config --global user.email "jjameson@technologytoolbox.com"
 git config --global user.name "Jeremy Jameson"
 ```
 
