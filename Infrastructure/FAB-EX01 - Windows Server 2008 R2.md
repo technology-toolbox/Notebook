@@ -376,6 +376,8 @@ Get-MailboxDatabase |
 
 ## Configure certificate
 
+### Reference
+
 **Managing Certificates in Exchange Server 2010 (Part 1)**\
 From <[http://www.msexchange.org/articles-tutorials/exchange-server-2010/management-administration/managing-certificates-exchange-server-2010-part1.html](http://www.msexchange.org/articles-tutorials/exchange-server-2010/management-administration/managing-certificates-exchange-server-2010-part1.html)>
 
@@ -409,7 +411,9 @@ Click **Next**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/C052D4851F5224A5A63CFF8B16699B7252D7BFB6.png)
 
-New-ExchangeCertificate -FriendlyName 'Fabrikam E-mail' -GenerateRequest -PrivateKeyExportable \$true -KeySize '2048' -SubjectName 'C=US,S="CO",L="Denver",O="Fabrikam Technologies",OU="IT",CN=mail.fabrikam.com' -DomainName 'fab-ex01.corp.fabrikam.com','mail.fabrikam.com','fabrikam.com','autodiscover.fabrikam.com' -Server 'FAB-EX01'
+```PowerShell
+New-ExchangeCertificate -FriendlyName 'Fabrikam E-mail' -GenerateRequest -PrivateKeyExportable $true -KeySize '2048' -SubjectName 'C=US,S="CO",L="Denver",O="Fabrikam Technologies",OU="IT",CN=mail.fabrikam.com' -DomainName 'fab-ex01.corp.fabrikam.com','mail.fabrikam.com','fabrikam.com','autodiscover.fabrikam.com' -Server 'FAB-EX01'
+```
 
 Step 1: Based on the information you provided, you must use a [Unified Communications certificate](Unified Communications certificate). Please get the certificate from a certification authority.
 
@@ -421,9 +425,45 @@ Step 3: Assign the Exchange services to the certificate using the Assign Service
 
 ### Create certificate
 
-Start Internet Explorer as TECHTOOLBOX\\jjameson-admin.
+##### # Create certificate using Active Directory Certificate Services
 
-Browse to [https://cipher01/certsrv](https://cipher01/certsrv).
+###### # Add ADCS website to the "Trusted sites" zone in Internet Explorer
+
+```PowerShell
+[string] $adcsHostname = "cipher01.corp.technologytoolbox.com"
+
+[string] $adcsDomainName = $adcsHostname.Split('.')[-2..-1] -join '.'
+
+[string] $adcsHost = $adcsHostname.Substring(
+    0,
+    $adcsHostName.Length - $adcsDomainName.Length -1)
+
+[string] $registryKey = ("HKCU:\Software\Microsoft\Windows" `
+    + "\CurrentVersion\Internet Settings\ZoneMap\EscDomains" `
+    + "\" + $adcsDomainName)
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+$registryKey = $registryKey + "\" + $adcsHost
+
+If ((Test-Path $registryKey) -eq $false)
+{
+    New-Item $registryKey | Out-Null
+}
+
+Set-ItemProperty -Path $registryKey -Name https -Value 2
+```
+
+###### # Open Internet Explorer and browse to the ADCS site
+
+```PowerShell
+& 'C:\Program Files (x86)\Internet Explorer\iexplore.exe' ("https://" + $adcsHostname)
+```
+
+Browse to [https://cipher01.corp.technologytoolbox.com](https://cipher01.corp.technologytoolbox.com).
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/10/6F890F12858D8A278B214CC8082EFEB48E583510.png)
 
@@ -435,7 +475,7 @@ Click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/DE/35FA6C3C953425DBF7A844268D48F099F6E601DE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6F/BC3275501E7670352F9935DB88EFD2D1FD585A6F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/97/05800E882A75A3D9A01B1512998DE8FB734FFE97.png)
 
 Click **Submit**.
 
@@ -462,7 +502,9 @@ Click **Complete Pending Request...**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/861FEC6357D4C54096E8CAFB8905F861F83A7EA2.png)
 
-Import-ExchangeCertificate -Server 'FAB-EX01' -FileData '`<Binary Data>`'
+```PowerShell
+Import-ExchangeCertificate -Server 'FAB-EX01' -FileData '<Binary Data>'
+```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/6F/9328AACAC797C95F211A0480DDD9535C8E42046F.png)
 
@@ -493,7 +535,9 @@ Click **Yes**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/6E/4C6ACB7D1CEF68818441C99875CC62896D43706E.png)
 
+```PowerShell
 Enable-ExchangeCertificate -Server 'FAB-EX01' -Services 'IMAP, POP, IIS, SMTP' -Thumbprint '4AE773744C7CDE6552EC41F66BC8F860369F8AC4'
+```
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/85/FFBB2F162B3FDC57E6E6869702EDEFEEC8389685.png)
 
@@ -848,6 +892,33 @@ Enable-DistributionGroup "Sales Support" `
 
 Enable-DistributionGroup "All Sales Staff" `
     -PrimarySmtpAddress "sales-all@fabrikam.com"
+```
+
+## # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+netsh advfirewall firewall add rule `
+    name="Remote Windows Update (Dynamic RPC)" `
+    description="Allows remote auditing and installation of Windows updates via POSHPAIG (http://poshpaig.codeplex.com/)" `
+    program="%windir%\system32\dllhost.exe" `
+    dir=in `
+    protocol=TCP `
+    localport=RPC `
+    profile=Domain `
+    action=Allow
+```
+
+## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+
+```PowerShell
+netsh advfirewall firewall set rule `
+    name="Remote Windows Update (Dynamic RPC)" new enable=no
 ```
 
 ## Restart All Services Exchange Server 2010
