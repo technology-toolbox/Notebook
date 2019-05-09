@@ -822,6 +822,36 @@ sudo docker run --restart unless-stopped --name mailhog -p 25:1025 -p 80:8025 -d
 **Setting up SMTP mail server using mailhog docker image**\
 From <[https://www.linkedin.com/pulse/setting-up-smtp-mail-server-using-mailhog-docker-image-chopparapu](https://www.linkedin.com/pulse/setting-up-smtp-mail-server-using-mailhog-docker-image-chopparapu)>
 
+### Remove MailHog
+
+sudo docker stop mailhog
+
+sudo docker rm mailhog
+
+## Remove cached Docker images
+
+```Shell
+sudo docker system prune df
+
+sudo docker system prune -a
+
+sudo docker system prune df
+```
+
+## Install poste.io
+
+```Shell
+sudo docker volume create mail-test-data
+
+sudo docker run \
+    --net=host \
+    -v /etc/localtime:/etc/localtime:ro \
+    -v mail-test-data:/data \
+    --name "mail-test" \
+    -h "mail-test.technologytoolbox.com" \
+    -t analogic/poste.io
+```
+
 ## Install Bitwarden
 
 ### Hosting Installation Id & Key
