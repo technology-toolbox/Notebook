@@ -1640,6 +1640,16 @@ cd "C:\NotBackedUp\techtoolbox\Caelum\Main\Source\Deployment Files\Scripts"
 & '.\Rebuild Website.ps1'
 ```
 
+```PowerShell
+cls
+```
+
+## # Install Bitwarden CLI
+
+```PowerShell
+npm install -g @bitwarden/cli
+```
+
 **TODO:**\
 
 ## Share printer
