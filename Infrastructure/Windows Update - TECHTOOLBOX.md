@@ -7,7 +7,7 @@ Saturday, January 11, 2014
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Patch FOOBAR16 (before patching other machines)
+## Patch FOOBAR18 (before patching other machines)
 
 ## Patch remaining TECHTOOLBOX machines
 
@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**FOOBAR16**
+**FOOBAR18**
 
 ```PowerShell
 cls
@@ -96,7 +96,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 $scriptBlock = [ScriptBlock]::Create($script)
 
 Get-Content "\\TT-FS01\Users$\jjameson-admin\My Documents\Computer List for Windows Update.txt" |
-    Where-Object { $_ -notin @('BANSHEE', 'FOOBAR16') } |
+    Where-Object { $_ -notin @('BANSHEE', 'FOOBAR18') } |
     ForEach-Object {
         $computer = $_
 
@@ -233,8 +233,8 @@ $coreVirtualMachines = @(
     'EXT-DC08',
     'EXT-DC09',
     'FOOBAR7',
-    'FOOBAR16',
-    'FOOBAR17',
+    'FOOBAR18',
+    'FOOBAR19',
     'HAVOK-TEST')
 
 Get-SCVirtualMachine |
@@ -253,12 +253,12 @@ Get-SCVirtualMachine |
     }
 ```
 
-#### # Shutdown "core" VMs -- except FOOBAR16 and FOOBAR17
+#### # Shutdown "core" VMs -- except FOOBAR18 and FOOBAR19
 
 ```PowerShell
 Get-SCVirtualMachine |
     ? { $_.Name -in $coreVirtualMachines } |
-    ? { $_.Name -notin @('FOOBAR16', 'FOOBAR17') } |
+    ? { $_.Name -notin @('FOOBAR18', 'FOOBAR19') } |
     ? { $_.VirtualMachineState -eq 'Running' } |
     ForEach-Object {
         $vmHost = $_
