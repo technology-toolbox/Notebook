@@ -1,7 +1,7 @@
-﻿# TT-DOCKER01
+﻿# TT-MAIL-TEST01
 
-Wednesday, May 8, 2019
-2:43 PM
+Friday, May 17, 2019
+9:08 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -21,7 +21,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05C"
-$vmName = "TT-DOCKER01"
+$vmName = "TT-MAIL-TEST01"
 $vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -32,14 +32,14 @@ New-VM `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 25GB `
-    -MemoryStartupBytes 4GB `
+    -MemoryStartupBytes 2GB `
     -SwitchName "Embedded Team Switch"
 
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
     -AutomaticCheckpointsEnabled $false `
-    -ProcessorCount 4 `
+    -ProcessorCount 2 `
     -StaticMemory
 
 Add-VMDvdDrive `
@@ -63,10 +63,10 @@ Set-VMDvdDrive `
 
 Set-VMDvdDrive : Failed to add device 'Virtual CD/DVD Disk'.
 User Account does not have permission to open attachment.
-'TT-DOCKER01' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID 59625409-653B-4E4C-A382-0B6AFF01741D)
-'TT-DOCKER01': User account does not have permission required to open attachment
+'TT-MAIL-TEST01' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID 2AE56627-B5E1-489B-B8D4-C2733F9940C9)
+'TT-MAIL-TEST01': User account does not have permission required to open attachment
 '\\TT-FS01\Products\Ubuntu\ubuntu-18.04.2-live-server-amd64.iso'. Error: 'General access denied error' (0x80070005). (Virtual machine
-ID 59625409-653B-4E4C-A382-0B6AFF01741D)
+ID 2AE56627-B5E1-489B-B8D4-C2733F9940C9)
 At line:1 char:1
 + Set-VMDvdDrive `
 + ~~~~~~~~~~~~~~~~
@@ -126,7 +126,7 @@ ifconfig | grep inet
 ### # Enable SSH
 
 ```Shell
-sudo apt install openssh-server -y
+sudo apt-get install openssh-server -y
 ```
 
 ---
@@ -141,7 +141,7 @@ cls
 
 ```PowerShell
 $checkpointName = "Baseline Ubuntu Server 18.04.2"
-$vmName = "TT-DOCKER01"
+$vmName = "TT-MAIL-TEST01"
 
 Stop-SCVirtualMachine -VM $vmName
 
@@ -200,7 +200,7 @@ dig -t SRV _ldap._tcp.corp.technologytoolbox.com
 ; <<>> DiG 9.11.3-1ubuntu1.7-Ubuntu <<>> -t SRV _ldap._tcp.corp.technologytoolbox.com
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 16964
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 41644
 ;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -214,7 +214,7 @@ _ldap._tcp.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC09.corp.technol
 
 ;; Query time: 1 msec
 ;; SERVER: 127.0.0.53#53(127.0.0.53)
-;; WHEN: Wed May 08 21:22:31 UTC 2019
+;; WHEN: Fri May 17 15:53:53 UTC 2019
 ;; MSG SIZE  rcvd: 122
 ```
 
@@ -231,7 +231,7 @@ dig @10.1.30.2 -t SRV _ldap._tcp.dc._msdcs.corp.technologytoolbox.com
 ; (1 server found)
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 22021
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 55294
 ;; flags: qr aa rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 3
 
 ;; OPT PSEUDOSECTION:
@@ -249,7 +249,7 @@ TT-DC09.corp.technologytoolbox.com. 3600 IN A   10.1.30.3
 
 ;; Query time: 1 msec
 ;; SERVER: 10.1.30.2#53(10.1.30.2)
-;; WHEN: Wed May 08 21:24:53 UTC 2019
+;; WHEN: Fri May 17 15:54:28 UTC 2019
 ;; MSG SIZE  rcvd: 216
 ```
 
@@ -260,7 +260,7 @@ clear
 #### # Install prerequisites for using realmd
 
 ```Shell
-sudo apt install realmd -y
+sudo apt-get install realmd -y
 ```
 
 ```Shell
@@ -285,7 +285,7 @@ sudo apt install \
 
 > **Note**
 >
-> Note the default home directory path (specified by the **fallback_homedir** setting in **/etc/sssd/sssd.conf**) is **/home/%u@%d** (e.g. **/home/jjameson@corp.technologytoolbox.com**). To create home directories under a "domain" directory, the **default-home** setting is specified in **/etc/realmd.conf** prior to joining the Active Directory domain.
+> The default home directory path (specified by the **fallback_homedir** setting in **/etc/sssd/sssd.conf**) is **/home/%u@%d** (e.g. **/home/jjameson@corp.technologytoolbox.com**). To create home directories under a "domain" directory (e.g. **/home/corp.technologytoolbox.com/jjameson**), the **default-home** setting is specified in **/etc/realmd.conf** prior to joining the Active Directory domain.
 
 ```Shell
 sudoedit /etc/realmd.conf
@@ -324,8 +324,8 @@ sudoedit /etc/hostname
 
 **/etc/hostname**
 
-```PowerShell
-tt-docker01.corp.technologytoolbox.com
+```Text
+tt-mail-test01.corp.technologytoolbox.com
 ```
 
 ---
@@ -335,13 +335,13 @@ sudo reboot
 
 cat /etc/hostname
 
-tt-docker01
+tt-mail-test01
 
-sudo hostnamectl set-hostname tt-docker01.corp.technologytoolbox.com
+sudo hostnamectl set-hostname tt-mail-test01.corp.technologytoolbox.com
 
 cat /etc/hostname
 
-tt-docker01.corp.technologytoolbox.com
+tt-mail-test01.corp.technologytoolbox.com
 ```
 
 > **Note**
@@ -350,7 +350,7 @@ tt-docker01.corp.technologytoolbox.com
 >
 > ```Text
 >  * Modifying computer account: userPrincipalName
->  ! Couldn't set service principals on computer account CN=tt-docker01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com: 00002083: AtrErr: DSID-03151904, #1:
+>  ! Couldn't set service principals on computer account CN=tt-mail-test01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com: 00002083: AtrErr: DSID-03151904, #1:
 >         0: 00002083: DSID-03151904, problem 1006 (ATT_OR_VALUE_EXISTS), data 0, Att 90303 (servicePrincipalName)
 > ```
 >
@@ -367,7 +367,6 @@ clear
 realm discover corp.technologytoolbox.com -v
 
  * Resolving: _ldap._tcp.corp.technologytoolbox.com
- * Performing LDAP DSE lookup on: 10.1.30.3
  * Performing LDAP DSE lookup on: 10.1.30.2
  * Successfully discovered: corp.technologytoolbox.com
 corp.technologytoolbox.com
@@ -394,7 +393,6 @@ clear
 ```Text
 sudo realm join -v -U jjameson-admin corp.technologytoolbox.com --os-name="Linux (Ubuntu Server)" --os-version=18.04
 
-[sudo] password for foo:
  * Resolving: _ldap._tcp.corp.technologytoolbox.com
  * Performing LDAP DSE lookup on: 10.1.30.2
  * Performing LDAP DSE lookup on: 10.1.30.3
@@ -404,35 +402,36 @@ Password for jjameson-admin:
  * Resolving required packages
  * LANG=C /usr/sbin/adcli join --verbose --domain corp.technologytoolbox.com --domain-realm CORP.TECHNOLOGYTOOLBOX.COM --domain-controller 10.1.30.2 --os-name Linux (Ubuntu Server) --os-version 18.04 --login-type user --login-user jjameson-admin --stdin-password
  * Using domain name: corp.technologytoolbox.com
- * Calculated computer account name from fqdn: TT-DOCKER01
+ * Calculated computer account name from fqdn: TT-MAIL-TEST01
  * Using domain realm: corp.technologytoolbox.com
  * Sending netlogon pings to domain controller: cldap://10.1.30.2
  * Received NetLogon info from: TT-DC08.corp.technologytoolbox.com
- * Wrote out krb5.conf snippet to /var/cache/realmd/adcli-krb5-6IKiEq/krb5.d/adcli-krb5-conf-z6bri9
+ * Wrote out krb5.conf snippet to /var/cache/realmd/adcli-krb5-q81fL4/krb5.d/adcli-krb5-conf-Ng7r0u
  * Authenticated as user: jjameson-admin@CORP.TECHNOLOGYTOOLBOX.COM
  * Looked up short domain name: TECHTOOLBOX
- * Using fully qualified name: tt-docker01
+ * Using fully qualified name: tt-mail-test01.corp.technologytoolbox.com
  * Using domain name: corp.technologytoolbox.com
- * Using computer account name: TT-DOCKER01
+ * Using computer account name: TT-MAIL-TEST01
  * Using domain realm: corp.technologytoolbox.com
- * Calculated computer account name from fqdn: TT-DOCKER01
+ * Calculated computer account name from fqdn: TT-MAIL-TEST01
  * Generated 120 character computer password
  * Using keytab: FILE:/etc/krb5.keytab
- * Computer account for TT-DOCKER01$ does not exist
+ * Computer account for TT-MAIL-TEST01$ does not exist
  * Found well known computer container at: CN=Computers,DC=corp,DC=technologytoolbox,DC=com
- * Calculated computer account: CN=TT-DOCKER01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
- * Created computer account: CN=TT-DOCKER01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
+ * Calculated computer account: CN=TT-MAIL-TEST01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
+ * Created computer account: CN=TT-MAIL-TEST01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
  * Set computer password
- * Retrieved kvno '2' for computer account in directory: CN=TT-DOCKER01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
+ * Retrieved kvno '2' for computer account in directory: CN=TT-MAIL-TEST01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
  * Modifying computer account: dNSHostName
  * Modifying computer account: userAccountControl
  * Modifying computer account: operatingSystem, operatingSystemVersion, operatingSystemServicePack
  * Modifying computer account: userPrincipalName
  * Discovered which keytab salt to use
- * Added the entries to the keytab: TT-DOCKER01$@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
- * Added the entries to the keytab: host/TT-DOCKER01@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
- * Added the entries to the keytab: host/TT-DOCKER01.corp.technologytoolbox.com@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
- * Added the entries to the keytab: RestrictedKrbHost/TT-DOCKER01@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab  * Added the entries to the keytab: RestrictedKrbHost/TT-DOCKER01.corp.technologytoolbox.com@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: TT-MAIL-TEST01$@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: host/TT-MAIL-TEST01@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: host/tt-mail-test01.corp.technologytoolbox.com@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: RestrictedKrbHost/TT-MAIL-TEST01@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: RestrictedKrbHost/tt-mail-test01.corp.technologytoolbox.com@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
  * /usr/sbin/update-rc.d sssd enable
  * /usr/sbin/service sssd restart
  * Successfully enrolled machine in realm
@@ -538,14 +537,20 @@ clear
 
 ## # Install Git
 
-```Shell
+```PowerShell
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get upgrade -y
 ```
 
-```Shell
+```PowerShell
 clear
 sudo apt-get install git
+
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+git is already the newest version (1:2.17.1-1ubuntu0.4).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
 ```
 
 ### Reference
@@ -689,87 +694,6 @@ clear
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-## Install PowerShell Core
-
-### Reference
-
-**Installing PowerShell Core on Linux**\
-From <[https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-6](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-6)>
-
-```Shell
-clear
-```
-
-### # Install via package repository
-
-#### # Download Microsoft repository GPG keys
-
-```PowerShell
-cd /tmp
-
-wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
-```
-
-```PowerShell
-clear
-```
-
-#### # Register Microsoft repository GPG keys
-
-```Shell
-sudo dpkg -i packages-microsoft-prod.deb
-```
-
-```Shell
-clear
-```
-
-#### # Update list of products
-
-```Shell
-sudo apt-get update
-```
-
-```Shell
-clear
-```
-
-#### # Install PowerShell
-
-```Shell
-sudo apt-get install powershell -y
-```
-
-```Shell
-clear
-```
-
-#### # Start PowerShell
-
-```Shell
-pwsh
-```
-
-```Shell
-clear
-```
-
-#### # Update help
-
-```PowerShell
-Update-Help
-```
-
-```PowerShell
-clear
-```
-
-#### # Exit PowerShell
-
-```PowerShell
-exit
-```
-
 ---
 
 **FOOBAR18 - Run as local administrator**
@@ -781,7 +705,7 @@ cls
 ## # Remove VM checkpoint
 
 ```PowerShell
-$vmName = "TT-DOCKER01"
+$vmName = "TT-MAIL-TEST01"
 ```
 
 ##### # Shutdown VM
@@ -793,8 +717,7 @@ Stop-SCVirtualMachine -VM $vmName
 ##### # Remove VM snapshot
 
 ```PowerShell
-Get-SCVMCheckpoint -VM $vmName |
-    Remove-SCVMCheckpoint
+Get-SCVMCheckpoint -VM $vmName | Remove-SCVMCheckpoint
 ```
 
 ##### # Start VM
@@ -809,33 +732,47 @@ Start-SCVirtualMachine -VM $vmName
 
 ### Add virtual machine to Hyper-V protection group in DPM
 
-**TODO:**
+## Configure name resolution for email server
 
-## Install MailHog
+---
 
-### Remove MailHog
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
 
-sudo docker stop mailhog
+```PowerShell
+Add-DNSServerResourceRecordCName `
+    -ComputerName TT-DC08 `
+    -ZoneName technologytoolbox.com `
+    -Name mail-test `
+    -HostNameAlias TT-MAIL-TEST01.corp.technologytoolbox.com
 
-sudo docker rm mailhog
+Add-DNSServerResourceRecordCName `
+    -ComputerName TT-DC08 `
+    -ZoneName technologytoolbox.com `
+    -Name smtp-test `
+    -HostNameAlias TT-MAIL-TEST01.corp.technologytoolbox.com
+```
 
-## Install Bitwarden
-
-### Hosting Installation Id & Key
-
-Installation Id: 6417d075-9d6f-49e4-bea1-{redacted}\
-Installation Key: MZFRpz4Lo25o\*\*\*\*\*\*\*\*
+---
 
 ```Shell
 clear
 ```
 
-## # Remove cached Docker images
+## # Install MailHog
 
 ```Shell
-sudo docker system prune df
-
-sudo docker system prune -a
-
-sudo docker system prune df
+sudo docker run \
+    --name "mailhog" \
+    --publish 25:1025 \
+    --publish 80:8025 \
+    --restart unless-stopped \
+    --tty \
+    mailhog/mailhog
 ```
+
+### Reference
+
+**Setting up SMTP mail server using mailhog docker image**\
+From <[https://www.linkedin.com/pulse/setting-up-smtp-mail-server-using-mailhog-docker-image-chopparapu](https://www.linkedin.com/pulse/setting-up-smtp-mail-server-using-mailhog-docker-image-chopparapu)>
+
+**TODO:**
