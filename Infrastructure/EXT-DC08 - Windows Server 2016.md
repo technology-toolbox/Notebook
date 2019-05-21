@@ -936,6 +936,376 @@ $computers |
 
 ---
 
+## Migrate from FRS to DFS replication
+
+### References
+
+**Windows Server version 1709 no longer supports FRS**\
+From <[https://support.microsoft.com/en-us/help/4025991/windows-server-version-1709-no-longer-supports-frs](https://support.microsoft.com/en-us/help/4025991/windows-server-version-1709-no-longer-supports-frs)>
+
+**Streamlined Migration of FRS to DFSR SYSVOL**\
+From <[https://techcommunity.microsoft.com/t5/Storage-at-Microsoft/Streamlined-Migration-of-FRS-to-DFSR-SYSVOL/ba-p/425405](https://techcommunity.microsoft.com/t5/Storage-at-Microsoft/Streamlined-Migration-of-FRS-to-DFSR-SYSVOL/ba-p/425405)>
+
+**SYSVOL Replication Migration Guide: FRS to DFS Replication**\
+From <[https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/dd640019(v=ws.10)](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/dd640019(v=ws.10))>
+
+### Ensure domain functional level is at least Windows Server 2008
+
+### Ensure free disk space
+
+On the volume containing the SYSVOL folder, ensure there is at least as much free space as the size of the current SYSVOL folder, plus a 10% fudge factor.
+
+### Ensure correct security policy
+
+Ensure the built-in **Administrators** group has the **Manage auditing and security log** user right on all your domain controllers.\
+
+### Ensure AD replication is working
+
+---
+
+**EXT-FOOBAR2 - Run as EXTRANET\\jjameson-admin**
+
+#### Install Active Directory Replication Status Tool
+
+**Active Directory Replication Status Tool**\
+From <[https://www.microsoft.com/en-us/download/details.aspx?id=30005](https://www.microsoft.com/en-us/download/details.aspx?id=30005)>
+
+---
+
+### Ensure SYSVOL is shared
+
+---
+
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Run diagnostic tests for each domain controller
+
+```PowerShell
+dcdiag /e /test:sysvolcheck /test:advertising /s:EXT-DC08
+
+dcdiag /e /test:sysvolcheck /test:advertising /s:EXT-DC09
+```
+
+---
+
+### Migrate to "Prepared" state
+
+> **Note**
+>
+> **EXT-DC08** is currently the PDC Emulator for the FABRIKAM domain.
+
+---
+
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Initiate migration to "Prepared" state
+
+```PowerShell
+dfsrmig /setglobalstate 1
+
+Current DFSR global state: 'Start'
+New DFSR global state: 'Prepared'
+
+Migration will proceed to 'Prepared' state. DFSR service will
+copy the contents of SYSVOL to SYSVOL_DFSR
+folder.
+
+If any domain controller is unable to start migration, try manual polling.
+Or run with option /CreateGlobalObjects.
+Migration can start anytime between 15 minutes to 1 hour.
+Succeeded.
+```
+
+```PowerShell
+cls
+```
+
+#### # Check migration status
+
+```PowerShell
+dfsrmig /getmigrationstate
+
+The following domain controllers have not reached Global state ('Prepared'):
+
+Domain Controller (Local Migration State) - DC Type
+===================================================
+
+EXT-DC08 ('Start') - Primary DC
+EXT-DC09 ('Start') - Writable DC
+
+Migration has not yet reached a consistent state on all domain controllers.
+State information might be stale due to Active Directory Domain Services latency.
+```
+
+```PowerShell
+cls
+```
+
+#### # Force replication
+
+```PowerShell
+repadmin /syncall /force /A /P /e /d
+Syncing all NC's held on EXT-DC08.
+Syncing partition: DC=DomainDnsZones,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: DC=ForestDnsZones,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: CN=Schema,CN=Configuration,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: CN=Configuration,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+```
+
+```PowerShell
+cls
+```
+
+#### # Check migration status
+
+```PowerShell
+dfsrmig /getmigrationstate
+
+All domain controllers have migrated successfully to the Global state ('Prepared').
+Migration has reached a consistent state on all domain controllers.
+Succeeded.
+```
+
+---
+
+### Migrate to "Redirected" state
+
+---
+
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Initiate migration to "Redirected" state
+
+```PowerShell
+dfsrmig /setglobalstate 2
+
+Current DFSR global state: 'Prepared'
+New DFSR global state: 'Redirected'
+
+Migration will proceed to 'Redirected' state. The SYSVOL share
+will be changed to SYSVOL_DFSR folder,
+which is replicated using DFSR.
+
+Succeeded.
+```
+
+```PowerShell
+cls
+```
+
+#### # Check migration status
+
+```PowerShell
+dfsrmig /getmigrationstate
+
+The following domain controllers have not reached Global state ('Redirected'):
+
+Domain Controller (Local Migration State) - DC Type
+===================================================
+
+EXT-DC08 ('Prepared') - Primary DC
+EXT-DC09 ('Prepared') - Writable DC
+
+Migration has not yet reached a consistent state on all domain controllers.
+State information might be stale due to Active Directory Domain Services latency.
+```
+
+```PowerShell
+cls
+```
+
+#### # Force replication
+
+```PowerShell
+repadmin /syncall /force /A /P /e /d
+Syncing all NC's held on EXT-DC08.
+Syncing partition: DC=DomainDnsZones,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: DC=ForestDnsZones,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: CN=Schema,CN=Configuration,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: CN=Configuration,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+```
+
+```PowerShell
+cls
+```
+
+#### # Check migration status
+
+```PowerShell
+dfsrmig /getmigrationstate
+
+All domain controllers have migrated successfully to the Global state ('Redirected').
+Migration has reached a consistent state on all domain controllers.
+Succeeded.
+```
+
+---
+
+### Migrate to "Eliminated" state
+
+---
+
+**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Initiate migration to "Eliminated" state
+
+```PowerShell
+dfsrmig /setglobalstate 3
+
+Current DFSR global state: 'Redirected'
+New DFSR global state: 'Eliminated'
+
+Migration will proceed to 'Eliminated' state. It is not possible
+to revert this step.
+
+If any read-only domain controller is stuck in the 'Eliminating' state for too long
+ run with option /DeleteRoNtfrsMember.
+Succeeded.
+```
+
+```PowerShell
+cls
+```
+
+#### # Check migration status
+
+```PowerShell
+dfsrmig /getmigrationstate
+
+The following domain controllers have not reached Global state ('Eliminated'):
+
+Domain Controller (Local Migration State) - DC Type
+===================================================
+
+EXT-DC08 ('Redirected') - Primary DC
+EXT-DC09 ('Redirected') - Writable DC
+
+Migration has not yet reached a consistent state on all domain controllers.
+State information might be stale due to Active Directory Domain Services latency.
+```
+
+```PowerShell
+cls
+```
+
+#### # Force replication
+
+```PowerShell
+repadmin /syncall /force /A /P /e /d
+Syncing all NC's held on EXT-DC08.
+Syncing partition: DC=DomainDnsZones,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: DC=ForestDnsZones,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: CN=Schema,CN=Configuration,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: CN=Configuration,DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+
+Syncing partition: DC=extranet,DC=technologytoolbox,DC=com
+CALLBACK MESSAGE: The following replication is in progress:
+...
+CALLBACK MESSAGE: SyncAll Finished.
+SyncAll terminated with no errors.
+```
+
+```PowerShell
+cls
+```
+
+#### # Check migration status
+
+```PowerShell
+dfsrmig /getmigrationstate
+
+All domain controllers have migrated successfully to the Global state ('Eliminated').
+Migration has reached a consistent state on all domain controllers.
+Succeeded.
+```
+
+---
+
 **TODO:**
 
 ```PowerShell
