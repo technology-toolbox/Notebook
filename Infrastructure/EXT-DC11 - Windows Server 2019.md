@@ -1,17 +1,17 @@
-﻿# EXT-DC09 - Windows Server 2016 Domain Controller
+﻿# EXT-DC11 - Windows Server 2019 Domain Controller
 
-Tuesday, March 13, 2018
-5:57 AM
+Monday, May 20, 2019
+1:48 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Deploy and configure the server infrastructure
+## Deploy and configure infrastructure
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as local administrator**
 
 ```PowerShell
 cls
@@ -21,7 +21,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05B"
-$vmName = "EXT-DC09"
+$vmName = "EXT-DC11"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -38,55 +38,78 @@ New-VM `
 Set-VM `
     -ComputerName $vmHost `
     -Name $vmName `
+    -ProcessorCount 2 `
     -DynamicMemory `
     -MemoryMinimumBytes 1GB `
-    -MemoryMaximumBytes 2GB `
-    -ProcessorCount 2
+    -MemoryMaximumBytes 4GB `
+    -AutomaticCheckpointsEnabled $false
 
-Start-VM -ComputerName $vmHost -Name $vmName
+Add-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName
+
+$vmDvdDrive = Get-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName
+
+Set-VMFirmware `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -EnableSecureBoot Off `
+    -FirstBootDevice $vmDvdDrive
+
+Set-VMDvdDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path "\\TT-FS01\Products\Microsoft\Windows Server 2019\en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso"
+
+Set-VMDvdDrive : Failed to add device 'Virtual CD/DVD Disk'.
+User Account does not have permission to open attachment.
+'EXT-DC11' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID 7342D631-217F-4090-80AF-B33903DD7C33)
+'EXT-DC11': User account does not have permission required to open attachment '\\TT-FS01\Products\Microsoft\Windows Server
+2019\en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso'. Error: 'General access denied error' (0x80070005). (Virtual
+machine ID 7342D631-217F-4090-80AF-B33903DD7C33)
+At line:1 char:1
++ Set-VMDvdDrive `
++ ~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (:) [Set-VMDvdDrive], VirtualizationException
+    + FullyQualifiedErrorId : AccessDenied,Microsoft.HyperV.PowerShell.Commands.SetVMDvdDrive
+
+$iso = Get-SCISO |
+    where {$_.Name -eq "en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso"}
+
+Get-SCVirtualMachine -Name $vmName | Read-SCVirtualMachine
+
+Get-SCVirtualMachine -Name $vmName |
+    Get-SCVirtualDVDDrive |
+    Set-SCVirtualDVDDrive -ISO $iso -Link
+
+#Start-VM -ComputerName $vmHost -Name $vmName
+Start-SCVirtualMachine -VM $vmName
 ```
 
 ---
 
-### Install custom Windows Server 2016 image
+### Install Windows Server 2019
 
-- On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
-- On the **Computer Details** step:
-  - In the **Computer name** box, type **EXT-DC09**.
-  - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
-  - Click **Next**.
-- On the **Applications** step, do not select any applications, and click **Next**.
+1. When prompted, select **Windows Server 2019 Standard (Desktop Experience)**.
+2. Specify a password for the local Administrator account.
 
-### # Rename local Administrator account and set password
+### # Rename local Administrator account
 
 ```PowerShell
-Set-ExecutionPolicy Bypass -Scope Process -Force
-
-$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
-```
-
-> **Note**
->
-> When prompted, type the password for the local Administrator account.
-
-```PowerShell
-$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
-
 $adminUser = [ADSI] 'WinNT://./Administrator,User'
 $adminUser.Rename('foo')
-$adminUser.SetPassword($plainPassword)
 
 logoff
 ```
 
-### Login as local administrator
+### Login as .\\foo
 
 ### # Copy Toolbox content
 
 ```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+net use \\TT-FS01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 ```
 
 > **Note**
@@ -94,10 +117,10 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$source = "\\TT-FS01\Public\Toolbox"
+$source = "\\TT-FS01.corp.technologytoolbox.com\Public\Toolbox"
 $destination = "C:\NotBackedUp\Public\Toolbox"
 
-robocopy $source $destination /E /XD "Microsoft SDKs"
+robocopy $source $destination /E /XD git-for-windows "Microsoft SDKs"
 ```
 
 ### # Set MaxPatchCacheSize to 0 (recommended)
@@ -108,35 +131,20 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
-### # Enable performance counters for Server Manager
-
-```PowerShell
-$taskName = "\Microsoft\Windows\PLA\Server Manager Performance Monitor"
-
-Enable-ScheduledTask -TaskName $taskName
-
-logman start "Server Manager Performance Monitor"
-```
-
-### Configure networking
-
 ---
 
-**TT-VMM01A**
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-#### # Change VM network
+### # Move VM to Extranet VM network
 
 ```PowerShell
-$vmName = "EXT-DC09"
-
+$vmName = "EXT-DC11"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
 $vmNetwork = Get-SCVMNetwork -Name "Extranet-20 VM Network"
-
-$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
-    ? { $_.SlotId -eq 0 }
 
 Stop-SCVirtualMachine $vmName
 
@@ -150,50 +158,24 @@ Start-SCVirtualMachine $vmName
 ---
 
 ```PowerShell
-$interfaceAlias = "Extranet-20"
+cls
 ```
 
-#### # Rename network connections
+### # Set time zone
 
 ```PowerShell
-Get-NetAdapter -Physical | select InterfaceDescription
-
-Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
-    Rename-NetAdapter -NewName $interfaceAlias
+tzutil /s "Mountain Standard Time"
 ```
 
-#### # Configure static IPv4 address
+### # Rename computer and join domain
 
 ```PowerShell
-New-NetIPAddress `
-    -InterfaceAlias $interfaceAlias `
-    -IPAddress 10.1.20.104 `
-    -PrefixLength 24 `
-    -DefaultGateway 10.1.20.1
+$computerName = "EXT-DC11"
+
+Rename-Computer -NewName $computerName -Restart
 ```
 
-#### # Configure IPv4 DNS servers
-
-```PowerShell
-Set-DNSClientServerAddress `
-    -InterfaceAlias $interfaceAlias `
-    -ServerAddresses 10.1.20.103
-```
-
-#### # Enable jumbo frames
-
-```PowerShell
-Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
-
-Set-NetAdapterAdvancedProperty `
-    -Name $interfaceAlias `
-    -DisplayName "Jumbo Packet" `
-    -RegistryValue 9014
-
-ping 10.1.20.1 -f -l 8900
-```
-
-### # Join server to domain
+Wait for the VM to restart and then execute the following command to join the **EXTRANET** domain:
 
 ```PowerShell
 Add-Computer -DomainName extranet.technologytoolbox.com -Restart
@@ -212,12 +194,10 @@ cls
 #### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
-Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "EXT-DC09$"
+Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "EXT-DC11$"
 ```
 
 ---
-
-### Login as domain administrator account
 
 ### Configure storage
 
@@ -226,11 +206,29 @@ Add-ADGroupMember -Identity "Windows Update - Slot 3" -Members "EXT-DC09$"
 | 0    | C:           | 32 GB       | 4K                   | OSDisk       |
 | 1    | D:           | 5 GB        | 4K                   | Data01       |
 
+```PowerShell
+cls
+```
+
+#### # Change drive letter for DVD-ROM
+
+```PowerShell
+$cdrom = Get-WmiObject -Class Win32_CDROMDrive
+$driveLetter = $cdrom.Drive
+
+$volumeId = mountvol $driveLetter /L
+$volumeId = $volumeId.Trim()
+
+mountvol $driveLetter /D
+
+mountvol X: $volumeId
+```
+
 #### Configure separate VHD for Active Directory data
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -240,7 +238,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05B"
-$vmName = "EXT-DC09"
+$vmName = "EXT-DC11"
 
 $vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data01.vhdx"
@@ -271,7 +269,118 @@ Get-Disk 1 |
         -Confirm:$false
 ```
 
-## # Configure domain controller
+```PowerShell
+cls
+```
+
+### # Configure networking
+
+```PowerShell
+$interfaceAlias = "Extranet-20"
+```
+
+#### # Rename network connections
+
+```PowerShell
+Get-NetAdapter -Physical | select InterfaceDescription
+
+Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
+    Rename-NetAdapter -NewName $interfaceAlias
+```
+
+#### # Enable jumbo frames
+
+```PowerShell
+Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
+
+Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
+    -DisplayName "Jumbo Packet" -RegistryValue 9014
+
+Start-Sleep -Seconds 5
+
+ping EXT-DC08 -f -l 8900
+```
+
+---
+
+**EXT-DC09 - Run as EXTRANET\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Remove old domain controller
+
+##### # Demote domain controller
+
+```PowerShell
+Import-Module ADDSDeployment
+
+Uninstall-ADDSDomainController `
+    -DemoteOperationMasterRole:$true `
+    -RemoveDnsDelegation:$true
+```
+
+> **Note**
+>
+> When prompted, specify the password for the local administrator account.
+
+##### Remove Active Directory Domain Services and DNS roles
+
+> **Note**
+>
+> Restart the computer to complete the removal of the roles.
+
+##### # Stop server
+
+```PowerShell
+Stop-Computer
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Configure static IP addresses
+
+```PowerShell
+$interfaceAlias = "Extranet-20"
+```
+
+##### # Disable DHCP and router discovery
+
+```PowerShell
+Set-NetIPInterface `
+    -InterfaceAlias $interfaceAlias `
+    -Dhcp Disabled `
+    -RouterDiscovery Disabled
+```
+
+##### # Configure static IPv4 address
+
+```PowerShell
+$ipAddress = "10.1.20.3"
+
+New-NetIPAddress `
+    -InterfaceAlias $interfaceAlias `
+    -IPAddress $ipAddress `
+    -PrefixLength 24 `
+    -DefaultGateway 10.1.20.1
+```
+
+##### # Configure IPv4 DNS servers
+
+```PowerShell
+Set-DNSClientServerAddress `
+    -InterfaceAlias $interfaceAlias `
+    -ServerAddresses 10.1.20.2
+```
+
+## Configure domain controller
+
+### Login as EXTRANET\\jjameson-admin
 
 ### # Install Active Directory Domain Services
 
@@ -304,99 +413,9 @@ Install-ADDSDomainController `
 >
 > When prompted, specify the password for the administrator account when the computer is started in Safe Mode or a variant of Safe Mode, such as Directory Services Restore Mode.
 
-```PowerShell
-cls
-```
+## Configure backups
 
-## # Configure backups
-
-### # Add Windows Server Backup feature (DPM dependency for System State backups)
-
-```PowerShell
-Add-WindowsFeature Windows-Server-Backup
-```
-
----
-
-**FOOBAR11 - DPM Management Shell**
-
-```PowerShell
-cls
-```
-
-### # Copy DPM agent installation files
-
-```PowerShell
-net use \\EXT-DC09.extranet.technologytoolbox.com\C$ /USER:EXTRANET\jjameson-admin
-
-$source = "\\TT-FS01\Products\Microsoft\System Center 2016\DPM\Agents"
-$destination = "\\EXT-DC09.extranet.technologytoolbox.com\C`$\NotBackedUp\Temp" `
-    + "\DPM\Agents"
-
-$filter = "DPMAgentInstaller_x64.exe"
-
-robocopy $source $destination $filter /E
-```
-
----
-
-```PowerShell
-cls
-```
-
-### # Install DPM agent
-
-```PowerShell
-$installer = "C:\NotBackedUp\Temp\DPM\Agents\DPMAgentInstaller_x64.exe"
-
-& $installer
-```
-
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
-
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
-
-- Exception for DPMRA.exe in all profiles
-- Exception for Windows Management Instrumentation service
-- Exception for RemoteAdmin service
-- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
-
-```PowerShell
-cls
-```
-
-#### # Remove Operations Manager installation files
-
-```PowerShell
-Remove-Item C:\NotBackedUp\Temp\DPM -Recurse
-```
-
-#### Reference
-
-**Installing Protection Agents Manually**\
-Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
-
----
-
-**FOOBAR11 - DPM Management Shell**
-
-```PowerShell
-cls
-```
-
-### # Attach DPM agent
-
-```PowerShell
-$productionServer = 'EXT-DC09.extranet.technologytoolbox.com'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM02 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
+### Add virtual machine to Hyper-V protection group in DPM
 
 ```PowerShell
 cls
@@ -465,7 +484,7 @@ Remove-Item $certFile
 
 ---
 
-**FOOBAR11**
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -474,7 +493,7 @@ cls
 ### # Copy SCOM agent installation files
 
 ```PowerShell
-$computerName = "EXT-DC09.extranet.technologytoolbox.com"
+$computerName = "EXT-DC11.extranet.technologytoolbox.com"
 
 net use "\\$computerName\IPC`$" /USER:EXTRANET\jjameson-admin
 ```
@@ -581,7 +600,7 @@ From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -592,7 +611,7 @@ cls
 ### # Migrate VM to shared storage
 
 ```PowerShell
-$vmName = "EXT-DC09"
+$vmName = "EXT-DC11"
 
 $vm = Get-SCVirtualMachine -Name $vmName
 $vmHost = $vm.VMHost
@@ -601,8 +620,12 @@ Move-SCVirtualMachine `
     -VM $vm `
     -VMHost $vmHost `
     -HighlyAvailable $true `
-    -Path "C:\ClusterStorage\iscsi01-Gold-01" `
+    -Path "C:\ClusterStorage\iscsi02-Silver-03" `
     -UseDiffDiskOptimization
+```
+
+```PowerShell
+cls
 ```
 
 ### # Allow migration to host with different processor version
@@ -617,101 +640,61 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-## Update IP addresses for EXTRANET domain controllers
+## Issue - Firewall log contains numerous entries for UDP 137 broadcast
 
-#### IPv4
-
-IP address: **10.1.20.3**\
-Subnet mask: **255.255.255.0**\
-Default gateway: **10.1.20.1**
-
-DNS servers: **10.1.20.103, 127.0.0.1**
-
-#### IPv6
-
-IP address: **Obtain an IPv6 address automatically**
-
-DNS servers: **Obtain DNS server address automatically**
-
----
-
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+### Solution
 
 ```PowerShell
 cls
 ```
 
-### # Update DNS on IP address pool in VMM
+#### # Disable NetBIOS over TCP/IP
 
 ```PowerShell
-$ipAddressPool = Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
-
-Set-SCStaticIPAddressPool `
-    -StaticIPAddressPool $ipAddressPool `
-    -DNSServer @("10.1.20.103", "10.1.20.3")
-```
-
-```PowerShell
-cls
-```
-
-### # Update DNS settings on VMs
-
-```PowerShell
-$extranetNetwork = Get-SCVMNetwork "Extranet-20 VM Network"
-
-Get-SCVirtualMachine |
-    Get-SCVirtualNetworkAdapter |
-    where { $_.IPv4AddressType -eq "Static" } |
-    where { $_.VMNetwork -in ($extranetNetwork) } |
-    select -ExpandProperty Name
-```
-
----
-
----
-
-**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
-
-```PowerShell
-cls
-
-$computers = @(
-    "EXT-ADFS01A",
-    "EXT-ADFS03A",
-    "EXT-ADFS03B",
-    "EXT-APP03A",
-    "EXT-FOOBAR2",
-    "EXT-FOOBAR3",
-    "EXT-FOOBAR4",
-    "EXT-FOOBAR8",
-    "EXT-FOOBAR9",
-    "EXT-SQL03",
-    "EXT-WAC02A",
-    "EXT-WAP01A",
-    "EXT-WAP03A",
-    "EXT-WAP03B",
-    "EXT-WEB03B",
-    "EXT-WEB03A"
-)
-
-$script = [scriptblock] {
-    $interfaceAlias = "Extranet-20"
-
-    Set-DNSClientServerAddress `
-        -InterfaceAlias $interfaceAlias `
-        -ServerAddresses @("10.1.20.103", "10.1.20.3")
-}
-
-$computers |
+Get-NetAdapter |
     foreach {
-        Write-Host "Updating DNS settings on $_"
+        $interfaceAlias = $_.Name
 
-        Invoke-Command -ScriptBlock $script -ComputerName $_
+        Write-Host ("Disabling NetBIOS over TCP/IP on interface" `
+            + " ($interfaceAlias)...")
+
+        $adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+            -Filter "NetConnectionId = '$interfaceAlias'"
+
+        $adapterConfig = `
+            Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+                -Filter "Index= '$($adapter.DeviceID)'"
+
+        # Disable NetBIOS over TCP/IP
+        $adapterConfig.SetTcpipNetbios(2)
     }
 ```
 
----
+## Issue - Firewall log contains numerous entries for UDP 5355 broadcast
+
+### Solution
+
+```PowerShell
+cls
+```
+
+#### # Disable Link-Layer Topology Discovery on all domain computers
+
+```PowerShell
+Get-NetAdapter |
+    foreach {
+        $interfaceAlias = $_.Name
+
+        Write-Host ("Disabling Link-Layer Topology Discovery on interface" `
+            + " ($interfaceAlias)...")
+
+        Disable-NetAdapterBinding -Name $interfaceAlias `
+            -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
+
+        Disable-NetAdapterBinding -Name $interfaceAlias `
+            -DisplayName "Link-Layer Topology Discovery Responder"
+    }
+```
 
 **TODO:**
 
