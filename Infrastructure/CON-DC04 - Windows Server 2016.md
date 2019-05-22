@@ -377,6 +377,36 @@ Start-SCVirtualMachine -VM $vm
 
 ## Add virtual machine to Hyper-V protection group in DPM
 
+## Issue - Firewall log contains numerous entries for UDP 137 broadcast
+
+### Solution
+
+```PowerShell
+cls
+```
+
+#### # Disable NetBIOS over TCP/IP
+
+```PowerShell
+Get-NetAdapter |
+    foreach {
+        $interfaceAlias = $_.Name
+
+        Write-Host ("Disabling NetBIOS over TCP/IP on interface" `
+            + " ($interfaceAlias)...")
+
+        $adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+            -Filter "NetConnectionId = '$interfaceAlias'"
+
+        $adapterConfig = `
+            Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+                -Filter "Index= '$($adapter.DeviceID)'"
+
+        # Disable NetBIOS over TCP/IP
+        $adapterConfig.SetTcpipNetbios(2)
+    }
+```
+
 **TODO:**
 
 ```PowerShell
