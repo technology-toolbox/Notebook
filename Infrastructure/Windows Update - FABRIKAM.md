@@ -95,7 +95,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 $scriptBlock = [ScriptBlock]::Create($script)
 
-Get-Content "\\FAB-DC01\Users$\jjameson-admin\Documents\Computer List for Windows Update.txt" |
+Get-Content "\\FAB-FS01\Users$\jjameson-admin\Documents\Computer List for Windows Update.txt" |
     ForEach-Object {
         $computer = $_
 
@@ -163,7 +163,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 $scriptBlock = [scriptblock]::Create($script)
 
-Get-Content "\\FAB-DC01\Users$\jjameson-admin\Documents\Computer List for Windows Update.txt" |
+Get-Content "\\FAB-FS01\Users$\jjameson-admin\Documents\Computer List for Windows Update.txt" |
     ForEach-Object {
         $computer = $_
 
