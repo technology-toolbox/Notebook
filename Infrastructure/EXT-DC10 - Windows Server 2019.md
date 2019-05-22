@@ -861,6 +861,25 @@ Set-SCVirtualMachine -VM $vmName -CPULimitForMigration $true
 Start-SCVirtualMachine -VM $vmName
 ```
 
+```PowerShell
+cls
+```
+
+## # Configure anti-affinity class names for virtual machines
+
+```PowerShell
+$antiAffinityClassNames = New-Object System.Collections.Specialized.StringCollection
+$antiAffinityClassNames.Add("EXT-DC")
+
+(Get-ClusterGroup -Cluster TT-HV05-FC -Name 'SCVMM EXT-DC10 Resources').AntiAffinityClassNames = $antiAffinityClassNames
+
+(Get-ClusterGroup -Cluster TT-HV05-FC -Name 'SCVMM EXT-DC11 Resources').AntiAffinityClassNames = $antiAffinityClassNames
+
+Get-ClusterGroup -Cluster TT-HV05-FC |
+    where { $_.GroupType -eq "VirtualMachine" } |
+    select Name, AntiAffinityClassNames
+```
+
 ---
 
 ## Issue - Firewall log contains numerous entries for UDP 137 broadcast
