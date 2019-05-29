@@ -775,4 +775,149 @@ sudo docker run \
 **Setting up SMTP mail server using mailhog docker image**\
 From <[https://www.linkedin.com/pulse/setting-up-smtp-mail-server-using-mailhog-docker-image-chopparapu](https://www.linkedin.com/pulse/setting-up-smtp-mail-server-using-mailhog-docker-image-chopparapu)>
 
+```Shell
+clear
+```
+
+### # Stop "mailhog" container
+
+```Shell
+sudo docker stop mailhog
+```
+
+```Shell
+clear
+```
+
+## # Install poste.io
+
+```Shell
+sudo docker volume create mail-test-data
+
+sudo docker run \
+    --hostname "mail-test.technologytoolbox.com" \
+    --name "mail-test" \
+    --net=host \
+    --volume /etc/localtime:/etc/localtime:ro \
+    --volume mail-test-data:/data \
+    --tty \
+    analogic/poste.io
+```
+
+### Configure poste.io
+
+```Shell
+clear
+```
+
+### # Backup poste.io data volume
+
+#### # Stop "mail-test" container
+
+```Shell
+sudo docker stop mail-test
+```
+
+```Shell
+clear
+```
+
+#### # Backup data volume
+
+##### # - Launch a new container and mount the volume from the "mail-test" container
+
+##### # - Mount a local host directory as /backup
+
+##### # - Pass a command that adds the contents of the data volume to a tar file inside the /backup directory
+
+```Shell
+now=$(date +"%Y-%m-%d_%H-%M-%S")
+backupFilename=mail-test-data_$now.tar
+
+sudo docker run \
+    --rm \
+    --volume /var/backups:/backup \
+    --volumes-from mail-test \
+    ubuntu \
+    tar cvf /backup/$backupFilename /data
+```
+
+```Shell
+clear
+```
+
+#### # Start "mail-test" container
+
+```Shell
+sudo docker start mail-test
+```
+
+```Shell
+clear
+```
+
+### # Restore poste.io data volume
+
+#### # Stop "mail-test" container
+
+```Shell
+sudo docker stop mail-test
+```
+
+```Shell
+clear
+```
+
+#### # Create "mail-test-restore" container
+
+```Shell
+sudo docker run --name mail-test-restore --volume /data ubuntu /bin/bash
+```
+
+#### # Un-tar the backup file in the new container's data volume
+
+```Shell
+sudo docker run \
+    --rm \
+    --volume /var/backups:/backup \
+    --volumes-from mail-test \
+    ubuntu \
+    bash -c "cd /data && tar xvf /backup/mail-test-data_2019-05-29_22-28-32.tar --strip 1"
+```
+
+```Shell
+clear
+```
+
+#### # Remove "mail-test-restore" container (to forcibly disconnect from volumes)
+
+```Shell
+sudo docker container rm mail-test-restore
+```
+
+```Shell
+clear
+```
+
+#### # Start "mail-test" container
+
+```Shell
+sudo docker start mail-test
+```
+
+```Shell
+clear
+```
+
+### # Remove mail-test container and data volume
+
+```Shell
+sudo docker stop mail-test
+
+#sudo docker rm mail-test --volumes
+
+sudo docker rm mail-test
+sudo docker volume rm mail-test-data
+```
+
 **TODO:**
