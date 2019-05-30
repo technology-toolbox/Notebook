@@ -168,6 +168,34 @@ $adminUser.SetInfo()
 **Managing Local User Accounts with PowerShell**\
 From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershell.aspx](https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershell.aspx)>
 
+---
+
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Move VM to Production VM network
+
+```PowerShell
+$vmName = "TT-W10-DEV10"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -MACAddressType Dynamic `
+    -IPv4AddressType Dynamic
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
 ### Login as .\\foo
 
 ### # Set MaxPatchCacheSize to 0 (recommended)
@@ -181,7 +209,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ### # Configure networking
 
 ```PowerShell
-$interfaceAlias = "LAN"
+$interfaceAlias = "Production"
 ```
 
 #### # Rename network connections
