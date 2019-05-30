@@ -920,4 +920,150 @@ sudo docker rm mail-test
 sudo docker volume rm mail-test-data
 ```
 
+## Move VM to Production VM network
+
+---
+
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Configure network adapter for Production VM network
+
+```PowerShell
+$vmName = "TT-MAIL-TEST01"
+$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
+$vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
+$ipAddressPool = Get-SCStaticIPAddressPool -Name "Production-15 Address Pool"
+
+Stop-SCVirtualMachine $vmName
+
+Set-SCVirtualNetworkAdapter `
+    -VirtualNetworkAdapter $networkAdapter `
+    -VMNetwork $vmNetwork `
+    -IPv4AddressPools $ipAddressPool `
+    -IPv4AddressType Static
+
+Start-SCVirtualMachine $vmName
+```
+
+---
+
+> **Note**
+>
+> IPv4 address allocated by VMM: **10.0.15.110**
+
+### # Check IP address
+
+```Shell
+ifconfig | grep inet
+```
+
+> **Note**
+>
+> Static IP address is not configured automatically by VMM.
+
+### Configure static IP address
+
+#### Reference
+
+**How to configure a static IP address in Ubuntu Server 18.04**\
+From <[https://www.techrepublic.com/article/how-to-configure-a-static-ip-address-in-ubuntu-server-18-04/](https://www.techrepublic.com/article/how-to-configure-a-static-ip-address-in-ubuntu-server-18-04/)>
+
+#### # Create netplan YAML file to define static IP configuration
+
+```PowerShell
+cd /etc/netplan
+
+sudo nano 01-netcfg.yaml
+```
+
+---
+
+**/etc/netplan/01-netcfg.yaml**
+
+```Text
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: no
+      addresses: [10.0.15.110/24]
+      nameservers:
+        addresses: [10.0.15.2,10.0.15.3]
+```
+
+---
+
+```Shell
+clear
+```
+
+#### # Restart networking using netplan
+
+```Shell
+sudo netplan apply
+```
+
+```Shell
+clear
+```
+
+#### # Check IP address
+
+```Shell
+ifconfig | grep inet
+```
+
+#### Update IP address in DNS
+
+> **Note**
+>
+> After changing to a static IP address, poste.io was still binding to the old IP address (DHCP - 192.168.10.x). To resolve this issue, the container was stopped, removed, and recreated (including restoring the data volume from backup).
+
+---
+
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Make virtual machine highly available
+
+### # Migrate VM to shared storage
+
+```PowerShell
+$vmName = "TT-MAIL-TEST01"
+
+$vm = Get-SCVirtualMachine -Name $vmName
+$vmHost = $vm.VMHost
+
+Move-SCVirtualMachine `
+    -VM $vm `
+    -VMHost $vmHost `
+    -HighlyAvailable $true `
+    -Path "C:\ClusterStorage\iscsi02-Silver-01" `
+    -UseDiffDiskOptimization
+```
+
+```PowerShell
+cls
+```
+
+### # Allow migration to host with different processor version
+
+```PowerShell
+Stop-SCVirtualMachine -VM $vmName
+
+Set-SCVirtualMachine -VM $vmName -CPULimitForMigration $true
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---
+
 **TODO:**
