@@ -2251,3 +2251,88 @@ Start-SCVirtualMachine $vmName
 ### Create VM snapshot
 
 **Baseline Client Portal 3.0.648.0 / Cloud Portal 1.0.111.0 / Employee Portal 1.0.28.0**
+
+**TODO:**
+
+## Install and configure Git
+
+---
+
+**FOOBAR18**
+
+```PowerShell
+cls
+```
+
+### # Copy Git installation file from internal file server to extranet server
+
+```PowerShell
+$computerName = "EXT-FOOBAR.extranet.technologytoolbox.com"
+
+net use \\$computerName\C$ /USER:EXTRANET\jjameson-admin
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$filename = "Git-2.21.0-64-bit.exe"
+$source = "\\TT-FS01\Products\Git"
+$destination = "\\$computerName\C`$\NotBackedUp\Temp"
+
+robocopy $source $destination $filename
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Install Git
+
+```PowerShell
+$setupPath = "C:\NotBackedUp\Temp\Git-2.21.0-64-bit.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+On the **Choosing the default editor used by Git** step, select **Use the Nano editor by default**.
+
+> **Important**
+>
+> Wait for the installation to complete and restart PowerShell for environment changes to take effect.
+
+```Console
+exit
+```
+
+```Console
+cls
+```
+
+### # Configure symbolic link (e.g. for bash shell)
+
+```PowerShell
+Push-Location C:\NotBackedUp\Public\Toolbox\cmder\vendor
+
+cmd /c mklink /J git-for-windows "C:\Program Files\Git"
+
+Pop-Location
+```
+
+### # Configure Git to use SourceGear DiffMerge
+
+```PowerShell
+git config --global diff.tool diffmerge
+
+git config --global difftool.diffmerge.cmd  '"C:/NotBackedUp/Public/Toolbox/DiffMerge/x64/sgdm.exe \"$LOCAL\" \"$REMOTE\"'
+```
+
+#### Reference
+
+**Git for Windows (MSysGit) or Git Cmd**\
+From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html](https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html)>
+
+## Install GitHub Desktop
