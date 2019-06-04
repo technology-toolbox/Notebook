@@ -224,78 +224,79 @@ Enable-PSRemoting -Confirm:$false
 cls
 ```
 
-## # Install Visual Studio 2017
+## # Install and configure Visual Studio 2017
 
----
-
-**FOOBAR18 - Run as administrator**
+### # Launch Visual Studio 2017 setup
 
 ```PowerShell
-cls
+net use \\EXT-FS01\IPC$ /USER:EXTRANET\jjameson-admin
 ```
-
-### # Insert Visual Studio 2017 installation media
-
-```PowerShell
-$vmName = "EXT-VS2017-DEV1"
-$vmHost = "TT-HV05C"
-
-Add-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName
-
-Get-SCVirtualMachine -Name $vmName | Read-SCVirtualMachine
-
-$iso = Get-SCISO |
-    where {$_.Name -eq "en_visual_studio_enterprise_2015_with_update_3_x86_x64_dvd_8923288.iso"}
-
-Get-SCVirtualMachine -Name $vmName |
-    Get-SCVirtualDVDDrive |
-    Set-SCVirtualDVDDrive -ISO $iso -Link
-```
-
----
-
-### Install Visual Studio 2017
 
 > **Note**
 >
-> When prompted, restart the computer to complete the installation.
+> When prompted, type the password to connect to the file share.
 
----
+```PowerShell
+$setupPath = "\\EXT-FS01\Products\Microsoft\Visual Studio 2017\Enterprise" `
+    + "\vs_setup.exe"
 
-**FOOBAR18 - Run as administrator**
+Start-Process -FilePath $setupPath -Wait
+```
+
+### # Install Visual Studio 2017
+
+Select the following workloads:
+
+- **.NET desktop development**
+- **Desktop development with C++**
+- **Universal Windows Platform development**
+- **ASP.NET and web development**
+- **Azure development**
+- **Python development**
+- **Node.js development**
+- **Data storage and processing**
+- **Data science and analytical applications**
+- **Office/SharePoint development**
+- **Mobile development with .NET**
+- **Game development with Unity**
+- **Mobile development with JavaScript**
+- **Mobile development with C++**
+- **Game development with C++**
+- **Visual Studio extension development**
+- **Linux development with C++**
+- **.NET Core cross-platform development**
 
 ```PowerShell
 cls
 ```
 
-### # Remove Visual Studio 2017 installation media
+### # Add items to Trusted Sites in Internet Explorer for Visual Studio login
 
 ```PowerShell
-$vmName = "EXT-VS2017-DEV1"
-
-Get-SCVirtualMachine -Name $vmName |
-    Get-SCVirtualDVDDrive |
-    Set-SCVirtualDVDDrive -NoMedia
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone TrustedSites `
+    -Patterns https://login.microsoftonline.com, https://aadcdn.msauth.net, `
+        https://aadcdn.msftauth.net
 ```
-
----
-
-## Install and configure Git
-
-### Download Git for Windows
-
-[https://git-scm.com/download/win](https://git-scm.com/download/win)
 
 ```PowerShell
 cls
 ```
+
+## # Install and configure Git
 
 ### # Install Git
 
 ```PowerShell
-$setupPath = "C:\Users\Administrator\Downloads\Git-2.21.0-64-bit.exe"
+net use \\EXT-FS01\IPC$ /USER:EXTRANET\jjameson-admin
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\EXT-FS01\Products\Git\Git-2.21.0-64-bit.exe"
 
 Start-Process -FilePath $setupPath -Wait
 ```
@@ -310,13 +311,7 @@ On the **Choosing the default editor used by Git** step, select **Use the Nano e
 exit
 ```
 
-### # Remove Git setup file
-
-```PowerShell
-Remove-Item "C:\Users\Administrator\Downloads\Git-2.21.0-64-bit.exe"
-```
-
-```PowerShell
+```Console
 cls
 ```
 
@@ -345,24 +340,68 @@ From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html]
 
 ## Install GitHub Desktop
 
-> **Note**
->
-> GitHub Desktop requires .NET Framework 4.5 to be installed (and will automatically install it, if necessary).
+```PowerShell
+cls
+```
 
-## Install Windows Management Framework 5.1
+## # Install PowerShell modules
 
-**Windows Management Framework 5.1**\
-From <[https://www.microsoft.com/en-us/download/details.aspx?id=54616](https://www.microsoft.com/en-us/download/details.aspx?id=54616)>
+### # Install posh-git module (e.g. for Powerline Git prompt customization)
 
-> **Note**
->
-> Windows Management Framework 5.1 must be installed before installing Microsoft Azure SDK for .NET (VS 2015) - 2.9.6. This is due to Azure PowerShell requiring Windows PowerShell 5.
+#### # Install NuGet package provider (to bypass prompt when installing posh-git module)
+
+```PowerShell
+Install-PackageProvider NuGet -MinimumVersion '2.8.5.201' -Force
+```
+
+#### # Trust PSGallery repository (to bypass prompt when installing posh-git module)
+
+```PowerShell
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+```
+
+#### # Install posh-git module
+
+```PowerShell
+Install-Module -Name 'posh-git'
+```
+
+### Upgrade Azure PowerShell module
+
+#### Remove AzureRM module
+
+1. Open **Programs and Features**
+2. Uninstall **Microsoft Azure PowerShell - April 2018**
+
+```PowerShell
+cls
+```
+
+#### # Install new Azure PowerShell module
+
+```PowerShell
+Install-Module -Name Az -AllowClobber -Scope AllUsers
+```
 
 ## Install updates using Windows Update
 
 > **Note**
 >
 > Repeat until there are no updates available for the computer.
+
+```PowerShell
+cls
+```
+
+## # Add developers to local Administrators group
+
+```PowerShell
+$domain = "EXTRANET"
+$groupName = "All Developers"
+
+([ADSI]"WinNT://./Administrators,group").Add(
+    "WinNT://$domain/$groupName,group")
+```
 
 ## Baseline virtual machine
 
@@ -377,16 +416,16 @@ cls
 ### # Checkpoint VM
 
 ```PowerShell
+$vmHost = "TT-HV05C"
 $vmName = "EXT-VS2017-DEV1"
 $checkpointName = "Baseline"
 
-Stop-VM -Name $vmName
+Stop-VM -ComputerName $vmHost -Name $vmName
 
 Checkpoint-VM `
+    -ComputerName $vmHost `
     -Name $vmName `
     -SnapshotName $checkpointName
-
-Start-VM -Name $vmName
 ```
 
 ---
@@ -394,6 +433,91 @@ Start-VM -Name $vmName
 ## Back up virtual machine
 
 **TODO:**
+
+```PowerShell
+cls
+```
+
+## # Copy cmder configuration
+
+##### # Temporarily enable firewall rule for copying files to server
+
+```PowerShell
+Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
+```
+
+---
+
+**STORM - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+#### # Copy cmder configuration
+
+```PowerShell
+$computer = "EXT-VS2017-DEV1.extranet.technologytoolbox.com"
+$source = "C:\NotBackedUp\Public\Toolbox\cmder"
+$destination = "\\$computer\C$\NotBackedUp\Public\Toolbox\cmder"
+
+robocopy $source $destination /E /XD git-for-windows /MIR /NP
+```
+
+---
+
+```PowerShell
+cls
+```
+
+##### # Disable firewall rule for copying files to server
+
+```PowerShell
+Disable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
+```
+
+```PowerShell
+cls
+```
+
+## # Configure e-mail and name for Git
+
+```PowerShell
+git config --global user.email "jjameson@technologytoolbox.com"
+git config --global user.name "Jeremy Jameson"
+```
+
+```PowerShell
+cls
+```
+
+## # Clone repo for Pluralsight course
+
+```PowerShell
+mkdir C:\NotBackedUp\GitHub\jeremy-jameson
+
+Push-Location C:\NotBackedUp\GitHub\jeremy-jameson
+
+git clone https://github.com/jeremy-jameson/SecuringAspNetCore2WithOAuth2AndOIDC.git
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+## # Clone repo for IdentityServer4.Admin
+
+```PowerShell
+mkdir C:\NotBackedUp\GitHub\skoruba
+
+Push-Location C:\NotBackedUp\GitHub\skoruba
+
+git clone https://github.com/skoruba/IdentityServer4.Admin.git
+
+Pop-Location
+```
 
 ```PowerShell
 cls
