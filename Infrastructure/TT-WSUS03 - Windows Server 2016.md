@@ -1404,6 +1404,60 @@ DROP TABLE IF EXISTS #Results;
 **Enhancing WSUS database cleanup performance SQL script**\
 From <[https://stevethompsonmvp.wordpress.com/2018/05/01/enhancing-wsus-database-cleanup-performance-sql-script/](https://stevethompsonmvp.wordpress.com/2018/05/01/enhancing-wsus-database-cleanup-performance-sql-script/)>
 
+## Expand D: (Data01) drive
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/2BCD2FA0FAF5CAFE0748A9EA14C20EFD18EEA67E.png)
+
+Screen clipping taken: 6/17/2019 2:43 PM
+
+---
+
+**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+### # Increase the size of "Data01" VHD
+
+```PowerShell
+$vmName = "TT-WSUS03"
+
+# Note: VHD is stored on Cluster Shared Volume -- so expand using VMM cmdlet
+
+Stop-SCVirtualMachine -VM $vmName
+
+Get-SCVirtualDiskDrive -VM $vmName |
+    where { $_.BusType -eq "SCSI" -and $_.Bus -eq 0 -and $_.Lun -eq 1 } |
+    Expand-SCVirtualDiskDrive -VirtualHardDiskSizeGB 140
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend partition
+
+```PowerShell
+$driveLetter = "D"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
 **TODO:**
 
 ## Create SQL job for WSUS database maintenance
