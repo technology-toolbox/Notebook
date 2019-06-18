@@ -1650,6 +1650,28 @@ cls
 npm install -g @bitwarden/cli
 ```
 
+```PowerShell
+cls
+```
+
+## # Install OpenCV
+
+```PowerShell
+setx -m OPENCV_DIR "C:\Program Files\OpenCV-3.4.6\opencv\build\x64\vc15"
+```
+
+#### # Add OpenCV bin folder to PATH environment variable
+
+```PowerShell
+Set-ExecutionPolicy RemoteSigned -Scope Process -Force
+
+$openCVPathFolder = "%OPENCV_DIR%\bin"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    -Folders $openCVPathFolder `
+    -EnvironmentVariableTarget Machine
+```
+
 **TODO:**\
 
 ## Share printer
