@@ -941,6 +941,60 @@ Resize-Partition `
     -Size $size.SizeMax
 ```
 
+## Issue - Not enough free space to install patches using Windows Update
+
+6.24 GB of free space, but unable to install **2019-06 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4503267)**.
+
+### Expand C:
+
+---
+
+**FOOBAR18**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV05C"
+$vmName = "TT-SQL02"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("C:\ClusterStorage\iscsi02-Silver-03\$vmName\$vmName" + ".vhdx") `
+    -SizeBytes 38GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
 **TODO:**
 
 ```PowerShell
