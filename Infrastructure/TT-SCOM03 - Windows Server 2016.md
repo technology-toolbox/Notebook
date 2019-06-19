@@ -2509,4 +2509,65 @@ Start-SCVirtualMachine $vmName
 
 ---
 
+## Issue - Not enough free space to install patches using Windows Update
+
+5.41 GB of free space, but unable to install **2019-06 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4503267).**
+
+### Expand C:
+
+---
+
+**FOOBAR18**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV05B"
+$vmName = "TT-SCOM03"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("C:\ClusterStorage\iscsi02-Silver-03\$vmName\$vmName" + ".vhdx") `
+    -SizeBytes 35GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Delete recovery partition
+
+```PowerShell
+Get-Partition | where { $_.Type -eq "Recovery" } |
+    Remove-Partition -Confirm:$false
+```
+
+#### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
 **TODO:**
