@@ -2958,13 +2958,11 @@ Import-MDTApplication `
     -DestinationFolder $appSetupFolder `
     -CommandLine $commandLine `
     -WorkingDirectory ".\Applications\$appSetupFolder"
-
-TODO:
 ```
 
 ---
 
-**WOLVERINE**
+**STORM**
 
 ```PowerShell
 cls
@@ -2975,7 +2973,7 @@ cls
 #### # Sync files
 
 ```PowerShell
-cd C:\NotBackedUp\TechnologyToolbox\Infrastructure
+cd C:\NotBackedUp\techtoolbox\Infrastructure
 
 $source = '\\TT-FS01\MDT-Build$'
 $destination = '.\Main\MDT-Build$'
@@ -2986,7 +2984,7 @@ robocopy $source $destination /E /XD Applications Backup Boot Captures Logs "Ope
 #### # Add files to TFS
 
 ```PowerShell
-$tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE" `
+$tf = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE" `
     + "\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\TF.exe"
 
 & $tf add Main /r
