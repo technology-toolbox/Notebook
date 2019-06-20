@@ -1,7 +1,7 @@
-﻿# FOOBAR19 - Windows 10 Enterprise (x64)
+﻿# FOOBAR21 - Windows 10 Enterprise (x64)
 
-Tuesday, January 1, 2019
-7:38 AM
+Thursday, June 20, 2019
+5:12 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Tuesday, January 1, 2019
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -20,9 +20,9 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05B"
-$vmName = "FOOBAR19"
-$vmPath = "E:\NotBackedUp\VMs"
+$vmHost = "TT-HV05A"
+$vmName = "FOOBAR21"
+$vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VM `
@@ -59,7 +59,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **FOOBAR19**.
+  - In the **Computer name** box, type **FOOBAR21**.
   - Click **Next**.
 - On the **Applications** step:
   - Select the following applications:
@@ -93,12 +93,12 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 
-$vmName = "FOOBAR19"
+$vmName = "FOOBAR21"
 ```
 
 ### # Move computer to different OU
@@ -113,7 +113,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 ### # Set first boot device to hard drive
 
 ```PowerShell
-$vmHost = "TT-HV05B"
+$vmHost = "TT-HV05A"
 
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
@@ -133,7 +133,7 @@ Set-VMFirmware `
 ##### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
-Add-ADGroupMember -Identity "Windows Update - Slot 0" -Members ($vmName + '$')
+Add-ADGroupMember -Identity "Windows Update - Slot 21" -Members ($vmName + '$')
 ```
 
 ---
@@ -176,7 +176,7 @@ From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershel
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -185,7 +185,7 @@ cls
 ### # Move VM to Production VM network
 
 ```PowerShell
-$vmName = "FOOBAR19"
+$vmName = "FOOBAR21"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
 $vmNetwork = Get-SCVMNetwork -Name "Production VM Network"
 
@@ -327,7 +327,7 @@ cls
 
 ```PowerShell
 $installerPath = "\\TT-FS01\Public\Download\Microsoft\SharePoint\Online" `
-    + "\SharePointOnlineManagementShell_8316-1200_x64_en-us.msi"
+    + "\SharePointOnlineManagementShell_8924-1200_x64_en-us.msi"
 
 Start-Process `
     -FilePath msiexec.exe `
@@ -339,9 +339,9 @@ Start-Process `
 cls
 ```
 
-## # Install Visual Studio 2017
+## # Install Visual Studio 2019
 
-### # Launch Visual Studio 2017 setup
+### # Launch Visual Studio 2019 setup
 
 ```PowerShell
 net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
@@ -352,19 +352,126 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\Visual Studio 2017\Enterprise" `
-    + "\vs_enterprise__740322565.1545343127.exe"
+$setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio 2019\Enterprise" `
+    + "\vs_setup.exe"
 
-Start-Process `
-    -FilePath $installerPath `
-    -Wait
+Start-Process -FilePath $setupPath -Wait
 ```
 
 Select the following workloads:
 
-- **.NET desktop development**
 - **ASP.NET and web development**
+- **.NET desktop development**
 - **Office/SharePoint development**
+
+> **Note**
+>
+> When prompted, restart the computer to complete the installation.
+
+### Install Visual Studio 2019 updates
+
+Open Visual Studio and install all updates (on the **Help** menu, select **Check for Updates**).
+
+> **Note**
+>
+> When prompted, restart the computer to complete the updates.
+
+```PowerShell
+cls
+```
+
+## # Install and configure Git
+
+### # Install Git
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Git\Git-2.22.0-64-bit.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+On the **Choosing the default editor used by Git** step, select **Use the Nano editor by default**.
+
+> **Important**
+>
+> Wait for the installation to complete and restart PowerShell for environment changes to take effect.
+
+```Console
+exit
+```
+
+```Console
+cls
+```
+
+### # Install module (posh-git) for git support in cmder
+
+```PowerShell
+Install-Module posh-git
+```
+
+> **Note**
+>
+> When prompted to install and import the NuGet provider, type **Y** to continue.
+
+```PowerShell
+cls
+```
+
+### # Configure symbolic link (e.g. for bash shell)
+
+```PowerShell
+Push-Location C:\NotBackedUp\Public\Toolbox\cmder\vendor
+
+cmd /c mklink /J git-for-windows "C:\Program Files\Git"
+
+Pop-Location
+```
+
+### # Configure Git to use SourceGear DiffMerge
+
+```PowerShell
+git config --global diff.tool diffmerge
+
+git config --global difftool.diffmerge.cmd  '"C:/NotBackedUp/Public/Toolbox/DiffMerge/x64/sgdm.exe \"$LOCAL\" \"$REMOTE\"'
+```
+
+#### Reference
+
+**Git for Windows (MSysGit) or Git Cmd**\
+From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html](https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html)>
+
+```PowerShell
+cls
+```
+
+## # Install GitHub Desktop
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\GitHub\GitHubDesktopSetup.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
 
 ## Install updates using Windows Update
 
@@ -376,11 +483,11 @@ Select the following workloads:
 
 ---
 
-**FOOBAR16**
+**FOOBAR18**
 
 ```PowerShell
 cls
-$vm = Get-SCVirtualMachine -Name "FOOBAR19"
+$vm = Get-SCVirtualMachine -Name "FOOBAR21"
 
 Stop-SCVirtualMachine -VM $vm
 
