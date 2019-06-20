@@ -7,7 +7,7 @@ Saturday, January 11, 2014
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Patch EXT-DC08 (before patching other machines)
+## Patch EXT-DC10 (before patching other machines)
 
 ## Patch remaining EXTRANET machines
 
@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**FOOBAR16**
+**FOOBAR21**
 
 ```PowerShell
 cls
@@ -28,10 +28,16 @@ $activity = "Prepare development and test VMs for patching"
 $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR'; VMHost = 'TT-HV05B'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR3'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR4'; VMHost = 'WOLVERINE'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR4'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR7'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'WOLVERINE'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05B'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2010-DEV1'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2013-DEV1'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2015-DEV1'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05A'; })
 ```
 
@@ -82,7 +88,7 @@ $virtualMachinesWithSnapshots |
 
 ---
 
-**EXT-DC08**
+**EXT-DC10**
 
 ```PowerShell
 cls
@@ -120,7 +126,7 @@ Get-Content "C:\Users\jjameson-admin\Desktop\Computer List for Windows Update.tx
 
 ---
 
-**FOOBAR16**
+**FOOBAR21**
 
 ```PowerShell
 cls
@@ -129,7 +135,7 @@ cls
 #### # Mirror Toolbox content from internal file server to extranet server
 
 ```PowerShell
-$computerName = "EXT-DC08.extranet.technologytoolbox.com"
+$computerName = "EXT-DC10.extranet.technologytoolbox.com"
 
 net use \\$computerName\C$ /USER:EXTRANET\jjameson-admin
 ```
@@ -149,7 +155,7 @@ robocopy $source $destination /E /MIR /XD git-for-windows "Microsoft SDKs"
 
 ---
 
-**EXT-DC08**
+**EXT-DC10**
 
 ```PowerShell
 cls
@@ -190,7 +196,7 @@ cd C:\NotBackedUp\Public\Toolbox\PowerShell\PoshPAIG_2_1_5_1
 
 ---
 
-**FOOBAR16**
+**FOOBAR21**
 
 ```PowerShell
 cls
@@ -278,7 +284,7 @@ $virtualMachines |
 
 ---
 
-**EXT-DC08**
+**EXT-DC10**
 
 ```PowerShell
 cls
@@ -328,7 +334,7 @@ Get-Content "C:\Users\jjameson-admin\Desktop\Computer List for Windows Update.tx
 
 ---
 
-**FOOBAR16**
+**FOOBAR21**
 
 ```PowerShell
 cls
@@ -340,10 +346,16 @@ cls
 $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR'; VMHost = 'TT-HV05B'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR3'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR4'; VMHost = 'WOLVERINE'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR4'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR7'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'WOLVERINE'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05B'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2010-DEV1'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2013-DEV1'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2015-DEV1'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05A'; })
 ```
 
