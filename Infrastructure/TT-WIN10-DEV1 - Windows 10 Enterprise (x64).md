@@ -496,9 +496,9 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-## TODO: Issue - Not enough free space to install patches using Windows Update
+## Issue - Not enough free space to install patches using Windows Update
 
-5.2 GB of free space, but unable to install **2018-12 Cumulative Update for Windows 10 for x64-based Systems (KB4471324)**.
+6.2 GB of free space, but unable to install **Feature update to Windows 10 (business editions), version 1809, en-us** (KB3012973).
 
 ### Expand C:
 
@@ -521,7 +521,7 @@ Stop-VM -ComputerName $vmHost -Name $vmName
 Resize-VHD `
     -ComputerName $vmHost `
     -Path ("C:\ClusterStorage\iscsi02-Silver-01\$vmName\$vmName" + ".vhdx") `
-    -SizeBytes 64GB
+    -SizeBytes 55GB
 
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
@@ -537,6 +537,60 @@ cls
 ```PowerShell
 Get-Partition -PartitionNumber 4 | Remove-Partition -Confirm:$false
 ```
+
+```PowerShell
+cls
+```
+
+#### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
+## Issue - Not enough free space to install patches using Windows Update
+
+6.9 GB of free space, but unable to install **Feature update to Windows 10 (business editions), version 1903, en-us (KB3012973)**.
+
+### Expand C:
+
+---
+
+**FOOBAR18**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV05C"
+$vmName = "TT-WIN10-DEV1"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("C:\ClusterStorage\iscsi02-Silver-02\$vmName\$vmName" + ".vhdx") `
+    -SizeBytes 60GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
 
 ```PowerShell
 cls
