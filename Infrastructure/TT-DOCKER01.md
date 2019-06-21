@@ -805,6 +805,48 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
+---
+
+**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+
+```PowerShell
+cls
+```
+
+## # Make virtual machine highly available
+
+### # Migrate VM to shared storage
+
+```PowerShell
+$vmName = "TT-DOCKER01"
+
+$vm = Get-SCVirtualMachine -Name $vmName
+$vmHost = $vm.VMHost
+
+Move-SCVirtualMachine `
+    -VM $vm `
+    -VMHost $vmHost `
+    -HighlyAvailable $true `
+    -Path "C:\ClusterStorage\iscsi02-Silver-01" `
+    -UseDiffDiskOptimization
+```
+
+```PowerShell
+cls
+```
+
+### # Allow migration to host with different processor version
+
+```PowerShell
+Stop-SCVirtualMachine -VM $vmName
+
+Set-SCVirtualMachine -VM $vmName -CPULimitForMigration $true
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---
+
 ## Configure backups
 
 ### Add virtual machine to Hyper-V protection group in DPM
