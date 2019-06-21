@@ -302,3 +302,35 @@ New-SCVMCheckpoint -VM $vm -Name Baseline
 ```
 
 ---
+
+## Issue - Not enough free space to install patches using Windows Update
+
+### Expand C:
+
+---
+
+**FOOBAR18**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmHost = "TT-HV05B"
+$vmName = "TT-WIN7-TEST1"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("F:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName" + ".vhdx") `
+    -SizeBytes 40GB
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+#### Extend partition using Disk Management console
