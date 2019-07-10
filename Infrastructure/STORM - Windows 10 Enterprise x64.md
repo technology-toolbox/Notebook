@@ -566,6 +566,26 @@ From <[http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx](htt
 cls
 ```
 
+### # Configure firewall rule to block Microsoft Money quote service
+
+```PowerShell
+New-NetFirewallRule `
+    -Name "BlockMicrosoftMoney" `
+    -DisplayName "Block Microsoft Money" `
+    -Direction Outbound `
+    -Program "%ProgramFiles%\Microsoft Money Plus\MNYCoreFiles\msmoney.exe" `
+    -Action Block
+```
+
+#### Reference
+
+**Eliminating the "online updating"delays and errors when opening Money**\
+From <[https://microsoftmoneyoffline.wordpress.com/2016/06/06/eliminating-the-online-updatingdelays-and-errors-when-opening-money/](https://microsoftmoneyoffline.wordpress.com/2016/06/06/eliminating-the-online-updatingdelays-and-errors-when-opening-money/)>
+
+```PowerShell
+cls
+```
+
 ### # Create custom invoice template
 
 ```PowerShell
