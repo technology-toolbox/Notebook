@@ -1404,6 +1404,30 @@ DROP TABLE IF EXISTS #Results;
 **Enhancing WSUS database cleanup performance SQL script**\
 From <[https://stevethompsonmvp.wordpress.com/2018/05/01/enhancing-wsus-database-cleanup-performance-sql-script/](https://stevethompsonmvp.wordpress.com/2018/05/01/enhancing-wsus-database-cleanup-performance-sql-script/)>
 
+### Alternative -- per Microsoft KB article
+
+```SQL
+-- Create custom index in tbLocalizedPropertyForRevision
+USE [SUSDB]
+
+CREATE NONCLUSTERED INDEX [nclLocalizedPropertyID] ON [dbo].[tbLocalizedPropertyForRevision]
+(
+     [LocalizedPropertyID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
+
+-- Create custom index in tbRevisionSupersedesUpdate
+CREATE NONCLUSTERED INDEX [nclSupercededUpdateID] ON [dbo].[tbRevisionSupersedesUpdate]
+(
+     [SupersededUpdateID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+```
+
+#### Reference
+
+**The complete guide to Microsoft WSUS and Configuration Manager SUP maintenance**\
+From <[https://support.microsoft.com/en-us/help/4490644/complete-guide-to-microsoft-wsus-and-configuration-manager-sup-maint](https://support.microsoft.com/en-us/help/4490644/complete-guide-to-microsoft-wsus-and-configuration-manager-sup-maint)>
+
 ## Expand D: (Data01) drive
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/2BCD2FA0FAF5CAFE0748A9EA14C20EFD18EEA67E.png)
