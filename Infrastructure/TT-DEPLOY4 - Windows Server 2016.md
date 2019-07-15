@@ -3095,4 +3095,135 @@ Resize-Partition `
     -Size $size.SizeMax
 ```
 
+```PowerShell
+cls
+```
+
+## # Import new version (June 2019) of Windows 10
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+```
+
+### # Import operating system - "Windows 10 Enterprise, Version 1903 (x64)"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows 10" `
+  + "\en_windows_10_business_edition_version_1903_updated_june_2019_x64_dvd_1f290297.iso"
+
+$imageDriveLetter = Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume |
+    select -ExpandProperty DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "W10Ent-1903-Jun-2019-x64"
+
+Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows 10" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+```
+
+```PowerShell
+cls
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+### Modify task sequence to use new version of Windows 10 Enterprise, Version 1903
+
+---
+
+**STORM**
+
+```PowerShell
+cls
+```
+
+### # Update files in TFS
+
+```PowerShell
+cd C:\NotBackedUp\techtoolbox\Infrastructure
+
+C:\NotBackedUp\Public\Toolbox\DiffMerge\x64\sgdm.exe `
+    \\TT-FS01\MDT-Build$ '.\Main\MDT-Build$'
+```
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Captures Logs "Operating Systems" Packages Servicing Tools
+```
+
+#### Check-in files
+
+---
+
+## Issue - Not enough free space to install patches using Windows Update
+
+4.5 GB of free space, but unable to install **2019-07 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4507460)**.
+
+### Expand C:
+
+---
+
+**FOOBAR21**
+
+```PowerShell
+cls
+```
+
+#### # Increase size of VHD
+
+```PowerShell
+$vmName = "TT-DEPLOY4"
+
+# Note: VHD is stored on Cluster Shared Volume -- so expand using VMM cmdlet
+
+Stop-SCVirtualMachine -VM $vmName
+
+Get-SCVirtualDiskDrive -VM $vmName |
+    where { $_.BusType -eq "SCSI" -and $_.Bus -eq 0 -and $_.Lun -eq 0 } |
+    Expand-SCVirtualDiskDrive -VirtualHardDiskSizeGB 40
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Extend partition
+
+```PowerShell
+$driveLetter = "C"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
 **TODO:**
