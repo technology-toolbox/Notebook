@@ -9082,3 +9082,15 @@ Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
 ```
 
 ---
+
+## Expand C: drive
+
+### Delete checkpoint
+
+### Expand primary VHD for virtual machine
+
+New size: 90 GB
+
+### Extend partition
+
+### Create checkpoint
