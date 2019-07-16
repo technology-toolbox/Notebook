@@ -1300,6 +1300,20 @@ Start-SCVirtualMachine $vmName
 
 **Baseline Client Portal 3.0.645.0 / Cloud Portal 1.0.106.0**
 
+## Issue - Not enough free space to install patches using Windows Update
+
+### Expand C: drive
+
+#### Delete checkpoint
+
+#### Expand primary VHD for virtual machine
+
+New size: 60 GB
+
+#### Extend partition
+
+#### Create checkpoint
+
 **TODO:**
 
 ```PowerShell
