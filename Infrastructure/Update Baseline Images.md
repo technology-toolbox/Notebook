@@ -117,6 +117,19 @@ cls
     -Force
 ```
 
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2019 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
 ---
 
 ## Update MDT production deployment images
