@@ -291,3 +291,28 @@ Get-ClusterGroup -Cluster TT-HV05-FC |
             select Path, @{N=’Size’; E={[Math]::Round(($_.Size / 1GB), 2) }}
     } | ft -auto
 ```
+
+```PowerShell
+cls
+```
+
+## # Start VMs in desired order
+
+```PowerShell
+Import-Csv 'C:\NotBackedUp\Temp\Cluster VMs.csv' |
+    sort @{ e = {$_.StartupOrder -as [int]} } |
+    where { $_.StartupOrder -ne 0 } |
+    foreach {
+        $vm = Get-SCVirtualMachine -Name $_.Name
+
+        If ($vm.VirtualMachineState -ne 'Running')
+        {
+            Write-Verbose "Starting VM ($($vm.Name))..."
+
+            Start-SCVirtualMachine $vm |
+                select Name, MostRecentTask, MostRecentTaskUIState
+
+            Start-Sleep -Seconds 30
+        }
+    }
+```
