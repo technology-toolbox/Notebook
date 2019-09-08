@@ -3702,4 +3702,179 @@ cls
 
 ---
 
-**TODO:**
+```PowerShell
+cls
+```
+
+## # Upgrade to latest version of Windows 10 (August 2019)
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+```
+
+### # Import operating system - "Windows 10 Enterprise, Version 1903 (x64)"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows 10" `
+  + "\en_windows_10_business_editions_version_1903_updated_aug_2019_x64_dvd_f50487e6.iso"
+
+$imageDriveLetter = Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume |
+    select -ExpandProperty DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "W10Ent-1903-Aug-2019-x64"
+
+Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows 10" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+```
+
+```PowerShell
+cls
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+### Modify task sequence to use new version of Windows 10 Enterprise, Version 1903
+
+### Delete old version of Windows 10 Enterprise, Version 1903
+
+---
+
+**STORM**
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ F:\NotBackedUp\MDT-Build /E /MIR
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location F:\NotBackedUp\MDT-Build
+
+git add Control/*
+
+git commit -m "Upgrade to latest version of Windows 10 (August 2019)"
+
+Pop-Location
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Upgrade to latest version of Windows Server 2019 (August 2019)
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+```
+
+### # Import operating system - "Windows Server 2019"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows Server 2019" `
+    + "\en_windows_server_2019_updated_aug_2019_x64_dvd_cdf24600.iso"
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "WS2019-Aug-2019"
+
+Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows Server 2019" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+```
+
+```PowerShell
+cls
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+### Modify task sequence to use new version of Windows Server 2019
+
+### Delete old version of Windows Server 2019
+
+---
+
+**STORM**
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ F:\NotBackedUp\MDT-Build /E /MIR
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location F:\NotBackedUp\MDT-Build
+
+git add Control/*
+
+git commit -m "Upgrade to latest version of Windows Server 2019 (August 2019)"
+
+git push
+
+Pop-Location
+```
+
+---
