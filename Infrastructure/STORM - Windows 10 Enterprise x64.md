@@ -1297,6 +1297,26 @@ choco install html-tidy -y
 cls
 ```
 
+## # Install Postman
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Postman\Postman-win64-7.7.2-Setup.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+```PowerShell
+cls
+```
+
 ## # Install Fiddler
 
 ```PowerShell
