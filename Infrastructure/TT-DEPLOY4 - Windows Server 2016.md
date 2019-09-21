@@ -3878,3 +3878,80 @@ Pop-Location
 ```
 
 ---
+
+## Issue - Errors building Windows 7 and Windows Server 2008 baseline images
+
+Error 0x80092004 occurred when installing updates due to missing SHA-1 signatures (starting with updates released in August 2019).
+
+### References
+
+**If you get Windows Update error 0x80092004 on Windows 7 or Server 2008 R2 do this**\
+From <[https://www.ghacks.net/2019/08/15/if-you-get-windows-update-error-0x80092004-on-windows-7-or-server-2008-r2-do-this/](https://www.ghacks.net/2019/08/15/if-you-get-windows-update-error-0x80092004-on-windows-7-or-server-2008-r2-do-this/)>
+
+```PowerShell
+cls
+```
+
+### # Add Servicing Stack Updates to MDT
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+```
+
+### # Create folder - "Packages\\Windows 7 and Windows Server 2008 R2"
+
+```PowerShell
+New-Item `
+    -Path "DS001:\Packages" `
+    -Name "Windows 7 and Windows Server 2008 R2" `
+    -ItemType Folder
+
+Import-MdtPackage `
+    -Path "DS001:\Packages\Windows 7 and Windows Server 2008 R2" `
+    -SourcePath "\\TT-FS01\Products\Microsoft\Windows 7\SSU"
+
+Remove-Item -Path ("DS001:\Packages\Windows 7 and Windows Server 2008 R2\" `
+    + "Package_for_KB4516655 neutral amd64 6.1.1.1")
+
+Remove-Item -Path ("DS001:\Packages\Windows 7 and Windows Server 2008 R2\" `
+    + "Package_for_KB4516655 neutral x86 6.1.1.1")
+```
+
+---
+
+**STORM**
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ F:\NotBackedUp\MDT-Build /E /MIR
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location F:\NotBackedUp\MDT-Build
+
+git add Control/*
+
+git commit -m "Add Servicing Stack Update for Windows 7 and Windows Server 2008 R2 (#1)"
+
+Pop-Location
+```
+
+---
+
