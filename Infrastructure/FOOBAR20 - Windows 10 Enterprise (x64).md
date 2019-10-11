@@ -748,6 +748,16 @@ cls
 cls
 ```
 
+## # Install dependencies for building PartsUnlimited sample
+
+```PowerShell
+npm install windows-build-tools -g
+```
+
+```PowerShell
+cls
+```
+
 ## # Install dependencies for building SharePoint solutions
 
 ### # Install reference assemblies
