@@ -1721,6 +1721,23 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -EnvironmentVariableTarget Machine
 ```
 
+## Install Minikube
+
+### Reference
+
+**Install Minikube**\
+From <[https://kubernetes.io/docs/tasks/tools/install-minikube/](https://kubernetes.io/docs/tasks/tools/install-minikube/)>
+
+```PowerShell
+cls
+```
+
+### # Start Minikube
+
+```PowerShell
+minikube start --vm-driver=hyperv
+```
+
 **TODO:**\
 
 ## Share printer
