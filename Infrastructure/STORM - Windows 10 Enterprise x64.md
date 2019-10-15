@@ -1185,6 +1185,15 @@ cls
 
 ## # Configure development environment
 
+### # Configure NuGet global package location
+
+```PowerShell
+[Environment]::SetEnvironmentVariable(
+    "NUGET_PACKAGES",
+    "C:\NotBackedUp\.nuget\packages",
+    "Machine")
+```
+
 ### # Install IIS
 
 ```PowerShell
