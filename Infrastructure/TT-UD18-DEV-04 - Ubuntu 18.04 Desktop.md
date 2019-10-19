@@ -644,6 +644,37 @@ From <[https://dotnet.microsoft.com/download/linux-package-manager/ubuntu18-04/s
 clear
 ```
 
+## # Install Postman
+
+### # Install Postman using Snap (currently version 6.7.5)
+
+```Shell
+sudo snap install postman
+```
+
+```Shell
+clear
+```
+
+### # Upgrade Postman to version 7.x
+
+```Shell
+sudo snap switch --channel=candidate postman
+sudo snap refresh postman
+```
+
+### References
+
+**How to Install Postman on Ubuntu 18.04**\
+From <[https://linuxize.com/post/how-to-install-postman-on-ubuntu-18-04/](https://linuxize.com/post/how-to-install-postman-on-ubuntu-18-04/)>
+
+**Stuck in an Installation loop on Ubuntu 18.04**\
+From <[https://community.getpostman.com/t/stuck-in-an-installation-loop-on-ubuntu-18-04/4832](https://community.getpostman.com/t/stuck-in-an-installation-loop-on-ubuntu-18-04/4832)>
+
+```Shell
+clear
+```
+
 ## # Install SourceGear DiffMerge
 
 ### # Download updated version of SourceGear DiffMerge
