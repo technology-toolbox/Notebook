@@ -1122,6 +1122,12 @@ ruby --version
 sudo gem install bundler
 ```
 
+### # Install Hugo
+
+```Shell
+sudo snap install hugo --channel=extended
+```
+
 ### References
 
 **Build tools**\
@@ -1132,6 +1138,9 @@ From <[https://linuxize.com/post/how-to-install-ruby-on-ubuntu-18-04/](https://l
 
 **Bundler**\
 From <[https://bundler.io/](https://bundler.io/)>
+
+**Install Hugo**\
+From <[https://gohugo.io/getting-started/installing](https://gohugo.io/getting-started/installing)>
 
 ```Shell
 clear
