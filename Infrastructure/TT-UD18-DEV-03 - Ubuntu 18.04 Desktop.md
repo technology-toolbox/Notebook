@@ -596,6 +596,42 @@ sudo apt --fix-broken install
 **How to Install GitKraken**\
 From <[https://support.gitkraken.com/how-to-install/](https://support.gitkraken.com/how-to-install/)>
 
+```Shell
+clear
+```
+
+## # Install LTS version of Node.js
+
+### # Add Node.js PPA
+
+```Shell
+sudo apt-get install curl
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+```
+
+### # Add Node.js PPA
+
+```Shell
+sudo apt-get install nodejs
+```
+
+```Shell
+clear
+```
+
+### # Verify Node.js and NPM versions
+
+```Shell
+node -v
+
+npm -v
+```
+
+### Reference
+
+**How to Install Latest Node.js and NPM on Ubuntu with PPA**\
+From <[https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/](https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/)>
+
 ## Install Visual Studio Code
 
 ```Shell
@@ -689,6 +725,63 @@ sudo apt-get install wireshark
 > **Note**
 >
 > When prompted whether to allow non-superusers to capture packets, select **Yes**.
+
+```Shell
+clear
+```
+
+## # Install Jekyll
+
+### # Install Ruby using APT
+
+#### # Update package index
+
+```Shell
+sudo apt-get update
+```
+
+#### # Install build tools
+
+```Shell
+sudo apt -y install make build-essential
+```
+
+#### # Install Ruby
+
+```Shell
+sudo apt-get install ruby-full
+```
+
+```Shell
+clear
+```
+
+#### # Verify Ruby version
+
+```Shell
+ruby --version
+```
+
+### # Install Jekyll
+
+```Shell
+sudo gem install jekyll
+```
+
+```Shell
+clear
+```
+
+### # Install Bundler
+
+```Shell
+sudo gem install bundler
+```
+
+### References
+
+**How To Install Jekyll on Ubuntu 18.04 / Debian 10 Linux**\
+From <[https://computingforgeeks.com/how-to-install-jekyll-on-ubuntu-18-04/](https://computingforgeeks.com/how-to-install-jekyll-on-ubuntu-18-04/)>
 
 ```Shell
 clear
@@ -1196,7 +1289,7 @@ clear
 
 ## # Install Java
 
-### # Install OpenJDK 10
+### # Install OpenJDK 11
 
 ```Shell
 sudo apt-get update
@@ -1207,10 +1300,37 @@ clear
 sudo apt-get install default-jdk
 ```
 
+#### Issue - Jackcess Encrypt unit tests fail with OpenJDK 11
+
+**How to resolve java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException in Java 9**\
+From <[https://stackoverflow.com/questions/43574426/how-to-resolve-java-lang-noclassdeffounderror-javax-xml-bind-jaxbexception-in-j](https://stackoverflow.com/questions/43574426/how-to-resolve-java-lang-noclassdeffounderror-javax-xml-bind-jaxbexception-in-j)>
+
+#### Resolution - Use OpenJDK 8 instead
+
 ### Reference
 
 **How to install Java on Ubuntu 18.04**\
 From <[https://linuxize.com/post/install-java-on-ubuntu-18-04/](https://linuxize.com/post/install-java-on-ubuntu-18-04/)>
+
+```Shell
+clear
+```
+
+### # Install OpenJDK 8
+
+```Shell
+sudo apt-get update
+```
+
+```Shell
+clear
+sudo apt-get install openjdk-8-jdk
+```
+
+### Reference
+
+**Installing Specific Versions of OpenJDK**\
+From <[https://www.digitalocean.com/community/tutorials/how-to-install-java-with-apt-on-ubuntu-18-04](https://www.digitalocean.com/community/tutorials/how-to-install-java-with-apt-on-ubuntu-18-04)>
 
 ```Shell
 clear

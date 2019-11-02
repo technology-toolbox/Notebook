@@ -597,6 +597,42 @@ From <[https://support.gitkraken.com/how-to-install/](https://support.gitkraken.
 clear
 ```
 
+## # Install LTS version of Node.js
+
+### # Add Node.js PPA
+
+```Shell
+sudo apt-get install curl
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+```
+
+### # Add Node.js PPA
+
+```Shell
+sudo apt-get install nodejs
+```
+
+```Shell
+clear
+```
+
+### # Verify Node.js and NPM versions
+
+```Shell
+node -v
+
+npm -v
+```
+
+### Reference
+
+**How to Install Latest Node.js and NPM on Ubuntu with PPA**\
+From <[https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/](https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/)>
+
+```Shell
+clear
+```
+
 ## # Install Visual Studio Code
 
 ```Shell
@@ -1049,6 +1085,53 @@ clear
 ```Shell
 sudo snap install go --classic
 ```
+
+```Shell
+clear
+```
+
+## # Install dependencies for building Bootstrap
+
+### # Install Ruby using APT
+
+#### # Update package index
+
+```Shell
+sudo apt-get update
+```
+
+#### # Install Ruby
+
+```Shell
+sudo apt-get install ruby-full
+```
+
+```Shell
+clear
+```
+
+#### # Verify Ruby version
+
+```Shell
+ruby --version
+```
+
+### # Install Ruby dependency for building Bootstrap
+
+```Shell
+sudo gem install bundler
+```
+
+### References
+
+**Build tools**\
+From <[https://getbootstrap.com/docs/4.3/getting-started/build-tools/](https://getbootstrap.com/docs/4.3/getting-started/build-tools/)>
+
+**How To Install Ruby on Ubuntu 18.04**\
+From <[https://linuxize.com/post/how-to-install-ruby-on-ubuntu-18-04/](https://linuxize.com/post/how-to-install-ruby-on-ubuntu-18-04/)>
+
+**Bundler**\
+From <[https://bundler.io/](https://bundler.io/)>
 
 ```Shell
 clear
