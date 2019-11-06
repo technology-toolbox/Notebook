@@ -367,11 +367,32 @@ $groupName = "All Developers"
 cls
 ```
 
-### # Install and configure SQL Server 2017
+## # Install Web Server (IIS) role
 
-#### # Prepare server for SQL Server installation
+```PowerShell
+Enable-WindowsOptionalFeature `
+    -Online `
+    -All `
+    -FeatureName IIS-ManagementConsole, `
+        IIS-ASPNET45, `
+        IIS-DefaultDocument, `
+        IIS-DirectoryBrowsing, `
+        IIS-HttpErrors, `
+        IIS-StaticContent, `
+        IIS-HttpLogging, `
+        IIS-HttpCompressionStatic, `
+        IIS-RequestFiltering
+```
 
-##### # Add setup account to local Administrators group
+```PowerShell
+cls
+```
+
+## # Install and configure SQL Server 2017
+
+### # Prepare server for SQL Server installation
+
+#### # Add setup account to local Administrators group
 
 ```PowerShell
 $domain = "EXTRANET"
@@ -385,7 +406,7 @@ $username = "setup-sql"
 >
 > Sign out and then sign in using the setup account for SQL Server.
 
-##### # Create folder for TempDB data files
+#### # Create folder for TempDB data files
 
 ```PowerShell
 New-Item `
@@ -393,7 +414,7 @@ New-Item `
     -ItemType Directory
 ```
 
-#### # Install SQL Server 2017
+### # Install SQL Server 2017
 
 ```PowerShell
 $imagePath = ("\\EXT-FS01\Products\Microsoft\SQL Server 2017" `
@@ -434,7 +455,7 @@ On the **Database Engine Configuration** step:
 cls
 ```
 
-#### # Install SQL Server Management Studio
+### # Install SQL Server Management Studio
 
 ```PowerShell
 & "\\EXT-FS01\Products\Microsoft\SQL Server Management Studio\18.3.1\SSMS-Setup-ENU.exe"
@@ -448,7 +469,7 @@ cls
 cls
 ```
 
-#### # Configure firewall rules for SQL Server
+### # Configure firewall rules for SQL Server
 
 ```PowerShell
 New-NetFirewallRule `
@@ -461,7 +482,7 @@ New-NetFirewallRule `
     -Action Allow
 ```
 
-#### # Configure permissions on \\Windows\\System32\\LogFiles\\Sum files
+### # Configure permissions on \\Windows\\System32\\LogFiles\\Sum files
 
 ```PowerShell
 icacls C:\Windows\System32\LogFiles\Sum\Api.chk `
@@ -478,13 +499,13 @@ icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb `
 cls
 ```
 
-#### # Install cumulative update for SQL Server
+### # Install cumulative update for SQL Server
 
 ```PowerShell
 & "\\EXT-FS01\Products\Microsoft\SQL Server 2017\Patches\CU17\SQLServer2017-KB4515579-x64.exe"
 ```
 
-#### Configure settings for SQL Server Agent job history log
+### Configure settings for SQL Server Agent job history log
 
 ##### Reference
 
@@ -495,7 +516,7 @@ From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql
 
 **SQL Server Management Studio**
 
-##### -- Do not limit size of SQL Server Agent job history log
+#### -- Do not limit size of SQL Server Agent job history log
 
 ```SQL
 USE [msdb]
@@ -507,9 +528,9 @@ GO
 
 ---
 
-#### Configure SQL Server maintenance
+### Configure SQL Server maintenance
 
-##### Reference
+#### Reference
 
 **SQL Server Backup, Integrity Check, and Index and Statistics Maintenance**\
 From <[https://ola.hallengren.com/](https://ola.hallengren.com/)>
@@ -522,7 +543,7 @@ From <[https://ola.hallengren.com/](https://ola.hallengren.com/)>
 cls
 ```
 
-##### # Download SQL Server maintenance solution files
+#### # Download SQL Server maintenance solution files
 
 ```PowerShell
 New-Item -ItemType Directory -Path C:\NotBackedUp\GitHub
@@ -541,7 +562,7 @@ Pop-Location
 
 **SQL Server Management Studio**
 
-##### -- Create SqlMaintenance database
+#### -- Create SqlMaintenance database
 
 ```SQL
 CREATE DATABASE SqlMaintenance
@@ -550,11 +571,11 @@ GO
 
 ---
 
-##### Create maintenance table, stored procedures, and jobs
+#### Create maintenance table, stored procedures, and jobs
 
 Execute script in SQL Server Management Studio: **MaintenanceSolution.sql**
 
-##### Configure schedules for SqlMaintenance jobs
+#### Configure schedules for SqlMaintenance jobs
 
 Execute script in SQL Server Management Studio: **JobSchedules.sql**
 
@@ -1008,6 +1029,16 @@ npm install --global --no-optional yo gulp-cli generator-webapp
 
 **Web app generator**\
 From <[https://www.npmjs.com/package/generator-webapp](https://www.npmjs.com/package/generator-webapp)>
+
+## Configure development environment for Technology Toolbox website
+
+### Import database export from production
+
+### Create IIS website - www-local.technologytoolbox.com
+
+### Create IIS virtual directory - www-local.technologytoolbox.com/blog
+
+### Create name resolution for www-local.technologytoolbox.com
 
 ## Baseline virtual machine
 
