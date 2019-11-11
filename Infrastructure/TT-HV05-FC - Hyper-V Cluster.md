@@ -296,6 +296,29 @@ Get-ClusterGroup -Cluster TT-HV05-FC |
 cls
 ```
 
+## # Stop VMs in desired order
+
+```PowerShell
+Import-Csv 'C:\NotBackedUp\Temp\Cluster VMs.csv' |
+    sort @{ e = {$_.StartupOrder -as [int]} } -Descending |
+    where { $_.StartupOrder -ne 0 } |
+    foreach {
+        $vm = Get-SCVirtualMachine -Name $_.Name
+
+        If ($vm.VirtualMachineState -eq 'Running')
+        {
+            Write-Verbose "Stopping VM ($($vm.Name))..."
+
+            Stop-SCVirtualMachine $vm |
+                select Name, MostRecentTask, MostRecentTaskUIState
+        }
+    }
+```
+
+```PowerShell
+cls
+```
+
 ## # Start VMs in desired order
 
 ```PowerShell
