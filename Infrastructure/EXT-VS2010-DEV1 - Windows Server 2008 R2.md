@@ -358,6 +358,10 @@ From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html]
 >
 > GitHub Desktop requires .NET Framework 4.5 to be installed (and will automatically install it, if necessary).
 
+## Install MbUnit test runner
+
+[https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/mb-unit/MbUnit-2.4.2.355-Setup.exe](https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/mb-unit/MbUnit-2.4.2.355-Setup.exe)
+
 ## Install Windows Management Framework 5.1
 
 **Windows Management Framework 5.1**\
