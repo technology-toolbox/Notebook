@@ -358,6 +358,22 @@ From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html]
 >
 > GitHub Desktop requires .NET Framework 4.5 to be installed (and will automatically install it, if necessary).
 
+```PowerShell
+cls
+```
+
+### # Install MbUnit test runner for .NET 4
+
+```PowerShell
+$setupPath = "\\EXT-FS01\Products\Gallio\GallioBundle-3.4.14.0-Setup-x64.msi"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
 ## Install Windows Management Framework 5.1
 
 **Windows Management Framework 5.1**\
