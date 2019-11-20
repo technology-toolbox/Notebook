@@ -34,10 +34,14 @@ $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR7'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2010-DEV1'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2012-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2013-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2015-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV1'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV2'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV3'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05A'; })
 ```
 
@@ -352,10 +356,14 @@ $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR7'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2010-DEV1'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2012-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2013-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2015-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV1'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV2'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV3'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05A'; })
 ```
 
