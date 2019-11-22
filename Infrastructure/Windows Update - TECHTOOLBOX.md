@@ -97,7 +97,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 $scriptBlock = [ScriptBlock]::Create($script)
 
 Get-Content "\\TT-FS01\Users$\jjameson-admin\My Documents\Computer List for Windows Update.txt" |
-    Where-Object { $_ -notin @('BANSHEE', 'FOOBAR18') } |
+    Where-Object { $_ -notin @('BANSHEE') } |
     ForEach-Object {
         $computer = $_
 
