@@ -1,7 +1,7 @@
-﻿# TT-DPM03 (FAIL!) - Windows Server 2019
+﻿# TT-DPM04 (FAIL) - Windows Server 2019
 
 Saturday, November 23, 2019
-8:09 AM
+11:57 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -30,12 +30,37 @@ New-ADGroup `
     -Path $orgUnit
 ```
 
-### # Add setup account and DPM administrators to domain group
+### # Add setup account to DPM administrators domain group
 
 ```PowerShell
 Add-ADGroupMember -Identity $dpmAdminsGroup -Members setup-systemcenter
+```
 
-Add-ADGroupMember -Identity $dpmAdminsGroup -Members jjameson-fabric
+```PowerShell
+cls
+```
+
+### # Create service account for DPM SQL Server instance
+
+```PowerShell
+$displayName = "Service account for SQL Server instance on TT-DPM04"
+$defaultUserName = "s-sql-dpm04"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
 ```
 
 ---
@@ -52,7 +77,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05C"
-$vmName = "TT-DPM03"
+$vmName = "TT-DPM04"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -87,7 +112,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows Server 2019** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-DPM03**.
+  - In the **Computer name** box, type **TT-DPM04**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
@@ -129,7 +154,7 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "TT-DPM03"
+$vmName = "TT-DPM04"
 
 $targetPath = ("OU=System Center Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
@@ -201,7 +226,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05C"
-$vmName = "TT-DPM03"
+$vmName = "TT-DPM04"
 $vmPath = "E:\NotBackedUp\VMs\$vmName"
 ```
 
@@ -351,10 +376,6 @@ $domainGroup = "DPM Admins"
     "WinNT://$domain/$domainGroup,group")
 ```
 
-```PowerShell
-cls
-```
-
 ### # Install and configure SQL Server 2017
 
 #### # Prepare server for SQL Server installation
@@ -399,8 +420,13 @@ On the **Feature Selection** step, select the following checkbox:
 
 On the **Server Configuration** step:
 
-- For the **SQL Server Agent** service, change the **Startup Type** to **Automatic**.
-- For the **SQL Server Browser** service, leave the **Startup Type** as **Disabled**.
+- For the **SQL Server Agent** service:
+  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-dpm04**.
+  - Change the **Startup Type** to **Automatic**.
+- For the **SQL Server Database Engine **service:
+  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-dpm04**.
+  - Ensure the **Startup Type** is set to **Automatic**.
+- For the **SQL Server Browser** service, ensure the **Startup Type** is set to **Disabled**.
 
 On the **Database Engine Configuration** step:
 
@@ -430,21 +456,19 @@ cls
 & "\\TT-FS01\Products\Microsoft\SQL Server 2017\SQLServerReportingServices.exe"
 ```
 
-> **Note**
->
-> When prompted for which edition of Reporting Services to install, select **Developer Edition**. The Express Edition cannot use a database server running SQL Server 2017 Standard Edition.
-
 > **Important**
+>
+> When prompted for which edition of Reporting Services to install, enter a product key for SQL Server Standard Edition. The Express Edition cannot use a database server running SQL Server 2017 Standard Edition.
 >
 > Wait for the installation to complete and restart the computer.
 
 ##### Configure SQL Server Reporting Services
 
 1. Start **Report Server Configuration Manager**. If prompted by User Account Control to allow the program to make changes to the computer, click **Yes**.
-2. In the **Report Server Configuration Connection** dialog box, ensure the name of the server and SQL Server instance are both correct, and then click **Connect**.
+2. In the **Report Server Configuration Connection** window, ensure the name of the server and SQL Server instance are both correct, and then click **Connect**.
 3. In the **Report Server Status** pane, click **Start** if the server is not already started.
 4. In the navigation pane, click **Service Account**.
-5. In the **Service Account** pane, ensure **Use built-in account** is selected and the account is set to **Virtual Service Account**.
+5. In the **Service Account** pane, ensure **Use built-in account** is selected, select **Network Service** from the dropdown list, and click **Apply**.
 6. In the navigation pane, click **Web Service URL**.
 7. In the **Web Service URL **pane:
    1. Confirm the following warning message appears:
@@ -464,7 +488,7 @@ cls
     2. Click **Apply**.
 13. In the navigation pane, click **E-mail Settings**.
 14. In the **E-mail Settings**:
-    1. In the **Sender Address** box, type **svc-backup@technologytoolbox.com**.
+    1. In the **Sender Address** box, type **s-backup@technologytoolbox.com**.
     2. In the **SMTP Server** box, type **smtp.technologytoolbox.com**.
     3. Click **Apply**.
 15. In the navigation pane, click **Encryption Keys**.
@@ -533,7 +557,7 @@ New-NetFirewallRule `
     -Action Allow
 ```
 
-#### # Configure permissions on \\Windows\\System32\\LogFiles\\Sum files
+#### # TODO: Configure permissions on \\Windows\\System32\\LogFiles\\Sum files
 
 ```PowerShell
 icacls C:\Windows\System32\LogFiles\Sum\Api.chk `
@@ -667,14 +691,100 @@ cls
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/BC4048F9237335F0D9A774B0668B174B39956EB6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A5/2FA6266FB43DBC78CB84F4BA238CFA3391815CA5.png)
+In the **Instance of SQL Server** box, type **TT-DPM04** and click **Check and Install**.
 
-In the **Instance of SQL Server** box, type **TT-DPM03** and click **Check and Install**.
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E8/0A074769F504C6B37DD2428F15EA9C75F90B50E8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E0/2CB20F69F356E54B5411BCD73AB2C56C379C47E0.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/47/CB963B0DC907A4C5939EBE689CB76A516C0EC347.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/13ACC5C9368A991E474309193F657F068A50315F.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/A1/8E6238FE66BE0033A48133D66536596F7E7DA2A1.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BF/0B7E6C5E4006291D497ACF4E68C53C0FD4D242BF.png)
+Wait for the DPM prerequisites to be installed and then restart the server.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/87/4582A00A480B01C70C3B7284DAE28CC6DB7FAF87.png)
+```PowerShell
+Restart-Computer
+```
+
+#### Login as TECHTOOLBOX\\setup-systemcenter
+
+#### # Restart DPM setup
+
+```PowerShell
+& "C:\NotBackedUp\Temp\System Center 2019 Data Protection Manager\setup.exe"
+```
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/E0/425DE962318315F055035081F946D87BE67C09E0.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/42D95212B3D0E18439BA413D21265C250A26DCB9.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/D2/32C0FC74CDB24FB848267B56004DD52C2A9E5AD2.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/563529A99B000095C6131878345CF54B9DB39F7D.png)
+
+In the **Instance of SQL Server** box, type **TT-DPM04** and click **Check and Install**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/79/58181F4C37EE1D7322B3D5237C620FFA5C362C79.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/15/1A69776F26BB9A89B6B66CD58AC0D2E37A1F9C15.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/68DA6BF8D3CD74E98789147BC044694821FA9EAF.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/11/9A84D192257012A3A90E52FCD6DEC70E91349811.png)
+
+Click **Use Microsoft Update when I check for updates (recommended)** and then click **Next**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/1D/6CB5019A8EAC748C88D36EAB10FB7FFBB238691D.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/53/DC803ADD6AC295E6238BD5B8D75ED84048B5B453.png)
+
+---
+
+**C:\\Program Files\\Microsoft System Center\\DPM\\DPMLogs\\DpmSetup.log**
+
+```Console
+...
+MSI (s) (48:24) [14:03:43:444]: Note: 1: 1707
+MSI (s) (48:24) [14:03:43:444]: Product: Microsoft System Center  Data Protection Manager -- Installation completed successfully.
+
+MSI (s) (48:24) [14:03:43:444]: Windows Installer installed the product. Product Name: Microsoft System Center  Data Protection Manager. Product Version: 10.19.58.0. Product Language: 1033. Manufacturer: Microsoft Corporation. Installation success or error status: 0.
+
+MSI (s) (48:24) [14:03:43:491]: Closing MSIHANDLE (1) of type 790542 for thread 4644
+MSI (s) (48:24) [14:03:43:741]: Deferring clean up of packages/files, if any exist
+MSI (s) (48:24) [14:03:43:741]: MainEngineThread is returning 0
+MSI (s) (48:28) [14:03:43:741]: RESTART MANAGER: Session closed.
+MSI (s) (48:28) [14:03:43:741]: No System Restore sequence number for this installation.
+=== Logging stopped: 11/23/2019  14:03:43 ===
+MSI (s) (48:28) [14:03:43:756]: User policy value 'DisableRollback' is 0
+MSI (s) (48:28) [14:03:43:756]: Machine policy value 'DisableRollback' is 0
+MSI (s) (48:28) [14:03:43:756]: Incrementing counter to disable shutdown. Counter after increment: 0
+MSI (s) (48:28) [14:03:43:756]: Note: 1: 1402 2: HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Installer\Rollback\Scripts 3: 2
+MSI (s) (48:28) [14:03:43:756]: Note: 1: 2265 2:  3: -2147287035
+MSI (s) (48:28) [14:03:43:756]: Note: 1: 1402 2: HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Installer\Rollback\Scripts 3: 2
+MSI (s) (48:28) [14:03:43:756]: Decrementing counter to disable shutdown. If counter >= 0, shutdown will be denied.  Counter after decrement: -1
+MSI (s) (48:28) [14:03:43:756]: Destroying RemoteAPI object.
+MSI (s) (48:B8) [14:03:43:756]: Custom Action Manager thread ending.
+MSI (c) (A8:6C) [14:03:43:772]: Decrementing counter to disable shutdown. If counter >= 0, shutdown will be denied.  Counter after decrement: -1
+MSI (c) (A8:6C) [14:03:43:772]: MainEngineThread is returning 0
+=== Verbose logging stopped: 11/23/2019  14:03:43 ===
+
+[11/23/2019 2:03:43 PM] Information : MsiInstallProduct returned 0.
+[11/23/2019 2:03:43 PM] Information : End install.
+[11/23/2019 2:03:43 PM] Information : **************************************************************************************
+[11/23/2019 2:03:43 PM] Information : **************************************************************************************
+[11/23/2019 2:03:43 PM] Information : Start configuration.
+[11/23/2019 2:03:43 PM] Information : Starting Service:MSSQLSERVER on machine:TT-DPM04 flag restart:False
+[11/23/2019 2:03:43 PM] Information : Starting Service:SQLSERVERAGENT on machine:TT-DPM04 flag restart:False
+[11/23/2019 2:04:43 PM] *** Error : CurrentDomain_UnhandledException
+[11/23/2019 2:05:23 PM] * Exception : Invoking Watson with Exception:  => System.ComponentModel.Win32Exception (0x80004005): Unable to Configure the service: MSDPM
+   at Microsoft.Internal.EnterpriseStorage.Dls.Utils.Win32ServiceHelper.SetFailureActions(String serviceName, SERVICE_FAILURE_ACTIONS& sfa)
+   at Microsoft.Internal.EnterpriseStorage.Dls.Setup.Wizard.Configurator.ConfigureServices(String instanceName)
+   at Microsoft.Internal.EnterpriseStorage.Dls.Setup.Wizard.BackEnd.Configure(Boolean existingDB, Boolean upgrading, String databaseLocation, String sqlServerMachineName, String sqlInstanceName, String reportingMachineName, String reportingInstanceName, Boolean oemSetup)
+   at Microsoft.Internal.EnterpriseStorage.Dls.Setup.Wizard.DpmInstaller.Configure()
+   at Microsoft.Internal.EnterpriseStorage.Dls.Setup.Wizard.ProgressPage.InstallerThreadEntry()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+   at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+   at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.ThreadHelper.ThreadStart()
+```
+
+---
