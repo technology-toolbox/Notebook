@@ -1028,6 +1028,78 @@ WITH
 
 ---
 
+## Upgrade to Data Protection Manager 2019
+
+```PowerShell
+cls
+```
+
+### # Remove DPM 2016 agent
+
+```PowerShell
+msiexec /x `{14DD5B44-17CE-4E89-8BEB-2E6536B81B35`}
+```
+
+> **Important**
+>
+> Restart the computer to complete the removal of the DPM agent.
+
+```PowerShell
+Restart-Computer
+```
+
+### # Install DPM 2019 agent
+
+```PowerShell
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
+    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
+
+$installerArguments = "TT-DPM05.corp.technologytoolbox.com"
+
+Start-Process `
+    -FilePath $installerPath `
+    -ArgumentList "$installerArguments" `
+    -Wait
+```
+
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
+
+- Exception for DPMRA.exe in all profiles
+- Exception for Windows Management Instrumentation service
+- Exception for RemoteAdmin service
+- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
+
+#### Reference
+
+**Installing Protection Agents Manually**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
+
+---
+
+**TT-ADMIN02 - DPM Management Shell**
+
+```PowerShell
+cls
+```
+
+### # Attach DPM agent
+
+```PowerShell
+$productionServer = 'TT-SQL03'
+
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName TT-DPM05 `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
+```
+
+---
+
+### Add virtual machine to DPM protection group
+
 **TODO:**
 
 ---
