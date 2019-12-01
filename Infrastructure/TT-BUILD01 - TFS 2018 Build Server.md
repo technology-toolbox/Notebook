@@ -838,6 +838,36 @@ At line:1 char:1
 >
 > The error is due to the small Recovery Partition created after the primary partition on the disk. Use **Computer Management** to delete the partition and then repeat the commands.
 
+## Upgrade to Operations Manager 2019
+
+```PowerShell
+cls
+```
+
+### # Remove SCOM 2016 agent
+
+```PowerShell
+msiexec /x `{742D699D-56EB-49CC-A04A-317DE01F31CD`}
+```
+
+```PowerShell
+cls
+```
+
+### # Install SCOM agent
+
+```PowerShell
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2019\SCOM\agent\AMD64" `
+    + "\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01C `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+### Approve manual agent install in Operations Manager
+
 **TODO:**
 
 ---

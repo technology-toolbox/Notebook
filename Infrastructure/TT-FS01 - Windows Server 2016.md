@@ -1009,3 +1009,33 @@ $productionServer = 'TT-FS01'
 ---
 
 ### Add virtual machine to domain controllers protection group in DPM
+
+## Upgrade to Operations Manager 2019
+
+```PowerShell
+cls
+```
+
+### # Remove SCOM 2016 agent
+
+```PowerShell
+msiexec /x `{742D699D-56EB-49CC-A04A-317DE01F31CD`}
+```
+
+```PowerShell
+cls
+```
+
+### # Install SCOM agent
+
+```PowerShell
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2019\SCOM\agent\AMD64" `
+    + "\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01C `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+### Approve manual agent install in Operations Manager

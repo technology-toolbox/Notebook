@@ -7519,5 +7519,34 @@ If you have multiple forests and do not move users between forests and domains, 
 
 From <[https://docs.microsoft.com/en-us/azure/active-directory/hybrid/plan-connect-design-concepts](https://docs.microsoft.com/en-us/azure/active-directory/hybrid/plan-connect-design-concepts)>
 
-[https://go.microsoft.com/fwlink/?linkid=862773](https://go.microsoft.com/fwlink/?linkid=862773)\
-smasters@technologytoolbox.com
+[https://go.microsoft.com/fwlink/?linkid=862773](https://go.microsoft.com/fwlink/?linkid=862773)
+
+## Upgrade to Operations Manager 2019
+
+```PowerShell
+cls
+```
+
+### # Remove SCOM 2016 agent
+
+```PowerShell
+msiexec /x `{742D699D-56EB-49CC-A04A-317DE01F31CD`}
+```
+
+```PowerShell
+cls
+```
+
+### # Install SCOM agent
+
+```PowerShell
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2019\SCOM\Agents\AMD64" `
+    + "\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01C `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+### Approve manual agent install in Operations Manager

@@ -1727,6 +1727,29 @@ Disable-ADAccount -Identity setup-systemcenter
 
 ---
 
+```PowerShell
+cls
+```
+
+## # Configure monitoring using System Center Operations Manager
+
+### # Install SCOM agent
+
+```PowerShell
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2019\SCOM\Agents\AMD64" `
+    + "\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01C `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+### Approve manual agent install in Operations Manager
+
+```PowerShell
+cls
+```
 
 ## # Update PowerShell help
 

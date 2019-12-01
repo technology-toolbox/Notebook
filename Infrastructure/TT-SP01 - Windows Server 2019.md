@@ -1827,3 +1827,29 @@ Pop-Location
 
 **Why I prefer PSCONFIGUI.EXE over PSCONFIG.EXE**\
 From <[https://blogs.technet.microsoft.com/stefan_gossner/2015/08/20/why-i-prefer-psconfigui-exe-over-psconfig-exe/](https://blogs.technet.microsoft.com/stefan_gossner/2015/08/20/why-i-prefer-psconfigui-exe-over-psconfig-exe/)>
+
+## Upgrade to Operations Manager 2019
+
+```PowerShell
+cls
+```
+
+### # Remove SCOM 2016 agent
+
+```PowerShell
+msiexec /x `{742D699D-56EB-49CC-A04A-317DE01F31CD`}
+```
+
+### # Install SCOM agent
+
+```PowerShell
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2019\SCOM\agent\AMD64" `
+    + "\MOMAgent.msi"
+
+msiexec.exe /i $msiPath `
+    MANAGEMENT_GROUP=HQ `
+    MANAGEMENT_SERVER_DNS=TT-SCOM01C `
+    ACTIONS_USE_COMPUTER_ACCOUNT=1
+```
+
+### Approve manual agent install in Operations Manager
