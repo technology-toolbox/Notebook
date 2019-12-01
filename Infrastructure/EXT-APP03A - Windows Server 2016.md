@@ -5396,3 +5396,96 @@ cls
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Resume-SPEnterpriseSearchServiceApplication
 ```
+
+```PowerShell
+cls
+```
+
+## # Configure monitoring
+
+### # Create certificate for Operations Manager
+
+#### # Create request for Operations Manager certificate
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+#### # Submit certificate request to the Certification Authority
+
+##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+[Uri] $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+##### # Submit the certificate request to an enterprise CA
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
+**To submit the certificate request to an enterprise CA:**
+
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\$env:USERNAME\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+If ($? -eq $true)
+{
+    Remove-Item $certFile
+}
+```
+
+### # Install SCOM agent
+
+```PowerShell
+$installerPath = "\\EXT-FS01\Products\Microsoft\System Center 2019\SCOM\Agents\AMD64" `
+    + "\MOMAgent.msi"
+
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=TT-SCOM01C.corp.technologytoolbox.com" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
+    -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = "\\EXT-FS01\Products\Microsoft" `
+    + "\System Center 2019\SCOM\SupportTools\AMD64\MOMCertImport.exe"
+
+& $certImportToolPath /SubjectName $hostName
+```
+
+### Approve manual agent install in Operations Manager
