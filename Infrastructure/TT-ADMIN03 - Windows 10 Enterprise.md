@@ -1,7 +1,7 @@
-﻿# TT-ADMIN02 - Windows 10 Enterprise
+﻿# TT-ADMIN03 - Windows 10 Enterprise
 
-Monday, September 9, 2019
-8:22 AM
+Wednesday, December 4, 2019
+9:21 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Monday, September 9, 2019
 
 ---
 
-**FOOBAR22 - Run as local administrator**
+**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05B"
-$vmName = "TT-ADMIN02"
+$vmHost = "TT-HV05C"
+$vmName = "TT-ADMIN03"
 $vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -59,7 +59,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-ADMIN02**.
+  - In the **Computer name** box, type **TT-ADMIN03**.
   - Click **Next**.
 - On the **Applications** step:
   - Select the following applications:
@@ -69,11 +69,11 @@ Start-VM -ComputerName $vmHost -Name $vmName
       - **Chrome (64-bit)**
     - **Microsoft**
       - **Microsoft Report Viewer 2012 (bundle)**
-      - **SQL Server 2017 Management Studio**
+      - **SQL Server Management Studio**
       - **System Center 2012 R2 Configuration Manager Toolkit**
-      - **System Center Data Protection Manager 2016 - Central Console (bundle)**
-      - **System Center Operations Manager 2016 - Operations Console (bundle)**
-      - **System Center Virtual Machine Manager 2016 - Console**
+      - **System Center Data Protection Manager 2019 - Central Console (bundle)**
+      - **System Center Operations Manager 2019 - Operations Console (bundle)**
+      - **System Center Virtual Machine Manager 2019 - Console**
     - **Mozilla**
       - **Firefox (64-bit)**
       - **Thunderbird**
@@ -93,12 +93,11 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR22 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
-
-$vmName = "TT-ADMIN02"
+$vmName = "TT-ADMIN03"
 ```
 
 ### # Move computer to different OU
@@ -113,7 +112,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 ### # Set first boot device to hard drive
 
 ```PowerShell
-$vmHost = "TT-HV05B"
+$vmHost = "TT-HV05C"
 
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
@@ -172,14 +171,6 @@ $adminUser.SetInfo()
 **Managing Local User Accounts with PowerShell**\
 From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershell.aspx](https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershell.aspx)>
 
-### Login as .\\foo
-
-### Configure storage
-
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 60 GB       | 4K                   | OSDisk       |
-
 ```PowerShell
 cls
 ```
@@ -212,11 +203,17 @@ Start-Sleep -Seconds 5
 ping TT-DC10 -f -l 8900
 ```
 
+### Configure storage
+
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | C:           | 60 GB       | 4K                   | OSDisk       |
+
 ```PowerShell
 cls
 ```
 
-## # Enable PowerShell remoting
+### # Enable PowerShell remoting
 
 ```PowerShell
 Enable-PSRemoting -Confirm:$false
@@ -226,11 +223,40 @@ Enable-PSRemoting -Confirm:$false
 >
 > PowerShell remoting must be enabled for remote Windows Update using PoshPAIG ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
 
+### Baseline virtual machine
+
+---
+
+**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+
 ```PowerShell
 cls
 ```
 
-## # Install Remote Server Administration Tools for Windows 10
+#### # Checkpoint VM
+
+```PowerShell
+$vmHost = "TT-HV05C"
+$vmName = "TT-ADMIN03"
+$checkpointName = "Baseline"
+
+Stop-VM -ComputerName $vmHost -Name $vmName
+
+Checkpoint-VM `
+    -ComputerName $vmHost `
+    -Name $vmName `
+    -SnapshotName $checkpointName
+
+Start-VM -ComputerName $vmHost -Name $vmName
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Install Remote Server Administration Tools for Windows 10
 
 ```PowerShell
 Get-WindowsCapability -Name Rsat* -Online | select DisplayName, State
@@ -259,7 +285,7 @@ From <[https://mikefrobbins.com/2018/10/03/use-powershell-to-install-the-remote-
 cls
 ```
 
-## # Turn on Hyper-V Management Tools
+### # Turn on Hyper-V Management Tools
 
 ```PowerShell
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-Tools-All
@@ -282,21 +308,89 @@ At line:1 char:1
 cls
 ```
 
-## # Enable firewall rules for Disk Management
+### # Enable firewall rules for Disk Management
 
 ```PowerShell
 Enable-NetFirewallRule -DisplayGroup "Remote Volume Management"
 ```
 
+### # Deploy Windows Admin Center
+
+#### # Download installation file for Windows Admin Center
+
+```PowerShell
+$installerPath = "$env:USERPROFILE\Downloads\WindowsAdminCenter.msi"
+
+Invoke-WebRequest `
+    -UseBasicParsing `
+    -Uri https://aka.ms/WACDownload `
+    -OutFile $installerPath
+```
+
+#### # Install Windows Admin Center
+
+```PowerShell
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`"" `
+    -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
 ```PowerShell
 cls
 ```
 
-## # Install SharePoint Online Management Shell
+#### # Remove installation file for Windows Admin Center
+
+```PowerShell
+Remove-Item $installerPath
+```
+
+### # Install Azure CLI
+
+#### # Download installation file for Azure CLI
+
+```PowerShell
+$installerPath = "$env:USERPROFILE\Downloads\AzureCLI.msi"
+
+Invoke-WebRequest `
+    -UseBasicParsing `
+    -Uri https://aka.ms/installazurecliwindows `
+    -OutFile $installerPath
+```
+
+#### # Install Azure CLI
+
+```PowerShell
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" /quiet" `
+    -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+#### # Remove installation file for Azure CLI
+
+```PowerShell
+Remove-Item $installerPath
+```
+
+### # Install SharePoint Online Management Shell
 
 ```PowerShell
 $installerPath = "\\TT-FS01\Public\Download\Microsoft\SharePoint\Online" `
-    + "\SharePointOnlineManagementShell_9119-1200_x64_en-us.msi"
+    + "\SharePointOnlineManagementShell_19418-12000_x64_en-us.msi"
 
 Start-Process `
     -FilePath msiexec.exe `
@@ -304,24 +398,20 @@ Start-Process `
     -Wait
 ```
 
+> **Important**
+>
+> Wait for the installation to complete.
+
 ```PowerShell
 cls
 ```
 
-## # Install and configure Git
+### # Install and configure Git
 
-### # Install Git
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
+#### # Install Git
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\Git\Git-2.23.0-64-bit.exe"
+$setupPath = "\\TT-FS01\Products\Git\Git-2.24.0-64-bit.exe"
 
 Start-Process -FilePath $setupPath -Wait
 ```
@@ -340,7 +430,7 @@ exit
 cls
 ```
 
-### # Configure symbolic link (e.g. for bash shell)
+#### # Configure symbolic link (e.g. for bash shell)
 
 ```PowerShell
 Push-Location C:\NotBackedUp\Public\Toolbox\cmder\vendor
@@ -350,7 +440,7 @@ cmd /c mklink /J git-for-windows "C:\Program Files\Git"
 Pop-Location
 ```
 
-### # Configure Git to use SourceGear DiffMerge
+#### # Configure Git to use SourceGear DiffMerge
 
 ```PowerShell
 git config --global diff.tool diffmerge
@@ -358,30 +448,39 @@ git config --global diff.tool diffmerge
 git config --global difftool.diffmerge.cmd  '"C:/NotBackedUp/Public/Toolbox/DiffMerge/x64/sgdm.exe \"$LOCAL\" \"$REMOTE\"'
 ```
 
-#### Reference
+##### Reference
 
 **Git for Windows (MSysGit) or Git Cmd**\
 From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html](https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html)>
-
-## Install GitHub Desktop
 
 ```PowerShell
 cls
 ```
 
-## # Install Visual Studio Code
+### # Install GitHub Desktop
 
 ```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+$setupPath = "\\TT-FS01\Products\GitHub\GitHubDesktopSetup.exe"
+
+Start-Process `
+    -FilePath $setupPath `
+    -ArgumentList $arguments `
+    -Wait
 ```
 
-> **Note**
+> **Important**
 >
-> When prompted, type the password to connect to the file share.
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+### # Install Visual Studio Code
 
 ```PowerShell
 $setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio Code" `
-    + "\VSCodeSetup-x64-1.37.1.exe"
+    + "\VSCodeSetup-x64-1.40.2.exe"
 
 $arguments = "/silent" `
     + " /mergetasks='!runcode,addcontextmenufiles,addcontextmenufolders" `
@@ -402,7 +501,7 @@ Start-Process `
 **Installer doesn't disable launch of VScode even when installing with /mergetasks=!runcode**\
 From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Microsoft/vscode/issues/46350)>
 
-### TODO: Modify Visual Studio Code shortcut to use custom extension and user data locations
+#### TODO: Modify Visual Studio Code shortcut to use custom extension and user data locations
 
 ```Console
 "C:\Program Files\Microsoft VS Code\Code.exe" --extensions-dir "C:\NotBackedUp\vscode-data\extensions" --user-data-dir "C:\NotBackedUp\vscode-data\user-data"
@@ -414,69 +513,34 @@ From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Micr
 >
 > Repeat until there are no updates available for the computer.
 
-## Baseline virtual machine
-
 ---
 
-**FOOBAR22 - Run as administrator**
+**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
 ```
 
-### # Checkpoint VM
+## # Delete VM checkpoint
 
 ```PowerShell
-$vmHost = "TT-HV05B"
-$vmName = "TT-ADMIN02"
+$vmHost = "TT-HV05C"
+$vmName = "TT-ADMIN03"
 $checkpointName = "Baseline"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
 
-Checkpoint-VM `
-    -ComputerName $vmHost `
-    -Name $vmName `
-    -SnapshotName $checkpointName
+Remove-VMSnapshot -ComputerName $vmHost -VMName $vmName -Name $checkpointName
+
+while (Get-VM -ComputerName $vmHost -Name $vmName | Where Status -eq "Merging disks") {
+    Write-Host "." -NoNewline
+    Start-Sleep -Seconds 5
+}
+
+Write-Host
 
 Start-VM -ComputerName $vmHost -Name $vmName
 ```
-
----
-
-```PowerShell
-cls
-```
-
-## # Deploy Windows Admin Center
-
-### # Download installation file for Windows Admin Center
-
-```PowerShell
-$installerPath = "$env:USERPROFILE\Downloads\WindowsAdminCenter.msi"
-
-Invoke-WebRequest `
-    -UseBasicParsing `
-    -Uri https://aka.ms/WACDownload `
-    -OutFile $installerPath
-```
-
-```PowerShell
-cls
-```
-
-### # Install Windows Admin Center
-
-```PowerShell
-Start-Process -FilePath $installerPath -Wait
-```
-
-> **Important**
->
-> Wait for the installation to complete.
-
----
-
-**FOOBAR22 - Run as TECHTOOLBOX\\jjameson-admin**
 
 ```PowerShell
 cls
@@ -487,7 +551,7 @@ cls
 ### # Migrate VM to shared storage
 
 ```PowerShell
-$vmName = "TT-ADMIN02"
+$vmName = "TT-ADMIN03"
 
 $vm = Get-SCVirtualMachine -Name $vmName
 $vmHost = $vm.VMHost
@@ -520,22 +584,20 @@ Start-SCVirtualMachine -VM $vmName
 
 ### Add virtual machine to Hyper-V protection group in DPM
 
-## Delete VM baseline
+## Configure profile
+
+### Configure Start menu
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/43652C4EB2478B2E77C569C7ABE051AC9AD42E91.png)
 
 ```PowerShell
 cls
 ```
 
-## # Install Azure CLI
+### # Configure cmder
 
 ```PowerShell
-Push-Location C:\NotBackedUp\Temp
-
-Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
-
-Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
-
-Pop-Location
+robocopy \\TT-FS01\Public\cmder-config C:\NotBackedUp\Public\Toolbox\cmder /E
 ```
 
 **TODO:**
