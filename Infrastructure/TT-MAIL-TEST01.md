@@ -917,7 +917,26 @@ sudo docker stop mail-test
 #sudo docker rm mail-test --volumes
 
 sudo docker rm mail-test
-sudo docker volume rm mail-test-data
+#sudo docker volume rm mail-test-data
+```
+
+```Shell
+clear
+```
+
+### # Run mail-test container (and configure to always restart)
+
+```Shell
+sudo docker run \
+    --hostname "mail-test.technologytoolbox.com" \
+    --name "mail-test" \
+    --net=host \
+    --volume /etc/localtime:/etc/localtime:ro \
+    --volume mail-test-data:/data \
+    --restart always \
+    analogic/poste.io
+
+sudo docker logs mail-test
 ```
 
 ## Move VM to Production VM network
