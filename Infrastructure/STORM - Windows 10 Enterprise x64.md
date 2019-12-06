@@ -1,4 +1,4 @@
-﻿# STORM - Windows 10 Enterprise x64
+﻿# STORM  (2018-07-02) - Windows 10 Enterprise x64
 
 Monday, July 2, 2018
 11:20 AM
@@ -2008,3 +2008,36 @@ npm install
 ```PowerShell
 gulp serve-dev-debug
 ```
+
+## Disk cleanup
+
+### Before
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/8E3E45F904E1D8E093B0D9D522FCB2CD5220D43F.png)
+
+```PowerShell
+cls
+```
+
+### # Purge node_modules folders
+
+```PowerShell
+Push-Location C:\NotBackedUp
+
+Get-ChildItem -Path "." -Include "node_modules" -Recurse -Directory |
+    Remove-Item -Recurse -Force
+
+Pop-Location
+```
+
+#### References
+
+**Delete all node_modules folders recursively on Windows or Mac**\
+From <[https://winsmarts.com/delete-all-node-modules-folders-recursively-on-windows-edcc9a9c079e](https://winsmarts.com/delete-all-node-modules-folders-recursively-on-windows-edcc9a9c079e)>
+
+**How to Delete ALL node_modules folders on your machine**\
+From <[https://trilon.io/blog/how-to-delete-all-nodemodules-recursively](https://trilon.io/blog/how-to-delete-all-nodemodules-recursively)>
+
+### After
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/32DF55BB503384021D4EA4B61ED2BF1BC99C60BB.png)
