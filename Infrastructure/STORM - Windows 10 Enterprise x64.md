@@ -1,4 +1,4 @@
-﻿# STORM  (2018-07-02) - Windows 10 Enterprise x64
+﻿# STORM - Windows 10 Enterprise x64
 
 Monday, July 2, 2018
 11:20 AM
@@ -20,8 +20,8 @@ Monday, July 2, 2018
   - Select the following applications:
     - **Adobe**
       - **Adobe Reader 8.3.1**
-    - **Chrome**
-      - **Chrome (64-bit)**
+    - **Microsoft**
+      - **SQL Server Management Studio**
     - **Mozilla**
       - **Firefox (64-bit)**
       - **Thunderbird**
@@ -92,8 +92,8 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 ### # Install NVIDIA display driver
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\Drivers\NVIDIA\GT-1030" `
-    + "\416.34-desktop-win10-64bit-international-whql.exe"
+$setupPath = "\\TT-FS01\Products\Drivers\NVIDIA\GTX-1070" `
+    + "\441.41-desktop-win10-64bit-international-whql.exe"
 
 Start-Process -FilePath $setupPath -Wait
 ```
@@ -101,23 +101,6 @@ Start-Process -FilePath $setupPath -Wait
 > **Important**
 >
 > Wait for the installation to complete.
-
-### # Install Intel network drivers
-
-```PowerShell
-$setupPath = "\\TT-FS01\Products\Drivers\Intel\Network\82579LM" `
-    + "\Windows 10\PROWinx64.exe"
-
-Start-Process -FilePath $setupPath -Wait
-```
-
-> **Important**
->
-> Wait for the installation to complete.
-
-```PowerShell
-Restart-Computer
-```
 
 ### # Configure networking
 
@@ -130,7 +113,7 @@ $interfaceAlias = "LAN"
 ```PowerShell
 Get-NetAdapter -Physical | select InterfaceDescription
 
-$interfaceDescription = "Intel(R) 82579LM Gigabit Network Connection"
+$interfaceDescription = "Intel(R) Gigabit CT Desktop Adapter"
 
 Get-NetAdapter -InterfaceDescription $interfaceDescription |
     Rename-NetAdapter -NewName $interfaceAlias
@@ -422,10 +405,79 @@ cls
 Get-Volume -DriveLetter C | Set-Volume -NewFileSystemLabel System
 ```
 
-##### # Create "Gold01" volume (D:)
+```PowerShell
+cls
+```
+
+## # Install software for HP Photosmart 6515
 
 ```PowerShell
-Get-PhysicalDisk |    where { $_.SerialNumber -eq '*********26709R' } |    Get-Disk |    Clear-Disk -RemoveData -Confirm:$false -PassThru |    Initialize-Disk -PartitionStyle GPT -PassThru |    New-Partition -DriveLetter "E" -UseMaximumSize |    Format-Volume `        -FileSystem NTFS `        -NewFileSystemLabel "Gold01" `        -Confirm:$false
+$setupPath = "\\TT-FS01\Products\HP\Photosmart 6515\PS6510_1315-1.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+On the **Software Selections** step:
+
+1. Click **Customize Software Selections**.
+2. Clear the checkboxes for the following items:
+   - **HP Update**
+   - **HP Photosmart 6510 series Product Improvement**
+   - **Bing Bar for HP (includes HP Smart Print)**
+   - **HP Photosmart 6510 series Help**
+   - **HP Photo Creations**
+
+[http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793](http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793)
+
+### Disable background apps
+
+1. Open **Windows Settings**.
+2. In the **Windows Setttings** window, select **Privacy**.
+3. On the **Privacy** page, select **Background apps**.
+4. On the **Background apps** page, disable the following apps from running in the background:
+   - **3D Viewer**
+   - **Calculator**
+   - **Camera**
+   - **Feedback Hub**
+   - **Get Help**
+   - **Maps**
+   - **Microsoft Solitaire Collection**
+   - **Microsoft Store**
+   - **Mobile Plans**
+   - **Movies & TV**
+   - **Office**
+   - **OneNote**
+   - **Paint 3D**
+   - **People**
+   - **Photos**
+   - **Print 3D**
+   - **Snip & Sketch**
+   - **Sticky Notes**
+   - **Tips**
+   - **Voice Recorder**
+   - **Xbox**
+   - **Your Phone**
+
+#### Issue: Photos app consumes high CPU
+
+```PowerShell
+cls
+```
+
+### # Enable firewall rules for Disk Management
+
+```PowerShell
+Enable-NetFirewallRule -DisplayGroup "Remote Volume Management"
+```
+
+### # Select "High performance" power scheme
+
+```PowerShell
+powercfg.exe /L
+
+powercfg.exe /S SCHEME_MIN
+
+powercfg.exe /L
 ```
 
 ```PowerShell
@@ -461,6 +513,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 `
 ```Console
 mkdir C:\NotBackedUp\Public\Symbols
 mkdir C:\NotBackedUp\Temp
+mkdir C:\NotBackedUp\vscode-data
 ```
 
 ---
@@ -516,6 +569,32 @@ Start-Sleep -Seconds 5
 
 ping TT-FS01 -f -l 8900
 ```
+
+### Install Microsoft Office
+
+### Install OneNote 2016
+
+### Install Google Chrome
+
+### # Install Bitwarden
+
+```PowerShell
+net use \\TT-FS01\Products /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Bitwarden\Bitwarden-Installer-1.16.6.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
 
 ```PowerShell
 cls
@@ -613,7 +692,7 @@ cls
 
 ```PowerShell
 Copy-Item `
-    '\\TT-FS01\Users$\jjameson\My Documents\Technology Toolbox LLC\InvoiceTemplate.htm' `
+    'C:\Users\jjameson\OneDrive - Technology Toolbox\InvoiceTemplate.htm' `
     'C:\Users\All Users\Microsoft\Money\17.0\Invoice\usr19.htm'
 ```
 
@@ -687,6 +766,401 @@ robocopy $source $destination /E
 cls
 ```
 
+## # Configure backup
+
+### # Install DPM agent
+
+```PowerShell
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
+    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
+
+$installerArguments = "TT-DPM05.corp.technologytoolbox.com"
+
+Start-Process `
+    -FilePath $installerPath `
+    -ArgumentList "$installerArguments" `
+    -Wait
+```
+
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
+
+- Exception for DPMRA.exe in all profiles
+- Exception for Windows Management Instrumentation service
+- Exception for RemoteAdmin service
+- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
+
+#### Reference
+
+**Installing Protection Agents Manually**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
+
+---
+
+**TT-ADMIN02 - DPM Management Shell**
+
+```PowerShell
+cls
+```
+
+### # Attach DPM agent
+
+```PowerShell
+$productionServer = 'STORM'
+
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName TT-DPM05 `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
+```
+
+---
+
+### Add virtual machine to DPM protection group
+
+```PowerShell
+cls
+```
+
+## # Install Microsoft SQL Server 2017
+
+### # Create folders for Distributed Replay Client
+
+```PowerShell
+mkdir "D:\NotBackedUp\Microsoft SQL Server\DReplayClient\WorkingDir\"
+mkdir "D:\NotBackedUp\Microsoft SQL Server\DReplayClient\ResultDir\"
+```
+
+### # Install SQL Server
+
+```PowerShell
+$imagePath = ("\\TT-FS01\Products\Microsoft\SQL Server 2017" `
+    + "\\en_sql_server_2017_developer_x64_dvd_11296168.iso")
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath \$ImagePath -PassThru |
+    Get-Volume).DriveLetter
+
+& ("$imageDriveLetter" + ":\setup.exe")
+```
+
+On the **Feature Selection** step, click **Select All** and then clear the checkbox for **PolyBase Query Service for External Data **(since this requires the Java Runtime Environment to be installed).
+
+On the **Server Configuration** page:
+
+- For **SQL Server Database Engine**, change the **Startup Type** to **Manual**.
+- For **SQL Server Analysis Services**, change the **Startup Type** to **Manual**.
+- For **SQL Server Integration Services 14.0**, change the **Startup Type** to **Manual**.
+- For **SQL Server Integration Services Scale Out Master 14.0**, change the **Startup Type** to **Manual**.
+- For **SQL Server Integration Services Scale Out Worker 14.0**, change the **Startup Type** to **Manual**.
+
+On the **Database Engine Configuration** page:
+
+- On the **Server Configuration** tab, click **Add Current User**.
+- On the **Data Directories** tab:
+  - Change the **Data root directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\**
+  - Change the **Backup directory** to **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**
+
+On the **Analysis Services Configuration** page:
+
+- On the **Server Configuration** tab, click **Add Current User**.
+- On the **Data Directories** tab:
+  - Change the **Data directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Data.**
+  - Change the **Log file directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Log.**
+  - Change the **Temp directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Temp.**
+  - Change the **Backup directory** to **Z:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Backup**.
+
+On the **Distributed Replay Controller **page, click **Add Current User**.
+
+On the **Distributed Replay Client **page:
+
+- On the **Server Configuration** tab, click **Add Current User**.
+  - Change the **Working Directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\WorkingDir\\.**
+  - Change the **Result Directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\ResultDir\\.**
+
+```PowerShell
+cls
+```
+
+### # Remove installation media
+
+```PowerShell
+Dismount-DiskImage $imagePath
+```
+
+### # Install cumulative update for SQL Server
+
+```PowerShell
+& "\\TT-FS01\Products\Microsoft\SQL Server 2017\Patches\CU17\SQLServer2017-KB4515579-x64.exe"
+```
+
+```PowerShell
+cls
+```
+
+### # Configure settings for SQL Server Agent job history log
+
+#### # Do not limit size of SQL Server Agent job history log
+
+```PowerShell
+$sqlcmd = @"
+EXEC msdb.dbo.sp_set_sqlagent_properties @jobhistory_max_rows=-1,
+    @jobhistory_max_rows_per_job=-1
+```
+
+"@
+
+```PowerShell
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+##### Reference
+
+**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field #017**\
+From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/](https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/)>
+
+```PowerShell
+cls
+```
+
+#### # Configure SQL Server maintenance
+
+##### # Create database for SQL Server maintenance
+
+```PowerShell
+$sqlcmd = "CREATE DATABASE SqlMaintenance"
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+Set-Location C:
+```
+
+##### # Create maintenance table, stored procedures, and jobs
+
+```PowerShell
+$url = "https://raw.githubusercontent.com/technology-toolbox" `
+    + "/sql-server-maintenance-solution/master/MaintenanceSolution.sql"
+
+$tempFileName = [System.IO.Path]::GetTempFileName()
+
+Invoke-WebRequest -Uri $url -OutFile $tempFileName
+
+Invoke-Sqlcmd -InputFile $tempFileName -Verbose -Debug:$false
+
+Set-Location C:
+
+Remove-Item $tempFileName
+```
+
+##### # Configure schedules for SQL Server maintenance jobs
+
+```PowerShell
+$url = "https://raw.githubusercontent.com/technology-toolbox" `
+    + "/sql-server-maintenance-solution/master/JobSchedules.sql"
+
+$tempFileName = [System.IO.Path]::GetTempFileName()
+
+Invoke-WebRequest -Uri $url -OutFile $tempFileName
+
+Invoke-Sqlcmd -InputFile $tempFileName -Verbose -Debug:$false
+
+Set-Location C:
+
+Remove-Item $tempFileName
+```
+
+##### Reference
+
+**SQL Server Backup, Integrity Check, and Index and Statistics Maintenance**\
+From <[https://ola.hallengren.com/](https://ola.hallengren.com/)>
+
+```PowerShell
+cls
+```
+
+## # Install Visual Studio Code
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio Code" `
+    + "\VSCodeSetup-x64-1.40.2.exe"
+
+$arguments = "/silent" `
+    + " /mergetasks='!runcode,addcontextmenufiles,addcontextmenufolders" `
+        + ",addtopath'"
+
+Start-Process `
+    -FilePath $setupPath `
+    -ArgumentList $arguments `
+    -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+### Issue
+
+**Installer doesn't disable launch of VScode even when installing with /mergetasks=!runcode**\
+From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Microsoft/vscode/issues/46350)>
+
+### Modify Visual Studio Code shortcut to use custom extension and user data locations
+
+```Console
+"C:\Program Files\Microsoft VS Code\Code.exe" --extensions-dir "C:\NotBackedUp\vscode-data\extensions" --user-data-dir "C:\NotBackedUp\vscode-data\user-data"
+```
+
+### Install Visual Studio Code extensions
+
+#### Install extension: Azure Resource Manager Tools
+
+#### Install extension: Beautify
+
+#### TODO: Install extension: C/C++
+
+```PowerShell
+ms-vscode.cpptools
+```
+
+#### Install extension: C#
+
+#### Install extension: Debugger for Chrome
+
+#### TODO: Install extension: ES7 React/Redux/GraphQL/React-Native snippets
+
+```Text
+dsznajder.es7-react-js-snippets
+```
+
+#### Install extension: ESLint
+
+#### Install extension: GitLens - Git supercharged
+
+#### Install extension: markdownlint
+
+#### Install extension: PowerShell
+
+#### Install extension: Prettier - Code formatter
+
+#### Install extension: SQL Server (mssql)
+
+#### Install extension: TSLint
+
+#### TODO: Install extension: VBScript
+
+```Text
+darfka.vbscript
+```
+
+#### Install extension: vscode-icons
+
+#### Install extension: XML Tools
+
+---
+
+**Notes**
+
+Potential issue when using both Beautify and Prettier extensions:\
+**Prettier & Beautify**\
+From <[https://css-tricks.com/prettier-beautify/](https://css-tricks.com/prettier-beautify/)>
+
+HTML formatting issue with Prettier:
+
+**Add the missing option to disable crappy Prettier VSCode HTML formatter #636**\
+From <[https://github.com/prettier/prettier-vscode/issues/636](https://github.com/prettier/prettier-vscode/issues/636)>
+
+---
+
+#### Configure Visual Studio Code settings
+
+1. Press **Ctrl+Shift+P**
+2. Select **Preferences: Open Settings (JSON)**
+
+---
+
+**settings.json**
+
+```Console
+{
+    "editor.formatOnSave": true,
+    "editor.renderWhitespace": "boundary",
+    "editor.rulers": [80],
+    "files.trimTrailingWhitespace": true,
+    "git.autofetch": true,
+    "html.format.wrapLineLength": 80,
+    "prettier.disableLanguages": ["html"],
+    "terminal.integrated.shell.windows":
+        "C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "workbench.iconTheme": "vscode-icons"
+}
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Install Visual Studio 2019
+
+### # Launch Visual Studio 2019 setup
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio 2019\Enterprise" `
+    + "\vs_setup.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+Select the following workloads:
+
+- **ASP.NET and web development**
+- **Azure development**
+- **Python development**
+- **Node.js development**
+- **.NET desktop development**
+- **Desktop development with C++**
+- **Universal Windows Platform development**
+- **Data storage and processing**
+- **Data science and analytical applications**
+- **Office/SharePoint development**
+- **.NET Core cross-platform development**
+
+> **Note**
+>
+> When prompted, restart the computer to complete the installation.
+
+### Install .NET Core 2.2 SDK
+
+[https://dotnet.microsoft.com/download/dotnet-core/thank-you/sdk-2.2.207-windows-x64-installer](https://dotnet.microsoft.com/download/dotnet-core/thank-you/sdk-2.2.207-windows-x64-installer)
+
+#### Reference
+
+**Download .NET Core 2.2**\
+From <[https://dotnet.microsoft.com/download/dotnet-core/2.2](https://dotnet.microsoft.com/download/dotnet-core/2.2)>
+
+```PowerShell
+cls
+```
+
 ## # Install and configure Git
 
 ### # Install Git
@@ -700,7 +1174,7 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\Git\Git-2.19.1-64-bit.exe"
+$setupPath = "\\TT-FS01\Products\Git\Git-2.24.0-64-bit.exe"
 
 Start-Process -FilePath $setupPath -Wait
 ```
@@ -770,9 +1244,7 @@ Start-Process -FilePath $setupPath -Wait
 cls
 ```
 
-## # Install Visual Studio 2017
-
-### # Launch Visual Studio 2017 setup
+## # Install GitKraken
 
 ```PowerShell
 net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
@@ -783,246 +1255,14 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio 2017\Enterprise" `
-    + "\vs_setup.exe"
+$setupPath = "\\TT-FS01\Products\Axosoft\GitKrakenSetup-6.3.1.exe"
 
 Start-Process -FilePath $setupPath -Wait
-```
-
-Select the following workloads:
-
-- **.NET desktop development**
-- **Desktop development with C++**
-- **ASP.NET and web development**
-- **Azure development**
-- **Python development**
-- **Node.js development**
-- **Data storage and processing**
-- **Data science and analytical applications**
-- **Office/SharePoint development**
-- **.NET Core cross-platform development**
-
-> **Note**
->
-> When prompted, restart the computer to complete the installation.
-
-```PowerShell
-cls
-```
-
-## # Install Microsoft SQL Server 2017
-
-### # Create folders for Distributed Replay Client
-
-```PowerShell
-mkdir "D:\NotBackedUp\Microsoft SQL Server\DReplayClient\WorkingDir\"
-mkdir "D:\NotBackedUp\Microsoft SQL Server\DReplayClient\ResultDir\"
-```
-
-### # Install SQL Server
-
-```PowerShell
-net use \\TT-FS01\Products /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$sourcePath = "\\TT-FS01\Products\Microsoft\SQL Server 2017"
-$destPath = "C:\NotBackedUp\Temp"
-$isoFilename = "en_sql_server_2017_developer_x64_dvd_11296168.iso"
-
-robocopy $sourcePath $destPath $isoFilename
-
-$imagePath = "$destPath\$isoFilename"
-
-Function Ensure-MountedDiskImage
-{
-    [CmdletBinding()]
-    Param(
-        [Parameter(Position = 1, Mandatory = $true)]
-        [string] $ImagePath)
-
-    $imageDriveLetter = (Get-DiskImage -ImagePath $ImagePath|
-        Get-Volume).DriveLetter
-
-    If ($imageDriveLetter -eq $null)
-    {
-        Write-Verbose "Mounting disk image ($ImagePath)..."
-        $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
-            Get-Volume).DriveLetter
-    }
-
-    return $imageDriveLetter
-}
-
-$imageDriveLetter = Ensure-MountedDiskImage $imagePath
-
-If ((Get-Process -Name "setup" -ErrorAction SilentlyContinue) -eq $null)
-{
-    $setupPath = $imageDriveLetter + ':\setup.exe'
-
-    Write-Verbose "Starting setup..."
-
-    & $setupPath
-
-    Start-Sleep -Seconds 15
-}
-```
-
-On the **Feature Selection** step, click **Select All** and then clear the checkbox for **PolyBase Query Service for External Data **(since this requires the Java Runtime Environment to be installed).
-
-On the **Server Configuration** page:
-
-- For **SQL Server Database Engine**, change the **Startup Type** to **Manual**.
-- For **SQL Server Analysis Services**, change the **Startup Type** to **Manual**.
-- For **SQL Server Integration Services 14.0**, change the **Startup Type** to **Manual**.
-- For **SQL Server Integration Services Scale Out Master 14.0**, change the **Startup Type** to **Manual**.
-- For **SQL Server Integration Services Scale Out Worker 14.0**, change the **Startup Type** to **Manual**.
-
-On the **Database Engine Configuration** page:
-
-- On the **Server Configuration** tab, click **Add Current User**.
-- On the **Data Directories** tab:
-  - Change the **Data root directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\**
-  - Change the **Backup directory** to **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**
-
-On the **Analysis Services Configuration** page:
-
-- On the **Server Configuration** tab, click **Add Current User**.
-- On the **Data Directories** tab:
-  - Change the **Data directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Data.**
-  - Change the **Log file directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Log.**
-  - Change the **Temp directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Temp.**
-  - Change the **Backup directory** to **Z:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Backup**.
-
-On the **Distributed Replay Controller **page, click **Add Current User**.
-
-On the **Distributed Replay Client **page:
-
-- On the **Server Configuration** tab, click **Add Current User**.
-  - Change the **Working Directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\WorkingDir\\.**
-  - Change the **Result Directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\ResultDir\\.**
-
-```PowerShell
-cls
-```
-
-### # Remove installation media
-
-```PowerShell
-Dismount-DiskImage $imagePath
-
-Remove-Item $imagePath -Confirm:$true
-```
-
-```PowerShell
-cls
-```
-
-## # Install Visual Studio Code
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio Code" `
-    + "\VSCodeSetup-x64-1.31.1.exe"
-
-$arguments = "/silent" `
-    + " /mergetasks='!runcode,addcontextmenufiles,addcontextmenufolders" `
-        + ",addtopath'"
-
-Start-Process `
-    -FilePath $setupPath `
-    -ArgumentList $arguments `
-    -Wait
 ```
 
 > **Important**
 >
 > Wait for the installation to complete.
-
-### Issue
-
-**Installer doesn't disable launch of VScode even when installing with /mergetasks=!runcode**\
-From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Microsoft/vscode/issues/46350)>
-
-### Modify Visual Studio Code shortcut to use custom extension and user data locations
-
-```Console
-"C:\Program Files\Microsoft VS Code\Code.exe" --extensions-dir "C:\NotBackedUp\vscode-data\extensions" --user-data-dir "C:\NotBackedUp\vscode-data\user-data"
-```
-
-### Install Visual Studio Code extensions
-
-#### Install extension: Azure Resource Manager Tools
-
-#### Install extension: Beautify
-
-#### Install extension: C#
-
-#### Install extension: Debugger for Chrome
-
-#### Install extension: ESLint
-
-#### Install extension: GitLens - Git supercharged
-
-#### Install extension: markdownlint
-
-#### Install extension: Prettier - Code formatter
-
-#### Install extension: TSLint
-
-#### Install extension: vscode-icons
-
----
-
-**Notes**
-
-Potential issue when using both Beautify and Prettier extensions:\
-**Prettier & Beautify**\
-From <[https://css-tricks.com/prettier-beautify/](https://css-tricks.com/prettier-beautify/)>
-
-HTML formatting issue with Prettier:
-
-**Add the missing option to disable crappy Prettier VSCode HTML formatter #636**\
-From <[https://github.com/prettier/prettier-vscode/issues/636](https://github.com/prettier/prettier-vscode/issues/636)>
-
----
-
-#### Configure Visual Studio Code settings
-
-1. Press **Ctrl+Shift+P**
-2. Select **Preferences: Open Settings (JSON)**
-
----
-
-**settings.json**
-
-```Console
-{
-    "editor.formatOnSave": true,
-    "editor.renderWhitespace": "boundary",
-    "editor.rulers": [80],
-    "files.trimTrailingWhitespace": true,
-    "git.autofetch": true,
-    "html.format.wrapLineLength": 80,
-    "prettier.disableLanguages": ["html"],
-    "terminal.integrated.shell.windows":
-        "C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-    "workbench.iconTheme": "vscode-icons"
-}
-```
-
----
 
 ```PowerShell
 cls
@@ -1033,7 +1273,7 @@ cls
 ### # Install Node.js
 
 ```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+net use \\EXT-FS01\IPC$ /USER:EXTRANET\jjameson-admin
 ```
 
 > **Note**
@@ -1041,7 +1281,7 @@ net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
 > When prompted, type the password to connect to the file share.
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\node.js\node-v10.13.0-x64.msi"
+$setupPath = "\\TT-FS01\Products\node.js\node-v12.13.1-x64.msi"
 
 Start-Process -FilePath $setupPath -Wait
 ```
@@ -1054,41 +1294,7 @@ Start-Process -FilePath $setupPath -Wait
 exit
 ```
 
-### Change NPM file locations to avoid issues with redirected folders
-
-#### Reference
-
-**npm on windows, install with -g flag should go into appdata/local rather than current appdata/roaming?**\
-From <[https://github.com/npm/npm/issues/4564](https://github.com/npm/npm/issues/4564)>
-
-**`npm install -g bower` goes into infinite loop on windows with %appdata% being a UNC path**\
-From <[https://github.com/npm/npm/issues/8814](https://github.com/npm/npm/issues/8814)>
-
-> **Note**
->
-> As illustrated in the following screenshot, the latest version of NPM (3.10.10) successfully installs the latest version of Bower (1.8.0) when %APPDATA% refers to a network location -- so it appears this problem has been fixed.
->
-> ![(screenshot)](https://assets.technologytoolbox.com/screenshots/50/023FB51E49C5E086909FFCCD50D6AB5E5426CF50.png)
->
-> ```Text
-> PS C:\Users\jjameson> $env:APPDATA
-> \\TT-FS01\Users$\jjameson\Application Data
-> PS C:\Users\jjameson> npm install -g bower
-> npm WARN deprecated bower@1.8.0: ..psst! While Bower is maintained, we recommend Yarn and Webpack for *new* front-end projects! Yarn's advantage is security and reliability, and Webpack's is support for both CommonJS and AMD projects. Currently there's no migration path, but please help to create it: https://github.com/bower/bower/issues/2467
-> \\TT-FS01\Users$\jjameson\Application Data\npm\bower -> \\TT-FS01\Users$\jjameson\Application Data\npm\node_modules\bower\bin\bower
-> \\TT-FS01\Users$\jjameson\Application Data\npm
-> `-- bower@1.8.0
-> ```
->
-> However, it still seems like a good idea to install global packages to %LOCALAPPDATA% instead of %APPDATA%:\
-> **npm on windows, install with -g flag should go into appdata/local rather than current appdata/roaming?**\
-> From <[https://github.com/npm/npm/issues/17325](https://github.com/npm/npm/issues/17325)>
-
-```PowerShell
-cls
-```
-
-#### # Configure installed version of npm to avoid issues with redirected folders
+### # Change NPM file locations to avoid issues with redirected folders
 
 ```PowerShell
 notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
@@ -1110,89 +1316,50 @@ cache=${LOCALAPPDATA}\npm-cache
 cls
 ```
 
-### # Change NPM "global" locations to shared location for all users
+## # Install PowerShell modules
+
+### # Install posh-git module (e.g. for Powerline Git prompt customization)
+
+#### # Install NuGet package provider (to bypass prompt when installing posh-git module)
 
 ```PowerShell
-mkdir "$env:ALLUSERSPROFILE\npm-cache"
+Install-PackageProvider NuGet -MinimumVersion '2.8.5.201' -Force
+```
 
-mkdir "$env:ALLUSERSPROFILE\npm\node_modules"
+#### # Trust PSGallery repository (to bypass prompt when installing posh-git module)
 
-npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
+```PowerShell
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+```
 
-npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
+#### # Install posh-git module
 
-Set-ExecutionPolicy RemoteSigned -Scope Process -Force
+```PowerShell
+Install-Module -Name 'posh-git'
+```
 
-C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
-    -Folders "$env:ALLUSERSPROFILE\npm" `
-    -EnvironmentVariableTarget Machine
+### Upgrade Azure PowerShell module
+
+#### Remove AzureRM module
+
+1. Open **Programs and Features**
+2. Uninstall **Microsoft Azure PowerShell - April 2018**
+
+```PowerShell
+cls
+```
+
+#### # Install new Azure PowerShell module
+
+```PowerShell
+Install-Module -Name Az -AllowClobber -Scope AllUsers
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Install global NPM packages
-
-### # Install Angular CLI
-
-```PowerShell
-npm install --global --no-optional @angular/cli@6.2.6
-```
-
-```PowerShell
-cls
-```
-
-### # Install rimraf
-
-```PowerShell
-npm install --global rimraf@2.6.2
-```
-
-## TODO: Configure NPM locations for TECHTOOLBOX\\jjameson account
-
----
-
-**runas /USER:TECHTOOLBOX\\jjameson PowerShell.exe**
-
-```PowerShell
-npm config --global set prefix "$env:ALLUSERSPROFILE\npm"
-
-npm config --global set cache "$env:ALLUSERSPROFILE\npm-cache"
-```
-
----
-
-## Configure Visual Studio 2017 to use newer versions of Node.js and NPM
-
-### Before
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0F/3B5712D6462D49CC17DB1EFE2DDAF657FB52E00F.png)
-
-### After
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/58/51CCEAA9A97B80142D704A7789E6919ADBFF7258.png)
-
-### Reference
-
-**Synchronizing node version with your environment in Visual Studio 2017**\
-From <[https://www.domstamand.com/synchronizing-node-version-with-your-environment-in-visual-studio-2017/](https://www.domstamand.com/synchronizing-node-version-with-your-environment-in-visual-studio-2017/)>
-
-```PowerShell
-cls
-```
-
-## # Configure development environment
-
-### # Configure NuGet global package location
-
-```PowerShell
-[Environment]::SetEnvironmentVariable(
-    "NUGET_PACKAGES",
-    "C:\NotBackedUp\.nuget\packages",
-    "Machine")
-```
+## # Install development tools
 
 ### # Install IIS
 
@@ -1212,6 +1379,286 @@ Enable-WindowsOptionalFeature `
         IIS-WindowsAuthentication
 ```
 
+```PowerShell
+cls
+```
+
+### # Install SharePoint Online Management Shell
+
+```PowerShell
+$installerPath = "\\TT-FS01\Public\Download\Microsoft\SharePoint\Online" `
+    + "\SharePointOnlineManagementShell_19418-12000_x64_en-us.msi"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`"" `
+    -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+### # Install SharePoint PnP cmdlets
+
+```PowerShell
+Install-Module SharePointPnPPowerShellOnline
+```
+
+```PowerShell
+cls
+```
+
+### # Install Chocolatey
+
+```PowerShell
+((New-Object System.Net.WebClient).DownloadString(
+    'https://chocolatey.org/install.ps1')) |
+    Invoke-Expression
+```
+
+> **Important**
+>
+> Restart PowerShell for environment changes to take effect.
+
+```Console
+exit
+```
+
+### Reference
+
+**Installing Chocolatey**\
+From <[https://chocolatey.org/install](https://chocolatey.org/install)>
+
+### # Install HTML Tidy
+
+```PowerShell
+choco install html-tidy
+```
+
+The recent package changes indicate a reboot is necessary.\
+Please reboot at your earliest convenience.
+
+```PowerShell
+Restart-Computer
+```
+
+### # Install Minikube
+
+```PowerShell
+choco install minikube
+```
+
+```PowerShell
+cls
+```
+
+#### # Start Minikube
+
+```PowerShell
+minikube start --vm-driver=hyperv
+```
+
+#### Reference
+
+**Install Minikube**\
+From <[https://kubernetes.io/docs/tasks/tools/install-minikube/](https://kubernetes.io/docs/tasks/tools/install-minikube/)>
+
+```PowerShell
+cls
+```
+
+### # Install FileZilla
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath =
+"\\TT-FS01\Products\FileZilla\FileZilla_3.46.0_win64-setup.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+```PowerShell
+cls
+```
+
+### # Install Postman
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Postman\Postman-win64-7.13.0-Setup.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+```PowerShell
+cls
+```
+
+### # Install Fiddler
+
+```PowerShell
+net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+```
+
+> **Note**
+>
+> When prompted, type the password to connect to the file share.
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Telerik\FiddlerSetup.exe"
+
+$arguments = "/S /D=C:\Program Files\Telerik\Fiddler"
+
+Start-Process `
+    -FilePath $setupPath `
+    -ArgumentList $arguments `
+    -Wait
+```
+
+### Reference
+
+**Default Install Path**\
+[https://www.telerik.com/forums/default-install-path#t8qFEfoMnUWlg50zptFlHQ](https://www.telerik.com/forums/default-install-path#t8qFEfoMnUWlg50zptFlHQ)
+
+```PowerShell
+cls
+```
+
+### # Install Microsoft Message Analyzer
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Microsoft\Message Analyzer 1.4\MessageAnalyzer64.msi"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+"Windows blocked the installation of a digitally unsigned driver..."
+
+**Microsoft Message Anlayzer 1.4 - 'A Digitally Signed Driver Is Required'**From <[https://social.technet.microsoft.com/Forums/windows/en-US/48b4c226-fc3d-4793-b544-3440ed13424a/microsoft-message-anlayzer-14-a-digitally-signed-driver-is-required?forum=messageanalyzer](https://social.technet.microsoft.com/Forums/windows/en-US/48b4c226-fc3d-4793-b544-3440ed13424a/microsoft-message-anlayzer-14-a-digitally-signed-driver-is-required?forum=messageanalyzer)>
+
+```PowerShell
+cls
+```
+
+### # Install Wireshark
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Wireshark\Wireshark-win64-3.0.7.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+### # Install Microsoft Log Parser 2.2
+
+```PowerShell
+$setupPath = "\\TT-FS01\Public\Download\Microsoft\LogParser 2.2\LogParser.msi"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+### # Install Remote Desktop Connection Manager
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Microsoft" `
+    + "\Remote Desktop Connection Manager\rdcman.msi"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+### # Install Microsoft Expression Studio 4
+
+### # Copy installation media from internal file server
+
+```PowerShell
+$isoFile = "en_expression_studio_4_ultimate_x86_dvd_537032.iso"
+
+$source = "\\TT-FS01\Products\Microsoft\Expression Studio"
+
+$destination = "C:\NotBackedUp\Temp"
+
+robocopy $source $destination $isoFile
+```
+
+### Install Expression Studio
+
+Use the "Toolbox" script to install Expression Studio
+
+```PowerShell
+cls
+```
+
+## # Install Paint.NET
+
+```PowerShell
+& "\\TT-FS01\Products\Paint.NET\paint.net.4.2.8.install.zip"
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+## # Configure development environment
+
+### # Configure NuGet global package location
+
+```PowerShell
+[Environment]::SetEnvironmentVariable(
+    "NUGET_PACKAGES",
+    "C:\NotBackedUp\.nuget\packages",
+    "Machine")
+```
+
 ### # Configure symbol path for debugging
 
 ```PowerShell
@@ -1219,7 +1666,10 @@ $symbolPath = "SRV*C:\NotBackedUp\Public\Symbols" `
      + "*\\TT-FS01\Public\Symbols" `
      + "*https://msdl.microsoft.com/download/symbols"
 
-[Environment]::SetEnvironmentVariable("_NT_SYMBOL_PATH", $symbolPath, "Machine")
+[Environment]::SetEnvironmentVariable(
+    "_NT_SYMBOL_PATH",
+    $symbolPath,
+    "Machine")
 ```
 
 ```PowerShell
@@ -1261,201 +1711,15 @@ robocopy $source $destination /E
 cls
 ```
 
-## # Install PowerShell modules
+## # Configure hosts file
 
 ```PowerShell
-Install-PackageProvider NuGet -MinimumVersion '2.8.5.201' -Force
+Set-ExecutionPolicy Bypass -Scope Process -Force
 
-Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-
-Install-Module -Name 'posh-git'
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 10.1.20.99 `
+    -Hostnames EXT-VS2017-DEV2, www-local.technologytoolbox.com
 ```
-
-```PowerShell
-cls
-```
-
-## # Install Chocolatey
-
-```PowerShell
-((New-Object System.Net.WebClient).DownloadString(
-    'https://chocolatey.org/install.ps1')) |
-    Invoke-Expression
-```
-
-> **Important**
->
-> Restart PowerShell for environment changes to take effect.
-
-```Console
-exit
-```
-
-### Reference
-
-**Installing Chocolatey**\
-From <[https://chocolatey.org/install](https://chocolatey.org/install)>
-
-## # Install HTML Tidy
-
-```PowerShell
-choco install html-tidy -y
-```
-
-```PowerShell
-cls
-```
-
-## # Install Postman
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$setupPath = "\\TT-FS01\Products\Postman\Postman-win64-7.7.2-Setup.exe"
-
-Start-Process -FilePath $setupPath -Wait
-```
-
-```PowerShell
-cls
-```
-
-## # Install Fiddler
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$setupPath = "\\TT-FS01\Products\Telerik\FiddlerSetup.exe"
-
-$arguments = "/S /D=C:\Program Files\Telerik\Fiddler"
-
-Start-Process `
-    -FilePath $setupPath `
-    -ArgumentList $arguments `
-    -Wait
-```
-
-### Reference
-
-**Default Install Path**\
-[https://www.telerik.com/forums/default-install-path#t8qFEfoMnUWlg50zptFlHQ](https://www.telerik.com/forums/default-install-path#t8qFEfoMnUWlg50zptFlHQ)
-
-```PowerShell
-cls
-```
-
-## # Install Microsoft Message Analyzer
-
-```PowerShell
-$setupPath = "\\TT-FS01\Products\Microsoft\Message Analyzer 1.4\MessageAnalyzer64.msi"
-
-Start-Process -FilePath $setupPath -Wait
-```
-
-> **Important**
->
-> Wait for the installation to complete.
-
-"Windows blocked the installation of a digitally unsigned driver..."
-
-**Microsoft Message Anlayzer 1.4 - 'A Digitally Signed Driver Is Required'**From <[https://social.technet.microsoft.com/Forums/windows/en-US/48b4c226-fc3d-4793-b544-3440ed13424a/microsoft-message-anlayzer-14-a-digitally-signed-driver-is-required?forum=messageanalyzer](https://social.technet.microsoft.com/Forums/windows/en-US/48b4c226-fc3d-4793-b544-3440ed13424a/microsoft-message-anlayzer-14-a-digitally-signed-driver-is-required?forum=messageanalyzer)>
-
-```PowerShell
-cls
-```
-
-## # Install Wireshark
-
-```PowerShell
-$setupPath = "\\TT-FS01\Products\Wireshark\Wireshark-win64-2.6.4.exe"
-
-Start-Process -FilePath $setupPath -Wait
-```
-
-> **Important**
->
-> Wait for the installation to complete.
-
-```PowerShell
-cls
-```
-
-## # Install Microsoft Log Parser 2.2
-
-```PowerShell
-$setupPath = "\\TT-FS01\Public\Download\Microsoft\LogParser 2.2\LogParser.msi"
-
-Start-Process -FilePath $setupPath -Wait
-```
-
-> **Important**
->
-> Wait for the installation to complete.
-
-```PowerShell
-cls
-```
-
-## # Install Remote Desktop Connection Manager
-
-```PowerShell
-$setupPath = "\\TT-FS01\Products\Microsoft" `
-    + "\Remote Desktop Connection Manager\rdcman.msi"
-
-Start-Process -FilePath $setupPath -Wait
-```
-
-> **Important**
->
-> Wait for the installation to complete.
-
-```PowerShell
-cls
-```
-
-## # Install Microsoft Expression Studio 4
-
-### # Copy installation media from internal file server
-
-```PowerShell
-$isoFile = "en_expression_studio_4_ultimate_x86_dvd_537032.iso"
-
-$source = "\\TT-FS01\Products\Microsoft\Expression Studio"
-
-$destination = "C:\NotBackedUp\Temp"
-
-robocopy $source $destination $isoFile
-```
-
-### Install Expression Studio
-
-Use the "Toolbox" script to install Expression Studio
-
-```PowerShell
-cls
-```
-
-## # Install Paint.NET
-
-```PowerShell
-& "\\TT-FS01\Products\Paint.NET\paint.net.4.1.3.install.zip"
-```
-
-> **Important**
->
-> Wait for the installation to complete.
 
 ```PowerShell
 cls
@@ -1467,92 +1731,49 @@ cls
 Update-Help
 ```
 
-```PowerShell
-cls
-```
+## Install updates using Windows Update
 
-## # Install software for HP Photosmart 6515
+> **Note**
+>
+> Repeat until there are no updates available for the computer.
 
-```PowerShell
-$setupPath = "\\TT-FS01\Products\HP\Photosmart 6515\PS6510_1315-1.exe"
-
-Start-Process -FilePath $setupPath -Wait
-```
-
-On the **Software Selections** step:
-
-1. Click **Customize Software Selections**.
-2. Clear the checkboxes for the following items:
-   - **HP Update**
-   - **HP Photosmart 6510 series Product Improvement**
-   - **Bing Bar for HP (includes HP Smart Print)**
-   - **HP Photosmart 6510 series Help**
-   - **HP Photo Creations**
-
-[http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793](http://support.hp.com/us-en/drivers/selfservice/HP-Photosmart-6510-e-All-in-One-Printer-series---B2/5058334/model/5191793)
+## Disk Cleanup
 
 ```PowerShell
 cls
 ```
 
-## # Install SharePoint Online Management Shell
+### # Delete C:\\Windows\\SoftwareDistribution folder (4.7 GB)
 
 ```PowerShell
-$installerPath = "\\TT-FS01\Public\Download\Microsoft\SharePoint\Online" `
-    + "\SharePointOnlineManagementShell_8316-1200_x64_en-us.msi"
+Stop-Service wuauserv
 
-$arguments = "/i `"$installerPath`""
-
-Start-Process `
-    -FilePath 'msiexec.exe' `
-    -ArgumentList $arguments `
-    -Wait
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Configure name resolution for development environments
+## # Enter a product key and activate Windows
 
 ```PowerShell
-notepad C:\Windows\system32\drivers\etc\hosts
+slmgr /ipk {product key}
 ```
 
----
+**Note:** When notified that the product key was set successfully, click **OK**.
 
-**C:\\Windows\\system32\\drivers\\etc\\hosts**
-
-```Text
-...
-
-# Securitas (Development)
-10.1.20.41	ext-foobar9 client-local-9.securitasinc.com client2-local-9.securitasinc.com cloud-local-9.securitasinc.com cloud2-local-9.securitasinc.com employee-local-9.securitasinc.com media-local-9.securitasinc.com
+```Console
+slmgr /ato
 ```
 
----
+## Configure profile for TECHTOOLBOX\\jjameson
 
-```PowerShell
-cls
-```
+> **Important**
+>
+> Login as TECHTOOLBOX\\jjameson
 
-## # Install NuGet package provider
-
-```PowerShell
-Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-```
-
-```PowerShell
-cls
-```
-
-## # Install SharePoint PnP cmdlets
-
-```PowerShell
-Install-Module SharePointPnPPowerShellOnline
-```
-
-## Disable background apps
+### Disable background apps
 
 1. Open **Windows Settings**.
 2. In the **Windows Setttings** window, select **Privacy**.
@@ -1578,78 +1799,44 @@ Install-Module SharePointPnPPowerShellOnline
    - **Sticky Notes**
    - **Tips**
    - **Voice Recorder**
-   - **Xbox**
    - **Your Phone**
 
-### Issue: Photos app consumes high CPU
+#### Issue: Photos app consumes high CPU
 
 ```PowerShell
 cls
 ```
 
-## # Install Visual Studio 2019
-
-### # Launch Visual Studio 2019 setup
+### # Configure e-mail and name for Git
 
 ```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
+git config --global user.email "jjameson@technologytoolbox.com"
+git config --global user.name "Jeremy Jameson"
 ```
 
-> **Note**
->
-> When prompted, type the password to connect to the file share.
+### # Configure Git to use SourceGear DiffMerge
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio 2019\Enterprise" `
-    + "\vs_setup.exe"
+git config --global diff.tool diffmerge
+
+git config --global difftool.diffmerge.cmd  '"C:/NotBackedUp/Public/Toolbox/DiffMerge/x64/sgdm.exe \"$LOCAL\" \"$REMOTE\"'
+```
+
+#### Reference
+
+**Git for Windows (MSysGit) or Git Cmd**\
+From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html](https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html)>
+
+```PowerShell
+cls
+```
+
+### # Install GitHub Desktop
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\GitHub\GitHubDesktopSetup.exe"
 
 Start-Process -FilePath $setupPath -Wait
-```
-
-Select the following workloads:
-
-- **ASP.NET and web development**
-- **Azure development**
-- **Python development**
-- **Node.js development**
-- **.NET desktop development**
-- **Desktop development with C++**
-- **Universal Windows Platform development**
-- **Data storage and processing**
-- **Data science and analytical applications**
-- **Office/SharePoint development**
-- **.NET Core cross-platform development**
-
-> **Note**
->
-> When prompted, restart the computer to complete the installation.
-
-```PowerShell
-cls
-```
-
-## # Upgrade Angular CLI
-
-### # Remove old version of Angular CLI
-
-```PowerShell
-npm uninstall --global @angular/cli
-```
-
-### # Install Angular CLI
-
-```PowerShell
-npm install --global --no-optional @angular/cli@7.3.8
-```
-
-```PowerShell
-cls
-```
-
-## # Install SQL Server Management Studio
-
-```PowerShell
-& "\\TT-FS01\Products\Microsoft\SQL Server 2017\SSMS-Setup-ENU-14.0.17289.0.exe"
 ```
 
 > **Important**
@@ -1660,50 +1847,102 @@ cls
 cls
 ```
 
-## # Create and configure Caelum website
-
-### # Set environment variables
+### # Add NPM "global" location to PATH environment variable
 
 ```PowerShell
-[Environment]::SetEnvironmentVariable(
-  "CAELUM_URL",
-  "http://www-local.technologytoolbox.com",
-  "Machine")
+Set-ExecutionPolicy RemoteSigned -Scope Process -Force
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
+    -Folders "$env:LOCALAPPDATA\npm" `
+    -EnvironmentVariableTarget User
 ```
 
 > **Important**
 >
-> Restart PowerShell for environment variable to be available.
+> Restart PowerShell for the change to PATH environment variable to take effect.
 
-```PowerShell
-C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
-    -IPAddress 127.0.0.1 `
-    -Hostnames www-local.technologytoolbox.com
+```Console
+exit
 ```
 
-### # Rebuild website
+### Install global NPM packages
+
+> **Important**
+>
+> Install global NPM packages using a non-elevated instance of PowerShell (to avoid issues when subsequently running the npm install command as a "normal" user).
+
+---
+
+**Non-elevated PowerShell instance**
 
 ```PowerShell
-cd "C:\NotBackedUp\techtoolbox\Caelum\Main\Source\Deployment Files\Scripts"
+cls
+```
 
-& '.\Rebuild Website.ps1'
+### # Install Angular CLI
+
+```PowerShell
+npm install --global --no-optional @angular/cli@7.3.9
+```
+
+### # Install Bitwarden CLI
+
+```PowerShell
+npm install --global @bitwarden/cli
+```
+
+### # Install Create React App
+
+```PowerShell
+npm install --global --no-optional create-react-app@3.2.0
+```
+
+### # Install rimraf
+
+```PowerShell
+npm install --global --no-optional rimraf@3.0.0
+```
+
+### # Install Yeoman, Gulp, and web app generator
+
+```PowerShell
+npm install --global --no-optional yo gulp-cli generator-webapp
+```
+
+---
+
+#### Reference
+
+**Web app generator**\
+From <[https://www.npmjs.com/package/generator-webapp](https://www.npmjs.com/package/generator-webapp)>
+
+**TODO:**\
+
+## Share printer
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/01/2EDCC101189FC9A8E4E5FD9205D12E8EB82B2F01.png)
+
+Click **Change Sharing Options**.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/39D600ED528C73CAE3772FDA8A9E263E29CBF094.png)
+
+## Other stuff that may need to be done
+
+```PowerShell
+cls
+```
+
+### # Configure credential helper for Git
+
+```PowerShell
+git config --global credential.helper !"C:\\NotBackedUp\\Public\\Toolbox\\git-credential-winstore.exe"
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Install Bitwarden CLI
-
-```PowerShell
-npm install -g @bitwarden/cli
-```
-
-```PowerShell
-cls
-```
-
-## # Install OpenCV
+### # Install OpenCV
 
 ```PowerShell
 setx -m OPENCV_DIR "C:\Program Files\OpenCV-3.4.6\opencv\build\x64\vc15"
@@ -1721,166 +1960,11 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
     -EnvironmentVariableTarget Machine
 ```
 
-## Install Minikube
-
-### Reference
-
-**Install Minikube**\
-From <[https://kubernetes.io/docs/tasks/tools/install-minikube/](https://kubernetes.io/docs/tasks/tools/install-minikube/)>
-
 ```PowerShell
 cls
 ```
 
-### # Start Minikube
-
-```PowerShell
-minikube start --vm-driver=hyperv
-```
-
-**TODO:**\
-
-## Share printer
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/01/2EDCC101189FC9A8E4E5FD9205D12E8EB82B2F01.png)
-
-Click **Change Sharing Options**.
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/39D600ED528C73CAE3772FDA8A9E263E29CBF094.png)
-
-## Install DPM agent
-
-### # Install DPM 2016 agent
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
-    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
-
-& $installer TT-DPM02.corp.technologytoolbox.com
-```
-
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
-
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
-
-- Exception for DPMRA.exe in all profiles
-- Exception for Windows Management Instrumentation service
-- Exception for RemoteAdmin service
-- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
-
-#### Reference
-
-**Installing Protection Agents Manually**\
-Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
-
----
-
-**TT-DPM02 - DPM Management Shell**
-
-```PowerShell
-cls
-```
-
-### # Attach DPM agent
-
-```PowerShell
-$productionServer = 'STORM'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM02 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
-
-```PowerShell
-cls
-```
-
-## # Enable firewall rules for Disk Management
-
-```PowerShell
-Enable-NetFirewallRule -DisplayGroup "Remote Volume Management"
-```
-
-```PowerShell
-cls
-```
-
-### # Select "High performance" power scheme
-
-```PowerShell
-powercfg.exe /L
-
-powercfg.exe /S SCHEME_MIN
-
-powercfg.exe /L
-```
-
-## Install updates using Windows Update
-
-**Note:** Repeat until there are no updates available for the computer.
-
-```PowerShell
-cls
-```
-
-### # Delete C:\\Windows\\SoftwareDistribution folder (4.7 GB)
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-```
-
-## Disk Cleanup
-
-```PowerShell
-cls
-```
-
-## # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-**Note:** When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-## # Configure e-mail and name for Git
-
-```PowerShell
-git config --global user.email "jjameson@technologytoolbox.com"
-git config --global user.name "Jeremy Jameson"
-```
-
-## # Configure credential helper for Git
-
-```PowerShell
-git config --global credential.helper !"C:\\NotBackedUp\\Public\\Toolbox\\git-credential-winstore.exe"
-```
-
-## Other stuff that may need to be done
-
-```PowerShell
-cls
-```
-
-## # Install Microsoft InfoPath 2013
+### # Install Microsoft InfoPath 2013
 
 ```PowerShell
 net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
@@ -1931,39 +2015,7 @@ cd C:\Program Files (x86)\Android\android-sdk\platform-tools
 adb.exe devices
 ```
 
-### Install Chutzpah Test Adapter
-
-1. Open Visual Studio.
-2. In the **Tools** menu, click **Extensions and Updates...**
-3. In the **Extensions and Updates** dialog window:
-   1. Select the **Online** pane.
-   2. In the search box, type **Chutzpah**.
-   3. In the list of items, select **Chutzpah Test Adapter for the Test Explorer**, and click **Download**.
-   4. Review the license terms, and click **Install**.
-   5. Wait for the extension to be installed.
-   6. Click **Restart Now**.
-
-### Install Chutzpah Test Runner
-
-1. Open Visual Studio.
-2. In the **Tools** menu, click **Extensions and Updates...**
-3. In the **Extensions and Updates** dialog window:
-   1. Select the **Online** pane.
-   2. In the search box, type **Chutzpah**.
-   3. In the list of items, select **Chutzpah Test Runner Context Menu Extension**, and click **Download**.
-   4. Review the license terms, and click **Install**.
-   5. Wait for the extension to be installled.
-   6. Click **Restart Now**.
-
 ### Install Apple iTunes
-
-### Install Sandcastle
-
-#### Sandcastle Documentation Compiler Tools
-
-#### Sandcastle Help File Builder
-
-### Install MSBuild Community Tasks
 
 ### Install ASP.NET ViewState Helper 2.0.1
 
@@ -2009,35 +2061,35 @@ npm install
 gulp serve-dev-debug
 ```
 
-## Disk cleanup
-
-### Before
-
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/8E3E45F904E1D8E093B0D9D522FCB2CD5220D43F.png)
-
 ```PowerShell
 cls
 ```
 
-### # Purge node_modules folders
+## # Create and configure Caelum website
+
+### # Set environment variables
 
 ```PowerShell
-Push-Location C:\NotBackedUp
-
-Get-ChildItem -Path "." -Include "node_modules" -Recurse -Directory |
-    Remove-Item -Recurse -Force
-
-Pop-Location
+[Environment]::SetEnvironmentVariable(
+  "CAELUM_URL",
+  "http://www-local.technologytoolbox.com",
+  "Machine")
 ```
 
-#### References
+> **Important**
+>
+> Restart PowerShell for environment variable to be available.
 
-**Delete all node_modules folders recursively on Windows or Mac**\
-From <[https://winsmarts.com/delete-all-node-modules-folders-recursively-on-windows-edcc9a9c079e](https://winsmarts.com/delete-all-node-modules-folders-recursively-on-windows-edcc9a9c079e)>
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
+    -IPAddress 127.0.0.1 `
+    -Hostnames www-local.technologytoolbox.com
+```
 
-**How to Delete ALL node_modules folders on your machine**\
-From <[https://trilon.io/blog/how-to-delete-all-nodemodules-recursively](https://trilon.io/blog/how-to-delete-all-nodemodules-recursively)>
+### # Rebuild website
 
-### After
+```PowerShell
+cd "C:\NotBackedUp\techtoolbox\Caelum\Main\Source\Deployment Files\Scripts"
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/32DF55BB503384021D4EA4B61ED2BF1BC99C60BB.png)
+& '.\Rebuild Website.ps1'
+```
