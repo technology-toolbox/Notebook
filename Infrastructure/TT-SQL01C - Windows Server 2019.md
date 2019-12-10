@@ -1822,6 +1822,16 @@ GO
 
 ---
 
+## Issue - Low disk space on Temp01
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6E/36B16116AF62ED563C121FAADEB2EA4FCE82376E.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/63/5F4859D4FD324C2820D97C566F1781C9C94A4263.png)
+
+### Increase Temp01 to 4 GB on TT-SQL01D
+
+### Increase Temp01 to 4 GB on TT-SQL01C
+
 **TODO:**
 
 ```PowerShell
