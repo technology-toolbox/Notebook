@@ -1065,6 +1065,16 @@ Checkpoint-VM `
 cls
 ```
 
+## # Install .NET Framework 4.7.2 Developer Pack
+
+```PowerShell
+& '\\EXT-FS01\Products\Microsoft\Visual Studio 2017\NDP472-DevPack-ENU.exe'
+```
+
+```PowerShell
+cls
+```
+
 ## # Clone repo for Pluralsight course
 
 ```PowerShell
