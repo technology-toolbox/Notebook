@@ -1353,6 +1353,12 @@ Install-PackageProvider NuGet -MinimumVersion '2.8.5.201' -Force
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 ```
 
+### # Install PowerShell for GitHub API
+
+```PowerShell
+Install-Module -Name PowerShellForGitHub
+```
+
 #### # Install posh-git module
 
 ```PowerShell
@@ -1847,6 +1853,14 @@ git config --global difftool.diffmerge.cmd  '"C:/NotBackedUp/Public/Toolbox/Diff
 
 **Git for Windows (MSysGit) or Git Cmd**\
 From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html](https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html)>
+
+```PowerShell
+cls
+```
+
+### # Configure personal access token for GitHub PowerShell module
+
+Set-GitHubAuthentication
 
 ```PowerShell
 cls
