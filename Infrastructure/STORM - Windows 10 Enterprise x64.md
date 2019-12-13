@@ -1951,6 +1951,26 @@ npm install --global --no-optional yo gulp-cli generator-webapp
 **Web app generator**\
 From <[https://www.npmjs.com/package/generator-webapp](https://www.npmjs.com/package/generator-webapp)>
 
+```PowerShell
+cls
+```
+
+## # Upgrade Git
+
+### # Install Git
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Git\Git-2.24.1.2-64-bit.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+On the **Choosing the default editor used by Git** step, select **Use the Nano editor by default**.
+
+> **Important**
+>
+> Wait for the installation to complete and restart PowerShell for environment changes to take effect.
+
 **TODO:**\
 
 ## Share printer
