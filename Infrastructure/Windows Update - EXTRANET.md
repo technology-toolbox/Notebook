@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**FOOBAR21**
+**TT-ADMIN03**
 
 ```PowerShell
 cls
@@ -42,6 +42,8 @@ $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV2'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV3'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV1'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV2'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05A'; })
 ```
 
@@ -130,7 +132,7 @@ Get-Content "C:\Users\jjameson-admin\Desktop\Computer List for Windows Update.tx
 
 ---
 
-**FOOBAR21**
+**TT-ADMIN03**
 
 ```PowerShell
 cls
@@ -200,7 +202,7 @@ cd C:\NotBackedUp\Public\Toolbox\PowerShell\PoshPAIG_2_1_5_1
 
 ---
 
-**FOOBAR21**
+**TT-ADMIN03**
 
 ```PowerShell
 cls
@@ -338,7 +340,7 @@ Get-Content "C:\Users\jjameson-admin\Desktop\Computer List for Windows Update.tx
 
 ---
 
-**FOOBAR21**
+**TT-ADMIN03**
 
 ```PowerShell
 cls
@@ -364,6 +366,8 @@ $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV2'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV3'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV1'; VMHost = 'TT-HV05C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV2'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05A'; })
 ```
 
