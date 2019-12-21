@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**FOOBAR18**
+**TT-ADMIN03**
 
 ```PowerShell
 cls
@@ -26,7 +26,6 @@ $activity = "Prepare development and test VMs for patching"
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'FAB-FOOBAR4'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'FAB-TEST1'; VMHost = 'STORM'; })
 ```
 
@@ -95,7 +94,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 $scriptBlock = [ScriptBlock]::Create($script)
 
-Get-Content "\\FAB-FS01\Users$\jjameson-admin\Documents\Computer List for Windows Update.txt" |
+Get-Content "\\FAB-FS01\Users$\jjameson-admin\My Documents\Computer List for Windows Update.txt" |
     ForEach-Object {
         $computer = $_
 
@@ -163,7 +162,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 $scriptBlock = [scriptblock]::Create($script)
 
-Get-Content "\\FAB-FS01\Users$\jjameson-admin\Documents\Computer List for Windows Update.txt" |
+Get-Content "\\FAB-FS01\Users$\jjameson-admin\My Documents\Computer List for Windows Update.txt" |
     ForEach-Object {
         $computer = $_
 
@@ -179,7 +178,7 @@ Get-Content "\\FAB-FS01\Users$\jjameson-admin\Documents\Computer List for Window
 
 ---
 
-**FOOBAR18**
+**TT-ADMIN03**
 
 ```PowerShell
 cls
@@ -189,7 +188,6 @@ cls
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'FAB-FOOBAR4'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'FAB-TEST1'; VMHost = 'STORM'; })
 ```
 
