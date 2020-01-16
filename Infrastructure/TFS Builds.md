@@ -107,3 +107,153 @@ Docs\\**</p>
 </td>
 </tr>
 </table>
+
+### Split "Copy Files" task into two tasks
+
+> **Comment**
+>
+> Split "Copy Files" task into two tasks -- so that "Deployment Files" folder is copied side-by-side with "Docs" folder (rather than "Code\\Deployment Files" and "Docs")
+
+| **New Task: Copy Files** |                                                                   |
+| ------------------------ | ----------------------------------------------------------------- |
+| Display name             | Copy Docs to: \$(Build.ArtifactStagingDirectory)                  |
+| Source Folder            | \$(Build.SourcesDirectory)                                        |
+| Contents                 | Docs\\**                                                          |
+| Target Folder            | \$(Build.ArtifactStagingDirectory)                                |
+| Run this task            | Even if a previous task has failed, unless the build was canceled |
+
+### Tweak variables (e.g. change "release" to "Release")
+
+| **Variables**      |         |
+| ------------------ | ------- |
+| BuildConfiguration | Release |
+| BuildPlatform      | Any CPU |
+
+### Build both Debug and Release configurations
+
+| **Variables**      |               |
+| ------------------ | ------------- |
+| BuildConfiguration | Debug,Release |
+
+| **Options**         |                    |
+| ------------------- | ------------------ |
+| Multi-configuration | Enabled            |
+| Multipliers         | BuildConfiguration |
+
+### Revert to only building Release configuration
+
+> **Comment**
+>
+> Revert to only building Release configuration (it takes a long time to build both configurations and we currently don't deploy Debug builds anywhere)
+
+### Set build number (from AssemblyVersionInfo.cs file)
+
+<table>
+<thead>
+<th>
+<p><strong>New Task: PowerShell</strong></p>
+</th>
+<th>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Display name</p>
+</td>
+<td valign='top'>
+<p>Set build number</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Type</p>
+</td>
+<td valign='top'>
+<p>Inline Script</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Inline Script</p>
+</td>
+<td valign='top'>
+<p>\$assemblyVersion = .\\Get-AssemblyFileVersion.ps1 AssemblyVersionInfo.cs</p>
+<p>Write-Host &quot;##vso[build.updatebuildnumber]\$assemblyVersion&quot;</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Working folder</p>
+</td>
+<td valign='top'>
+<p>Code</p>
+</td>
+</tr>
+</table>
+
+### Increment the assembly version (for the next build)
+
+| **New Task: PowerShell** |                                      |
+| ------------------------ | ------------------------------------ |
+| Display name             | Increment assembly version           |
+| Type                     | File Path                            |
+| Script Path              | Code\\Increment Assembly Version.ps1 |
+| Arguments                | -Verbose                             |
+| Working folder           | Code\\                               |
+
+### Throw error when a build already exists for the specified assembly version
+
+| **Task: Increment assembly version** |       |
+| ------------------------------------ | ----- |
+| Enabled                              | false |
+
+<table>
+<thead>
+<th>
+<p><strong>Task: Set build number</strong></p>
+</th>
+<th>
+</th>
+</thead>
+<tr>
+<td valign='top'>
+<p>Display name</p>
+</td>
+<td valign='top'>
+<p>Validate and set build number</p>
+</td>
+</tr>
+<tr>
+<td valign='top'>
+<p>Inline Script</p>
+</td>
+<td valign='top'>
+<p>\$assemblyVersion = .\\Get-AssemblyFileVersion.ps1 AssemblyVersionInfo.cs</p>
+<p>\$builds = .\\Get-TfsBuilds.ps1 -BuildNumberFilter \$assemblyVersion</p>
+<p>If (\$builds -eq \$null)<br />
+{<br />
+    Write-Host &quot;##vso[build.updatebuildnumber]\$assemblyVersion&quot;<br />
+}<br />
+Else<br />
+{<br />
+    throw &quot;The build number (\$assemblyVersion) already exists.&quot;<br />
+}</p>
+</td>
+</tr>
+</table>
+
+### Increment assembly version using TFS Rest API
+
+| **Task: Increment assembly version** |                      |
+| ------------------------------------ | -------------------- |
+| Arguments                            | -UseRestApi -Verbose |
+| Enabled                              | true                 |
+
+### Create bug on build failure
+
+| **Options**                 |         |
+| --------------------------- | ------- |
+| Create work item on failure | Enabled |
+| Type                        | Bug     |
+
+### Change "Copy Files" tasks to only run when all previous tasks have succeeded

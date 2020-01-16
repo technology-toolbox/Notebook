@@ -7,41 +7,11 @@ Wednesday, March 20, 2019
 
 ### Create project
 
-<table>
-<thead>
-<th>
-<p><strong>Name</strong></p>
-</th>
-<th>
-<p><strong>Training-Agile</strong></p>
-</th>
-</thead>
-<tr>
-<td valign='top'>
-<p><strong>Description</strong></p>
-</td>
-<td valign='top'>
-<p><strong>Original process template: Agile</strong><br />
-<strong>Created: 2019-03-20</strong></p>
-</td>
-</tr>
-<tr>
-<td valign='top'>
-<p><strong>Process</strong></p>
-</td>
-<td valign='top'>
-<p><strong>Agile</strong></p>
-</td>
-</tr>
-<tr>
-<td valign='top'>
-<p><strong>Visibility</strong></p>
-</td>
-<td valign='top'>
-<p><strong>Private</strong></p>
-</td>
-</tr>
-</table>
+| **Name**        | **Training-Agile**                                       |
+| --------------- | -------------------------------------------------------- |
+| **Description** | **Original process template: AgileCreated: 2019-03-20** |
+| **Process**     | **Agile**                                                |
+| **Visibility**  | **Private**                                              |
 
 ### Configure project
 
