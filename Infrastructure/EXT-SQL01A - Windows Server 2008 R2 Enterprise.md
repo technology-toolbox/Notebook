@@ -7,6 +7,8 @@ Sunday, April 17, 2016
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
+## Deploy and configure server infrastructure
+
 ---
 
 **FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
@@ -71,9 +73,9 @@ logoff
 
 ## # Rename network connections
 
-# **Note:** Get-NetAdapter is not available on Windows Server 2008 R2
+```PowerShell
+# Note: Get-NetAdapter is not available on Windows Server 2008 R2
 
-```Console
 netsh interface show interface
 
 netsh interface set interface name="Local Area Connection" newname="Production"
@@ -95,17 +97,13 @@ $interfaceAlias = "Production"
 
 ```PowerShell
 $ipAddress = "192.168.10.211"
-```
 
-# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+# Note: New-NetIPAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv4 set address name=$interfaceAlias source=static address=$ipAddress mask=255.255.255.0 gateway=192.168.10.1
-```
 
-# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+# Note: Set-DNSClientServerAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv4 set dnsserver name=$interfaceAlias source=static address=192.168.10.209
 
 netsh interface ipv4 add dnsserver name=$interfaceAlias address=192.168.10.210
@@ -115,17 +113,13 @@ netsh interface ipv4 add dnsserver name=$interfaceAlias address=192.168.10.210
 
 ```PowerShell
 $ipAddress = "2601:282:4201:e500::211"
-```
 
-# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+# Note: New-NetIPAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv6 set address interface=$interfaceAlias address=$ipAddress store=persistent
-```
 
-# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+# Note: Set-DNSClientServerAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=2601:282:4201:e500::209
 
 netsh interface ipv6 add dnsserver name=$interfaceAlias address=2601:282:4201:e500::210
@@ -145,19 +139,17 @@ $interfaceAlias = "Storage"
 
 ```PowerShell
 $ipAddress = "10.1.10.211"
-```
 
-# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+# Note: New-NetIPAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv4 set address name=$interfaceAlias source=static address=$ipAddress mask=255.255.255.0
 ```
 
 ### # Disable features on iSCSI network adapter
 
-# **Note:** Disable-NetAdapterBinding is not available on Windows Server 2008 R2
-
 ```PowerShell
+# Note: Disable-NetAdapterBinding is not available on Windows Server 2008 R2
+
 # Disable "Client for Microsoft Networks"
 C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_msclient
 
@@ -188,11 +180,11 @@ $adapterConfig.SetTcpipNetbios(2)
 **Note:** Get-NetAdapterAdvancedProperty is not available on Windows Server 2008 R2
 
 1. Open **Network and Sharing Center**.
-2. In the **Network and Sharing Center **window, click **Production**.
+2. In the **Network and Sharing Center** window, click **Production**.
 3. In the **Production Status** window, click **Properties**.
 4. In the **Production Properties** window, on the **Networking** tab, click **Configure**.
 5. In the **Microsoft Virtual Machine Bus Network Adapter Properties** window:
-   1. On the **Advanced **tab:
+   1. On the **Advanced** tab:
       1. In the **Property** list, select **Jumbo Packet**.
       2. In the **Value** dropdown, select **9014 Bytes**.
    2. Click **OK**.
@@ -223,9 +215,9 @@ cls
 
 ## # Rename computer
 
-# **Note:** Rename-Computer is not available on Windows Server 2008 R2
-
 ```PowerShell
+# Note: Rename-Computer is not available on Windows Server 2008 R2
+
 netdom renamecomputer $env:COMPUTERNAME /newname:EXT-SQL01A /reboot
 ```
 
@@ -235,11 +227,11 @@ netdom renamecomputer $env:COMPUTERNAME /newname:EXT-SQL01A /reboot
 
 ## # Join domain
 
-# **Note:**\
-#  "-Restart" parameter is not available on Windows Server 2008 R2\
+```PowerShell
+# Note:
+#  "-Restart" parameter is not available on Windows Server 2008 R2
 #  "-Credential" parameter must be specified to avoid error
 
-```PowerShell
 Add-Computer `
     -DomainName extranet.technologytoolbox.com `
     -Credential EXTRANET\jjameson-admin
@@ -309,7 +301,7 @@ cls
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 netsh advfirewall firewall set rule `
@@ -334,7 +326,7 @@ netsh advfirewall firewall add rule `
     action=Allow
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 netsh advfirewall firewall set rule `
@@ -589,12 +581,14 @@ finished (0)
 
 From Detail.txt:
 
+```Text
 2014-02-01 08:47:00 Slp: Init rule target object: Microsoft.SqlServer.Configuration.SetupExtension.NetworkBindingFacet\
 2014-02-01 08:47:00 Slp:   NetworkBindingFacet: Looking up network binding order.\
 2014-02-01 08:47:00 Slp:   NetworkBindingFacet:   Network: 'LAN 1 - 192.168.10.x' Device: '\\Device\\{135B5C69-92FD-47E5-B016-777E597F0F52}' Domain: 'extranet.technologytoolbox.com' Adapter Id: '{135B5C69-92FD-47E5-B016-777E597F0F52}'\
 2014-02-01 08:47:00 Slp:   NetworkBindingFacet:   Network: 'Local Area Connection* 9' Device: '\\Device\\{E522D006-7BF8-4899-ACA0-64D71E88D9E1}' Domain: '' Adapter Id: '{E522D006-7BF8-4899-ACA0-64D71E88D9E1}'\
 2014-02-01 08:47:00 Slp:   NetworkBindingFacet:   Network: 'iSCSI 1 - 10.1.10.x' Device: '\\Device\\{15F2221D-8DBC-499C-9A43-9CC4BA20CAA9}' Domain: '' Adapter Id: '{15F2221D-8DBC-499C-9A43-9CC4BA20CAA9}'\
 2014-02-01 08:47:00 Slp: IsDomainInCorrectBindOrder: The top network interface 'LAN 1 - 192.168.10.x' is bound to domain 'extranet.technologytoolbox.com' and the current domain is 'CORP.TECHNOLOGYTOOLBOX.COM'.
+```
 
 Restart SQL Server setup.
 
@@ -623,7 +617,7 @@ On the **Cluster Resource Group** page, ensure **SQL Server cluster resource gro
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/F4213B26C52A73AC3084071B982CDF1C6159C02F.png)
 
-On the **Cluster Disk Selection **page, select all of the available cluster disks (**Cluster Disk 2**, **Cluster Disk 3**, **Cluster Disk 4**, and **Cluster Disk 5**).
+On the **Cluster Disk Selection** page, select all of the available cluster disks (**Cluster Disk 2**, **Cluster Disk 3**, **Cluster Disk 4**, and **Cluster Disk 5**).
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/36/67F72027648299B0F68E2AE87FC934E1F85A5236.png)
 
@@ -708,7 +702,7 @@ Under **Services and applications**, right-click **SQL Server (MSSQLSERVER)**, p
 
 Wait for the **Status** column to show **Online** for all of the resources.
 
-Repeat the process to update the other cluster node (EXT-SQL01A). After the upgrade is complete, move  SQL Server back to EXT-SQL01A.
+Repeat the process to update the other cluster node (EXT-SQL01A). After the upgrade is complete, move SQL Server back to EXT-SQL01A.
 
 ```PowerShell
 cls
@@ -716,9 +710,9 @@ cls
 
 ## # Configure firewall rule for SQL Server
 
-# **Note:** New-NetFirewallRule is not available on Windows Server 2008 R2
-
 ```PowerShell
+# Note: New-NetFirewallRule is not available on Windows Server 2008 R2
+
 netsh advfirewall firewall add rule `
     name="SQL Server Database Engine" `
     dir=in `
@@ -942,12 +936,14 @@ cls
 
 ### Alert
 
-_Source: WinMgmt_\
-_Event ID: 10_\
-_Event Category: 0_\
-_User: N/A_\
-_Computer: EXT-SQL01A.extranet.technologytoolbox.com_\
-_Event Description: Event filter with query "SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA "Win32_Processor" AND TargetInstance.LoadPercentage > 99" could not be reactivated in namespace "//./root/CIMV2" because of error 0x80041003. Events cannot be delivered through this filter until the problem is corrected._
+```Text
+Source: WinMgmt
+Event ID: 10
+Event Category: 0
+User: N/A
+Computer: EXT-SQL01A.extranet.technologytoolbox.com
+Event Description: Event filter with query "SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA "Win32_Processor" AND TargetInstance.LoadPercentage > 99" could not be reactivated in namespace "//./root/CIMV2" because of error 0x80041003. Events cannot be delivered through this filter until the problem is corrected.
+```
 
 ### Reference
 
@@ -958,9 +954,9 @@ From <[https://support.microsoft.com/en-us/kb/2545227](https://support.microsoft
 
 ---
 
-**VBScript**
+Run the following VBScript:
 
-```PowerShell
+```VBScript
 strComputer = "."
 
 Set objWMIService = GetObject("winmgmts:" _
@@ -1016,19 +1012,17 @@ slmgr /ato
 $interfaceAlias = "Production"
 
 $ipAddress = "2601:282:4201:e500::211"
-```
 
-# **Note:** Remove-NetIPAddress is not available on Windows Server 2008 R2
+# Note: Remove-NetIPAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv6 delete address interface=$interfaceAlias address=$ipAddress store=persistent
 ```
 
 ### # Update IPv6 DNS servers
 
-# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+```PowerShell
+# Note: Set-DNSClientServerAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=2603:300b:802:8900::209
 
 netsh interface ipv6 add dnsserver name=$interfaceAlias address=2603:300b:802:8900::210
@@ -1169,11 +1163,11 @@ Address
 
 ### Configure static IP address for failover cluster name (EXT-SQL01-FC)
 
-**10.1.20.209**
+IP address: **10.1.20.209**
 
 ### Configure static IP address for SQL Server cluster name (EXT-SQL01)
 
-**10.1.20.200**
+IP address: **10.1.20.200**
 
 **TODO:**
 
@@ -1181,23 +1175,25 @@ Address
 
 ### Details from SQL Server job history
 
-Date		9/15/2014 7:25:00 AM\
+```Text
+Date		9/15/2014 7:25:00 AM
 Log		Job History (SessionState_Job_DeleteExpiredSessions)
 
-Step ID		0\
-Server		EXT-SQL01\
-Job Name		SessionState_Job_DeleteExpiredSessions\
-Step Name		(Job outcome)\
-Duration		00:00:00\
-Sql Severity		0\
-Sql Message ID		0\
-Operator Emailed\
-Operator Net sent\
-Operator Paged\
+Step ID		0
+Server		EXT-SQL01
+Job Name		SessionState_Job_DeleteExpiredSessions
+Step Name		(Job outcome)
+Duration		00:00:00
+Sql Severity		0
+Sql Message ID		0
+Operator Emailed
+Operator Net sent
+Operator Paged
 Retries Attempted		0
 
-Message\
+Message
 The job failed.  Unable to determine if the owner (TECHTOOLBOX\\jjameson-admin) of job SessionState_Job_DeleteExpiredSessions has server access (reason: Could not obtain information about Windows NT group/user 'TECHTOOLBOX\\jjameson-admin', error code 0x5. [SQLSTATE 42000] (Error 15404)).
+```
 
 ### Resolution
 

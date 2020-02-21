@@ -61,7 +61,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 - On the **Computer Details** step:
   - In the **Computer name** box, type **CON-FS01**.
   - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no applications are selected and click **Next**.
 

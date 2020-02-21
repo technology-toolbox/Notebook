@@ -929,7 +929,7 @@ Start-SCVirtualMachine $vmName
 
 4 GB of free space, but unable to install **2018-08 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4343887)**.
 
-### Expand C:
+### Expand C: volume
 
 ---
 
@@ -1037,7 +1037,7 @@ Resize-Partition `
 
 ~4 GB of free space, but unable to install **2018-10 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4462917)**.
 
-### Expand C:
+### Expand C: volume
 
 ---
 

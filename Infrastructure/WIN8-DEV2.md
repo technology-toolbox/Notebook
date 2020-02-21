@@ -88,7 +88,7 @@ robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
 
 ## Reduce paging file size
 
-**Virtual Memory**
+Configure **Virtual Memory**
 
 - **Automatically manage paging file size for all drives: No**
 - **C: drive**
@@ -225,7 +225,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
 #### Reference
 
 **How to use npm with node.exe?**\
-http://stackoverflow.com/a/9366416
+[http://stackoverflow.com/a/9366416](http://stackoverflow.com/a/9366416)
 
 ```PowerShell
 cls
@@ -284,7 +284,7 @@ Stop-Computer
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ## # Enable PowerShell remoting
 
@@ -292,7 +292,7 @@ Enable-PSRemoting -Confirm:$false
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ---
 
@@ -329,7 +329,7 @@ Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 
 ---
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ---
 

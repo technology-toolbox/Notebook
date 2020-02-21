@@ -171,9 +171,9 @@ Add-Computer -DomainName corp.contoso.com -Restart
 cls
 ```
 
-#### # Remove old domain controller
+## # Remove old domain controller
 
-##### # Demote domain controller
+### # Demote domain controller
 
 ```PowerShell
 Import-Module ADDSDeployment
@@ -187,13 +187,13 @@ Uninstall-ADDSDomainController `
 >
 > When prompted, specify the password for the local administrator account.
 
-##### Remove Active Directory Domain Services and DNS roles
+### Remove Active Directory Domain Services and DNS roles
 
 > **Note**
 >
 > Restart the computer to complete the removal of the roles.
 
-##### # Stop server
+### # Stop server
 
 ```PowerShell
 Stop-Computer
@@ -205,13 +205,13 @@ Stop-Computer
 cls
 ```
 
-#### # Configure static IP addresses
+## # Configure static IP addresses
 
 ```PowerShell
 $interfaceAlias = "Contoso-60"
 ```
 
-##### # Disable DHCP and router discovery
+### # Disable DHCP and router discovery
 
 ```PowerShell
 Set-NetIPInterface `
@@ -220,7 +220,7 @@ Set-NetIPInterface `
     -RouterDiscovery Disabled
 ```
 
-##### # Configure static IPv4 address
+### # Configure static IPv4 address
 
 ```PowerShell
 $ipAddress = "10.0.60.2"
@@ -232,7 +232,7 @@ New-NetIPAddress `
     -DefaultGateway 10.0.60.1
 ```
 
-##### # Configure IPv4 DNS servers
+### # Configure IPv4 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
@@ -240,14 +240,14 @@ Set-DNSClientServerAddress `
     -ServerAddresses 10.0.60.3
 ```
 
-### Configure storage
+## Configure storage
 
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------------------- | ------------ |
 | 0    | C:           | 32 GB       | 4K                   | OSDisk       |
 | 1    | D:           | 5 GB        | 4K                   | Data01       |
 
-#### Configure separate VHD for Active Directory data
+### Configure separate VHD for Active Directory data
 
 ---
 
@@ -257,7 +257,7 @@ Set-DNSClientServerAddress `
 cls
 ```
 
-##### # Add disk for Active Directory data
+#### # Add disk for Active Directory data
 
 ```PowerShell
 $vmHost = "TT-HV05A"
@@ -280,7 +280,7 @@ Add-VMHardDiskDrive `
 cls
 ```
 
-##### # Initialize disks and format volumes
+#### # Initialize disks and format volumes
 
 ```PowerShell
 Get-Disk 1 |
@@ -300,9 +300,9 @@ Get-Disk 1 |
 cls
 ```
 
-### # Configure Windows Update
+## # Configure Windows Update
 
-#### # Add machine to security group for Windows Update schedule
+### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 17" -Members "CON-DC03$"

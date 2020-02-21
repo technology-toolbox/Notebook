@@ -104,7 +104,7 @@ From <[https://technet.microsoft.com/en-us/library/dn744278.aspx](https://techne
     + "\Windows ADK for Windows 8.1 Update\adksetup.exe"
 ```
 
-On the **Select the features you want to install **page:
+On the **Select the features you want to install** page:
 
 - Select the following items:
   - **Deployment Tools**
@@ -636,7 +636,7 @@ After the deployment share has been configured, it needs to be updated. This wil
 cls
 ```
 
-# Build baseline images
+## Build baseline images
 
 ### # Copy MDT boot images to Products file share
 
@@ -691,7 +691,7 @@ cls
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>Image Size [KB]</strong></p>
@@ -779,7 +779,7 @@ Edit the task sequence to include the actions required to update the reference i
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 7**, right-click **Windows 7 Ultimate (x86) - Baseline**, and click **Properties**.
 2. In the **Windows 7 Ultimate (x86) - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -816,7 +816,7 @@ Edit the task sequence to include the actions required to update the reference i
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows Server 2008 R2**, right-click **Windows Server 2008 R2 - Baseline**, and click **Properties**.
 2. In the **Windows Server 2008 R2 - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -915,7 +915,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 7**, right-click **Windows 7 Ultimate (x86) - Baseline**, and click **Properties**.
 2. In the **Windows 7 Ultimate (x86) - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, Office 2013, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -1005,7 +1005,7 @@ cls
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>Image Size [KB]</strong></p>
@@ -1659,7 +1659,7 @@ robocopy '\\ICEMAN\MDT-Deploy$\Boot' '\\ICEMAN\Products\Microsoft' *.iso
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>VHD Size [KB]</strong></p>
@@ -1869,8 +1869,8 @@ Remove-Item $tempSourcePath -Force -Recurse
       2. In the **Config.xml settings** section:
          1. Click the **Customer name** checkbox and then type **Technology Toolbox **in the corresponding textbox.
          2. Click the **Display level** checkbox and then click **None **in the corresponding dropdown list.
-         3. Click the **Accept EULA **checkbox.
-         4. Click the **Always suppress reboot **checkbox.
+         3. Click the **Accept EULA** checkbox.
+         4. Click the **Always suppress reboot** checkbox.
    2. In the **SharePoint Designer 2013 with Service Pack 1 (x86) Properties** window, click **OK**.
 
 ```PowerShell
@@ -1972,7 +1972,7 @@ cls
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>VHD Size [KB]</strong></p>
@@ -2304,7 +2304,7 @@ cls
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>Image Size [KB]</strong></p>
@@ -2509,7 +2509,7 @@ Edit the task sequence to include the actions required to update the reference i
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 8.1**, right-click **Windows 8.1 Enterprise (x64) - Baseline**, and click **Properties**.
 2. In the **Windows 8.1 Enterprise (x64) - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, PowerShell help files, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -2547,7 +2547,7 @@ Repeat the steps in the previous section for the **Windows Server 2012 R2 - Base
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 8.1**, right-click **Windows 8.1 Enterprise (x64) - Baseline**, and click **Properties**.
 2. In the **Windows 8.1 Enterprise (x64) - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, PowerShell help files, Office 2013, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -2622,7 +2622,7 @@ cls
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>Image Size [KB]</strong></p>
@@ -3525,7 +3525,7 @@ Edit the task sequence to include the actions required to install SQL Server 201
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows Server 2012 R2**, right-click **SharePoint Server 2013 - Development** and click **Properties**.
 2. In the **SharePoint Server 2013 - Development Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Windows Server 2012 R2, Toolbox content, Windows features for SharePoint 2013, PowerShell help files, SQL Server 2014, Visual Studio 2013 with Update 4, Office 2013, and SharePoint Server 2013**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -3602,7 +3602,12 @@ Edit the task sequence to include the actions required to install SQL Server 201
             3. Application to install: **SharePoint Server 2013 with Service Pack 1 - Prerequisites**
          7. After the **Install SharePoint Server 2013 with Service Pack 1 - Prerequisites** action, add a new **Run Command Line** action with the following settings:
             1. Name: **Remove SharePoint prerequisite files**
-            2. Command line: **PowerShell.exe -Command "& { Remove-Item C:\\PrerequisiteInstallerFiles_SP1 -Recurse -Force }"Note: **I originally attempted to use the following command line...rmdir /S /Q C:\\PrerequisiteInstallerFiles_SP1...but encountered numerous issues (despite adding "1" to the list of success codes -- since rmdir was found to return this value when deleting the folder). Consequently I switched to deleting the folder via PowerShell instead.
+            2. Command line: **PowerShell.exe -Command "& { Remove-Item C:\\PrerequisiteInstallerFiles_SP1 -Recurse -Force }"**
+               > **Note:** I originally attempted to use the following command line...
+               >
+               > rmdir /S /Q C:\\PrerequisiteInstallerFiles_SP1
+               >
+               > ...but encountered numerous issues (despite adding "1" to the list of success codes -- since rmdir was found to return this value when deleting the folder). Consequently I switched to deleting the folder via PowerShell instead.
          8. After the **Remove SharePoint prerequisite files** action, add a new **Restart computer** action.
          9. Select **Custom Tasks (Pre-Windows Update)** and add a new **Install Application** action with the following settings:
             1. Name: **Install SharePoint Server 2013 with Service Pack 1**
@@ -3661,7 +3666,7 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>Image Size [KB]</strong></p>
@@ -3938,7 +3943,7 @@ Edit the task sequence to enable the Windows Update actions.
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows Server 2012 R2**, right-click **SharePoint Server 2013 - Development** and click **Properties**.
 2. In the **SharePoint Server 2013 - Development Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Windows Server 2012 R2, Toolbox content, Windows features for SharePoint 2013, PowerShell help files, SQL Server 2014, Visual Studio 2013 with Update 4, Office 2013, SharePoint Server 2013, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -3995,7 +4000,7 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>Image Size [KB]</strong></p>
@@ -4348,7 +4353,7 @@ Remove-Item "C:\NotBackedUp\Temp\Action - Cleanup before Sysprep"
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 7**, right-click **Windows 7 Ultimate (x86) - Baseline** and click **Properties**.
 2. In the **Windows 7 Ultimate (x86) - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, Office 2013, latest patches, and cleanup before Sysprep**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -4471,7 +4476,7 @@ cls
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>Image Size [KB]</strong></p>
@@ -4924,7 +4929,7 @@ cls
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 7**, right-click **Windows 7 Ultimate (x86) - Baseline** and click **Properties**.
 2. In the **Windows 7 Ultimate (x86) - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content, .NET Framework 3.5, Office 2013, latest patches, and cleanup before Sysprep**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -5041,7 +5046,7 @@ cls
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>Image Size [KB]</strong></p>
@@ -5957,13 +5962,13 @@ robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot C
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Production ([\\\\ICEMAN\\MDT-Deploy\$](\\ICEMAN\MDT-Deploy$)) / Task Sequences / Windows 7 **folder, right-click **Windows 7 Ultimate (x86)** and click **Properties**.
 2. In the **Windows 7 Ultimate (x86) Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Production image - create native images for .NET assemblies**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
          1. In the **Custom Tasks **group, add a new **Run Command Line** action with the following settings:
             1. Name: **Create native images for .NET assemblies**
-            2. Command line: **PowerShell.exe -Command "Get-ChildItem \$env:SystemRoot\\Microsoft.NET -Filter Ngen.exe -Recurse | % { & \$_.FullName executeQueuedItems }"**
+            2. Command line: **PowerShell.exe -Command "Get-ChildItem \$env:SystemRoot\\Microsoft.NET -Filter Ngen.exe -Recurse | % { & \$\_.FullName executeQueuedItems }"**
    3. Right-click the **Create native images for .NET assemblies** action and click **Copy**.
    4. Click **OK**.
 
@@ -6036,15 +6041,15 @@ Remove-Item $tempSourcePath -Force -Recurse
       2. In the **Config.xml settings** section:
          1. Click the **Customer name** checkbox and then type **Technology Toolbox **in the corresponding textbox.
          2. Click the **Display level** checkbox and then click **None **in the corresponding dropdown list.
-         3. Click the **Accept EULA **checkbox.
-         4. Click the **Always suppress reboot **checkbox.
+         3. Click the **Accept EULA** checkbox.
+         4. Click the **Always suppress reboot** checkbox.
    2. In the **SharePoint Designer 2013 with Service Pack 1 (x86) Properties** window, click **OK**.
 
 ### Add action to "SharePoint Server 2013 - Development" task sequence to install SharePoint Designer 2013
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows Server 2012 R2**, right-click **SharePoint Server 2012 - Development**, and click **Properties**.
 2. In the **SharePoint Server 2012 - Development** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Windows Server 2012 R2, MaxPatchCacheSize = 0, Toolbox content, Windows features for SharePoint 2013, PowerShell help files, SQL Server 2014, Visual Studio 2013 with Update 4, Office 2013, SharePoint Designer 2013, SharePoint Server 2013, latest patches, and cleanup before Sysprep**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -6114,7 +6119,7 @@ cls
 <p><strong>End</strong></p>
 </th>
 <th>
-<p><strong>Duration[HH:MM:SS]</strong></p>
+<p><strong>Duration<br>[HH:MM:SS]</strong></p>
 </th>
 <th>
 <p><strong>Image Size [KB]</strong></p>
@@ -6887,7 +6892,7 @@ cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
 
 ---
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ---
 
@@ -7199,11 +7204,11 @@ Install-WindowsFeature `
 3. In the **SMTP Virtual Server Properties** window:
    1. On the **Access** tab:
       1. In the **Access control **section, click **Authentication...**
-      2. In the **Authentication **window:
+      2. In the **Authentication** window:
          1. Select **Integrated Windows Authentication**.
          2. Click **OK**.
       3. In the **Relay restrictions **section, click **Relay...**
-      4. In the **Relay Restrictions **window:
+      4. In the **Relay Restrictions** window:
          1. Ensure the **Only the list below** option is selected.
          2. Ensure **Allow all computers which successfully authenticate to relay, regardless of the list above** is selected.
          3. Click **OK**.

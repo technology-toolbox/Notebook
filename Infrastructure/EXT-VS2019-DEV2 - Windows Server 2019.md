@@ -317,7 +317,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members ($vmName + '$')
@@ -331,7 +331,7 @@ cls
 
 ## # Configure cmder
 
-#### # Copy cmder configuration from file server
+### # Copy cmder configuration from file server
 
 ```PowerShell
 $source = "\\EXT-FS01\Public\cmder-config"
@@ -877,7 +877,7 @@ notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
 
 ---
 
-**C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
+File - **C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
 
 ```Text
 ;prefix=${APPDATA}\npm
@@ -1002,7 +1002,7 @@ exit
 
 ---
 
-**Non-elevated PowerShell instance**
+**Non-elevated** PowerShell instance
 
 ```PowerShell
 cls

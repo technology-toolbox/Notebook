@@ -66,7 +66,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-FOOBAR3**.
   - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
@@ -876,7 +876,7 @@ Notepad ($env:ProgramFiles `
 
 ---
 
-**DistributedCacheService.exe.config**
+File - **DistributedCacheService.exe.config**
 
 ```XML
   <appSettings>
@@ -1329,7 +1329,7 @@ cls
 
 ## # Install and configure Office Web Apps
 
-#### # Configure SharePoint 2013 farm to use Office Web Apps
+### # Configure SharePoint 2013 farm to use Office Web Apps
 
 ```PowerShell
 New-SPWOPIBinding -ServerName wac.fabrikam.com
@@ -1337,7 +1337,7 @@ New-SPWOPIBinding -ServerName wac.fabrikam.com
 Set-SPWOPIZone -zone "external-https"
 ```
 
-#### # Configure name resolution on Office Web Apps farm
+### # Configure name resolution on Office Web Apps farm
 
 ---
 
@@ -1434,9 +1434,9 @@ cls
 
 #### # Create User Profile Service Application
 
-# Create User Profile Service Application as EXTRANET\\s-sp-farm-dev:
-
 ```PowerShell
+# Create User Profile Service Application as EXTRANET\\s-sp-farm-dev
+
 $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
 ```
 
@@ -1457,7 +1457,7 @@ Start-Process $PSHOME\powershell.exe `
 
 ---
 
-**PowerShell -- running as EXTRANET\\s-sp-farm-dev**
+**PowerShell** -- running as **EXTRANET\\s-sp-farm-dev**
 
 ```PowerShell
 cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.670.0\DeploymentFiles\Scripts
@@ -1958,7 +1958,7 @@ notepad web.config
 
 ---
 
-**Web.config**
+File - **Web.config**
 
 ```XML
   <connectionStrings>
@@ -2526,6 +2526,7 @@ Start-Process $env:SECURITAS_CLOUD_PORTAL_URL
 
 Unable to hide the Search navigation item -- click **OK** but changes are not saved (no error reported).
 
+```Text
 07/22/2016 09:45:12.65	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96\
 07/22/2016 09:45:12.65	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__GlobalNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96\
 07/22/2016 09:45:12.67	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96\
@@ -2542,6 +2543,7 @@ Unable to hide the Search navigation item -- click **OK** but changes are not sa
 07/22/2016 09:45:12.79	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96\
 07/22/2016 09:45:12.82	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__CurrentNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96\
 07/22/2016 09:45:12.82	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96
+```
 
 ```PowerShell
 cls
@@ -2603,11 +2605,11 @@ Tracking ID: **UA-25949832-5**
 cls
 ```
 
-# Install Employee Portal
+## Install Employee Portal
 
-## # Extend SecuritasConnect and Cloud Portal web applications
+### # Extend SecuritasConnect and Cloud Portal web applications
 
-### # Extend web applications to Intranet zone
+#### # Extend web applications to Intranet zone
 
 ```PowerShell
 [CmdletBinding()]
@@ -2725,7 +2727,7 @@ Process
 }
 ```
 
-### Enable disk-based caching for "intranet" websites
+#### Enable disk-based caching for "intranet" websites
 
 (skipped)
 
@@ -2733,31 +2735,31 @@ Process
 cls
 ```
 
-### # Map intranet URLs to loopback address in Hosts file
+#### # Map intranet URLs to loopback address in Hosts file
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
     127.0.0.1 client2-local-3.securitasinc.com, cloud2-local-3.securitasinc.com
 ```
 
-### # Allow specific host names mapped to 127.0.0.1
+#### # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
     client2-local-3.securitasinc.com, cloud2-local-3.securitasinc.com
 ```
 
-## Install Web Deploy 3.6
+### Install Web Deploy 3.6
 
-### Download Web Platform Installer
+#### Download Web Platform Installer
 
 (skipped)
 
-### Install Web Deploy
+#### Install Web Deploy
 
 (skipped -- since this is installed with Visual Studio 2015)
 
-## Install .NET Framework 4.5
+### Install .NET Framework 4.5
 
 (skipped -- since this is installed with Visual Studio 2015)
 
@@ -2765,9 +2767,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 cls
 ```
 
-## # Install Employee Portal
+### # Install Employee Portal
 
-### # Copy Employee Portal build to SharePoint server
+#### # Copy Employee Portal build to SharePoint server
 
 ```PowerShell
 net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
@@ -2784,7 +2786,7 @@ robocopy `
     /E
 ```
 
-### # Add Employee Portal URL to "Local intranet" zone
+#### # Add Employee Portal URL to "Local intranet" zone
 
 ```PowerShell
 [Uri] $url = [Uri] "http://employee-local-3.securitasinc.com"
@@ -2817,7 +2819,7 @@ Set-ItemProperty -Path $registryKey -Name http -Value 1
 cls
 ```
 
-### # Create Employee Portal SharePoint site
+#### # Create Employee Portal SharePoint site
 
 ```PowerShell
 cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Deployment Files\Scripts'
@@ -2832,9 +2834,9 @@ cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Deployment Files\Scr
 cls
 ```
 
-### # Create Employee Portal website
+#### # Create Employee Portal website
 
-#### # Create Employee Portal website on SharePoint Central Administration server
+##### # Create Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
 cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Deployment Files\Scripts'
@@ -2845,11 +2847,11 @@ cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Deployment Files\Scr
     -Verbose
 ```
 
-#### Configure SSL bindings on Employee Portal website
+##### Configure SSL bindings on Employee Portal website
 
 (skipped)
 
-#### Create Employee Portal website on other web servers in farm
+##### Create Employee Portal website on other web servers in farm
 
 (skipped)
 
@@ -2857,9 +2859,9 @@ cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Deployment Files\Scr
 cls
 ```
 
-### # Deploy Employee Portal website
+#### # Deploy Employee Portal website
 
-#### # Deploy Employee Portal website on SharePoint Central Administration server
+##### # Deploy Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
 Push-Location C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.28.0\Debug\_PublishedWebsites\Web_Package
@@ -2871,7 +2873,7 @@ Notepad .\Web.SetParameters.xml
 
 ---
 
-**Web.SetParameters.xml**
+File - **Web.SetParameters.xml**
 
 ```XML
 <?xml version="1.0" encoding="utf-8"?>
@@ -2899,7 +2901,7 @@ cls
 Pop-Location
 ```
 
-#### # Configure application settings and web service URLs
+##### # Configure application settings and web service URLs
 
 ```PowerShell
 Notepad C:\inetpub\wwwroot\employee-local-3.securitasinc.com\Web.config
@@ -2907,7 +2909,7 @@ Notepad C:\inetpub\wwwroot\employee-local-3.securitasinc.com\Web.config
 
 Set the value of the **GoogleAnalytics.TrackingId** application setting to **UA-25949832-3**.
 
-#### Deploy Employee Portal website content to other web servers in farm
+##### Deploy Employee Portal website content to other web servers in farm
 
 (skipped)
 
@@ -2915,7 +2917,7 @@ Set the value of the **GoogleAnalytics.TrackingId** application setting to **UA-
 cls
 ```
 
-### # Configure database logins and permissions for Employee Portal
+#### # Configure database logins and permissions for Employee Portal
 
 ```PowerShell
 $sqlcmd = @"
@@ -2937,24 +2939,24 @@ GO
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
 ```
 
-### Grant PNKCAN and PNKUS users permissions on Cloud Portal website
+#### Grant PNKCAN and PNKUS users permissions on Cloud Portal website
 
 (skipped)
 
-### Install additional service packs and updates
+#### Install additional service packs and updates
 
 ```PowerShell
 cls
 ```
 
-### # Map Employee Portal URL to loopback address in Hosts file
+#### # Map Employee Portal URL to loopback address in Hosts file
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
     127.0.0.1 employee-local-3.securitasinc.com
 ```
 
-### # Allow specific host names mapped to 127.0.0.1
+#### # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
@@ -2965,7 +2967,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 cls
 ```
 
-### # Resume Search Service Application and start full crawl on all content sources
+#### # Resume Search Service Application and start full crawl on all content sources
 
 ```PowerShell
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
@@ -3196,4 +3198,4 @@ Start-SCVirtualMachine $vmName
 
 ### Create VM snapshot
 
-**Before - Create and configure SharePoint farm**
+Snapshot name: **Before - Create and configure SharePoint farm**

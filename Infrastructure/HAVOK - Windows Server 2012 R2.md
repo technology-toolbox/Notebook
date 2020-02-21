@@ -123,7 +123,7 @@ cls
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 New-NetFirewallRule `
@@ -336,7 +336,8 @@ New-NetFirewallRule `
     -Group 'Technology Toolbox (Custom)' `
     -Direction Inbound `
     -Protocol TCP `
-    -LocalPort 2383 `-Action Allow
+    -LocalPort 2383 `
+    -Action Allow
 
 New-NetFirewallRule `
     -Name "SQL Server Database Engine" `
@@ -344,7 +345,8 @@ New-NetFirewallRule `
     -Group 'Technology Toolbox (Custom)' `
     -Direction Inbound `
     -Protocol TCP `
-    -LocalPort 1433 `-Action Allow
+    -LocalPort 1433 `
+    -Action Allow
 ```
 
 ## Configure Max Degree of Parallelism for SharePoint

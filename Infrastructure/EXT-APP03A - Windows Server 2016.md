@@ -55,7 +55,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-APP03A**.
   - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, do not select any applications, and click **Next**.
 
@@ -327,7 +327,7 @@ Add-Computer `
 cls
 ```
 
-##### # Move computer to different OU
+#### # Move computer to different OU
 
 ```PowerShell
 $computerName = "EXT-APP03A"
@@ -338,9 +338,9 @@ $targetPath = ("OU=SharePoint Servers,OU=Servers,OU=Resources,OU=IT" `
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 ```
 
-##### # Configure Windows Update
+### # Configure Windows Update
 
-###### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 $domainGroupName = "Windows Update - Slot 1"
@@ -787,7 +787,7 @@ Notepad ($env:ProgramFiles `
 
 ---
 
-**DistributedCacheService.exe.config**
+File - **DistributedCacheService.exe.config**
 
 ```XML
   <appSettings>
@@ -1110,7 +1110,7 @@ Pop-Location
 
 ---
 
-**258521-VM4 - Command Prompt**
+**258521-VM4** - Command Prompt
 
 #### REM Export MIIS encryption key
 
@@ -1241,9 +1241,8 @@ Enable-NetFirewallRule `
 
 ```PowerShell
 Get-SPServiceInstance |
+    where {($_.service.ToString()) -eq "SPDistributedCacheService Name=AppFabricCachingService"}
 ```
-
-    where {(\$_.service.ToString()) -eq "SPDistributedCacheService Name=AppFabricCachingService"}
 
 ```PowerShell
 $s = Get-SPServiceInstance {GUID}
@@ -1504,9 +1503,9 @@ cls
 
 #### # Create User Profile Service Application
 
-# Use SharePoint farm service account to create User Profile Service Application:
-
 ```PowerShell
+# Use SharePoint farm service account to create User Profile Service Application
+
 $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
 ```
 
@@ -1527,7 +1526,7 @@ Start-Process $PSHOME\powershell.exe `
 
 ---
 
-**PowerShell -- running as EXTRANET\\s-sp-farm**
+**PowerShell** -- running as **EXTRANET\\s-sp-farm**
 
 ```PowerShell
 cd D:\Shares\Builds\ClientPortal\4.0.701.0\DeploymentFiles\Scripts
@@ -1586,11 +1585,11 @@ cls
 
 #### # Import MIIS encryption key
 
+```PowerShell
 # Note: NullReferenceException occurs if you attempt to perform this step before starting the User Profile Synchronization Service.
 
-# Import MIIS encryption key as the SharePoint farm service account:
+# Import MIIS encryption key as the SharePoint farm service account
 
-```PowerShell
 If ($farmCredential -eq $null)
 {
     $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
@@ -1610,7 +1609,7 @@ Start-Process $PSHOME\powershell.exe `
 
 ---
 
-**Command Prompt -- running as EXTRANET\\s-sp-farm**
+**Command Prompt** -- running as **EXTRANET\\s-sp-farm**
 
 ```Console
 cd "C:\Program Files\Microsoft Office Servers\15.0\Synchronization Service\Bin\"
@@ -2294,7 +2293,7 @@ Notepad web.config
 
 ---
 
-**Web.config**
+File - **Web.config**
 
 ```XML
     <BlobCache
@@ -2535,7 +2534,7 @@ notepad web.config
 
 ---
 
-**Web.config**
+File - **Web.config**
 
 ```XML
   <connectionStrings>
@@ -2645,11 +2644,8 @@ cls
 
 ```PowerShell
 $source = "\\TT-FS01\Archive\Clients\Securitas\Configuration" `
-```
+    + "\AppSettings-UAT_2018-01-19.csv"
 
-    + "\\AppSettings-UAT_2018-01-19.csv"
-
-```PowerShell
 $destination = "\\EXT-APP03A.extranet.technologytoolbox.com" `
     + "\C`$\Users\setup-sharepoint\Desktop"
 
@@ -2964,18 +2960,18 @@ Set-Location C:
 
 ##### Configure TrackTik credentials for Branch Manager
 
-[https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-test.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 Branch Manager: **smasters@technologytoolbox.com**\
 TrackTik username:** opanduro2m**
 
 ##### HACK: Update TrackTik password for Angela.Parks
 
-[https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-2.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ##### HACK: Update TrackTik password for bbarthelemy-demo
 
-[https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-2.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ---
 
@@ -3111,7 +3107,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 7-1/2  minutes.
+> Expect the previous operation to complete in approximately 7-1/2 minutes.
 
 ```PowerShell
 cls
@@ -3667,7 +3663,7 @@ Notepad web.config
 
 ---
 
-**Web.config**
+File - **Web.config**
 
 ```XML
     <BlobCache
@@ -3872,11 +3868,11 @@ cls
 cls
 ```
 
-# Install Employee Portal
+## Install Employee Portal
 
-## # Extend SecuritasConnect and Cloud Portal web applications
+### # Extend SecuritasConnect and Cloud Portal web applications
 
-### # Copy Employee Portal build to SharePoint server
+#### # Copy Employee Portal build to SharePoint server
 
 ```PowerShell
 net use \\ICEMAN\Builds /USER:PNKUS\jjameson
@@ -3895,7 +3891,7 @@ $destPath = "\\EXT-APP03A\Builds\EmployeePortal\$build"
 robocopy $sourcePath $destPath /E
 ```
 
-### # Extend web applications to Intranet zone
+#### # Extend web applications to Intranet zone
 
 ```PowerShell
 cd 'D:\Shares\Builds\EmployeePortal\1.0.29.0\Deployment Files\Scripts'
@@ -3907,9 +3903,9 @@ cd 'D:\Shares\Builds\EmployeePortal\1.0.29.0\Deployment Files\Scripts'
 cls
 ```
 
-### # Enable disk-based caching for "intranet" websites
+#### # Enable disk-based caching for "intranet" websites
 
-#### # Enable disk-based caching for SecuritasConnect "intranet" website
+##### # Enable disk-based caching for SecuritasConnect "intranet" website
 
 ```PowerShell
 Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
@@ -3924,7 +3920,7 @@ C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
 Pop-Location
 ```
 
-#### # Enable disk-based caching for Cloud Portal "intranet" website
+##### # Enable disk-based caching for Cloud Portal "intranet" website
 
 ```PowerShell
 Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
@@ -3943,23 +3939,23 @@ Pop-Location
 cls
 ```
 
-### # Map intranet URLs to loopback address in Hosts file
+#### # Map intranet URLs to loopback address in Hosts file
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
     127.0.0.1 client2-test.securitasinc.com, cloud2-test.securitasinc.com
 ```
 
-### # Allow specific host names mapped to 127.0.0.1
+#### # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
     client2-test.securitasinc.com, cloud2-test.securitasinc.com
 ```
 
-## Install Web Deploy 3.6
+### Install Web Deploy 3.6
 
-### Download Web Platform Installer
+#### Download Web Platform Installer
 
 (skipped)
 
@@ -3967,7 +3963,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 cls
 ```
 
-### # Install Web Deploy
+#### # Install Web Deploy
 
 ```PowerShell
 net use \\ICEMAN\Products /USER:PNKUS\jjameson
@@ -3986,9 +3982,9 @@ net use \\ICEMAN\Products /USER:PNKUS\jjameson
 cls
 ```
 
-## # Install .NET Framework 4.5
+### # Install .NET Framework 4.5
 
-### # Download .NET Framework 4.5.2 installer
+#### # Download .NET Framework 4.5.2 installer
 
 ```PowerShell
 net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
@@ -4005,7 +4001,7 @@ Copy-Item `
     C:\NotBackedUp\Temp
 ```
 
-### # Install .NET Framework 4.5.2
+#### # Install .NET Framework 4.5.2
 
 ```PowerShell
 & C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
@@ -4019,17 +4015,17 @@ Copy-Item `
 Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
 ```
 
-### Install updates
+#### Install updates
 
 > **Important**
 >
 > When prompted, restart the computer to complete the process of installing the updates.
 
-### Restart computer (if not restarted since installing .NET Framework 4.5)
+#### Restart computer (if not restarted since installing .NET Framework 4.5)
 
 (skipped)
 
-### Ensure ASP.NET v4.0 ISAPI filters are enabled
+#### Ensure ASP.NET v4.0 ISAPI filters are enabled
 
 (skipped -- since the ISAPI filters were already enabled)
 
@@ -4037,9 +4033,9 @@ Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
 cls
 ```
 
-## # Install Employee Portal
+### # Install Employee Portal
 
-### # Add Employee Portal URLs to "Local intranet" zone
+#### # Add Employee Portal URLs to "Local intranet" zone
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
@@ -4048,7 +4044,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
         https://employee-test.securitasinc.com
 ```
 
-### Create Employee Portal SharePoint site
+#### Create Employee Portal SharePoint site
 
 (skipped)
 
@@ -4056,9 +4052,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
 cls
 ```
 
-### # Create Employee Portal website
+#### # Create Employee Portal website
 
-#### # Create Employee Portal website on SharePoint Central Administration server
+##### # Create Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
 cd 'D:\Shares\Builds\EmployeePortal\1.0.29.0\Deployment Files\Scripts'
@@ -4069,13 +4065,13 @@ cd 'D:\Shares\Builds\EmployeePortal\1.0.29.0\Deployment Files\Scripts'
     -Verbose
 ```
 
-#### Configure SSL bindings on Employee Portal website
+##### Configure SSL bindings on Employee Portal website
 
 ```PowerShell
 cls
 ```
 
-#### # Create Employee Portal website on other web servers in farm
+##### # Create Employee Portal website on other web servers in farm
 
 ```PowerShell
 Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
@@ -4105,9 +4101,9 @@ Pop-Location
 cls
 ```
 
-### # Deploy Employee Portal website
+#### # Deploy Employee Portal website
 
-#### # Deploy Employee Portal website on SharePoint Central Administration server
+##### # Deploy Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
 Push-Location D:\Shares\Builds\EmployeePortal\1.0.29.0\Release\_PublishedWebsites\Web_Package
@@ -4119,7 +4115,7 @@ Notepad .\Web.SetParameters.xml
 
 ---
 
-**Web.SetParameters.xml**
+File - **Web.SetParameters.xml**
 
 ```XML
 <?xml version="1.0" encoding="utf-8"?>
@@ -4147,7 +4143,7 @@ cls
 Pop-Location
 ```
 
-#### # Configure application settings and web service URLs
+##### # Configure application settings and web service URLs
 
 ```PowerShell
 Notepad C:\inetpub\wwwroot\employee-test.securitasinc.com\Web.config
@@ -4164,7 +4160,7 @@ Notepad C:\inetpub\wwwroot\employee-test.securitasinc.com\Web.config
 cls
 ```
 
-#### # Deploy Employee Portal website content to other web servers in farm
+##### # Deploy Employee Portal website content to other web servers in farm
 
 ```PowerShell
 Push-Location "C:\Program Files\IIS\Microsoft Web Deploy V3"
@@ -4186,7 +4182,7 @@ Pop-Location
 
 **EXT-SQL03 - SQL Server Management Studio**
 
-### -- Configure database logins and permissions for Employee Portal
+#### -- Configure database logins and permissions for Employee Portal
 
 ```SQL
 USE [master]
@@ -4226,7 +4222,7 @@ GO
 cls
 ```
 
-### # Grant PNKCAN and PNKUS users permissions on Cloud Portal site
+#### # Grant PNKCAN and PNKUS users permissions on Cloud Portal site
 
 ```PowerShell
 Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
@@ -4285,24 +4281,24 @@ $supportedDomains |
 $web.Dispose()
 ```
 
-### Replace absolute URLs in "User Sites" list
+#### Replace absolute URLs in "User Sites" list
 
 (skipped)
 
-### Install additional service packs and updates
+#### Install additional service packs and updates
 
 ```PowerShell
 cls
 ```
 
-### # Map Employee Portal URL to loopback address in Hosts file
+#### # Map Employee Portal URL to loopback address in Hosts file
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
     127.0.0.1 employee-test.securitasinc.com
 ```
 
-### # Allow specific host names mapped to 127.0.0.1
+#### # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
@@ -4313,7 +4309,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 cls
 ```
 
-### # Resume Search Service Application and start full crawl on all content sources
+#### # Resume Search Service Application and start full crawl on all content sources
 
 ```PowerShell
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
@@ -4332,13 +4328,13 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 cls
 ```
 
-## # Clean up WinSxS folder
+### # Clean up WinSxS folder
 
 ```PowerShell
 Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
 ```
 
-## Disable setup accounts
+### Disable setup accounts
 
 ---
 

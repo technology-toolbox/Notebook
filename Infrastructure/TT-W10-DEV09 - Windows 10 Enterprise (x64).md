@@ -117,7 +117,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members ($vmName + '$')
@@ -602,9 +602,9 @@ On the **Analysis Services Configuration** page:
   - Change the **Temp directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Temp.**
   - Change the **Backup directory** to **Z:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Backup**.
 
-On the **Distributed Replay Controller **page, click **Add Current User**.
+On the **Distributed Replay Controller** page, click **Add Current User**.
 
-On the **Distributed Replay Client **page:
+On the **Distributed Replay Client** page:
 
 - On the **Server Configuration** tab, click **Add Current User**.
   - Change the **Working Directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\WorkingDir\\.**

@@ -29,7 +29,8 @@ $vhdPath = "C:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
 New-VHD `
     -Path $vhdPath `
-    -SizeBytes 32GB `-Dynamic
+    -SizeBytes 32GB `
+    -Dynamic
 
 Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
 
@@ -37,7 +38,8 @@ $isoPath = "\\iceman\Products\Microsoft\Windows Server 2012 R2" `
     + "\en_windows_server_2012_r2_x64_dvd_2707946.iso"
 
 Set-VMDvdDrive `
-    -VMName $vmName `-Path $isoPath
+    -VMName $vmName `
+    -Path $isoPath
 
 Start-VM $vmName
 ```
@@ -72,7 +74,7 @@ tzutil /g
 7. Close Notepad.
 
 ```Console
-    notepad C:\Windows\CAPolicy.inf
+notepad C:\Windows\CAPolicy.inf
 ```
 
 ```INI
@@ -119,7 +121,11 @@ Install-WindowsFeature Adcs-Cert-Authority -IncludeManagementTools
 
 ```PowerShell
 Install-AdcsCertificationAuthority `
-    -CAType StandaloneRootCA `-CACommonName "Technology Toolbox Root Certificate Authority" `-KeyLength 4096 `-HashAlgorithmName SHA256 `-CryptoProviderName "RSA#Microsoft Software Key Storage Provider" `
+    -CAType StandaloneRootCA `
+    -CACommonName "Technology Toolbox Root Certificate Authority" `
+    -KeyLength 4096 `
+    -HashAlgorithmName SHA256 `
+    -CryptoProviderName "RSA#Microsoft Software Key Storage Provider" `
     -ValidityPeriod Years `
     -ValidityPeriodUnits 20
 ```
@@ -264,7 +270,7 @@ Start-VM -ComputerName TT-HV05A -Name CRYPTID
 5. Close Notepad.
 
 ```Console
-    notepad C:\Windows\CAPolicy.inf
+notepad C:\Windows\CAPolicy.inf
 ```
 
 ```Text
@@ -526,9 +532,15 @@ certutil -addstore -f `
     root "Technology Toolbox Root Certificate Authority.crl"
 ```
 
-**Note**
-
-The first command places the root CA public certificate into the Configuration container of Active Directory. Doing so allows domain client computers to automatically trust the root CA certificate and there is no additional need to distribute that certificate in Group Policy. The second and third commands place the root CA certificate and CRL into the local store of CIPHER01. This provides CIPHER01 immediate trust of root CA public certificate and knowledge of the root CA CRL.
+> **Note**
+>
+> The first command places the root CA public certificate into the Configuration
+> container of Active Directory. Doing so allows domain client computers to
+> automatically trust the root CA certificate and there is no additional need to
+> distribute that certificate in Group Policy. The second and third commands
+> place the root CA certificate and CRL into the local store of CIPHER01. This
+> provides CIPHER01 immediate trust of root CA public certificate and knowledge
+> of the root CA CRL.
 
 ```PowerShell
 cls
@@ -590,7 +602,7 @@ cls
 5. Close Notepad.
 
 ```Console
-    notepad C:\Windows\CAPolicy.inf
+notepad C:\Windows\CAPolicy.inf
 ```
 
 ```Text
@@ -722,11 +734,25 @@ cls
 certreq.exe -submit 'A:\CIPHER01.corp.technologytoolbox.com_Technology Toolbox Issuing Certificate Authority 01(1).req'
 ```
 
-1. In the **Certification Authority List **window, ensure that **Technology Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click **OK**.
+1. In the **Certification Authority List** window, ensure that **Technology Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click **OK**.
 2. Note that the certificate request is pending. Make a note of the request ID number.
-3. To approve the request using certutil, enter:Certutil -resubmit _`<RequestId>`_Replace the actual request number for `<RequestId>`. For example, if the Request ID is 6, you would enter:certutil.exe -resubmit 6
-4. From the command prompt, retrieve the issued certificate by running the command:certreq.exe -retrieve 6 'A:\\Technology Toolbox Issuing Certificate Authority 01(1).crt'
-5. In the **Certification Authority List **window, ensure that **Technology Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click **OK**.
+3. To approve the request using certutil, enter:\
+   \
+   Certutil -resubmit _`<RequestId>`_
+
+   Replace the actual request number for `<RequestId>`. For example, if the Request ID is 6, you would enter:
+
+   ```Console
+   certutil.exe -resubmit 6
+   ```
+
+4. From the command prompt, retrieve the issued certificate by running the command:
+
+   ```Console
+   certreq.exe -retrieve 6 'A:\\Technology Toolbox Issuing Certificate Authority 01(1).crt'
+   ```
+
+5. In the **Certification Authority List** window, ensure that **Technology Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click **OK**.
 
 ```PowerShell
 cls

@@ -7,9 +7,7 @@ Tuesday, November 21, 2017
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Deploy and configure the infrastructure
-
-### Install Windows 7
+## Deploy and configure workstation
 
 ---
 
@@ -19,7 +17,7 @@ Tuesday, November 21, 2017
 cls
 ```
 
-#### # Create virtual machine
+### # Create virtual machine
 
 ```PowerShell
 $vmHost = "TT-HV02B"
@@ -51,7 +49,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-#### Install custom Windows 7 image
+### Install custom Windows 7 image
 
 - On the **Task Sequence** step, select **Windows 7 Ultimate (x86)** and click **Next**.
 - On the **Computer Details** step, in the **Computer name** box, type **TT-WIN7-TEST1** and click **Next**.
@@ -305,7 +303,7 @@ New-SCVMCheckpoint -VM $vm -Name Baseline
 
 ## Issue - Not enough free space to install patches using Windows Update
 
-### Expand C:
+### Expand C: volume
 
 ---
 

@@ -219,7 +219,7 @@ robocopy \\iceman.corp.technologytoolbox.com\Public\Toolbox C:\NotBackedUp\Publi
 Enable-PSRemoting -Confirm:$false
 ```
 
-### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 Set-ExecutionPolicy RemoteSigned -Force
@@ -227,7 +227,7 @@ Set-ExecutionPolicy RemoteSigned -Force
 C:\NotBackedUp\Public\Toolbox\PowerShell\Enable-RemoteWindowsUpdate.ps1 -Verbose
 ```
 
-### # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Disable firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbose
@@ -328,7 +328,7 @@ Start-VM -ComputerName $vmHost -VMName $vmName
 
 ---
 
-# Expand C: partition
+#### Expand C: partition
 
 ```PowerShell
 $maxSize = (Get-PartitionSupportedSize -DriveLetter C).SizeMax
@@ -1054,10 +1054,10 @@ $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
 	Where-Object { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
-	$smtpServer,
-	$fromAddress,
-	$replyAddress,
-	$characterSet)
+    $smtpServer,
+    $fromAddress,
+    $replyAddress,
+    $characterSet)
 ```
 
 ### # DEV - Configure timer job history
@@ -1131,9 +1131,9 @@ cls
 
 #### # Create the User Profile Service Application
 
-# Create User Profile Service Application as EXTRANET\\s-spfarm-dev:
-
 ```PowerShell
+# Create User Profile Service Application as EXTRANET\\s-spfarm-dev
+
 $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
 ```
 
@@ -1154,7 +1154,7 @@ Start-Process $PSHOME\powershell.exe `
 
 ---
 
-**PowerShell -- running as EXTRANET\\s-spfarm-dev**
+**PowerShell** -- running as **EXTRANET\\s-spfarm-dev**
 
 ```PowerShell
 cd C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts

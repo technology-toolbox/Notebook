@@ -663,10 +663,12 @@ robocopy D:\Shares\VM-Library F:\Shares\VM-Library /COPYALL /NP /E
 
 > **Note**
 >
-> Warnings are displayed when using the /COPYALL option (to copy permissions) because the volumes are formatted using ReFS (not NTFS). However, after checking the permissions on the files afterwards, the permissions were found to be copied as expected.This was further confirmed by the following PowerShell:
+> Warnings are displayed when using the /COPYALL option (to copy permissions) because the volumes are formatted using ReFS (not NTFS). However, after checking the permissions on the files afterwards, the permissions were found to be copied as expected.\
 >
-> ```Console
-> icacls D:\Shares\VM-Library /save C:\NotBackedUp\Temp\tmp.txt /T
+> This was further confirmed by the following PowerShell:
+>
+> ```PowerShell
+> icacls D:\Shares\VM-Library /save C:\NotBackedUp\Temp\tmp.txt /T
 > icacls F:\Shares\VM-Library /save C:\NotBackedUp\Temp\tmp2.txt /T
 > Get-FileHash -Algorithm SHA1 C:\NotBackedUp\Temp\tmp*.txt | select Hash, Path
 >
@@ -888,7 +890,7 @@ Start-Process `
 
 6.7 GB of free space, but unable to install **2019-06 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4503267).**
 
-### Expand C:
+### Expand C: volume
 
 ---
 

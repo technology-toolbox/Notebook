@@ -332,17 +332,19 @@ Install-ADDSDomainController `
 
 ## Issue - DNS errors
 
-Log Name:      System\
-Source:        Microsoft-Windows-DNS-Client\
-Date:          5/11/2017 1:35:49 AM\
-Event ID:      1014\
-Task Category: (1014)\
-Level:         Warning\
-Keywords:      (268435456)\
-User:          NETWORK SERVICE\
-Computer:      EXT-DC07.extranet.technologytoolbox.com\
-Description:\
+```Text
+Log Name:      System
+Source:        Microsoft-Windows-DNS-Client
+Date:          5/11/2017 1:35:49 AM
+Event ID:      1014
+Task Category: (1014)
+Level:         Warning
+Keywords:      (268435456)
+User:          NETWORK SERVICE
+Computer:      EXT-DC07.extranet.technologytoolbox.com
+Description:
 Name resolution for the name microsoft.com timed out after none of the configured DNS servers responded.
+```
 
 ### Troubleshooting
 
@@ -529,20 +531,22 @@ From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom
 
 ## Issue - License Activation failures
 
-Log Name:      Application\
-Source:        Microsoft-Windows-Security-SPP\
-Date:          3/27/2017 1:27:16 PM\
-Event ID:      8198\
-Task Category: None\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      EXT-DC07.extranet.technologytoolbox.com\
-Description:\
-License Activation (slui.exe) failed with the following error code:\
-hr=0xC004F074\
-Command-line arguments:\
+```Text
+Log Name:      Application
+Source:        Microsoft-Windows-Security-SPP
+Date:          3/27/2017 1:27:16 PM
+Event ID:      8198
+Task Category: None
+Level:         Error
+Keywords:      Classic
+User:          N/A
+Computer:      EXT-DC07.extranet.technologytoolbox.com
+Description:
+License Activation (slui.exe) failed with the following error code:
+hr=0xC004F074
+Command-line arguments:
 RuleId=502ff3ba-669a-4674-bbb1-601f34a3b968;Action=AutoActivateSilent;AppId=55c92734-d682-4d71-983e-d6ec3f16059f;SkuId=00091344-1ea4-4f37-b789-01750ba6988c;NotificationInterval=1440;Trigger=TimerEvent
+```
 
 ### Solution
 

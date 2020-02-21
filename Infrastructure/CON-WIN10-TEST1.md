@@ -233,7 +233,7 @@ Enable-PSRemoting -Confirm:$false
 
 1.7 GB of free space, but unable to install **2018-12 Cumulative Update for Windows 10 for x64-based Systems (KB4471324)**.
 
-### Expand C:
+### Expand C: volume
 
 ---
 

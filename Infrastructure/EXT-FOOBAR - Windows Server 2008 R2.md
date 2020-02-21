@@ -50,7 +50,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 - On the **Task Sequence** step, select **Windows Server 2008 R2** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-FOOBAR**.
-  - In the **Domain to join **box, type **extranet.technologytoolbox.com**.
+  - In the **Domain to join** box, type **extranet.technologytoolbox.com**.
   - Specify the credentials to join the domain.
   - Click **Next**.
 - On the Applications step:
@@ -125,7 +125,7 @@ cls
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 # Note: New-NetFirewallRule is not available on Windows Server 2008 R2
@@ -141,7 +141,7 @@ netsh advfirewall firewall add rule `
     action=Allow
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 netsh advfirewall firewall set rule `
@@ -1716,11 +1716,9 @@ From <[https://support.microsoft.com/en-us/kb/2545227](https://support.microsoft
 
 ### Solution
 
----
+Run the following VBScript:
 
-**VBScript**
-
-```PowerShell
+```VBScript
 strComputer = "."
 
 Set objWMIService = GetObject("winmgmts:" _
@@ -1753,8 +1751,6 @@ For Each obj1elem in obj1
   obj1elem.Delete_
 Next
 ```
-
----
 
 ## Copy Post Orders from TEST
 
@@ -2114,7 +2110,7 @@ Copy/paste the following:
 
 ---
 
-**Web.SetParameters.xml**
+File - **Web.SetParameters.xml**
 
 ```XML
 <?xml version="1.0" encoding="utf-8"?>
@@ -2250,7 +2246,7 @@ Start-SCVirtualMachine $vmName
 
 ### Create VM snapshot
 
-**Baseline Client Portal 3.0.648.0 / Cloud Portal 1.0.111.0 / Employee Portal 1.0.28.0**
+Snapshot name: **Baseline Client Portal 3.0.648.0 / Cloud Portal 1.0.111.0 / Employee Portal 1.0.28.0**
 
 ## Issue - Not enough free space to install patches using Windows Update
 

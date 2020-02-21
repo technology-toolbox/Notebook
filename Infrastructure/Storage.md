@@ -8,4 +8,3 @@ robocopy E:\ '\\tt-hv02c\d$\NotBackedUp\TT-HV02A\E' /E /J /XD "System Volume Inf
 
 robocopy E:\ '\\tt-hv02c\d$\NotBackedUp\TT-HV02B\E' /E /J /XD "System Volume Information" /W:1 /R:1
 ```
-

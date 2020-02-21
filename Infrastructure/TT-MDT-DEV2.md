@@ -150,7 +150,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members ($vmName + '$')
@@ -287,16 +287,15 @@ cls
 
 ```PowerShell
 & ("\\TT-FS01\Products\Microsoft\Windows Assessment and Deployment Kit" `
+    + "\Windows ADK for Windows 10, version 1903\adksetup.exe")
 ```
 
-    + "\\Windows ADK for Windows 10, version 1903\\adksetup.exe")
-
 1. On the **Specify Location** page, click **Next**.
-2. On the **Windows Kits Privacy **page, click **Next**.
+2. On the **Windows Kits Privacy** page, click **Next**.
 3. On the **License Agreement** page:
    1. Review the software license terms.
    2. If you agree to the terms, click **Accept**.
-4. On the **Select the features you want to install **page:
+4. On the **Select the features you want to install** page:
    1. Select the following items:
       - **Deployment Tools**
       - **User State Migration Tool (USMT)**
@@ -310,16 +309,15 @@ cls
 
 ```PowerShell
 & ("\\TT-FS01\Products\Microsoft\Windows Assessment and Deployment Kit" `
+    + "\Windows PE Add-ons for ADK\adkwinpesetup.exe")
 ```
 
-    + "\\Windows PE Add-ons for ADK\\adkwinpesetup.exe")
-
 1. On the **Specify Location** page, click **Next**.
-2. On the **Windows Kits Privacy **page, click **Next**.
+2. On the **Windows Kits Privacy** page, click **Next**.
 3. On the **License Agreement** page:
    1. Review the software license terms.
    2. If you agree to the terms, click **Accept**.
-4. On the **Select the features you want to install **page:
+4. On the **Select the features you want to install** page:
    1. Select the following items:
       - **Deployment Tools**
       - **User State Migration Tool (USMT)**

@@ -58,7 +58,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-WAP03B**.
   - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 

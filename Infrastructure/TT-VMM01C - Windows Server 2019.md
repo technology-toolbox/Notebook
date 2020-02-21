@@ -237,7 +237,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update configuration
+#### # Add machine to security group for Windows Update configuration
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 5" -Members ($vmName + '$')

@@ -276,7 +276,7 @@ Install-WebApplicationProxy `
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 New-NetFirewallRule `
@@ -309,7 +309,7 @@ Enable-NetFirewallRule `
     -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
 ```
 
-## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 Disable-NetFirewallRule -Group 'Remote Windows Update'

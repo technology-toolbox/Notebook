@@ -130,7 +130,7 @@ Set-VMFirmware `
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 21" -Members ($vmName + '$')
@@ -281,7 +281,7 @@ Get-WindowsCapability -Name Rsat* -Online |
 Get-WindowsCapability -Name Rsat* -Online | select DisplayName, State
 ```
 
-#### Reference
+### Reference
 
 **Use PowerShell to Install the Remote Server Administration Tools (RSAT) on Windows 10 version 1809**\
 From <[https://mikefrobbins.com/2018/10/03/use-powershell-to-install-the-remote-server-administration-tools-rsat-on-windows-10-version-1809/](https://mikefrobbins.com/2018/10/03/use-powershell-to-install-the-remote-server-administration-tools-rsat-on-windows-10-version-1809/)>

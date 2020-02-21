@@ -79,7 +79,7 @@ Add-VMNetworkAdapter -VMName $vmName -SwitchName "Virtual LAN 2 - 192.168.10.x"
 Start-VM $vmName
 ```
 
-# Rename network connections
+### # Rename network connections
 
 ```PowerShell
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
@@ -89,7 +89,7 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter #2" |
     Rename-NetAdapter -NewName "WAN"
 ```
 
-## # Enable jumbo frames
+### # Enable jumbo frames
 
 ```PowerShell
 Set-NetAdapterAdvancedProperty `
@@ -104,7 +104,7 @@ ping ICEMAN -f -l 8900
 cls
 ```
 
-## # Configure static IPv4 addresses
+### # Configure static IPv4 addresses
 
 ```PowerShell
 $ipAddress = "192.168.10.219"
@@ -133,7 +133,7 @@ New-NetIPAddress `
 cls
 ```
 
-## # Configure static IPv6 address
+### # Configure static IPv6 address
 
 ```PowerShell
 $ipAddress = "2601:1:8200:6000::219"
@@ -152,7 +152,7 @@ Set-DNSClientServerAddress `
 cls
 ```
 
-# Configure WAN network adapter
+### Configure WAN network adapter
 
 ```PowerShell
 Disable-NetAdapterBinding `
@@ -350,7 +350,7 @@ cls
 
 1. Start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
 2. On the **Welcome** page, click **Download a CA certificate, certificate chain, or CRL**.
-3. On the **Download a CA Certificate, Certificate Chain, or CRL **page, click **Download CA certificate chain** and save the certificate chain to a file share ([\\\\iceman.corp.technologytoolbox.com\\Temp\\certnew.p7b](\\iceman.corp.technologytoolbox.com\Temp\certnew.p7b)).
+3. On the **Download a CA Certificate, Certificate Chain, or CRL** page, click **Download CA certificate chain** and save the certificate chain to a file share ([\\\\iceman.corp.technologytoolbox.com\\Temp\\certnew.p7b](\iceman.corp.technologytoolbox.com\Temp\certnew.p7b)).
 
 ```PowerShell
 cls
@@ -427,7 +427,7 @@ net use \\iceman.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
 4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
 5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
-6. On the **Certificate Issued** page click **Download certificate** and save the certificate to a file share ([\\\\iceman.corp.technologytoolbox.com\\Temp\\certnew.cer](\\iceman.corp.technologytoolbox.com\Temp\certnew.cer)).
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate to a file share ([\\\\iceman.corp.technologytoolbox.com\\Temp\\certnew.cer](\iceman.corp.technologytoolbox.com\Temp\certnew.cer)).
 
 ```PowerShell
 cls

@@ -46,7 +46,7 @@ IPv6 Prefix ID: f
 ## Services / DHCPv6 Server & RA / CON60 / DHCPv6 Server
 
 Enable DHCPv6 server on interface CON60: Yes (checked)\
-Range: From ::1000  To ::2000\
+Range: From ::1000 To ::2000\
 Prefix Delegation Size: 64
 
 ## Services / DHCPv6 Server & RA / CON60 / Router Advertisements

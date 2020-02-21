@@ -530,7 +530,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
 #### Reference
 
 **How to use npm with node.exe?**\
-http://stackoverflow.com/a/9366416
+[http://stackoverflow.com/a/9366416](http://stackoverflow.com/a/9366416)
 
 ```PowerShell
 cls
@@ -718,7 +718,7 @@ cls
 
 ### # Install TypeScript 2.7.2 for Visual Studio 2017
 
-##### # Copy installer from internal file server
+#### # Copy installer from internal file server
 
 ```PowerShell
 $installer = "TypeScript_SDK.exe"
@@ -731,7 +731,7 @@ $destination = 'C:\NotBackedUp\Temp'
 robocopy $source $destination $installer
 ```
 
-##### # Install new version of TypeScript for Visual Studio 2017
+#### # Install new version of TypeScript for Visual Studio 2017
 
 ```PowerShell
 Start-Process `
@@ -771,7 +771,7 @@ Start-SCVirtualMachine $vmName
 
 ~6 GB of free space, but unable to install **2018-10 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4462917)**.
 
-### Expand C:
+### Expand C: volume
 
 ---
 

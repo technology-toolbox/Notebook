@@ -186,7 +186,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members ($vmName + '$')
@@ -457,7 +457,7 @@ cls
 
 ## # Copy cmder configuration
 
-##### # Temporarily enable firewall rule for copying files to server
+### # Temporarily enable firewall rule for copying files to server
 
 ```PowerShell
 Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
@@ -471,7 +471,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 cls
 ```
 
-#### # Copy cmder configuration
+### # Copy cmder configuration
 
 ```PowerShell
 $computer = "EXT-VS2012-DEV1.extranet.technologytoolbox.com"
@@ -487,7 +487,7 @@ robocopy $source $destination /E /XD git-for-windows /MIR /NP
 cls
 ```
 
-##### # Disable firewall rule for copying files to server
+### # Disable firewall rule for copying files to server
 
 ```PowerShell
 Disable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"

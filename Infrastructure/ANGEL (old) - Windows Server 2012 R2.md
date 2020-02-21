@@ -271,7 +271,7 @@ cls
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 New-NetFirewallRule `
@@ -287,7 +287,7 @@ New-NetFirewallRule `
     -Action Allow
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 Disable-NetFirewallRule -Name 'Remote Windows Update (Dynamic RPC)'
@@ -478,7 +478,8 @@ $productionServer = "ANGEL"
 .\Attach-ProductionServer.ps1 `
     -DPMServerName JUGGERNAUT `
     -PSName $productionServer `
-    -Domain TECHTOOLBOX `-UserName jjameson-admin
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
 ```
 
 ```PowerShell

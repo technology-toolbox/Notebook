@@ -22,7 +22,8 @@ New-VM `
 
 Set-VMMemory `
     -VMName $vmName `
-    -DynamicMemoryEnabled $true `-MinimumBytes 128MB `
+    -DynamicMemoryEnabled $true `
+    -MinimumBytes 128MB `
     -MaximumBytes 1024MB
 
 $sysPrepedImage =
@@ -94,7 +95,7 @@ In the **Advanced Delivery** window:
 
 Mount the SCOM 2012 R2 ISO image:
 
-[\\\\iceman\\Products\\Microsoft\\System Center 2012 R2\\](\\iceman\Products\Microsoft\System Center 2012 R2\)en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso
+[\\\\iceman\\Products\\Microsoft\\System Center 2012 R2\\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso](\\iceman\Products\Microsoft\System Center 2012 R2\en_system_center_2012_r2_operations_manager_x86_and_x64_dvd_2920299.iso)
 
 ### REM Install MSXML 6.0 Parser and SDK (prerequisite for SCCOM agent)
 

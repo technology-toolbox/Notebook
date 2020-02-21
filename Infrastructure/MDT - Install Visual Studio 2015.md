@@ -77,13 +77,13 @@ Start-Process `
 $xml = [xml] (Get-Content "$path\AdminDeployment.xml")
 ```
 
-##### # In the <BundleCustomizations> element, change the NoWeb attribute to "yes"
+##### # In the `<BundleCustomizations>` element, change the NoWeb attribute to "yes"
 
 ```PowerShell
 $xml.AdminDeploymentCustomizations.BundleCustomizations.NoWeb = "yes"
 ```
 
-##### # Change the "Selected" attributes for <SelectableItemCustomization> elements
+##### # Change the "Selected" attributes for `<SelectableItemCustomization>` elements
 
 ```PowerShell
 $xml.AdminDeploymentCustomizations.SelectableItemCustomizations.SelectableItemCustomization |
@@ -350,7 +350,7 @@ Notepad C:\ODT\configuration.xml
 
 ---
 
-**C:\\ODT\\configuration.xml**
+File - **C:\\ODT\\configuration.xml**
 
 ```XML
 <Configuration>
@@ -451,7 +451,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows Server 2012 R2**, right-click **SharePoint Server 2013 - Development**, and click **Properties**.
 2. In the **SharePoint Server 2013 - Development Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Windows Server 2012 R2, MaxPatchCacheSize = 0, Toolbox content, Windows features for SharePoint 2013, PowerShell help files, SQL Server 2014, SharePoint Designer 2013, Office 2016, SharePoint Server 2013, Visual Studio 2015 with Update 3, latest patches, and cleanup before Sysprep**
    2. On the **Task Sequence** tab:
       1. Modify the task previously created to install Office 2013 to now install Office 2016.
@@ -490,7 +490,7 @@ robocopy $source $destination /E /XD Applications Backup Boot Captures Logs "Ope
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows 10**, right-click **Windows 10 Enterprise (x64) - Baseline**, and click **Properties**.
 2. In the **Windows 10 Enterprise (x64) - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, Office 2016, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -529,11 +529,11 @@ robocopy $source $destination /E /XD Applications Backup Boot Captures Logs "Ope
 cls
 ```
 
-# Build baseline images
+## Build baseline images
 
 ---
 
-**TT-HV02A / TT-HV02B / TT-HV02C**
+**TT-HV02A** / **TT-HV02B** / **TT-HV02C**
 
 ```PowerShell
 cls
@@ -576,7 +576,7 @@ cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows 10**, right-click **Windows 10 Enterprise (x64) - Baseline**, and click **Properties**.
 2. In the **Windows 10 Enterprise (x64) - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content, .NET Framework 3.5, Office 2016, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -615,11 +615,11 @@ robocopy $source $destination /E /XD Applications Backup Boot Captures Logs "Ope
 cls
 ```
 
-# Build baseline images
+## Build baseline images
 
 ---
 
-**TT-HV02A / TT-HV02B / TT-HV02C**
+**TT-HV02A** / **TT-HV02B** / **TT-HV02C**
 
 ```PowerShell
 cls
@@ -702,7 +702,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
    2. Click **Cancel**.
 3. Expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows 10**, right-click **Windows 10 Enterprise (x64) - Baseline**, and click **Properties**.
 4. In the **Windows 10 Enterprise (x64) - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content, .NET Framework 3.5, Office 2016, latest patches, and cleanup before Sysprep**
    2. On the **Task Sequence** tab, add the cleanup action to the task sequence(right-click the **Apply Local GPO Package** action and then click **Paste**).
    3. Click **OK**.
@@ -736,11 +736,11 @@ robocopy $source $destination /E /XD Applications Backup Boot Captures Logs "Ope
 cls
 ```
 
-# Build baseline images
+## Build baseline images
 
 ---
 
-**TT-HV02A / TT-HV02B / TT-HV02C**
+**TT-HV02A** / **TT-HV02B** / **TT-HV02C**
 
 ```PowerShell
 cls

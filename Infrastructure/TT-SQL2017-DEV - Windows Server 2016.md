@@ -9,7 +9,7 @@ Saturday, February 3, 2018
 
 ## Deploy and configure the server infrastructure
 
-#### Install Windows Server 2016
+### Install Windows Server 2016
 
 ---
 
@@ -19,7 +19,7 @@ Saturday, February 3, 2018
 cls
 ```
 
-##### # Create virtual machine
+#### # Create virtual machine
 
 ```PowerShell
 $vmHost = "WOLVERINE"
@@ -48,7 +48,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-##### Install custom Windows Server 2016 image
+#### Install custom Windows Server 2016 image
 
 - On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
 - On the **Computer Details** step:

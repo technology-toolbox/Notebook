@@ -7,6 +7,8 @@ Friday, January 13, 2017
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
+## Deploy and configure server infrastructure
+
 ---
 
 **FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**

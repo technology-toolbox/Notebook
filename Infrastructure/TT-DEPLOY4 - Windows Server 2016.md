@@ -324,16 +324,15 @@ cls
 
 ```PowerShell
 & ("\\TT-FS01\Products\Microsoft\Windows Assessment and Deployment Kit" `
+    + "\Windows ADK for Windows 10, version 1709\adksetup.exe")
 ```
 
-    + "\\Windows ADK for Windows 10, version 1709\\adksetup.exe")
-
 1. On the **Specify Location** page, click **Next**.
-2. On the **Windows Kits Privacy **page, click **Next**.
+2. On the **Windows Kits Privacy** page, click **Next**.
 3. On the **License Agreement** page:
    1. Review the software license terms.
    2. If you agree to the terms, click **Accept**.
-4. On the **Select the features you want to install **page:
+4. On the **Select the features you want to install** page:
    1. Select the following items:
       - **Deployment Tools**
       - **Windows Preinstallation Environment (Windows PE)**
@@ -613,7 +612,7 @@ Notepad $pxeLinuxMenuFile
 
 ---
 
-**D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
+File - **D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
 
 ```INI
 # Set the default command line
@@ -813,7 +812,7 @@ Notepad $pxeLinuxMenuFile
 
 ---
 
-**D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
+File - **D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
 
 ```INI
 ...
@@ -920,7 +919,7 @@ Notepad $pxeLinuxMenuFile
 
 ---
 
-**D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
+File - **D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
 
 ```INI
 ...
@@ -1022,7 +1021,7 @@ Notepad $pxeLinuxMenuFile
 
 ---
 
-**D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
+File - **D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
 
 ```INI
 ...
@@ -1124,7 +1123,7 @@ Notepad $pxeLinuxMenuFile
 
 ---
 
-**D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
+File - **D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
 
 ```INI
 ...
@@ -1246,7 +1245,7 @@ Notepad $pxeLinuxMenuFile
 
 ---
 
-**D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
+File - **D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
 
 ```INI
 ...
@@ -1364,7 +1363,7 @@ Notepad $pxeLinuxMenuFile
 
 ---
 
-**D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
+File - **D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
 
 ```INI
 ...
@@ -1461,7 +1460,7 @@ Notepad $pxeLinuxMenuFile
 
 ---
 
-**D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
+File - **D:\\RemoteInstall\\Boot\\PXELinux\\pxelinux.cfg\\default**
 
 ```INI
 ...
@@ -1581,11 +1580,11 @@ slmgr /ato
 cls
 ```
 
-# Build baseline images
+## Build baseline images
 
 ---
 
-**TT-HV02A / TT-HV02B / TT-HV02C**
+**TT-HV02A** / **TT-HV02B** / **TT-HV02C**
 
 ```PowerShell
 cls
@@ -2292,7 +2291,7 @@ Import-MDTApplication `
 
 ---
 
-**Baseline Windows 10 VM**
+## Baseline Windows 10 VM
 
 ```Console
 cls
@@ -2639,7 +2638,7 @@ Notepad C:\ODT\configuration-Office365-x64.xml
 
 ---
 
-**C:\\ODT\\configuration-Office365-x64.xml**
+File - **C:\\ODT\\configuration-Office365-x64.xml**
 
 ```XML
 <Configuration>
@@ -3019,7 +3018,7 @@ Restart-Service WDSServer
 2. Expand the **Servers** node, right-click the server name, and click **Properties**.
 3. In the **Properties** window:
    1. Select the **TFTP** tab.
-   2. In the **Variable Window Extension** section, clear the **Enable Variable Window Extension **checkbox.
+   2. In the **Variable Window Extension** section, clear the **Enable Variable Window Extension** checkbox.
    3. Click **OK**.
 4. Restart the server.
 
@@ -3045,7 +3044,7 @@ From <[https://support.microsoft.com/en-us/help/4489882/windows-10-update-kb4489
 
 8.5 GB of free space, but unable to install **2019-05 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4494440)**.
 
-### Expand C:
+### Expand C: volume
 
 ---
 
@@ -3176,7 +3175,7 @@ robocopy \\TT-FS01\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Ca
 
 4.5 GB of free space, but unable to install **2019-07 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4507460)**.
 
-### Expand C:
+### Expand C: volume
 
 ---
 
@@ -3340,7 +3339,9 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2019 does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file. In other words, if no product key is specified in the task sequence, when building the reference image it will prompt to enter a product key (but provide an option to do this later).The product key specified above was obtained from the following:
+> The MSDN version of Windows Server 2019 does not honor the `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words, if no product key is specified in the task sequence, when building the reference image it will prompt to enter a product key (but provide an option to do this later).
+>
+> The product key specified above was obtained from the following:
 >
 > **KMS client setup keys**\
 > From <[https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys](https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys)>
@@ -3407,7 +3408,7 @@ Edit the task sequence to include the actions required to update the reference i
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows Server 2019**, right-click **Windows Server 2019 - Baseline**, and click **Properties**.
 2. In the **Windows Server 2019 - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
@@ -3589,7 +3590,9 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2019 does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file. In other words, if no product key is specified in the task sequence, when deploying the baseline image it will prompt to enter a product key (but provide an option to do this later).The product key specified above was obtained from the following:
+> The MSDN version of Windows Server 2019 does not honor the `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words, if no product key is specified in the task sequence, when deploying the baseline image it will prompt to enter a product key (but provide an option to do this later).
+>
+> The product key specified above was obtained from the following:
 >
 > **KMS client setup keys**\
 > From <[https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys](https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys)>
@@ -3635,7 +3638,7 @@ Edit the task sequence to include actions to set MaxPatchCacheSize to 0 and clea
 
 1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows Server 2019**, right-click **Windows Server 2019 - Baseline**, and click **Properties**.
 2. In the **Windows Server 2019 - Baseline Properties** window:
-   1. On the **General **tab, configure the following settings:
+   1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content, latest patches, and cleanup before Sysprep**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**

@@ -7,6 +7,8 @@ Tuesday, December 15, 2015
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
+## Deploy and configure server infrastructure
+
 ---
 
 **FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
@@ -51,7 +53,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 - On the **Task Sequence** step, select **Windows Server 2008 R2** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-FOOBAR7**.
-  - In the **Domain to join **box, type **extranet.technologytoolbox.com**.
+  - In the **Domain to join** box, type **extranet.technologytoolbox.com**.
   - Specify the credentials to join the domain.
   - Click **Next**.
 - On the Applications step:
@@ -119,13 +121,15 @@ mountvol X: $volumeId
 cls
 ```
 
-## # Enable PowerShell remoting
+## Configure Windows Update
+
+### # Enable PowerShell remoting
 
 ```PowerShell
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 # Note: New-NetFirewallRule is not available on Windows Server 2008 R2
@@ -141,12 +145,14 @@ netsh advfirewall firewall add rule `
     action=Allow
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Disable firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 netsh advfirewall firewall set rule `
     name="Remote Windows Update (Dynamic RPC)" new enable=no
 ```
+
+### Configure network settings
 
 #### Rename network connection
 
@@ -389,10 +395,10 @@ $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
 	Where-Object { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
-	$smtpServer,
-	$fromAddress,
-	$replyAddress,
-	$characterSet)
+    $smtpServer,
+    $fromAddress,
+    $replyAddress,
+    $characterSet)
 ```
 
 ```PowerShell
@@ -767,10 +773,12 @@ cls
 
 ### # Configure application settings (e.g. Web service URLs)
 
-Import-Csv [\\\\iceman.corp.technologytoolbox.com\\Archive\\Clients\\Securitas\\AppSettings-UAT_2015-12-16.csv](\\iceman.corp.technologytoolbox.com\Archive\Clients\Securitas\AppSettings-UAT_2015-12-16.csv) |\
-ForEach-Object {\
-.\\Set-AppSetting.ps1 \$_.Key \$_.Value \$_.Description -Force\
-}
+```PowerShell
+Import-Csv \\iceman.corp.technologytoolbox.com\Archive\Clients\Securitas\AppSettings-UAT_2015-12-16.csv |
+    foreach {
+        .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force
+    }
+```
 
 ```PowerShell
 cls
@@ -1298,7 +1306,7 @@ Start-SCVirtualMachine $vmName
 
 ### Create VM snapshot
 
-**Baseline Client Portal 3.0.645.0 / Cloud Portal 1.0.106.0**
+Snapshot name: **Baseline Client Portal 3.0.645.0 / Cloud Portal 1.0.106.0**
 
 ## Issue - Not enough free space to install patches using Windows Update
 

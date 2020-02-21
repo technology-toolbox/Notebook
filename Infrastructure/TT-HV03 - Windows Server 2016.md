@@ -1203,11 +1203,10 @@ Get-StoragePool "Pool 1" |
 > Extended information:\
 > The storage pool does not have sufficient eligible resources for the creation of the specified virtual disk.
 >
-> Recommended Actions:\
-> - Choose a combination of FaultDomainAwareness and NumberOfDataCopies (or PhysicalDiskRedundancy) supported by the\
-> storage pool.\
-> - Choose a value for NumberOfColumns that is less than or equal to the number of physical disks in the storage fault\
-> domain selected for the virtual disk.
+> Recommended Actions:
+>
+> - Choose a combination of FaultDomainAwareness and NumberOfDataCopies (or PhysicalDiskRedundancy) supported by the storage pool.
+> - Choose a value for NumberOfColumns that is less than or equal to the number of physical disks in the storage fault domain selected for the virtual disk.
 
 ```PowerShell
 cls
@@ -1395,11 +1394,12 @@ Screen clipping taken: 2/16/2018 3:21 PM
 
 Screen clipping taken: 2/16/2018 3:22 PM
 
-PNP Device ID	PCI\\VEN_8086&DEV_1E02&SUBSYS_84CA1043&REV_04\\3&11583659&0&FA
+| Item          | Value                                                                                                        |
+| ------------- | ------------------------------------------------------------------------------------------------------------ |
+| PNP Device ID | PCI\\VEN_8086&DEV_1E02&SUBSYS_84CA1043&REV_04\\3&11583659&0&FA                                               |
+| Driver        | c:\\windows\\system32\\drivers\\storahci.sys (10.0.14393.953, 127.84 KB (130,912 bytes), 3/21/2017 10:05 AM) |
 
-Driver	c:\\windows\\system32\\drivers\\storahci.sys (10.0.14393.953, 127.84 KB (130,912 bytes), 3/21/2017 10:05 AM)
-
-#### Update AHCI drivers
+### Update AHCI drivers
 
 1. Download the latest AHCI drivers from the Intel website:\
    **Intel® Rapid Storage Technology (Intel® RST) User Interface and Driver**\
@@ -1412,12 +1412,10 @@ Driver	c:\\windows\\system32\\drivers\\storahci.sys (10.0.14393.953, 127.84 KB (
 >
 > Version 12.x contains the drivers for the Intel C216 chipset (a.k.a. "1E02") -- newer versions do not.
 
-```Console
-    robocopy "\\TT-FS01\Public\Download\Drivers\Intel\RST Driver for ASUS P8Z77-V"  '\\TT-HV03\C$\NotBackedUp\Temp\Drivers\Intel\RST' /E
-```
+```PowerShell
+robocopy "\\TT-FS01\Public\Download\Drivers\Intel\RST Driver for ASUS P8Z77-V" '\\TT-HV03\C$\NotBackedUp\Temp\Drivers\Intel\RST' /E
 
-```Console
-    pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\RST\iaAHCIC.inf
+pnputil -i -a C:\NotBackedUp\Temp\Drivers\Intel\RST\iaAHCIC.inf
 ```
 
 ### Reconfigure storage

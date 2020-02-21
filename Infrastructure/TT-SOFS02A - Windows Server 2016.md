@@ -434,7 +434,7 @@ ping 10.1.10.56 -f -l 8900
 
 ---
 
-**FOOBAR11- Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11- Run as administrator**
 
 ```PowerShell
 cls
@@ -616,10 +616,9 @@ cls
 
 ```PowerShell
 Set-StoragePool `
-```
-
-    -FriendlyName "S2D on TT-SOFS02-FC" `\
+    -FriendlyName "S2D on TT-SOFS02-FC" `
     -FaultDomainAwarenessDefault PhysicalDisk
+```
 
 **Deploying Storage Spaces Direct on a Single Node SOFS Cluster**\
 From <[https://www.danielstechblog.info/deploying-storage-spaces-direct-on-a-single-node-sofs-cluster/](https://www.danielstechblog.info/deploying-storage-spaces-direct-on-a-single-node-sofs-cluster/)>
@@ -632,13 +631,12 @@ cls
 
 ```PowerShell
 New-Volume `
-```
-
-    -FriendlyName "Volume1" `\
-    -FileSystem CSVFS_ReFS `\
-    -StoragePoolFriendlyName S2D* `\
-    -UseMaximumSize `\
+    -FriendlyName "Volume1" `
+    -FileSystem CSVFS_ReFS `
+    -StoragePoolFriendlyName S2D* `
+    -UseMaximumSize `
     -ResiliencySettingName Parity
+```
 
 ```PowerShell
 cls
@@ -913,10 +911,9 @@ $hostCluster = Get-SCVMHostCluster -Name "TT-HV02-FC"
 $fileShare = Get-SCStorageFileShare "VM-Storage-Bronze"
 
 Register-SCStorageFileShare `
+    -StorageFileShare $fileShare `
+    -VMHostCluster $hostCluster
 ```
-
-    -StorageFileShare \$fileShare `\
-    -VMHostCluster \$hostCluster
 
 ---
 

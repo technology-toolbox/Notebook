@@ -235,7 +235,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update configuration
+#### # Add machine to security group for Windows Update configuration
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 6" -Members ($vmName + '$')
@@ -284,7 +284,7 @@ $domainGroup = "SCOM Admins"
 
 ### # Install SSL certificate
 
-##### # Install certificate for Reporting Services and Operations Manager web console
+#### # Install certificate for Reporting Services and Operations Manager web console
 
 ```PowerShell
 $certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1

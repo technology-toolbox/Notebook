@@ -109,7 +109,7 @@ cls
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 New-NetFirewallRule `
@@ -669,7 +669,7 @@ mkdir D:\Shares\Backups\HAVOK
 
 ---
 
-**HAVOK (connect SQL Server Management Studio from FOOBAR8)**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 ### -- Backup SharePoint databases
 
@@ -826,7 +826,7 @@ Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
 
 ---
 
-**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
+**SQL Server Management Studio** - Database Engine - **HAVOK-TEST**
 
 #### -- Configure permissions on stored procedures in SharePoint_Config database
 
@@ -874,7 +874,7 @@ cls
 
 ---
 
-**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
+**SQL Server Management Studio** - Database Engine - **HAVOK-TEST**
 
 #### -- Restore service application database from production
 
@@ -907,7 +907,7 @@ cls
 
 ---
 
-**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
+**SQL Server Management Studio** - Database Engine - **HAVOK-TEST**
 
 #### -- Restore service application databases from production
 
@@ -954,7 +954,7 @@ cls
 
 ---
 
-**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
+**SQL Server Management Studio** - Database Engine - **HAVOK-TEST**
 
 #### -- Restore service application database from production
 
@@ -1027,7 +1027,7 @@ When prompted, type the passphrase for the Secure Store Service.
 cls
 ```
 
-## # Restore Web application - http://ttweb-test
+## # Restore Web application - [http://ttweb-test](http://ttweb-test)
 
 ```PowerShell
 cls
@@ -1055,7 +1055,7 @@ New-SPWebApplication `
 
 ---
 
-**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
+**SQL Server Management Studio** - Database Engine - **HAVOK-TEST**
 
 ### -- Restore content database from production
 
@@ -1098,7 +1098,7 @@ Get-SPContentDatabase -WebApplication http://ttweb-test |
 cls
 ```
 
-## # Restore Web application - http://team-test
+## # Restore Web application - [http://team-test](http://team-test)
 
 ```PowerShell
 cls
@@ -1126,7 +1126,7 @@ New-SPWebApplication `
 
 ---
 
-**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
+**SQL Server Management Studio** - Database Engine - **HAVOK-TEST**
 
 ### -- Restore content database from production
 
@@ -1170,7 +1170,7 @@ Get-SPContentDatabase -WebApplication http://team-test |
 cls
 ```
 
-## # Restore Web application - http://my-test
+## # Restore Web application - [http://my-test](http://my-test)
 
 ```PowerShell
 cls
@@ -1193,7 +1193,7 @@ New-SPWebApplication `
 
 ---
 
-**HAVOK-TEST (connect SQL Server Management Studio from FOOBAR8)**
+**SQL Server Management Studio** - Database Engine - **HAVOK-TEST**
 
 ### -- Restore content database from production
 
@@ -1467,7 +1467,7 @@ cls
 
 ## # Install and configure Office Web Apps
 
-##### # Create the binding between SharePoint 2013 and Office Web Apps Server
+### # Create the binding between SharePoint 2013 and Office Web Apps Server
 
 ```PowerShell
 New-SPWOPIBinding -ServerName wac.fabrikam.com
@@ -1477,13 +1477,13 @@ New-SPWOPIBinding -ServerName wac.fabrikam.com
 cls
 ```
 
-##### # View the WOPI zone of SharePoint 2013
+### # View the WOPI zone of SharePoint 2013
 
 ```PowerShell
 Get-SPWOPIZone
 ```
 
-##### # Change the WOPI zone if necessary
+### # Change the WOPI zone if necessary
 
 ```PowerShell
 Set-SPWOPIZone -zone "external-https"
@@ -1537,72 +1537,74 @@ Set-DnsClientServerAddress `
 Restart-Computer
 ```
 
-## Issue - Error accessing SharePoint sites (e.g. http://my-test)
+## Issue - Error accessing SharePoint sites (e.g. [http://my-test](http://my-test))
 
-Log Name:      Application\
-Source:        ASP.NET 4.0.30319.0\
-Date:          3/31/2017 6:06:36 AM\
-Event ID:      1309\
-Task Category: Web Event\
-Level:         Warning\
-Keywords:      Classic\
-User:          N/A\
-Computer:      POLARIS-TEST.corp.technologytoolbox.com\
-Description:\
-Event code: 3005\
-Event message: An unhandled exception has occurred.\
-Event time: 3/31/2017 6:06:36 AM\
-Event time (UTC): 3/31/2017 12:06:36 PM\
-Event ID: dc49886cb6044587926cb38109d9bae0\
-Event sequence: 8\
-Event occurrence: 1\
-Event detail code: 0\
-\
-Application information:\
-    Application domain: /LM/W3SVC/1901879644/ROOT-2-131354245470869571\
-    Trust level: Full\
-    Application Virtual Path: /\
-    Application Path: C:\\inetpub\\wwwroot\\wss\\VirtualDirectories\\my-test80\\\
-    Machine name: POLARIS-TEST\
-\
-Process information:\
-    Process ID: 9460\
-    Process name: w3wp.exe\
-    Account name: TECHTOOLBOX\\s-web-my-team-test\
-\
-Exception information:\
-    Exception type: FileLoadException\
-    Exception message: Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)\
-   at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)\
-   at Microsoft.SharePoint.IdentityModel.SPChunkedCookieHandler.ReadCore(String name, HttpContext context)\
-   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.TryReadSessionTokenFromCookie(SessionSecurityToken& sessionToken)\
-   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
-   at Microsoft.SharePoint.IdentityModel.SPSessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
-   at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()\
+```Text
+Log Name:      Application
+Source:        ASP.NET 4.0.30319.0
+Date:          3/31/2017 6:06:36 AM
+Event ID:      1309
+Task Category: Web Event
+Level:         Warning
+Keywords:      Classic
+User:          N/A
+Computer:      POLARIS-TEST.corp.technologytoolbox.com
+Description:
+Event code: 3005
+Event message: An unhandled exception has occurred.
+Event time: 3/31/2017 6:06:36 AM
+Event time (UTC): 3/31/2017 12:06:36 PM
+Event ID: dc49886cb6044587926cb38109d9bae0
+Event sequence: 8
+Event occurrence: 1
+Event detail code: 0
+
+Application information:
+    Application domain: /LM/W3SVC/1901879644/ROOT-2-131354245470869571
+    Trust level: Full
+    Application Virtual Path: /
+    Application Path: C:\inetpub\wwwroot\wss\VirtualDirectories\my-test80\
+    Machine name: POLARIS-TEST
+
+Process information:
+    Process ID: 9460
+    Process name: w3wp.exe
+    Account name: TECHTOOLBOX\s-web-my-team-test
+
+Exception information:
+    Exception type: FileLoadException
+    Exception message: Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)
+   at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)
+   at Microsoft.SharePoint.IdentityModel.SPChunkedCookieHandler.ReadCore(String name, HttpContext context)
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.TryReadSessionTokenFromCookie(SessionSecurityToken& sessionToken)
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)
+   at Microsoft.SharePoint.IdentityModel.SPSessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)
+   at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
    at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
 
-\
-\
-Request information:\
-    Request URL: [http://my-test/favicon.ico](http://my-test/favicon.ico)\
-    Request path: /favicon.ico\
-    User host address: 192.168.10.5\
-    User:\
-    Is authenticated: False\
-    Authentication Type:\
-    Thread account name: TECHTOOLBOX\\s-web-my-team-test\
-\
-Thread information:\
-    Thread ID: 260\
-    Thread account name: TECHTOOLBOX\\s-web-my-team-test\
-    Is impersonating: False\
-    Stack trace:    at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)\
-   at Microsoft.SharePoint.IdentityModel.SPChunkedCookieHandler.ReadCore(String name, HttpContext context)\
-   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.TryReadSessionTokenFromCookie(SessionSecurityToken& sessionToken)\
-   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
-   at Microsoft.SharePoint.IdentityModel.SPSessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
-   at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()\
+
+
+Request information:
+    Request URL: [http://my-test/favicon.ico](http://my-test/favicon.ico)
+    Request path: /favicon.ico
+    User host address: 192.168.10.5
+    User:
+    Is authenticated: False
+    Authentication Type:
+    Thread account name: TECHTOOLBOX\s-web-my-team-test
+
+Thread information:
+    Thread ID: 260
+    Thread account name: TECHTOOLBOX\s-web-my-team-test
+    Is impersonating: False
+    Stack trace:    at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)
+   at Microsoft.SharePoint.IdentityModel.SPChunkedCookieHandler.ReadCore(String name, HttpContext context)
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.TryReadSessionTokenFromCookie(SessionSecurityToken& sessionToken)
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)
+   at Microsoft.SharePoint.IdentityModel.SPSessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)
+   at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
    at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
+```
 
 ### References
 

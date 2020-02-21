@@ -7,6 +7,8 @@ Sunday, April 17, 2016
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
+## Deploy and configure server infrastructure
+
 ---
 
 **FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
@@ -71,9 +73,9 @@ logoff
 
 ## # Rename network connections
 
-# **Note:** Get-NetAdapter is not available on Windows Server 2008 R2
+```PowerShell
+# Note: Get-NetAdapter is not available on Windows Server 2008 R2
 
-```Console
 netsh interface show interface
 
 netsh interface set interface name="Local Area Connection" newname="Production"
@@ -95,17 +97,13 @@ $interfaceAlias = "Production"
 
 ```PowerShell
 $ipAddress = "192.168.10.212"
-```
 
-# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+# Note: New-NetIPAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv4 set address name=$interfaceAlias source=static address=$ipAddress mask=255.255.255.0 gateway=192.168.10.1
-```
 
-# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+# Note: Set-DNSClientServerAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv4 set dnsserver name=$interfaceAlias source=static address=192.168.10.209
 
 netsh interface ipv4 add dnsserver name=$interfaceAlias address=192.168.10.210
@@ -115,17 +113,13 @@ netsh interface ipv4 add dnsserver name=$interfaceAlias address=192.168.10.210
 
 ```PowerShell
 $ipAddress = "2601:282:4201:e500::212"
-```
 
-# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+# Note: New-NetIPAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv6 set address interface=$interfaceAlias address=$ipAddress store=persistent
-```
 
-# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+# Note: Set-DNSClientServerAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=2601:282:4201:e500::209
 
 netsh interface ipv6 add dnsserver name=$interfaceAlias address=2601:282:4201:e500::210
@@ -145,19 +139,17 @@ $interfaceAlias = "Storage"
 
 ```PowerShell
 $ipAddress = "10.1.10.212"
-```
 
-# **Note:** New-NetIPAddress is not available on Windows Server 2008 R2
+# Note: New-NetIPAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv4 set address name=$interfaceAlias source=static address=$ipAddress mask=255.255.255.0
 ```
 
 ### # Disable features on iSCSI network adapter
 
-# **Note:** Disable-NetAdapterBinding is not available on Windows Server 2008 R2
-
 ```PowerShell
+# Note: Disable-NetAdapterBinding is not available on Windows Server 2008 R2
+
 # Disable "Client for Microsoft Networks"
 C:\NotBackedUp\Public\Toolbox\nvspbind\x64\nvspbind.exe -d $interfaceAlias ms_msclient
 
@@ -188,11 +180,11 @@ $adapterConfig.SetTcpipNetbios(2)
 **Note:** Get-NetAdapterAdvancedProperty is not available on Windows Server 2008 R2
 
 1. Open **Network and Sharing Center**.
-2. In the **Network and Sharing Center **window, click **Production**.
+2. In the **Network and Sharing Center** window, click **Production**.
 3. In the **Production Status** window, click **Properties**.
 4. In the **Production Properties** window, on the **Networking** tab, click **Configure**.
 5. In the **Microsoft Virtual Machine Bus Network Adapter Properties** window:
-   1. On the **Advanced **tab:
+   1. On the **Advanced** tab:
       1. In the **Property** list, select **Jumbo Packet**.
       2. In the **Value** dropdown, select **9014 Bytes**.
    2. Click **OK**.
@@ -223,9 +215,9 @@ cls
 
 ## # Rename computer
 
-# **Note:** Rename-Computer is not available on Windows Server 2008 R2
-
 ```PowerShell
+# Note: Rename-Computer is not available on Windows Server 2008 R2
+
 netdom renamecomputer $env:COMPUTERNAME /newname:EXT-SQL01B /reboot
 ```
 
@@ -235,11 +227,11 @@ netdom renamecomputer $env:COMPUTERNAME /newname:EXT-SQL01B /reboot
 
 ## # Join domain
 
-# **Note:**\
-#  "-Restart" parameter is not available on Windows Server 2008 R2\
+```PowerShell
+# Note:
+#  "-Restart" parameter is not available on Windows Server 2008 R2
 #  "-Credential" parameter must be specified to avoid error
 
-```PowerShell
 Add-Computer `
     -DomainName extranet.technologytoolbox.com `
     -Credential EXTRANET\jjameson-admin
@@ -309,7 +301,7 @@ cls
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 netsh advfirewall firewall set rule `
@@ -334,7 +326,7 @@ netsh advfirewall firewall add rule `
     action=Allow
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 netsh advfirewall firewall set rule `
@@ -532,14 +524,14 @@ Click **Re-run**.
 ## Install SQL Server 2008 R2 Service Pack 2
 
 ```Console
-Cls
+cls
 ```
 
 ## # Configure firewall rule for SQL Server
 
-# **Note:** New-NetFirewallRule is not available on Windows Server 2008 R2
-
 ```PowerShell
+# Note: New-NetFirewallRule is not available on Windows Server 2008 R2
+
 netsh advfirewall firewall add rule `
     name="SQL Server Database Engine" `
     dir=in `
@@ -690,12 +682,14 @@ cls
 
 ### Alert
 
-Source: WinMgmt\
-Event ID: 10\
-Event Category: 0\
-User: N/A\
-Computer: EXT-SQL01B.extranet.technologytoolbox.com\
+```Text
+Source: WinMgmt
+Event ID: 10
+Event Category: 0
+User: N/A
+Computer: EXT-SQL01B.extranet.technologytoolbox.com
 Event Description: Event filter with query "SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA "Win32_Processor" AND TargetInstance.LoadPercentage > 99" could not be reactivated in namespace "//./root/CIMV2" because of error 0x80041003. Events cannot be delivered through this filter until the problem is corrected.
+```
 
 ### Reference
 
@@ -706,9 +700,9 @@ From <[https://support.microsoft.com/en-us/kb/2545227](https://support.microsoft
 
 ---
 
-**VBScript**
+Run the following VBScript:
 
-```PowerShell
+```VBScript
 strComputer = "."
 
 Set objWMIService = GetObject("winmgmts:" _
@@ -764,19 +758,17 @@ slmgr /ato
 $interfaceAlias = "Production"
 
 $ipAddress = "2601:282:4201:e500::212"
-```
 
-# **Note:** Remove-NetIPAddress is not available on Windows Server 2008 R2
+# Note: Remove-NetIPAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv6 delete address interface=$interfaceAlias address=$ipAddress store=persistent
 ```
 
 ### # Update IPv6 DNS servers
 
-# **Note:** Set-DNSClientServerAddress is not available on Windows Server 2008 R2
+```PowerShell
+# Note: Set-DNSClientServerAddress is not available on Windows Server 2008 R2
 
-```Console
 netsh interface ipv6 set dnsserver name=$interfaceAlias source=static address=2603:300b:802:8900::209
 
 netsh interface ipv6 add dnsserver name=$interfaceAlias address=2603:300b:802:8900::210

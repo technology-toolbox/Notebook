@@ -20,12 +20,14 @@ Wednesday, February 6, 2019
 | Collection name: | **DefaultCollection** | Azure DevOps organization name: | **techtoolbox** |
 | ---------------- | --------------------- | ------------------------------- | --------------- |
 
+
 #### Datacenter location
 
 **Task:** Choose the datacenter for your Azure DevOps Services organization.
 
 | Selected region’s shorthand code: | **CUS** |
 | --------------------------------- | ------- |
+
 
 | **Geographic Region** | **Azure Region**      | **Import Specification Value** |
 | --------------------- | --------------------- | ------------------------------ |
@@ -38,7 +40,7 @@ From <[https://docs.microsoft.com/en-us/azure/devops/articles/migration-import?v
 
 #### Download TFS Migrator tool
 
-**Task:** Download the TFS Migrator tool from  [https://aka.ms/DownloadTFSMigrator](https://aka.ms/DownloadTFSMigrator).
+**Task:** Download the TFS Migrator tool from [https://aka.ms/DownloadTFSMigrator](https://aka.ms/DownloadTFSMigrator).
 
 Downloaded and extract to **C:\\NotBackedUp\\Temp** on **TT-TFS02**.
 
@@ -64,7 +66,7 @@ AzureDevOpsImport@microsoft.com - requires NDA with Microsoft
 
 ### Azure Active Directory
 
-**Task:** Implement Azure Active Directory to synchronize with your  on-premises Active Directory environment.
+**Task:** Implement Azure Active Directory to synchronize with your on-premises Active Directory environment.
 
 ### Additional security for Cloud authentication
 
@@ -216,7 +218,7 @@ $projects |
 
 ##### Download the latest version of MSF process template
 
-[https://tfs.technologytoolbox.com/DefaultCollection/_admin/_process](https://tfs.technologytoolbox.com/DefaultCollection/_admin/_process)
+[https://tfs.technologytoolbox.com/DefaultCollection/\_admin/\_process](https://tfs.technologytoolbox.com/DefaultCollection/_admin/_process)
 
 Export **Agile**
 
@@ -480,7 +482,7 @@ $tfsCollectionUrl = "https://tfs.technologytoolbox.com/DefaultCollection"
 
 ##### Download the latest version of MSF process template
 
-[https://tfs.technologytoolbox.com/DefaultCollection/_admin/_process](https://tfs.technologytoolbox.com/DefaultCollection/_admin/_process)
+[https://tfs.technologytoolbox.com/DefaultCollection/\_admin/\_process](https://tfs.technologytoolbox.com/DefaultCollection/_admin/_process)
 
 Export **MSF for CMMI Process Improvement 2013.4**
 
@@ -612,7 +614,7 @@ $projects |
 
 **Task:** Run the "Configure Features" wizard on every team project in each of your team project collections.
 
- [https://aka.ms/TFSConfigureFeatures](https://aka.ms/TFSConfigureFeatures)
+[https://aka.ms/TFSConfigureFeatures](https://aka.ms/TFSConfigureFeatures)
 
 ## 4 - Validate Your TFS Server
 
@@ -835,6 +837,7 @@ Pop-Location
 
 | Name: | **import** |
 | ----- | ---------- |
+
 
 #### Install AzCopy
 

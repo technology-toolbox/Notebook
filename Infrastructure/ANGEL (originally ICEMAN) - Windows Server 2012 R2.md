@@ -424,7 +424,8 @@ $productionServer = "ICEMAN"
 .\Attach-ProductionServer.ps1 `
     -DPMServerName JUGGERNAUT `
     -PSName $productionServer `
-    -Domain TECHTOOLBOX `-UserName jjameson-admin
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
 ```
 
 ## Create share for TFS builds
@@ -539,7 +540,7 @@ Click **Add...**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/2B/6B997E115288522B40325FA7F41ACA9281A74E2B.png)
 
-On the **Enable Authentication **page, ensure **Enable CHAP** is not selected.
+On the **Enable Authentication** page, ensure **Enable CHAP** is not selected.
 
 > **Important**
 >
@@ -650,7 +651,7 @@ netsh int ipv6 add dns "LAN 1 - 192.168.10.x" 2601:282:4201:e500::103
 netsh int ipv6 add dns "LAN 1 - 192.168.10.x" 2601:282:4201:e500::104
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ---
 

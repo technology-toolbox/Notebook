@@ -235,7 +235,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update configuration
+#### # Add machine to security group for Windows Update configuration
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 22" -Members ($vmName + '$')
@@ -284,7 +284,7 @@ $domainGroup = "SCOM Admins"
 
 ### # Install SSL certificate
 
-##### # Install certificate for Reporting Services and Operations Manager web console
+#### # Install certificate for Reporting Services and Operations Manager web console
 
 ```PowerShell
 $certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
@@ -912,43 +912,55 @@ GO
    3. In the **Password** box, types the password for the service account.
    4. Click **Apply**.
 6. In the navigation pane, click **Web Service URL**.
-7. In the **Web Service URL **pane:
+7. In the **Web Service URL** pane:
+
    1. Confirm the following warning message appears:
+
+      > Report Server Web Service is not configured. Default values have been provided to you. To accept these defaults simply press the Apply button, else change them and then press Apply.
+
    2. In the **Report Server Web Service Site identification** section, in the **HTTPS Certificate** dropdown list, select the SSL certificate installed previously for System Center (**systemcenter.technologytoolbox.com**).
    3. Click **Apply**.
    4. The following warning message appears:
+
+      > The specified url was unexpectedly reserved. The previous reservation has been overridden.\
+      > The specified url may have been reserved by another product.
+
    5. Click **OK**.
+
 8. In the navigation pane, click **Database**.
 9. In the **Report Server Database** pane, click **Change Database**.
 10. In the **Report Server Database Configuration Wizard** window:
     1. In the **Action** pane, ensure **Choose an existing report server database** is selected, and then click **Next**.
     2. In the **Database Server** pane, type the name of the database server (**TT-SQL01**) in the **Server Name** box, click **Test Connection** and confirm the test succeeded, and then click **Next**.
-    3. In the **Database **pane, in the **Report Server Database** list, select the reporting services database (**ReportServer_SCOM**) and then click **Next**.
-    4. In the **Credentials **pane, ensure **Authentication Type** is set to **Service Credentials** and then click **Next**.
+    3. In the **Database** pane, in the **Report Server Database** list, select the reporting services database (**ReportServer_SCOM**) and then click **Next**.
+    4. In the **Credentials** pane, ensure **Authentication Type** is set to **Service Credentials** and then click **Next**.
     5. On the **Summary** page, verify the information is correct, and then click **Next**.
     6. Click **Finish** to close the wizard.
 11. In the navigation pane, click **Web Portal URL**.
-12. In the **Web Portal URL **pane:
+12. In the **Web Portal URL** pane:
+
     1. Confirm the following warning message appears:
+
+       > The Web Portal virtual directory name is not configured. To configure the directory, enter a name or use the default value that is provided, and then click Apply.
+
     2. Click **Apply**.
     3. The following warning message appears:
+
+       > The specified url was unexpectedly reserved. The previous reservation has been overridden.\
+       > The specified url may have been reserved by another product.
+
     4. Click **OK**.
+
 13. In the navigation pane, click **Encryption Keys**.
-14. In the **Encryption Keys **pane, click **Restore**.
+14. In the **Encryption Keys** pane, click **Restore**.
 15. In the **Restore Encryption Key** window:
-    1. In the **File Location **box, specify the location of the backup file for the encryption key.
+
+    1. In the **File Location** box, specify the location of the backup file for the encryption key.
+
+       **\\TT-FS01\Backups\Encryption Keys\Reporting Services - SCOM.snk**
+
     2. In the **Password** box, type the password for the backup file.
     3. Click **OK**.
-
-Report Server Web Service is not configured. Default values have been provided to you. To accept these defaults simply press the Apply button, else change them and then press Apply.
-
-The specified url was unexpectedly reserved. The previous reservation has been overridden.The specified url may have been reserved by another product.
-
-The Web Portal virtual directory name is not configured. To configure the directory, enter a name or use the default value that is provided, and then click Apply.
-
-The specified url was unexpectedly reserved. The previous reservation has been overridden.The specified url may have been reserved by another product.
-
-**[\\\\TT-FS01\\Backups\\Encryption Keys\\Reporting Services - SCOM.snk](\\TT-FS01\Backups\Encryption Keys\Reporting Services - SCOM.snk)**
 
 #### Remove previous server from Reporting Services
 
@@ -1042,17 +1054,19 @@ GO
 
 ### Issue - Missing reports in SCOM
 
-Log Name:      Operations Manager\
-Source:        Health Service Modules\
-Event ID:      31567\
-Task Category: Data Warehouse\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      TT-SCOM03.corp.technologytoolbox.com\
-Description:\
-Failed to deploy reporting component to the SQL Server Reporting Services server. The operation will be retried.\
+```Text
+Log Name:      Operations Manager
+Source:        Health Service Modules
+Event ID:      31567
+Task Category: Data Warehouse
+Level:         Error
+Keywords:      Classic
+User:          N/A
+Computer:      TT-SCOM03.corp.technologytoolbox.com
+Description:
+Failed to deploy reporting component to the SQL Server Reporting Services server. The operation will be retried.
 Exception 'DeploymentException': Failed to deploy reports for management pack with version dependent id '1cdbe0c8-cde6-77a3-f024-4a1a2970b24c'. Uploading or saving files with .PerformanceBySystem extension is not allowed. Contact your administrator if you have any questions. ---> Microsoft.ReportingServices.Diagnostics.Utilities.ResourceFileFormatNotAllowedException: Uploading or saving files with .PerformanceBySystem extension is not allowed. Contact your administrator if you have any questions.
+```
 
 ```PowerShell
 cls
@@ -1070,7 +1084,10 @@ cls
 
 1. Start SQL Server Management Studio and connect to the report server instance that Operations Manager uses.
 2. Right-click the report server name, select **Properties**, and then select **Advanced**.
-3. Locate the **AllowedResourceExtensionsForUpload** setting and specify the following value to allow any extension:***,*.***
+3. Locate the **AllowedResourceExtensionsForUpload** setting and specify the following value to allow any extension:\
+   \
+   **\*,\*.\***
+
 4. Click **OK**.
 5. Restart SQL Server Reporting Services.
 

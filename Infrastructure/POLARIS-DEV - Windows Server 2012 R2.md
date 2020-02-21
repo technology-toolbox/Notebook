@@ -134,7 +134,7 @@ Enable-PSRemoting -Confirm:$false
 cls
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 Get-NetFirewallRule |
@@ -340,20 +340,22 @@ icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb /grant 'NT Service\MS
 
 ---
 
-**Example**
+Example
 
-Log Name:      Application\
-Source:        ESENT\
-Date:          1/11/2014 12:04:33 PM\
-Event ID:      490\
-Task Category: General\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      POLARIS-DEV.corp.technologytoolbox.com\
-Description:\
-sqlservr (1472) An attempt to open the file "C:\\Windows\\system32\\LogFiles\\Sum\\Api.chk" for read / write access failed with system error 5 (0x00000005): "Access is denied. ".  The open file operation will fail with error -1032 (0xfffffbf8).\
+```Text
+Log Name:      Application
+Source:        ESENT
+Date:          1/11/2014 12:04:33 PM
+Event ID:      490
+Task Category: General
+Level:         Error
+Keywords:      Classic
+User:          N/A
+Computer:      POLARIS-DEV.corp.technologytoolbox.com
+Description:
+sqlservr (1472) An attempt to open the file "C:\\Windows\\system32\\LogFiles\\Sum\\Api.chk" for read / write access failed with system error 5 (0x00000005): "Access is denied. ".  The open file operation will fail with error -1032 (0xfffffbf8).
 Event Xml:
+```
 
 ```XML
 <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
@@ -786,7 +788,7 @@ $acl.SetAccessRule($rule)
 Set-Acl -Path $registryPath -AclObject $acl
 ```
 
-#### Reference
+### Reference
 
 Source: Microsoft-SharePoint Products-SharePoint Foundation\
 Event ID: 6398\
@@ -1272,7 +1274,7 @@ When prompted, type the passphrase for the Secure Store Service.
 cls
 ```
 
-## # Restore Web application - http://ttweb-dev
+## # Restore Web application - [http://ttweb-dev](http://ttweb-dev)
 
 ```PowerShell
 cls
@@ -1340,7 +1342,7 @@ Get-SPContentDatabase -WebApplication http://ttweb-dev |
 cls
 ```
 
-## # Restore Web application - http://team-dev
+## # Restore Web application - [http://team-dev](http://team-dev)
 
 ### # Create Web application
 
@@ -1404,7 +1406,7 @@ Get-SPContentDatabase -WebApplication http://team-dev |
 cls
 ```
 
-## # Restore Web application - http://my-dev
+## # Restore Web application - [http://my-dev](http://my-dev)
 
 ### # Create Web application
 
@@ -1629,7 +1631,7 @@ GRANT EXECUTE ON [dbo].[proc_putDependency] TO [WSS_Content_Application_Pools]
 GO
 ```
 
-##### References
+### References
 
 **Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ‘proc_putObjectTVP’, database ‘SharePoint_Config’**\
 From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html](http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html)>
@@ -1643,7 +1645,7 @@ cls
 
 ## # Install and configure Office Web Apps
 
-##### # Create the binding between SharePoint 2013 and Office Web Apps Server
+### # Create the binding between SharePoint 2013 and Office Web Apps Server
 
 ```PowerShell
 New-SPWOPIBinding -ServerName wac.fabrikam.com
@@ -1653,13 +1655,13 @@ New-SPWOPIBinding -ServerName wac.fabrikam.com
 cls
 ```
 
-##### # View the WOPI zone of SharePoint 2013
+### # View the WOPI zone of SharePoint 2013
 
 ```PowerShell
 Get-SPWOPIZone
 ```
 
-##### # Change the WOPI zone if necessary
+### # Change the WOPI zone if necessary
 
 ```PowerShell
 Set-SPWOPIZone -zone "external-https"

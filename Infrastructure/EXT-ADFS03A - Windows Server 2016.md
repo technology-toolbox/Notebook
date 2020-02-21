@@ -104,7 +104,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-ADFS03A**.
   - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
@@ -612,16 +612,18 @@ GO
 
 ##### Issue
 
-Log Name:      Application\
-Source:        MSSQLSERVER\
-Event ID:      28005\
-Task Category: Server\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      EXT-SQL03.extranet.technologytoolbox.com\
-Description:\
+```Text
+Log Name:      Application
+Source:        MSSQLSERVER
+Event ID:      28005
+Task Category: Server
+Level:         Error
+Keywords:      Classic
+User:          N/A
+Computer:      EXT-SQL03.extranet.technologytoolbox.com
+Description:
 An exception occurred while enqueueing a message in the target queue. Error: 15404, State: 19. Could not obtain information about Windows NT group/user 'TECHTOOLBOX\\s-adfs', error code 0x5.
+```
 
 ##### Solution
 
@@ -667,7 +669,7 @@ runas /USER:TECHTOOLBOX\jjameson cmd
 
 ---
 
-**Command Prompt - running as TECHTOOLBOX\\jjameson**
+**Command Prompt** - running as **TECHTOOLBOX\\jjameson**
 
 ```Console
 PowerShell
@@ -675,7 +677,7 @@ PowerShell
 
 ---
 
-**PowerShell - running as TECHTOOLBOX\\jjameson**
+**PowerShell** - running as **TECHTOOLBOX\\jjameson**
 
 ```PowerShell
 Start-Process PowerShell -Verb runAs
@@ -683,7 +685,7 @@ Start-Process PowerShell -Verb runAs
 
 ---
 
-**Administrator PowerShell - running as TECHTOOLBOX\\jjameson**
+**Administrator PowerShell** - running as **TECHTOOLBOX\\jjameson**
 
 ```PowerShell
 Set-AdfsClaimsProviderTrust `
@@ -887,7 +889,7 @@ copy $source $destination
 cls
 ```
 
-##### # Configure name resolution for identity provider website
+#### # Configure name resolution for identity provider website
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
@@ -1204,23 +1206,25 @@ From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-rea
 
 #### Event log
 
-Log Name:      AD FS/Admin\
-Source:        AD FS\
-Event ID:      356\
-Task Category: None\
-Level:         Error\
-Keywords:      AD FS\
-User:          TECHTOOLBOX\\s-adfs\
-Computer:      EXT-ADFS03A.extranet.technologytoolbox.com\
-Description:\
+```Text
+Log Name:      AD FS/Admin
+Source:        AD FS
+Event ID:      356
+Task Category: None
+Level:         Error
+Keywords:      AD FS
+User:          TECHTOOLBOX\s-adfs
+Computer:      EXT-ADFS03A.extranet.technologytoolbox.com
+Description:
 Failed to register notification to the SQL database with the connection string Data Source=EXT-SQL03;Initial Catalog=AdfsConfigurationV3;Integrated Security=True;Min Pool Size=20 for cache type 'ServiceStateSummary'. Changes to settings may not take effect until the Federation Service restarts.
 
 Additional Data
 
-Exception details:\
-Cannot find the user 'owner', because it does not exist or you do not have permission.\
-Cannot find the queue 'SqlQueryNotificationService-90ad86ae-721c-47e4-bbbf-e3a897b3f208', because it does not exist or you do not have permission.\
+Exception details:
+Cannot find the user 'owner', because it does not exist or you do not have permission.
+Cannot find the queue 'SqlQueryNotificationService-90ad86ae-721c-47e4-bbbf-e3a897b3f208', because it does not exist or you do not have permission.
 Invalid object name 'SqlQueryNotificationService-90ad86ae-721c-47e4-bbbf-e3a897b3f208'.
+```
 
 #### Database
 
@@ -1273,16 +1277,18 @@ From <[https://blogs.msdn.microsoft.com/dataaccess/2005/09/27/sqldependency-chan
 
 ### Issue
 
-Log Name:      Application\
-Source:        MSSQLSERVER\
-Event ID:      28005\
-Task Category: Server\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      EXT-SQL03.extranet.technologytoolbox.com\
-Description:\
-An exception occurred while enqueueing a message in the target queue. Error: 15404, State: 19. Could not obtain information about Windows NT group/user 'TECHTOOLBOX\\s-adfs', error code 0x5.
+```Text
+Log Name:      Application
+Source:        MSSQLSERVER
+Event ID:      28005
+Task Category: Server
+Level:         Error
+Keywords:      Classic
+User:          N/A
+Computer:      EXT-SQL03.extranet.technologytoolbox.com
+Description:
+An exception occurred while enqueueing a message in the target queue. Error: 15404, State: 19. Could not obtain information about Windows NT group/user 'TECHTOOLBOX\s-adfs', error code 0x5.
+```
 
 ### Solution
 

@@ -108,7 +108,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update configuration
+#### # Add machine to security group for Windows Update configuration
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 21" -Members ($vmName + '$')
@@ -1126,7 +1126,7 @@ WITH FILE = 1, NORECOVERY
 
 **SQL Server Management Studio - TT-SQL01D**
 
-#### -- Create logins for databases in availability group
+### -- Create logins for databases in availability group
 
 ```SQL
 USE [master]

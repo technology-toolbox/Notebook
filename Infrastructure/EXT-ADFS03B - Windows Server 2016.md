@@ -56,7 +56,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-ADFS02B**.
   - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
@@ -167,7 +167,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Credential $cred -Resta
 cls
 ```
 
-##### # Move computer to different OU
+#### # Move computer to different OU
 
 ```PowerShell
 $computerName = "EXT-ADFS03B"
@@ -178,9 +178,9 @@ $targetPath = ("OU=Servers,OU=Resources,OU=IT" `
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 ```
 
-##### # Configure Windows Update
+#### # Configure Windows Update
 
-###### # Add machine to security group for Windows Update schedule
+##### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 $domainGroupName = "Windows Update - Slot 7"

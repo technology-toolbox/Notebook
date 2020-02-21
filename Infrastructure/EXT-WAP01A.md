@@ -346,7 +346,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
         idp.technologytoolbox.com
 ```
 
-#### # Publish https://idp.technologytoolbox.com
+#### # Publish [https://idp.technologytoolbox.com](https://idp.technologytoolbox.com)
 
 ```PowerShell
 $cert = Get-ChildItem -Path Cert:\LocalMachine\My |
@@ -362,7 +362,7 @@ Add-WebApplicationProxyApplication `
     -ExternalPreAuthentication PassThrough
 ```
 
-#### # Publish https://client-local-4.securitasinc.com
+#### # Publish [https://client-local-4.securitasinc.com](https://client-local-4.securitasinc.com)
 
 ```PowerShell
 $cert = Get-ChildItem -Path Cert:\LocalMachine\My |

@@ -327,7 +327,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members ($vmName + '$')
@@ -625,7 +625,7 @@ cls
 
 ### # Install Visual Studio Code extensions
 
-##### # Temporarily enable firewall rule for copying files to server
+#### # Temporarily enable firewall rule for copying files to server
 
 ```PowerShell
 Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
@@ -822,7 +822,7 @@ notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
 
 ---
 
-**C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
+File - **C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
 
 ```Text
 ;prefix=${APPDATA}\npm
@@ -897,7 +897,7 @@ cls
 
 ## # Copy cmder configuration
 
-##### # Temporarily enable firewall rule for copying files to server
+### # Temporarily enable firewall rule for copying files to server
 
 ```PowerShell
 Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
@@ -911,7 +911,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 cls
 ```
 
-#### # Copy cmder configuration
+### # Copy cmder configuration
 
 ```PowerShell
 $computer = "EXT-VS2017-DEV3.extranet.technologytoolbox.com"
@@ -927,7 +927,7 @@ robocopy $source $destination /E /XD git-for-windows /MIR /NP
 cls
 ```
 
-##### # Disable firewall rule for copying files to server
+### # Disable firewall rule for copying files to server
 
 ```PowerShell
 Disable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
@@ -993,7 +993,7 @@ exit
 
 ---
 
-**Non-elevated PowerShell instance**
+**Non-elevated** PowerShell instance
 
 ```PowerShell
 cls

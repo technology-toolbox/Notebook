@@ -209,12 +209,12 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 
 ### Configure VM storage
 
-| Disk | Drive Letter | Volume Size                | Allocation Unit Size | Volume Label      | Host Cache |
-| ---- | ------------ | -------------------------- | -------------------- | ----------------- | ---------- |
-| 0    | C:           | 127 GB                     | 4K                   |                   | Read/Write |
-| 1    | D:           | 100 GB                     | 4K                   | Temporary Storage |            |
-| 2    | E:           | 300 GB(3x100 GB, striped) | 64K                  | Data01            | None       |
-| 3    | L:           | 60 GB                      | 64K                  | Log01             | None       |
+| Disk | Drive Letter | Volume Size                   | Allocation Unit Size | Volume Label      | Host Cache |
+| ---- | ------------ | ----------------------------- | -------------------- | ----------------- | ---------- |
+| 0    | C:           | 127 GB                        | 4K                   |                   | Read/Write |
+| 1    | D:           | 100 GB                        | 4K                   | Temporary Storage |            |
+| 2    | E:           | 300 GB<br>(3x100 GB, striped) | 64K                  | Data01            | None       |
+| 3    | L:           | 60 GB                         | 64K                  | Log01             | None       |
 
 #### # Create storage pool and "Data01" drive
 
@@ -510,10 +510,10 @@ $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
 	Where-Object { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
-	$smtpServer,
-	$fromAddress,
-	$replyAddress,
-	$characterSet)
+    $smtpServer,
+    $fromAddress,
+    $replyAddress,
+    $characterSet)
 ```
 
 ### # DEV - Configure timer job history
@@ -793,7 +793,7 @@ Notepad "$path\web.config"
 cls
 ```
 
-# Install SecuritasConnect solutions and activate the features
+### Install SecuritasConnect solutions and activate the features
 
 ```PowerShell
 & '.\Add Solutions.ps1'
@@ -1143,7 +1143,7 @@ cls
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 New-NetFirewallRule `
@@ -1176,7 +1176,7 @@ Enable-NetFirewallRule `
     -DisplayName "File and Printer Sharing (Echo Request - ICMPv6-In)"
 ```
 
-## # Disable firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 Disable-NetFirewallRule -Group 'Remote Windows Update'

@@ -28,7 +28,7 @@ Section: Workspace mappings
 
 > **Comment**
 >
-> Specify solution file to build (since using "**\\*.sln" can be problematic with node_modules folder)
+> Specify solution file to build (since using "\*\*\\\*.sln" can be problematic with node_modules folder)
 
 Process\
 Section: Parameters\
@@ -55,9 +55,9 @@ Clean: true
 ### Set MSBuild arguments to match build definition for ASP.NET projects
 
 | **Task: Build solution...** |                                                                                                                                                                             |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|                           |                                                                                                                                                                             |
-| MSBuild Arguments         | /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="\$(Build.ArtifactStagingDirectory)\\\\" |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                             |                                                                                                                                                                             |
+| MSBuild Arguments           | /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="\$(Build.ArtifactStagingDirectory)\\\\" |
 
 ### Modify "Get sources" task to clean all build directories
 
@@ -73,19 +73,19 @@ Clean: true
 > Change drop location to file share and add "\$(BuildConfiguration)" to package path
 
 | **Task: Build solution...** |                                                                                                                                                                                                       |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MSBuild Arguments         | /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="\$(Build.ArtifactStagingDirectory)\\\\\$(BuildConfiguration)\\\\" |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MSBuild Arguments           | /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="\$(Build.ArtifactStagingDirectory)\\\\\$(BuildConfiguration)\\\\" |
 
 | **Task: Publish Artifact...** |                                                                                                                                         |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Artifact Type               | File share                                                                                                                              |
-| Path                        | [\\\\TT-FS01\\Builds\\Securitas\\EmployeePortal\\\$(Build.BuildNumber)](\\TT-FS01\Builds\Securitas\EmployeePortal\$(Build.BuildNumber)) |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Artifact Type                 | File share                                                                                                                              |
+| Path                          | [\\\\TT-FS01\\Builds\\Securitas\\EmployeePortal\\\$(Build.BuildNumber)](<\TT-FS01\Builds\Securitas\EmployeePortal$(Build.BuildNumber)>) |
 
 ### Tweak "Publish Build Artifacts" task (e.g. to avoid extraneous "drop" folder)
 
-| **Task: Publish Artifact...** |   |
-| --------------------------- | - |
-| Artifact Name               | . |
+| **Task: Publish Artifact...** |     |
+| ----------------------------- | --- |
+| Artifact Name                 | .   |
 
 ### Change "Copy Files" task to only include "Deployment Files" and "Docs"
 
@@ -118,7 +118,7 @@ Docs\\**</p>
 | ------------------------ | ----------------------------------------------------------------- |
 | Display name             | Copy Docs to: \$(Build.ArtifactStagingDirectory)                  |
 | Source Folder            | \$(Build.SourcesDirectory)                                        |
-| Contents                 | Docs\\**                                                          |
+| Contents                 | Docs\\\*\*                                                        |
 | Target Folder            | \$(Build.ArtifactStagingDirectory)                                |
 | Run this task            | Even if a previous task has failed, unless the build was canceled |
 

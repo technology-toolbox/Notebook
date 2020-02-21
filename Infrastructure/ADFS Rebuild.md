@@ -141,9 +141,8 @@ $cert = `
         $certPath)
 
 Get-SPTrustedRootAuthority -Identity "ADFS Signing - fs.technologytoolbox.com" |
+    Set-SPTrustedRootAuthority -Certificate $cert
 ```
-
-    Set-SPTrustedRootAuthority -Certificate \$cert
 
 #### # Update authentication provider for AD FS
 

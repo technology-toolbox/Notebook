@@ -615,7 +615,7 @@ Notepad C:\\NotBackedUp\\Temp\\Get-Subnet.ps1
 
 ---
 
-**Get-Subnet.ps1**
+File - **Get-Subnet.ps1**
 
 ```PowerShell
 $ErrorActionPreference = "stop";
@@ -674,7 +674,7 @@ Notepad "C:\\NotBackedUp\\Temp\\Rename Network Adapters.ps1"
 
 ---
 
-**Rename Network Adapters.ps1**
+File - **Rename Network Adapters.ps1**
 
 ```PowerShell
 . .\Get-Subnet.ps1;

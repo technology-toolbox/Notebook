@@ -7,7 +7,9 @@ Monday, September 23, 2019
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-### Deploy and configure the server infrastructure
+## Deploy and configure the server infrastructure
+
+### Install Windows Server 2019
 
 ---
 
@@ -578,7 +580,7 @@ robocopy `
 >
 > Wait for the update to be installed.
 
-```Console
+```PowerShell
 cls
 Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 ```
@@ -669,7 +671,7 @@ Notepad ($env:ProgramFiles `
 
 ---
 
-**DistributedCacheService.exe.config**
+File - **DistributedCacheService.exe.config**
 
 ```XML
   <appSettings>
@@ -817,7 +819,7 @@ cls
 
 ### -- Backup databases in SharePoint 2013 environment
 
-```Console
+```SQL
 DECLARE @backupPath NVARCHAR(255) = N'\\TT-FS01\Backups\HAVOK'
 
 DECLARE @backupFilePath NVARCHAR(255)
@@ -1060,7 +1062,9 @@ Add-SPProfileSyncConnection `
     -ConnectionUserName $cred.UserName `
     -ConnectionPassword $cred.Password `
     -ConnectionSynchronizationOU $orgUnit
+```
 
+```Text
 Add-SPProfileSyncConnection : The supplied credential is invalid.
 At line:1 char:1
 + Add-SPProfileSyncConnection `
@@ -1339,7 +1343,7 @@ Set-SPEnterpriseSearchCrawlContentSource `
 cls
 ```
 
-## # Restore Web application - http://ttweb
+## # Restore Web application - [http://ttweb](http://ttweb)
 
 ### # Create Web application
 
@@ -1404,7 +1408,7 @@ Get-SPContentDatabase -WebApplication http://ttweb |
 cls
 ```
 
-## # Restore Web application - http://team
+## # Restore Web application - [http://team](http://team)
 
 ### # Create Web application
 
@@ -1470,7 +1474,7 @@ Get-SPContentDatabase -WebApplication http://team |
 cls
 ```
 
-## # Restore Web application - http://my
+## # Restore Web application - [http://my](http://my)
 
 ### # Create Web application
 
@@ -1727,7 +1731,7 @@ slmgr /ipk {product key}
 slmgr /ato
 ```
 
-```Console
+```PowerShell
 cls
 ```
 
@@ -1749,7 +1753,7 @@ $acl.SetAccessRule($rule)
 Set-Acl -Path $registryPath -AclObject $acl
 ```
 
-#### Reference
+### Reference
 
 Source: Microsoft-SharePoint Products-SharePoint Foundation\
 Event ID: 6398\
@@ -1766,7 +1770,7 @@ cls
 
 ## # Install and configure Office Web Apps
 
-##### # Create the binding between SharePoint 2016 and Office Web Apps Server
+### # Create the binding between SharePoint 2016 and Office Web Apps Server
 
 ```PowerShell
 New-SPWOPIBinding -ServerName wac.fabrikam.com
@@ -1776,13 +1780,13 @@ New-SPWOPIBinding -ServerName wac.fabrikam.com
 cls
 ```
 
-##### # View the WOPI zone of SharePoint 2016
+### # View the WOPI zone of SharePoint 2016
 
 ```PowerShell
 Get-SPWOPIZone
 ```
 
-##### # Change the WOPI zone if necessary
+### # Change the WOPI zone if necessary
 
 ```PowerShell
 Set-SPWOPIZone -zone "external-https"
@@ -1810,16 +1814,13 @@ Push-Location ("C:\Program Files\Common Files\microsoft shared" `
     + "\Web Server Extensions\16\BIN")
 
 .\PSConfig.exe `
-```
-
-    -cmd upgrade -inplace b2b `\
-    -wait `\
-    -cmd applicationcontent -install `\
-    -cmd installfeatures `\
-    -cmd secureresources `\
+    -cmd upgrade -inplace b2b `
+    -wait `
+    -cmd applicationcontent -install `
+    -cmd installfeatures `
+    -cmd secureresources `
     -cmd services -install
 
-```PowerShell
 Pop-Location
 ```
 

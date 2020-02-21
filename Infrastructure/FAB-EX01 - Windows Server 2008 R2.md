@@ -425,9 +425,9 @@ Step 3: Assign the Exchange services to the certificate using the Assign Service
 
 ### Create certificate
 
-##### # Create certificate using Active Directory Certificate Services
+#### # Create certificate using Active Directory Certificate Services
 
-###### # Add ADCS website to the "Trusted sites" zone in Internet Explorer
+##### # Add ADCS website to the "Trusted sites" zone in Internet Explorer
 
 ```PowerShell
 [string] $adcsHostname = "cipher01.corp.technologytoolbox.com"
@@ -457,7 +457,7 @@ If ((Test-Path $registryKey) -eq $false)
 Set-ItemProperty -Path $registryKey -Name https -Value 2
 ```
 
-###### # Open Internet Explorer and browse to the ADCS site
+##### # Open Internet Explorer and browse to the ADCS site
 
 ```PowerShell
 & 'C:\Program Files (x86)\Internet Explorer\iexplore.exe' ("https://" + $adcsHostname)
@@ -573,7 +573,7 @@ From <[https://technet.microsoft.com/en-us/library/aa998359(v=exchg.141).aspx](h
 9. In the **Actions** pane, click **Apply**.
 10. Click **Default Web Site**.
 11. In the **Default Web Site Home** pane, double-click **SSL Settings**.
-12. In the **SSL Settings** pane, clear the **Require SSL **checkbox.
+12. In the **SSL Settings** pane, clear the **Require SSL** checkbox.
 13. In the **Actions** pane, click **Apply**.
 
 ### Test Outlook Web App
@@ -652,15 +652,15 @@ Applying Exchange Server SP3 reverts the configuration change made previously in
 2. Expand the local computer, expand **Sites**, and then click **Default Web Site**.
 3. At the bottom of the **Default Web Site Home** pane, click **Features View** if this option isn't already selected.
 4. In the **Default Web Site Home** pane, double-click **SSL Settings**.
-5. In the **SSL Settings** pane, clear the **Require SSL **checkbox.
+5. In the **SSL Settings** pane, clear the **Require SSL** checkbox.
 6. In the **Actions** pane, click **Apply**.
 
 ## Security vulnerability - credentials may be sent in clear text over HTTP
 
 ### Repro steps
 
-1. Open Internet Explorer and browse to [http://mail.fabrikam.com/owa](http://mail.fabrikam.com/owa)\
-   **Note:** In this case, IIS does not redirect to [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa).
+1. Open Internet Explorer and browse to [http://mail.fabrikam.com/owa](http://mail.fabrikam.com/owa)
+   > **Note:** In this case, IIS does not redirect to [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa).
 2. On the Outlook Web App login page, type the user credentials and click **Sign in**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/78/912114981A271CBDF9338BC9589B358FFE92C378.png)
@@ -675,7 +675,7 @@ Revert the configuration change made previously in IIS Manager to clear the **Re
 2. Expand the local computer, expand **Sites**, and then click **Default Web Site**.
 3. At the bottom of the **Default Web Site Home** pane, click **Features View** if this option isn't already selected.
 4. In the **Default Web Site Home** pane, double-click **SSL Settings**.
-5. In the **SSL Settings** pane, select the **Require SSL **checkbox.
+5. In the **SSL Settings** pane, select the **Require SSL** checkbox.
 6. In the **Actions** pane, click **Apply**.
 
 ### Test Outlook Web App
@@ -725,15 +725,15 @@ Revert the configuration change made previously in IIS Manager to clear the **Re
 9. In the **Actions** pane, click **Apply**.
 10. In the **Connections** pane, select **Default Web Site**.
 11. In the **Default Web Site Home** pane, double-click **SSL Settings**.
-12. In the **SSL Settings** pane, clear the **Require SSL **checkbox.
+12. In the **SSL Settings** pane, clear the **Require SSL** checkbox.
 13. In the **Actions** pane, click **Apply**.
 14. In the **Connections** pane, expand **Default Web Site**, and then select **owa**.
 15. In the **/owa Home** pane, double-click **SSL Settings**.
-16. In the **SSL Settings** pane, select the **Require SSL **checkbox.
+16. In the **SSL Settings** pane, select the **Require SSL** checkbox.
 17. In the **Actions** pane, click **Apply**.
 18. In the **Connections** pane, expand **Default Web Site**, and then select **ecp**.
 19. In the **/ecp Home** pane, double-click **SSL Settings**.
-20. In the **SSL Settings** pane, select the **Require SSL **checkbox.
+20. In the **SSL Settings** pane, select the **Require SSL** checkbox.
 21. In the **Actions** pane, click **Apply**.
 
 ### Test Outlook Web App
@@ -759,17 +759,19 @@ Revert the configuration change made previously in IIS Manager to clear the **Re
 
 ### Issue
 
-Log Name:      Application\
-Source:        MSExchange EdgeSync\
-Date:          6/19/2015 6:31:53 PM\
-Event ID:      1045\
-Task Category: Initialization\
-Level:         Warning\
-Keywords:      Classic\
-User:          N/A\
-Computer:      FAB-EX01.corp.fabrikam.com\
-Description:\
+```Text
+Log Name:      Application
+Source:        MSExchange EdgeSync
+Date:          6/19/2015 6:31:53 PM
+Event ID:      1045
+Task Category: Initialization
+Level:         Warning
+Keywords:      Classic
+User:          N/A
+Computer:      FAB-EX01.corp.fabrikam.com
+Description:
 Initialization failed with exception: Microsoft.Exchange.EdgeSync.Common.EdgeSyncServiceConfigNotFoundException: Couldn't find EdgeSync service configuration object for the site Azure-West-US. If the configuration object doesn't exist in the Active Directory location CN=EdgeSyncService,CN=Azure-West-US,CN=Sites,CN=Configuration,DC=corp,DC=fabrikam,DC=com, create it using the New-EdgeSyncServiceConfig cmdlet. If the object does exist, check its permissions.. If this warning frequently occurs, contact Microsoft Product Support.
+```
 
 ### # Resolution
 
@@ -900,7 +902,7 @@ Enable-DistributionGroup "All Sales Staff" `
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 netsh advfirewall firewall add rule `
@@ -914,7 +916,7 @@ netsh advfirewall firewall add rule `
     action=Allow
 ```
 
-## # Disable firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Disable firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 netsh advfirewall firewall set rule `

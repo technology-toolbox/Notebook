@@ -55,7 +55,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-WEB03B**.
   - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, do not select any applications, and click **Next**.
 
@@ -327,7 +327,7 @@ Add-Computer `
 cls
 ```
 
-##### # Move computer to different OU
+### # Move computer to different OU
 
 ```PowerShell
 $computerName = "EXT-WEB03B"
@@ -338,9 +338,9 @@ $targetPath = ("OU=SharePoint Servers,OU=Servers,OU=Resources,OU=IT" `
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 ```
 
-##### # Configure Windows Update
+### # Configure Windows Update
 
-###### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 $domainGroupName = "Windows Update - Slot 3"
@@ -607,7 +607,7 @@ Notepad ($env:ProgramFiles `
 
 ---
 
-**DistributedCacheService.exe.config**
+File - **DistributedCacheService.exe.config**
 
 ```XML
   <appSettings>
@@ -985,17 +985,17 @@ Remove-Item $tempScript
 cls
 ```
 
-# Install Employee Portal
+## Install Employee Portal
 
-## # Extend SecuritasConnect and Cloud Portal web applications
+### # Extend SecuritasConnect and Cloud Portal web applications
 
 ```PowerShell
 cls
 ```
 
-### # Enable disk-based caching for "intranet" websites
+#### # Enable disk-based caching for "intranet" websites
 
-#### # Enable disk-based caching for SecuritasConnect "intranet" website
+##### # Enable disk-based caching for SecuritasConnect "intranet" website
 
 ```PowerShell
 Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
@@ -1010,7 +1010,7 @@ C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
 Pop-Location
 ```
 
-#### # Enable disk-based caching for Cloud Portal "intranet" website
+##### # Enable disk-based caching for Cloud Portal "intranet" website
 
 ```PowerShell
 Push-Location ("C:\inetpub\wwwroot\wss\VirtualDirectories\" `
@@ -1029,23 +1029,23 @@ Pop-Location
 cls
 ```
 
-### # Map intranet URLs to loopback address in Hosts file
+#### # Map intranet URLs to loopback address in Hosts file
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
     127.0.0.1 client2-test.securitasinc.com, cloud2-test.securitasinc.com
 ```
 
-### # Allow specific host names mapped to 127.0.0.1
+#### # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
     client2-test.securitasinc.com, cloud2-test.securitasinc.com
 ```
 
-## Install Web Deploy 3.6
+### Install Web Deploy 3.6
 
-### Install Web Deploy
+#### Install Web Deploy
 
 (skipped -- since this was completed earlier)
 
@@ -1053,9 +1053,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 cls
 ```
 
-## # Install .NET Framework 4.5
+### # Install .NET Framework 4.5
 
-### # Download .NET Framework 4.5.2 installer
+#### # Download .NET Framework 4.5.2 installer
 
 ```PowerShell
 net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
@@ -1072,7 +1072,7 @@ Copy-Item `
     C:\NotBackedUp\Temp
 ```
 
-### # Install .NET Framework 4.5.2
+#### # Install .NET Framework 4.5.2
 
 ```PowerShell
 & C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
@@ -1086,7 +1086,7 @@ Copy-Item `
 Remove-Item C:\NotBackedUp\Temp\NDP452-KB2901907-x86-x64-AllOS-ENU.exe
 ```
 
-### Install updates
+#### Install updates
 
 > **Important**
 >
@@ -1241,72 +1241,74 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-## Issue - Error accessing SharePoint sites (e.g. http://client-test.securitasinc.com)
+## Issue - Error accessing SharePoint sites (e.g. [http://client-test.securitasinc.com](http://client-test.securitasinc.com))
 
-Log Name:      Application\
-Source:        ASP.NET 4.0.30319.0\
-Date:          5/18/2017 11:06:29 AM\
-Event ID:      1309\
-Task Category: Web Event\
-Level:         Warning\
-Keywords:      Classic\
-User:          N/A\
-Computer:      EXT-WEB02B.extranet.technologytoolbox.com\
-Description:\
-Event code: 3005\
-Event message: An unhandled exception has occurred.\
-Event time: 5/18/2017 11:06:29 AM\
-Event time (UTC): 5/18/2017 5:06:29 PM\
-Event ID: 0fd660226e724958bba36b1cb4e17992\
-Event sequence: 8\
-Event occurrence: 1\
-Event detail code: 0\
-\
-Application information:\
-    Application domain: /LM/W3SVC/762047535/ROOT-1-131396007128500689\
-    Trust level: Full\
-    Application Virtual Path: /\
-    Application Path: C:\\inetpub\\wwwroot\\wss\\VirtualDirectories\\client-test.securitasinc.com80\\\
-    Machine name: EXT-WEB02B\
-\
-Process information:\
-    Process ID: 4496\
-    Process name: w3wp.exe\
-    Account name: EXTRANET\\s-web-client\
-\
-Exception information:\
-    Exception type: FileLoadException\
-    Exception message: Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)\
-   at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)\
-   at Microsoft.SharePoint.IdentityModel.SPChunkedCookieHandler.ReadCore(String name, HttpContext context)\
-   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.TryReadSessionTokenFromCookie(SessionSecurityToken& sessionToken)\
-   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
-   at Microsoft.SharePoint.IdentityModel.SPSessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
-   at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()\
+```Text
+Log Name:      Application
+Source:        ASP.NET 4.0.30319.0
+Date:          5/18/2017 11:06:29 AM
+Event ID:      1309
+Task Category: Web Event
+Level:         Warning
+Keywords:      Classic
+User:          N/A
+Computer:      EXT-WEB02B.extranet.technologytoolbox.com
+Description:
+Event code: 3005
+Event message: An unhandled exception has occurred.
+Event time: 5/18/2017 11:06:29 AM
+Event time (UTC): 5/18/2017 5:06:29 PM
+Event ID: 0fd660226e724958bba36b1cb4e17992
+Event sequence: 8
+Event occurrence: 1
+Event detail code: 0
+
+Application information:
+    Application domain: /LM/W3SVC/762047535/ROOT-1-131396007128500689
+    Trust level: Full
+    Application Virtual Path: /
+    Application Path: C:\inetpub\wwwroot\wss\VirtualDirectories\client-test.securitasinc.com80\
+    Machine name: EXT-WEB02B
+
+Process information:
+    Process ID: 4496
+    Process name: w3wp.exe
+    Account name: EXTRANET\s-web-client
+
+Exception information:
+    Exception type: FileLoadException
+    Exception message: Loading this assembly would produce a different grant set from other instances. (Exception from HRESULT: 0x80131401)
+   at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)
+   at Microsoft.SharePoint.IdentityModel.SPChunkedCookieHandler.ReadCore(String name, HttpContext context)
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.TryReadSessionTokenFromCookie(SessionSecurityToken& sessionToken)
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)
+   at Microsoft.SharePoint.IdentityModel.SPSessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)
+   at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
    at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)
 
-\
-\
-Request information:\
-    Request URL: [https://client-test.securitasinc.com:443/favicon.ico](https://client-test.securitasinc.com:443/favicon.ico)\
-    Request path: /favicon.ico\
-    User host address: 127.0.0.1\
-    User:\
-    Is authenticated: False\
-    Authentication Type:\
-    Thread account name: EXTRANET\\s-web-client\
-\
-Thread information:\
-    Thread ID: 20\
-    Thread account name: EXTRANET\\s-web-client\
-    Is impersonating: False\
-    Stack trace:    at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)\
-   at Microsoft.SharePoint.IdentityModel.SPChunkedCookieHandler.ReadCore(String name, HttpContext context)\
-   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.TryReadSessionTokenFromCookie(SessionSecurityToken& sessionToken)\
-   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
-   at Microsoft.SharePoint.IdentityModel.SPSessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)\
-   at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()\
+
+
+Request information:
+    Request URL: [https://client-test.securitasinc.com:443/favicon.ico](https://client-test.securitasinc.com:443/favicon.ico)
+    Request path: /favicon.ico
+    User host address: 127.0.0.1
+    User:
+    Is authenticated: False
+    Authentication Type:
+    Thread account name: EXTRANET\s-web-client
+
+Thread information:
+    Thread ID: 20
+    Thread account name: EXTRANET\s-web-client
+    Is impersonating: False
+    Stack trace:    at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)
+   at Microsoft.SharePoint.IdentityModel.SPChunkedCookieHandler.ReadCore(String name, HttpContext context)
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.TryReadSessionTokenFromCookie(SessionSecurityToken& sessionToken)
+   at Microsoft.IdentityModel.Web.SessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)
+   at Microsoft.SharePoint.IdentityModel.SPSessionAuthenticationModule.OnAuthenticateRequest(Object sender, EventArgs eventArgs)
+   at System.Web.HttpApplication.SyncEventExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()
    at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously)\
+```
 
 ### References
 
@@ -1355,17 +1357,11 @@ cls
 
 ```PowerShell
 $source = "\\TT-FS01.corp.technologytoolbox.com\Products\Microsoft" `
-```
+    + "\System Center 2016\SCOM\agent\AMD64"
 
-    + "\\System Center 2016\\SCOM\\agent\\AMD64"
-
-```PowerShell
 $destination = "\\EXT-WEB02B.extranet.technologytoolbox.com\C$\NotBackedUp\Temp" `
-```
+    + "\System Center 2016\SCOM\agent\AMD64"
 
-    + "\\System Center 2016\\SCOM\\agent\\AMD64"
-
-```Console
 robocopy $source $destination /E /MIR
 ```
 
@@ -1582,12 +1578,9 @@ $keyPath = [System.IO.Path]::Combine(
 $acl = Get-Acl -Path $keyPath
 
 $accessRule = New-Object `
-```
+    -TypeName System.Security.AccessControl.FileSystemAccessRule `
+    -ArgumentList $serviceAccount, "Read", "Allow"
 
-    -TypeName System.Security.AccessControl.FileSystemAccessRule `\
-    -ArgumentList \$serviceAccount, "Read", "Allow"
-
-```PowerShell
 $acl.AddAccessRule($accessRule)
 
 Set-Acl -Path $keyPath -AclObject $acl

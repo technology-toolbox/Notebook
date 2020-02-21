@@ -59,7 +59,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-SQL03**.
   - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, do not select any applications, and click **Next**.
 
@@ -386,7 +386,7 @@ Add-Computer `
 cls
 ```
 
-##### # Move computer to different OU
+### # Move computer to different OU
 
 ```PowerShell
 $computerName = "EXT-SQL03"
@@ -397,9 +397,9 @@ $targetPath = ("OU=SQL Servers,OU=Servers,OU=Resources,OU=IT" `
 Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 ```
 
-##### # Configure Windows Update
+### # Configure Windows Update
 
-###### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 $domainGroupName = "Windows Update - Slot 3"
@@ -770,8 +770,8 @@ Ending at:<strong> 11:59:59 PM</strong></p>
       2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Full**.
       3. On the **Options** tab, in the **Set backup compression** dropdown, select **Compress backup**.
       4. Click **Next**.
-   6. On the **Select Report Options **page, click **Next**.
-   7. On the **Complete the Wizard **page, click **Finish**.
+   6. On the **Select Report Options** page, click **Next**.
+   7. On the **Complete the Wizard** page, click **Finish**.
 
 #### Create maintenance plan for differential backup of all databases
 
@@ -791,8 +791,8 @@ Ending at:<strong> 11:59:59 PM</strong></p>
       2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Differential**.
       3. On the **Options** tab, in the **Set backup compression** dropdown, select **Compress backup**.
       4. Click **Next**.
-   6. On the **Select Report Options **page, click **Next**.
-   7. On the **Complete the Wizard **page, click **Finish**.
+   6. On the **Select Report Options** page, click **Next**.
+   7. On the **Complete the Wizard** page, click **Finish**.
 
 #### Create maintenance plan for transaction log backup of all databases
 
@@ -812,8 +812,8 @@ Ending at:<strong> 11:59:59 PM</strong></p>
       2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log**.
       3. On the **Options** tab, in the **Set backup compression** dropdown, select **Do not compress backup**.
       4. Click **Next**.
-   6. On the **Select Report Options **page, click **Next**.
-   7. On the **Complete the Wizard **page, click **Finish**.
+   6. On the **Select Report Options** page, click **Next**.
+   7. On the **Complete the Wizard** page, click **Finish**.
 
 ### Create cleanup maintenance plan
 
@@ -914,12 +914,12 @@ Recurs every: <strong>1</strong> week on</p>
    4. On the **Select Maintenance Task Order** page, click **Next**.
    5. On the **Define Maintenance Cleanup Task** page:
       1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\**.
-      2. In the **File extension **box, type **bak**.
+      2. In the **File extension** box, type **bak**.
       3. Select the **Include first-level subfolders** checkbox.
       4. In the **File age** section, configure the settings to delete files older than **3 Week(s)**.
       5. Click **Next**.
-   6. On the **Select Report Options **page, click **Next**.
-   7. On the **Complete the Wizard **page, click **Finish**.
+   6. On the **Select Report Options** page, click **Next**.
+   7. On the **Complete the Wizard** page, click **Finish**.
 
 #### Modify maintenance plan to remove old Transaction Log backups
 
@@ -938,12 +938,12 @@ Recurs every: <strong>1</strong> week on</p>
    6. Right-click the **Remove Transaction Log Backups** task and click **Edit...**
    7. In the **Maintenance Cleanup Task** window:
       1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
-      2. In the **File extension **box, type **trn**.
+      2. In the **File extension** box, type **trn**.
       3. In the **File age** section, configure the settings to delete files older than **3 Week(s)**.
       4. Click **OK**.
    8. Use the **Toolbox** to add a new **History Cleanup Task**.
    9. Right-click the new task and click **Edit...**
-   10. In the **History Cleanup Task **window, click **OK**.
+   10. In the **History Cleanup Task** window, click **OK**.
 4. On the **File** menu, click **Save Selected Items**.
 
 ### Execute maintenance plan - Full Backup of All Databases

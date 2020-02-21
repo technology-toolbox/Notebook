@@ -679,9 +679,8 @@ cls
 
 ```PowerShell
 move "C:\Users\jjameson-admin\Downloads\certnew.cer" `
+    \\EXT-FS01.extranet.technologytoolbox.com\Public
 ```
-
-    [\\\\EXT-FS01.extranet.technologytoolbox.com\\Public](\\EXT-FS01.extranet.technologytoolbox.com\Public)
 
 ---
 

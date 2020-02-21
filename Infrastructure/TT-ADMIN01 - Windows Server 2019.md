@@ -196,7 +196,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members ($vmName + '$')
@@ -329,7 +329,7 @@ Remove-Item $certFile
 
 ##### Export certificate
 
-Filename: **[\\\\TT-FS01\\Users\$\\jjameson-admin\\My Documents\\Certificates\\admin.technologytoolbox.com.pfx](\\TT-FS01\Users$\jjameson-admin\My Documents\Certificates\admin.technologytoolbox.com.pfx)**
+Filename: **[\\\\TT-FS01\\Users\$\\jjameson-admin\\My Documents\\Certificates\\admin.technologytoolbox.com.pfx](\\TT-FS01\Users\$\jjameson-admin\My Documents\Certificates\admin.technologytoolbox.com.pfx)**
 
 ---
 

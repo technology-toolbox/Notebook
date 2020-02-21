@@ -716,18 +716,18 @@ Set-Location C:
 
 ##### Configure TrackTik credentials for Branch Manager
 
-[https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-test.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-test.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 Branch Manager: **smasters@technologytoolbox.com**\
 TrackTik username:** opanduro2m**
 
 ##### HACK: Update TrackTik password for Angela.Parks
 
-[https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-2.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ##### HACK: Update TrackTik password for bbarthelemy-demo
 
-[https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-2.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-local-2.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ---
 
@@ -863,7 +863,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 > **Note**
 >
-> Expect the previous operation to complete in approximately 7-1/2  minutes.
+> Expect the previous operation to complete in approximately 7-1/2 minutes.
 
 ```PowerShell
 cls

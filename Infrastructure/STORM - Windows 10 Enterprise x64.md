@@ -9,7 +9,7 @@ Monday, July 2, 2018
 
 ## Install Windows 10 Enterprise (x64)
 
-#### Install custom Windows 10 image
+### Install custom Windows 10 image
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
@@ -27,7 +27,7 @@ Monday, July 2, 2018
       - **Thunderbird**
   - Click **Next**.
 
-#### # Rename local Administrator account and set password
+### # Rename local Administrator account and set password
 
 ```PowerShell
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -52,7 +52,7 @@ logoff
 
 Install DaVinci Resolve
 
-# Rename computer and join domain
+### Rename computer and join domain
 
 ```PowerShell
 $computerName = "STORM"
@@ -167,7 +167,7 @@ Function Disable-AutomaticallyDetectProxySettings {
     $conSet = $(Get-ItemProperty $regKeyPath).DefaultConnectionSettings
     if ($($conSet[$flagIndex] -band $autoProxyFlag) -ne $autoProxyFlag)
     {
-    	Write-Host "'Automatically detect proxy settings' is disabled."
+        Write-Host "'Automatically detect proxy settings' is disabled."
     }
 }
 
@@ -201,15 +201,15 @@ mountvol X: $volumeId
 
 #### Physical disks
 
-| Disk | Model                           | Serial Number        | Capacity | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------------------------- | -------------------- | -------- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | Samsung SSD 850 PRO 256GB       | *********19550Z      | 256 GB   | C:           | 235 GB      | 4K                   | System       |
-| 1    | Samsung Samsung SSD 860 EVO 1TB | *********26709R      | 1 TB     | E:           | 931 GB      | 4K                   | Gold01       |
-| 2    | WDC WD1001FALS-00E3A0           | WD-******283566      | 1 TB     | Z:           | 931 GB      | 4K                   | Backup01     |
-| 3    | WDC WD1002FAEX-00Y9A0           | WD-******201582      | 1 TB     | F:           | 931 GB      | 4K                   | Bronze01     |
-| 4    | ST1000NM0033-9ZM173             | *****EMV             | 1 TB     |              |             |                      |              |
-| 5    | ST1000NM0033-9ZM173             | *****4YL             | 1 TB     |              |             |                      |              |
-| 6    | Samsung SSD 970 PRO 512GB       | *********_81B1_6431. | 512 GB   | D:           |             | 4K                   | Platinum01   |
+| Disk | Model                           | Serial Number                  | Capacity | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------------------------- | ------------------------------ | -------- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | Samsung SSD 850 PRO 256GB       | \*\*\*\*\*\*\*\*\*19550Z       | 256 GB   | C:           | 235 GB      | 4K                   | System       |
+| 1    | Samsung Samsung SSD 860 EVO 1TB | \*\*\*\*\*\*\*\*\*26709R       | 1 TB     | E:           | 931 GB      | 4K                   | Gold01       |
+| 2    | WDC WD1001FALS-00E3A0           | WD-\*\*\*\*\*\*283566          | 1 TB     | Z:           | 931 GB      | 4K                   | Backup01     |
+| 3    | WDC WD1002FAEX-00Y9A0           | WD-\*\*\*\*\*\*201582          | 1 TB     | F:           | 931 GB      | 4K                   | Bronze01     |
+| 4    | ST1000NM0033-9ZM173             | \*\*\*\*\*EMV                  | 1 TB     |              |             |                      |              |
+| 5    | ST1000NM0033-9ZM173             | \*\*\*\*\*4YL                  | 1 TB     |              |             |                      |              |
+| 6    | Samsung SSD 970 PRO 512GB       | \*\*\*\*\*\*\*\*\*\_81B1_6431. | 512 GB   | D:           |             | 4K                   | Platinum01   |
 
 ```PowerShell
 Get-PhysicalDisk | sort DeviceId
@@ -315,7 +315,7 @@ cls
 Enable-PSRemoting -Confirm:$false
 ```
 
-### # Configure firewall rules for POSHPAIG (http://poshpaig.codeplex.com/)
+### # Configure firewall rules for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 Set-ExecutionPolicy RemoteSigned -Scope Process -Force
@@ -332,8 +332,6 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 `
 > Run the following commands using a non-elevated command prompt (to avoid issues with customizing the folder icons).
 
 ---
-
-**Command Prompt**
 
 ```Console
 mkdir C:\NotBackedUp\Public\Symbols
@@ -450,16 +448,17 @@ Start-Process -FilePath $setupPath -Wait
 ### Patch Money DLL to avoid crash when importing transactions
 
 1. Open DLL in hex editor:
+
+   ```Console
+   C:\NotBackedUp\Public\Toolbox\HxD\HxD.exe "C:\Program Files (x86)\Microsoft Money Plus\MNYCoreFiles\mnyob99.dll"
+   ```
+
 2. Make the following changes:
 
-```Console
-    C:\NotBackedUp\Public\Toolbox\HxD\HxD.exe "C:\Program Files (x86)\Microsoft Money Plus\MNYCoreFiles\mnyob99.dll"
-```
-
-    File offset **003FACE8**: Change **85** to **8D**\
-    File offset **003FACED**: Change **50** to **51**\
-    File offset **003FACF0**: Change **FF** to **85**\
-    File offset **003FACF6**: Change **E8** to **B9**
+   File offset **003FACE8**: Change **85** to **8D**\
+   File offset **003FACED**: Change **50** to **51**\
+   File offset **003FACF0**: Change **FF** to **85**\
+   File offset **003FACF6**: Change **E8** to **B9**
 
 #### Reference
 
@@ -662,9 +661,9 @@ mkdir "D:\NotBackedUp\Microsoft SQL Server\DReplayClient\ResultDir\"
 
 ```PowerShell
 $imagePath = ("\\TT-FS01\Products\Microsoft\SQL Server 2017" `
-    + "\\en_sql_server_2017_developer_x64_dvd_11296168.iso")
+    + "\en_sql_server_2017_developer_x64_dvd_11296168.iso")
 
-$imageDriveLetter = (Mount-DiskImage -ImagePath \$ImagePath -PassThru |
+$imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
     Get-Volume).DriveLetter
 
 & ("$imageDriveLetter" + ":\setup.exe")
@@ -696,9 +695,9 @@ On the **Analysis Services Configuration** page:
   - Change the **Temp directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Temp.**
   - Change the **Backup directory** to **Z:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Backup**.
 
-On the **Distributed Replay Controller **page, click **Add Current User**.
+On the **Distributed Replay Controller** page, click **Add Current User**.
 
-On the **Distributed Replay Client **page:
+On the **Distributed Replay Client** page:
 
 - On the **Server Configuration** tab, click **Add Current User**.
   - Change the **Working Directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\WorkingDir\\.**
@@ -893,16 +892,17 @@ darfka.vbscript
 
 ---
 
-**Notes**
-
-Potential issue when using both Beautify and Prettier extensions:\
-**Prettier & Beautify**\
-From <[https://css-tricks.com/prettier-beautify/](https://css-tricks.com/prettier-beautify/)>
-
-HTML formatting issue with Prettier:
-
-**Add the missing option to disable crappy Prettier VSCode HTML formatter #636**\
-From <[https://github.com/prettier/prettier-vscode/issues/636](https://github.com/prettier/prettier-vscode/issues/636)>
+> **Notes**
+>
+> Potential issue when using both Beautify and Prettier extensions:
+>
+> **Prettier & Beautify**\
+> From <[https://css-tricks.com/prettier-beautify/](https://css-tricks.com/prettier-beautify/)>
+>
+> HTML formatting issue with Prettier:
+>
+> **Add the missing option to disable crappy Prettier VSCode HTML formatter #636**\
+> From <[https://github.com/prettier/prettier-vscode/issues/636](https://github.com/prettier/prettier-vscode/issues/636)>
 
 ---
 
@@ -913,9 +913,9 @@ From <[https://github.com/prettier/prettier-vscode/issues/636](https://github.co
 
 ---
 
-**settings.json**
+File - **settings.json**
 
-```Console
+```JSON
 {
     "editor.formatOnSave": true,
     "editor.renderWhitespace": "boundary",
@@ -1148,7 +1148,7 @@ notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
 
 ---
 
-**C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
+File - **C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
 
 ```Text
 ;prefix=${APPDATA}\npm
@@ -1409,7 +1409,8 @@ Start-Process -FilePath $setupPath -Wait
 
 "Windows blocked the installation of a digitally unsigned driver..."
 
-**Microsoft Message Anlayzer 1.4 - 'A Digitally Signed Driver Is Required'**From <[https://social.technet.microsoft.com/Forums/windows/en-US/48b4c226-fc3d-4793-b544-3440ed13424a/microsoft-message-anlayzer-14-a-digitally-signed-driver-is-required?forum=messageanalyzer](https://social.technet.microsoft.com/Forums/windows/en-US/48b4c226-fc3d-4793-b544-3440ed13424a/microsoft-message-anlayzer-14-a-digitally-signed-driver-is-required?forum=messageanalyzer)>
+**Microsoft Message Anlayzer 1.4 - 'A Digitally Signed Driver Is Required'**\
+From <[https://social.technet.microsoft.com/Forums/windows/en-US/48b4c226-fc3d-4793-b544-3440ed13424a/microsoft-message-anlayzer-14-a-digitally-signed-driver-is-required?forum=messageanalyzer](https://social.technet.microsoft.com/Forums/windows/en-US/48b4c226-fc3d-4793-b544-3440ed13424a/microsoft-message-anlayzer-14-a-digitally-signed-driver-is-required?forum=messageanalyzer)>
 
 ```PowerShell
 cls
@@ -1733,7 +1734,7 @@ exit
 
 ---
 
-**Non-elevated PowerShell instance**
+**Non-elevated** PowerShell instance
 
 ```PowerShell
 cls

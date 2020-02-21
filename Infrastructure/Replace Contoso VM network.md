@@ -81,10 +81,9 @@ $logicalNetworkDefinitionsToRemove = @()
 $logicalNetworkDefinitionsToRemove += $logicalNetworkDefinition
 
 Set-SCNativeUplinkPortProfile `
+    -NativeUplinkPortProfile $portProfile `
+    -RemoveLogicalNetworkDefinition $logicalNetworkDefinitionsToRemove
 ```
-
-    -NativeUplinkPortProfile \$portProfile `\
-    -RemoveLogicalNetworkDefinition \$logicalNetworkDefinitionsToRemove
 
 ### # Remove network site (a.k.a. logical network definition)
 

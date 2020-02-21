@@ -255,7 +255,7 @@ sudoedit /etc/realmd.conf
 
 ---
 
-**/etc/realmd.conf**
+File - **/etc/realmd.conf**
 
 ```INI
 [users]
@@ -284,7 +284,7 @@ sudoedit /etc/hostname
 
 ---
 
-**/etc/hostname**
+File - **/etc/hostname**
 
 ```Text
 TT-UD18-DEV-03.corp.technologytoolbox.com
@@ -421,7 +421,7 @@ sudoedit /etc/pam.d/common-session
 
 ---
 
-**/etc/pam.d/common-session**
+File - **/etc/pam.d/common-session**
 
 ```Text
 ...
@@ -526,7 +526,7 @@ nano ~/.bashrc
 
 ---
 
-**~/.bashrc**
+File - **~/.bashrc**
 
 ```Text
 ...
@@ -795,7 +795,7 @@ sudoedit /etc/default/grub
 
 ---
 
-**/etc/realmd.conf**
+File - **/etc/realmd.conf**
 
 ```Text
 ...
@@ -890,7 +890,7 @@ nano ~/.bashrc
 
 ---
 
-**~/.bashrc**
+File - **~/.bashrc**
 
 ```Text
 ...
@@ -1448,7 +1448,7 @@ mvn install
 clear
 ```
 
-#### # Allow a non-superuser to capture packets with Wireshark
+### # Allow a non-superuser to capture packets with Wireshark
 
 ```Shell
 sudo usermod -a -G wireshark jjameson
@@ -1458,7 +1458,7 @@ sudo usermod -a -G wireshark jjameson
 clear
 ```
 
-#### # Install package for troubleshooting Kerberos (e.g. kinit)
+### # Install package for troubleshooting Kerberos (e.g. kinit)
 
 ```Shell
 sudo apt install krb5-user

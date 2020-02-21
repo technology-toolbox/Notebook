@@ -109,7 +109,7 @@ cls
 Enable-PSRemoting -Confirm:$false
 ```
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ```PowerShell
 New-NetFirewallRule `
@@ -322,7 +322,8 @@ New-NetFirewallRule `
     -Group 'Technology Toolbox (Custom)' `
     -Direction Inbound `
     -Protocol TCP `
-    -LocalPort 2383 `-Action Allow
+    -LocalPort 2383 `
+    -Action Allow
 
 New-NetFirewallRule `
     -Name "SQL Server Database Engine" `
@@ -330,7 +331,8 @@ New-NetFirewallRule `
     -Group 'Technology Toolbox (Custom)' `
     -Direction Inbound `
     -Protocol TCP `
-    -LocalPort 1433 `-Action Allow
+    -LocalPort 1433 `
+    -Action Allow
 ```
 
 ```PowerShell
@@ -398,7 +400,8 @@ $productionServer = "HAVOK-TEST"
 .\Attach-ProductionServer.ps1 `
     -DPMServerName JUGGERNAUT `
     -PSName $productionServer `
-    -Domain TECHTOOLBOX `-UserName jjameson-admin
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
 ```
 
 ## Add "Local System" account to SQL Server sysadmin role
@@ -796,7 +799,8 @@ GO
 ## -- Restore additional SQL Server databases
 
 ```SQL
-RESTORE DATABASE [AdventureWorks2012] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\AdventureWorks2012_backup_2014_01_04_064316_3627095.bak' WITH  FILE = 1,  MOVE N'AdventureWorks2012_Data' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\AdventureWorks2012_Data.mdf',  MOVE N'AdventureWorks2012_Log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\AdventureWorks2012_log.ldf',  NOUNLOAD,  STATS = 5
+RESTORE DATABASE [AdventureWorks2012]
+ FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\AdventureWorks2012_backup_2014_01_04_064316_3627095.bak' WITH  FILE = 1,  MOVE N'AdventureWorks2012_Data' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\AdventureWorks2012_Data.mdf',  MOVE N'AdventureWorks2012_Log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\AdventureWorks2012_log.ldf',  NOUNLOAD,  STATS = 5
 
 RESTORE DATABASE [AdventureWorksLT2012]
  FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\AdventureWorksLT2012_backup_2014_01_04_064316_3158285.bak' WITH  FILE = 1,  MOVE N'AdventureWorksLT2008_Data' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\AdventureWorksLT2012_Data.mdf',  MOVE N'AdventureWorksLT2008_Log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\AdventureWorksLT2012_log.ldf',  NOUNLOAD,  STATS = 5
@@ -804,7 +808,8 @@ RESTORE DATABASE [AdventureWorksLT2012]
 RESTORE DATABASE [Caelum]
  FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\Caelum_backup_2014_01_04_064316_3158285.bak' WITH  FILE = 1,  MOVE N'DB_29334_caelum_data' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Caelum.mdf',  MOVE N'DB_29334_caelum_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\Caelum.ldf',  NOUNLOAD,  STATS = 5
 
-RESTORE DATABASE [Caelum_Warehouse] FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\Caelum_Warehouse_backup_2014_01_04_064316_3314531.bak' WITH  FILE = 1,  MOVE N'Caelum_Warehouse' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Caelum_Warehouse.mdf',  MOVE N'Caelum_Warehouse_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\Caelum_Warehouse_log.LDF',  NOUNLOAD,  STATS = 5
+RESTORE DATABASE [Caelum_Warehouse]
+ FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\Caelum_Warehouse_backup_2014_01_04_064316_3314531.bak' WITH  FILE = 1,  MOVE N'Caelum_Warehouse' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Caelum_Warehouse.mdf',  MOVE N'Caelum_Warehouse_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\Caelum_Warehouse_log.LDF',  NOUNLOAD,  STATS = 5
 
 RESTORE DATABASE [LoadTest2010]
  FROM  DISK = N'\\iceman\Archive\BEAST\NotBackedUp\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Backup\Full\LoadTest2010_backup_2014_01_04_064316_3314531.bak' WITH  FILE = 1,  MOVE N'LoadTest2010' TO N'D:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\LoadTest2010.mdf',  MOVE N'LoadTest2010_log' TO N'L:\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\Data\LoadTest2010_log.LDF',  NOUNLOAD,  STATS = 5
@@ -1102,7 +1107,7 @@ Screen clipping taken: 11/17/2017 4:45 AM
 cls
 ```
 
-#### # Increase size of VHD
+### # Increase size of VHD
 
 ```PowerShell
 $vmName = "HAVOK-TEST"

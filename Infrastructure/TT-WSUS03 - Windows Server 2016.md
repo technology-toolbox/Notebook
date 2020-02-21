@@ -16,10 +16,10 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 ### Plan WSUS deployment
 
-| Setting          | Value                                  |
-| ---------------- | -------------------------------------- |
+| Setting          | Value                                 |
+| ---------------- | ------------------------------------- |
 | Content location | [\\\\TT-FS01\\WSUS\$](\\TT-FS01\WSUS$) |
-| Current size     | 40.4 GB (3,705 files, 258 folders)     |
+| Current size     | 40.4 GB (3,705 files, 258 folders)    |
 
 ### Deploy and configure the server infrastructure
 
@@ -169,7 +169,7 @@ Set-VMFirmware `
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update schedule
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 9" -Members ($vmName + '$')
@@ -334,11 +334,8 @@ cls
 
 ```PowerShell
 $installerPath = "\\TT-FS01\Products\Microsoft\Report Viewer 2012 Runtime" `
-```
+    + "\ReportViewer.msi"
 
-    + "\\ReportViewer.msi"
-
-```PowerShell
 Start-Process `
     -FilePath $installerPath `
     -Wait
@@ -366,7 +363,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
    1. Select **Windows Server Update Services**.
    2. A dialog window opens for adding the features required for WSUS. Click **Add Features**.
    3. Click **Next**.
-6. On the **Select features **page, click **Next**.
+6. On the **Select features** page, click **Next**.
 7. On the **Windows Server Update Services** page, click **Next**.
 8. On the **Select role services** page:
    1. Clear the **WID Connectivity** checkbox.
@@ -374,7 +371,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
    3. Select the **SQL Server Connectivity** checkbox.
    4. Click **Next**.
 9. On the **Content location selection** page:
-   1. Ensure the **Store updates in the following location **checkbox is selected.
+   1. Ensure the **Store updates in the following location** checkbox is selected.
    2. In the location box, type **D:\\WSUS**.
    3. Click **Next**.
 10. On the **Database Instance Selection** page:
@@ -424,29 +421,31 @@ Windows Update failing on clients:
 
 ###### Troubleshooting
 
-Log Name:      System\
-Source:        Microsoft-Windows-WAS\
-Date:          10/14/2016 9:32:42 AM\
-Event ID:      5117\
-Task Category: None\
-Level:         Information\
-Keywords:      Classic\
-User:          N/A\
-Computer:      COLOSSUS.corp.technologytoolbox.com\
-Description:\
+```Text
+Log Name:      System
+Source:        Microsoft-Windows-WAS
+Date:          10/14/2016 9:32:42 AM
+Event ID:      5117
+Task Category: None
+Level:         Information
+Keywords:      Classic
+User:          N/A
+Computer:      COLOSSUS.corp.technologytoolbox.com
+Description:
 A worker process serving application pool 'WsusPool' has requested a recycle because it reached its private bytes memory limit.
 
-Log Name:      System\
-Source:        Microsoft-Windows-WAS\
-Date:          10/14/2016 9:33:42 AM\
-Event ID:      5002\
-Task Category: None\
-Level:         Error\
-Keywords:      Classic\
-User:          N/A\
-Computer:      COLOSSUS.corp.technologytoolbox.com\
-Description:\
+Log Name:      System
+Source:        Microsoft-Windows-WAS
+Date:          10/14/2016 9:33:42 AM
+Event ID:      5002
+Task Category: None
+Level:         Error
+Keywords:      Classic
+User:          N/A
+Computer:      COLOSSUS.corp.technologytoolbox.com
+Description:
 Application pool 'WsusPool' is being automatically disabled due to a series of failures in the process(es) serving that application pool.
+```
 
 ### Configure WSUS by using the WSUS Configuration Wizard
 
@@ -485,7 +484,7 @@ Application pool 'WsusPool' is being automatically disabled due to a series of f
        **System Center 2016 - Virtual Machine Manager**\
        **Windows**
     2. Click **Next**.
-12. On the **Choose Classifications **page:
+12. On the **Choose Classifications** page:
     1. Select the following classifications:\
        **All Classifications**\
        **Critical Updates**\
@@ -651,15 +650,20 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
    1. Select **Definition Updates**.
    2. Clear the checkboxes for all other update classifications.
    3. Click** OK**.
-7. Confirm the **Rule properties** for the **Default Automatic Approval Rule** are configured as follows:**When an update is in Definition UpdatesApprove the update for all computers**
+7. Confirm the **Rule properties** for the **Default Automatic Approval Rule** are configured as follows:\
+   \
+   **When an update is in _Definition Updates_**\
+   \
+   **Approve the update for _all computers_**
+
 8. Select the **Default Automatic Approval Rule** checkbox.
 9. Click **New Rule...**
 10. In the **Add Rule** window:
     1. In the **Step 1: Select properties** section, select** When an update is in a specific classification**.
     2. In the **Step 2: Edit the properties** section:
        1. Click **any classification**.
-          1. In the **Choose Update Classifications **window:
-             1. Clear the **All Classifications **checkbox.
+          1. In the **Choose Update Classifications** window:
+             1. Clear the **All Classifications** checkbox.
              2. Select the following checkboxes:
                 - **Critical Updates**
                 - **Security Updates**
@@ -671,10 +675,16 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
                 - **Fabrikam / Fabrikam - Quality Assurance / Fabrikam - Beta Testing**
                 - **Technology Toolbox / Quality Assurance / Beta Testing**
           2. Click **OK**.
-    3. In the **Step 3: Specify a name **box, type **Beta Testing Approval Rule**.
+    3. In the **Step 3: Specify a name** box, type **Beta Testing Approval Rule**.
     4. Click **OK**.
 11. In the **Automatic Approvals** window:
-    1. Confirm the **Rule properties** for the **Beta Testing Approval Rule** are configured as follows:**When an update is in Critical Updates, Security UpdatesApprove the update for Fabrikam - Beta Testing, Beta Testing**
+
+    1. Confirm the **Rule properties** for the **Beta Testing Approval Rule** are configured as follows:\
+       \
+       **When an update is in _Critical Updates, Security Updates_**\
+       \
+       **Approve the update for _Fabrikam - Beta Testing, Beta Testing_**
+
     2. Click **OK**.
 
 ### Configure client updates
@@ -1574,6 +1584,7 @@ Name: **WsusDBMaintenance**\
 Steps:
 
 - Step 1
+
   - Step name: **Defragment database and update statistics**
   - Type: **Transact-SQL script (T-SQL)**
   - Command: (click **Open...** and then select script - **"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql"**)
@@ -1581,6 +1592,7 @@ Steps:
     Schedule:
 
 - Schedule 1
+
   - Name: **Weekly**
   - Frequency:
     - Occurs: **Weekly**

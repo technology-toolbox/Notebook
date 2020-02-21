@@ -293,7 +293,7 @@ sudoedit /etc/realmd.conf
 
 ---
 
-**/etc/realmd.conf**
+File - **/etc/realmd.conf**
 
 ```INI
 [users]
@@ -322,7 +322,7 @@ sudoedit /etc/hostname
 
 ---
 
-**/etc/hostname**
+File - **/etc/hostname**
 
 ```PowerShell
 tt-docker01.corp.technologytoolbox.com
@@ -464,7 +464,7 @@ sudoedit /etc/pam.d/common-session
 
 ---
 
-**/etc/pam.d/common-session**
+File - **/etc/pam.d/common-session**
 
 ```Text
 ...
@@ -784,20 +784,20 @@ cls
 $vmName = "TT-DOCKER01"
 ```
 
-##### # Shutdown VM
+### # Shutdown VM
 
 ```PowerShell
 Stop-SCVirtualMachine -VM $vmName
 ```
 
-##### # Remove VM snapshot
+### # Remove VM snapshot
 
 ```PowerShell
 Get-SCVMCheckpoint -VM $vmName |
     Remove-SCVMCheckpoint
 ```
 
-##### # Start VM
+### # Start VM
 
 ```PowerShell
 Start-SCVirtualMachine -VM $vmName

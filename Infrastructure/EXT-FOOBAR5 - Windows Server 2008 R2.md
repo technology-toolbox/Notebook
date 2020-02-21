@@ -188,12 +188,12 @@ $endpointNames |
 
 ### Configure VM storage
 
-| Disk | Drive Letter | Volume Size                | Allocation Unit Size | Volume Label      | Host Cache |
-| ---- | ------------ | -------------------------- | -------------------- | ----------------- | ---------- |
-| 0    | C:           | 127 GB                     | 4K                   |                   | Read/Write |
-| 1    | D:           | 100 GB                     | 4K                   | Temporary Storage |            |
-| 2    | E:           | 300 GB(3x100 GB, striped) | 64K                  | Data01            | None       |
-| 3    | L:           | 60 GB                      | 64K                  | Log01             | None       |
+| Disk | Drive Letter | Volume Size                   | Allocation Unit Size | Volume Label      | Host Cache |
+| ---- | ------------ | ----------------------------- | -------------------- | ----------------- | ---------- |
+| 0    | C:           | 127 GB                        | 4K                   |                   | Read/Write |
+| 1    | D:           | 100 GB                        | 4K                   | Temporary Storage |            |
+| 2    | E:           | 300 GB<br>(3x100 GB, striped) | 64K                  | Data01            | None       |
+| 3    | L:           | 60 GB                         | 64K                  | Log01             | None       |
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/4E/4F3728FFAF0E10870250FE284CCD64697C903C4E.png)
 
@@ -277,13 +277,13 @@ END
 
 ### DEV - Install additional browsers and software (Recommended)
 
-## Install Internet Explorer 10
+#### Install Internet Explorer 10
 
 ```PowerShell
 cls
 ```
 
-## # Delete Windows Update files
+### # Delete Windows Update files
 
 ```PowerShell
 Stop-Service wuauserv
@@ -371,10 +371,10 @@ $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
 	Where-Object { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
-	$smtpServer,
-	$fromAddress,
-	$replyAddress,
-	$characterSet)
+    $smtpServer,
+    $fromAddress,
+    $replyAddress,
+    $characterSet)
 ```
 
 ### # DEV - Configure timer job history
@@ -473,7 +473,7 @@ cls
 cls
 ```
 
-## # Create and configure the Web application"
+## # Create and configure the Web application
 
 ### # Restore content database from EXT-FOOBAR2
 
@@ -641,13 +641,13 @@ Copy-Item "$path\web.config" "$path\web - Copy.config"
 Notepad "$path\web.config"
 ```
 
-**{copy/paste Web.config entries from browser -- to avoid issue when copy/pasting from OneNote}**
+**{copy/paste Web.config entries from browser -- to avoid issue with copy/paste from OneNote}**
 
 ```Console
 cls
 ```
 
-# Install SecuritasConnect solutions and activate the features
+### Install SecuritasConnect solutions and activate the features
 
 ```PowerShell
 & '.\Add Solutions.ps1'
@@ -817,7 +817,7 @@ Copy-Item "$path\web.config" "$path\web - Copy.config"
 Notepad "$path\web.config"
 ```
 
-**{copy/paste Web.config entries from Word -- to avoid issue when copy/pasting from OneNote}**
+**{copy/paste Web.config entries from Word -- to avoid issue with copy/paste from OneNote}**
 
 ```PowerShell
 cls

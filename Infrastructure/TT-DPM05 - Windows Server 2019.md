@@ -191,7 +191,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update configuration
+#### # Add machine to security group for Windows Update configuration
 
 ```PowerShell
 Add-ADGroupMember -Identity "Manual Windows Update" -Members ($vmName + '$')
@@ -572,7 +572,7 @@ cls
 4. In the navigation pane, click **Service Account**.
 5. In the **Service Account** pane, ensure **Use built-in account** is selected, select **Network Service** from the dropdown list, and click **Apply**.
 6. In the navigation pane, click **Web Service URL**.
-7. In the **Web Service URL **pane:
+7. In the **Web Service URL** pane:
    1. Confirm the following warning message appears:
    2. Click **Apply**.
 8. In the navigation pane, click **Database**.
@@ -580,12 +580,12 @@ cls
 10. In the **Report Server Database Configuration Wizard** window:
     1. In the **Action** pane, ensure **Create a new report server database** is selected, and then click **Next**.
     2. In the **Database Server** pane, ensure the local computer name is in the **Server Name** box, click **Test Connection** and confirm the test succeeded, and then click **Next**.
-    3. In the **Database **pane, ensure the **Database Name** is set to **ReportServer**, and click **Next**.
-    4. In the **Credentials **pane, ensure **Authentication Type** is set to **Service Credentials** and then click **Next**.
+    3. In the **Database** pane, ensure the **Database Name** is set to **ReportServer**, and click **Next**.
+    4. In the **Credentials** pane, ensure **Authentication Type** is set to **Service Credentials** and then click **Next**.
     5. On the **Summary** page, verify the information is correct, and then click **Next**.
     6. Click **Finish** to close the wizard.
 11. In the navigation pane, click **Web Portal URL**.
-12. In the **Web Portal URL **pane:
+12. In the **Web Portal URL** pane:
     1. Confirm the following warning message appears:
     2. Click **Apply**.
 13. In the navigation pane, click **E-mail Settings**.
@@ -594,7 +594,7 @@ cls
     2. In the **SMTP Server** box, type **smtp.technologytoolbox.com**.
     3. Click **Apply**.
 15. In the navigation pane, click **Encryption Keys**.
-16. In the **Encryption Keys **pane, click **Backup**.
+16. In the **Encryption Keys** pane, click **Backup**.
 17. In the **Backup Encryption Key** window:
     1. Specify the location of the file that will contain a copy of the key.
     2. Specify the password used to lock and unlock the file.
@@ -931,6 +931,7 @@ Please click on the link to check for the latest DPM updates:\
 [http://go.microsoft.com/fwlink/?linkid=820914](http://go.microsoft.com/fwlink/?linkid=820914)
 
 DPM Setup has created the following firewall exceptions:\
+
 - Exception for DCOM communication on port 135 (TCP and UDP) in all profiles.\
 - Exception for Msdpm.exe in all profiles.\
 - Exception for DPMRA.exe in all profiles.\
@@ -1223,8 +1224,8 @@ Set-Location C:
       2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Full**.
       3. On the **Options** tab, in the **Set backup compression** dropdown, ensure **Use the default server setting** is selected.
       4. Click **Next**.
-   6. On the **Select Report Options **page, click **Next**.
-   7. On the **Complete the Wizard **page, click **Finish**.
+   6. On the **Select Report Options** page, click **Next**.
+   7. On the **Complete the Wizard** page, click **Finish**.
 
 #### Create maintenance plan for differential backup of all databases
 
@@ -1244,8 +1245,8 @@ Set-Location C:
       2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Differential**.
       3. On the **Options** tab, in the **Set backup compression** dropdown, ensure **Use the default server setting** is selected.
       4. Click **Next**.
-   6. On the **Select Report Options **page, click **Next**.
-   7. On the **Complete the Wizard **page, click **Finish**.
+   6. On the **Select Report Options** page, click **Next**.
+   7. On the **Complete the Wizard** page, click **Finish**.
 
 #### Create maintenance plan for transaction log backup of all databases
 
@@ -1265,8 +1266,8 @@ Set-Location C:
       2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log**.
       3. On the **Options** tab, in the **Set backup compression** dropdown, ensure **Use the default server setting** is selected.
       4. Click **Next**.
-   6. On the **Select Report Options **page, click **Next**.
-   7. On the **Complete the Wizard **page, click **Finish**.
+   6. On the **Select Report Options** page, click **Next**.
+   7. On the **Complete the Wizard** page, click **Finish**.
 
 ### Create cleanup maintenance plan
 
@@ -1367,12 +1368,12 @@ Recurs every: <strong>1</strong> week on</p>
    4. On the **Select Maintenance Task Order** page, click **Next**.
    5. On the **Define Maintenance Cleanup Task** page:
       1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\**.
-      2. In the **File extension **box, type **bak**.
+      2. In the **File extension** box, type **bak**.
       3. Select the **Include first-level subfolders** checkbox.
       4. In the **File age** section, configure the settings to delete files older than **2 Week(s)**.
       5. Click **Next**.
-   6. On the **Select Report Options **page, click **Next**.
-   7. On the **Complete the Wizard **page, click **Finish**.
+   6. On the **Select Report Options** page, click **Next**.
+   7. On the **Complete the Wizard** page, click **Finish**.
 
 #### Modify maintenance plan to remove old Transaction Log backups
 
@@ -1391,7 +1392,7 @@ Recurs every: <strong>1</strong> week on</p>
    6. Right-click the **Remove Transaction Log Backups** task and click **Edit...**
    7. In the **Maintenance Cleanup Task** window:
       1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
-      2. In the **File extension **box, type **trn**.
+      2. In the **File extension** box, type **trn**.
       3. In the **File age** section, configure the settings to delete files older than **2 Week(s)**.
       4. Click **OK**.
 4. On the **File** menu, click **Save Selected Items**.
@@ -1449,11 +1450,9 @@ Right-click **Full Backup of All Databases** and click **Execute**.
 
 ## Add disks to the storage pool
 
-**To add disks to the storage pool**
-
 1. In DPM Administrator Console, click **Management**, and then click the **Disk Storage**.
 2. Click **Add** on the tool ribbon.
-The **Add Disks to Storage Pool** dialog box appears. The **Available disks** section lists the disks that you can add to the storage pool.
+   The **Add Disks to Storage Pool** dialog box appears. The **Available disks** section lists the disks that you can add to the storage pool.
 3. Select one or more disks, click **Add**, and then click **OK**.
 
 Pasted from <[http://technet.microsoft.com/en-us/library/hh758075.aspx](http://technet.microsoft.com/en-us/library/hh758075.aspx)>
@@ -1645,7 +1644,7 @@ Dismount-DiskImage -ImagePath $imagePath
 6. On the **Installation location** page, ensure the default path is specified (**C:\\Program Files\\Microsoft System Center\\Virtual Machine Manager**), and then click **Next**.
 7. On the **Port configuration** page, ensure the default port number (**8100**) is specified for communication with the VMM management server, and click **Next**.
 8. On the **Installation summary** page, review your selections and do one of the following:
-9. On the **Setup completed... **page:
+9. On the **Setup completed...** page:
    1. Review any warnings that occurred.
    2. Clear the **Check for the latest Virtual Machine Manager updates** checkbox.
    3. Clear the **Open the VMM console when this wizard closes** checkbox.

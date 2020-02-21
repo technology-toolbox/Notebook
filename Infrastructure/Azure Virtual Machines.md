@@ -3,8 +3,6 @@
 Friday, June 05, 2015
 5:26 AM
 
-# Manage Azure virtual machines
-
 ## # Start VMs - sync
 
 ```PowerShell

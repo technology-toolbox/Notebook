@@ -9,7 +9,7 @@ Thursday, December 6, 2018
 
 #### Navigation bar customization
 
-| Theme Setting      | Color  |
+| Theme Setting      | Value  |
 | ------------------ | ------ |
 | Accent color       | 3C78C3 |
 | Nav bar background | 1E4173 |
@@ -45,7 +45,7 @@ $UserCredential = Get-Credential jjameson-admin@technologytoolbox.com
 $Session = New-PSSession `
     -ConfigurationName Microsoft.Exchange `
     -ConnectionUri https://outlook.office365.com/powershell-liveid/ `
-    -Credential \$UserCredential `
+    -Credential $UserCredential `
     -Authentication Basic `
     -AllowRedirection
 

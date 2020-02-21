@@ -5,13 +5,13 @@ Sunday, February 23, 2014
 
 ```Console
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-PowerShell
 ```
 
 ---
 
 **STORM**
+
+## Deploy and configure infrastructure
 
 ### # Create virtual machine (CIPHER01)
 
@@ -150,9 +150,18 @@ certutil -addstore -f `
     root "Technology Toolbox Root Certificate Authority.crl"
 ```
 
-**Note**
-
-The first command places the root CA public certificate into the Configuration container of Active Directory. Doing so allows domain client computers to automatically trust the root CA certificate and there is no additional need to distribute that certificate in Group Policy. The second and third commands place the root CA certificate and CRL into the local store of CIPHER01. This provides CIPHER01 immediate trust of root CA public certificate and knowledge of the root CA CRL. CIPHER01 could obtain the certificate from Group Policy and the CRL from the CDP location, but publishing these two items to the local store on CIPHER01 is helpful to speed the configuration of CIPHER01 as a subordinate CA.
+> **Note**
+>
+> The first command places the root CA public certificate into the Configuration
+> container of Active Directory. Doing so allows domain client computers to
+> automatically trust the root CA certificate and there is no additional need to
+> distribute that certificate in Group Policy. The second and third commands
+> place the root CA certificate and CRL into the local store of CIPHER01. This
+> provides CIPHER01 immediate trust of root CA public certificate and knowledge
+> of the root CA CRL. CIPHER01 could obtain the certificate from Group Policy
+> and the CRL from the CDP location, but publishing these two items to the local
+> store on CIPHER01 is helpful to speed the configuration of CIPHER01 as a
+> subordinate CA.
 
 ## Prepare the CAPolicy.inf for the issuing CA
 
@@ -170,7 +179,7 @@ The first command places the root CA public certificate into the Configuration c
 7. Close Notepad.
 
 ```Console
-    notepad C:\Windows\CAPolicy.inf
+notepad C:\Windows\CAPolicy.inf
 ```
 
 ```INI
@@ -291,7 +300,11 @@ Set-Content `
 
 ```PowerShell
 Install-AdcsCertificationAuthority `
-    -CAType EnterpriseSubordinateCA `-CACommonName "Technology Toolbox Issuing Certificate Authority 01" `-KeyLength 2048 `-HashAlgorithmName SHA256 `-CryptoProviderName "RSA#Microsoft Software Key Storage Provider"
+    -CAType EnterpriseSubordinateCA `
+    -CACommonName "Technology Toolbox Issuing Certificate Authority 01" `
+    -KeyLength 2048 `
+    -HashAlgorithmName SHA256 `
+    -CryptoProviderName "RSA#Microsoft Software Key Storage Provider"
 ```
 
 WARNING: The Active Directory Certificate Services installation is incomplete. To complete the installation, use the request file "C:\\CIPHER01.corp.technologytoolbox.com_Technology Toolbox Issuing Certificate Authority 01.req" to obtain a certificate from the parent CA. Then, use the Certification Authority snap-in to install the certificate. To complete this procedure, right-click the node with the name of the CA, and then click Install CA Certificate. The operation completed successfully. 0x0 (WIN32: 0)
@@ -317,12 +330,12 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $vfdPath
 ```
 
 - On CRYPTID, from Windows PowerShell, submit the request using the following command:
-- In the **Certification Authority List **window, ensure that **Technology Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click **OK**.
+- In the **Certification Authority List** window, ensure that **Technology Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click **OK**.
 - Note that the certificate request is pending. Make a note of the request ID number.
 - On ORCA1, you must approve the request. You can do this using Server Manager or by using certutil from the command line.
   - To use certutil, enter Certutil -resubmit _`<RequestId>`_, replace the actual request number for `<RequestId>`. For example, if the Request ID is 2, you would enter:
 - From the command prompt on ORCA1, retrieve the issued certificate by running the command
-- In the **Certification Authority List **window, ensure that **Technology Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click **OK**.
+- In the **Certification Authority List** window, ensure that **Technology Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click **OK**.
 
 ```Console
 certreq.exe -submit 'A:\CIPHER01.corp.technologytoolbox.com_Technology Toolbox Issuing Certificate Authority 01.req'
@@ -528,7 +541,7 @@ Add-ADGroupMember "Web Servers" CIPHER01$
 
 ### # Duplicate the Web Server certificate template
 
-A best practice is to duplicate certificate templates instead of using the out-of-the-box templates.  This allows you to retain the original templates, without modification.
+A best practice is to duplicate certificate templates instead of using the out-of-the-box templates. This allows you to retain the original templates, without modification.
 
 Start the **Certification Authority** console (certsrv.msc).
 
@@ -538,7 +551,7 @@ Expand the CA, right-click **Certificate Templates**, and click **Manage**.
 
 In the **Certificate Templates Console** window, in the list of certificate templates, right-click **Web Server** and then click **Duplicate Template**.
 
-In Windows Server 2012 you will first be presented with the Compatibility tab.  The idea is that you select the OS Version of your Certification Authority and the OS Version of clients that will be enrolling for certificates based on this template.  This will then only allow you to select options in the Certificate Template that are supported by both the CA and the client/enrollee.  In my example, I am going to leave the defaults.
+In Windows Server 2012 you will first be presented with the Compatibility tab. The idea is that you select the OS Version of your Certification Authority and the OS Version of clients that will be enrolling for certificates based on this template. This will then only allow you to select options in the Certificate Template that are supported by both the CA and the client/enrollee. In my example, I am going to leave the defaults.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/BD/1F9F5A27A6C716142B0A6ADC0DCB988B9FFDF2BD.png)
 
@@ -561,7 +574,7 @@ In the **Technology Toolbox Web Server Properties** window:
 
 ### Enable the certificate template on the issuing CA
 
-So, now the CA has proper permission to the Certificate Template.  Next, I have to make the Certificate Template available on the CA.
+So, now the CA has proper permission to the Certificate Template. Next, I have to make the Certificate Template available on the CA.
 
 Start the **Certification Authority** console (certsrv.msc).
 
@@ -573,7 +586,7 @@ In the **Enable Certificate Templates** window, select** Technology Toolbox Web 
 
 ### Enroll for the Certificate
 
-I could enroll for the Certificate through IIS.  However, I prefer to use the **Certificates** MMC as that gives me more control over the configuration of my request.
+I could enroll for the Certificate through IIS. However, I prefer to use the **Certificates** MMC as that gives me more control over the configuration of my request.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/41/6E27C890278FEE4140766E30B3F0E30E63F26841.png)
 
@@ -714,7 +727,7 @@ Membership in **Domain Admins** or **Enterprise Admins** is required to complete
    1. In the **Configuration Model** drop-down, select **Enabled**.
    2. Select the **Renew expired certificates, update pending certificates, and remove revoked certificates** checkbox.
    3. Select the **Update certificates that use certificate templates** checkbox.
-   4. Select the **Display user notifications for expiring certificates in user and machine MY store **checkbox.
+   4. Select the **Display user notifications for expiring certificates in user and machine MY store** checkbox.
    5. Click **OK**.
 7. In the console tree of the **Group Policy Management Editor** window, under **Computer Configuration**, expand the following objects: **Policies**, **Windows Settings**, **Security Settings**, and then click **Public Key Policies**.
 8. In the details pane, double-click **Certificate Services Client - Auto-Enrollment**.
@@ -775,7 +788,7 @@ The disk C: (C:) on computer CIPHER01.corp.technologytoolbox.com has high fragme
 
 ### Resolution
 
-##### # Copy Toolbox content
+#### # Copy Toolbox content
 
 ```PowerShell
 robocopy \\iceman\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E
@@ -959,9 +972,9 @@ powercfg.exe /S SCHEME_MIN
 powercfg.exe /L
 ```
 
-## Configure certificate for https://pki.technologytoolbox.com
+## Configure certificate for [https://pki.technologytoolbox.com](https://pki.technologytoolbox.com)
 
-**Modify binding on Default Web Site to require Server Name Indication**
+### Modify binding on Default Web Site to require Server Name Indication
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/79AAC9816660F91CED604BE98430152AA061FF0E.png)
 
@@ -975,7 +988,7 @@ In the **Edit Site Binding** window:
 2. Select **Require Server Name Indication**.
 3. Click **OK**.
 
-### Configure redirect from http://cipher01 to https://cipher01.corp.technologytoolbox.com/certsrv
+### Configure redirect from [http://cipher01](http://cipher01) to [https://cipher01.corp.technologytoolbox.com/certsrv](https://cipher01.corp.technologytoolbox.com/certsrv)
 
 In IIS Manager, select **Default Web Site**.\
 In the **Features View**, in the **IIS** section, double-click **HTTP Redirect**.\
@@ -985,11 +998,11 @@ On the **HTTP Redirect** page:
 2. In the **Redirect Behavior** section, select **Only redirect requests to content in this directory (not subdirectories)**.
 3. In the **Actions** pane, click **Apply**.
 
-### Verify http://cipher01 automatically redirects to https://cipher01.corp.technologytoolbox.com/certsrv
+### Verify [http://cipher01](http://cipher01) automatically redirects to [https://cipher01.corp.technologytoolbox.com/certsrv](https://cipher01.corp.technologytoolbox.com/certsrv)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/E528CDD0C1C3A327336DEE614172D9163DFD3062.png)
 
-### Enroll certificate for https://pki.technologytoolbox.com
+### Enroll certificate for [https://pki.technologytoolbox.com](https://pki.technologytoolbox.com)
 
 1. Open MMC.
 2. Add **Certificates** snap-in for **Computer account** (**Local computer**).
@@ -1072,7 +1085,7 @@ In the **Site Bindings** window, click **Close**.
 2. Expand the CA, right-click **Certificate Templates**, and click **Manage**.
 3. In the **Certificate Templates Console** window, in the list of certificate templates, right-click **Web Server** and then click **Duplicate Template**.
 4. On the **General** tab, in the **Template display name** box, type **Technology Toolbox Web Server - Exportable**.
-5. On the **Request Handling **tab, select **Allow private key to be exported**.
+5. On the **Request Handling** tab, select **Allow private key to be exported**.
 6. On the **Security** tab:
    1. Click **Add...**
    2. In the **Select Users, Computers, Service Accounts, or Groups** window, type **Web Servers**, click **Check Names**, and then click **OK**.
@@ -1085,7 +1098,7 @@ In the **Site Bindings** window, click **Close**.
 2. Expand the CA, right-click **Certificate Templates**, select **New**, then **Certificate Template to Issue**.
 3. In the **Enable Certificate Templates** window, select** Technology Toolbox Web Server - Exportable**, and then click **OK**.
 
-## # Configure firewall rule for POSHPAIG (http://poshpaig.codeplex.com/)
+## # Configure firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
 ---
 
@@ -1129,10 +1142,10 @@ From <[https://technet.microsoft.com/en-US/library/hh467900.aspx#BKMK_CreateTemp
 2. Expand the CA, right-click **Certificate Templates**, and click **Manage**.
 3. In the **Certificate Templates Console** window, in the list of certificate templates, right-click **IPsec (Offline request)** and then click **Duplicate Template**.
 4. In the **Properties of New Template** window:
-   1. On the **Compatibility **tab, in the **Compatibility Settings **section, click the **Certification Authority** dropdown and select **Windows Server 2008**.
+   1. On the **Compatibility** tab, in the **Compatibility Settings **section, click the **Certification Authority** dropdown and select **Windows Server 2008**.
    2. On the **General** tab, in the **Template display name** box, type **Technology Toolbox Operations Manager**.
-   3. On the **Request Handling **tab, select **Allow private key to be exported**.
-   4. On the **Extensions **tab:
+   3. On the **Request Handling** tab, select **Allow private key to be exported**.
+   4. On the **Extensions** tab:
       1. In the **Extensions included in this template** list, select **Application Policies**.
       2. Click **Edit...**
       3. In the **Edit Application Policies Extension** window:
@@ -1341,17 +1354,19 @@ del $vfdPath
 
 ### Warning
 
-Log Name:      Application\
-Source:        Microsoft-Windows-CertificationAuthority\
-Date:          3/10/2016 1:12:53 AM\
-Event ID:      53\
-Task Category: None\
-Level:         Warning\
-Keywords:\
-User:          SYSTEM\
-Computer:      CIPHER01.corp.technologytoolbox.com\
-Description:\
+```Text
+Log Name:      Application
+Source:        Microsoft-Windows-CertificationAuthority
+Date:          3/10/2016 1:12:53 AM
+Event ID:      53
+Task Category: None
+Level:         Warning
+Keywords:
+User:          SYSTEM
+Computer:      CIPHER01.corp.technologytoolbox.com
+Description:
 Active Directory Certificate Services denied request 1295 because The EMail name is unavailable and cannot be added to the Subject or Subject Alternate name. 0x80094812 (-2146875374 CERTSRV_E_SUBJECT_EMAIL_REQUIRED).  The request was for TECHTOOLBOX\\svc-tfs.  Additional information: Denied by Policy Module
+```
 
 ### Solution
 
@@ -1561,7 +1576,7 @@ Event ID: 22\
 Event Category: 0\
 User: NT AUTHORITY\\SYSTEM\
 Computer: CIPHER01.corp.technologytoolbox.com\
-Event Description: Active Directory Certificate Services could not process request 2207 due to an error: The revocation function was unable to check revocation because the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE).  The request was for TECHTOOLBOX\\FOOBAR10\$.  Additional information: Error Verifying Request Signature or Signing Certificate
+Event Description: Active Directory Certificate Services could not process request 2207 due to an error: The revocation function was unable to check revocation because the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE). The request was for TECHTOOLBOX\\FOOBAR10\$. Additional information: Error Verifying Request Signature or Signing Certificate
 
 ### Solution
 
@@ -1807,17 +1822,19 @@ Start-SCVirtualMachine -VM $vmName
 
 ### Alert
 
-Log Name:      Application\
-Source:        Microsoft-Windows-CertificationAuthority\
-Date:          6/9/2018 9:25:45 PM\
-Event ID:      22\
-Task Category: None\
-Level:         Error\
-Keywords:\
-User:          SYSTEM\
-Computer:      CIPHER01.corp.technologytoolbox.com\
-Description:\
+```Text
+Log Name:      Application
+Source:        Microsoft-Windows-CertificationAuthority
+Date:          6/9/2018 9:25:45 PM
+Event ID:      22
+Task Category: None
+Level:         Error
+Keywords:
+User:          SYSTEM
+Computer:      CIPHER01.corp.technologytoolbox.com
+Description:
 Active Directory Certificate Services could not process request 2790 due to an error: The revocation function was unable to check revocation because the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE).  The request was for TECHTOOLBOX\\TT-DPM02\$.  Additional information: Error Verifying Request Signature or Signing Certificate
+```
 
 ### Solution
 
@@ -2076,17 +2093,19 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 
 ### Alert
 
-Log Name:      Application\
-Source:        Microsoft-Windows-CertificationAuthority\
-Date:          1/6/2019 6:08:16 AM\
-Event ID:      100\
-Task Category: None\
-Level:         Error\
-Keywords:\
-User:          SYSTEM\
-Computer:      CIPHER01.corp.technologytoolbox.com\
-Description:\
+```Text
+Log Name:      Application
+Source:        Microsoft-Windows-CertificationAuthority
+Date:          1/6/2019 6:08:16 AM
+Event ID:      100
+Task Category: None
+Level:         Error
+Keywords:
+User:          SYSTEM
+Computer:      CIPHER01.corp.technologytoolbox.com
+Description:
 Active Directory Certificate Services did not start: Could not load or verify the current CA certificate.  Technology Toolbox Issuing Certificate Authority 01 The revocation function was unable to check revocation because the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE).
+```
 
 ### Solution
 

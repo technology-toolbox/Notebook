@@ -62,7 +62,7 @@ Start-VM -Name $vmName
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-FOOBAR4**.
   - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
@@ -905,7 +905,7 @@ Notepad ($env:ProgramFiles `
 
 ---
 
-**DistributedCacheService.exe.config**
+File - **DistributedCacheService.exe.config**
 
 ```XML
   <appSettings>
@@ -1355,7 +1355,7 @@ cls
 
 ## # Install and configure Office Web Apps
 
-#### # Configure the SharePoint 2013 farm to use Office Web Apps
+### # Configure the SharePoint 2013 farm to use Office Web Apps
 
 ```PowerShell
 New-SPWOPIBinding -ServerName wac.fabrikam.com
@@ -1363,7 +1363,7 @@ New-SPWOPIBinding -ServerName wac.fabrikam.com
 Set-SPWOPIZone -zone "external-https"
 ```
 
-#### # Configure name resolution on Office Web Apps farm
+### # Configure name resolution on Office Web Apps farm
 
 ---
 
@@ -1472,7 +1472,7 @@ robocopy `
 
 ---
 
-**EXT-FOOBAR - Command Prompt**
+**EXT-FOOBAR** - Command Prompt
 
 #### REM Export MIIS encryption key
 
@@ -1727,9 +1727,9 @@ Set-Location C:
 
 #### # Create the User Profile Service Application
 
-# Create User Profile Service Application as EXTRANET\\s-sp-farm-dev:
-
 ```PowerShell
+# Create User Profile Service Application as EXTRANET\\s-sp-farm-dev
+
 $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
 ```
 
@@ -1750,7 +1750,7 @@ Start-Process $PSHOME\powershell.exe `
 
 ---
 
-**PowerShell -- running as EXTRANET\\s-sp-farm-dev**
+**PowerShell** -- running as **EXTRANET\\s-sp-farm-dev**
 
 ```PowerShell
 cd C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.675.0\DeploymentFiles\Scripts
@@ -1813,9 +1813,9 @@ cls
 # Note: NullReferenceException occurs if you attempt to perform this step before starting the User Profile Synchronization Service.
 ```
 
-# Import MIIS encryption key as EXTRANET\\s-sp-farm-dev:
-
 ```PowerShell
+# Import MIIS encryption key as EXTRANET\\s-sp-farm-dev
+
 If ($farmCredential -eq $null)
 {
     $farmCredential = Get-Credential (Get-SPFarm).DefaultServiceAccount.Name
@@ -1835,7 +1835,7 @@ Start-Process $PSHOME\powershell.exe `
 
 ---
 
-**Command Prompt -- running as EXTRANET\\s-sp-farm-dev**
+**Command Prompt** -- running as **EXTRANET\\s-sp-farm-dev**
 
 ```Console
 cd "C:\Program Files\Microsoft Office Servers\15.0\Synchronization Service\Bin\"
@@ -2417,7 +2417,7 @@ Notepad web.config
 
 ---
 
-**Web.config**
+File - **Web.config**
 
 ```XML
   <connectionStrings>
@@ -2539,6 +2539,7 @@ Start-Process "$env:SECURITAS_CLIENT_PORTAL_URL/sites/cc"
 
 Unable to hide the Search navigation item -- click **OK** but changes are not saved (no error reported).
 
+```Text
 07/22/2016 05:20:23.91	w3wp.exe (0x1408)	0x04A0	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','ee88efd2-ace8-4432-861d-9919b1c36394;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	2948929d-0039-c02f-8599-463ceeb79f88\
 07/22/2016 05:20:23.91	w3wp.exe (0x1408)	0x04A0	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__GlobalNavigationExcludes','ee88efd2-ace8-4432-861d-9919b1c36394;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	2948929d-0039-c02f-8599-463ceeb79f88\
 07/22/2016 05:20:23.93	w3wp.exe (0x1408)	0x04A0	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','ee88efd2-ace8-4432-861d-9919b1c36394;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	2948929d-0039-c02f-8599-463ceeb79f88\
@@ -2553,6 +2554,7 @@ Unable to hide the Search navigation item -- click **OK** but changes are not sa
 07/22/2016 05:20:24.00	w3wp.exe (0x1408)	0x04A0	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','ee88efd2-ace8-4432-861d-9919b1c36394;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	2948929d-0039-c02f-8599-463ceeb79f88\
 07/22/2016 05:20:24.04	w3wp.exe (0x1408)	0x04A0	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__CurrentNavigationExcludes','ee88efd2-ace8-4432-861d-9919b1c36394;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	2948929d-0039-c02f-8599-463ceeb79f88\
 07/22/2016 05:20:24.04	w3wp.exe (0x1408)	0x04A0	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','ee88efd2-ace8-4432-861d-9919b1c36394;899fb9b6-159f-4a9d-a3e1-ed65eb1642f3;'> to the web-property-bag for '[http://client-local.securitasinc.com/sites/cc](http://client-local.securitasinc.com/sites/cc)'	2948929d-0039-c02f-8599-463ceeb79f88
+```
 
 ```PowerShell
 cls
@@ -2679,7 +2681,7 @@ WITH NOFORMAT, NOINIT
 cls
 ```
 
-#### # Copy the backup files to the SQL Server for the SharePoint 2013 farm
+### # Copy the backup files to the SQL Server for the SharePoint 2013 farm
 
 ```PowerShell
 robocopy `
@@ -3075,6 +3077,7 @@ Start-Process $env:SECURITAS_CLOUD_PORTAL_URL
 
 Unable to hide the Search navigation item -- click **OK** but changes are not saved (no error reported).
 
+```Text
 07/22/2016 09:45:12.65	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96\
 07/22/2016 09:45:12.65	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__GlobalNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96\
 07/22/2016 09:45:12.67	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__GlobalNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96\
@@ -3091,6 +3094,7 @@ Unable to hide the Search navigation item -- click **OK** but changes are not sa
 07/22/2016 09:45:12.79	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96\
 07/22/2016 09:45:12.82	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wzd	Medium	Adding key-value pair <'__CurrentNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96\
 07/22/2016 09:45:12.82	w3wp.exe (0x30EC)	0x0B48	Web Content Management	Publishing Provisioning	6wze	Medium	Finished adding key-value pair <'__CurrentNavigationExcludes','70100f2c-9f52-420e-99b8-4f56945435b2;50a50edf-612b-49d1-a971-0f5a31d1d21b;'> to the web-property-bag for '[http://cloud-local.securitasinc.com](http://cloud-local.securitasinc.com)'	5057929d-2053-c02f-8599-442468e79b96
+```
 
 ```PowerShell
 cls
@@ -3205,13 +3209,13 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 cls
 ```
 
-# Install Employee Portal
+## Install Employee Portal
 
-## # DEV - Install build dependencies for Employee Portal solution
+### # DEV - Install build dependencies for Employee Portal solution
 
-### # Install and configure Python
+#### # Install and configure Python
 
-#### # Install Python
+##### # Install Python
 
 ```PowerShell
 net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
@@ -3229,7 +3233,7 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 cls
 ```
 
-#### # Add Python to PATH environment variable
+##### # Add Python to PATH environment variable
 
 ```PowerShell
 $path = [Environment]::GetEnvironmentVariable("Path", "Machine")
@@ -3239,9 +3243,9 @@ $path = "$path;C:\Python27\;C:\Python27\Scripts"
 [Environment]::SetEnvironmentVariable("Path", $path, "Machine")
 ```
 
-### # Install and configure Git
+#### # Install and configure Git
 
-#### # Install Git
+##### # Install Git
 
 ```PowerShell
 \\ICEMAN\Products\Git\Git-2.10.1-64-bit.exe
@@ -3251,7 +3255,7 @@ $path = "$path;C:\Python27\;C:\Python27\Scripts"
 cls
 ```
 
-#### # Add Git to PATH environment variable
+##### # Add Git to PATH environment variable
 
 ```PowerShell
 $path = [Environment]::GetEnvironmentVariable("Path", "Machine")
@@ -3261,7 +3265,7 @@ $path = "$path;C:\Program Files\Git\cmd"
 [Environment]::SetEnvironmentVariable("Path", $path, "Machine")
 ```
 
-#### Configure Git to use https:// URLs (instead of git:// URLS)
+##### Configure Git to use https:// URLs (instead of git:// URLS)
 
 (skipped)
 
@@ -3269,9 +3273,9 @@ $path = "$path;C:\Program Files\Git\cmd"
 cls
 ```
 
-### # Install and configure Node.js
+#### # Install and configure Node.js
 
-#### # Install Node.js
+##### # Install Node.js
 
 ```PowerShell
 \\ICEMAN\Products\node.js\node-v4.6.0-x64.msi
@@ -3283,7 +3287,7 @@ exit
 >
 > Restart PowerShell for the changes to the PATH environment variable to take effect.
 
-#### # Change npm file locations to avoid issues with redirected folders
+##### # Change npm file locations to avoid issues with redirected folders
 
 ```PowerShell
 Notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
@@ -3291,7 +3295,7 @@ Notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
 
 ---
 
-**npmrc**
+File - **npmrc**
 
 ```Text
 ;prefix=${APPDATA}\npm
@@ -3305,7 +3309,7 @@ cache=${LOCALAPPDATA}\npm-cache
 cls
 ```
 
-#### # Change npm "global" locations to shared location for all users
+##### # Change npm "global" locations to shared location for all users
 
 ```PowerShell
 mkdir "$env:ALLUSERSPROFILE\npm-cache"
@@ -3329,41 +3333,41 @@ $path = "$path;$env:ALLUSERSPROFILE\npm"
 cls
 ```
 
-### # Install global npm packages
+#### # Install global npm packages
 
-#### # Install Grunt CLI
+##### # Install Grunt CLI
 
 ```PowerShell
 npm install --global grunt-cli
 ```
 
-#### # Install Gulp
+##### # Install Gulp
 
 ```PowerShell
 npm install --global gulp
 ```
 
-#### # Install Bower
+##### # Install Bower
 
 ```PowerShell
 npm install --global bower
 ```
 
-#### # Install Karma CLI
+##### # Install Karma CLI
 
 ```PowerShell
 npm install --global karma-cli
 ```
 
-#### # Install rimraf
+##### # Install rimraf
 
 ```PowerShell
 npm install --global rimraf
 ```
 
-## # Extend SecuritasConnect and Cloud Portal web applications
+### # Extend SecuritasConnect and Cloud Portal web applications
 
-### # Copy Employee Portal build to SharePoint server
+#### # Copy Employee Portal build to SharePoint server
 
 ```PowerShell
 net use \\ICEMAN\Builds /USER:TECHTOOLBOX\jjameson
@@ -3382,7 +3386,7 @@ $destPath = "C:\NotBackedUp\Builds\Securitas\EmployeePortal\$build"
 robocopy $sourcePath $destPath /E
 ```
 
-### # Extend web applications to Intranet zone
+#### # Extend web applications to Intranet zone
 
 ```PowerShell
 cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.29.0\Deployment Files\Scripts'
@@ -3390,7 +3394,7 @@ cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.29.0\Deployment Files\Scr
 & '.\Extend Web Applications.ps1' -Confirm:$false -Verbose
 ```
 
-### Enable disk-based caching for the "intranet" websites
+#### Enable disk-based caching for the "intranet" websites
 
 (skipped)
 
@@ -3398,7 +3402,7 @@ cd 'C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.29.0\Deployment Files\Scr
 cls
 ```
 
-### # Map intranet URLs to loopback address in Hosts file
+#### # Map intranet URLs to loopback address in Hosts file
 
 ```PowerShell
 [Uri] $clientPortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL
@@ -3416,18 +3420,18 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
     127.0.0.1 $clientPortalIntranetHostHeader, $cloudPortalIntranetHostHeader
 ```
 
-### # Allow specific host names mapped to 127.0.0.1
+#### # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
     $clientPortalIntranetHostHeader, $cloudPortalIntranetHostHeader
 ```
 
-## Install Web Deploy 3.6
+### Install Web Deploy 3.6
 
 (skipped -- since this is installed with Visual Studio 2015)
 
-## Install .NET Framework 4.5
+### Install .NET Framework 4.5
 
 (skipped -- since this is installed with Visual Studio 2015)
 
@@ -3435,9 +3439,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
 cls
 ```
 
-## # Install Employee Portal
+### # Install Employee Portal
 
-### # Add the Employee Portal URL to the "Local intranet" zone
+#### # Add the Employee Portal URL to the "Local intranet" zone
 
 ```PowerShell
 [Uri] $employeePortalUrl = [Uri] $env:SECURITAS_CLIENT_PORTAL_URL.Replace(
@@ -3449,7 +3453,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
     -Patterns $employeePortalUrl.AbsoluteUri
 ```
 
-### Create Employee Portal SharePoint site
+#### Create Employee Portal SharePoint site
 
 (skipped)
 
@@ -3457,9 +3461,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
 cls
 ```
 
-### # Create Employee Portal website
+#### # Create Employee Portal website
 
-#### # Create Employee Portal website on SharePoint Central Administration server
+##### # Create Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
 [String] $employeePortalHostHeader = $employeePortalUrl.Host
@@ -3475,11 +3479,11 @@ Push-Location ("C:\NotBackedUp\Builds\Securitas\EmployeePortal\$build" `
 Pop-Location
 ```
 
-#### Configure SSL binding on Employee Portal website
+##### Configure SSL binding on Employee Portal website
 
 (skipped)
 
-#### Create Employee Portal website on other web servers in the farm
+##### Create Employee Portal website on other web servers in the farm
 
 (skipped)
 
@@ -3487,9 +3491,9 @@ Pop-Location
 cls
 ```
 
-### # Deploy Employee Portal website
+#### # Deploy Employee Portal website
 
-#### # Deploy Employee Portal website on SharePoint Central Administration server
+##### # Deploy Employee Portal website on SharePoint Central Administration server
 
 ```PowerShell
 Push-Location ("C:\NotBackedUp\Builds\Securitas\EmployeePortal\$build" `
@@ -3513,7 +3517,7 @@ $configXml.Save("$pwd\Web.SetParameters.xml")
 Pop-Location
 ```
 
-#### # Configure application settings and web service URLs
+##### # Configure application settings and web service URLs
 
 ```PowerShell
 Push-Location ("C:\inetpub\wwwroot\" + $employeePortalHostHeader)
@@ -3528,7 +3532,7 @@ Push-Location ("C:\inetpub\wwwroot\" + $employeePortalHostHeader)
 Pop-Location
 ```
 
-#### Deploy Employee Portal website content to other web servers in the farm
+##### Deploy Employee Portal website content to other web servers in the farm
 
 (skipped)
 
@@ -3536,7 +3540,7 @@ Pop-Location
 cls
 ```
 
-### # Configure database logins and permissions for Employee Portal
+#### # Configure database logins and permissions for Employee Portal
 
 ```PowerShell
 $sqlcmd = @"
@@ -3562,35 +3566,35 @@ Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
 Set-Location C:
 ```
 
-### Grant PNKCAN and PNKUS users permissions on Cloud Portal site
+#### Grant PNKCAN and PNKUS users permissions on Cloud Portal site
 
 (skipped)
 
-### Replace absolute URLs in "User Sites" list
+#### Replace absolute URLs in "User Sites" list
 
 (skipped)
 
-### Install additional service packs and updates
+#### Install additional service packs and updates
 
 ```PowerShell
 cls
 ```
 
-### # Map Employee Portal URL to loopback address in Hosts file
+#### # Map Employee Portal URL to loopback address in Hosts file
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
     127.0.0.1 $employeePortalHostHeader
 ```
 
-### # Allow specific host names mapped to 127.0.0.1
+#### # Allow specific host names mapped to 127.0.0.1
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-BackConnectionHostnames.ps1 `
     $employeePortalHostHeader
 ```
 
-### # Resume Search Service Application and start full crawl on all content sources
+#### # Resume Search Service Application and start full crawl on all content sources
 
 ```PowerShell
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
@@ -4133,16 +4137,12 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.677.0" `
-```
-
-    + " / Cloud Portal 2.0.122.0" `\
+    + " / Cloud Portal 2.0.122.0" `
     + " / Employee Portal 1.0.29.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
+    Rename-VMSnapshot -NewName $newSnapshotName
 ```
-
-    Rename-VMSnapshot -NewName \$newSnapshotName
 
 ---
 
@@ -4344,16 +4344,12 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.678.0" `
-```
-
-    + " / Cloud Portal 2.0.122.0" `\
+    + " / Cloud Portal 2.0.122.0" `
     + " / Employee Portal 1.0.32.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
+    Rename-VMSnapshot -NewName $newSnapshotName
 ```
-
-    Rename-VMSnapshot -NewName \$newSnapshotName
 
 ---
 
@@ -4603,11 +4599,11 @@ TrackTik username:** opanduro2m**
 
 #### HACK: Update TrackTik password for Angela.Parks
 
-[http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[http://client-local-4.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 #### HACK: Update TrackTik password for bbarthelemy-demo
 
-[http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[http://client-local-4.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ---
 
@@ -4631,12 +4627,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.681.0" `
-```
-
-    + " / Cloud Portal 2.0.122.0" `\
+    + " / Cloud Portal 2.0.122.0" `
     + " / Employee Portal 1.0.32.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -4914,18 +4907,18 @@ Set-Location C:
 
 ##### Configure TrackTik credentials for Branch Manager
 
-[http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[http://client-local-4.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 Branch Manager: **TECHTOOLBOX\\smasters**\
 TrackTik username:** opanduro2m**
 
 ##### HACK: Update TrackTik password for Angela.Parks
 
-[http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[http://client-local-4.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ##### HACK: Update TrackTik password for bbarthelemy-demo
 
-[http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[http://client-local-4.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](http://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ---
 
@@ -5002,12 +4995,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.681.1" `
-```
-
-    + " / Cloud Portal 2.0.122.0" `\
+    + " / Cloud Portal 2.0.122.0" `
     + " / Employee Portal 1.0.32.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -5168,7 +5158,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
 
 ---
 
-**784810-SPAPP - Run as SEC\\jjameson-admin**
+**784810-SPAPP** - Run as **SEC\\jjameson-admin**
 
 ```PowerShell
 Enable-SharePointCmdlets
@@ -5518,7 +5508,7 @@ Notepad Web.config
 
 ---
 
-**Web.config**
+File - **Web.config**
 
 ```XML
     <BlobCache
@@ -5560,7 +5550,7 @@ Notepad Web.config
 
 ---
 
-**Web.config**
+File - **Web.config**
 
 ```XML
     <BlobCache
@@ -6170,12 +6160,9 @@ $keyPath = [System.IO.Path]::Combine(
 $acl = Get-Acl -Path $keyPath
 
 $accessRule = New-Object `
-```
+    -TypeName System.Security.AccessControl.FileSystemAccessRule `
+    -ArgumentList $serviceAccount, "Read", "Allow"
 
-    -TypeName System.Security.AccessControl.FileSystemAccessRule `\
-    -ArgumentList \$serviceAccount, "Read", "Allow"
-
-```PowerShell
 $acl.AddAccessRule($accessRule)
 
 Set-Acl -Path $keyPath -AclObject $acl
@@ -6847,9 +6834,8 @@ cls
 
 ```PowerShell
 Start-Process ($env:SECURITAS_CLOUD_PORTAL_URL `
-```
-
     + "/sites/Employee-Portal/Lists/Shortcuts")
+```
 
 ```PowerShell
 cls
@@ -6916,12 +6902,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.697.0" `
-```
-
-    + " / Cloud Portal 2.0.125.0" `\
+    + " / Cloud Portal 2.0.125.0" `
     + " / Employee Portal 1.0.38.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -7249,18 +7232,18 @@ Set-Location C:
 
 ##### Configure TrackTik credentials for Branch Manager
 
-[https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-4.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 Branch Manager: **smasters@technologytoolbox.com**\
 TrackTik username:** opanduro2m**
 
 ##### HACK: Update TrackTik password for Angela.Parks
 
-[https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-4.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ##### HACK: Update TrackTik password for bbarthelemy-demo
 
-[https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx](https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
+[https://client-local-4.securitasinc.com/\_layouts/Securitas/EditProfile.aspx](https://client-local-4.securitasinc.com/_layouts/Securitas/EditProfile.aspx)
 
 ---
 
@@ -7364,12 +7347,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.701.0" `
-```
-
-    + " / Cloud Portal 2.0.131.0" `\
+    + " / Cloud Portal 2.0.131.0" `
     + " / Employee Portal 1.0.38.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -7435,7 +7415,7 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 
 ## Upgrade Employee Portal to "v1.0 Sprint-7" release
 
-DEV - Upgrade and reconfigure Node.js
+### DEV - Upgrade and reconfigure Node.js
 
 #### Upgrade Node.js
 
@@ -7480,7 +7460,7 @@ notepad "C:\Program Files\nodejs\node_modules\npm\npmrc"
 
 ---
 
-**C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
+File - **C:\\Program Files\\nodejs\\node_modules\\npm\\npmrc**
 
 ```Text
 ;prefix=${APPDATA}\npm
@@ -7544,7 +7524,7 @@ npm install --global rimraf@2.6.2
 cls
 ```
 
-##### # Copy installer from internal file server
+#### # Copy installer from internal file server
 
 ```PowerShell
 $installer = "TypeScript_Dev14Full.exe"
@@ -7684,12 +7664,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.701.0" `
-```
-
-    + " / Cloud Portal 2.0.131.0" `\
+    + " / Cloud Portal 2.0.131.0" `
     + " / Employee Portal 1.0.49.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -7811,12 +7788,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.701.0" `
-```
-
-    + " / Cloud Portal 2.0.131.0" `\
+    + " / Cloud Portal 2.0.131.0" `
     + " / Employee Portal 1.0.58.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -8046,11 +8020,8 @@ Pop-Location
 ```PowerShell
 cls
 Push-Location ("C:\Program Files\Common Files\microsoft shared" `
-```
+    + "\Web Server Extensions\15\BIN")
 
-    + "\\Web Server Extensions\\15\\BIN")
-
-```PowerShell
 .\PSConfig.exe `
      -cmd upgrade `
      -inplace b2b `
@@ -8167,12 +8138,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.705.0" `
-```
-
-    + " / Cloud Portal 2.0.131.0" `\
+    + " / Cloud Portal 2.0.131.0" `
     + " / Employee Portal 1.0.58.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -8237,11 +8205,8 @@ $filter = "SQLServer2014-KB4077063-x64.exe"
 $computerName = "EXT-FOOBAR4.extranet.technologytoolbox.com"
 
 $sourcePath = "\\TT-FS01\Products\Microsoft\SQL Server 2014\Patches" `
-```
+    + "\12.0.5579.0 - Cumulative Update 11 for SQL Server 2014 SP2"
 
-    + "\\12.0.5579.0 - Cumulative Update 11 for SQL Server 2014 SP2"
-
-```PowerShell
 $destPath = "\\$computerName\C$" `
     + "\NotBackedUp\Temp"
 
@@ -8346,9 +8311,8 @@ cls
 
 ```PowerShell
 Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.705.0 `
-```
-
     -Recurse -Force
+```
 
 ---
 
@@ -8370,12 +8334,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.711.0" `
-```
-
-    + " / Cloud Portal 2.0.131.0" `\
+    + " / Cloud Portal 2.0.131.0" `
     + " / Employee Portal 1.0.58.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -8476,9 +8437,8 @@ cls
 
 ```PowerShell
 Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.711.0 `
-```
-
     -Recurse -Force
+```
 
 ### Configure "Business Unit" dimension in Google Analytics
 
@@ -8502,12 +8462,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.714.0" `
-```
-
-    + " / Cloud Portal 2.0.131.0" `\
+    + " / Cloud Portal 2.0.131.0" `
     + " / Employee Portal 1.0.58.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -8643,12 +8600,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.714.0" `
-```
-
-    + " / Cloud Portal 2.0.131.0" `\
+    + " / Cloud Portal 2.0.131.0" `
     + " / Employee Portal 1.0.86.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -8665,7 +8619,7 @@ Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
 cls
 ```
 
-##### # Copy installer from internal file server
+#### # Copy installer from internal file server
 
 ```PowerShell
 $installer = "TypeScript_Dev14Full.exe"
@@ -8722,16 +8676,13 @@ Push-Location ("C:\Program Files\Common Files\microsoft shared" `
     + "\Web Server Extensions\15\BIN")
 
 .\PSConfig.exe `
-```
-
-    -cmd upgrade -inplace b2b `\
-    -wait `\
-    -cmd applicationcontent -install `\
-    -cmd installfeatures `\
-    -cmd secureresources `\
+    -cmd upgrade -inplace b2b `
+    -wait `
+    -cmd applicationcontent -install `
+    -cmd installfeatures `
+    -cmd secureresources `
     -cmd services -install
 
-```PowerShell
 Pop-Location
 ```
 
@@ -8838,9 +8789,8 @@ cls
 
 ```PowerShell
 Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.714.0 `
-```
-
     -Recurse -Force
+```
 
 ### # Prepare VM for snapshot
 
@@ -8870,12 +8820,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.716.0" `
-```
-
-    + " / Cloud Portal 2.0.131.0" `\
+    + " / Cloud Portal 2.0.131.0" `
     + " / Employee Portal 1.0.86.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```
@@ -8991,14 +8938,16 @@ Notepad .\web.config
 
 ---
 
-**Web.config**
+File - **Web.config**
 
 ```XML
 ...
   <system.webServer>
     <httpProtocol>
       <customHeaders>
-      ...        <add name="Content-Security-Policy" value="frame-ancestors 'self' http://*.securitasinc.com https://*.securitasinc.com;" />
+        ...
+        <add name="Content-Security-Policy"
+          value="frame-ancestors 'self' http://*.securitasinc.com https://*.securitasinc.com;" />
       </customHeaders>
     </httpProtocol>
 ...
@@ -9018,14 +8967,16 @@ Notepad .\web.config
 
 ---
 
-**Web.config**
+File - **Web.config**
 
 ```XML
 ...
   <system.webServer>
     <httpProtocol>
       <customHeaders>
-      ...        <add name="Content-Security-Policy" value="frame-ancestors 'self' http://*.securitasinc.com https://*.securitasinc.com;" />
+        ...
+        <add name="Content-Security-Policy"
+          value="frame-ancestors 'self' http://*.securitasinc.com https://*.securitasinc.com;" />
       </customHeaders>
     </httpProtocol>
 ...
@@ -9071,12 +9022,9 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
     -Confirm:$false
 
 $newSnapshotName = ("Baseline Client Portal 4.0.716.0" `
-```
-
-    + " / Cloud Portal 2.0.131.0" `\
+    + " / Cloud Portal 2.0.131.0" `
     + " / Employee Portal 1.0.91.0")
 
-```PowerShell
 Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
     Rename-VMSnapshot -NewName $newSnapshotName
 ```

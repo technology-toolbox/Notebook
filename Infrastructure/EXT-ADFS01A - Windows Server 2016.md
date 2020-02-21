@@ -539,7 +539,7 @@ copy `
 
 ---
 
-**EXT-FOOBAR4 - Run as EXTRANET\\setup-sharepoint-dev**
+**EXT-FOOBAR4** - Run as **EXTRANET\\setup-sharepoint-dev**
 
 ```PowerShell
 cls
@@ -583,10 +583,9 @@ $emailClaimMapping = New-SPClaimTypeMapping `
     -IncomingClaimTypeDisplayName "EmailAddress" `
     -SameAsIncoming
 
-# Note: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name is a reserved claim
+# Note: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name is a reserved
+# claim type in SharePoint
 ```
-
-# type in SharePoint
 
 ```PowerShell
 $nameClaimMapping = New-SPClaimTypeMapping `
@@ -733,18 +732,15 @@ New-AdfsWebTheme -Name $themeName -SourceName Default
 mkdir "C:\NotBackedUp\Temp\$themeName-Theme"
 
 Export-AdfsWebTheme `
-```
+    -Name $themeName `
+    -DirectoryPath "C:\NotBackedUp\Temp\$themeName-Theme"
 
-    -Name \$themeName `\
-    -DirectoryPath "C:\\NotBackedUp\\Temp\\\$themeName-Theme"
-
-```Console
 Notepad "C:\NotBackedUp\Temp\$themeName-Theme\script\onload.js"
 ```
 
 ---
 
-**onload.js**
+File content - **onload.js**
 
 ```JavaScript
 // -- Begin custom code
@@ -910,7 +906,7 @@ if (hrdAreaElement) {
                 //Calculate the URL to redirect the user to the AD form
                 var redirectUrl = currentUrl;
 
-           	//Check if the URL has an empty username
+                //Check if the URL has an empty username
                 if (redirectUrl.indexOf("username=") != -1 ) {
                      //Discard the old name
                      redirectUrl = redirectUrl.replace("username=","userNameOld=") ;
@@ -1039,7 +1035,7 @@ runas /USER:TECHTOOLBOX\jjameson cmd
 
 ---
 
-**Command Prompt - running as TECHTOOLBOX\\jjameson**
+**Command Prompt** - running as **TECHTOOLBOX\\jjameson**
 
 ```Console
 PowerShell
@@ -1047,7 +1043,7 @@ PowerShell
 
 ---
 
-**PowerShell - running as TECHTOOLBOX\\jjameson**
+**PowerShell** - running as **TECHTOOLBOX\\jjameson**
 
 ```PowerShell
 Start-Process PowerShell -Verb runAs
@@ -1055,7 +1051,7 @@ Start-Process PowerShell -Verb runAs
 
 ---
 
-**Administrator PowerShell - running as TECHTOOLBOX\\jjameson**
+**Administrator PowerShell** - running as **TECHTOOLBOX\\jjameson**
 
 ```PowerShell
 Set-AdfsClaimsProviderTrust `

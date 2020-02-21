@@ -278,7 +278,7 @@ notepad C:\Windows\system32\drivers\etc\hosts
 
 ---
 
-**C:\\Windows\\system32\\drivers\\etc\\hosts**
+File - **C:\\Windows\\system32\\drivers\\etc\\hosts**
 
 ```Text
 ...

@@ -60,7 +60,7 @@ Start-SCVirtualMachine $vmName
 - On the **Computer Details** step:
   - In the **Computer name** box, type **CON-ADFS01**.
   - Select **Join a workgroup**.
-  - In the **Workgroup **box, type **WORKGROUP**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
@@ -358,7 +358,7 @@ Install-WindowsFeature ADFS-Federation -IncludeManagementTools
 ### Create AD FS farm
 
 1. On the Server Manager **Dashboard** page, click the **Notifications** flag, and then click **Configure the federation service on the server**.
-The **Active Directory Federation Service Configuration Wizard** opens.
+   The **Active Directory Federation Service Configuration Wizard** opens.
 2. On the **Welcome** page, select **Create the first federation server in a federation server farm**, and then click **Next**.
 3. On the **Connect to Active Directory Domain Services** page, specify an account with domain administrator permissions for the Active Directory domain to which this computer is joined, and then click **Next**.
 4. On the **Specify Service Properties** page:

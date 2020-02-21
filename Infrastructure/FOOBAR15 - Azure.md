@@ -60,7 +60,7 @@ Authentication Provider: NTLM
 Confirm\
 Are you sure you want to perform this action?\
 Performing operation "Create Farm.ps1" on Target "**FOOBAR15**".\
-[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "Y"):\
+[Y] Yes [A] Yes to All [N] No [L] No to All [S] Suspend [?] Help (default is "Y"):\
 [2015-02-27 12:54:12] Creating SharePoint farm...\
 VERBOSE: [2015-02-27 12:54:12] Start activity - Create SharePoint farm\
 VERBOSE: [2015-02-27 12:54:12] Status - Creating the configuration database...\
@@ -88,7 +88,7 @@ Authentication Provider: NTLM
 Confirm\
 Are you sure you want to perform this action?\
 Performing the operation "Create Farm.ps1" on target "**EXT-FOOBAR4**".\
-[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "Y"):\
+[Y] Yes [A] Yes to All [N] No [L] No to All [S] Suspend [?] Help (default is "Y"):\
 [2015-02-27 05:24:07] Creating SharePoint farm...\
 VERBOSE: [2015-02-27 05:24:07] Start activity - Create SharePoint farm\
 VERBOSE: [2015-02-27 05:24:07] Status - Creating the configuration database...\

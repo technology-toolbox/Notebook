@@ -467,16 +467,18 @@ logoff
 
 ### Issue
 
-System.UnauthorizedAccessException: Access to the path 'C:\\Program Files (x86)\\Microsoft Team Foundation Server Integration Tools\\17559.txt' is denied.\
-   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)\
-   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy)\
-   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options)\
-   at System.IO.StreamWriter.CreateFile(String path, Boolean append)\
-   at System.IO.StreamWriter..ctor(String path, Boolean append, Encoding encoding, Int32 bufferSize)\
-   at System.IO.StreamWriter..ctor(String path)\
-   at Microsoft.TeamFoundation.Migration.Tfs2010VCAdapter.TfsVCMigrationProvider.codeReview(IEnumerable`1 pendChanges, Int32 changeset, HashSet`1 implicitRenames, HashSet`1 implicitAdds, HashSet`1 skippedActions, Int32& changeCount, Boolean autoResolve)\
-   at Microsoft.TeamFoundation.Migration.Tfs2010VCAdapter.TfsVCMigrationProvider.Checkin(ChangeGroup group, HashSet`1 implicitRenames, HashSet`1 implicitAdds, HashSet`1 skippedActions, Int32& changesetId)\
+```Text
+System.UnauthorizedAccessException: Access to the path 'C:\Program Files (x86)\Microsoft Team Foundation Server Integration Tools\17559.txt' is denied.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options)
+   at System.IO.StreamWriter.CreateFile(String path, Boolean append)
+   at System.IO.StreamWriter..ctor(String path, Boolean append, Encoding encoding, Int32 bufferSize)
+   at System.IO.StreamWriter..ctor(String path)
+   at Microsoft.TeamFoundation.Migration.Tfs2010VCAdapter.TfsVCMigrationProvider.codeReview(IEnumerable`1 pendChanges, Int32 changeset, HashSet`1 implicitRenames, HashSet`1 implicitAdds, HashSet`1 skippedActions, Int32& changeCount, Boolean autoResolve)
+   at Microsoft.TeamFoundation.Migration.Tfs2010VCAdapter.TfsVCMigrationProvider.Checkin(ChangeGroup group, HashSet`1 implicitRenames, HashSet`1 implicitAdds, HashSet`1 skippedActions, Int32& changesetId)
    at Microsoft.TeamFoundation.Migration.Tfs2010VCAdapter.TfsVCMigrationProvider.ProcessChangeGroup(ChangeGroup group)
+```
 
 ### Solution
 

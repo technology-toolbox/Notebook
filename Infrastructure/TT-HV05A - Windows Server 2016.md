@@ -181,15 +181,15 @@ ping TT-FS01 -f -l 8900
 
 #### Physical disks
 
-| Disk | Model                  | Serial Number   | Capacity | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ---------------------- | --------------- | -------- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | WDC WD3000F9YZ-09N20L0 | WD-******357156 | 3 TB     |              |             |                      |              |
-| 1    | WDC WD3000F9YZ-09N20L0 | WD-******FV469C | 3 TB     |              |             |                      |              |
-| 2    | ST2000NM0033-9ZM175    | *****0FT        | 2 TB     |              |             |                      |              |
-| 3    | Samsung SSD 850        | *********12260P | 512 GB   |              |             |                      |              |
-| 4    | Samsung SSD 850        | *********09894X | 512 GB   |              |             |                      |              |
-| 5    | Samsung SSD 850        | *********03852K | 128 GB   | C:           | 119 GB      | 4K                   |              |
-| 6    | ST2000NM0033-9ZM175    | *****34P        | 2 TB     |              |             |                      |              |
+| Disk | Model                  | Serial Number            | Capacity | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ---------------------- | ------------------------ | -------- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | WDC WD3000F9YZ-09N20L0 | WD-\*\*\*\*\*\*357156    | 3 TB     |              |             |                      |              |
+| 1    | WDC WD3000F9YZ-09N20L0 | WD-\*\*\*\*\*\*FV469C    | 3 TB     |              |             |                      |              |
+| 2    | ST2000NM0033-9ZM175    | \*\*\*\*\*0FT            | 2 TB     |              |             |                      |              |
+| 3    | Samsung SSD 850        | \*\*\*\*\*\*\*\*\*12260P | 512 GB   |              |             |                      |              |
+| 4    | Samsung SSD 850        | \*\*\*\*\*\*\*\*\*09894X | 512 GB   |              |             |                      |              |
+| 5    | Samsung SSD 850        | \*\*\*\*\*\*\*\*\*03852K | 128 GB   | C:           | 119 GB      | 4K                   |              |
+| 6    | ST2000NM0033-9ZM175    | \*\*\*\*\*34P            | 2 TB     |              |             |                      |              |
 
 ```PowerShell
 Get-PhysicalDisk | sort DeviceId
@@ -222,36 +222,22 @@ Screen clipping taken: 3/7/2018 7:53 AM
 7. Restart the server.
 
 ```PowerShell
-    $source = "\\TT-FS01\Public\Download\Drivers\Intel" `
-```
+$source = "\\TT-FS01\Public\Download\Drivers\Intel" `
+    + "\RSTe AHCI & SCU Software RAID driver for Windows\Drivers\x64" `
+    + "\AHCI\Win8_Win10_2K12_2K16"
 
-    + "\\RSTe AHCI & SCU Software RAID driver for Windows\\Drivers\\x64" `\
-    + "\\AHCI\\Win8_Win10_2K12_2K16"
+$destination = "C:\NotBackedUp\Temp\Drivers\Intel\x64" `
+    + "\AHCI\Win8_Win10_2K12_2K16"
 
-```PowerShell
-    $destination = "C:\NotBackedUp\Temp\Drivers\Intel\x64" `
-```
+robocopy $source $destination /E
 
-    + "\\AHCI\\Win8_Win10_2K12_2K16"
+pnputil -i -a "$destination\iaAHCI.inf"
 
-```Console
-    robocopy $source $destination /E
-```
+pnputil -i -a "$destination\iaAHCIB.inf"
 
-```Console
-    pnputil -i -a "$destination\iaAHCI.inf"
-```
+pnputil -i -a "$destination\iaStorA.inf"
 
-```Console
-    pnputil -i -a "$destination\iaAHCIB.inf"
-```
-
-```Console
-    pnputil -i -a "$destination\iaStorA.inf"
-```
-
-```Console
-    pnputil -i -a "$destination\iaStorB.inf"
+pnputil -i -a "$destination\iaStorB.inf"
 ```
 
 ##### After
@@ -528,10 +514,8 @@ $fileSystem = "NTFS"
 >
 > | **Functionality**  | **ReFS** | **NTFS** |
 > | ------------------ | -------- | -------- |
-> | ...                  | ...        | ...        |
+> | ...                | ...      | ...      |
 > | NTFS storage tiers | No       | Yes      |
->
->
 >
 > **Windows Server 2016 Storage Spaces Tier ReFS**\
 > From <[https://social.technet.microsoft.com/Forums/lync/en-US/06f07aaf-484c-435e-b655-2761a1dcbb67/windows-server-2016-storage-spaces-tier-refs?forum=winserverfiles](https://social.technet.microsoft.com/Forums/lync/en-US/06f07aaf-484c-435e-b655-2761a1dcbb67/windows-server-2016-storage-spaces-tier-refs?forum=winserverfiles)>
@@ -741,11 +725,8 @@ TT-HV05-FC
 
 ```PowerShell
 $source = "C:\Windows\cluster\Reports" `
-```
+    + "\Create Cluster Wizard TT-HV05-FC on 2018.03.08 At 10.09.29.htm"
 
-    + "\\Create Cluster Wizard TT-HV05-FC on 2018.03.08 At 10.09.29.htm"
-
-```PowerShell
 $destination = "\\TT-FS01\Public"
 
 Copy-Item $source $destination
@@ -1370,45 +1351,29 @@ cls
 
 ```PowerShell
 Get-Volume -FileSystemLabel iscsi01-Gold-01 |
-```
-
-    Get-Partition |\
+    Get-Partition |
     Set-Partition -NewDriveLetter G
 
-```PowerShell
 Get-Volume -FileSystemLabel iscsi01-Gold-02 |
-```
-
-    Get-Partition |\
+    Get-Partition |
     Set-Partition -NewDriveLetter H
 
-```PowerShell
 Get-Volume -FileSystemLabel iscsi01-Bronze-01A |
-```
-
-    Get-Partition |\
+    Get-Partition |
     Set-Partition -NewDriveLetter I
 
-```PowerShell
 Get-Volume -FileSystemLabel iscsi01-Bronze-01B |
-```
-
-    Get-Partition |\
+    Get-Partition |
     Set-Partition -NewDriveLetter J
 
-```PowerShell
 Get-Volume -FileSystemLabel iscsi01-Bronze-02A |
-```
-
-    Get-Partition |\
+    Get-Partition |
     Set-Partition -NewDriveLetter K
 
-```PowerShell
 Get-Volume -FileSystemLabel iscsi01-Bronze-02B |
-```
-
-    Get-Partition |\
+    Get-Partition |
     Set-Partition -NewDriveLetter L
+```
 
 ```PowerShell
 cls
@@ -2015,17 +1980,14 @@ $portClassification = Get-SCPortClassification -Name "Host Management"
 $vmHost = Get-SCVMHost -ComputerName $vmHostName
 
 New-SCVirtualNetworkAdapter `
-```
+    -VMHost $vmHost `
+    -Name $networkAdapterName `
+    -VMNetwork $vmNetwork `
+    -LogicalSwitch $logicalSwitch `
+    -VLanEnabled $true `
+    -VLanID $vlanID `
+    -PortClassification $portClassification
 
-    -VMHost \$vmHost `\
-    -Name \$networkAdapterName `\
-    -VMNetwork \$vmNetwork `\
-    -LogicalSwitch \$logicalSwitch `\
-    -VLanEnabled \$true `\
-    -VLanID \$vlanID `\
-    -PortClassification \$portClassification
-
-```PowerShell
 $networkAdapter = Get-SCVirtualNetworkAdapter -VMHost $vmHost |
     where { $_.Name -eq $networkAdapterName }
 
@@ -2165,13 +2127,13 @@ $adapterConfig = Get-WmiObject `
     -Filter "Index= '$($adapter.DeviceID)'"
 ```
 
-##### # Do not register this connection in DNS
+#### # Do not register this connection in DNS
 
 ```PowerShell
 $adapterConfig.SetDynamicDNSRegistration($false)
 ```
 
-##### # Remove default gateway
+#### # Remove default gateway
 
 ```PowerShell
 Remove-NetRoute -InterfaceAlias $interfaceAlias -NextHop 10.1.11.1 -Confirm:$false

@@ -3,11 +3,11 @@
 Tuesday, June 12, 2018
 8:14 AM
 
-Build baseline images
+## Build baseline images
 
 ---
 
-**TT-HV02A / TT-HV02B / TT-HV02C**
+**TT-HV02A** / **TT-HV02B** / **TT-HV02C**
 
 ```PowerShell
 cls
