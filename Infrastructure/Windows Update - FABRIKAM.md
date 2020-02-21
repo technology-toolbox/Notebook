@@ -7,7 +7,7 @@ Saturday, January 11, 2014
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Patch FAB-DC01 (before patching other machines)
+## Patch FAB-DC05 (before patching other machines)
 
 ## Patch remaining FABRIKAM machines
 
@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**TT-ADMIN03**
+**TT-ADMIN03 - Run as domain administrator**
 
 ```PowerShell
 cls
@@ -76,7 +76,7 @@ $virtualMachinesWithSnapshots |
 
 ---
 
-**FAB-DC01**
+**FAB-DC05 - Run as domain administrator**
 
 ```PowerShell
 cls

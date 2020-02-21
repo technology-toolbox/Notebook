@@ -7,7 +7,7 @@ Saturday, January 11, 2014
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Patch FOOBAR18 (before patching other machines)
+## Patch TT-ADMIN03 (before patching other machines)
 
 ## Patch remaining TECHTOOLBOX machines
 
@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**FOOBAR18**
+**TT-ADMIN03 - Run as domain administrator**
 
 ```PowerShell
 cls
@@ -26,8 +26,8 @@ $activity = "Prepare development and test VMs for patching"
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    #[PSCustomObject] @{ VMName = 'FOOBAR'; VMHost = 'TT-HV05B'; },
-    #[PSCustomObject] @{ VMName = 'TT-WIN10-DEV3'; VMHost = 'WOLVERINE'; },
+    [PSCustomObject] @{ VMName = 'TT-VS2013-DEV'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'TT-W10-DEV09'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'TT-WIN10-DEV6'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'TT-WIN7-TEST1'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'TT-WIN7-TEST2'; VMHost = 'TT-HV05B'; },
@@ -539,8 +539,8 @@ cls
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    #[PSCustomObject] @{ VMName = 'FOOBAR'; VMHost = 'TT-HV05B'; },
-    #[PSCustomObject] @{ VMName = 'TT-WIN10-DEV3'; VMHost = 'WOLVERINE'; },
+    [PSCustomObject] @{ VMName = 'TT-VS2013-DEV'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'TT-W10-DEV09'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'TT-WIN10-DEV6'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'TT-WIN7-TEST1'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'TT-WIN7-TEST2'; VMHost = 'TT-HV05B'; },
