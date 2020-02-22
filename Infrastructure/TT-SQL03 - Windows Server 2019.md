@@ -13,7 +13,7 @@ Monday, September 23, 2019
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -63,7 +63,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -165,7 +165,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -250,7 +250,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -541,7 +541,7 @@ From <[https://ola.hallengren.com/](https://ola.hallengren.com/)>
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -628,7 +628,7 @@ Start-Service SQLSERVERAGENT
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -770,7 +770,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://t
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -892,7 +892,7 @@ WITH NOFORMAT, NOINIT
 
 ---
 
-**TT-SQL03 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-SQL03 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1134,7 +1134,7 @@ msiexec.exe /i $msiPath `
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls

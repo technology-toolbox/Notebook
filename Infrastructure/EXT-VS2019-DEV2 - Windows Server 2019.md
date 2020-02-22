@@ -113,7 +113,7 @@ logoff
 
 ---
 
-**TT-ADMIN03 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN03 - Run as administrator**
 
 ```PowerShell
 cls
@@ -236,7 +236,7 @@ Get-Disk 4 |
 
 ---
 
-**TT-ADMIN03 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN03 - Run as administrator**
 
 ```PowerShell
 cls
@@ -298,7 +298,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**EXT-DC10 - Run as domain administrator**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -370,7 +370,7 @@ $groupName = "All Developers"
 
 ---
 
-**EXT-DC10 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -610,7 +610,7 @@ $username = "setup-sql"
 
 ---
 
-**EXT-DC10 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -663,7 +663,7 @@ From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Micr
 
 ---
 
-**STORM - Run as TECHTOOLBOX\\jjameson-admin**
+**STORM - Run as administrator**
 
 ```PowerShell
 cls

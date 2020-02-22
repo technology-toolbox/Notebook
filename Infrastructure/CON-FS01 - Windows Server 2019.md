@@ -113,7 +113,7 @@ robocopy $source $destination /E /XD git-for-windows "Microsoft SDKs" /NP
 
 ---
 
-**FOOBAR21 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR21 - Run as administrator**
 
 ```PowerShell
 cls
@@ -161,7 +161,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**EXT-DC10 - Run as EXTRANET\\jjameson-admin**
+**CON-DC03** - Run as domain administrator
 
 ```PowerShell
 Cls
@@ -217,7 +217,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR21 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR21 - Run as administrator**
 
 ```PowerShell
 cls

@@ -133,7 +133,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -185,7 +185,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**EXT-DC10 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 Cls
@@ -241,7 +241,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -316,7 +316,7 @@ ping EXT-DC10 -f -l 8900
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -463,7 +463,7 @@ Remove-Item $certFile
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -651,7 +651,7 @@ cls
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls

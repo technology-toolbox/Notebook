@@ -123,7 +123,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -246,7 +246,7 @@ Get-Disk 4 |
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -308,7 +308,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**EXT-DC10 - Run as domain administrator**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -516,7 +516,7 @@ From <[https://ola.hallengren.com/](https://ola.hallengren.com/)>
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -633,7 +633,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**STORM - Run as TECHTOOLBOX\\jjameson-admin**
+**STORM - Run as administrator**
 
 ```PowerShell
 cls
@@ -905,7 +905,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**STORM - Run as TECHTOOLBOX\\jjameson-admin**
+**STORM - Run as administrator**
 
 ```PowerShell
 cls

@@ -11,7 +11,7 @@ Sunday, January 7, 2018
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -64,7 +64,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -177,7 +177,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 $vmHost = "TT-HV02B"
@@ -228,7 +228,7 @@ Checkpoint-VM `
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

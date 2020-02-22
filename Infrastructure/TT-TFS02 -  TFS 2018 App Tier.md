@@ -13,7 +13,7 @@ Thursday, March 22, 2018
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -80,7 +80,7 @@ logoff
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -147,7 +147,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -206,7 +206,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -273,7 +273,7 @@ $username = "setup-tfs"
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -465,7 +465,7 @@ BACKUP DATABASE @databaseName
 
 ---
 
-**FOOBAR11 - TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -892,7 +892,7 @@ Stop-Service elasticsearch-service-x64
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

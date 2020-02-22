@@ -11,7 +11,7 @@ Thursday, November 2, 2017
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -61,7 +61,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -463,7 +463,7 @@ slmgr /ato
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

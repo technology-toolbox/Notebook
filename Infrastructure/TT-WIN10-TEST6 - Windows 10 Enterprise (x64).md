@@ -11,7 +11,7 @@ Sunday, November 12, 2017
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -79,7 +79,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -139,7 +139,7 @@ From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershel
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -324,7 +324,7 @@ Stop-Computer
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls

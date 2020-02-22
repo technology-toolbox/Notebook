@@ -11,7 +11,7 @@ Tuesday, January 24, 2017
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -172,7 +172,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC01** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -255,7 +255,7 @@ Install-WindowsFeature Web-Application-Proxy -IncludeManagementTools
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls

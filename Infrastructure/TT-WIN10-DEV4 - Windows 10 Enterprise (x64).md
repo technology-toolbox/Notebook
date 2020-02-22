@@ -11,7 +11,7 @@ Thursday, June 14, 2018
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -61,7 +61,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -497,7 +497,7 @@ icacls 'C:\Program Files (x86)\Microsoft Team Foundation Server Integration Tool
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

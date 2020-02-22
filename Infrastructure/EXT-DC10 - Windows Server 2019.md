@@ -133,7 +133,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -185,7 +185,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -230,7 +230,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -305,7 +305,7 @@ ping EXT-DC08 -f -l 8900
 
 ---
 
-**EXT-DC08 - Run as TECHTOOLBOX\\jjameson-admin**
+**EXT-DC08 - Run as administrator**
 
 ```PowerShell
 cls
@@ -419,7 +419,7 @@ Install-ADDSDomainController `
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -541,7 +541,7 @@ Add-WindowsFeature Windows-Server-Backup
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -707,7 +707,7 @@ Remove-Item $certFile
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -823,7 +823,7 @@ From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls

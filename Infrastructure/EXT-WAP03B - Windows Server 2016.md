@@ -15,7 +15,7 @@ Thursday, March 29, 2018
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -169,7 +169,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Credential $cred -Resta
 
 ---
 
-**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -277,7 +277,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -389,7 +389,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls

@@ -9,7 +9,7 @@ Friday, July 14, 2017
 
 ---
 
-**FAB-DC05 - Run as domain administrator**
+**FAB-DC05** - Run as domain administrator
 
 ```PowerShell
 cls

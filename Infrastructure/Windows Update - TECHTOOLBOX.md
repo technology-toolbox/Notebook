@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**TT-ADMIN03 - Run as domain administrator**
+**TT-ADMIN03** - Run as domain administrator
 
 ```PowerShell
 cls

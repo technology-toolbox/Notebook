@@ -31,7 +31,7 @@ sconfig
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -688,7 +688,7 @@ powercfg.exe /L
 
 ---
 
-**TT-VMM01A - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-VMM01A - Run as administrator**
 
 ```PowerShell
 cls
@@ -1152,7 +1152,7 @@ Connect-IscsiTarget `
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

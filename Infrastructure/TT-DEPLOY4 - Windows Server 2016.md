@@ -13,7 +13,7 @@ Friday, November 17, 2017
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -76,7 +76,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -118,7 +118,7 @@ logoff
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -225,7 +225,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -269,7 +269,7 @@ Get-Disk 1 |
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -390,7 +390,7 @@ cls
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -561,7 +561,7 @@ From <[https://www.mikeslab.net/?p=504](https://www.mikeslab.net/?p=504)>
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ### Download syslinux
 
@@ -722,7 +722,7 @@ WDSUTIL /Set-Server /N12BootProgram:Boot\x64\pxelinux.com /Architecture:x64
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -761,7 +761,7 @@ From <[http://www.syslinux.org/wiki/index.php?title=Hardware_Compatibility#LOCAL
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ### Install chain.c32
 
@@ -831,7 +831,7 @@ LABEL local
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -867,7 +867,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ### Install hdt.c32
 
@@ -934,7 +934,7 @@ LABEL hdt
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -970,7 +970,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ### Install reboot.c32
 
@@ -1036,7 +1036,7 @@ LABEL reboot
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -1072,7 +1072,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ### Install poweroff.com
 
@@ -1138,7 +1138,7 @@ LABEL poweroff
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -1198,7 +1198,7 @@ Pop-Location
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ### Install Memtest86+
 
@@ -1260,7 +1260,7 @@ LABEL memtest
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -1287,7 +1287,7 @@ robocopy $source $destination /E
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ### Install memdisk
 
@@ -1330,7 +1330,7 @@ Pop-Location
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ### Install Parted Magic 2013_08_01
 
@@ -1380,7 +1380,7 @@ LABEL partedmagic
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -1418,7 +1418,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 Copy background image to [\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
 
@@ -1477,7 +1477,7 @@ LABEL partedmagic
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -1515,7 +1515,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1704,7 +1704,7 @@ cls
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -2367,7 +2367,7 @@ robocopy \\TT-FS01\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot 
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -2404,7 +2404,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

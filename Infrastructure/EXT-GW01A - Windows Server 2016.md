@@ -11,7 +11,7 @@ Friday, January 13, 2017
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -99,7 +99,7 @@ Set-ADObject $computerObject -Replace @{ nTSecurityDescriptor = $securityDescrip
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -236,7 +236,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -255,7 +255,7 @@ Set-VMDvdDrive -ComputerName $vmHost -VMName $vmName -Path $null
 
 ---
 
-**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC01** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -414,7 +414,7 @@ Restart-Computer
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -800,7 +800,7 @@ Add-ClusterResourceType -Name "RAS Cluster Resource" -Dll \$env:windir\\System32
 
 ---
 
-**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC01** - Run as domain administrator
 
 ```PowerShell
 cls

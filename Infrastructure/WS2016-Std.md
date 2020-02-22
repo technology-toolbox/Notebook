@@ -11,7 +11,7 @@ Saturday, January 14, 2017
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -57,7 +57,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -179,7 +179,7 @@ Copy VM before running SysPrep (to avoid issues with running SysPrep multiple ti
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -234,7 +234,7 @@ C:\Windows\System32\Sysprep\sysprep.exe /generalize /oobe /shutdown
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls

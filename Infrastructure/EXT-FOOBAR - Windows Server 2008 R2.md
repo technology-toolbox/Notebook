@@ -9,7 +9,7 @@ Tuesday, December 15, 2015
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ## # Create virtual machine (EXT-FOOBAR)
 
@@ -82,7 +82,7 @@ logoff
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ## # Remove disk from virtual CD/DVD drive
 
@@ -1756,7 +1756,7 @@ Next
 
 ---
 
-**EXT-APP01A - Run as EXTRANET\\jjameson-admin**
+**EXT-APP01A** - Run as administrator
 
 ### # Export Post Orders
 

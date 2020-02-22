@@ -807,7 +807,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls

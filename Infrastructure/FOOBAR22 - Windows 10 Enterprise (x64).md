@@ -11,7 +11,7 @@ Thursday, June 20, 2019
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -93,7 +93,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -176,7 +176,7 @@ From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershel
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls

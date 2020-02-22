@@ -991,7 +991,7 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1153,7 +1153,7 @@ Resize-Partition -DriveLetter L -Size $maxSize
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1389,7 +1389,7 @@ GO
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1417,7 +1417,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1454,7 +1454,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

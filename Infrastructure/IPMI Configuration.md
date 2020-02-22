@@ -77,7 +77,7 @@ $serialNumbers |
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls

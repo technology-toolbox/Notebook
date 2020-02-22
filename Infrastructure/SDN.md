@@ -255,7 +255,7 @@ From <[https://blogs.technet.microsoft.com/larryexchange/2016/05/30/step-by-step
 
 ---
 
-**TT-DEPLOY-SDN - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-DEPLOY-SDN - Run as administrator**
 
 ```PowerShell
 cls

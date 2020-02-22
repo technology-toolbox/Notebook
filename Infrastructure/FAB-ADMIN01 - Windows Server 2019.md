@@ -151,7 +151,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -221,7 +221,7 @@ Add-Computer -DomainName corp.fabrikam.com -Restart
 
 ---
 
-**FAB-DC05 - Run as FABRIKAM\\jjameson-admin**
+**FAB-DC05** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -314,7 +314,7 @@ ping TT-FS01.corp.technologytoolbox.com -f -l 8900
 
 ---
 
-**FAB-TEST1 - Run as FABRIKAM\\jjameson-admin**
+**FAB-TEST1** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -459,7 +459,7 @@ Start-Process `
 
 ---
 
-**FAB-DC05 - Run as FABRIKAM\\jjameson-admin**
+**FAB-DC05** - Run as domain administrator
 
 ```PowerShell
 Add-DNSServerResourceRecordCName `
@@ -472,7 +472,7 @@ Add-DNSServerResourceRecordCName `
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls

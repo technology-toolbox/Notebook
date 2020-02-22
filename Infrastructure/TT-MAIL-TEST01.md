@@ -736,7 +736,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 Add-DNSServerResourceRecordCName `
@@ -943,7 +943,7 @@ sudo docker logs mail-test
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1045,7 +1045,7 @@ ifconfig | grep inet
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls

@@ -106,7 +106,7 @@ logoff
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -158,7 +158,7 @@ Add-Computer -DomainName corp.fabrikam.com -Restart
 
 ---
 
-**FAB-DC03 - Run as FABRIKAM\\jjameson-admin**
+**FAB-DC03** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -228,7 +228,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -303,7 +303,7 @@ ping TT-FS01.corp.technologytoolbox.com -f -l 8900
 
 ---
 
-**FAB-DC03 - Run as TECHTOOLBOX\\jjameson-admin**
+**FAB-DC03 - Run as administrator**
 
 ```PowerShell
 cls
@@ -431,7 +431,7 @@ Restart-Computer
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -524,7 +524,7 @@ w32tm /resync /rediscover
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls

@@ -11,7 +11,7 @@ Thursday, September 27, 2018
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -112,7 +112,7 @@ From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershel
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -254,7 +254,7 @@ C:\NotBackedUp\Public\Toolbox\Wdu.exe
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

@@ -93,7 +93,7 @@ logoff
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -201,7 +201,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -251,7 +251,7 @@ Add-ADGroupMember -Identity "Windows Update - Slot 5" -Members ($vmName + '$')
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -294,7 +294,7 @@ $domainGroup = "VMM Admins"
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -626,7 +626,7 @@ Register-SCVMMAccessLicense `
 
 ---
 
-**TT-ADMIN02 - Run as domain administrator**
+**TT-ADMIN02** - Run as domain administrator
 
 ```PowerShell
 cls

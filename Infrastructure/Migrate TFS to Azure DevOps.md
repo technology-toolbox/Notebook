@@ -896,7 +896,7 @@ From <[https://storageexplorer.com/](https://storageexplorer.com/)>
 
 ---
 
-**STORM - Run as TECHTOOLBOX\\jjameson-admin**
+**STORM - Run as administrator**
 
 ```PowerShell
 cls

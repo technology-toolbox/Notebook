@@ -11,7 +11,7 @@ Wednesday, January 2, 2019
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -89,7 +89,7 @@ logoff
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -165,7 +165,7 @@ Add-Computer -DomainName corp.contoso.com -Restart
 
 ---
 
-**CON-DC1 - Run as CONTOSO\\Administrator**
+**CON-DC1** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -251,7 +251,7 @@ Set-DNSClientServerAddress `
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -294,7 +294,7 @@ Get-Disk 1 |
 
 ---
 
-**CON-DC2 - Run as CONTOSO\\Administrator**
+**CON-DC2** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -349,7 +349,7 @@ Install-ADDSDomainController `
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -474,7 +474,7 @@ Start-SCVirtualMachine -VM $vm
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls

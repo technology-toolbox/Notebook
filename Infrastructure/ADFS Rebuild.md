@@ -5,7 +5,7 @@ Tuesday, April 3, 2018
 
 ---
 
-**EXT-ADFS03A - Run as EXTRANET\\jjameson-admin**
+**EXT-ADFS03A** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -157,7 +157,7 @@ Get-SPTrustedIdentityTokenIssuer -Identity "ADFS" |
 
 ---
 
-**EXT-ADFS03A - Run as EXTRANET\\jjameson-admin**
+**EXT-ADFS03A** - Run as domain administrator
 
 ```PowerShell
 cls

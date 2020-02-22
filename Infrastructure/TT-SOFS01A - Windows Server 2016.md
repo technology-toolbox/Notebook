@@ -11,7 +11,7 @@ Tuesday, January 31, 2017
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -55,7 +55,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\New-ClusterObject.ps1 `
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -157,7 +157,7 @@ Add-Computer -DomainName corp.technologytoolbox.com -Restart
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1053,7 +1053,7 @@ $productionServer = 'TT-SOFS01A'
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls

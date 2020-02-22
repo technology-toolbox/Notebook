@@ -11,7 +11,7 @@ Tuesday, February 23, 2016
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -145,7 +145,7 @@ Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 $vmName = "EXT-SP2013-DEV"
@@ -159,7 +159,7 @@ Restart-VM $vmName -Force
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 $vmName = "EXT-SP2013-DEV"
@@ -245,7 +245,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 -Verbos
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -401,7 +401,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -426,7 +426,7 @@ Set-VMDvdDrive -VMName EXT-SP2013-DEV -Path $isoPath
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -457,7 +457,7 @@ Install-WindowsFeature NET-Framework-Core -Source $sourcePath
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -646,7 +646,7 @@ icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb `
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -689,7 +689,7 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -754,7 +754,7 @@ cls
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -785,7 +785,7 @@ cls
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -841,7 +841,7 @@ Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles" -Recurse
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -946,7 +946,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -1234,7 +1234,7 @@ Set-SPEnterpriseSearchCrawlContentSource `
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls

@@ -242,7 +242,7 @@ Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -NoMedia
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -392,7 +392,7 @@ Set-SCVirtualDVDDrive -VirtualDVDDrive $dvdDrive -NoMedia
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

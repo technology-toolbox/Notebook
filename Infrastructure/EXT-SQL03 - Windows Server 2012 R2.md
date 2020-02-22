@@ -19,7 +19,7 @@ Install SecuritasConnect v4.0
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -125,7 +125,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -184,7 +184,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -240,7 +240,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -380,7 +380,7 @@ Add-Computer `
 
 ---
 
-**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -429,7 +429,7 @@ $groupName = "SQL Server Admins"
 
 ---
 
-**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -449,7 +449,7 @@ Enable-ADAccount -Identity setup-sql
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -498,7 +498,7 @@ Get-SCVirtualDVDDrive -VM $vmName |
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1111,7 +1111,7 @@ GO
 
 ---
 
-**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -1356,7 +1356,7 @@ msiexec.exe /i $msiPath `
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls

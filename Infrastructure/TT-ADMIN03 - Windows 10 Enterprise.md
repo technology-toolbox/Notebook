@@ -11,7 +11,7 @@ Wednesday, December 4, 2019
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -93,7 +93,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -227,7 +227,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -515,7 +515,7 @@ From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Micr
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls

@@ -19,7 +19,7 @@ Install SecuritasConnect v4.0
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -120,7 +120,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -170,7 +170,7 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -231,7 +231,7 @@ Add-Computer `
 
 ---
 
-**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -269,7 +269,7 @@ Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members ($computerName + 
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -414,7 +414,7 @@ $username = "setup-sharepoint-dev"
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -465,7 +465,7 @@ Get-SCVirtualDVDDrive -VM $vmName |
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -631,7 +631,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-in)"
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -655,7 +655,7 @@ robocopy $source $destination /E
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -704,7 +704,7 @@ Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -770,7 +770,7 @@ cls
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -818,7 +818,7 @@ exit
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -875,7 +875,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -920,7 +920,7 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -986,7 +986,7 @@ cls
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1046,7 +1046,7 @@ Remove-Item "C:\NotBackedUp\Temp\Prince" -Recurse
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1142,7 +1142,7 @@ File: **SSDTSetup.exe**
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1295,7 +1295,7 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1370,7 +1370,7 @@ New-Item -ItemType Directory -Path C:\Shares\Builds\ClientPortal
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -2222,7 +2222,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -5236,7 +5236,7 @@ Remove-Item C:\Shares\Builds\EmployeePortal\1.0.29.0 -Recurse -Force
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -5590,7 +5590,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -6718,7 +6718,7 @@ Pop-Location
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -6745,7 +6745,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+**EXT-ADFS02A** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -7067,7 +7067,7 @@ Remove-Item C:\Shares\Builds\ClientPortal\4.0.681.1 `
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -7294,7 +7294,7 @@ Set-Acl -Path $keyPath -AclObject $acl
 
 ---
 
-**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+**EXT-ADFS02A** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -7490,7 +7490,7 @@ Notepad C:\NotBackedUp\Temp\ADFS-Claims-Provider-Trust-Configuration.csv
 
 ---
 
-**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+**EXT-ADFS02A** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -7706,7 +7706,7 @@ $tokenIssuer.Update()
 
 ---
 
-**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+**EXT-ADFS02A** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -7854,7 +7854,7 @@ Remove-Item C:\Shares\Builds\CloudPortal\2.0.122.0 `
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls

@@ -11,7 +11,7 @@ Thursday, May 23, 2019
 
 ---
 
-**STORM - Run as .\\foo**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -98,7 +98,7 @@ Start-VM -Name $vmName
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -129,7 +129,7 @@ Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members ($vmName + '$')
 
 ---
 
-**PowerShell - Run as TECHTOOLBOX\\jjameson-admin**
+**PowerShell - Run as administrator**
 
 ```PowerShell
 cls
@@ -461,7 +461,7 @@ Restart-Computer
 
 ---
 
-**STORM - Run as .\\foo**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -486,7 +486,7 @@ Checkpoint-VM `
 
 ---
 
-**STORM - Run as .\\foo**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls

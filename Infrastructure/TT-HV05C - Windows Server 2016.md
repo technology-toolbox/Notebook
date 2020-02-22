@@ -31,7 +31,7 @@ sconfig
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -660,7 +660,7 @@ Add-ClusterNode -Cluster TT-HV05-FC
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls
@@ -686,7 +686,7 @@ Invoke-Command -ComputerName TT-HV05C -ScriptBlock $scriptBlock
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1150,7 +1150,7 @@ Connect-IscsiTarget `
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

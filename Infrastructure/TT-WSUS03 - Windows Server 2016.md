@@ -25,7 +25,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -132,7 +132,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -209,7 +209,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -264,7 +264,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -551,7 +551,7 @@ Computers
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 Add-DNSServerResourceRecordCName `
@@ -1149,7 +1149,7 @@ Screen clipping taken: 5/11/2018 6:29 AM
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1197,7 +1197,7 @@ Resize-Partition `
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1226,7 +1226,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1261,7 +1261,7 @@ Screen clipping taken: 11/15/2018 6:10 AM
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1446,7 +1446,7 @@ Screen clipping taken: 6/17/2019 2:43 PM
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1500,7 +1500,7 @@ Screen clipping taken: 7/11/2019 5:42 AM
 
 ---
 
-**FOOBAR21 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR21 - Run as administrator**
 
 ```PowerShell
 cls

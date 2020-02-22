@@ -108,7 +108,7 @@ logoff
 
 ---
 
-**FOOBAR22 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR22 - Run as administrator**
 
 ```PowerShell
 cls
@@ -177,7 +177,7 @@ ping TT-DC10 -f -l 8900
 
 ---
 
-**FOOBAR22 - Run as domain administrator**
+**FOOBAR22** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -259,7 +259,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR22 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR22 - Run as administrator**
 
 ```PowerShell
 cls
@@ -406,7 +406,7 @@ Start-Process `
 
 ---
 
-**FOOBAR22 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR22 - Run as administrator**
 
 ```PowerShell
 cls

@@ -11,7 +11,7 @@ Monday, August 20, 2018
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -68,7 +68,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -124,7 +124,7 @@ logoff
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls
@@ -197,7 +197,7 @@ Add-Computer `
 
 ---
 
-**CON-DC1 - Run as CONTOSO\\Administrator**
+**CON-DC1** - Run as domain administrator
 
 ```PowerShell
 cls

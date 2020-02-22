@@ -105,7 +105,7 @@ logoff
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -167,7 +167,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**EXT-DC10 - Run as domain administrator**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -465,7 +465,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**STORM - Run as TECHTOOLBOX\\jjameson-admin**
+**STORM - Run as administrator**
 
 ```PowerShell
 cls

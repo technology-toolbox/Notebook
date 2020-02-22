@@ -9,7 +9,7 @@ Friday, July 14, 2017
 
 ---
 
-**EXT-DC10 - Run as domain administrator**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls

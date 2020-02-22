@@ -184,7 +184,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -229,7 +229,7 @@ Get-Disk 1 |
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -281,7 +281,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-DC08 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-DC08 - Run as administrator**
 
 ```PowerShell
 cls
@@ -358,7 +358,7 @@ Set-DNSClientServerAddress `
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -431,7 +431,7 @@ Restart-Computer
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls

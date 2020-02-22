@@ -11,7 +11,7 @@ Thursday, January 3, 2019
 
 ---
 
-**STORM - Run as .\\foo**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -103,7 +103,7 @@ Start-VM -Name $vmName
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -375,7 +375,7 @@ From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Micr
 
 ---
 
-**STORM - Run as TECHTOOLBOX\\jjameson-admin**
+**STORM - Run as administrator**
 
 ```PowerShell
 cls
@@ -613,7 +613,7 @@ Install-Module -Name Az -AllowClobber -Scope AllUsers
 
 ---
 
-**STORM - Run as TECHTOOLBOX\\jjameson-admin**
+**STORM - Run as administrator**
 
 ```PowerShell
 cls
@@ -684,7 +684,7 @@ Add **TECHTOOLBOX\\Domain Users** to **Remote Desktop Users**.
 
 ---
 
-**STORM - Run as .\\foo**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls

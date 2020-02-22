@@ -13,7 +13,7 @@ Saturday, February 3, 2018
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -81,7 +81,7 @@ logoff
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -156,7 +156,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -201,7 +201,7 @@ $username = "setup-tfs"
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -243,7 +243,7 @@ Get-Disk 1 |
 
 ---
 
-**FOOBAR11 - TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11** - Run as domain administrator
 
 ```PowerShell
 cls

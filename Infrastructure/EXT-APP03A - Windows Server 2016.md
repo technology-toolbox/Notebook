@@ -15,7 +15,7 @@ Install SecuritasConnect v4.0
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -121,7 +121,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -184,7 +184,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -238,7 +238,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -321,7 +321,7 @@ Add-Computer `
 
 ---
 
-**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -356,7 +356,7 @@ Add-ADGroupMember -Identity $domainGroupName -Members ($computerName + '$')
 
 ---
 
-**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC01** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -542,7 +542,7 @@ $groupName = "SharePoint Admins"
 
 ---
 
-**EXT-DC08 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC08** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -562,7 +562,7 @@ Enable-ADAccount -Identity setup-sharepoint
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -652,7 +652,7 @@ Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -688,7 +688,7 @@ exit
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -735,7 +735,7 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -866,7 +866,7 @@ New-Item -ItemType Directory -Path "$buildsPath\ClientPortal"
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1034,7 +1034,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-in)"
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1129,7 +1129,7 @@ miiskmu.exe /e C:\Users\%USERNAME%\Desktop\miiskeys-1.bin ^
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -2132,7 +2132,7 @@ Set-Acl -Path $regPath -AclObject $acl
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -2634,7 +2634,7 @@ cls
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -4521,7 +4521,7 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 ---
 
-**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+**EXT-ADFS02A** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -4759,7 +4759,7 @@ $webApp.Update()
 
 ---
 
-**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+**EXT-ADFS02A** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -4856,7 +4856,7 @@ Notepad C:\NotBackedUp\Temp\ADFS-Claims-Provider-Trust-Configuration.csv
 
 ---
 
-**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+**EXT-ADFS02A** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -5072,7 +5072,7 @@ $tokenIssuer.Update()
 
 ---
 
-**EXT-ADFS02A - Run as EXTRANET\\jjameson-admin**
+**EXT-ADFS02A** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -5220,7 +5220,7 @@ Remove-Item D:\Shares\Builds\CloudPortal\2.0.122.0 `
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls

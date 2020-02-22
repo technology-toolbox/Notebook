@@ -11,7 +11,7 @@ Tuesday, January 24, 2017
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -57,7 +57,7 @@ From <[https://technet.microsoft.com/en-us/library/dd807078(v=ws.11).aspx](https
 
 ---
 
-**FOOBAR10 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR10 - Run as administrator**
 
 ```PowerShell
 cls
@@ -210,7 +210,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC01** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -342,7 +342,7 @@ Install-WindowsFeature ADFS-Federation -IncludeManagementTools
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -644,7 +644,7 @@ $authProvider.Update()
 
 ---
 
-**EXT-FOOBAR4 - Run as TECHTOOLBOX\\jjameson**
+**EXT-FOOBAR4** - Run as administrator
 
 #### Associate web applications with the ADFS identity provider
 

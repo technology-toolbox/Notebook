@@ -141,7 +141,7 @@ mountvol X: $volumeId
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -173,7 +173,7 @@ Rename **Local Area Connection** to **Extranet-20**.
 
 ---
 
-**EXT-DC10 - Run as domain administrator**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls

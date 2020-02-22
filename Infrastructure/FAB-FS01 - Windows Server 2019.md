@@ -147,7 +147,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -209,7 +209,7 @@ Add-Computer -DomainName corp.fabrikam.com -Restart
 
 ---
 
-**FAB-DC05 - Run as FABRIKAM\\jjameson-admin**
+**FAB-DC05** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -269,7 +269,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls
@@ -391,7 +391,7 @@ Get-Disk 1 |
 
 ---
 
-**FOOBAR18 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR18 - Run as administrator**
 
 ```PowerShell
 cls

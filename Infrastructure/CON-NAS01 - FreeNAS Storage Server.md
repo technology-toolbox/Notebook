@@ -91,7 +91,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -122,7 +122,7 @@ Set-VMFirmware `
 
 ---
 
-**FOOBAR21 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR21 - Run as administrator**
 
 ```PowerShell
 cls
@@ -159,7 +159,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR21 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR21 - Run as administrator**
 
 ```PowerShell
 cls

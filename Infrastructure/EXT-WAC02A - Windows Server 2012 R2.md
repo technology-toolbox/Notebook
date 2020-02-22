@@ -11,7 +11,7 @@ Friday, April 15, 2016
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ### # Create virtual machine
 
@@ -85,7 +85,7 @@ logoff
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ## # Remove disk from virtual CD/DVD drive
 
@@ -754,7 +754,7 @@ Set-SPWOPIZone -zone "external-https"
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ### # Set memory to 4 GB
 

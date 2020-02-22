@@ -13,7 +13,7 @@ Monday, September 23, 2019
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -63,7 +63,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -165,7 +165,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -248,7 +248,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -324,7 +324,7 @@ Get-Disk 2 |
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -404,7 +404,7 @@ dsacls.exe "$configurationNamingContext" /G "$($userPrincipal):CA;Replicating Di
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -589,7 +589,7 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ### # Checkpoint VM
 
@@ -643,7 +643,7 @@ cd C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -763,7 +763,7 @@ $centralAdmin.UpdateMailSettings(
 
 ---
 
-**TT-FS01 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-FS01 - Run as administrator**
 
 ```PowerShell
 cls
@@ -901,7 +901,7 @@ WITH NOFORMAT, NOINIT
 
 ---
 
-**TT-SQL03 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-SQL03 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1550,7 +1550,7 @@ Set-SPProfileServiceApplication `
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1590,7 +1590,7 @@ Start-VM -ComputerName $vmHost -VMName $vmName
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -1656,7 +1656,7 @@ Get-SPEnterpriseSearchServiceApplication |
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls

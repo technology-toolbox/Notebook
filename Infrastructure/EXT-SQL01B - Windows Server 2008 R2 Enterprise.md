@@ -11,7 +11,7 @@ Sunday, April 17, 2016
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ### # Create virtual machine
 

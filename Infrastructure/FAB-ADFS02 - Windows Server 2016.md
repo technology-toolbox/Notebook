@@ -13,7 +13,7 @@ Monday, November 28, 2016
 
 ---
 
-**FOOBAR8 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR8 - Run as administrator**
 
 ```PowerShell
 cls
@@ -198,7 +198,7 @@ Add-Computer `
 
 ---
 
-**EXT-DC01 - Run as EXTRANET\\jjameson-admin**
+**EXT-DC01** - Run as domain administrator
 
 ```PowerShell
 $computerName = "FAB-ADFS02"
@@ -473,7 +473,7 @@ copy `
 
 ---
 
-**EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson**
+**EXT-FOOBAR9** - Run as administrator
 
 #### # Import token signing certificate
 
@@ -563,7 +563,7 @@ $authProvider.Update()
 
 ---
 
-**EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson-admin**
+**EXT-FOOBAR9 - Run as administrator**
 
 ```PowerShell
 cls
@@ -616,7 +616,7 @@ SSL certificate: **\*.securitasinc.com**
 
 ---
 
-**EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson**
+**EXT-FOOBAR9** - Run as administrator
 
 #### # Extend web applications to Extranet zone
 
@@ -843,7 +843,7 @@ Process
 
 ---
 
-**EXT-FOOBAR9 - Run as TECHTOOLBOX\\jjameson-admin**
+**EXT-FOOBAR9 - Run as administrator**
 
 #### # Associate web applications with the ADFS identity provider
 
@@ -1013,7 +1013,7 @@ From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-rea
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

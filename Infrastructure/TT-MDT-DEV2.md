@@ -382,7 +382,7 @@ icacls C:\MDT /remove:g "BUILTIN\Users"
 
 ---
 
-**WOLVERINE - Run as TECHTOOLBOX\\jjameson-admin**
+**WOLVERINE - Run as administrator**
 
 ```PowerShell
 cls

@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**TT-ADMIN03 - Run as domain administrator**
+**TT-ADMIN03** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -76,7 +76,7 @@ $virtualMachinesWithSnapshots |
 
 ---
 
-**FAB-DC05 - Run as domain administrator**
+**FAB-DC05** - Run as domain administrator
 
 ```PowerShell
 cls

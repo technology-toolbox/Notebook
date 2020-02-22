@@ -93,7 +93,7 @@ logoff
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -199,7 +199,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -378,7 +378,7 @@ New-WebBinding `
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -429,7 +429,7 @@ cls
 
 ---
 
-**TT-ADMIN02 - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-ADMIN02 - Run as administrator**
 
 ```PowerShell
 cls
@@ -653,7 +653,7 @@ Execute the following scripts using SQL Server Management Studio for the seconda
 
 ---
 
-**TT-ADMIN02 - Run as domain administrator**
+**TT-ADMIN02** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -1104,7 +1104,7 @@ From <[https://kevinholman.com/2019/03/07/scom-2019-news/](https://kevinholman.c
 
 ---
 
-**TT-ADMIN02 - Run as domain administrator**
+**TT-ADMIN02** - Run as domain administrator
 
 ```PowerShell
 cls

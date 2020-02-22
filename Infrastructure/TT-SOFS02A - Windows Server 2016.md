@@ -11,7 +11,7 @@ Wednesday, February 28, 2018
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -55,7 +55,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\New-ClusterObject.ps1 `
 
 ---
 
-**FOOBAR11- Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11- Run as administrator**
 
 ```PowerShell
 cls
@@ -104,7 +104,7 @@ Set-VMFirmware `
 
 ---
 
-**TT-HV02A - Run as TECHTOOLBOX\\jjameson-admin**
+**TT-HV02A - Run as administrator**
 
 ```PowerShell
 cls
@@ -191,7 +191,7 @@ Add-Computer -DomainName corp.technologytoolbox.com -Restart
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -291,7 +291,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -718,7 +718,7 @@ icacls $path /grant 'TT-HV02C$:(OI)(CI)(F)'
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -815,7 +815,7 @@ From <[https://technet.microsoft.com/en-us/library/jj860437(v=sc.12).aspx](https
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls
@@ -972,7 +972,7 @@ $productionServer = 'TT-SOFS02A'
 
 ---
 
-**FOOBAR11 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR11 - Run as administrator**
 
 ```PowerShell
 cls

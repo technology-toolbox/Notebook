@@ -243,7 +243,7 @@ Disable-NetFirewallRule -Group 'Remote Windows Update'
 
 ---
 
-**FOOBAR16 - Run as TECHTOOLBOX\\jjameson-admin**
+**FOOBAR16 - Run as administrator**
 
 ```PowerShell
 cls

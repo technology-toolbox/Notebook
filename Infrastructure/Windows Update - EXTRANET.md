@@ -94,7 +94,7 @@ $virtualMachinesWithSnapshots |
 
 ---
 
-**EXT-DC10 - Run as domain administrator**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -161,7 +161,7 @@ robocopy $source $destination /E /MIR /XD git-for-windows "Microsoft SDKs"
 
 ---
 
-**EXT-DC10 - Run as domain administrator**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -290,7 +290,7 @@ $virtualMachines |
 
 ---
 
-**EXT-DC10 - Run as domain administrator**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls

@@ -175,7 +175,7 @@ Rename **Local Area Connection** to **Extranet-20**.
 
 ---
 
-**EXT-DC10 - Run as domain administrator**
+**EXT-DC10** - Run as domain administrator
 
 ```PowerShell
 cls
