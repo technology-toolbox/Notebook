@@ -13,7 +13,7 @@ Saturday, February 3, 2018
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -81,7 +81,7 @@ logoff
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -156,7 +156,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -201,7 +201,7 @@ $username = "setup-sql"
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -437,7 +437,7 @@ robocopy $source $destination
 
 ---
 
-**SQL Server Management Studio - Database Engine**
+**SQL Server Management Studio** - Database Engine
 
 #### -- Restore Reporting Services and TFS 2015 OLTP databases
 
@@ -551,7 +551,7 @@ ADD MEMBER [PNKUS\\Srvc-TFSReports]
 
 ---
 
-**SQL Server Management Studio - Analysis Services**
+**SQL Server Management Studio** - Analysis Services
 
 #### <!-- Restore Reporting Services and TFS 2015 OLTP databases -->
 

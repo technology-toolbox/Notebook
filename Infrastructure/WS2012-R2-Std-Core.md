@@ -11,7 +11,7 @@ Thursday, February 2, 2017
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -58,7 +58,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -166,7 +166,7 @@ Copy VM before running SysPrep (to avoid issues with running SysPrep multiple ti
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -225,7 +225,7 @@ C:\Windows\System32\Sysprep\sysprep.exe /generalize /oobe /shutdown
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls

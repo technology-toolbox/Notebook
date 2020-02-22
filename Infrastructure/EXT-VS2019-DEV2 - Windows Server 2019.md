@@ -11,7 +11,7 @@ Friday, December 20, 2019
 
 ---
 
-**TT-ADMIN03 - Run as administrator**
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -113,7 +113,7 @@ logoff
 
 ---
 
-**TT-ADMIN03 - Run as administrator**
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -236,7 +236,7 @@ Get-Disk 4 |
 
 ---
 
-**TT-ADMIN03 - Run as administrator**
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -663,7 +663,7 @@ From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Micr
 
 ---
 
-**STORM - Run as administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -1043,7 +1043,7 @@ From <[https://www.npmjs.com/package/generator-webapp](https://www.npmjs.com/pac
 
 ---
 
-**TT-ADMIN03 - Run as administrator**
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls

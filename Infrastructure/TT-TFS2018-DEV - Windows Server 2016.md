@@ -13,7 +13,7 @@ Saturday, February 3, 2018
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -81,7 +81,7 @@ logoff
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -156,7 +156,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -201,7 +201,7 @@ $username = "setup-tfs"
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -309,7 +309,7 @@ Remove-Item $certFile
 
 ---
 
-**SQL Server Management Studio - Database Engine - USWVTFS007**
+**SQL Server Management Studio** - Database Engine - **USWVTFS007**
 
 #### -- Add TFS setup account to sysadmin role in Database Engine instance
 

@@ -11,7 +11,7 @@ Monday, May 20, 2019
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -133,7 +133,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -228,7 +228,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -484,7 +484,7 @@ Remove-Item $certFile
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -600,7 +600,7 @@ From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

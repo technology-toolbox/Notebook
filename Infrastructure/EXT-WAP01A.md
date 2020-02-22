@@ -11,7 +11,7 @@ Tuesday, January 24, 2017
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -255,7 +255,7 @@ Install-WindowsFeature Web-Application-Proxy -IncludeManagementTools
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls

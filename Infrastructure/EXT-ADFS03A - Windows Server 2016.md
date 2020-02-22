@@ -13,7 +13,7 @@ Wednesday, March 28, 2018
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -61,7 +61,7 @@ From <[https://technet.microsoft.com/en-us/library/dd807078(v=ws.11).aspx](https
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -327,7 +327,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -584,7 +584,7 @@ Restart-Computer
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 #### -- Backup AD FS databases
 
@@ -629,7 +629,7 @@ An exception occurred while enqueueing a message in the target queue. Error: 154
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 ```SQL
 USE [AdfsConfigurationV3]
@@ -736,7 +736,7 @@ Update-AdfsCertificate -Urgent
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -933,7 +933,7 @@ Set-AdfsClaimsProviderTrust `
 
 ---
 
-**EXT-FOOBAR9 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-FOOBAR9**
 
 #### -- Create configuration file for AD FS claims provider trust
 
@@ -1245,7 +1245,7 @@ SqlQueryNotificationService-ff3a8640-1784-448b-a5b0-998a31c673f1
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 ```SQL
 USE [AdfsConfigurationV3]
@@ -1294,7 +1294,7 @@ An exception occurred while enqueueing a message in the target queue. Error: 154
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 ```SQL
 USE [AdfsConfigurationV3]

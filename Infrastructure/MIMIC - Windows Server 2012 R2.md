@@ -7338,7 +7338,7 @@ cls
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -7423,7 +7423,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -7451,7 +7451,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

@@ -13,7 +13,7 @@ Thursday, March 22, 2018
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -80,7 +80,7 @@ logoff
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -147,7 +147,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -206,7 +206,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -273,7 +273,7 @@ $username = "setup-tfs"
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -373,7 +373,7 @@ cls
 
 ---
 
-**SQL Server Management Studio - Database Engine - HAVOK**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 ```Console
 DECLARE @backupDirectory VARCHAR(255)
@@ -533,7 +533,7 @@ Remove-Item $certFile
 
 ---
 
-**SQL Server Management Studio - Database Engine - TT-SQL02**
+**SQL Server Management Studio** - Database Engine - **TT-SQL02**
 
 #### -- Add TFS setup account to sysadmin role in Database Engine instance
 
@@ -569,7 +569,7 @@ cls
 
 ---
 
-**SQL Server Management Studio - Database Engine - TT-SQL02**
+**SQL Server Management Studio** - Database Engine - **TT-SQL02**
 
 #### -- Fix permissions for SQL Server Reporting Services
 
@@ -744,7 +744,7 @@ Revoke-SmbShareAccess `
 
 ---
 
-**SQL Server Management Studio - Database Engine - TT-SQL02**
+**SQL Server Management Studio** - Database Engine - **TT-SQL02**
 
 #### -- Remove TFS setup account from SQL Server sysadmin role
 
@@ -892,7 +892,7 @@ Stop-Service elasticsearch-service-x64
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

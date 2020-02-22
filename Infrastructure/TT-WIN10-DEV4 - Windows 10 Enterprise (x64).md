@@ -11,7 +11,7 @@ Thursday, June 14, 2018
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -61,7 +61,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -431,7 +431,7 @@ Start-Process `
 
 ---
 
-**HAVOK - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 ##### -- Temporarily add TECHTOOLBOX\\svc-tfs to dbcreator role
 
@@ -447,7 +447,7 @@ ALTER SERVER ROLE [dbcreator] ADD MEMBER [TECHTOOLBOX\svc-tfs]
 
 ---
 
-**HAVOK - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 ##### -- Remove TECHTOOLBOX\\svc-tfs from dbcreator role
 
@@ -497,7 +497,7 @@ icacls 'C:\Program Files (x86)\Microsoft Team Foundation Server Integration Tool
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

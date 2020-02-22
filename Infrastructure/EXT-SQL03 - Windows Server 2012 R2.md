@@ -19,7 +19,7 @@ Install SecuritasConnect v4.0
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -125,7 +125,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -184,7 +184,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -240,7 +240,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -449,7 +449,7 @@ Enable-ADAccount -Identity setup-sql
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -498,7 +498,7 @@ Get-SCVirtualDVDDrive -VM $vmName |
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -534,7 +534,7 @@ icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb `
 
 ---
 
-**SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine
 
 ### -- Configure TempDB data and log files
 
@@ -1310,7 +1310,7 @@ From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql
 
 ---
 
-**SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine
 
 ### -- Do not limit size of SQL Server Agent job history log
 
@@ -1356,7 +1356,7 @@ msiexec.exe /i $msiPath `
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls

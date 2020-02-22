@@ -11,7 +11,7 @@ Wednesday, November 27, 2019
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -93,7 +93,7 @@ logoff
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -199,7 +199,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -378,7 +378,7 @@ New-WebBinding `
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -429,7 +429,7 @@ cls
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -500,7 +500,7 @@ $domainUser = "setup-systemcenter"
 
 ---
 
-**SQL Server Management Studio - TT-SQL01**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01**
 
 #### -- Temporarily add SCOM installation account to sysadmin role in SQL Server
 
@@ -594,7 +594,7 @@ On the **Specify an installation option** step, select **Add a Management server
 
 ---
 
-**SQL Server Management Studio - TT-SQL01**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01**
 
 #### -- Remove SCOM installation account from sysadmin role in SQL Server
 
@@ -886,7 +886,7 @@ $installer = "\\TT-FS01\Products\Microsoft\SQL Server 2017" `
 
 ---
 
-**SQL Server Management Studio - TT-SQL01**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01**
 
 #### -- Temporarily add SCOM installation account to sysadmin role in SQL Server
 
@@ -978,7 +978,7 @@ GO
 
 ---
 
-**SQL Server Management Studio - TT-SQL01**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01**
 
 ##### -- Remove previous server from Reporting Services database
 
@@ -1038,7 +1038,7 @@ $installer = "C:\NotBackedUp\Temp\System Center 2019 Operations Manager\Setup.ex
 
 ---
 
-**SQL Server Management Studio - TT-SQL01**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01**
 
 #### -- Remove SCOM installation account from sysadmin role in SQL Server
 

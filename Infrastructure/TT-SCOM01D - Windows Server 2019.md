@@ -11,7 +11,7 @@ Wednesday, November 27, 2019
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -93,7 +93,7 @@ logoff
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -199,7 +199,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -378,7 +378,7 @@ New-WebBinding `
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls

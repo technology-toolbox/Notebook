@@ -11,7 +11,7 @@ Thursday, November 2, 2017
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -61,7 +61,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -376,7 +376,7 @@ Start-Process `
 
 ---
 
-**HAVOK - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 ##### -- Temporarily add TECHTOOLBOX\\svc-tfs to db
 
@@ -392,7 +392,7 @@ ALTER SERVER ROLE [dbcreator] ADD MEMBER [TECHTOOLBOX\svc-tfs]
 
 ---
 
-**HAVOK - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 ##### -- Remove TECHTOOLBOX\\svc-tfs from dbcreator role
 
@@ -463,7 +463,7 @@ slmgr /ato
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

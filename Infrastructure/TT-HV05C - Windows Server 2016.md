@@ -31,7 +31,7 @@ sconfig
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -660,7 +660,7 @@ Add-ClusterNode -Cluster TT-HV05-FC
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -686,7 +686,7 @@ Invoke-Command -ComputerName TT-HV05C -ScriptBlock $scriptBlock
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -961,7 +961,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-DPM02 - DPM Management Shell**
+**TT-DPM02** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -1150,7 +1150,7 @@ Connect-IscsiTarget `
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -1383,7 +1383,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-ADMIN02 - DPM Management Shell**
+**TT-ADMIN02** - DPM Management Shell
 
 ```PowerShell
 cls

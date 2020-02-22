@@ -11,7 +11,7 @@ Friday, May 31, 2019
 
 ---
 
-**STORM - Run as administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -67,7 +67,7 @@ Start-VM -Name $vmName
 
 ---
 
-**STORM - Run as administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -144,7 +144,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**STORM - Run as administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -224,7 +224,7 @@ cls
 
 ---
 
-**STORM - Run as administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -512,7 +512,7 @@ git config --global user.name "Jeremy Jameson"
 
 ---
 
-**STORM - Run as administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls

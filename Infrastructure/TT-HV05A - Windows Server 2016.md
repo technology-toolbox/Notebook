@@ -11,7 +11,7 @@ Thursday, March 8, 2018
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -57,7 +57,7 @@ sconfig
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -752,7 +752,7 @@ Copy-Item $source $destination
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -804,7 +804,7 @@ Set-ClusterQuorum `
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -831,7 +831,7 @@ $scriptBlock = [ScriptBlock]::Create($command)
 
 ---
 
-**TT-VMM01A - Run as administrator**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -1125,7 +1125,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-DPM02 - DPM Management Shell**
+**TT-DPM02** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -1960,7 +1960,7 @@ Pop-Location
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -2864,7 +2864,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-ADMIN02 - DPM Management Shell**
+**TT-ADMIN02** - DPM Management Shell
 
 ```PowerShell
 cls

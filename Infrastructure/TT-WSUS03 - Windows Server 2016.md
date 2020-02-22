@@ -25,7 +25,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -132,7 +132,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -209,7 +209,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -264,7 +264,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -397,7 +397,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 ---
 
-**HAVOK - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 #### -- Change auto-grow increment on SUSDB.mdf from 1 MB to 100 MB
 
@@ -551,7 +551,7 @@ Computers
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 Add-DNSServerResourceRecordCName `
@@ -771,7 +771,7 @@ Start-Process `
 
 ---
 
-**HAVOK - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 #### -- Clear the synchronization history
 
@@ -812,7 +812,7 @@ Stop-Service WsusService
 
 ---
 
-**HAVOK - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 #### -- Create copy-only database backup on source server
 
@@ -869,7 +869,7 @@ Move-Item `
 
 ---
 
-**TT-SQL01A - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01A**
 
 #### -- Restore database backup
 
@@ -1095,7 +1095,7 @@ GO
 
 ---
 
-**HAVOK - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 ### -- Delete database on source server
 
@@ -1149,7 +1149,7 @@ Screen clipping taken: 5/11/2018 6:29 AM
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -1197,7 +1197,7 @@ Resize-Partition `
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -1226,7 +1226,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -1261,7 +1261,7 @@ Screen clipping taken: 11/15/2018 6:10 AM
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -1313,7 +1313,7 @@ Resize-Partition `
 
 ---
 
-**SQL Server Management Studio - TT-SQL01**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01**
 
 ```Console
 USE [SUSDB];
@@ -1446,7 +1446,7 @@ Screen clipping taken: 6/17/2019 2:43 PM
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -1500,7 +1500,7 @@ Screen clipping taken: 7/11/2019 5:42 AM
 
 ---
 
-**FOOBAR21 - Run as administrator**
+**FOOBAR21** - Run as administrator
 
 ```PowerShell
 cls

@@ -11,7 +11,7 @@ Wednesday, November 13, 2019
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -71,7 +71,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -141,7 +141,7 @@ mountvol X: $volumeId
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -256,7 +256,7 @@ Start-Process -FilePath $setupPath -Wait
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -292,7 +292,7 @@ Select all features except **SQL Server 2005 Express Edition**.
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -518,7 +518,7 @@ git config --global user.name "Jeremy Jameson"
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -538,7 +538,7 @@ Get-SCVirtualMachine -Name $vmName |
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls

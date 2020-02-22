@@ -11,7 +11,7 @@ Friday, April 15, 2016
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ### # Create virtual machine
 
@@ -85,7 +85,7 @@ logoff
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ## # Remove disk from virtual CD/DVD drive
 
@@ -724,7 +724,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ---
 
-**EXT-FOOBAR3 - SharePoint 2013 Management Shell**
+**EXT-FOOBAR3** - SharePoint 2013 Management Shell
 
 ##### # Create the binding between SharePoint 2013 and Office Web Apps Server
 
@@ -754,7 +754,7 @@ Set-SPWOPIZone -zone "external-https"
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ### # Set memory to 4 GB
 

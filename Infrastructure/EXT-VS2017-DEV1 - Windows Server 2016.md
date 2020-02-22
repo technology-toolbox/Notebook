@@ -11,7 +11,7 @@ Monday, June 3, 2019
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -117,7 +117,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -407,7 +407,7 @@ $groupName = "All Developers"
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -448,7 +448,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**STORM - Run as administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls

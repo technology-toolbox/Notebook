@@ -11,7 +11,7 @@ Tuesday, January 24, 2017
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -57,7 +57,7 @@ From <[https://technet.microsoft.com/en-us/library/dd807078(v=ws.11).aspx](https
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -342,7 +342,7 @@ Install-WindowsFeature ADFS-Federation -IncludeManagementTools
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls

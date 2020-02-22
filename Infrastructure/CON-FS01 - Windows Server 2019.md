@@ -11,7 +11,7 @@ Wednesday, August 28, 2019
 
 ---
 
-**FOOBAR21 - Run as local administrator**
+**FOOBAR21** - Run as administrator
 
 ```PowerShell
 cls
@@ -113,7 +113,7 @@ robocopy $source $destination /E /XD git-for-windows "Microsoft SDKs" /NP
 
 ---
 
-**FOOBAR21 - Run as administrator**
+**FOOBAR21** - Run as administrator
 
 ```PowerShell
 cls
@@ -217,7 +217,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR21 - Run as administrator**
+**FOOBAR21** - Run as administrator
 
 ```PowerShell
 cls

@@ -98,7 +98,7 @@ Start-VM -Name $vmName
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -129,7 +129,7 @@ Add-ADGroupMember -Identity "Windows Update - Slot 20" -Members ($vmName + '$')
 
 ---
 
-**PowerShell - Run as administrator**
+**PowerShell** - Run as administrator
 
 ```PowerShell
 cls

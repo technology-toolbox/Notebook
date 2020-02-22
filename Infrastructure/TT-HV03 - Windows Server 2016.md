@@ -1097,7 +1097,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-DPM01 - DPM Management Shell**
+**TT-DPM01** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -1364,7 +1364,7 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 
 ---
 
-**TT-DPM02 - DPM Management Shell**
+**TT-DPM02** - DPM Management Shell
 
 ```PowerShell
 cls

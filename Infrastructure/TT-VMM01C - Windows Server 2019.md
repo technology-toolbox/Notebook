@@ -11,7 +11,7 @@ Wednesday, November 27, 2019
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -93,7 +93,7 @@ logoff
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -201,7 +201,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -251,7 +251,7 @@ Add-ADGroupMember -Identity "Windows Update - Slot 5" -Members ($vmName + '$')
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -294,7 +294,7 @@ $domainGroup = "VMM Admins"
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -406,7 +406,7 @@ Restart-Computer
 
 ---
 
-**SQL Server Management Studio - TT-SQL01**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01**
 
 #### -- Temporarily add VMM installation account to sysadmin role in SQL Server
 
@@ -547,7 +547,7 @@ Remove-Item "C:\NotBackedUp\Temp\System Center 2019 Virtual Machine Manager" -Re
 
 ---
 
-**SQL Server Management Studio - TT-SQL01**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01**
 
 ### -- Remove SCOM installation account from sysadmin role in SQL Server
 

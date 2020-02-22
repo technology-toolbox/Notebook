@@ -98,7 +98,7 @@ Start-VM -Name $vmName
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

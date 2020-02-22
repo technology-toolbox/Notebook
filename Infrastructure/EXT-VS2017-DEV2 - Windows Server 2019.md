@@ -11,7 +11,7 @@ Thursday, October 24, 2019
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -123,7 +123,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -246,7 +246,7 @@ Get-Disk 4 |
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -514,7 +514,7 @@ From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql
 
 ---
 
-**SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine
 
 #### -- Do not limit size of SQL Server Agent job history log
 
@@ -537,7 +537,7 @@ From <[https://ola.hallengren.com/](https://ola.hallengren.com/)>
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -560,7 +560,7 @@ Pop-Location
 
 ---
 
-**SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine
 
 #### -- Create SqlMaintenance database
 
@@ -654,7 +654,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**STORM - Run as administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -926,7 +926,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**STORM - Run as administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -1044,7 +1044,7 @@ From <[https://www.npmjs.com/package/generator-webapp](https://www.npmjs.com/pac
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls

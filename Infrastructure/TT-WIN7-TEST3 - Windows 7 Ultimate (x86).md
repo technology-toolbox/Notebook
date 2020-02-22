@@ -11,7 +11,7 @@ Tuesday, November 21, 2017
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -93,7 +93,7 @@ logoff
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ### # Remove disk from virtual CD/DVD drive
 
@@ -278,7 +278,7 @@ Internet Explorer 10
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

@@ -9,7 +9,7 @@ Tuesday, December 15, 2015
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ## # Create virtual machine (EXT-FOOBAR)
 
@@ -82,7 +82,7 @@ logoff
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ## # Remove disk from virtual CD/DVD drive
 

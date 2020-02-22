@@ -11,7 +11,7 @@ Tuesday, November 26, 2019
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -89,7 +89,7 @@ logoff
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -108,7 +108,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 
 ### # Configure Windows Update
 
-##### # Add machine to security group for Windows Update configuration
+#### # Add machine to security group for Windows Update configuration
 
 ```PowerShell
 Add-ADGroupMember -Identity "Windows Update - Slot 1" -Members ($vmName + '$')
@@ -188,7 +188,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -320,7 +320,7 @@ Get-Disk 4 |
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -644,7 +644,7 @@ Enable-SqlAlwaysOn -ServerInstance $env:COMPUTERNAME -Force
 
 ---
 
-**SQL Server Management Studio - TT-SQL01D**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01D**
 
 ### -- Create logins for databases in availability group
 
@@ -954,7 +954,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-ADMIN02 - DPM Management Shell**
+**TT-ADMIN02** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -978,7 +978,7 @@ $productionServer = 'TT-SQL01D'
 
 ---
 
-**TT-SQL01D - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01D**
 
 ### -- Add "Local System" account to SQL Server sysadmin role
 
@@ -1069,7 +1069,7 @@ Remove database from availability group, enable service broker, and then add bac
 
 ---
 
-**TT-SQL01D - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01D**
 
 ### -- Configure trusted assemblies for SCOM
 
@@ -1165,7 +1165,7 @@ msiexec.exe /i $msiPath `
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -1191,7 +1191,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-SQL01D - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01D**
 
 ### -- Add TempDB data files (to match CPU count)
 

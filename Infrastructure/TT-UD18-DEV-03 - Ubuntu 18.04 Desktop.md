@@ -11,7 +11,7 @@ Friday, January 25, 2019
 
 ---
 
-**STORM - Run as local administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -110,7 +110,7 @@ sudo apt install openssh-server
 
 ---
 
-**STORM - Run as local administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -1192,7 +1192,7 @@ exit
 
 ---
 
-**STORM - Run as local administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls

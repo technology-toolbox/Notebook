@@ -11,7 +11,7 @@ Thursday, February 2, 2017
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -84,7 +84,7 @@ Product key: **NPD6V-MT6HM-C8F3J-4QFH8-HMGPB**
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -198,7 +198,7 @@ Copy VM before running SysPrep (to avoid issues with running SysPrep multiple ti
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -257,7 +257,7 @@ C:\Windows\System32\Sysprep\sysprep.exe /generalize /oobe /shutdown
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls

@@ -11,7 +11,7 @@ Friday, August 24, 2018
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -60,7 +60,7 @@ When prompted to format the partition, select **NTFS (Quick)**.
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -87,7 +87,7 @@ Get-SCVirtualMachine -Name $vmName |
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -115,7 +115,7 @@ Get-SCVirtualMachine -Name $vmName |
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -167,7 +167,7 @@ robocopy \\TT-FS01\Public\Toolbox C:\NotBackedUp\Public\Toolbox /E /XD git-for-w
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -304,7 +304,7 @@ Backup VHD before running SysPrep (to avoid issues with running SysPrep multiple
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -383,7 +383,7 @@ C:\Windows\System32\SysPrep\sysprep.exe -forceshutdown -reseal -mini
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -429,7 +429,7 @@ Invoke-Command -ComputerName $vmHost -ScriptBlock $scriptBlock
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

@@ -11,7 +11,7 @@ Wednesday, May 22, 2019
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -147,7 +147,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -269,7 +269,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -391,7 +391,7 @@ Get-Disk 1 |
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

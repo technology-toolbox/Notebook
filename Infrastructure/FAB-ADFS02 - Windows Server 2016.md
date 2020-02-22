@@ -13,7 +13,7 @@ Monday, November 28, 2016
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -563,7 +563,7 @@ $authProvider.Update()
 
 ---
 
-**EXT-FOOBAR9 - Run as administrator**
+**EXT-FOOBAR9** - Run as administrator
 
 ```PowerShell
 cls
@@ -843,7 +843,7 @@ Process
 
 ---
 
-**EXT-FOOBAR9 - Run as administrator**
+**EXT-FOOBAR9** - Run as administrator
 
 #### # Associate web applications with the ADFS identity provider
 
@@ -1013,7 +1013,7 @@ From <[https://blogs.technet.microsoft.com/pie/2015/10/18/customize-the-home-rea
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

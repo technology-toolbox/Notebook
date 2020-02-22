@@ -134,7 +134,7 @@ cls
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls

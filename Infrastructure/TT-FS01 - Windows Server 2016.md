@@ -11,7 +11,7 @@ Saturday, January 21, 2017
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -112,7 +112,7 @@ Add-Computer -DomainName corp.technologytoolbox.com -Restart
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -368,7 +368,7 @@ slmgr /ato
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -586,7 +586,7 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 
 ---
 
-**TT-DPM02 - DPM Management Shell**
+**TT-DPM02** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -798,7 +798,7 @@ From <[https://blogs.technet.microsoft.com/pstips/2014/12/21/changing-shared-fol
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -827,7 +827,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -990,7 +990,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-ADMIN02 - DPM Management Shell**
+**TT-ADMIN02** - DPM Management Shell
 
 ```PowerShell
 cls

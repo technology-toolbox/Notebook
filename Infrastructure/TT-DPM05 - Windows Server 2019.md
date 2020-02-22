@@ -11,7 +11,7 @@ Sunday, November 24, 2019
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -94,7 +94,7 @@ New-ADUser `
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -172,7 +172,7 @@ logoff
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -257,7 +257,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -386,7 +386,7 @@ Get-Disk 4 |
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -819,7 +819,7 @@ $username = "setup-sql"
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -1684,7 +1684,7 @@ Remove-Item `
 
 ---
 
-**TT-VMM01 - Run as administrator**
+**TT-VMM01** - Run as administrator
 
 ```PowerShell
 cls
@@ -1712,7 +1712,7 @@ Set-DPMGlobalProperty -DPMServerName TT-DPM05 -KnownVMMServers TT-VMM01
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls

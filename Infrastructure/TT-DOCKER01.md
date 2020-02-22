@@ -11,7 +11,7 @@ Wednesday, May 8, 2019
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -131,7 +131,7 @@ sudo apt install openssh-server -y
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -772,7 +772,7 @@ exit
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -807,7 +807,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

@@ -13,7 +13,7 @@ Monday, September 23, 2019
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -63,7 +63,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -165,7 +165,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -248,7 +248,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -324,7 +324,7 @@ Get-Disk 2 |
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -404,7 +404,7 @@ dsacls.exe "$configurationNamingContext" /G "$($userPrincipal):CA;Replicating Di
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -439,7 +439,7 @@ Checkpoint-VM `
 
 ---
 
-**SQL Server Management Studio - TT-SQL03**
+**SQL Server Management Studio** - Database Engine - **TT-SQL03**
 
 ```SQL
 USE [master]
@@ -589,7 +589,7 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ### # Checkpoint VM
 
@@ -643,7 +643,7 @@ cd C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -763,7 +763,7 @@ $centralAdmin.UpdateMailSettings(
 
 ---
 
-**TT-FS01 - Run as administrator**
+**TT-FS01** - Run as administrator
 
 ```PowerShell
 cls
@@ -815,7 +815,7 @@ cls
 
 ---
 
-**HAVOK - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 ### -- Backup databases in SharePoint 2013 environment
 
@@ -901,7 +901,7 @@ WITH NOFORMAT, NOINIT
 
 ---
 
-**TT-SQL03 - Run as administrator**
+**TT-SQL03** - Run as administrator
 
 ```PowerShell
 cls
@@ -975,7 +975,7 @@ When prompted for the credentials to use for SharePoint service applications:
 
 ---
 
-**SQL Server Management Studio - TT-SQL03**
+**SQL Server Management Studio** - Database Engine - **TT-SQL03**
 
 #### -- Restore service application database from SharePoint 2013
 
@@ -1004,7 +1004,7 @@ cls
 
 ---
 
-**SQL Server Management Studio - TT-SQL03**
+**SQL Server Management Studio** - Database Engine - **TT-SQL03**
 
 #### -- Restore service application database from SharePoint 2013
 
@@ -1081,7 +1081,7 @@ At line:1 char:1
 
 ---
 
-**SQL Server Management Studio - TT-SQL03**
+**SQL Server Management Studio** - Database Engine - **TT-SQL03**
 
 #### -- Restore service application database from SharePoint 2013
 
@@ -1200,7 +1200,7 @@ Set-Acl -Path HKLM:\SYSTEM\CurrentControlSet\Services\VSS\Diag -AclObject $acl
 
 ---
 
-**SQL Server Management Studio - TT-SQL03**
+**SQL Server Management Studio** - Database Engine - **TT-SQL03**
 
 #### -- Configure permissions on stored procedures in SharePoint_Config database
 
@@ -1365,7 +1365,7 @@ New-SPWebApplication `
 
 ---
 
-**SQL Server Management Studio - TT-SQL03**
+**SQL Server Management Studio** - Database Engine - **TT-SQL03**
 
 ### -- Restore content database from SharePoint 2013
 
@@ -1430,7 +1430,7 @@ New-SPWebApplication `
 
 ---
 
-**SQL Server Management Studio - TT-SQL03**
+**SQL Server Management Studio** - Database Engine - **TT-SQL03**
 
 ### -- Restore content database from SharePoint 2013
 
@@ -1493,7 +1493,7 @@ New-SPWebApplication `
 
 ---
 
-**SQL Server Management Studio - TT-SQL03**
+**SQL Server Management Studio** - Database Engine - **TT-SQL03**
 
 ### -- Restore content database from SharePoint 2013
 
@@ -1550,7 +1550,7 @@ Set-SPProfileServiceApplication `
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -1590,7 +1590,7 @@ Start-VM -ComputerName $vmHost -VMName $vmName
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -1656,7 +1656,7 @@ Get-SPEnterpriseSearchServiceApplication |
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls

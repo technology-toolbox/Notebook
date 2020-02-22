@@ -11,7 +11,7 @@ Friday, August 30, 2019
 
 ---
 
-**FOOBAR21 - Run as administrator**
+**FOOBAR21** - Run as administrator
 
 ```PowerShell
 cls
@@ -131,7 +131,7 @@ ping TT-DC10 -f -l 8900
 
 ---
 
-**FOOBAR21 - Run as domain administrator**
+**FOOBAR21** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -243,7 +243,7 @@ From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html]
 
 ---
 
-**FOOBAR21 - Run as administrator**
+**FOOBAR21** - Run as administrator
 
 ```PowerShell
 cls
@@ -382,7 +382,7 @@ icacls C:\MDT /remove:g "BUILTIN\Users"
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls

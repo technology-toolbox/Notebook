@@ -11,7 +11,7 @@ Monday, September 9, 2019
 
 ---
 
-**FOOBAR22 - Run as local administrator**
+**FOOBAR22** - Run as administrator
 
 ```PowerShell
 cls
@@ -108,7 +108,7 @@ logoff
 
 ---
 
-**FOOBAR22 - Run as administrator**
+**FOOBAR22** - Run as administrator
 
 ```PowerShell
 cls
@@ -228,7 +228,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**FOOBAR22 - Run as administrator**
+**FOOBAR22** - Run as administrator
 
 ```PowerShell
 cls
@@ -259,7 +259,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR22 - Run as administrator**
+**FOOBAR22** - Run as administrator
 
 ```PowerShell
 cls
@@ -406,7 +406,7 @@ Start-Process `
 
 ---
 
-**FOOBAR22 - Run as administrator**
+**FOOBAR22** - Run as administrator
 
 ```PowerShell
 cls

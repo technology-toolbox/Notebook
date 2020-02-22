@@ -11,7 +11,7 @@ Sunday, February 18, 2018
 
 ---
 
-**WOLVERINE - Run as local administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls

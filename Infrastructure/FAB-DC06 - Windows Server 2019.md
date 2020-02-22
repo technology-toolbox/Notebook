@@ -11,7 +11,7 @@ Monday, May 20, 2019
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -106,7 +106,7 @@ logoff
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -228,7 +228,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -429,7 +429,7 @@ Restart-Computer
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

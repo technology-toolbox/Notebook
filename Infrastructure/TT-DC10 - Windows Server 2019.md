@@ -11,7 +11,7 @@ Saturday, May 18, 2019
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -184,7 +184,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -229,7 +229,7 @@ Get-Disk 1 |
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -281,7 +281,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-DC08 - Run as administrator**
+**TT-DC08** - Run as administrator
 
 ```PowerShell
 cls
@@ -358,7 +358,7 @@ Set-DNSClientServerAddress `
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -431,7 +431,7 @@ Restart-Computer
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -568,7 +568,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**FOOBAR18 - DPM Management Shell**
+**FOOBAR18** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -673,7 +673,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-ADMIN02 - DPM Management Shell**
+**TT-ADMIN02** - DPM Management Shell
 
 ```PowerShell
 cls

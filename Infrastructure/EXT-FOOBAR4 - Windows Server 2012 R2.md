@@ -19,7 +19,7 @@ Install SecuritasConnect v4.0
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -290,7 +290,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -419,7 +419,7 @@ Get-Disk 4 |
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -466,7 +466,7 @@ icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb `
 
 ---
 
-**SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine
 
 #### -- Configure TempDB data and log files
 
@@ -631,7 +631,7 @@ cls
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -690,7 +690,7 @@ Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -779,7 +779,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-PathFolders.ps1 `
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -962,7 +962,7 @@ Copy-Item `
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -1027,7 +1027,7 @@ File: **SSDTSetup.exe**
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -1073,7 +1073,7 @@ net use \\ICEMAN\Products /USER:TECHTOOLBOX\jjameson
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -1101,7 +1101,7 @@ C:
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -1188,7 +1188,7 @@ slmgr /ato
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -1383,7 +1383,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ---
 
-**EXT-FOOBAR - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-FOOBAR**
 
 ```Console
 DECLARE @backupPath NVARCHAR(255) =
@@ -2058,7 +2058,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -2655,7 +2655,7 @@ Install Cloud Portal v2.0
 
 ---
 
-**EXT-FOOBAR - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-FOOBAR**
 
 ```Console
 DECLARE @backupPath NVARCHAR(255) =
@@ -3623,7 +3623,7 @@ cls
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -3867,7 +3867,7 @@ cls
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -4119,7 +4119,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.675.0 `
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -4326,7 +4326,7 @@ Remove-Item `
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -4609,7 +4609,7 @@ TrackTik username:** opanduro2m**
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -4926,7 +4926,7 @@ TrackTik username:** opanduro2m**
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -4977,7 +4977,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.681.0 `
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -5074,7 +5074,7 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -5100,7 +5100,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -5134,7 +5134,7 @@ Resize-Partition -DiskNumber 1 -PartitionNumber 1 -Size $size.SizeMax
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -5261,7 +5261,7 @@ Remove-Item -Path $zipFile -Confirm:$false
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -5579,7 +5579,7 @@ Pop-Location
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -5939,7 +5939,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.681.1 `
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -6739,7 +6739,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.122.0 `
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -6884,7 +6884,7 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -6941,7 +6941,7 @@ Resize-Partition `
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -7251,7 +7251,7 @@ TrackTik username:** opanduro2m**
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -7329,7 +7329,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\CloudPortal\2.0.125.0 `
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -7646,7 +7646,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.38.0 -Recurse -Fo
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -7770,7 +7770,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.49.0 -Recurse -Fo
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -8120,7 +8120,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.701.0 `
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -8316,7 +8316,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.705.0 `
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -8444,7 +8444,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.711.0 `
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -8582,7 +8582,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\EmployeePortal\1.0.58.0 -Recurse -Fo
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -8648,7 +8648,7 @@ Start-Process `
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -8693,7 +8693,7 @@ From <[https://blogs.technet.microsoft.com/stefan_gossner/2015/08/20/why-i-prefe
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -8802,7 +8802,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Clear-EventLogs.ps1
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -9004,7 +9004,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Clear-EventLogs.ps1
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

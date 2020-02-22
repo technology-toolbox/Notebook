@@ -255,7 +255,7 @@ From <[https://blogs.technet.microsoft.com/larryexchange/2016/05/30/step-by-step
 
 ---
 
-**TT-DEPLOY-SDN - Run as administrator**
+**TT-DEPLOY-SDN** - Run as administrator
 
 ```PowerShell
 cls
@@ -276,7 +276,7 @@ $serviceAccount = "setup-sdn"
 
 ---
 
-**TT-DEPLOY-SDN - Run as TECHTOOLBOX\\setup-sdn**
+**TT-DEPLOY-SDN** - Run as **TECHTOOLBOX\\setup-sdn**
 
 ```Console
 cls

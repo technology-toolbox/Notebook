@@ -11,7 +11,7 @@ Wednesday, August 28, 2019
 
 ---
 
-**FOOBAR21 - Run as local administrator**
+**FOOBAR21** - Run as administrator
 
 ```PowerShell
 cls
@@ -91,7 +91,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -122,7 +122,7 @@ Set-VMFirmware `
 
 ---
 
-**FOOBAR21 - Run as administrator**
+**FOOBAR21** - Run as administrator
 
 ```PowerShell
 cls
@@ -159,7 +159,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR21 - Run as administrator**
+**FOOBAR21** - Run as administrator
 
 ```PowerShell
 cls

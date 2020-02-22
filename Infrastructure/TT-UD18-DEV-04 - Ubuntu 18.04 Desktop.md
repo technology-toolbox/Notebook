@@ -11,7 +11,7 @@ Tuesday, May 7, 2019
 
 ---
 
-**STORM - Run as local administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -119,7 +119,7 @@ sudo apt install openssh-server
 
 ---
 
-**STORM - Run as local administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -1461,7 +1461,7 @@ cat ~/.git-credentials
 
 ---
 
-**STORM - Run as local administrator**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls

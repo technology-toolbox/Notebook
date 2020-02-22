@@ -11,7 +11,7 @@ Tuesday, November 26, 2019
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -89,7 +89,7 @@ logoff
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -188,7 +188,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -334,7 +334,7 @@ $domainGroup = "SQL Server Admins"
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -702,7 +702,7 @@ Ugh...
 
 ---
 
-**SQL Server Management Studio - TT-SQL01**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01**
 
 #### -- Backup databases on primary SQL Server 2016 replica
 
@@ -849,7 +849,7 @@ TO DISK = @backupFilePath
 
 ---
 
-**SQL Server Management Studio - TT-SQL01C**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01C**
 
 #### -- Create logins for databases in availability group
 
@@ -1124,7 +1124,7 @@ WITH FILE = 1, NORECOVERY
 
 ---
 
-**SQL Server Management Studio - TT-SQL01D**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01D**
 
 ### -- Create logins for databases in availability group
 
@@ -1545,7 +1545,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-ADMIN02 - DPM Management Shell**
+**TT-ADMIN02** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -1569,7 +1569,7 @@ $productionServer = 'TT-SQL01C'
 
 ---
 
-**TT-SQL01C - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01C**
 
 ### -- Add "Local System" account to SQL Server sysadmin role
 
@@ -1666,7 +1666,7 @@ Remove database from availability group, enable service broker, and then add bac
 
 ---
 
-**TT-SQL01C - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01C**
 
 ### -- Configure trusted assemblies for SCOM
 
@@ -1765,7 +1765,7 @@ msiexec.exe /i $msiPath `
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -1791,7 +1791,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-SQL01C - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **TT-SQL01C**
 
 ### -- Add TempDB data files (to match CPU count)
 

@@ -11,7 +11,7 @@ Friday, May 17, 2019
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -131,7 +131,7 @@ sudo apt-get install openssh-server -y
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -696,7 +696,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -736,7 +736,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 Add-DNSServerResourceRecordCName `
@@ -943,7 +943,7 @@ sudo docker logs mail-test
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -1045,7 +1045,7 @@ ifconfig | grep inet
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

@@ -15,7 +15,7 @@ Install SecuritasConnect v4.0
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -121,7 +121,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -184,7 +184,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -238,7 +238,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -562,7 +562,7 @@ Enable-ADAccount -Identity setup-sharepoint
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -652,7 +652,7 @@ Remove-Item "C:\NotBackedUp\Temp\PrerequisiteInstallerFiles_SP1" -Recurse
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -688,7 +688,7 @@ exit
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -735,7 +735,7 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -821,7 +821,7 @@ Disable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-in)"
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 ### -- Add setup account to dbcreator and securityadmin server roles
 
@@ -866,7 +866,7 @@ New-Item -ItemType Directory -Path "$buildsPath\ClientPortal"
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -1034,7 +1034,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-in)"
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -1129,7 +1129,7 @@ miiskmu.exe /e C:\Users\%USERNAME%\Desktop\miiskeys-1.bin ^
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -1301,7 +1301,7 @@ Enable-SPSessionStateService -DatabaseName SessionStateService
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 #### -- Restore database backup from Production
 
@@ -1361,7 +1361,7 @@ cls
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 #### -- Restore database backups from Production
 
@@ -1701,7 +1701,7 @@ End time: 10:42:03 AM
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 #### -- Add SharePoint setup account to db_owner role in Usage and Health Data Collection database
 
@@ -1904,7 +1904,7 @@ Remove-SPContentDatabase WSS_Content_SecuritasPortal -Confirm:$false -Force
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 #### -- Restore database backups from Production
 
@@ -2132,7 +2132,7 @@ Set-Acl -Path $regPath -AclObject $acl
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -2634,7 +2634,7 @@ cls
 
 ---
 
-**FOOBAR11 - Run as administrator**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -3494,7 +3494,7 @@ Remove-SPContentDatabase WSS_Content_CloudPortal -Confirm:$false -Force
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 ##### -- Restore database backup from Production
 
@@ -3714,7 +3714,7 @@ $webApp.Update()
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 ### -- Configure permissions for SecuritasPortal database
 
@@ -3822,7 +3822,7 @@ Tracking ID: **UA-25899478-3**
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 ### -- Change recovery model of content database from Simple to Full
 
@@ -4180,7 +4180,7 @@ Pop-Location
 
 ---
 
-**EXT-SQL03 - SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine - **EXT-SQL03**
 
 #### -- Configure database logins and permissions for Employee Portal
 
@@ -5220,7 +5220,7 @@ Remove-Item D:\Shares\Builds\CloudPortal\2.0.122.0 `
 
 ---
 
-**FOOBAR10 - Run as administrator**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls

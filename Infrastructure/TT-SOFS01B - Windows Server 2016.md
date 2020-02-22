@@ -11,7 +11,7 @@ Tuesday, January 31, 2017
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -113,7 +113,7 @@ Add-Computer -DomainName corp.technologytoolbox.com -Restart
 
 ---
 
-**FOOBAR8 - Run as administrator**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -744,7 +744,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-DPM01 - DPM Management Shell**
+**TT-DPM01** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -834,7 +834,7 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 
 ---
 
-**TT-DPM02 - DPM Management Shell**
+**TT-DPM02** - DPM Management Shell
 
 ```PowerShell
 cls

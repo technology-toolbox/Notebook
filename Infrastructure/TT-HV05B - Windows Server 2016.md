@@ -31,7 +31,7 @@ sconfig
 
 ---
 
-**WOLVERINE - Run as administrator**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -688,7 +688,7 @@ powercfg.exe /L
 
 ---
 
-**TT-VMM01A - Run as administrator**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -963,7 +963,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-DPM02 - DPM Management Shell**
+**TT-DPM02** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -1152,7 +1152,7 @@ Connect-IscsiTarget `
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -1385,7 +1385,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-ADMIN02 - DPM Management Shell**
+**TT-ADMIN02** - DPM Management Shell
 
 ```PowerShell
 cls

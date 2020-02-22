@@ -13,7 +13,7 @@ Monday, September 23, 2019
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -63,7 +63,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -165,7 +165,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -250,7 +250,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -518,7 +518,7 @@ From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql
 
 ---
 
-**SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine
 
 ##### -- Do not limit size of SQL Server Agent job history log
 
@@ -541,7 +541,7 @@ From <[https://ola.hallengren.com/](https://ola.hallengren.com/)>
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -564,7 +564,7 @@ Pop-Location
 
 ---
 
-**SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine
 
 ##### -- Create SqlMaintenance database
 
@@ -593,7 +593,7 @@ From <[https://docs.microsoft.com/en-us/sharepoint/administration/best-practices
 
 ---
 
-**SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine
 
 ### -- Set Max Degree of Parallelism to 1
 
@@ -628,7 +628,7 @@ Start-Service SQLSERVERAGENT
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -681,7 +681,7 @@ Start-Process `
 
 ---
 
-**SQL Server Management Studio**
+**SQL Server Management Studio** - Database Engine
 
 ### -- Create SqlManagement database
 
@@ -732,7 +732,7 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 
 ---
 
-**DPM Management Shell - TT-ADMIN02**
+**TT-ADMIN02** - DPM Management Shell
 
 ```PowerShell
 $productionServer = 'TT-SQL03'
@@ -750,7 +750,7 @@ $productionServer = 'TT-SQL03'
 
 ---
 
-**SQL Server Management Studio - TT-SQL03**
+**SQL Server Management Studio** - Database Engine - **TT-SQL03**
 
 ```SQL
 ALTER SERVER ROLE [sysadmin] ADD MEMBER [NT AUTHORITY\SYSTEM]
@@ -770,7 +770,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://t
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls
@@ -806,7 +806,7 @@ Write-Host "VM checkpoint deleted"
 
 ---
 
-**SQL Server Management Studio - HAVOK**
+**SQL Server Management Studio** - Database Engine - **HAVOK**
 
 ### -- Backup databases in SQL Server 2014 environment
 
@@ -892,7 +892,7 @@ WITH NOFORMAT, NOINIT
 
 ---
 
-**TT-SQL03 - Run as administrator**
+**TT-SQL03** - Run as administrator
 
 ```PowerShell
 cls
@@ -910,7 +910,7 @@ robocopy `
 
 ---
 
-**SQL Server Management Studio - TT-SQL03**
+**SQL Server Management Studio** - Database Engine - **TT-SQL03**
 
 ### -- Restore databases in SQL Server 2017 environment
 
@@ -1078,7 +1078,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-ADMIN02 - DPM Management Shell**
+**TT-ADMIN02** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -1134,7 +1134,7 @@ msiexec.exe /i $msiPath `
 
 ---
 
-**TT-ADMIN02 - Run as administrator**
+**TT-ADMIN02** - Run as administrator
 
 ```PowerShell
 cls

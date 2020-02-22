@@ -11,7 +11,7 @@ Thursday, May 23, 2019
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -85,7 +85,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -116,7 +116,7 @@ Add-ADGroupMember -Identity "Windows Update - Slot 21" -Members ($vmName + '$')
 
 ---
 
-**PowerShell - Run as administrator**
+**PowerShell** - Run as administrator
 
 ```PowerShell
 cls
@@ -170,7 +170,7 @@ From <[https://mcpmag.com/articles/2015/05/07/local-user-accounts-with-powershel
 
 ---
 
-**FOOBAR18 - Run as administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -476,7 +476,7 @@ Restart-Computer
 
 ---
 
-**FOOBAR18 - Run as local administrator**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

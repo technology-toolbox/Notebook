@@ -11,7 +11,7 @@ Tuesday, August 7, 2018
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -109,7 +109,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -166,7 +166,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -304,7 +304,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\New-CertificateRequest.ps1 `
 
 ---
 
-**FOOBAR16 - Run as administrator**
+**FOOBAR16** - Run as administrator
 
 #### Submit certificate request to Active Directory Certificate Services
 
