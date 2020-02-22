@@ -931,7 +931,7 @@ cls
 $adminsGroup = "EXTRANET\SharePoint Admins"
 
 Get-SPDatabase |
-    Where-Object {$_.WebApplication -like "SPAdministrationWebApplication"} |
+    where {$_.WebApplication -like "SPAdministrationWebApplication"} |
     Add-SPShellAdmin $adminsGroup
 ```
 
@@ -965,7 +965,7 @@ $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-    Where-Object { $_.IsAdministrationWebApplication -eq $true }
+    where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -2656,7 +2656,7 @@ Copy-Item $source $destination
 
 ```PowerShell
 Import-Csv "C:\Users\setup-sharepoint\Desktop\AppSettings-UAT_2018-01-19.csv" |
-    ForEach-Object {
+    foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
 ```
@@ -2897,14 +2897,14 @@ $sites = @(
     "Template-Sites/Post-Orders-fr-CA")
 
 $sites |
-    % {
+    foreach {
         $siteUrl = $clientPortalUrl.AbsoluteUri + $_
 
         $site = Get-SPSite -Identity $siteUrl
 
         $group = $site.RootWeb.AssociatedVisitorGroup
 
-        $group.Users | % { $group.Users.Remove($_) }
+        $group.Users | foreach { $group.Users.Remove($_) }
 
         $group.AddUser(
             "c:0-.t|adfs|Branch Managers",
@@ -3264,7 +3264,7 @@ Function ReplaceSiteCollectionAdministrators(
 }
 
 Get-SPSite -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL -Limit ALL |
-    ForEach-Object {
+    foreach {
         $site = $_
 
         Write-Host `
@@ -4234,7 +4234,7 @@ $web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/"
 $group = $web.Groups["Cloud Portal Visitors"]
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $claim = New-SPClaimsPrincipal `
             -Identity "$_\Domain Users" `
             -IdentityType WindowsSecurityGroupName
@@ -4250,7 +4250,7 @@ $web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/sites/Employee-Portal"
 $group = $web.SiteGroups["Viewers"]
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $claim = New-SPClaimsPrincipal `
             -Identity "$_\Domain Users" `
             -IdentityType WindowsSecurityGroupName
@@ -4268,7 +4268,7 @@ $list = $web.Lists["Profile Pictures"]
 $contributeRole = $web.RoleDefinitions['Contribute']
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $domainUsers = $web.EnsureUser($_ + '\Domain Users')
 
         $assignment = New-Object Microsoft.SharePoint.SPRoleAssignment(
@@ -4317,7 +4317,7 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Get-SPEnterpriseSearchCrawlContentSource |
-    ForEach-Object { $_.StartFullCrawl() }
+    foreach { $_.StartFullCrawl() }
 ```
 
 > **Note**
@@ -5045,14 +5045,14 @@ $sites = @(
     "/Template-Sites/Post-Orders-fr-CA")
 
 $sites |
-    % {
+    foreach {
         $siteUrl = $clientPortalUrl + $_
 
         $site = Get-SPSite -Identity $siteUrl
 
         $group = $site.RootWeb.AssociatedVisitorGroup
 
-        $group.Users | % { $group.Users.Remove($_) }
+        $group.Users | foreach { $group.Users.Remove($_) }
 
         $group.AddUser(
             "c:0-.t|adfs|Branch Managers",

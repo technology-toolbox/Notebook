@@ -3025,7 +3025,7 @@ $xml.AdminDeploymentCustomizations.BundleCustomizations.NoWeb = "yes"
 
 ```PowerShell
 $xml.AdminDeploymentCustomizations.SelectableItemCustomizations.SelectableItemCustomization |
-    % {
+    foreach {
         If ($_.Id -eq "Blend" `
             -Or $_.Id -eq "LightSwitch" `
             -Or $_.Id -eq "VC_MFC_Libraries" `
@@ -3506,11 +3506,11 @@ $allOsRoleServices = "ADCS-Cert-Authority,ADCS-Enroll-Web-Pol,ADCS-Enroll-Web-Sv
 
 $allOsFeatures = "NET-Framework-Features,NET-Framework-Core,NET-HTTP-Activation,NET-Non-HTTP-Activ,NET-Framework-45-Features,NET-Framework-45-Core,NET-Framework-45-ASPNET,NET-WCF-Services45,NET-WCF-HTTP-Activation45,NET-WCF-MSMQ-Activation45,NET-WCF-Pipe-Activation45,NET-WCF-TCP-Activation45,NET-WCF-TCP-PortSharing45,BITS,BITS-IIS-Ext,BITS-Compact-Server,BitLocker,BitLocker-NetworkUnlock,BranchCache,NFS-Client,Data-Center-Bridging,Direct-Play,EnhancedStorage,Failover-Clustering,GPMC,InkAndHandwritingServices,Internet-Print-Client,IPAM,ISNS,LPR-Port-Monitor,ManagementOdata,Server-Media-Foundation,MSMQ,MSMQ-Services,MSMQ-Server,MSMQ-Directory,MSMQ-HTTP-Support,MSMQ-Triggers,MSMQ-Multicasting,MSMQ-Routing,MSMQ-DCOM,Multipath-IO,NLB,PNRP,qWave,CMAK,Remote-Assistance,RDC,RSAT,RSAT-Feature-Tools,RSAT-SMTP,RSAT-Feature-Tools-BitLocker,RSAT-Feature-Tools-BitLocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,RSAT-Bits-Server,RSAT-Clustering,RSAT-Clustering-Mgmt,RSAT-Clustering-PowerShell,RSAT-Clustering-AutomationServer,RSAT-Clustering-CmdInterface,IPAM-Client-Feature,RSAT-NLB,RSAT-SNMP,RSAT-WINS,RSAT-Role-Tools,RSAT-AD-Tools,RSAT-AD-PowerShell,RSAT-ADDS,RSAT-AD-AdminCenter,RSAT-ADDS-Tools,RSAT-NIS,RSAT-ADLDS,RSAT-Hyper-V-Tools,Hyper-V-Tools,Hyper-V-PowerShell,RSAT-RDS-Tools,RSAT-RDS-Gateway,RSAT-RDS-Licensing-Diagnosis-UI,RDS-Licensing-UI,UpdateServices-RSAT,UpdateServices-API,UpdateServices-UI,RSAT-ADCS,RSAT-ADCS-Mgmt,RSAT-Online-Responder,RSAT-ADRMS,RSAT-DHCP,RSAT-DNS-Server,RSAT-Fax,RSAT-File-Services,RSAT-DFS-Mgmt-Con,RSAT-FSRM-Mgmt,RSAT-NFS-Admin,RSAT-CoreFile-Mgmt,RSAT-NPAS,RSAT-Print-Services,RSAT-RemoteAccess,RSAT-RemoteAccess-Mgmt,RSAT-RemoteAccess-PowerShell,RSAT-VA-Tools,WDS-AdminPack,RPC-over-HTTP-Proxy,Simple-TCPIP,FS-SMB1,FS-SMBBW,SMTP-Server,SNMP-Service,SNMP-WMI-Provider,Telnet-Client,Telnet-Server,TFTP-Client,User-Interfaces-Infra,Server-Gui-Mgmt-Infra,Desktop-Experience,Server-Gui-Shell,Biometric-Framework,WFF,Windows-Identity-Foundation,Windows-Internal-Database,PowerShellRoot,DSC-Service,PowerShell,PowerShell-V2,PowerShell-ISE,WindowsPowerShellWebAccess,WAS,WAS-Process-Model,WAS-NET-Environment,WAS-Config-APIs,Search-Service,Windows-Server-Backup,Migration,WindowsStorageManagementService,Windows-TIFF-IFilter,WinRM-IIS-Ext,WINS,Wireless-Networking,WoW64-Support,XPS-Viewer".Split(",")
 
-$selectedOsRoles = ($allOosRoles | ? { $requiredFeatures.Contains($_) }) -join ","
+$selectedOsRoles = ($allOosRoles | where { $requiredFeatures.Contains($_) }) -join ","
 
-$selectedOsRoleServices = ($allOsRoleServices | ? { $requiredFeatures.Contains($_) }) -join ","
+$selectedOsRoleServices = ($allOsRoleServices | where { $requiredFeatures.Contains($_) }) -join ","
 
-$selectedOsFeatures = ($allOsFeatures | ? { $requiredFeatures.Contains($_) }) -join ","
+$selectedOsFeatures = ($allOsFeatures | where { $requiredFeatures.Contains($_) }) -join ","
 
 "<variable name=`"OSRoles`" property=`"OSRoles`">" + $selectedOsRoles + "</variable>"
 
@@ -5672,7 +5672,7 @@ $path = "\\ICEMAN\MDT-Deploy$\Control\OperatingSystems.xml"
 
 $xml = [xml] (Get-Content "$path")
 
-$node = $xml.oss.os | ? { $_.Name -eq "Windows 7 Ultimate (x86) - Baseline" }
+$node = $xml.oss.os | where { $_.Name -eq "Windows 7 Ultimate (x86) - Baseline" }
 $node.ImageFile = ".\Operating Systems\W7Ult-x86\$imageFile"
 
 $xml.Save($path)
@@ -5696,7 +5696,7 @@ $path = "\\ICEMAN\MDT-Deploy$\Control\OperatingSystems.xml"
 
 $xml = [xml] (Get-Content "$path")
 
-$node = $xml.oss.os | ? { $_.Name -eq "Windows 7 Ultimate (x64) - Baseline" }
+$node = $xml.oss.os | where { $_.Name -eq "Windows 7 Ultimate (x64) - Baseline" }
 $node.ImageFile = ".\Operating Systems\W7Ult-x64\$imageFile"
 
 $xml.Save($path)
@@ -5720,7 +5720,7 @@ $path = "\\ICEMAN\MDT-Deploy$\Control\OperatingSystems.xml"
 
 $xml = [xml] (Get-Content "$path")
 
-$node = $xml.oss.os | ? { $_.Name -eq "Windows Server 2008 R2 Standard - Baseline" }
+$node = $xml.oss.os | where { $_.Name -eq "Windows Server 2008 R2 Standard - Baseline" }
 $node.ImageFile = ".\Operating Systems\WS2008-R2\$imageFile"
 
 $xml.Save($path)
@@ -5968,7 +5968,7 @@ robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot C
       1. **State Restore**
          1. In the **Custom Tasks **group, add a new **Run Command Line** action with the following settings:
             1. Name: **Create native images for .NET assemblies**
-            2. Command line: **PowerShell.exe -Command "Get-ChildItem \$env:SystemRoot\\Microsoft.NET -Filter Ngen.exe -Recurse | % { & \$\_.FullName executeQueuedItems }"**
+            2. Command line: **PowerShell.exe -Command "Get-ChildItem \$env:SystemRoot\\Microsoft.NET -Filter Ngen.exe -Recurse | foreach { & \$\_.FullName executeQueuedItems }"**
    3. Right-click the **Create native images for .NET assemblies** action and click **Copy**.
    4. Click **OK**.
 
@@ -6775,7 +6775,7 @@ $path = "\\ICEMAN\MDT-Deploy$\Control\OperatingSystems.xml"
 
 $xml = [xml] (Get-Content "$path")
 
-$node = $xml.oss.os | ? { $_.Name -eq "SharePoint Server 2013 - Development" }
+$node = $xml.oss.os | where { $_.Name -eq "SharePoint Server 2013 - Development" }
 $node.ImageFile = ".\Operating Systems\SP2013-DEV\$imageFile"
 
 $xml.Save($path)
@@ -7008,7 +7008,7 @@ $xml.AdminDeploymentCustomizations.BundleCustomizations.NoWeb = "yes"
 
 ```PowerShell
 $xml.AdminDeploymentCustomizations.SelectableItemCustomizations.SelectableItemCustomization |
-    % {
+    foreach {
         If ($_.Id -eq "Blend" `
             -Or $_.Id -eq "LightSwitch" `
             -Or $_.Id -eq "VC_MFC_Libraries" `

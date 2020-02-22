@@ -1137,7 +1137,7 @@ $interfaceAlias = Get-NetAdapter `
     -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     select -ExpandProperty Name
 
-@("IPv4", "IPv6") | ForEach-Object {
+@("IPv4", "IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |
@@ -1210,7 +1210,7 @@ $vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
 $ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
 
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
-    ? { $_.SlotId -eq 0 }
+    where { $_.SlotId -eq 0 }
 
 Stop-SCVirtualMachine $vmName
 

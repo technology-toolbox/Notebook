@@ -331,7 +331,7 @@ cls
 
 ```PowerShell
 $iScsiAdapters = Get-NetAdapter -Physical |
-    ? { $_.LinkSpeed -eq "10 Gbps" } |
+    where { $_.LinkSpeed -eq "10 Gbps" } |
     sort ifIndex
 
 $iScsiAdapters[0] | Rename-NetAdapter -NewName "iSCSI 1"
@@ -362,7 +362,7 @@ New-NetIPAddress `
 
 ```PowerShell
 @("iSCSI 1", "iSCSI 2") |
-    % {
+    foreach {
         $interfaceAlias = $_
 
         Disable-NetAdapterBinding -Name $interfaceAlias `
@@ -409,7 +409,7 @@ $interfaceAlias = "Storage"
 
 ```PowerShell
 $networkAdapter = Get-NetAdapter -Physical |
-    ? { $_.LinkSpeed -eq "2 Gbps" -and $_.Name -ne "Management" }
+    where { $_.LinkSpeed -eq "2 Gbps" -and $_.Name -ne "Management" }
 
 $networkAdapter | Rename-NetAdapter -NewName $interfaceAlias
 ```
@@ -553,7 +553,7 @@ cls
 #### # Online and initialize disks
 
 ```PowerShell
-$iscsiDisks = Get-Disk | ? { $_.BusType -eq "iSCSI" }
+$iscsiDisks = Get-Disk | where { $_.BusType -eq "iSCSI" }
 
 $quorumDiskNumber = $iscsiDisks |
     sort Size |
@@ -561,7 +561,7 @@ $quorumDiskNumber = $iscsiDisks |
     select -ExpandProperty Number
 
 $iscsiDisks |
-    % {
+    foreach {
         $disk = $_
 
         If ($disk.IsOffline -eq $true) {
@@ -776,7 +776,7 @@ Get-NetAdapter `
 
 ```PowerShell
 Get-NetAdapter -Physical |
-    % {
+    foreach {
         Set-NetAdapterAdvancedProperty -Name $_.Name `
             -DisplayName "Jumbo Packet" -RegistryValue 9014
     }

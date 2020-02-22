@@ -51,7 +51,7 @@ $virtualMachinesWithSnapshots = @(
 
 ```PowerShell
 $virtualMachinesWithSnapshots |
-    ForEach-Object {
+    foreach {
         $vmHost = $_.VMHost
         $vmName = $_.VMName
 
@@ -60,8 +60,8 @@ $virtualMachinesWithSnapshots |
             -Status "Reverting VM ($vmName) to most recent checkpoint..."
 
         Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
-            Sort-Object CreationTime |
-            Select-Object -Last 1 |
+            sort CreationTime |
+            select -Last 1 |
             Restore-VMSnapshot -Confirm:$false -Verbose
     }
 ```
@@ -72,7 +72,7 @@ $virtualMachinesWithSnapshots |
 $startupDelayInSeconds = 30
 
 $virtualMachinesWithSnapshots |
-    ForEach-Object {
+    foreach {
         $vmHost = $_.VMHost
         $vmName = $_.VMName
 
@@ -115,7 +115,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 $scriptBlock = [ScriptBlock]::Create($script)
 
 Get-Content "C:\Users\jjameson-admin\Desktop\Computer List for Windows Update.txt" |
-    ForEach-Object {
+    foreach {
         $computer = $_
 
         Write-Progress `
@@ -173,13 +173,13 @@ cls
 $source = "C:\NotBackedUp\Public\Toolbox"
 
 $computers = Get-ADComputer -Filter * |
-    Where-Object { $_.Name -notin
+    where { $_.Name -notin
         @('EXT-SP2013-DEV',
         'EXT-SQL01',
         'EXT-SQL01-FC') } |
     select Name
 
-$computers | ForEach-Object {
+$computers | foreach {
     $destination = '\\' + $_.Name + '\C$\NotBackedUp\Public\Toolbox'
 
     robocopy $source $destination /E /MIR /XD git-for-windows "Microsoft SDKs" /R:1 /W:1
@@ -225,7 +225,7 @@ $virtualMachines = @(
     'EXT-APP03A')
 
 $virtualMachines |
-    ForEach-Object {
+    foreach {
         $vmName = $_
 
         Write-Progress `
@@ -267,7 +267,7 @@ $startupDelayInSeconds = 30
 [Array]::Reverse($virtualMachines)
 
 $virtualMachines |
-    ForEach-Object {
+    foreach {
         $vmName = $_
 
         Write-Progress `
@@ -320,10 +320,10 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
     -Verbose
 "
 
-$scriptBlock = [scriptblock]::Create($script)
+$scriptBlock = [ScriptBlock]::Create($script)
 
 Get-Content "C:\Users\jjameson-admin\Desktop\Computer List for Windows Update.txt" |
-    ForEach-Object {
+    foreach {
         $computer = $_
 
         Write-Progress `
@@ -375,7 +375,7 @@ $virtualMachinesWithSnapshots = @(
 
 ```PowerShell
 $virtualMachinesWithSnapshots |
-    ForEach-Object {
+    foreach {
         $vmHost = $_.VMHost
         $vmName = $_.VMName
 

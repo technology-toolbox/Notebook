@@ -391,7 +391,7 @@ $interfaceAlias = "Storage"
 
 ```PowerShell
 $networkAdapter = Get-NetAdapter -Physical |
-    ? { $_.LinkSpeed -eq "2 Gbps" -and $_.Name -ne "Management" }
+    where { $_.LinkSpeed -eq "2 Gbps" -and $_.Name -ne "Management" }
 
 $networkAdapter | Rename-NetAdapter -NewName $interfaceAlias
 ```
@@ -829,7 +829,7 @@ $command = "net localgroup Administrators TECHTOOLBOX\s-vmm01-mgmt /ADD"
 $scriptBlock = [ScriptBlock]::Create($command)
 
 @("TT-SOFS02A") |
-    ForEach-Object {
+    foreach {
         Invoke-Command -ComputerName $_ -ScriptBlock $scriptBlock
     }
 ```

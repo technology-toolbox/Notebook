@@ -159,7 +159,7 @@ $vm = Get-AzureVM -ServiceName $vmName -Name $vmName
 $endpointNames = "PowerShell", "RemoteDesktop"
 
 $endpointNames |
-    ForEach-Object {
+    foreach {
         $endpointName = $_
 
         $endpoint = $vm | Get-AzureEndpoint -Name $endpointName
@@ -223,8 +223,8 @@ $dataDiskCount = 3
 
 $dataDisks = Get-StorageSubSystem -FriendlyName "Storage Spaces*" |
     Get-PhysicalDisk -CanPool $true |
-    Sort-Object -Property FriendlyName |
-    Select-Object -First $dataDiskCount
+    sort FriendlyName |
+    select -First $dataDiskCount
 
 New-StoragePool `
     -StorageSubsystemFriendlyName "Storage Spaces*" `
@@ -507,7 +507,7 @@ $replyAddress = "no-reply@fabrikam.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-	Where-Object { $_.IsAdministrationWebApplication -eq $true }
+	where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -844,7 +844,7 @@ Get-SPPowerPointServiceApplication |
 
 ```PowerShell
 Get-SPServiceInstance |
-    Where-Object { $_.TypeName -eq "PowerPoint Service" } |
+    where { $_.TypeName -eq "PowerPoint Service" } |
     Start-SPServiceInstance | Out-Null
 ```
 
@@ -1077,11 +1077,11 @@ cls
 
 ```PowerShell
 Get-SPSite -Limit ALL |
-    ForEach-Object {
+    foreach {
         Write-Host "Migrating users on site ($($_.Url))..."
 
         Get-SPUser -Web $_.Url -Limit ALL |
-        ForEach-Object {
+        foreach {
             $newAlias = $_.UserLogin.Replace("techtoolbox\", "fabrikam\")
 
             If ($newAlias -ne $_.UserLogin)

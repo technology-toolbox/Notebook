@@ -1055,7 +1055,7 @@ $vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
 $portClassification = Get-SCPortClassification -Name "1 Gbps Tenant vNIC"
 
 Get-SCVirtualMachine -VMHost TT-HV03 |
-    % {
+    foreach {
         Get-SCVirtualNetworkAdapter -VM $_ |
             Set-SCVirtualNetworkAdapter `
                 -VMNetwork $vmNetwork `

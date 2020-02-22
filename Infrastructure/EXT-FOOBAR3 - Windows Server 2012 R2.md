@@ -136,7 +136,7 @@ Get-NetAdapter `
 ###### # Disable DHCP
 
 ```PowerShell
-@("IPv4", "IPv6") | ForEach-Object {
+@("IPv4", "IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |
@@ -1270,7 +1270,7 @@ cls
 $adminsGroup = "EXTRANET\SharePoint Admins (DEV)"
 
 Get-SPDatabase |
-    Where-Object {$_.WebApplication -like "SPAdministrationWebApplication"} |
+    where {$_.WebApplication -like "SPAdministrationWebApplication"} |
     Add-SPShellAdmin $adminsGroup
 ```
 
@@ -1308,7 +1308,7 @@ $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-    Where-Object { $_.IsAdministrationWebApplication -eq $true }
+    where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -2003,7 +2003,7 @@ Pop-Location
 $webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
 
 @("/" , "/sites/cc", "/sites/my", "/sites/Search") |
-    ForEach-Object {
+    foreach {
         Upgrade-SPSite ($webAppUrl + $_) -VersionUpgrade -Unthrottled
     }
 ```
@@ -2093,7 +2093,7 @@ net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 .\Get-AppSetting.ps1 |
-    Sort-Object Key |
+    sort Key |
     Export-Csv C:\NotBackedUp\Temp\AppSettings.csv
 
 C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
@@ -2107,7 +2107,7 @@ C:\NotBackedUp\Public\Toolbox\DiffMerge\DiffMerge.exe `
 
 ```PowerShell
 Import-Csv C:\NotBackedUp\Temp\AppSettings.csv |
-    ForEach-Object {
+    foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
 ```
@@ -2975,7 +2975,7 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Get-SPEnterpriseSearchCrawlContentSource |
-    ForEach-Object { $_.StartFullCrawl() }
+    foreach { $_.StartFullCrawl() }
 ```
 
 > **Note**
@@ -3041,7 +3041,7 @@ Remove-NetIPAddress 2601:282:4201:e500::217 -Confirm:$false
 ```PowerShell
 $interfaceAlias = "Extranet-20"
 
-@("IPv6") | ForEach-Object {
+@("IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |
@@ -3090,7 +3090,7 @@ $interfaceAlias = Get-NetAdapter `
     -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     select -ExpandProperty Name
 
-@("IPv4", "IPv6") | ForEach-Object {
+@("IPv4", "IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |
@@ -3165,7 +3165,7 @@ $vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
 $ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
 
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
-    ? { $_.SlotId -eq 0 }
+    where { $_.SlotId -eq 0 }
 
 Stop-SCVirtualMachine $vmName
 

@@ -87,7 +87,7 @@ $xml.AdminDeploymentCustomizations.BundleCustomizations.NoWeb = "yes"
 
 ```PowerShell
 $xml.AdminDeploymentCustomizations.SelectableItemCustomizations.SelectableItemCustomization |
-    % {
+    foreach {
         If ($_.Id -eq "OfficeDeveloperToolsV1")
         {
             $_.Selected = "yes"

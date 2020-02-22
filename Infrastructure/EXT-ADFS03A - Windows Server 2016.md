@@ -153,7 +153,7 @@ $vmNetwork = Get-SCVMNetwork -Name "Extranet-20 VM Network"
 $ipPool = Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
 
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
-    ? { $_.SlotId -eq 0 }
+    where { $_.SlotId -eq 0 }
 
 Stop-SCVirtualMachine $vmName
 

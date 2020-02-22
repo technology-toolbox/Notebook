@@ -39,7 +39,7 @@ Function ConvertVM($vmName) {
 $ErrorActionPreference = 'Stop'
 
 Get-ChildItem C:\NotBackedUp\Temp\VirtualBox -Filter *.vdi -Recurse |
- % {
+  foreach {
     $sourceVdi = $_.FullName
 
     If ($sourceVdi.Contains('{') -eq $false)

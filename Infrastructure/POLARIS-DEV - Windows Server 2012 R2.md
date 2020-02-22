@@ -138,7 +138,7 @@ cls
 
 ```PowerShell
 Get-NetFirewallRule |
-  Where-Object { `
+  where { `
     $_.Profile -eq 'Domain' `
       -and $_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
   Enable-NetFirewallRule
@@ -831,10 +831,10 @@ Start-Sleep -Seconds 10
 
 ```PowerShell
 Get-SPUsageDefinition  |
-    ForEach-Object { Set-SPUsageDefinition $_ -DaysRetained 3 }
+    foreach { Set-SPUsageDefinition $_ -DaysRetained 3 }
 
 Get-SPTimerJob |
-    Where-Object {
+    where {
         $_.Title -eq "Microsoft SharePoint Foundation Usage Data Import" } |
     Start-SPTimerJob
 ```
@@ -859,7 +859,7 @@ $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-    Where-Object { $_.IsAdministrationWebApplication -eq $true }
+    where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -1231,8 +1231,9 @@ ALTER ROLE [SPDataAccess] ADD MEMBER [TECHTOOLBOX\s-spserviceapp-dev]
 
 ```PowerShell
 Get-SPServiceInstance |
-    Where-Object { $_.TypeName -eq "Secure Store Service" } |
-    Start-SPServiceInstance | Out-Null
+    where { $_.TypeName -eq "Secure Store Service" } |
+    Start-SPServiceInstance |
+    Out-Null
 
 $serviceApplicationName = "Secure Store Service"
 
@@ -1334,7 +1335,7 @@ cls
 
 ```PowerShell
 Get-SPContentDatabase -WebApplication http://ttweb-dev |
-    Where-Object { $_.Name -ne "WSS_Content_ttweb" } |
+    where { $_.Name -ne "WSS_Content_ttweb" } |
     Remove-SPContentDatabase
 ```
 
@@ -1398,7 +1399,7 @@ cls
 
 ```PowerShell
 Get-SPContentDatabase -WebApplication http://team-dev |
-    Where-Object { $_.Name -ne "WSS_Content_Team1" } |
+    where { $_.Name -ne "WSS_Content_Team1" } |
     Remove-SPContentDatabase
 ```
 
@@ -1455,7 +1456,7 @@ cls
 
 ```PowerShell
 Get-SPContentDatabase -WebApplication http://my-dev |
-    Where-Object { $_.Name -ne "WSS_Content_MySites" } |
+    where { $_.Name -ne "WSS_Content_MySites" } |
     Remove-SPContentDatabase
 ```
 
@@ -1538,7 +1539,7 @@ cls
 ```PowerShell
 Get-SPEnterpriseSearchServiceApplication |
     Get-SPEnterpriseSearchCrawlContentSource |
-    % { $_.StartFullCrawl() }
+    foreach { $_.StartFullCrawl() }
 ```
 
 ```PowerShell

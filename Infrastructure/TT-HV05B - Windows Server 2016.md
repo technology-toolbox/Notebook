@@ -718,7 +718,7 @@ $networkAdapters += Get-SCVMHostNetworkAdapter `
     -Name "Intel(R) I210 Gigabit Network Connection #2"
 
 $networkAdapters |
-    % {
+    foreach {
         $networkAdapter = $_
 
         Set-SCVMHostNetworkAdapter `
@@ -763,7 +763,7 @@ New-SCVirtualNetwork `
 
 ```PowerShell
 Get-SCVirtualNetworkAdapter -VMHost $vmHost |
-    ? { $_.Name -in $("Storage 1", "Storage 2") } |
+    where { $_.Name -in $("Storage 1", "Storage 2") } |
     Remove-SCVirtualNetworkAdapter
 ```
 
@@ -895,8 +895,8 @@ vEthernet (Embedded Team Switch) Disabled
 vEthernet (Live Migration)       Disabled
 
 Get-NetAdapter |
-    ? { $_.Name -like 'vEthernet*' } |
-    % {
+    where { $_.Name -like 'vEthernet*' } |
+    foreach {
         Set-NetAdapterAdvancedProperty `
             -Name $_.Name `
             -DisplayName "Jumbo Packet" -RegistryValue 9014

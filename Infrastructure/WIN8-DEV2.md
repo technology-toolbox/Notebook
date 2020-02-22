@@ -302,7 +302,7 @@ Enable-PSRemoting -Confirm:$false
 $computer = 'WIN8-DEV2'
 
 $command = "Get-NetFirewallRule |
-    Where-Object { `$_.Profile -eq 'Domain' ``
+    where { `$_.Profile -eq 'Domain' ``
         -and `$_.DisplayName -like 'File and Printer Sharing (Echo Request *-In)' } |
     Enable-NetFirewallRule"
 
@@ -322,7 +322,7 @@ $command = "New-NetFirewallRule ``
     -Profile Domain ``
     -Action Allow"
 
-$scriptBlock = [scriptblock]::Create($command)
+$scriptBlock = [ScriptBlock]::Create($command)
 
 Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```
@@ -341,7 +341,7 @@ $computer = 'WIN8-DEV2'
 $command = "Disable-NetFirewallRule ``
     -DisplayName 'Remote Windows Update (Dynamic RPC)'"
 
-$scriptBlock = [scriptblock]::Create($command)
+$scriptBlock = [ScriptBlock]::Create($command)
 
 Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 ```

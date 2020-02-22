@@ -809,13 +809,13 @@ $primaryServer = Get-SCOMManagementServer -Name TT-SCOM01C.corp.technologytoolbo
 $failoverServer = Get-SCOMManagementServer -Name TT-SCOM01D.corp.technologytoolbox.com
 
 Get-SCOMAgent |
-    ForEach-Object {
+    foreach {
         $agent = $_
         Set-SCOMParentManagementServer -Agent $agent -FailoverServer $failoverServer
     }
 
 Get-SCOMAgent |
-    ForEach-Object {
+    foreach {
         $agent = $_
         Set-SCOMParentManagementServer -Agent $agent -PrimaryServer $primaryServer
     }

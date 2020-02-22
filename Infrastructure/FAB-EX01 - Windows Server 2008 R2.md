@@ -145,7 +145,7 @@ $vm = Get-AzureVM -ServiceName fabrikam-extranet -Name FAB-EX01
 $endpointNames = "PowerShell", "Remote Desktop"
 
 $endpointNames |
-    ForEach-Object {
+    foreach {
         $endpointName = $_
 
         $endpoint = $vm | Get-AzureEndpoint -Name $endpointName
@@ -869,14 +869,14 @@ New-Mailbox `
 $rooms = Get-Mailbox -RecipientTypeDetails RoomMailbox
 
 $rooms |
-    ForEach-Object {
+    foreach {
         Set-CalendarProcessing `
             -Identity $_.Name `
             -AutomateProcessing AutoAccept
     }
 
 $rooms |
-    ForEach-Object {
+    foreach {
         Set-MailboxFolderPermission `
             -Identity $_":\Calendar" `
             -User Default `

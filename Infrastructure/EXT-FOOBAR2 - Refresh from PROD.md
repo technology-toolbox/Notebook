@@ -608,14 +608,14 @@ $sites = @(
     "Template-Sites/Post-Orders-fr-CA")
 
 $sites |
-    % {
+    foreach {
         $siteUrl = $clientPortalUrl.AbsoluteUri + $_
 
         $site = Get-SPSite -Identity $siteUrl
 
         $group = $site.RootWeb.AssociatedVisitorGroup
 
-        $group.Users | % { $group.Users.Remove($_) }
+        $group.Users | foreach { $group.Users.Remove($_) }
 
         $group.AddUser(
             "c:0-.t|adfs|Branch Managers",

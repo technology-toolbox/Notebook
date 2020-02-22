@@ -640,7 +640,7 @@ cls
 
 ```PowerShell
 $cert = Get-ChildItem cert:\LocalMachine\My |
-    Where-Object { $_.Subject -like "CN=wac.fabrikam.com,*" }
+    where { $_.Subject -like "CN=wac.fabrikam.com,*" }
 
 $cert.FriendlyName = "OfficeWebApps Certificate"
 ```
@@ -840,7 +840,7 @@ $interfaceAlias = Get-NetAdapter `
     -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     select -ExpandProperty Name
 
-@("IPv4", "IPv6") | ForEach-Object {
+@("IPv4", "IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |
@@ -913,7 +913,7 @@ $vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
 $ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
 
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
-    ? { $_.SlotId -eq 0 }
+    where { $_.SlotId -eq 0 }
 
 Stop-SCVirtualMachine $vmName
 
@@ -980,7 +980,7 @@ cls
 
 ```PowerShell
 Get-ChildItem cert:\LocalMachine\My |
-    Where-Object { $_.Subject -like "CN=wac.fabrikam.com,*" } |
+    where { $_.Subject -like "CN=wac.fabrikam.com,*" } |
     Remove-Item
 ```
 
@@ -1006,7 +1006,7 @@ cls
 
 ```PowerShell
 $cert = Get-ChildItem cert:\LocalMachine\My |
-    Where-Object { $_.Subject -like "CN=wac.fabrikam.com,*" }
+    where { $_.Subject -like "CN=wac.fabrikam.com,*" }
 
 $cert.FriendlyName = "OfficeWebApps Certificate"
 ```

@@ -533,7 +533,7 @@ Get-NetAdapter `
 ### # Disable DHCP
 
 ```PowerShell
-@("IPv4", "IPv6") | ForEach-Object {
+@("IPv4", "IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |

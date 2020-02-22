@@ -39,7 +39,7 @@ $virtualMachinesWithSnapshots = @(
 
 ```PowerShell
 $virtualMachinesWithSnapshots |
-    ForEach-Object {
+    foreach {
         $vmHost = $_.VMHost
         $vmName = $_.VMName
 
@@ -48,8 +48,8 @@ $virtualMachinesWithSnapshots |
             -Status "Reverting VM ($vmName) to most recent checkpoint..."
 
         Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
-            Sort-Object CreationTime |
-            Select-Object -Last 1 |
+            sort CreationTime |
+            select -Last 1 |
             Restore-VMSnapshot -Confirm:$false -Verbose
     }
 ```
@@ -60,7 +60,7 @@ $virtualMachinesWithSnapshots |
 $startupDelayInSeconds = 30
 
 $virtualMachinesWithSnapshots |
-    ForEach-Object {
+    foreach {
         $vmHost = $_.VMHost
         $vmName = $_.VMName
 
@@ -97,8 +97,8 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 $scriptBlock = [ScriptBlock]::Create($script)
 
 Get-Content "\\TT-FS01\Users$\jjameson-admin\My Documents\Computer List for Windows Update.txt" |
-    Where-Object { $_ -notin @('BANSHEE') } |
-    ForEach-Object {
+    where { $_ -notin @('BANSHEE') } |
+    foreach {
         $computer = $_
 
         Write-Progress `
@@ -143,7 +143,7 @@ $virtualMachines = @(
     'CYCLOPS-TEST')
 
 $virtualMachines |
-    ForEach-Object {
+    foreach {
         $vmName = $_
 
         Write-Progress `
@@ -151,7 +151,7 @@ $virtualMachines |
             -Status "Stopping virtual machine ($vmName)..."
 
         Get-SCVirtualMachine -Name $vmName |
-            ? { $_.VirtualMachineState -eq 'Running' } |
+            where { $_.VirtualMachineState -eq 'Running' } |
             Stop-SCVirtualMachine |
             select Name, MostRecentTask, MostRecentTaskUIState
     }
@@ -169,7 +169,7 @@ $virtualMachines = @(
     'HAVOK-TEST')
 
 $virtualMachines |
-    ForEach-Object {
+    foreach {
         $vmName = $_
 
         Write-Progress `
@@ -177,7 +177,7 @@ $virtualMachines |
             -Status "Stopping virtual machine ($vmName)..."
 
         Get-SCVirtualMachine -Name $vmName |
-            ? { $_.VirtualMachineState -eq 'Running' } |
+            where { $_.VirtualMachineState -eq 'Running' } |
             Stop-SCVirtualMachine |
             select Name, MostRecentTask, MostRecentTaskUIState
 
@@ -209,7 +209,7 @@ $sharePointVirtualMachines = @(
     'EXT-SQL03')
 
 $sharePointVirtualMachines |
-    ForEach-Object {
+    foreach {
         $vmName = $_
 
         Write-Progress `
@@ -217,7 +217,7 @@ $sharePointVirtualMachines |
             -Status "Stopping virtual machine ($vmName)..."
 
         Get-SCVirtualMachine -Name $vmName |
-            ? { $_.VirtualMachineState -eq 'Running' } |
+            where { $_.VirtualMachineState -eq 'Running' } |
             Stop-SCVirtualMachine |
             select Name, MostRecentTask, MostRecentTaskUIState
     }
@@ -239,10 +239,10 @@ $coreVirtualMachines = @(
     'HAVOK-TEST')
 
 Get-SCVirtualMachine |
-    ? { $_.Location -like 'C:\ClusterStorage\*' } |
-    ? { $_.Name -notin $coreVirtualMachines } |
-    ? { $_.VirtualMachineState -eq 'Running' } |
-    ForEach-Object {
+    where { $_.Location -like 'C:\ClusterStorage\*' } |
+    where { $_.Name -notin $coreVirtualMachines } |
+    where { $_.VirtualMachineState -eq 'Running' } |
+    foreach {
         $vmName = $_.Name
 
         Write-Progress `
@@ -258,10 +258,10 @@ Get-SCVirtualMachine |
 
 ```PowerShell
 Get-SCVirtualMachine |
-    ? { $_.Name -in $coreVirtualMachines } |
-    ? { $_.Name -notin @('FOOBAR18', 'FOOBAR19') } |
-    ? { $_.VirtualMachineState -eq 'Running' } |
-    ForEach-Object {
+    where { $_.Name -in $coreVirtualMachines } |
+    where { $_.Name -notin @('FOOBAR18', 'FOOBAR19') } |
+    where { $_.VirtualMachineState -eq 'Running' } |
+    foreach {
         $vmHost = $_
 
         $vmName = $_.Name
@@ -283,7 +283,7 @@ cls
 
 ```PowerShell
 @('TT-HV03', 'TT-DC04') |
-    ForEach-Object {
+    foreach {
         Restart-Computer $_
     }
 ```
@@ -356,7 +356,7 @@ $virtualMachines = @(
 [Array]::Reverse($virtualMachines)
 
 $virtualMachines |
-    ForEach-Object {
+    foreach {
         $vmName = $_
 
         Write-Progress `
@@ -364,7 +364,7 @@ $virtualMachines |
             -Status "Starting virtual machine ($vmName)..."
 
         Get-SCVirtualMachine -Name $vmName |
-            ? { $_.VirtualMachineState -ne 'Running' } |
+            where { $_.VirtualMachineState -ne 'Running' } |
             Start-SCVirtualMachine |
             select Name, MostRecentTask, MostRecentTaskUIState
 
@@ -399,7 +399,7 @@ $sharePointVirtualMachines = @(
 [Array]::Reverse($sharePointVirtualMachines)
 
 $sharePointVirtualMachines |
-    ForEach-Object {
+    foreach {
         $vmName = $_
 
         Write-Progress `
@@ -407,7 +407,7 @@ $sharePointVirtualMachines |
             -Status "Starting virtual machine ($vmName)..."
 
         Get-SCVirtualMachine -Name $vmName |
-            ? { $_.VirtualMachineState -ne 'Running' } |
+            where { $_.VirtualMachineState -ne 'Running' } |
             Start-SCVirtualMachine |
             select Name, MostRecentTask, MostRecentTaskUIState
 
@@ -435,7 +435,7 @@ $sharePointVirtualMachines = @(
 [Array]::Reverse($sharePointVirtualMachines)
 
 $sharePointVirtualMachines |
-    ForEach-Object {
+    foreach {
         $vmName = $_
 
         Write-Progress `
@@ -443,7 +443,7 @@ $sharePointVirtualMachines |
             -Status "Starting virtual machine ($vmName)..."
 
         Get-SCVirtualMachine -Name $vmName |
-            ? { $_.VirtualMachineState -ne 'Running' } |
+            where { $_.VirtualMachineState -ne 'Running' } |
             Start-SCVirtualMachine |
             select Name, MostRecentTask, MostRecentTaskUIState
 
@@ -461,14 +461,14 @@ $sharePointVirtualMachines |
 $startupDelayInSeconds = 15
 
 Get-SCVirtualMachine |
-    ? { $_.Location -like 'C:\ClusterStorage\*' } |
-    ? { $_.Name -notin @(
+    where { $_.Location -like 'C:\ClusterStorage\*' } |
+    where { $_.Name -notin @(
         'CRYPTID',
         'DEVOPS2012',
         'EXT-RRAS1',
         'FAB-FOOBAR4') } |
-    ? { $_.VirtualMachineState -ne 'Running' } |
-    ForEach-Object {
+    where { $_.VirtualMachineState -ne 'Running' } |
+    foreach {
         $vmName = $_.Name
 
         Write-Progress `
@@ -516,11 +516,11 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
     -Verbose
 "
 
-$scriptBlock = [scriptblock]::Create($script)
+$scriptBlock = [ScriptBlock]::Create($script)
 
 Get-Content "\\TT-FS01\Users$\jjameson-admin\My Documents\Computer List for Windows Update.txt" |
-    Where-Object { $_ -notin @('BANSHEE') } |
-    ForEach-Object {
+    where { $_ -notin @('BANSHEE') } |
+    foreach {
         $computer = $_
 
         Write-Progress `
@@ -548,7 +548,7 @@ $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'TT-WIN8-TEST1'; VMHost = 'TT-HV05B'; })
 
 $virtualMachinesWithSnapshots |
-    ForEach-Object {
+    foreach {
         $vmHost = $_.VMHost
         $vmName = $_.VMName
 

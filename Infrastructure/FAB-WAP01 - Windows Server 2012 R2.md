@@ -122,7 +122,7 @@ $vm = Get-AzureVM -ServiceName $cloudService -Name $vmName
 $endpointNames = "PowerShell", "RemoteDesktop"
 
 $endpointNames |
-    ForEach-Object {
+    foreach {
         $endpointName = $_
 
         $endpoint = $vm | Get-AzureEndpoint -Name $endpointName

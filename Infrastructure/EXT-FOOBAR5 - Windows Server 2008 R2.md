@@ -157,7 +157,7 @@ $vm = Get-AzureVM -ServiceName $vmName -Name $vmName
 $endpointNames = "PowerShell", "RemoteDesktop"
 
 $endpointNames |
-    ForEach-Object {
+    foreach {
         $endpointName = $_
 
         $endpoint = $vm | Get-AzureEndpoint -Name $endpointName
@@ -368,7 +368,7 @@ $replyAddress = "no-reply@fabrikam.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-	Where-Object { $_.IsAdministrationWebApplication -eq $true }
+	where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -684,7 +684,7 @@ Get-SPPowerPointServiceApplication |
 
 ```PowerShell
 Get-SPServiceInstance |
-    Where-Object { $_.TypeName -eq "PowerPoint Service" } |
+    where { $_.TypeName -eq "PowerPoint Service" } |
     Start-SPServiceInstance | Out-Null
 ```
 

@@ -383,7 +383,7 @@ $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-    Where-Object { $_.IsAdministrationWebApplication -eq $true }
+    where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -767,7 +767,7 @@ cls
 
 ```PowerShell
 Import-Csv \\iceman.corp.technologytoolbox.com\Archive\Clients\Securitas\AppSettings-UAT_2015-12-16.csv |
-    ForEach-Object {
+    foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force
     }
 ```
@@ -859,7 +859,7 @@ Get-SPPowerPointServiceApplication |
 
 ```PowerShell
 Get-SPServiceInstance |
-    Where-Object { $_.TypeName -eq "PowerPoint Service" } |
+    where { $_.TypeName -eq "PowerPoint Service" } |
     Start-SPServiceInstance | Out-Null
 ```
 
@@ -1264,7 +1264,7 @@ $permissions = "Full Control"
 $claim = New-SPClaimsPrincipal -Identity $sharePointAdminsGroup `
     -IdentityType WindowsSecurityGroupName
 
-Get-SPWebApplication | ForEach-Object {
+Get-SPWebApplication | foreach {
     $webApp = $_
 
     [Microsoft.SharePoint.Administration.SPPolicyRole] $policyRole =
@@ -1644,7 +1644,7 @@ $list = $web.Lists["User Sites"]
 
 $items = $list.GetItems()
 
-$items | ForEach-Object {
+$items | foreach {
     $item = $_
 
     $url = $item["SiteRedirectURL"]
@@ -1789,7 +1789,7 @@ cd 'C:\NotBackedUp\Temp\Sample Post Orders'
     "Wells-Real-Estate",
     "Navistar-Conway,-Arkansas",
     "Comcast") |
-% {
+foreach {
     Export-SPWeb ("http://client-test.securitasinc.com/Post-Orders/" + $_) `
         -Path ($_ + ".cmp") -IncludeUserSecurity -IncludeVersions All
 }
@@ -1997,7 +1997,7 @@ Function ReplaceSiteCollectionAdministrators(
 }
 
 Get-SPSite http://client-local.securitasinc.com/Post-Orders/* -Limit ALL |
-    % {
+    foreach {
         $site = $_
 
         Write-Host `
@@ -2160,7 +2160,9 @@ $db1 = Get-SPContentDatabase WSS_Content_CloudPortal
 
 $wacCacheDb = Get-SPContentDatabase OfficeWebAppsCache_CloudPortal
 
-$wacCacheDb | Get-SPSite | ? { $_.ServerRelativeUrl -ne '/sites/Office_Viewing_Service_Cache' } |
+$wacCacheDb |
+    Get-SPSite |
+    where { $_.ServerRelativeUrl -ne '/sites/Office_Viewing_Service_Cache' } |
     Move-SPSite -DestinationDatabase $db1 -Confirm:$false
 
 iisreset
@@ -2222,7 +2224,7 @@ $vmNetwork = Get-SCVMNetwork -Name "Extranet-20 VM Network"
 $ipAddressPool= Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
 
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
-    ? { $_.SlotId -eq 0 }
+    where { $_.SlotId -eq 0 }
 
 Stop-SCVirtualMachine $vmName
 

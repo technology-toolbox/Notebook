@@ -1430,7 +1430,7 @@ cls
 $adminsGroup = "EXTRANET\SharePoint Admins (DEV)"
 
 Get-SPDatabase |
-    Where-Object {$_.WebApplication -like "SPAdministrationWebApplication"} |
+    where {$_.WebApplication -like "SPAdministrationWebApplication"} |
     Add-SPShellAdmin $adminsGroup
 ```
 
@@ -1481,7 +1481,7 @@ $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-    Where-Object { $_.IsAdministrationWebApplication -eq $true }
+    where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -2808,7 +2808,7 @@ net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 Import-Csv "\\ICEMAN\Archive\Clients\Securitas\AppSettings-UAT_2016-10-06.csv" |
-    ForEach-Object {
+    foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
 ```
@@ -3307,7 +3307,7 @@ $websiteName = "media-local-2.securitasinc.com"
     "Training\TAPS",
     "Vigilance"
 ) |
-    % {
+    foreach {
         Remove-Item "C:\inetpub\wwwroot\$websiteName\$_" -Recurse -Force
     }
 ```
@@ -3393,7 +3393,7 @@ Function ReplaceSiteCollectionAdministrators(
 }
 
 Get-SPSite -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL -Limit ALL |
-    ForEach-Object {
+    foreach {
         $site = $_
 
         Write-Host `
@@ -4177,7 +4177,7 @@ $web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/"
 $group = $web.Groups["Cloud Portal Visitors"]
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $claim = New-SPClaimsPrincipal `
             -Identity "$_\Domain Users" `
             -IdentityType WindowsSecurityGroupName
@@ -4193,7 +4193,7 @@ $web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/sites/Employee-Portal"
 $group = $web.SiteGroups["Viewers"]
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $claim = New-SPClaimsPrincipal `
             -Identity "$_\Domain Users" `
             -IdentityType WindowsSecurityGroupName
@@ -4211,7 +4211,7 @@ $list = $web.Lists["Profile Pictures"]
 $contributeRole = $web.RoleDefinitions['Contribute']
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $domainUsers = $web.EnsureUser($_ + '\Domain Users')
 
         $assignment = New-Object Microsoft.SharePoint.SPRoleAssignment(
@@ -4260,7 +4260,7 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Get-SPEnterpriseSearchCrawlContentSource |
-    ForEach-Object { $_.StartFullCrawl() }
+    foreach { $_.StartFullCrawl() }
 ```
 
 > **Note**
@@ -4299,7 +4299,7 @@ net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 Import-Csv "\\ICEMAN\Archive\Clients\Securitas\AppSettings-UAT_2016-10-06.csv" |
-    ForEach-Object {
+    foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
 ```
@@ -4753,7 +4753,7 @@ cls
 cd C:\Shares\Builds\ClientPortal\4.0.677.0\DeploymentFiles\Scripts
 
 Import-Csv "\\ICEMAN\Archive\Clients\Securitas\AppSettings-UAT_2016-11-10.csv" |
-    ForEach-Object {
+    foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
 ```
@@ -4817,7 +4817,7 @@ Function ReplaceSiteCollectionAdministrators(
 }
 
 Get-SPSite -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL -Limit ALL |
-    ForEach-Object {
+    foreach {
         $site = $_
 
         Write-Host `
@@ -4943,7 +4943,7 @@ $web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/"
 $group = $web.Groups["Cloud Portal Visitors"]
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $claim = New-SPClaimsPrincipal `
             -Identity "$_\Domain Users" `
             -IdentityType WindowsSecurityGroupName
@@ -4963,7 +4963,7 @@ $web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/sites/Employee-Portal"
 $group = $web.SiteGroups["Viewers"]
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $claim = New-SPClaimsPrincipal `
             -Identity "$_\Domain Users" `
             -IdentityType WindowsSecurityGroupName
@@ -4985,7 +4985,7 @@ $list = $web.Lists["Profile Pictures"]
 $contributeRole = $web.RoleDefinitions['Contribute']
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $domainUsers = $web.EnsureUser($_ + '\Domain Users')
 
         $assignment = New-Object Microsoft.SharePoint.SPRoleAssignment(
@@ -5018,7 +5018,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Remove-OldBackups.ps1 `
 $sqlServer = New-Object Microsoft.SqlServer.Management.Smo.Server $HostName
 
 $job = ($sqlServer.JobServer.Jobs |
-    ? { $_.Name -eq "Full Backup of All Databases.Subplan_1" })
+    where { $_.Name -eq "Full Backup of All Databases.Subplan_1" })
 
 $job.Start()
 ```
@@ -5046,7 +5046,7 @@ $serviceApp.Reset($false, $false)
 ```PowerShell
 $serviceApp |
     Get-SPEnterpriseSearchCrawlContentSource |
-    % { $_.StartFullCrawl() }
+    foreach { $_.StartFullCrawl() }
 ```
 
 > **Note**
@@ -5482,7 +5482,7 @@ $interfaceAlias = Get-NetAdapter `
     -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     select -ExpandProperty Name
 
-@("IPv4", "IPv6") | ForEach-Object {
+@("IPv4", "IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |
@@ -5555,7 +5555,7 @@ $vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
 $ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
 
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
-    ? { $_.SlotId -eq 0 }
+    where { $_.SlotId -eq 0 }
 
 Stop-SCVirtualMachine $vmName
 
@@ -6030,7 +6030,7 @@ cls
 Push-Location C:\Shares\Builds\ClientPortal\4.0.681.1\DeploymentFiles\Scripts
 
 Import-Csv "C:\NotBackedUp\Temp\AppSettings-UAT_2017-06-06.csv" |
-    ForEach-Object {
+    foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
 
@@ -6298,7 +6298,7 @@ $web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/"
 $group = $web.Groups["Cloud Portal Visitors"]
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $claim = New-SPClaimsPrincipal `
             -Identity "$_\Domain Users" `
             -IdentityType WindowsSecurityGroupName
@@ -6318,7 +6318,7 @@ $web = Get-SPWeb "$env:SECURITAS_CLOUD_PORTAL_URL/sites/Employee-Portal"
 $group = $web.SiteGroups["Viewers"]
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $claim = New-SPClaimsPrincipal `
             -Identity "$_\Domain Users" `
             -IdentityType WindowsSecurityGroupName
@@ -6340,7 +6340,7 @@ $list = $web.Lists["Profile Pictures"]
 $contributeRole = $web.RoleDefinitions['Contribute']
 
 $supportedDomains |
-    ForEach-Object {
+    foreach {
         $domainUsers = $web.EnsureUser($_ + '\Domain Users')
 
         $assignment = New-Object Microsoft.SharePoint.SPRoleAssignment(
@@ -6373,7 +6373,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Remove-OldBackups.ps1 `
 $sqlServer = New-Object Microsoft.SqlServer.Management.Smo.Server $HostName
 
 $job = ($sqlServer.JobServer.Jobs |
-    ? { $_.Name -eq "Full Backup of All Databases.Subplan_1" })
+    where { $_.Name -eq "Full Backup of All Databases.Subplan_1" })
 
 $job.Start()
 
@@ -6388,7 +6388,7 @@ while ($job.CurrentRunStatus -eq "Executing") {
     $sqlServer = New-Object Microsoft.SqlServer.Management.Smo.Server $HostName
 
     $job = ($sqlServer.JobServer.Jobs |
-        ? { $_.Name -eq "Full Backup of All Databases.Subplan_1" })
+        where { $_.Name -eq "Full Backup of All Databases.Subplan_1" })
 }
 
 Write-Host
@@ -6413,7 +6413,7 @@ $serviceApp.Reset($false, $false)
 ```PowerShell
 $serviceApp |
     Get-SPEnterpriseSearchCrawlContentSource |
-    % { $_.StartFullCrawl() }
+    foreach { $_.StartFullCrawl() }
 ```
 
 > **Note**
@@ -7391,7 +7391,7 @@ attrib -r .\Branch-Manager-Mapping.csv
 $branchManagerMapping = Import-Csv .\Branch-Manager-Mapping.csv
 
 $branchManagerMapping |
-    ForEach-Object {
+    foreach {
         $email = $_.EmailAddress
 
         If (($email.EndsWith("securitasinc.com") -eq $false) `
@@ -7679,14 +7679,14 @@ $sites = @(
     "/Template-Sites/Post-Orders-fr-CA")
 
 $sites |
-    % {
+    foreach {
         $siteUrl = $clientPortalUrl + $_
 
         $site = Get-SPSite -Identity $siteUrl
 
         $group = $site.RootWeb.AssociatedVisitorGroup
 
-        $group.Users | % { $group.Users.Remove($_) }
+        $group.Users | foreach { $group.Users.Remove($_) }
 
         $group.AddUser(
             "c:0-.t|adfs|Branch Managers",

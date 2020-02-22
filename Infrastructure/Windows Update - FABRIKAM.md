@@ -33,7 +33,7 @@ $virtualMachinesWithSnapshots = @(
 
 ```PowerShell
 $virtualMachinesWithSnapshots |
-    ForEach-Object {
+    foreach {
         $vmHost = $_.VMHost
         $vmName = $_.VMName
 
@@ -42,8 +42,8 @@ $virtualMachinesWithSnapshots |
             -Status "Reverting VM ($vmName) to most recent checkpoint..."
 
         Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
-            Sort-Object CreationTime |
-            Select-Object -Last 1 |
+            sort CreationTime |
+            select -Last 1 |
             Restore-VMSnapshot -Confirm:$false -Verbose
     }
 ```
@@ -54,7 +54,7 @@ $virtualMachinesWithSnapshots |
 $startupDelayInSeconds = 15
 
 $virtualMachinesWithSnapshots |
-    ForEach-Object {
+    foreach {
         $vmHost = $_.VMHost
         $vmName = $_.VMName
 
@@ -95,7 +95,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 $scriptBlock = [ScriptBlock]::Create($script)
 
 Get-Content "\\FAB-FS01\Users$\jjameson-admin\My Documents\Computer List for Windows Update.txt" |
-    ForEach-Object {
+    foreach {
         $computer = $_
 
         Write-Host "Enabling remote Windows Update on computer ($computer)..."
@@ -122,11 +122,11 @@ net use \\TT-FS01.corp.technologytoolbox.com\IPC$ /USER:TECHTOOLBOX\jjameson
 $source = "\\TT-FS01.corp.technologytoolbox.com\Public\Toolbox"
 
 $computers = Get-ADComputer -Filter * |
-    Where-Object { $_.Name -notin
+    where { $_.Name -notin
         @('EXCHANGE-CAS') } |
     select Name
 
-$computers | ForEach-Object {
+$computers | foreach {
     $destination = '\\' + $_.Name + '\C$\NotBackedUp\Public\Toolbox'
 
     robocopy $source $destination `
@@ -160,10 +160,10 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
     -Verbose
 "
 
-$scriptBlock = [scriptblock]::Create($script)
+$scriptBlock = [ScriptBlock]::Create($script)
 
 Get-Content "\\FAB-FS01\Users$\jjameson-admin\My Documents\Computer List for Windows Update.txt" |
-    ForEach-Object {
+    foreach {
         $computer = $_
 
         Write-Host "Disabling remote Windows Update on computer ($computer)..."
@@ -195,7 +195,7 @@ $virtualMachinesWithSnapshots = @(
 
 ```PowerShell
 $virtualMachinesWithSnapshots |
-    ForEach-Object {
+    foreach {
         $vmHost = $_.VMHost
         $vmName = $_.VMName
 

@@ -691,7 +691,7 @@ cls
 $adminsGroup = "TECHTOOLBOX\SharePoint Admins"
 
 Get-SPDatabase |
-    Where-Object {$_.WebApplication -like "SPAdministrationWebApplication"} |
+    where {$_.WebApplication -like "SPAdministrationWebApplication"} |
     Add-SPShellAdmin $adminsGroup
 ```
 
@@ -750,7 +750,7 @@ $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-    Where-Object { $_.IsAdministrationWebApplication -eq $true }
+    where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -1115,7 +1115,7 @@ cls
 
 ```PowerShell
 Get-SPServiceInstance |
-    Where-Object { $_.TypeName -eq "Secure Store Service" } |
+    where { $_.TypeName -eq "Secure Store Service" } |
     Start-SPServiceInstance | Out-Null
 
 $serviceApplicationName = "Secure Store Service"
@@ -1400,7 +1400,7 @@ cls
 
 ```PowerShell
 Get-SPContentDatabase -WebApplication http://ttweb |
-    Where-Object { $_.Name -ne "WSS_Content_ttweb" } |
+    where { $_.Name -ne "WSS_Content_ttweb" } |
     Remove-SPContentDatabase
 ```
 
@@ -1466,7 +1466,7 @@ cls
 
 ```PowerShell
 Get-SPContentDatabase -WebApplication http://team |
-    Where-Object { $_.Name -ne "WSS_Content_Team1" } |
+    where { $_.Name -ne "WSS_Content_Team1" } |
     Remove-SPContentDatabase
 ```
 
@@ -1529,7 +1529,7 @@ cls
 
 ```PowerShell
 Get-SPContentDatabase -WebApplication http://my |
-    Where-Object { $_.Name -ne "WSS_Content_MySites1" } |
+    where { $_.Name -ne "WSS_Content_MySites1" } |
     Remove-SPContentDatabase
 ```
 
@@ -1651,7 +1651,7 @@ Get-SPEnterpriseSearchServiceApplication |
 
 Get-SPEnterpriseSearchServiceApplication |
     Get-SPEnterpriseSearchCrawlContentSource |
-    % { $_.StartFullCrawl() }
+    foreach { $_.StartFullCrawl() }
 ```
 
 ---

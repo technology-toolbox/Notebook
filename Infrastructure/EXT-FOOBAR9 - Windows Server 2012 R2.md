@@ -132,7 +132,7 @@ Get-NetAdapter `
 ###### # Disable DHCP
 
 ```PowerShell
-@("IPv4", "IPv6") | ForEach-Object {
+@("IPv4", "IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |
@@ -1296,7 +1296,7 @@ cls
 $adminsGroup = "EXTRANET\SharePoint Admins (DEV)"
 
 Get-SPDatabase |
-    Where-Object {$_.WebApplication -like "SPAdministrationWebApplication"} |
+    where {$_.WebApplication -like "SPAdministrationWebApplication"} |
     Add-SPShellAdmin $adminsGroup
 ```
 
@@ -1334,7 +1334,7 @@ $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-    Where-Object { $_.IsAdministrationWebApplication -eq $true }
+    where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -2462,7 +2462,7 @@ Pop-Location
 $webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
 
 @("/" , "/sites/cc", "/sites/my", "/sites/Search") |
-    ForEach-Object {
+    foreach {
         Upgrade-SPSite ($webAppUrl + $_) -VersionUpgrade -Unthrottled
     }
 ```
@@ -2582,8 +2582,8 @@ $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 $webAppUrl = $env:SECURITAS_CLIENT_PORTAL_URL
 
 Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
-    ? { $_.CompatibilityLevel -lt 15 } |
-    ForEach-Object {
+    where { $_.CompatibilityLevel -lt 15 } |
+    foreach {
         $siteUrl = $_.Url
 
         Write-Host "Upgrading site ($siteUrl)..."
@@ -3150,14 +3150,14 @@ $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 $webAppUrl = $env:SECURITAS_CLOUD_PORTAL_URL
 
 Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
-    Where-Object { $_.CompatibilityLevel -lt 15 } |
-    ForEach-Object {
+    where { $_.CompatibilityLevel -lt 15 } |
+    foreach {
         $siteUrl = $_.Url
 
         Write-Host "Upgrading site ($siteUrl)..."
 
         Get-SPWeb -Site $siteUrl |
-            ForEach-Object {
+            foreach {
                 $webUrl = $_.Url
 
                 Disable-SPFeature `
@@ -3178,7 +3178,7 @@ Get-SPSite ($webAppUrl + "/sites/*") -Limit ALL |
             -Url $siteUrl
 
         Get-SPWeb -Site $siteUrl |
-            ForEach-Object {
+            foreach {
                 $webUrl = $_.Url
 
                 Enable-SPFeature `
@@ -3602,7 +3602,7 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
     Get-SPEnterpriseSearchCrawlContentSource |
-    ForEach-Object { $_.StartFullCrawl() }
+    foreach { $_.StartFullCrawl() }
 ```
 
 > **Note**
@@ -3713,8 +3713,8 @@ If ((Get-PSSnapin Microsoft.SharePoint.PowerShell `
 
 ```PowerShell
 Get-SPSite "$env:SECURITAS_CLIENT_PORTAL_URL/Post-Orders/*" -Limit ALL |
-    ? { $_.CompatibilityLevel -lt 15 } |
-    Select-Object `
+    where { $_.CompatibilityLevel -lt 15 } |
+    select `
         Url,
         @{Name="Created"; Expression={$_.RootWeb.Created}},
         @{Name="ServerRelativeUrl"; Expression={$_.RootWeb.ServerRelativeUrl}},
@@ -3730,7 +3730,7 @@ Get-SPSite "$env:SECURITAS_CLIENT_PORTAL_URL/Post-Orders/*" -Limit ALL |
 $excludeList = @()
 
 Import-Csv C:\NotBackedUp\Temp\Post-Orders.csv |
-    ? { $excludeList -notcontains $_.ServerRelativeUrl } |
+    where { $excludeList -notcontains $_.ServerRelativeUrl } |
     Export-Csv -Path C:\NotBackedUp\Temp\Post-Orders-Filtered.csv -Encoding UTF8
 ```
 
@@ -3741,7 +3741,7 @@ $batch = 0
 $maxBatch = 4
 
 Import-Csv C:\NotBackedUp\Temp\Post-Orders-Filtered.csv |
-    ForEach-Object {
+    foreach {
         $batch++
 
         If ($batch -gt $maxBatch)
@@ -3763,11 +3763,11 @@ Import-Csv C:\NotBackedUp\Temp\Post-Orders-Filtered.csv |
 
 ```PowerShell
 1..$maxBatch |
-    % {
+    foreach {
         $batch = $_
 
         Import-Csv C:\NotBackedUp\Temp\Post-Orders-Batched.csv |
-            ? { $_.Batch -eq $batch } |
+            where { $_.Batch -eq $batch } |
             Export-Csv `
                 -Path C:\NotBackedUp\Temp\Post-Orders-Batch-$batch.csv `
                 -Encoding UTF8
@@ -3800,7 +3800,7 @@ Function UpgradePostOrders
     $stopwatch = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-Stopwatch.ps1
 
     Import-Csv C:\NotBackedUp\Temp\Post-Orders-Batch-$Batch.csv |
-        ForEach-Object {
+        foreach {
             $siteUrl = $_.Url
 
             & '.\Upgrade Post Orders.ps1' -Url $siteUrl -Verbose
@@ -3850,7 +3850,7 @@ $serviceApp.Reset($false, $false)
 ```PowerShell
 $serviceApp |
     Get-SPEnterpriseSearchCrawlContentSource |
-    % { $_.StartFullCrawl() }
+    foreach { $_.StartFullCrawl() }
 ```
 
 ```PowerShell
@@ -3899,7 +3899,7 @@ Remove-NetIPAddress 2601:282:4201:e500::224 -Confirm:$false
 ```PowerShell
 $interfaceAlias = "Extranet-20"
 
-@("IPv6") | ForEach-Object {
+@("IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |
@@ -3953,7 +3953,7 @@ net use \\ICEMAN\Archive /USER:TECHTOOLBOX\jjameson
 
 ```PowerShell
 Import-Csv "\\ICEMAN\Archive\Clients\Securitas\AppSettings-UAT_2016-10-06.csv" |
-    ForEach-Object {
+    foreach {
         .\Set-AppSetting.ps1 $_.Key $_.Value $_.Description -Force -Verbose
     }
 ```
@@ -4838,7 +4838,7 @@ GO
 "@
 
 $employeePortalAccounts |
-    ForEach-Object {
+    foreach {
         $employeePortalAccount = $_
 
         $sqlcmd += [System.Environment]::NewLine
@@ -5013,7 +5013,7 @@ $interfaceAlias = Get-NetAdapter `
     -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     select -ExpandProperty Name
 
-@("IPv4", "IPv6") | ForEach-Object {
+@("IPv4", "IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |
@@ -6267,7 +6267,7 @@ attrib -r .\Branch-Manager-Mapping.csv
 $branchManagerMapping = Import-Csv .\Branch-Manager-Mapping.csv
 
 $branchManagerMapping |
-    ForEach-Object {
+    foreach {
         $email = $_.EmailAddress
 
         If (($email.EndsWith("securitasinc.com") -eq $false) `
@@ -6564,14 +6564,14 @@ $sites = @(
     "/Template-Sites/Post-Orders-fr-CA")
 
 $sites |
-    % {
+    foreach {
         $siteUrl = $clientPortalUrl + $_
 
         $site = Get-SPSite -Identity $siteUrl
 
         $group = $site.RootWeb.AssociatedVisitorGroup
 
-        $group.Users | % { $group.Users.Remove($_) }
+        $group.Users | foreach { $group.Users.Remove($_) }
 
         $group.AddUser(
             "c:0-.t|adfs|Branch Managers",
@@ -7163,7 +7163,7 @@ GO
 "@
 
 $employeePortalAccounts |
-    ForEach-Object {
+    foreach {
         $employeePortalAccount = $_
 
         $sqlcmd += [System.Environment]::NewLine

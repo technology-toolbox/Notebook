@@ -392,7 +392,7 @@ $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-	Where-Object { $_.IsAdministrationWebApplication -eq $true }
+    where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -819,7 +819,7 @@ Get-SPPowerPointServiceApplication |
 
 ```PowerShell
 Get-SPServiceInstance |
-    Where-Object { $_.TypeName -eq "PowerPoint Service" } |
+    where { $_.TypeName -eq "PowerPoint Service" } |
     Start-SPServiceInstance | Out-Null
 ```
 
@@ -1224,7 +1224,7 @@ $permissions = "Full Control"
 $claim = New-SPClaimsPrincipal -Identity $sharePointAdminsGroup `
     -IdentityType WindowsSecurityGroupName
 
-Get-SPWebApplication | ForEach-Object {
+Get-SPWebApplication | foreach {
     $webApp = $_
 
     [Microsoft.SharePoint.Administration.SPPolicyRole] $policyRole =
@@ -1282,7 +1282,7 @@ $vmNetwork = Get-SCVMNetwork -Name "Extranet-20 VM Network"
 $ipAddressPool= Get-SCStaticIPAddressPool -Name "Extranet-20 Address Pool"
 
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
-    ? { $_.SlotId -eq 0 }
+    where { $_.SlotId -eq 0 }
 
 Stop-SCVirtualMachine $vmName
 

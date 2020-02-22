@@ -1051,7 +1051,7 @@ $replyAddress = "no-reply@technologytoolbox.com"
 $characterSet = 65001 # Unicode (UTF-8)
 
 $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration |
-	Where-Object { $_.IsAdministrationWebApplication -eq $true }
+    where { $_.IsAdministrationWebApplication -eq $true }
 
 $centralAdmin.UpdateMailSettings(
     $smtpServer,
@@ -1397,7 +1397,7 @@ cls
 ```PowerShell
 Get-SPEnterpriseSearchServiceApplication |
     Get-SPEnterpriseSearchCrawlContentSource |
-    % { $_.StartFullCrawl() }
+    foreach { $_.StartFullCrawl() }
 ```
 
 ### Install additional service packs and updates
@@ -1458,7 +1458,7 @@ Remove-NetIPAddress 2601:282:4201:e500::221 -Confirm:$false
 ```PowerShell
 $interfaceAlias = "LAN 1 - 192.168.10.x"
 
-@("IPv6") | ForEach-Object {
+@("IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |

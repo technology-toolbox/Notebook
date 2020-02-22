@@ -290,7 +290,7 @@ cls
 
 ```PowerShell
 Get-NetAdapter |
-    ? { $_.Status -eq "Disconnected" } |
+    where { $_.Status -eq "Disconnected" } |
     Rename-NetAdapter -NewName "Back end (network virtualization)"
 ```
 

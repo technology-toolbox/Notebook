@@ -838,7 +838,7 @@ $vmNetwork = Get-SCVMNetwork -Name "Extranet VM Network"
 $ipPool = Get-SCStaticIPAddressPool -Name "Extranet Address Pool"
 
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName |
-    ? { $_.SlotId -eq 0 }
+    where { $_.SlotId -eq 0 }
 
 Stop-SCVirtualMachine $vmName
 

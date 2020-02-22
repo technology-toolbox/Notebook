@@ -229,7 +229,7 @@ New-NetFirewallRule `
 $profile = Get-NetFirewallProfile "Domain"
 
 Get-NetFirewallRule -AssociatedNetFirewallProfile $profile |
-    Where-Object {
+    where {
         $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv4-In)" `
         -or $_.DisplayName -eq "File and Printer Sharing (Echo Request - ICMPv6-In)" } |
     Enable-NetFirewallRule

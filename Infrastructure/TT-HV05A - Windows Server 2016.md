@@ -822,7 +822,7 @@ net localgroup Administrators TECHTOOLBOX\s-vmm01-mgmt /ADD
 $scriptBlock = [ScriptBlock]::Create($command)
 
 @("TT-HV05A", "TT-HV05B") |
-    ForEach-Object {
+    foreach {
         Invoke-Command -ComputerName $_ -ScriptBlock $scriptBlock
     }
 ```
@@ -879,7 +879,7 @@ $networkAdapters += Get-SCVMHostNetworkAdapter `
     -Name "Intel(R) I210 Gigabit Network Connection #2"
 
 $networkAdapters |
-    % {
+    foreach {
         $networkAdapter = $_
 
         Set-SCVMHostNetworkAdapter `
@@ -924,7 +924,7 @@ New-SCVirtualNetwork `
 
 ```PowerShell
 Get-SCVirtualNetworkAdapter -VMHost $vmHost |
-    ? { $_.Name -in $("Storage 1", "Storage 2") } |
+    where { $_.Name -in $("Storage 1", "Storage 2") } |
     Remove-SCVirtualNetworkAdapter
 ```
 
@@ -1056,8 +1056,8 @@ vEthernet (Embedded Team Switch) Disabled
 vEthernet (Live Migration)       Disabled
 
 Get-NetAdapter |
-    ? { $_.Name -like 'vEthernet*' } |
-    % {
+    where { $_.Name -like 'vEthernet*' } |
+    foreach {
         Set-NetAdapterAdvancedProperty `
             -Name $_.Name `
             -DisplayName "Jumbo Packet" -RegistryValue 9014
@@ -1283,10 +1283,10 @@ cls
 #### # Online and initialize disks
 
 ```PowerShell
-$iscsiDisks = Get-Disk | ? { $_.BusType -eq "iSCSI" }
+$iscsiDisks = Get-Disk | where { $_.BusType -eq "iSCSI" }
 
 $iscsiDisks |
-    % {
+    foreach {
         $disk = $_
 
         If ($disk.IsOffline -eq $true) {
@@ -1693,10 +1693,10 @@ cls
 #### # Online and initialize disks
 
 ```PowerShell
-$iscsiDisks = Get-Disk | ? { $_.BusType -eq "iSCSI" }
+$iscsiDisks = Get-Disk | where { $_.BusType -eq "iSCSI" }
 
 $iscsiDisks |
-    % {
+    foreach {
         $disk = $_
 
         If ($disk.IsOffline -eq $true) {

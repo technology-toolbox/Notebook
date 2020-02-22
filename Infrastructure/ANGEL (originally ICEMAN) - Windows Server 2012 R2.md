@@ -889,7 +889,7 @@ Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
 #### # Enable DHCP
 
 ```PowerShell
-@("IPv4", "IPv6") | ForEach-Object {
+@("IPv4", "IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |
@@ -979,7 +979,7 @@ Get-NetAdapter $interfaceAlias | Remove-NetIPAddress -Confirm:$false
 #### # Enable DHCP
 
 ```PowerShell
-@("IPv4", "IPv6") | ForEach-Object {
+@("IPv4", "IPv6") | foreach {
     $addressFamily = $_
 
     $interface = Get-NetAdapter $interfaceAlias |

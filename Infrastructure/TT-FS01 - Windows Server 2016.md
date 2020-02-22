@@ -302,13 +302,13 @@ robocopy '\\ICEMAN\E$\Shares' E:\Shares /COPYALL /NP /E /MIR `
 
 ```PowerShell
 Get-ChildItem D:\Shares, E:\Shares |
-    % {
-    New-SmbShare `
-        -Name $_.Name `
-        -Path $_.FullName `
-        -CachingMode None `
-        -ChangeAccess Everyone
-}
+    foreach {
+        New-SmbShare `
+            -Name $_.Name `
+            -Path $_.FullName `
+            -CachingMode None `
+            -ChangeAccess Everyone
+    }
 ```
 
 ### Change the location for WSUS content
@@ -491,7 +491,7 @@ $vm = Get-SCVirtualMachine TT-FS01
 Stop-SCVirtualMachine $vm
 
 $networkAdapter =  Get-SCVirtualNetworkAdapter -VM $vm |
-    ? { $_.SlotId -eq 0 }
+    where { $_.SlotId -eq 0 }
 
 $macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
 
@@ -763,12 +763,12 @@ function Change-SharePath {
     )
 
     $RegPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Shares'
-    dir -Path $RegPath | Select-Object -ExpandProperty Property | ForEach-Object {
+    dir -Path $RegPath | select -ExpandProperty Property | foreach {
         $ShareName = $_
         $ShareData = Get-ItemProperty -Path $RegPath -Name $ShareName |
-            Select-Object -ExpandProperty $ShareName
+            select -ExpandProperty $ShareName
 
-        if ($ShareData | Where-Object { $_ -eq  "Path=$OldPath"}) {
+        if ($ShareData | where { $_ -eq  "Path=$OldPath"}) {
             $ShareData = $ShareData -replace [regex]::Escape("Path=$OldPath"), "Path=$NewPath"
 
             if ($PSCmdlet.ShouldProcess($ShareName, 'Change-SharePath')) {
