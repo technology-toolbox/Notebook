@@ -500,7 +500,7 @@ Copy-Item $source $destination
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 & "\\ICEMAN\Public\Validation Report 2017.01.14 At 06.40.21.htm"
@@ -558,7 +558,7 @@ Copy-Item $source $destination
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 & "\\ICEMAN\Public\Create Cluster Wizard EXT-GW01-FC on 2017.01.14 At 06.44.22.htm"
@@ -580,7 +580,7 @@ Copy-Item $source $destination
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls

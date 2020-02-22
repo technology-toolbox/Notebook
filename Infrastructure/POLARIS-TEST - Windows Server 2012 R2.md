@@ -9,7 +9,7 @@ Tuesday, April 28, 2015
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## Create VM using Virtual Machine Manager
 
@@ -135,7 +135,7 @@ New-NetFirewallRule `
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ### # Add disks to virtual machine
 
@@ -200,7 +200,7 @@ Get-Disk 2 |
 
 ---
 
-**XAVIER1**
+**XAVIER1** - Run as administrator
 
 ### # Create the SharePoint farm service account (TEST)
 
@@ -362,7 +362,7 @@ Pasted from <[http://support.microsoft.com/kb/2765260](http://support.microsoft.
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ### # Insert the SharePoint 2013 installation media
 
@@ -434,7 +434,7 @@ Clear the checkbox and click **Close**.
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## # Checkpoint VM
 
@@ -623,7 +623,7 @@ cls
 
 ---
 
-**ICEMAN**
+**ICEMAN** - Run as administrator
 
 ```Console
 PowerShell
@@ -657,7 +657,7 @@ Backup-SPFarm `
 
 ---
 
-**ICEMAN**
+**ICEMAN** - Run as administrator
 
 ### # Create share for production backups
 
@@ -1250,7 +1250,7 @@ Set-SPProfileServiceApplication `
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## # Delete VM checkpoint - "Before SharePoint Server 2013 configuration"
 
@@ -1493,7 +1493,7 @@ Set-SPWOPIZone -zone "external-https"
 
 ---
 
-**EXT-WAC02A**
+**EXT-WAC02A** - Run as administrator
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `

@@ -57,7 +57,7 @@ Get-SPTrustedRootAuthority |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -170,7 +170,7 @@ New-WebBinding `
 
 ---
 
-**EXT-WEB02A**
+**EXT-WEB02A** - Run as administrator
 
 ```PowerShell
 cls
@@ -196,7 +196,7 @@ New-WebBinding `
 
 ---
 
-**EXT-WEB02B**
+**EXT-WEB02B** - Run as administrator
 
 ```PowerShell
 cls
@@ -252,7 +252,7 @@ Tracking ID: **UA-25899478-2**
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -279,7 +279,7 @@ robocopy $source $destination $backupFile
 
 ---
 
-**EXT-SQL02**
+**EXT-SQL02** - Run as administrator
 
 ```PowerShell
 cls
@@ -682,7 +682,7 @@ $tokenIssuer.Update()
 
 ---
 
-**EXT-SQL02**
+**EXT-SQL02** - Run as administrator
 
 ```PowerShell
 cls
@@ -710,7 +710,7 @@ Set-Location C:
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 #### Configure SSO credentials for users
 
@@ -735,7 +735,7 @@ TrackTik username:** opanduro2m**
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -784,7 +784,7 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
 
 ---
 
-**EXT-SQL02**
+**EXT-SQL02** - Run as administrator
 
 ```PowerShell
 cls
@@ -982,7 +982,7 @@ Copy-Item `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -1065,7 +1065,7 @@ New-WebBinding `
 
 ---
 
-**EXT-WEB02A**
+**EXT-WEB02A** - Run as administrator
 
 ```PowerShell
 cls
@@ -1091,7 +1091,7 @@ New-WebBinding `
 
 ---
 
-**EXT-WEB02B**
+**EXT-WEB02B** - Run as administrator
 
 ```PowerShell
 cls
@@ -1123,7 +1123,7 @@ Tracking ID: **UA-25899478-3**
 
 ---
 
-**TT-FS01**
+**TT-FS01** - Run as administrator
 
 ```PowerShell
 cls
@@ -1164,7 +1164,7 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLOUD_PORTAL_URL |
 
 ---
 
-**EXT-SQL02**
+**EXT-SQL02** - Run as administrator
 
 ```PowerShell
 cls
@@ -1371,7 +1371,7 @@ $webApp | New-SPWebApplicationExtension `
 
 ---
 
-**EXT-SQL02**
+**EXT-SQL02** - Run as administrator
 
 ```PowerShell
 cls

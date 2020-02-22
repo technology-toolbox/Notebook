@@ -506,7 +506,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -570,7 +570,7 @@ Resize-Partition `
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

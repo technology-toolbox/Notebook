@@ -89,7 +89,7 @@ logoff
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -269,7 +269,7 @@ Enable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls

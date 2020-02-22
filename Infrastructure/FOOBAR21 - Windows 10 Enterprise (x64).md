@@ -483,7 +483,7 @@ Start-Process -FilePath $setupPath -Wait
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

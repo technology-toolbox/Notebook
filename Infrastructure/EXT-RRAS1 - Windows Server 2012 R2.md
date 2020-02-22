@@ -360,7 +360,7 @@ cls
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ### # Download root CA and issuing CA certificates
 
@@ -451,7 +451,7 @@ cls
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -498,7 +498,7 @@ Pop-Location
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls

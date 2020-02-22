@@ -247,7 +247,7 @@ Remove-VMSnapshot CRYPTID
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -392,7 +392,7 @@ Rename-Item `
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -457,7 +457,7 @@ dir A:\
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -511,7 +511,7 @@ Set-VMFloppyDiskDrive -ComputerName $vmHost -VMName $vmName -Path $vfdPath
 
 ---
 
-**CIPHER01**
+**CIPHER01** - Run as administrator
 
 ```PowerShell
 cls
@@ -564,7 +564,7 @@ Pop-Location
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -587,7 +587,7 @@ Invoke-Command -ComputerName $vmHost -ScriptBlock $scriptBlock
 
 ---
 
-**CIPHER01**
+**CIPHER01** - Run as administrator
 
 ```PowerShell
 cls
@@ -676,7 +676,7 @@ copy 'C:\CIPHER01.corp.technologytoolbox.com_Technology Toolbox Issuing Certific
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -768,7 +768,7 @@ certutil.exe -verify 'A:\Technology Toolbox Issuing Certificate Authority 01(1).
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -816,7 +816,7 @@ Set-VMFloppyDiskDrive -ComputerName $vmHost -VMName $vmName -Path $vfdPath
 
 ---
 
-**CIPHER01**
+**CIPHER01** - Run as administrator
 
 #### Install new certificate for issuing CA
 
@@ -829,7 +829,7 @@ Set-VMFloppyDiskDrive -ComputerName $vmHost -VMName $vmName -Path $vfdPath
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

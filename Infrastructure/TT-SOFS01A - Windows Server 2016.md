@@ -228,7 +228,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -631,7 +631,7 @@ Copy-Item $source $destination
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 & "\\TT-FS01\Public\Validation Report 2017.01.31 At 09.43.52.htm"

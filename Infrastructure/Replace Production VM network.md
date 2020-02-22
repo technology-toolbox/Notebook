@@ -124,7 +124,7 @@ cls
 
 ---
 
-**CON-DC1**
+**CON-DC1** - Run as administrator
 
 ```PowerShell
 cls
@@ -208,7 +208,7 @@ Add-DnsServerPrimaryZone `
 
 ---
 
-**CON-DC2**
+**CON-DC2** - Run as administrator
 
 ```PowerShell
 cls

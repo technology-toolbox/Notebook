@@ -9,7 +9,7 @@ Saturday, January 04, 2014
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## Create VM using Virtual Machine Manager
 
@@ -129,7 +129,7 @@ New-NetFirewallRule `
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## # Add disks to virtual machine
 
@@ -249,7 +249,7 @@ Install-WindowsFeature NET-Framework-Core -Source $sourcePath
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 #### # Insert the SQL Server 2014 installation media
 
@@ -519,7 +519,7 @@ EXEC sp_executesql @sqlStatement;
 
 ---
 
-**HAVOK**
+**HAVOK** - Run as administrator
 
 ```SQL
 BACKUP DATABASE [ReportServer_TFS]
@@ -571,7 +571,7 @@ WITH NOFORMAT, NOINIT
 
 ---
 
-**HAVOK**
+**HAVOK** - Run as administrator
 
 ```XML
 <Backup xmlns="http://schemas.microsoft.com/analysisservices/2003/engine">
@@ -640,7 +640,7 @@ GO
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ### # Create the "TFS reporting" service account
 
@@ -864,7 +864,7 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 
 ---
 
-**TT-HV02B**
+**TT-HV02B** - Run as administrator
 
 ### # Expand primary VHD for virtual machine
 
@@ -1019,7 +1019,7 @@ Move-SCVirtualMachine `
 
 ---
 
-**TT-HV02A**
+**TT-HV02A** - Run as administrator
 
 ```PowerShell
 cls
@@ -1060,7 +1060,7 @@ Screen clipping taken: 11/17/2017 4:41 AM
 
 ---
 
-**FOOBAR10**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -1101,7 +1101,7 @@ Screen clipping taken: 11/17/2017 4:45 AM
 
 ---
 
-**FOOBAR10**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -1127,7 +1127,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ### # Increase the size of "Log01" VHD
 
@@ -1199,7 +1199,7 @@ Screen clipping taken: 3/27/2018 5:45 AM
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls

@@ -56,7 +56,7 @@ logoff
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## # Remove disk from virtual CD/DVD drive
 
@@ -168,7 +168,7 @@ New-NetFirewallRule `
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ### # Create Data01, Log01, Temp01, and Backup01 VHDs
 
@@ -538,7 +538,7 @@ GO
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## # Checkpoint VM - "Baseline SharePoint Server 2013 configuration"
 
@@ -562,7 +562,7 @@ Start-VM -ComputerName $vmHost -VMName $vmName
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ### # Create the SharePoint farm service account (DEV)
 
@@ -920,7 +920,7 @@ mkdir \\ICEMAN\Backups\HAVOK
 
 ---
 
-**HAVOK**
+**HAVOK** - Run as administrator
 
 ### -- Backup SharePoint databases
 
@@ -1671,7 +1671,7 @@ Set-SPWOPIZone -zone "external-https"
 
 ---
 
-**EXT-WAC02A**
+**EXT-WAC02A** - Run as administrator
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `

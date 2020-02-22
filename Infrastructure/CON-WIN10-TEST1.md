@@ -237,7 +237,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**FOOBAR16**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

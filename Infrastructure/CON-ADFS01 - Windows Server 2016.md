@@ -280,7 +280,7 @@ For lab work the delay can be overridden using the EffectiveTime parameter.
 
 ---
 
-**CON-DC1**
+**CON-DC1** - Run as administrator
 
 ```PowerShell
 Add-KdsRootKey -EffectiveTime (Get-Date).AddHours(-10)
@@ -395,7 +395,7 @@ Restart-Computer
 
 ---
 
-**CON-DC1**
+**CON-DC1** - Run as administrator
 
 #### # Create A record - "fs.contoso.com"
 

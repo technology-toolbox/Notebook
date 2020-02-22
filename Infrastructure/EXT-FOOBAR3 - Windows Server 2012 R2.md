@@ -239,7 +239,7 @@ Add-Computer `
 
 ---
 
-**EXT-DC01**
+**EXT-DC01** - Run as administrator
 
 ```PowerShell
 $computerName = "EXT-FOOBAR3"
@@ -1341,7 +1341,7 @@ Set-SPWOPIZone -zone "external-https"
 
 ---
 
-**EXT-WAC02A**
+**EXT-WAC02A** - Run as administrator
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
@@ -3147,7 +3147,7 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls

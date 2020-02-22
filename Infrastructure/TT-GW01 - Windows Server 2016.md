@@ -75,7 +75,7 @@ logoff
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -231,7 +231,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls

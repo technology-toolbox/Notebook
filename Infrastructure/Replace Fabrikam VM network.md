@@ -83,7 +83,7 @@ cls
 
 ---
 
-**FAB-DC01**
+**FAB-DC01** - Run as administrator
 
 ```PowerShell
 cls
@@ -167,7 +167,7 @@ Add-DnsServerPrimaryZone `
 
 ---
 
-**FAB-DC02**
+**FAB-DC02** - Run as administrator
 
 ```PowerShell
 cls

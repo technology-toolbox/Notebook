@@ -775,7 +775,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -872,7 +872,7 @@ msiexec.exe /i $msiPath `
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls

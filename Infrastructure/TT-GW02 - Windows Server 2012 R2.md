@@ -164,7 +164,7 @@ ping ICEMAN -f -l 8900
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls

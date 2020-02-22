@@ -249,7 +249,7 @@ Restart-Computer
 
 ---
 
-**EXT-DC01**
+**EXT-DC01** - Run as administrator
 
 ```PowerShell
 $computerName = "EXT-SQL01A"
@@ -865,7 +865,7 @@ cls
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -912,7 +912,7 @@ Pop-Location
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -1074,7 +1074,7 @@ msiexec.exe /i $msiPath `
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls

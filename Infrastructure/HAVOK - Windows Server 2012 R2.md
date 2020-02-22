@@ -9,7 +9,7 @@ Tuesday, September 8, 2015
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## # Create virtual machine
 
@@ -143,7 +143,7 @@ New-NetFirewallRule `
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## # Add disks to virtual machine
 
@@ -263,7 +263,7 @@ Install-WindowsFeature NET-Framework-Core -Source $sourcePath
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 #### # Insert the SQL Server 2014 installation media
 
@@ -683,7 +683,7 @@ WITH FILE = 1, NOUNLOAD, STATS = 5,
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ### # Create the "TFS reporting" service account
 
@@ -798,7 +798,7 @@ On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the follo
 
 ---
 
-**JUGGERNAUT**
+**JUGGERNAUT** - Run as administrator
 
 ```PowerShell
 $productionServer = 'HAVOK'
@@ -886,7 +886,7 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 
 ---
 
-**FOOBAR10**
+**FOOBAR10** - Run as administrator
 
 ### # Expand primary VHD for virtual machine
 
@@ -917,7 +917,7 @@ Resize-Partition -DriveLetter C -Size $maxSize
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ### # Increase the size of "Log01" VHD
 
@@ -1048,7 +1048,7 @@ $installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
 
 ---
 
-**FOOBAR10**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -1091,7 +1091,7 @@ Screen clipping taken: 11/18/2017 2:21 PM
 
 ---
 
-**FOOBAR10**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -1137,7 +1137,7 @@ Screen clipping taken: 3/27/2018 5:51 AM
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls

@@ -696,7 +696,7 @@ Copy-Item $source $destination
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 & "\\TT-FS01\Public\Validation Report 2018.03.08 At 10.06.30.htm"
@@ -734,7 +734,7 @@ Copy-Item $source $destination
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 & "\\TT-FS01\Public\Create Cluster Wizard TT-HV05-FC on 2018.03.08 At 10.09.29.htm"
@@ -766,7 +766,7 @@ Enter-PSSession TT-FS01
 
 ---
 
-**TT-FS01**
+**TT-FS01** - Run as administrator
 
 ###### # Create folder for specific failover cluster (TT-HV05-FC)
 
@@ -1471,7 +1471,7 @@ Copy-Item $source $destination
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 & "\\TT-FS01\Public\Validation Report 2018.03.15 At 15.36.19.htm"
@@ -1620,7 +1620,7 @@ Pop-Location
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -1840,7 +1840,7 @@ Copy-Item $source $destination
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 & "\\TT-FS01\Public\Validation Report 2018.03.31 At 05.11.40.htm"
@@ -2369,7 +2369,7 @@ iscsi02-Silver-03 TT-HV05C      NotFileSystemRedirected
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -2589,7 +2589,7 @@ iscsi02-Silver-03 TT-HV05C      NotFileSystemRedirected
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

@@ -1520,7 +1520,7 @@ Set-SPWOPIZone -zone external-https
 
 ---
 
-**EXT-WAC02A**
+**EXT-WAC02A** - Run as administrator
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
@@ -1538,7 +1538,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -5446,7 +5446,7 @@ Set-Location C:
 
 ---
 
-**FOOBAR10**
+**FOOBAR10** - Run as administrator
 
 ### # Expand primary VHD for virtual machine
 
@@ -5537,7 +5537,7 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -5643,7 +5643,7 @@ Remove-Item C:\Shares\Builds\ClientPortal\4.0.681.0 `
 
 ---
 
-**FOOBAR10**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -5694,7 +5694,7 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -5868,7 +5868,7 @@ TrackTik username:** opanduro2m**
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -5999,7 +5999,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Write-ElapsedTime.ps1 $stopwatch
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -6182,7 +6182,7 @@ Pop-Location
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -6439,7 +6439,7 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -6981,7 +6981,7 @@ $webApp.Update()
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -7780,7 +7780,7 @@ Remove-Item $tempJsFile
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -8210,7 +8210,7 @@ $webFeatures = @(
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -8280,7 +8280,7 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls

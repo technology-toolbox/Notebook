@@ -15,7 +15,7 @@ Friday, March 30, 2018
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

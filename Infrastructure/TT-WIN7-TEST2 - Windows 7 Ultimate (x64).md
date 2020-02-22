@@ -303,7 +303,7 @@ New-SCVMCheckpoint -VM $vm -Name Baseline
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

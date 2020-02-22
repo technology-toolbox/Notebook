@@ -802,7 +802,7 @@ This step is no longer applicable (i.e. licensing information is no longer inclu
 
 ---
 
-**TT-SQL02**
+**TT-SQL02** - Run as administrator
 
 ```PowerShell
 cls
@@ -846,7 +846,7 @@ From <[https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy]
 
 ---
 
-**TT-SQL02**
+**TT-SQL02** - Run as administrator
 
 ```PowerShell
 cls

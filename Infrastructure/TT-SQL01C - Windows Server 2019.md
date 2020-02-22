@@ -1604,7 +1604,7 @@ GO
 
 ---
 
-**TT-SCOM03**
+**TT-SCOM03** - Run as administrator
 
 ```PowerShell
 cls
@@ -1698,7 +1698,7 @@ SELECT * FROM sys.trusted_assemblies
 
 ---
 
-**TT-SCOM03**
+**TT-SCOM03** - Run as administrator
 
 ```PowerShell
 cls

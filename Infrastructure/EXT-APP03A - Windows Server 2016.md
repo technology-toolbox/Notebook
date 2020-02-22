@@ -998,7 +998,7 @@ Set-SPWOPIZone -zone external-https
 
 ---
 
-**EXT-WAC02A**
+**EXT-WAC02A** - Run as administrator
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
@@ -1018,7 +1018,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ---
 
-**EXT-SQL03**
+**EXT-SQL03** - Run as administrator
 
 ```PowerShell
 cls
@@ -1056,7 +1056,7 @@ robocopy $source $destination $filter /XF "WSS_Content_CloudPortal_*"
 
 ---
 
-**EXT-SQL03**
+**EXT-SQL03** - Run as administrator
 
 ```PowerShell
 cls
@@ -1209,7 +1209,7 @@ Enable-NetFirewallRule `
 
 ---
 
-**EXT-WEB03A**
+**EXT-WEB03A** - Run as administrator
 
 ```PowerShell
 Remove-SPDistributedCacheServiceInstance
@@ -1225,7 +1225,7 @@ Enable-NetFirewallRule `
 
 ---
 
-**EXT-WEB03B**
+**EXT-WEB03B** - Run as administrator
 
 ```PowerShell
 Remove-SPDistributedCacheServiceInstance
@@ -1253,7 +1253,7 @@ Add-SPDistributedCacheServiceInstance
 
 ---
 
-**EXT-WEB03A**
+**EXT-WEB03A** - Run as administrator
 
 ```PowerShell
 Add-SPDistributedCacheServiceInstance
@@ -1263,7 +1263,7 @@ Add-SPDistributedCacheServiceInstance
 
 ---
 
-**EXT-WEB03B**
+**EXT-WEB03B** - Run as administrator
 
 ```PowerShell
 Add-SPDistributedCacheServiceInstance
@@ -2200,7 +2200,7 @@ New-WebBinding `
 
 ---
 
-**EXT-WEB03A**
+**EXT-WEB03A** - Run as administrator
 
 ```PowerShell
 cls
@@ -2226,7 +2226,7 @@ New-WebBinding `
 
 ---
 
-**EXT-WEB03B**
+**EXT-WEB03B** - Run as administrator
 
 ```PowerShell
 cls
@@ -2350,7 +2350,7 @@ My Site Host location: **[http://client-test.securitasinc.com/sites/my](http://c
 
 ---
 
-**EXT-SQL03**
+**EXT-SQL03** - Run as administrator
 
 ```PowerShell
 cls
@@ -2924,7 +2924,7 @@ $tokenIssuer.Update()
 
 ---
 
-**EXT-SQL03**
+**EXT-SQL03** - Run as administrator
 
 ```PowerShell
 cls
@@ -2954,7 +2954,7 @@ Set-Location C:
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 #### Configure SSO credentials for users
 
@@ -2979,7 +2979,7 @@ TrackTik username:** opanduro2m**
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -3028,7 +3028,7 @@ Get-SPContentDatabase -WebApplication $env:SECURITAS_CLIENT_PORTAL_URL |
 
 ---
 
-**EXT-SQL03**
+**EXT-SQL03** - Run as administrator
 
 ```PowerShell
 cls
@@ -3291,7 +3291,7 @@ Install Cloud Portal v2.0
 
 ---
 
-**EXT-DC01**
+**EXT-DC01** - Run as administrator
 
 ```PowerShell
 cls
@@ -3330,7 +3330,7 @@ New-ADUser `
 
 ---
 
-**EXT-SQL03**
+**EXT-SQL03** - Run as administrator
 
 ```PowerShell
 cls
@@ -4338,7 +4338,7 @@ Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
 
 ---
 
-**EXT-DC01**
+**EXT-DC01** - Run as administrator
 
 ```PowerShell
 Disable-ADAccount -Identity setup-sharepoint
@@ -4414,7 +4414,7 @@ Remove-Item $certFile
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -4817,7 +4817,7 @@ Set-AdfsClaimsProviderTrust `
 
 ---
 
-**EXT-SQL03**
+**EXT-SQL03** - Run as administrator
 
 ```PowerShell
 cls
@@ -5146,7 +5146,7 @@ Remove-Item $tempJsFile
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls

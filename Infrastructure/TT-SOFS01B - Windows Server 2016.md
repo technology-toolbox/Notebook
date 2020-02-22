@@ -184,7 +184,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls

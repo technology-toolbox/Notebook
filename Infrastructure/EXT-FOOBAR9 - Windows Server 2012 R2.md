@@ -235,7 +235,7 @@ Add-Computer `
 
 ---
 
-**EXT-DC01**
+**EXT-DC01** - Run as administrator
 
 ```PowerShell
 $computerName = "EXT-FOOBAR9"
@@ -1367,7 +1367,7 @@ Set-SPWOPIZone -zone "external-https"
 
 ---
 
-**EXT-WAC02A**
+**EXT-WAC02A** - Run as administrator
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
@@ -4590,7 +4590,7 @@ Set-Location C:
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 #### Configure TrackTik credentials for Branch Manager
 
@@ -4640,7 +4640,7 @@ Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
 
 ---
 
-**784837-SQLCLUS1**
+**784837-SQLCLUS1** - Run as administrator
 
 ```PowerShell
 cls
@@ -4698,7 +4698,7 @@ Set-Location C:
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -4901,7 +4901,7 @@ Set-Location C:
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 #### Configure SSO credentials for users
 
@@ -5202,7 +5202,7 @@ Remove-Item -Path $tempPath -Recurse -Confirm:$true
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -5300,7 +5300,7 @@ Get-SPEnterpriseSearchServiceApplication "Search Service Application" |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -5853,7 +5853,7 @@ $webApp.Update()
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -5963,7 +5963,7 @@ Add-DnsServerResourceRecordA `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -6665,7 +6665,7 @@ Remove-Item $tempJsFile
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -7023,7 +7023,7 @@ Remove-Item C:\NotBackedUp\Builds\Securitas\ClientPortal\4.0.697.0 `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -7226,7 +7226,7 @@ Set-Location C:
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 #### Configure SSO credentials for users
 
@@ -7421,7 +7421,7 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -7518,7 +7518,7 @@ npm install --global rimraf@2.6.2
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -7553,7 +7553,7 @@ Start-Process `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -7847,7 +7847,7 @@ $webFeatures = @(
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -7917,7 +7917,7 @@ Remove-Item "C:\NotBackedUp\Temp\$patch" -Recurse
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -8068,7 +8068,7 @@ icacls $logsFolder /grant "NT AUTHORITY\LOCAL SERVICE:(OI)(CI)(R,W,DC)"
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -8117,7 +8117,7 @@ Remove-Item $installerPath
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -8223,7 +8223,7 @@ Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -8351,7 +8351,7 @@ Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -8489,7 +8489,7 @@ Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -8593,7 +8593,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Update-VMBaseline `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -8709,7 +8709,7 @@ Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -8909,7 +8909,7 @@ Get-VMSnapshot -ComputerName $vmHost -VMName $vmName |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls

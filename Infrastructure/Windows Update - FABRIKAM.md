@@ -178,7 +178,7 @@ Get-Content "\\FAB-FS01\Users$\jjameson-admin\My Documents\Computer List for Win
 
 ---
 
-**TT-ADMIN03**
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls

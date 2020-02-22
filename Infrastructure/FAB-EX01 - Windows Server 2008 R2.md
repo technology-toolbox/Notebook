@@ -13,7 +13,7 @@ Wednesday, May 13, 2015
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 $VerbosePreference = "Continue"
@@ -135,7 +135,7 @@ New-AzureVM `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 #### # Configure endpoint ACLS
 
@@ -172,7 +172,7 @@ $endpointNames |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 Get-AzureVM -ServiceName fabrikam-extranet -Name FAB-EX01 |
@@ -225,7 +225,7 @@ copy "\\iceman.corp.technologytoolbox.com\Products\Mozilla\Firefox\Firefox Setup
 
 ---
 
-**FAB-DC01**
+**FAB-DC01** - Run as administrator
 
 #### # Create CNAME record - "autodiscover.fabrikam.com"
 
@@ -783,7 +783,7 @@ New-EdgeSyncServiceConfig
 
 ---
 
-**FAB-DC01**
+**FAB-DC01** - Run as administrator
 
 ### # Create OU for conference rooms
 

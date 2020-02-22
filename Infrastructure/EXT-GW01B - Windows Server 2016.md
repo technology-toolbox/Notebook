@@ -366,7 +366,7 @@ Install-WindowsFeature -Name Failover-Clustering -IncludeManagementTools
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls

@@ -186,7 +186,7 @@ ping ICEMAN.corp.technologytoolbox.com -f -l 8900
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -973,7 +973,7 @@ cls
 
 ---
 
-**EXT-FOOBAR2**
+**EXT-FOOBAR2** - Run as administrator
 
 ### # Backup "Fabrikam Shipping" site collection
 
@@ -1011,7 +1011,7 @@ stsadm -o restore -url http://cloud-local.securitasinc.com/sites/Fabrikam-Shippi
 
 ---
 
-**EXT-FOOBAR2**
+**EXT-FOOBAR2** - Run as administrator
 
 ### # Backup "Online Provisioning" site collection
 
@@ -1264,7 +1264,7 @@ WHERE BranchManagerUserName = 'PNKUS\jjameson'
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls

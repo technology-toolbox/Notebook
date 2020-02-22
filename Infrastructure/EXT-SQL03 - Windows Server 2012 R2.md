@@ -1196,7 +1196,7 @@ Remove-Item $certFile
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls

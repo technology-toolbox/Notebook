@@ -13,7 +13,7 @@ Wednesday, May 10, 2017
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 $VerbosePreference = "Continue"
@@ -142,7 +142,7 @@ New-AzureVM `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 $vmName = "EXT-DC07"
@@ -266,7 +266,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**EXT-DC01**
+**EXT-DC01** - Run as administrator
 
 ### # Create Active Directory site
 

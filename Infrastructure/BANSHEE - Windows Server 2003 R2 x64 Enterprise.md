@@ -188,7 +188,7 @@ This product must be installed on Windows Vista SP2, Windows Server 2008 SP2, or
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -220,7 +220,7 @@ ACTIONS_USE_COMPUTER_ACCOUNT=1
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -288,7 +288,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -338,7 +338,7 @@ Restart the server
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -370,7 +370,7 @@ msiexec.exe /i D:\agent\AMD64\MOMAgent.msi ^
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls

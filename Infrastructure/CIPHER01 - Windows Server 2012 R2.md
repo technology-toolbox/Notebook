@@ -9,7 +9,7 @@ Sunday, February 23, 2014
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ## Deploy and configure infrastructure
 
@@ -1102,7 +1102,7 @@ In the **Site Bindings** window, click **Close**.
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 $computer = 'CIPHER01'
@@ -1183,7 +1183,7 @@ Event Description: Active Directory Certificate Services did not start: Could no
 
 ---
 
-**ICEMAN**
+**ICEMAN** - Run as administrator
 
 ##### # Start root CA (CRYPTID)
 
@@ -1195,7 +1195,7 @@ Start-VM CRYPTID
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ##### # Republish the CRL
 
@@ -1209,7 +1209,7 @@ certutil -CRL
 
 ---
 
-**ICEMAN**
+**ICEMAN** - Run as administrator
 
 ##### # Create virtual floppy disk on Hyper-V host
 
@@ -1229,7 +1229,7 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $vfdPath
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ##### # Format virtual floppy disk
 
@@ -1261,7 +1261,7 @@ dir A:\
 
 ---
 
-**ICEMAN**
+**ICEMAN** - Run as administrator
 
 ##### # Remove virtual floppy disk from root CA
 
@@ -1281,7 +1281,7 @@ Stop-VM $vmName
 
 ---
 
-**BEAST**
+**BEAST** - Run as administrator
 
 ##### # Configure virtual floppy disk containing CRL from root CA
 
@@ -1330,7 +1330,7 @@ Restart-Computer
 
 ---
 
-**BEAST**
+**BEAST** - Run as administrator
 
 ```PowerShell
 cls
@@ -1389,7 +1389,7 @@ Event Description: Active Directory Certificate Services could not process reque
 
 ---
 
-**FORGE**
+**FORGE** - Run as administrator
 
 ##### # Start root CA (CRYPTID)
 
@@ -1401,7 +1401,7 @@ Start-VM CRYPTID
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ##### # Republish the CRL
 
@@ -1415,7 +1415,7 @@ certutil -CRL
 
 ---
 
-**FORGE**
+**FORGE** - Run as administrator
 
 ##### # Create virtual floppy disk on Hyper-V host
 
@@ -1435,7 +1435,7 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $vfdPath
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ##### # Format virtual floppy disk
 
@@ -1467,7 +1467,7 @@ dir A:\
 
 ---
 
-**FORGE**
+**FORGE** - Run as administrator
 
 ##### # Remove virtual floppy disk from root CA
 
@@ -1487,7 +1487,7 @@ Stop-VM $vmName
 
 ---
 
-**BEAST**
+**BEAST** - Run as administrator
 
 ##### # Configure virtual floppy disk containing CRL from root CA
 
@@ -1536,7 +1536,7 @@ Restart-Computer
 
 ---
 
-**BEAST**
+**BEAST** - Run as administrator
 
 ```PowerShell
 cls
@@ -1584,7 +1584,7 @@ Event Description: Active Directory Certificate Services could not process reque
 
 ---
 
-**TT-HV02B**
+**TT-HV02B** - Run as administrator
 
 ##### # Start root CA (CRYPTID)
 
@@ -1596,7 +1596,7 @@ Start-VM CRYPTID
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ##### # Republish the CRL
 
@@ -1610,7 +1610,7 @@ certutil -CRL
 
 ---
 
-**TT-HV02B**
+**TT-HV02B** - Run as administrator
 
 ##### # Create virtual floppy disk on Hyper-V host
 
@@ -1631,7 +1631,7 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $vfdPath
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ##### # Format virtual floppy disk
 
@@ -1663,7 +1663,7 @@ dir A:\
 
 ---
 
-**TT-HV02B**
+**TT-HV02B** - Run as administrator
 
 ```PowerShell
 cls
@@ -1725,7 +1725,7 @@ Restart-Computer
 
 ---
 
-**TT-HV02B**
+**TT-HV02B** - Run as administrator
 
 ```PowerShell
 cls
@@ -1782,7 +1782,7 @@ Restart-Computer
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -1842,7 +1842,7 @@ Active Directory Certificate Services could not process request 2790 due to an e
 
 ---
 
-**TT-HV02A**
+**TT-HV02A** - Run as administrator
 
 ##### # Start root CA (CRYPTID)
 
@@ -1854,7 +1854,7 @@ Start-VM CRYPTID
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ##### # Republish the CRL
 
@@ -1868,7 +1868,7 @@ certutil -CRL
 
 ---
 
-**TT-HV02A**
+**TT-HV02A** - Run as administrator
 
 ##### # Create virtual floppy disk on Hyper-V host
 
@@ -1889,7 +1889,7 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $vfdPath
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ##### # Format virtual floppy disk
 
@@ -1921,7 +1921,7 @@ dir A:\
 
 ---
 
-**TT-HV02A**
+**TT-HV02A** - Run as administrator
 
 ```PowerShell
 cls
@@ -1953,7 +1953,7 @@ copy $vfdPath "C:\ClusterStorage\iscsi02-Silver-02\$vmName"
 
 ---
 
-**TT-HV02B**
+**TT-HV02B** - Run as administrator
 
 ```PowerShell
 cls
@@ -2001,7 +2001,7 @@ Restart-Computer
 
 ---
 
-**TT-HV02B**
+**TT-HV02B** - Run as administrator
 
 ```PowerShell
 cls
@@ -2113,7 +2113,7 @@ Active Directory Certificate Services did not start: Could not load or verify th
 
 ---
 
-**TT-HV05A**
+**TT-HV05A** - Run as administrator
 
 ##### # Start root CA (CRYPTID)
 
@@ -2125,7 +2125,7 @@ Start-VM CRYPTID
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ##### # Republish the CRL
 
@@ -2139,7 +2139,7 @@ certutil -CRL
 
 ---
 
-**TT-HV05A**
+**TT-HV05A** - Run as administrator
 
 ##### # Create virtual floppy disk on Hyper-V host
 
@@ -2160,7 +2160,7 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $vfdPath
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ##### # Format virtual floppy disk
 
@@ -2192,7 +2192,7 @@ dir A:\
 
 ---
 
-**TT-HV05A**
+**TT-HV05A** - Run as administrator
 
 ```PowerShell
 cls
@@ -2266,7 +2266,7 @@ Restart-Computer
 
 ---
 
-**TT-HV05C**
+**TT-HV05C** - Run as administrator
 
 ```PowerShell
 cls

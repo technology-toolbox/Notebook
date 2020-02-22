@@ -5,7 +5,7 @@ Monday, August 17, 2015
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## # On the Hyper-V host (STORM), start the offline root CA (CRYPTID) and attach a new virtual floppy disk
 
@@ -41,7 +41,7 @@ Invoke-Command -ComputerName STORM -ScriptBlock {
 
 ---
 
-**CRYPTID**
+**CRYPTID** - Run as administrator
 
 ```Console
 PowerShell
@@ -79,7 +79,7 @@ dir A:\
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ## # Remove virtual floppy disk from root CA VM and copy the CRL to a file server (ICEMAN)
 

@@ -354,7 +354,7 @@ Start-Process `
 
 ---
 
-**CYCLOPS**
+**CYCLOPS** - Run as administrator
 
 ```PowerShell
 cls
@@ -668,7 +668,7 @@ cd "C:\Program Files\Microsoft Team Foundation Server 2018\Tools"
 
 ---
 
-**TT-FS01**
+**TT-FS01** - Run as administrator
 
 ```PowerShell
 cls
@@ -831,7 +831,7 @@ $projects |
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -933,7 +933,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -987,7 +987,7 @@ Resize-Partition `
 
 ---
 
-**FOOBAR16**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -1041,7 +1041,7 @@ Resize-Partition `
 
 ---
 
-**FOOBAR16**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

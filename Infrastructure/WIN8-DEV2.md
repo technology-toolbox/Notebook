@@ -296,7 +296,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 $computer = 'WIN8-DEV2'
@@ -333,7 +333,7 @@ Invoke-Command -ComputerName $computer -ScriptBlock $scriptBlock
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 $computer = 'WIN8-DEV2'

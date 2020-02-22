@@ -1305,7 +1305,7 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -1460,7 +1460,7 @@ Remove-Item "C:\Program Files\Microsoft Monitoring Agent" -Recurse -Force
 
 ---
 
-**FOOBAR10**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -1767,7 +1767,7 @@ Pop-Location
 
 ---
 
-**EXT-SQL03**
+**EXT-SQL03** - Run as administrator
 
 ```PowerShell
 cls

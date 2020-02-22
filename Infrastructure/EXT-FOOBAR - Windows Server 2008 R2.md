@@ -182,7 +182,7 @@ ping ICEMAN.corp.technologytoolbox.com -f -l 8900
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 #### # Create Data01, Log01, Temp01, and Backup01 VHDs
 
@@ -1013,7 +1013,7 @@ cls
 
 ---
 
-**EXT-FOOBAR2**
+**EXT-FOOBAR2** - Run as administrator
 
 ### # Backup "Fabrikam Shipping" site collection
 
@@ -1051,7 +1051,7 @@ stsadm -o restore -url http://cloud-local.securitasinc.com/sites/Fabrikam-Shippi
 
 ---
 
-**EXT-FOOBAR2**
+**EXT-FOOBAR2** - Run as administrator
 
 ### # Backup "Online Provisioning" site collection
 
@@ -2204,7 +2204,7 @@ netsh interface ipv6 add dnsserver name=$interfaceAlias address=2603:300b:802:89
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls

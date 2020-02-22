@@ -559,7 +559,7 @@ Copy-Item $source $destination
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls

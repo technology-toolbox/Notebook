@@ -1758,7 +1758,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -1826,7 +1826,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -1894,7 +1894,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -2307,7 +2307,7 @@ cscript \\TT-FS01\MDT-Deploy$\Scripts\LiteTouch.vbs
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -2340,7 +2340,7 @@ robocopy \\TT-FS01\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot 
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -2486,7 +2486,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -2559,7 +2559,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -2593,7 +2593,7 @@ From <[https://support.office.com/en-us/article/use-the-office-offline-installer
 
 ---
 
-**WIN10-DEV1**
+**WIN10-DEV1** - Run as administrator
 
 ```PowerShell
 cls
@@ -2698,7 +2698,7 @@ Import-MDTApplication `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -2783,7 +2783,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -2816,7 +2816,7 @@ robocopy \\TT-FS01\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Ca
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -2849,7 +2849,7 @@ robocopy \\TT-FS01\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot 
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -2880,7 +2880,7 @@ robocopy \\TT-FS01\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot 
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -2961,7 +2961,7 @@ Import-MDTApplication `
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -3048,7 +3048,7 @@ From <[https://support.microsoft.com/en-us/help/4489882/windows-10-update-kb4489
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls
@@ -3146,7 +3146,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -3179,7 +3179,7 @@ robocopy \\TT-FS01\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Ca
 
 ---
 
-**FOOBAR21**
+**FOOBAR21** - Run as administrator
 
 ```PowerShell
 cls
@@ -3277,7 +3277,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -3348,7 +3348,7 @@ Import-MDTTaskSequence `
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -3383,7 +3383,7 @@ Build baseline image
 
 ---
 
-**TT-HV05A**
+**TT-HV05A** - Run as administrator
 
 ```PowerShell
 cls
@@ -3435,7 +3435,7 @@ Edit the task sequence to include the actions required to update the reference i
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -3464,7 +3464,7 @@ Build baseline images
 
 ---
 
-**TT-HV05A**
+**TT-HV05A** - Run as administrator
 
 ```PowerShell
 cls
@@ -3522,7 +3522,7 @@ $os.RenameItem("Windows Server 2019 Standard - Baseline")
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -3599,7 +3599,7 @@ Import-MDTTaskSequence `
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -3659,7 +3659,7 @@ Edit the task sequence to include actions to set MaxPatchCacheSize to 0 and clea
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -3688,7 +3688,7 @@ Build baseline images
 
 ---
 
-**TT-HV05A**
+**TT-HV05A** - Run as administrator
 
 ```PowerShell
 cls
@@ -3759,7 +3759,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -3846,7 +3846,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -3924,7 +3924,7 @@ Remove-Item -Path ("DS001:\Packages\Windows 7 and Windows Server 2008 R2\" `
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -4012,7 +4012,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -4099,7 +4099,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls

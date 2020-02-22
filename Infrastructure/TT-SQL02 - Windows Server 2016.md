@@ -657,7 +657,7 @@ icacls $backupPath /grant '"TECHTOOLBOX\Team Foundation Server Admins":(OI)(CI)(
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -893,7 +893,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -949,7 +949,7 @@ Resize-Partition `
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

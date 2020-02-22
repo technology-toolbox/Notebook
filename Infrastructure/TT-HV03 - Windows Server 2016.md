@@ -31,7 +31,7 @@ sconfig
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -605,7 +605,7 @@ Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -710,7 +710,7 @@ cls
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -777,7 +777,7 @@ Add-IscsiVirtualDiskTargetMapping `
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -1042,7 +1042,7 @@ robocopy $source $destination en_windows_server_2016_x64_dvd_9718492.iso
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls

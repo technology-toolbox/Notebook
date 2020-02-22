@@ -349,7 +349,7 @@ Install-ADDSDomainController `
 
 ---
 
-**FOOBAR16**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

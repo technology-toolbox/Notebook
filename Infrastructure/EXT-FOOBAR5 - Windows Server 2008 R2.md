@@ -13,7 +13,7 @@ Friday, May 15, 2015
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 $VerbosePreference = "Continue"
@@ -147,7 +147,7 @@ New-AzureVM `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 $vmName = "EXT-FOOBAR5"

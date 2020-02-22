@@ -13,7 +13,7 @@ Thursday, June 04, 2015
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 $VerbosePreference = "Continue"
@@ -111,7 +111,7 @@ New-AzureVM `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 $vmName = "FAB-WAP01"
@@ -149,7 +149,7 @@ $endpointNames |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 $vmName = "FAB-WAP01"

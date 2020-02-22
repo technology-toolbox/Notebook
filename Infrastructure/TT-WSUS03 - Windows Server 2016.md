@@ -701,7 +701,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls
@@ -849,7 +849,7 @@ GO
 
 ---
 
-**HAVOK**
+**HAVOK** - Run as administrator
 
 ```PowerShell
 cls
@@ -978,7 +978,7 @@ GO
 
 ---
 
-**TT-SQL01B**
+**TT-SQL01B** - Run as administrator
 
 ```PowerShell
 cls

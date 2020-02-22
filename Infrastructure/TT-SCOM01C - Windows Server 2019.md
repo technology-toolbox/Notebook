@@ -451,7 +451,7 @@ Enable-ADAccount -Identity setup-systemcenter
 
 ---
 
-**TT-SQL01C**
+**TT-SQL01C** - Run as administrator
 
 ```PowerShell
 cls
@@ -610,7 +610,7 @@ GO
 
 ---
 
-**TT-SQL01C**
+**TT-SQL01C** - Run as administrator
 
 ```PowerShell
 cls
@@ -966,7 +966,7 @@ GO
 
 ---
 
-**TT-SCOM03**
+**TT-SCOM03** - Run as administrator
 
 ##### Stop Reporting Services on previous server
 

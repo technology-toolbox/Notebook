@@ -799,7 +799,7 @@ Backup-SPFarm `
 
 ---
 
-**POLARIS**
+**POLARIS** - Run as administrator
 
 ```PowerShell
 cls
@@ -1713,7 +1713,7 @@ Start-Process `
 
 ### Approve manual agent install in Operations Manager
 
-**TODO**
+**TODO** - Run as administrator
 
 ```PowerShell
 cls
@@ -1796,7 +1796,7 @@ Set-SPWOPIZone -zone "external-https"
 
 ---
 
-**EXT-WAC02A**
+**EXT-WAC02A** - Run as administrator
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `

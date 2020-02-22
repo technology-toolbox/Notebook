@@ -19,7 +19,7 @@ sconfig
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 $computerName = "ANGEL"

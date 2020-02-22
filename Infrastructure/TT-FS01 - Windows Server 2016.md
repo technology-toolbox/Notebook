@@ -208,7 +208,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -315,7 +315,7 @@ Get-ChildItem D:\Shares, E:\Shares |
 
 ---
 
-**COLOSSUS**
+**COLOSSUS** - Run as administrator
 
 ```Console
 cd "C:\Program Files\Update Services\Tools"
@@ -396,7 +396,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -481,7 +481,7 @@ ping 10.1.10.25 -f -l 8900
 
 ---
 
-**TT-VMM01B**
+**TT-VMM01B** - Run as administrator
 
 ## # Assign static IP address
 
@@ -610,7 +610,7 @@ $productionServer = 'TT-FS01'
 
 ---
 
-**FOOBAR10**
+**FOOBAR10** - Run as administrator
 
 ```PowerShell
 cls
@@ -894,7 +894,7 @@ Start-Process `
 
 ---
 
-**FOOBAR18**
+**FOOBAR18** - Run as administrator
 
 ```PowerShell
 cls

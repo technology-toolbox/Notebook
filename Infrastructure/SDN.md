@@ -5,7 +5,7 @@ Monday, July 30, 2018
 
 ---
 
-**FOOBAR16**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls
@@ -230,7 +230,7 @@ Add-DnsServerPrimaryZone `
 
 ---
 
-**FOOBAR16**
+**FOOBAR16** - Run as administrator
 
 ```PowerShell
 cls

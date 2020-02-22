@@ -121,7 +121,7 @@ On the **Select the features you want to install** page:
 
 ---
 
-**XAVIER1**
+**XAVIER1** - Run as administrator
 
 ### # Create the "MDT - Build" service account
 
@@ -150,7 +150,7 @@ New-ADUser `
 
 ---
 
-**ICEMAN**
+**ICEMAN** - Run as administrator
 
 ### # Create and share the MDT-Build\$ folder
 
@@ -200,7 +200,7 @@ From <[https://technet.microsoft.com/en-us/library/dn744290.aspx](https://techne
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Baseline the MDT build lab deployment files in TFS
 
@@ -222,7 +222,7 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Backup
 
 ---
 
-**ICEMAN**
+**ICEMAN** - Run as administrator
 
 ### # Create the MDT Logs folder
 
@@ -385,7 +385,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -507,7 +507,7 @@ Import-MDTTaskSequence `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -600,7 +600,7 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -646,7 +646,7 @@ robocopy '\\ICEMAN\MDT-Build$\Boot' '\\ICEMAN\Products\Microsoft' *.iso
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ### # Create temporary VM to build image - "Windows 7 Ultimate (x86) - Baseline"
 
@@ -932,7 +932,7 @@ Repeat the steps in the previous section for the **Windows 7 Ultimate (x64) - Ba
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -960,7 +960,7 @@ cls
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ### # Create temporary VM to build image - "Windows 7 Ultimate (x86) - Baseline"
 
@@ -1162,7 +1162,7 @@ From <[https://technet.microsoft.com/en-us/library/dn744279.aspx](https://techne
 
 ---
 
-**XAVIER1**
+**XAVIER1** - Run as administrator
 
 ### # Create the "MDT - Deploy" service account
 
@@ -1191,7 +1191,7 @@ New-ADUser `
 
 ---
 
-**ICEMAN**
+**ICEMAN** - Run as administrator
 
 ### # Create and share the MDT-Deploy\$ folder
 
@@ -1233,7 +1233,7 @@ icacls D:\Shares\MDT-Deploy$ /grant '"s-mdt-deploy":(OI)(CI)(RX)'
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Baseline the MDT production deployment files in TFS
 
@@ -1255,7 +1255,7 @@ robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Backup
 
 ---
 
-**ICEMAN**
+**ICEMAN** - Run as administrator
 
 ### # Create the MDT Logs folder
 
@@ -1355,7 +1355,7 @@ $os.RenameItem("Windows Server 2008 R2 Standard - Baseline")
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -1473,7 +1473,7 @@ Import-MDTTaskSequence `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -1585,7 +1585,7 @@ $xml.Save("\\ICEMAN\MDT-Deploy$\Scripts\DomainOUList.xml")
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -1636,7 +1636,7 @@ robocopy '\\ICEMAN\MDT-Deploy$\Boot' '\\ICEMAN\Products\Microsoft' *.iso
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ### # Create temporary VM to build image - "Windows 7 Ultimate (x86)"
 
@@ -1921,7 +1921,7 @@ Import-MDTApplication `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -1949,7 +1949,7 @@ cls
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ### # Create temporary VM to build image - "Windows 7 Ultimate (x86)"
 
@@ -2138,7 +2138,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -2236,7 +2236,7 @@ Import-MDTTaskSequence `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -2270,7 +2270,7 @@ cls
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ### # Create temporary VM to build image - "Windows 8.1 Enterprise (x64) - Baseline"
 
@@ -2560,7 +2560,7 @@ Repeat the steps in the previous section for the **Windows Server 2012 R2 - Base
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -2588,7 +2588,7 @@ cls
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ### # Create temporary VM to build image (Windows 8.1 Enterprise x64 - Baseline)
 
@@ -3066,7 +3066,7 @@ Import-MDTApplication `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -3211,7 +3211,7 @@ Import-MDTApplication `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -3368,7 +3368,7 @@ Import-MDTApplication `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -3437,7 +3437,7 @@ Import-MDTTaskSequence `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -3475,7 +3475,7 @@ copy '\\ICEMAN\MDT-Build$\Control\WS2012-R2-REF\ts.xml' '\\ICEMAN\MDT-Build$\Con
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -3619,7 +3619,7 @@ Edit the task sequence to include the actions required to install SQL Server 201
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -3643,7 +3643,7 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ### # Create temporary VM to build image (SharePoint Server 2013 - Development)
 
@@ -3953,7 +3953,7 @@ Edit the task sequence to enable the Windows Update actions.
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -3977,7 +3977,7 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ### # Create temporary VM to build image (SharePoint Server 2013 - Development)
 
@@ -4374,7 +4374,7 @@ Add the cleanup action to the other task sequences in the MDT build lab deployme
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -4398,7 +4398,7 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ### # Create temporary VM to build image - "Windows 7 Ultimate (x86) - Baseline"
 
@@ -4944,7 +4944,7 @@ Add the copied action to the other task sequences in the MDT build lab deploymen
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -4968,7 +4968,7 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ### # Create temporary VM to build image - "Windows 7 Ultimate (x86) - Baseline"
 
@@ -5814,7 +5814,7 @@ $os.RenameItem("SharePoint Server 2013 - Development")
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -5938,7 +5938,7 @@ Import-MDTTaskSequence `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -6072,7 +6072,7 @@ Remove-Item -Path "DS002:\Applications\Microsoft\SharePoint Designer 2013 with S
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -6092,7 +6092,7 @@ robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot C
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```PowerShell
 cls
@@ -6800,7 +6800,7 @@ From <[https://www.microsoft.com/en-us/download/details.aspx?id=36213](https://w
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```Console
 PowerShell
@@ -6882,7 +6882,7 @@ cls
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
@@ -6896,7 +6896,7 @@ cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 $computer = 'MIMIC'
@@ -7119,7 +7119,7 @@ Import-MDTApplication `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -7242,7 +7242,7 @@ Grant the service account (TECHTOOLBOX\\s-mdt-deploy) the appropriate permission
 
 ---
 
-**STORM**
+**STORM** - Run as administrator
 
 ```Console
 PowerShell
@@ -7385,7 +7385,7 @@ Restart-Computer
 
 ---
 
-**FOOBAR11**
+**FOOBAR11** - Run as administrator
 
 ```PowerShell
 cls

@@ -254,7 +254,7 @@ For lab work the delay can be overridden using the EffectiveTime parameter.
 
 ---
 
-**FAB-DC01**
+**FAB-DC01** - Run as administrator
 
 ```PowerShell
 Add-KdsRootKey -EffectiveTime (Get-Date).AddHours(-10)
@@ -365,7 +365,7 @@ Restart-Computer
 
 ---
 
-**FAB-DC01**
+**FAB-DC01** - Run as administrator
 
 #### # Create A record - "fs.fabrikam.com"
 

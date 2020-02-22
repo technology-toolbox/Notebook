@@ -117,7 +117,7 @@ logoff
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls
@@ -422,7 +422,7 @@ Restart-Computer
 
 ---
 
-**XAVIER1**
+**XAVIER1** - Run as administrator
 
 #### # Create A record - "fs.technologytoolbox.com"
 

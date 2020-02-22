@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**TT-ADMIN03**
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -132,7 +132,7 @@ Get-Content "C:\Users\jjameson-admin\Desktop\Computer List for Windows Update.tx
 
 ---
 
-**TT-ADMIN03**
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -202,7 +202,7 @@ cd C:\NotBackedUp\Public\Toolbox\PowerShell\PoshPAIG_2_1_5_1
 
 ---
 
-**TT-ADMIN03**
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -340,7 +340,7 @@ Get-Content "C:\Users\jjameson-admin\Desktop\Computer List for Windows Update.tx
 
 ---
 
-**TT-ADMIN03**
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls

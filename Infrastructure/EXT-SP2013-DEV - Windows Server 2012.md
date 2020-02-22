@@ -131,7 +131,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**EXT-DC01**
+**EXT-DC01** - Run as administrator
 
 ```PowerShell
 $computerName = "EXT-SP2013-DEV"

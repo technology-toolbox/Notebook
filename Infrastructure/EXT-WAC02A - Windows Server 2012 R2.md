@@ -196,7 +196,7 @@ Add-Computer -DomainName extranet.technologytoolbox.com -Restart
 
 ---
 
-**EXT-DC01**
+**EXT-DC01** - Run as administrator
 
 ```PowerShell
 $computerName = "EXT-WAC02A"
@@ -360,7 +360,7 @@ cls
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -407,7 +407,7 @@ Pop-Location
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -445,7 +445,7 @@ slmgr /ato
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ### # Create Data01, Log01, and Backup01 VHDs
 
@@ -517,7 +517,7 @@ From <[https://technet.microsoft.com/en-us/library/jj219455.aspx](https://techne
 
 ---
 
-**FAB-DC01**
+**FAB-DC01** - Run as administrator
 
 #### # Create A record - "wac.fabrikam.com"
 
@@ -566,7 +566,7 @@ Add-WindowsFeature Web-Server, Web-Mgmt-Tools, Web-Mgmt-Console,Web-WebServer, `
 
 ---
 
-**FOOBAR8**
+**FOOBAR8** - Run as administrator
 
 ```PowerShell
 cls
@@ -895,7 +895,7 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 ---
 
-**TT-VMM01A**
+**TT-VMM01A** - Run as administrator
 
 ```PowerShell
 cls

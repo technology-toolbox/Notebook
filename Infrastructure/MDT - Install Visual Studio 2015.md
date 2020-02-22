@@ -124,7 +124,7 @@ Import-MDTApplication `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### # Update files in TFS
 
@@ -273,7 +273,7 @@ Import-MDTApplication `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -305,7 +305,7 @@ From <[https://support.office.com/en-us/article/Use-the-Office-2016-offline-inst
 
 ---
 
-**WIN10-DEV1**
+**WIN10-DEV1** - Run as administrator
 
 ```PowerShell
 cls
@@ -408,7 +408,7 @@ Import-MDTApplication `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -461,7 +461,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -502,7 +502,7 @@ robocopy $source $destination /E /XD Applications Backup Boot Captures Logs "Ope
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -588,7 +588,7 @@ cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -660,7 +660,7 @@ cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls

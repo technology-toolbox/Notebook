@@ -7,7 +7,7 @@ Wednesday, July 5, 2017
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -294,7 +294,7 @@ iisreset /start
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ### Configure SSO credentials for users
 

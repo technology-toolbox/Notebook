@@ -57,7 +57,7 @@ Get-SPTrustedRootAuthority |
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -176,7 +176,7 @@ Tracking ID: **UA-25949832-4**
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -635,7 +635,7 @@ $tokenIssuer.Update()
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 #### Configure SSO credentials for users
 
@@ -660,7 +660,7 @@ TrackTik username:** opanduro2m**
 
 ---
 
-**TT-FS01**
+**TT-FS01** - Run as administrator
 
 ```PowerShell
 cls
@@ -914,7 +914,7 @@ Copy-Item `
 
 ---
 
-**WOLVERINE**
+**WOLVERINE** - Run as administrator
 
 ```PowerShell
 cls
@@ -1003,7 +1003,7 @@ Tracking ID: **UA-25949832-5**
 
 ---
 
-**TT-FS01**
+**TT-FS01** - Run as administrator
 
 ```PowerShell
 cls
