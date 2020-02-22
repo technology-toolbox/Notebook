@@ -943,7 +943,7 @@ From <[https://eshlox.net/2017/08/10/how-to-install-powerline-for-bash-on-fedora
 
 ### Install Visual Studio Code extensions
 
-#### Install extension: C#
+#### Install extension: C&#35;
 
 #### Install extension: Debugger for Chrome
 

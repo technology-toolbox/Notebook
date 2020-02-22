@@ -856,7 +856,7 @@ From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Micr
 ms-vscode.cpptools
 ```
 
-#### Install extension: C#
+#### Install extension: C&#35;
 
 #### Install extension: Debugger for Chrome
 

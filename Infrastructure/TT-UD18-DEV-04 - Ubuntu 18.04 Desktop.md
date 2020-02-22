@@ -1329,7 +1329,7 @@ ext install msazurermtools.azurerm-vscode-tools
 ext install hookyqr.beautify
 ```
 
-#### Install extension: C#
+#### Install extension: C&#35;
 
 ```Text
 ext install ms-vscode.csharp
