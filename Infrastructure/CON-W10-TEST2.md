@@ -1,17 +1,17 @@
-﻿# CON-WIN10-TEST1
+﻿# CON-W10-TEST2
 
-Monday, August 20, 2018
-5:57 AM
+Tuesday, February 25, 2020
+12:26 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Deploy and configure the server infrastructure
+## Deploy and configure infrastructure
 
 ---
 
-**FOOBAR16** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -21,7 +21,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05C"
-$vmName = "CON-WIN10-TEST1"
+$vmName = "CON-W10-TEST2"
 $vmPath = "E:\NotBackedUp\VMs\$vmName"
 $vhdPath = "$vmPath\Virtual Hard Disks\$vmName.vhdx"
 
@@ -31,7 +31,7 @@ New-VM `
     -Generation 2 `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
-    -NewVHDSizeBytes 32GB `
+    -NewVHDSizeBytes 37GB `
     -MemoryStartupBytes 2GB `
     -SwitchName "Embedded Team Switch"
 
@@ -56,7 +56,9 @@ Start-SCVirtualMachine $vmName
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **CON-WIN10-TEST1**.
+  - In the **Computer name** box, type **CON-W10-TEST2**.
+  - Select **Join a workgroup**.
+  - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step:
   - Select the following applications:
@@ -68,7 +70,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**FOOBAR16** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -78,7 +80,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05C"
-$vmName = "CON-WIN10-TEST1"
+$vmName = "CON-W10-TEST2"
 
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
@@ -105,7 +107,7 @@ $password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
 
 > **Note**
 >
-> When prompted, type the password for the local Administrator account.
+> When prompted, type the password to use for the local Administrator account.
 
 ```PowerShell
 $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
@@ -118,22 +120,20 @@ $adminUser.SetPassword($plainPassword)
 logoff
 ```
 
-### Login as .\\foo
-
-### Configure networking
+### Configure network settings
 
 ---
 
-**FOOBAR16** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
 ```
 
-#### # Configure VM network using VMM
+#### # Move VM to Contoso network
 
 ```PowerShell
-$vmName = "CON-WIN10-TEST1"
+$vmName = "CON-W10-TEST2"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
 $vmNetwork = Get-SCVMNetwork -Name "Contoso VM Network"
 
@@ -148,20 +148,22 @@ Start-SCVirtualMachine $vmName
 
 ---
 
+#### Login as .\\foo
+
+#### # Configure network adapter
+
 ```PowerShell
 $interfaceAlias = "Contoso-60"
 ```
 
-#### # Rename network connection
+##### # Rename network connection
 
 ```PowerShell
-Get-NetAdapter -Physical | select InterfaceDescription
-
 Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
     Rename-NetAdapter -NewName $interfaceAlias
 ```
 
-#### # Enable jumbo frames
+##### # Enable jumbo frames
 
 ```PowerShell
 Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
@@ -171,157 +173,10 @@ Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
 
 Start-Sleep -Seconds 5
 
-ping CON-DC1 -f -l 8900
+ping CON-DC03 -f -l 8900
 ```
 
-### Configure storage
-
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 50 GB       | 4K                   | OSDisk       |
-
-```PowerShell
-cls
-```
-
-### # Join member server to domain
-
-#### # Add computer to domain
-
-```PowerShell
-Add-Computer `
-    -DomainName corp.contoso.com `
-    -Credential (Get-Credential CONTOSO\Administrator) `
-    -Restart
-```
-
----
-
-**CON-DC1** - Run as domain administrator
-
-```PowerShell
-cls
-```
-
-### # Move computer to different OU
-
-```PowerShell
-$computerName = "CON-WIN10-TEST1"
-$targetPath = "OU=Workstations,OU=Resources,OU=Quality Assurance" `
-    + ",DC=corp,DC=contoso,DC=com"
-
-Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
-```
-
----
-
-### # Enable PowerShell remoting
-
-```PowerShell
-Enable-PSRemoting -Confirm:$false
-```
-
-### Add virtual machine to Hyper-V protection group in DPM
-
-### Install updates using Windows Update
-
-> **Note**
->
-> Repeat until there are no updates available for the computer.
-
-## Issue - Not enough free space to install patches using Windows Update
-
-1.7 GB of free space, but unable to install **2018-12 Cumulative Update for Windows 10 for x64-based Systems (KB4471324)**.
-
-### Expand C: volume
-
----
-
-**FOOBAR16** - Run as administrator
-
-```PowerShell
-cls
-```
-
-#### # Increase size of VHD
-
-```PowerShell
-$vmHost = "TT-HV05C"
-$vmName = "CON-WIN10-TEST1"
-
-Stop-VM -ComputerName $vmHost -Name $vmName
-
-Resize-VHD `
-    -ComputerName $vmHost `
-    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks" `
-        + "\$vmName" + ".vhdx") `
-    -SizeBytes 37GB
-
-Start-VM -ComputerName $vmHost -Name $vmName
-```
-
----
-
-```PowerShell
-cls
-```
-
-#### # Delete "recovery" partition
-
-```PowerShell
-Get-Partition -PartitionNumber 4 | Remove-Partition -Confirm:$false
-```
-
-#### # Extend partition
-
-```PowerShell
-$driveLetter = "C"
-
-$partition = Get-Partition -DriveLetter $driveLetter |
-    where { $_.DiskNumber -ne $null }
-
-$size = (Get-PartitionSupportedSize `
-    -DiskNumber $partition.DiskNumber `
-    -PartitionNumber $partition.PartitionNumber)
-
-Resize-Partition `
-    -DiskNumber $partition.DiskNumber `
-    -PartitionNumber $partition.PartitionNumber `
-    -Size $size.SizeMax
-```
-
-**TODO:**
-
-### # Enter a product key and activate Windows
-
-```PowerShell
-slmgr /ipk {product key}
-```
-
-> **Note**
->
-> When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-## Activate Microsoft Office
-
-1. Start Word 2016
-2. Enter product key
-
-### Login as .\\foo
-
-## Issue - Firewall log contains numerous entries for UDP 137 broadcast
-
-### Solution
-
-```PowerShell
-cls
-```
-
-#### # Disable NetBIOS over TCP/IP
+##### # Disable NetBIOS over TCP/IP
 
 ```PowerShell
 Get-NetAdapter |
@@ -343,4 +198,146 @@ Get-NetAdapter |
     }
 ```
 
-## Install Wireshark
+### Configure storage
+
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | C:           | 37 GB       | 4K                   | OSDisk       |
+
+```PowerShell
+cls
+```
+
+### # Join computer to domain
+
+#### # Add computer to domain
+
+```PowerShell
+Add-Computer `
+    -DomainName corp.contoso.com `
+    -Credential (Get-Credential CONTOSO\Administrator) `
+    -Restart
+```
+
+---
+
+**CON-DC03** - Run as domain administrator
+
+```PowerShell
+cls
+```
+
+#### # Move computer to different organizational unit
+
+```PowerShell
+$computerName = "CON-W10-TEST2"
+$targetPath = "OU=Workstations,OU=Resources,OU=Quality Assurance" `
+    + ",DC=corp,DC=contoso,DC=com"
+
+Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
+```
+
+### # Configure Windows Update
+
+#### # Add computer to security group for Windows Update schedule
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 17" -Members "$computerName`$"
+```
+
+---
+
+#### # Enable PowerShell remoting
+
+```PowerShell
+Enable-PSRemoting -Confirm:$false
+```
+
+> **Note**
+>
+> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
+
+```PowerShell
+cls
+```
+
+### # Allow domain users to logon remotely
+
+```PowerShell
+$domain = "CONTOSO"
+$groupName = "Domain Users"
+
+([ADSI]"WinNT://./Remote Desktop Users,group").Add(
+    "WinNT://$domain/$groupName,group")
+```
+
+---
+
+**TT-ADMIN03** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Make virtual machine highly available
+
+#### # Migrate VM to shared storage
+
+```PowerShell
+$vmName = "CON-W10-TEST2"
+
+$vm = Get-SCVirtualMachine -Name $vmName
+$vmHost = $vm.VMHost
+
+Move-SCVirtualMachine `
+    -VM $vm `
+    -VMHost $vmHost `
+    -HighlyAvailable $true `
+    -Path "C:\ClusterStorage\iscsi02-Silver-02" `
+    -UseDiffDiskOptimization
+```
+
+#### # Allow migration to host with different processor version
+
+```PowerShell
+Stop-SCVirtualMachine -VM $vmName
+
+Set-SCVirtualMachine -VM $vmName -CPULimitForMigration $true
+
+Start-SCVirtualMachine -VM $vmName
+```
+
+---
+
+### Configure backup
+
+#### Add virtual machine to Hyper-V protection group in DPM
+
+### Install updates using Windows Update
+
+> **Note**
+>
+> Repeat until there are no updates available for the computer.
+
+**TODO:**
+
+### # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+> **Note**
+>
+> When notified that the product key was set successfully, click **OK**.
+
+```Console
+slmgr /ato
+```
+
+### Activate Microsoft Office
+
+1. Start Word 2016
+2. Enter product key
+
+### Install Wireshark
