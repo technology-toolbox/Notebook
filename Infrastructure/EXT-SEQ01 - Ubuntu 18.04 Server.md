@@ -584,3 +584,49 @@ sudo unattended-upgrade -v
 ```Shell
 sudo reboot
 ```
+
+# Issue - Error running Docker container when logged in as domain user
+
+## Symptom
+
+Login as **EXTRANET\jjameson-admin**
+
+```Shell
+docker run hello-world
+```
+
+```Text
+cannot create user data directory: /home/extranet.technologytoolbox.com/jjameson-admin/snap/docker/423: Permission denied
+```
+
+## Solution
+
+#### # Configure AppArmor to work with non-standard home directories
+
+```Shell
+sudo dpkg-reconfigure apparmor
+```
+
+```Text
+Skipping profile in /etc/apparmor.d/disable: usr.sbin.rsyslogd
+Warning: found usr.sbin.sssd in /etc/apparmor.d/force-complain, forcing complain mode
+Warning failed to create cache: usr.sbin.sssd
+```
+
+> **Note**
+>
+> When prompted for additional home directories, type **/home/extranet.technologytoolbox.com/** and select **OK**.
+
+##### References
+
+**How do I make AppArmor work with a non-standard HOME directory?**\
+From <[https://help.ubuntu.com/community/AppArmor](https://help.ubuntu.com/community/AppArmor)>
+
+**How can I use snap when I don’t use /home/\$USER?**\
+From <[https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352](https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352)>
+
+**Permission denied on launch**\
+From <[https://forum.snapcraft.io/t/permission-denied-on-launch/909](https://forum.snapcraft.io/t/permission-denied-on-launch/909)>
+
+**cannot create user data directory: Bad file descriptor**\
+From <[https://github.com/anbox/anbox/issues/43](https://github.com/anbox/anbox/issues/43)>
