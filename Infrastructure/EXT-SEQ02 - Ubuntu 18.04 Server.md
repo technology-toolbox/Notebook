@@ -1,7 +1,7 @@
-﻿# EXT-SEQ01 - Ubuntu 18.04 Server
+﻿# EXT-SEQ02 - Ubuntu 18.04 Server
 
 Saturday, March 7, 2020
-8:04 AM
+9:25 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -21,7 +21,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05C"
-$vmName = "EXT-SEQ01"
+$vmName = "EXT-SEQ02"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -32,7 +32,7 @@ New-VM `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 25GB `
-    -MemoryStartupBytes 4GB `
+    -MemoryStartupBytes 3.75GB `
     -SwitchName "Embedded Team Switch"
 
 Set-VM `
@@ -65,10 +65,10 @@ Set-VMDvdDrive `
 ```Text
 Set-VMDvdDrive : Failed to add device 'Virtual CD/DVD Disk'.
 User Account does not have permission to open attachment.
-'EXT-SEQ01' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID 75DE413D-085A-4CD9-9D60-47EFA818E0F3)
-'EXT-SEQ01': User account does not have permission required to open attachment
+'EXT-SEQ02' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID BB0DC5F5-4568-467F-8312-D914527EFFB3)
+'EXT-SEQ02': User account does not have permission required to open attachment
 '\\TT-FS01\Products\Ubuntu\ubuntu-18.04.4-live-server-amd64.iso'. Error: 'General access denied error'
-(0x80070005). (Virtual machine ID 75DE413D-085A-4CD9-9D60-47EFA818E0F3)
+(0x80070005). (Virtual machine ID BB0DC5F5-4568-467F-8312-D914527EFFB3)
 At line:1 char:1
 + Set-VMDvdDrive `
 + ~~~~~~~~~~~~~~~~
@@ -77,6 +77,7 @@ At line:1 char:1
 ```
 
 ```PowerShell
+cls
 $iso = Get-SCISO |
     where {$_.Name -eq "ubuntu-18.04.4-live-server-amd64.iso"}
 
@@ -101,7 +102,7 @@ Set-SCVirtualNetworkAdapter `
 ```Text
 IPv4Addresses
 -------------
-{10.1.20.163}
+{10.1.20.164}
 ```
 
 ```PowerShell
@@ -117,7 +118,7 @@ Network interface configuration
 | Setting        | Value                          |
 | -------------- | ------------------------------ |
 | Subnet         | 10.1.20.0/24                   |
-| Address        | 10.1.20.163                    |
+| Address        | 10.1.20.164                    |
 | Gateway        | 10.1.20.1                      |
 | Name servers   | 10.1.20.2,10.1.20.3            |
 | Search domains | extranet.technologytoolbox.com |
@@ -136,13 +137,32 @@ clear
 ifconfig | grep inet
 ```
 
-### Install updates
+```Shell
+clear
+```
+
+### # Install updates
 
 #### # Update APT packages
 
 ```Shell
 sudo apt-get update
+```
+
+> **Note**
+>
+> When prompted, type the password to run the command as root.
+
+```Shell
+clear
+```
+
+```Shell
 sudo apt-get upgrade -y
+```
+
+```Shell
+clear
 ```
 
 #### # Install security updates
@@ -211,7 +231,7 @@ dig -t SRV _ldap._tcp.extranet.technologytoolbox.com
 ; <<>> DiG 9.11.3-1ubuntu1.11-Ubuntu <<>> -t SRV _ldap._tcp.extranet.technologytoolbox.com
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 35219
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 40564
 ;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -220,12 +240,12 @@ dig -t SRV _ldap._tcp.extranet.technologytoolbox.com
 ;_ldap._tcp.extranet.technologytoolbox.com. IN SRV
 
 ;; ANSWER SECTION:
-_ldap._tcp.extranet.technologytoolbox.com. 600 IN SRV 0 100 389 EXT-DC11.extranet.technologytoolbox.com.
 _ldap._tcp.extranet.technologytoolbox.com. 600 IN SRV 0 100 389 EXT-DC10.extranet.technologytoolbox.com.
+_ldap._tcp.extranet.technologytoolbox.com. 600 IN SRV 0 100 389 EXT-DC11.extranet.technologytoolbox.com.
 
 ;; Query time: 2 msec
 ;; SERVER: 127.0.0.53#53(127.0.0.53)
-;; WHEN: Sat Mar 07 15:40:06 UTC 2020
+;; WHEN: Sat Mar 07 16:40:28 UTC 2020
 ;; MSG SIZE  rcvd: 128
 ```
 
@@ -244,7 +264,7 @@ dig @10.1.30.2 -t SRV _ldap._tcp.dc._msdcs.extranet.technologytoolbox.com
 ; (1 server found)
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 19270
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 12745
 ;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 3
 
 ;; OPT PSEUDOSECTION:
@@ -253,16 +273,16 @@ dig @10.1.30.2 -t SRV _ldap._tcp.dc._msdcs.extranet.technologytoolbox.com
 ;_ldap._tcp.dc._msdcs.extranet.technologytoolbox.com. IN        SRV
 
 ;; ANSWER SECTION:
-_ldap._tcp.dc._msdcs.extranet.technologytoolbox.com. 599 IN SRV 0 100 389 EXT-DC10.extranet.technologytoolbox.com.
-_ldap._tcp.dc._msdcs.extranet.technologytoolbox.com. 599 IN SRV 0 100 389 EXT-DC11.extranet.technologytoolbox.com.
+_ldap._tcp.dc._msdcs.extranet.technologytoolbox.com. 600 IN SRV 0 100 389 EXT-DC11.extranet.technologytoolbox.com.
+_ldap._tcp.dc._msdcs.extranet.technologytoolbox.com. 600 IN SRV 0 100 389 EXT-DC10.extranet.technologytoolbox.com.
 
 ;; ADDITIONAL SECTION:
-EXT-DC10.extranet.technologytoolbox.com. 431 IN A 10.1.20.2
-EXT-DC11.extranet.technologytoolbox.com. 3075 IN A 10.1.20.3
+EXT-DC11.extranet.technologytoolbox.com. 3083 IN A 10.1.20.3
+EXT-DC10.extranet.technologytoolbox.com. 444 IN A 10.1.20.2
 
-;; Query time: 4 msec
+;; Query time: 2 msec
 ;; SERVER: 10.1.30.2#53(10.1.30.2)
-;; WHEN: Sat Mar 07 15:40:47 UTC 2020
+;; WHEN: Sat Mar 07 16:40:47 UTC 2020
 ;; MSG SIZE  rcvd: 230
 ```
 
@@ -275,6 +295,10 @@ clear
 ```Shell
 sudo apt-get install realmd -y
 ```
+
+> **Note**
+>
+> When prompted, type the password to run the command as root.
 
 ```Shell
 clear
@@ -333,7 +357,7 @@ clear
 ```Shell
 #sudoedit /etc/hostname
 
-sudo hostnamectl set-hostname ext-seq01.extranet.technologytoolbox.com
+sudo hostnamectl set-hostname ext-seq02.extranet.technologytoolbox.com
 cat /etc/hostname
 ```
 
@@ -342,7 +366,7 @@ cat /etc/hostname
 File - **/etc/hostname**
 
 ```Text
-ext-seq01.extranet.technologytoolbox.com
+ext-seq02.extranet.technologytoolbox.com
 ```
 
 ---
@@ -357,7 +381,7 @@ sudo reboot
 >
 > ```Text
 >  * Modifying computer account: userPrincipalName
->  ! Couldn't set service principals on computer account CN=ext-seq01,CN=Computers,DC=extranet,DC=technologytoolbox,DC=com: 00002083: AtrErr: DSID-03151904, #1:
+>  ! Couldn't set service principals on computer account CN=ext-seq02,CN=Computers,DC=extranet,DC=technologytoolbox,DC=com: 00002083: AtrErr: DSID-03151904, #1:
 >         0: 00002083: DSID-03151904, problem 1006 (ATT_OR_VALUE_EXISTS), data 0, Att 90303 (servicePrincipalName)
 > ```
 >
@@ -376,6 +400,7 @@ realm discover extranet.technologytoolbox.com -v
 
 ```Text
  * Resolving: _ldap._tcp.extranet.technologytoolbox.com
+ * Performing LDAP DSE lookup on: 10.1.20.3
  * Performing LDAP DSE lookup on: 10.1.20.2
  * Successfully discovered: extranet.technologytoolbox.com
 extranet.technologytoolbox.com
@@ -409,40 +434,43 @@ sudo realm join -v -U jjameson-admin extranet.technologytoolbox.com --os-name="L
  * Performing LDAP DSE lookup on: 10.1.20.3
  * Successfully discovered: extranet.technologytoolbox.com
 Password for jjameson-admin:
+```
+
+```Text
  * Unconditionally checking packages
  * Resolving required packages
  * LANG=C /usr/sbin/adcli join --verbose --domain extranet.technologytoolbox.com --domain-realm EXTRANET.TECHNOLOGYTOOLBOX.COM --domain-controller 10.1.20.2 --os-name Linux (Ubuntu Server) --os-version 18.04 --login-type user --login-user jjameson-admin --stdin-password
  * Using domain name: extranet.technologytoolbox.com
- * Calculated computer account name from fqdn: EXT-SEQ01
+ * Calculated computer account name from fqdn: EXT-SEQ02
  * Using domain realm: extranet.technologytoolbox.com
  * Sending netlogon pings to domain controller: cldap://10.1.20.2
  * Received NetLogon info from: EXT-DC10.extranet.technologytoolbox.com
- * Wrote out krb5.conf snippet to /var/cache/realmd/adcli-krb5-8UDL6N/krb5.d/adcli-krb5-conf-NvygAB
+ * Wrote out krb5.conf snippet to /var/cache/realmd/adcli-krb5-qR91m4/krb5.d/adcli-krb5-conf-tTCu6E
  * Authenticated as user: jjameson-admin@EXTRANET.TECHNOLOGYTOOLBOX.COM
  * Looked up short domain name: EXTRANET
- * Using fully qualified name: ext-seq01.extranet.technologytoolbox.com
+ * Using fully qualified name: ext-seq02.extranet.technologytoolbox.com
  * Using domain name: extranet.technologytoolbox.com
- * Using computer account name: EXT-SEQ01
+ * Using computer account name: EXT-SEQ02
  * Using domain realm: extranet.technologytoolbox.com
- * Calculated computer account name from fqdn: EXT-SEQ01
+ * Calculated computer account name from fqdn: EXT-SEQ02
  * Generated 120 character computer password
  * Using keytab: FILE:/etc/krb5.keytab
- * Computer account for EXT-SEQ01$ does not exist
+ * Computer account for EXT-SEQ02$ does not exist
  * Found well known computer container at: CN=Computers,DC=extranet,DC=technologytoolbox,DC=com
- * Calculated computer account: CN=EXT-SEQ01,CN=Computers,DC=extranet,DC=technologytoolbox,DC=com
- * Created computer account: CN=EXT-SEQ01,CN=Computers,DC=extranet,DC=technologytoolbox,DC=com
+ * Calculated computer account: CN=EXT-SEQ02,CN=Computers,DC=extranet,DC=technologytoolbox,DC=com
+ * Created computer account: CN=EXT-SEQ02,CN=Computers,DC=extranet,DC=technologytoolbox,DC=com
  * Set computer password
- * Retrieved kvno '2' for computer account in directory: CN=EXT-SEQ01,CN=Computers,DC=extranet,DC=technologytoolbox,DC=com
+ * Retrieved kvno '2' for computer account in directory: CN=EXT-SEQ02,CN=Computers,DC=extranet,DC=technologytoolbox,DC=com
  * Modifying computer account: dNSHostName
  * Modifying computer account: userAccountControl
  * Modifying computer account: operatingSystem, operatingSystemVersion, operatingSystemServicePack
  * Modifying computer account: userPrincipalName
  * Discovered which keytab salt to use
- * Added the entries to the keytab: EXT-SEQ01$@EXTRANET.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
- * Added the entries to the keytab: host/EXT-SEQ01@EXTRANET.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
- * Added the entries to the keytab: host/ext-seq01.extranet.technologytoolbox.com@EXTRANET.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
- * Added the entries to the keytab: RestrictedKrbHost/EXT-SEQ01@EXTRANET.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
- * Added the entries to the keytab: RestrictedKrbHost/ext-seq01.extranet.technologytoolbox.com@EXTRANET.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: EXT-SEQ02$@EXTRANET.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: host/EXT-SEQ02@EXTRANET.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: host/ext-seq02.extranet.technologytoolbox.com@EXTRANET.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: RestrictedKrbHost/EXT-SEQ02@EXTRANET.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: RestrictedKrbHost/ext-seq02.extranet.technologytoolbox.com@EXTRANET.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
  * /usr/sbin/update-rc.d sssd enable
  * /usr/sbin/service sssd restart
  * Successfully enrolled machine in realm
@@ -487,6 +515,40 @@ session optional        pam_systemd.so
 ```
 
 ---
+
+```Shell
+clear
+```
+
+#### # Configure AppArmor to work with non-standard home directories
+
+```Shell
+sudo dpkg-reconfigure apparmor
+```
+
+```Text
+Skipping profile in /etc/apparmor.d/disable: usr.sbin.rsyslogd
+Warning: found usr.sbin.sssd in /etc/apparmor.d/force-complain, forcing complain mode
+Warning failed to create cache: usr.sbin.sssd
+```
+
+> **Note**
+>
+> When prompted for additional home directories, type **/home/extranet.technologytoolbox.com/** and select **OK**.
+
+##### References
+
+**How do I make AppArmor work with a non-standard HOME directory?**\
+From <[https://help.ubuntu.com/community/AppArmor](https://help.ubuntu.com/community/AppArmor)>
+
+**How can I use snap when I don’t use /home/\$USER?**\
+From <[https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352](https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352)>
+
+**Permission denied on launch**\
+From <[https://forum.snapcraft.io/t/permission-denied-on-launch/909](https://forum.snapcraft.io/t/permission-denied-on-launch/909)>
+
+**cannot create user data directory: Bad file descriptor**\
+From <[https://github.com/anbox/anbox/issues/43](https://github.com/anbox/anbox/issues/43)>
 
 ```Shell
 clear
@@ -558,20 +620,68 @@ docker run \
   datalust/seq:latest
 ```
 
+### Configure name resolution for Seq
+
+---
+
+**TT-ADMIN03** - Run as administrator
+
+```PowerShell
+cls
+```
+
+#### # Configure name resolution for seq.corp.technologytoolbox.com
+
+```PowerShell
+Add-DnsServerResourceRecordA `
+    -ComputerName TT-DC10 `
+    -Name seq `
+    -IPv4Address 10.1.20.164 `
+    -ZoneName corp.technologytoolbox.com
+```
+
+---
+
+---
+
+**EXT-DC10** - Run as administrator
+
+```PowerShell
+cls
+```
+
+#### # Configure name resolution for seq.extranet.technologytoolbox.com
+
+```PowerShell
+Add-DNSServerResourceRecordCName `
+    -ZoneName extranet.technologytoolbox.com `
+    -Name seq `
+    -HostNameAlias EXT-SEQ02.extranet.technologytoolbox.com
+```
+
+---
+
 ```Shell
 clear
 ```
 
-### Install updates
+## # Install updates
 
-#### # Update APT packages
+### # Update APT packages
 
 ```Shell
 sudo apt-get update
+```
+
+> **Note**
+>
+> When prompted, type the password to run the command as root.
+
+```Shell
 sudo apt-get upgrade -y
 ```
 
-#### # Install security updates
+### # Install security updates
 
 ```Shell
 sudo unattended-upgrade -v
@@ -584,49 +694,3 @@ sudo unattended-upgrade -v
 ```Shell
 sudo reboot
 ```
-
-# Issue - Error running Docker container when logged in as domain user
-
-## Symptom
-
-Login as **EXTRANET\jjameson-admin**
-
-```Shell
-docker run hello-world
-```
-
-```Text
-cannot create user data directory: /home/extranet.technologytoolbox.com/jjameson-admin/snap/docker/423: Permission denied
-```
-
-## Solution
-
-#### # Configure AppArmor to work with non-standard home directories
-
-```Shell
-sudo dpkg-reconfigure apparmor
-```
-
-```Text
-Skipping profile in /etc/apparmor.d/disable: usr.sbin.rsyslogd
-Warning: found usr.sbin.sssd in /etc/apparmor.d/force-complain, forcing complain mode
-Warning failed to create cache: usr.sbin.sssd
-```
-
-> **Note**
->
-> When prompted for additional home directories, type **/home/extranet.technologytoolbox.com/** and select **OK**.
-
-##### References
-
-**How do I make AppArmor work with a non-standard HOME directory?**\
-From <[https://help.ubuntu.com/community/AppArmor](https://help.ubuntu.com/community/AppArmor)>
-
-**How can I use snap when I don’t use /home/\$USER?**\
-From <[https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352](https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352)>
-
-**Permission denied on launch**\
-From <[https://forum.snapcraft.io/t/permission-denied-on-launch/909](https://forum.snapcraft.io/t/permission-denied-on-launch/909)>
-
-**cannot create user data directory: Bad file descriptor**\
-From <[https://github.com/anbox/anbox/issues/43](https://github.com/anbox/anbox/issues/43)>
