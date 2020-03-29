@@ -27,11 +27,9 @@ $activity = "Prepare development and test VMs for patching"
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR3'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR4'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR7'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV05C'; },
@@ -351,11 +349,9 @@ cls
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR3'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR4'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR7'; VMHost = 'TT-HV05A'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05B'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV05C'; },
