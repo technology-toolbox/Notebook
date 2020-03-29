@@ -1085,4 +1085,135 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
+## Install certificate for mail server
+
+---
+
+**TT-WIN10-DEV6** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Create certificate for mail server
+
+#### # Create certificate request
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\PowerShell\New-CertificateRequest.ps1" `
+    -Subject ("CN=mail-test.technologytoolbox.com,OU=Quality Assurance," `
+        + "O=Technology Toolbox,L=Parker,S=CO,C=US") `
+    -SANs mail-test.technologytoolbox.com,smtp-test.technologytoolbox.com
+```
+
+#### # Submit certificate request to the Certification Authority
+
+##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+[Uri] $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns $adcsUrl.AbsoluteUri
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+##### # Submit the certificate request to an enterprise CA
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
+**To submit the certificate request to an enterprise CA:**
+
+1. Start Internet Explorer, and browse to the Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the certificate template (**Technology Toolbox Web Server - Exportable**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+```
+
+```PowerShell
+cls
+```
+
+#### # Delete the certificate file
+
+```PowerShell
+Remove-Item $certFile
+```
+
+#### Export certificate
+
+Filename: **C:\NotBackedUp\Temp\mail-test.technologytoolbox.com.pfx**
+
+```PowerShell
+cls
+```
+
+#### # Split PFX certificate into required files
+
+```PowerShell
+Push-Location C:\NotBackedUp\Temp
+```
+
+##### # Extract private key from PFX certificate file
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\OpenSSL-Win64\bin\openssl.exe `
+    pkcs12 -nocerts -nodes `
+    -in mail-test.technologytoolbox.com.pfx `
+    -out mail-test.technologytoolbox.com.key
+```
+
+> **Note**
+>
+> When prompted, type the password specified previously when exporting the certificate.
+
+##### # Extract public key from PFX certificate file
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\OpenSSL-Win64\bin\openssl.exe `
+    pkcs12 -clcerts -nokeys `
+    -in mail-test.technologytoolbox.com.pfx `
+    -out mail-test.technologytoolbox.com.crt
+```
+
+> **Note**
+>
+> When prompted, type the password specified previously when exporting the certificate.
+
+##### # Extract Certificate Authority (CA) certificate chain from PFX certificate file
+
+```PowerShell
+C:\NotBackedUp\Public\Toolbox\OpenSSL-Win64\bin\openssl.exe `
+    pkcs12 -cacerts -chain -nokeys `
+    -in mail-test.technologytoolbox.com.pfx `
+    -out chain.crt
+```
+
+> **Note**
+>
+> When prompted, type the password specified previously when exporting the certificate.
+
+```PowerShell
+Pop-Location
+```
+
+---
+
 **TODO:**
