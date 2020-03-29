@@ -788,6 +788,22 @@ From <[https://sourcegear.com/diffmerge/webhelp/sec__git__windows__msysgit.html]
 cls
 ```
 
+## # Install GitKraken
+
+```PowerShell
+$setupPath = "\\EXT-FS01\Products\Axosoft\GitKrakenSetup-6.5.3.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
 ## # Install and configure Node.js
 
 ### # Install Node.js
@@ -885,6 +901,21 @@ cls
 Update-Help
 ```
 
+```PowerShell
+cls
+```
+
+## # Install Azure CLI on Windows
+
+```PowerShell
+Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+```
+
+#### Reference
+
+**Install Azure CLI on Windows**\
+From <[https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows)>
+
 ## Install updates using Windows Update
 
 > **Note**
@@ -938,6 +969,20 @@ Disable-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)"
 > **Important**
 >
 > Login as TECHTOOLBOX\\jjameson
+
+```PowerShell
+cls
+```
+
+### # Create PowerShell profile
+
+```PowerShell
+notepad $PROFILE
+```
+
+> **Note**
+>
+> Copy the PowerShell profile content into the file.
 
 ```PowerShell
 cls
@@ -1003,12 +1048,6 @@ cls
 
 ```PowerShell
 npm install --global --no-optional @angular/cli@7.3.9
-```
-
-### # Install Create React App
-
-```PowerShell
-npm install --global --no-optional create-react-app@3.2.0
 ```
 
 ### # Install rimraf
