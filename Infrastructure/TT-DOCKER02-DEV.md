@@ -1,7 +1,7 @@
-﻿# TT-DOCKER01-DEV
+﻿# TT-DOCKER02-DEV
 
-Sunday, February 18, 2018
-11:57 AM
+Friday, March 6, 2020
+2:25 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -20,7 +20,7 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmName = "TT-DOCKER01-DEV"
+$vmName = "TT-DOCKER02-DEV"
 $vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -31,12 +31,12 @@ New-VM `
     -NewVHDPath $vhdPath `
     -NewVHDSizeBytes 20GB `
     -MemoryStartupBytes 4GB `
-    -SwitchName "Management"
+    -SwitchName "LAN"
 
 Set-VM `
     -Name $vmName `
     -AutomaticCheckpointsEnabled $false `
-    -ProcessorCount 2 `
+    -ProcessorCount 4 `
     -StaticMemory
 
 Add-VMDvdDrive `
@@ -52,7 +52,7 @@ Set-VMFirmware `
 
 Set-VMDvdDrive `
     -VMName $vmName `
-    -Path "\\TT-FS01\Products\Ubuntu\ubuntu-16.04.3-server-amd64.iso"
+    -Path "\\TT-FS01\Products\Ubuntu\ubuntu-18.04.4-live-server-amd64.iso"
 
 Start-VM -Name $vmName
 ```
@@ -60,6 +60,10 @@ Start-VM -Name $vmName
 ---
 
 ### Install Linux server
+
+> **Important**
+>
+> When prompted, select to install openssh-server and Docker.
 
 ### # Install security updates
 
@@ -72,11 +76,29 @@ reboot
 ### # Check IP address
 
 ```Shell
-ifconfig | grep "inet addr"
+ifconfig | grep inet
 ```
 
-### # Enable SSH
+### Install Docker Compose
 
 ```Shell
-sudo apt-get install openssh-server
+sudo curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
+
+```Shell
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+```Shell
+docker volume create seq-data
+
+docker run \
+  -d \
+  --restart unless-stopped \
+  --name seq \
+  -e ACCEPT_EULA=Y \
+  --volume seq-data:/data \
+  -p 8080:80 \
+  -p 5341:5341 \
+  datalust/seq:latest
 ```
