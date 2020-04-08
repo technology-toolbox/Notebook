@@ -525,3 +525,127 @@ msiexec.exe /i $msiPath `
     MANAGEMENT_SERVER_DNS=TT-SCOM01C.corp.technologytoolbox.com `
     ACTIONS_USE_COMPUTER_ACCOUNT=1
 ```
+
+## Issue - Certificate for Operations Manager expires March 28, 2020
+
+```PowerShell
+cls
+```
+
+### # Replace expiring certificate for Operations Manager
+
+#### # Create request for Operations Manager certificate
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\Operations Manager\Scripts\New-OperationsManagerCertificateRequest.ps1"
+```
+
+#### # Submit certificate request to the Certification Authority
+
+##### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+[Uri] $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns $adcsUrl.AbsoluteUri
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+##### # Submit the certificate request to an enterprise CA
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
+**To submit the certificate request to an enterprise CA:**
+
+1. On the computer hosting the Operations Manager feature for which you are requesting a certificate, start Internet Explorer, and browse to Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the Operations Manager certificate template (**Technology Toolbox Operations Manager**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
+
+```PowerShell
+cls
+```
+
+#### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+
+If ($? -eq $true)
+{
+    Remove-Item $certFile -Verbose
+}
+```
+
+```PowerShell
+cls
+```
+
+#### # Remove expiring certificate from certificate store
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+Get-ChildItem "Cert:\LocalMachine\My" |
+  Where-Object { $_.Subject -eq "CN=$hostName" } |
+  Where-Object { $_.NotAfter -lt (Get-Date).AddDays(30) } |
+  Remove-Item -Verbose
+```
+
+```PowerShell
+cls
+```
+
+### # Copy SCOM agent installation files
+
+```PowerShell
+$source = "\\EXT-FS01\Products\Microsoft\System Center 2019\SCOM" `
+    + "\SupportTools\AMD64"
+
+$destination = "C:\NotBackedUp\Temp\SCOM\SupportTools\AMD64"
+
+robocopy $source $destination /E
+```
+
+### # Import the certificate into Operations Manager using MOMCertImport
+
+```PowerShell
+$hostName = ([System.Net.Dns]::GetHostByName(($env:computerName))).HostName
+
+$certImportToolPath = "C:\NotBackedUp\Temp\SCOM\SupportTools\AMD64"
+
+Push-Location "$certImportToolPath"
+
+.\MOMCertImport.exe /SubjectName $hostName
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Remove Operations Manager installation files
+
+```PowerShell
+Remove-Item C:\NotBackedUp\Temp\SCOM -Recurse
+```
+
+```PowerShell
+cls
+```
+
+### # Restart monitoring service
+
+```PowerShell
+Restart-Service HealthService
+```
