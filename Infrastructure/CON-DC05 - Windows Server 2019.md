@@ -1,17 +1,17 @@
-﻿# CON-DC03 - Windows Server 2016
+﻿# CON-DC05 - Windows Server 2019 Domain Controller
 
-Wednesday, January 2, 2019
-1:21 PM
+Friday, April 10, 2020
+8:52 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Deploy and configure the server infrastructure
+## Deploy and configure server infrastructure
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05A"
-$vmName = "CON-DC03"
+$vmHost = "TT-HV05D"
+$vmName = "CON-DC05"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -55,11 +55,11 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-### Install custom Windows Server 2016 image
+### Install custom Windows Server 2019 image
 
-- On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
+- On the **Task Sequence** step, select **Windows Server 2019** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **CON-DC03**.
+  - In the **Computer name** box, type **CON-DC05**.
   - Specify **WORKGROUP**.
   - Click **Next**.
 - On the **Applications** step, do not select any applications, and click **Next**.
@@ -89,7 +89,7 @@ logoff
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -98,9 +98,9 @@ cls
 ### # Move VM to Contoso VM network
 
 ```PowerShell
-$vmName = "CON-DC03"
+$vmName = "CON-DC05"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
-$vmNetwork = Get-SCVMNetwork -Name "Contoso VM Network"
+$vmNetwork = Get-SCVMNetwork -Name "Contoso-60 VM Network"
 
 Stop-SCVirtualMachine $vmName
 
@@ -123,6 +123,86 @@ Start-SCVirtualMachine $vmName
 Set-ExecutionPolicy Bypass -Scope Process -Force
 
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
+```
+
+### # Join domain
+
+```PowerShell
+Add-Computer -DomainName corp.contoso.com -Restart
+```
+
+---
+
+**CON-DC03** - Run as domain administrator
+
+```PowerShell
+cls
+```
+
+### # Configure Windows Update
+
+#### # Add machine to security group for Windows Update schedule
+
+```PowerShell
+Add-ADGroupMember -Identity "Windows Update - Slot 17" -Members "CON-DC05$"
+```
+
+---
+
+### Configure storage
+
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| ---- | ------------ | ----------- | -------------------- | ------------ |
+| 0    | C:           | 32 GB       | 4K                   | OSDisk       |
+| 1    | D:           | 5 GB        | 4K                   | Data01       |
+
+#### Configure separate VHD for Active Directory data
+
+---
+
+**TT-ADMIN03** - Run as administrator
+
+```PowerShell
+cls
+```
+
+##### # Add disk for Active Directory data
+
+```PowerShell
+$vmHost = "TT-HV05D"
+$vmName = "CON-DC05"
+
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+    + $vmName + "_Data01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 5GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
+```
+
+---
+
+```PowerShell
+cls
+```
+
+##### # Initialize disks and format volumes
+
+```PowerShell
+Get-Disk 1 |
+    Initialize-Disk -PartitionStyle GPT -PassThru |
+    New-Partition -UseMaximumSize -DriveLetter D |
+    Format-Volume `
+        -FileSystem NTFS `
+        -NewFileSystemLabel "Data01" `
+        -Confirm:$false
+```
+
+```PowerShell
+cls
 ```
 
 ### # Configure networking
@@ -150,30 +230,78 @@ Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
 
 Start-Sleep -Seconds 5
 
-ping CON-DC1 -f -l 8900
+ping CON-DC03 -f -l 8900
 ```
 
 ```PowerShell
 cls
 ```
 
-## # Join domain
+#### # Disable Link-Layer Topology Discovery
 
 ```PowerShell
-Add-Computer -DomainName corp.contoso.com -Restart
+Get-NetAdapter |
+    foreach {
+        $interfaceAlias = $_.Name
+
+        Write-Host ("Disabling Link-Layer Topology Discovery on interface" `
+            + " ($interfaceAlias)...")
+
+        Disable-NetAdapterBinding -Name $interfaceAlias `
+            -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
+
+        Disable-NetAdapterBinding -Name $interfaceAlias `
+            -DisplayName "Link-Layer Topology Discovery Responder"
+    }
 ```
+
+> **Note**
+>
+> This avoids flooding the firewall log with numerous entries for UDP 5355
+> broadcast.
+
+```PowerShell
+cls
+```
+
+#### # Disable NetBIOS over TCP/IP
+
+```PowerShell
+Get-NetAdapter |
+    foreach {
+        $interfaceAlias = $_.Name
+
+        Write-Host ("Disabling NetBIOS over TCP/IP on interface" `
+            + " ($interfaceAlias)...")
+
+        $adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+            -Filter "NetConnectionId = '$interfaceAlias'"
+
+        $adapterConfig = `
+            Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+                -Filter "Index= '$($adapter.DeviceID)'"
+
+        # Disable NetBIOS over TCP/IP
+        $adapterConfig.SetTcpipNetbios(2)
+    }
+```
+
+> **Note**
+>
+> This avoids flooding the firewall log with numerous entries for UDP 137
+> broadcast.
 
 ---
 
-**CON-DC1** - Run as domain administrator
+**CON-DC03** - Run as administrator
 
 ```PowerShell
 cls
 ```
 
-## # Remove old domain controller
+#### # Remove old domain controller
 
-### # Demote domain controller
+##### # Demote domain controller
 
 ```PowerShell
 Import-Module ADDSDeployment
@@ -187,13 +315,13 @@ Uninstall-ADDSDomainController `
 >
 > When prompted, specify the password for the local administrator account.
 
-### Remove Active Directory Domain Services and DNS roles
+##### Remove Active Directory Domain Services and DNS roles
 
 > **Note**
 >
 > Restart the computer to complete the removal of the roles.
 
-### # Stop server
+##### # Stop server
 
 ```PowerShell
 Stop-Computer
@@ -205,13 +333,13 @@ Stop-Computer
 cls
 ```
 
-## # Configure static IP addresses
+#### # Configure static IP addresses
 
 ```PowerShell
 $interfaceAlias = "Contoso-60"
 ```
 
-### # Disable DHCP and router discovery
+##### # Disable DHCP and router discovery
 
 ```PowerShell
 Set-NetIPInterface `
@@ -220,7 +348,7 @@ Set-NetIPInterface `
     -RouterDiscovery Disabled
 ```
 
-### # Configure static IPv4 address
+##### # Configure static IPv4 address
 
 ```PowerShell
 $ipAddress = "10.0.60.2"
@@ -232,83 +360,13 @@ New-NetIPAddress `
     -DefaultGateway 10.0.60.1
 ```
 
-### # Configure IPv4 DNS servers
+##### # Configure IPv4 DNS servers
 
 ```PowerShell
 Set-DNSClientServerAddress `
     -InterfaceAlias $interfaceAlias `
     -ServerAddresses 10.0.60.3
 ```
-
-## Configure storage
-
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 32 GB       | 4K                   | OSDisk       |
-| 1    | D:           | 5 GB        | 4K                   | Data01       |
-
-### Configure separate VHD for Active Directory data
-
----
-
-**FOOBAR18** - Run as administrator
-
-```PowerShell
-cls
-```
-
-#### # Add disk for Active Directory data
-
-```PowerShell
-$vmHost = "TT-HV05A"
-$vmName = "CON-DC03"
-
-$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-    + $vmName + "_Data01.vhdx"
-
-New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 5GB
-Add-VMHardDiskDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Path $vhdPath `
-    -ControllerType SCSI
-```
-
----
-
-```PowerShell
-cls
-```
-
-#### # Initialize disks and format volumes
-
-```PowerShell
-Get-Disk 1 |
-    Initialize-Disk -PartitionStyle GPT -PassThru |
-    New-Partition -UseMaximumSize -DriveLetter D |
-    Format-Volume `
-        -FileSystem NTFS `
-        -NewFileSystemLabel "Data01" `
-        -Confirm:$false
-```
-
----
-
-**CON-DC2** - Run as domain administrator
-
-```PowerShell
-cls
-```
-
-## # Configure Windows Update
-
-### # Add machine to security group for Windows Update schedule
-
-```PowerShell
-Add-ADGroupMember -Identity "Windows Update - Slot 17" -Members "CON-DC03$"
-```
-
----
 
 ## Configure domain controller
 
@@ -343,13 +401,15 @@ Install-ADDSDomainController `
 
 > **Note**
 >
-> When prompted, specify the password for the administrator account when the computer is started in Safe Mode or a variant of Safe Mode, such as Directory Services Restore Mode.
+> When prompted, specify the password for the administrator account when the
+> computer is started in Safe Mode or a variant of Safe Mode, such as Directory
+> Services Restore Mode.
 
 ## Configure NTP
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -358,8 +418,8 @@ cls
 ### # Disable Hyper-V time synchronization service
 
 ```PowerShell
-$vmHost = "TT-HV05A"
-$vmName = "CON-DC03"
+$vmHost = "TT-HV05D"
+$vmName = "CON-DC05"
 
 Disable-VMIntegrationService `
     -ComputerName $vmHost `
@@ -410,7 +470,8 @@ Set-ItemProperty `
 Set-ItemProperty `
     -Path HKLM:SYSTEM\CurrentControlSet\Services\W32Time\Parameters `
     -Name NtpServer `
-    -Value "pool.ntp.org,0x1 time.windows.com,0x1"
+    -Value ("time.windows.com,0x1 time-nw.nist.gov,0x1 time-b.nist.gov,0x1" `
+        + " time.nist.gov,0x1 time-a.nist.gov,0x1")
 ```
 
 #### # Set poll interval to every 15 minutes (900 seconds)
@@ -440,41 +501,63 @@ Restart-Service w32time
 w32tm /resync /rediscover
 ```
 
-## Make virtual machine highly available
+```PowerShell
+cls
+```
+
+#### # Configure DNS record for NTP (ntp.corp.contoso.com)
+
+```PowerShell
+Get-DnsServerResourceRecord -ZoneName corp.contoso.com -Name ntp |
+    Remove-DnsServerResourceRecord -ZoneName corp.contoso.com -Force
+
+Add-DnsServerResourceRecordCName `
+    -ZoneName "corp.contoso.com" `
+    -Name "ntp" `
+    -HostNameAlias "CON-DC05.corp.contoso.com"
+```
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
-$vm = Get-SCVirtualMachine -Name "CON-DC03"
+```
+
+## # Make virtual machine highly available
+
+### # Migrate VM to shared storage
+
+```PowerShell
+$vm = Get-SCVirtualMachine -Name "CON-DC05"
 
 # Note: Refresh VM properties to avoid issue where primary VHD (C:) is migrated
 # to shared storage but secondary VHD (D:) is not
 
 Read-SCVirtualMachine -VM $vm
 
-Stop-SCVirtualMachine -VM $vm
-
 Move-SCVirtualMachine `
     -VM $vm `
-    -VMHost $vm.HostName `
+    -VMHost $vm.VMHost `
     -HighlyAvailable $true `
     -Path "C:\ClusterStorage\iscsi02-Silver-01" `
-    -UseDiffDiskOptimization `
-    -UseLAN
-
-Start-SCVirtualMachine -VM $vm
+    -UseDiffDiskOptimization
 ```
 
----
+```PowerShell
+cls
+```
 
-## Add virtual machine to Hyper-V protection group in DPM
+### # Allow migration to host with different processor version
 
----
+```PowerShell
+Stop-SCVirtualMachine -VM $vmName
 
-**FOOBAR18** - Run as administrator
+Set-SCVirtualMachine -VM $vmName -CPULimitForMigration $true
+
+Start-SCVirtualMachine -VM $vmName
+```
 
 ```PowerShell
 cls
@@ -483,12 +566,20 @@ cls
 ## # Configure anti-affinity class names for virtual machines
 
 ```PowerShell
-$antiAffinityClassNames = New-Object System.Collections.Specialized.StringCollection
+$antiAffinityClassNames = `
+    New-Object System.Collections.Specialized.StringCollection
+
 $antiAffinityClassNames.Add("CON-DC")
 
-(Get-ClusterGroup -Cluster TT-HV05-FC -Name 'SCVMM CON-DC03 Resources').AntiAffinityClassNames = $antiAffinityClassNames
+(Get-ClusterGroup `
+    -Cluster TT-HV05-FC `
+    -Name 'SCVMM CON-DC05 Resources').AntiAffinityClassNames = `
+    $antiAffinityClassNames
 
-(Get-ClusterGroup -Cluster TT-HV05-FC -Name 'SCVMM CON-DC04 Resources').AntiAffinityClassNames = $antiAffinityClassNames
+(Get-ClusterGroup `
+    -Cluster TT-HV05-FC `
+    -Name 'SCVMM CON-DC06 Resources').AntiAffinityClassNames = `
+    $antiAffinityClassNames
 
 Get-ClusterGroup -Cluster TT-HV05-FC |
     where { $_.GroupType -eq "VirtualMachine" } |
@@ -497,41 +588,11 @@ Get-ClusterGroup -Cluster TT-HV05-FC |
 
 ---
 
-## Issue - Firewall log contains numerous entries for UDP 137 broadcast
+## Configure backups
 
-### Solution
-
-```PowerShell
-cls
-```
-
-#### # Disable NetBIOS over TCP/IP
-
-```PowerShell
-Get-NetAdapter |
-    foreach {
-        $interfaceAlias = $_.Name
-
-        Write-Host ("Disabling NetBIOS over TCP/IP on interface" `
-            + " ($interfaceAlias)...")
-
-        $adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
-            -Filter "NetConnectionId = '$interfaceAlias'"
-
-        $adapterConfig = `
-            Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
-                -Filter "Index= '$($adapter.DeviceID)'"
-
-        # Disable NetBIOS over TCP/IP
-        $adapterConfig.SetTcpipNetbios(2)
-    }
-```
+### Add virtual machine to Hyper-V protection group in DPM
 
 **TODO:**
-
-```PowerShell
-cls
-```
 
 ## # Enter a product key and activate Windows
 
