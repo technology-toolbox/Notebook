@@ -26,11 +26,11 @@ $activity = "Prepare development and test VMs for patching"
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR3'; VMHost = 'TT-HV05A'; },
+    [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05D'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05D'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR3'; VMHost = 'TT-HV05D'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR4'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05B'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05E'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2010-DEV1'; VMHost = 'STORM'; },
@@ -42,7 +42,7 @@ $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV3'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV2'; VMHost = 'TT-HV05C'; },
-    [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05A'; })
+    [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05D'; })
 ```
 
 #### # Revert VMs to most recent checkpoint
@@ -348,11 +348,11 @@ cls
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05A'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR3'; VMHost = 'TT-HV05A'; },
+    [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05D'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05D'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR3'; VMHost = 'TT-HV05D'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR4'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05B'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05E'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2010-DEV1'; VMHost = 'STORM'; },
@@ -364,7 +364,7 @@ $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV3'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV1'; VMHost = 'TT-HV05C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV2'; VMHost = 'TT-HV05C'; },
-    [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05A'; })
+    [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05D'; })
 ```
 
 #### # Stop VMs after patching and update "Baseline" checkpoints
