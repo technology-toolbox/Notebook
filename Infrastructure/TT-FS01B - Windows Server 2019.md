@@ -1,7 +1,7 @@
-﻿# TT-FS01A - Windows Server 2019 File Server
+﻿# TT-FS01B - Windows Server 2019 File Server
 
-Sunday, March 29, 2020
-7:08 AM
+Wednesday, April 22, 2020
+9:08 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05C"
-$vmName = "TT-FS01A"
+$vmHost = "TT-HV05E"
+$vmName = "TT-FS01B"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -73,10 +73,10 @@ Set-VMDvdDrive `
 ```Text
 Set-VMDvdDrive : Failed to add device 'Virtual CD/DVD Disk'.
 User Account does not have permission to open attachment.
-'TT-FS01A' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID F42C2D42-4979-45E6-8B8D-6C1F5BD9F115)
-'TT-FS01A': User account does not have permission required to open attachment
+'TT-FS01B' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID 9A44221A-99D8-497A-8712-F3B4D37AD483)
+'TT-FS01B': User account does not have permission required to open attachment
 '\\TT-FS01\Products\Microsoft\Windows Server 2019\en_windows_server_2019_updated_jan_2020_x64_dvd_9069e1c0.iso'.
-Error: 'General access denied error' (0x80070005). (Virtual machine ID F42C2D42-4979-45E6-8B8D-6C1F5BD9F115)
+Error: 'General access denied error' (0x80070005). (Virtual machine ID 9A44221A-99D8-497A-8712-F3B4D37AD483)
 At line:1 char:1
 + Set-VMDvdDrive `
 + ~~~~~~~~~~~~~~~~
@@ -101,6 +101,9 @@ Start-SCVirtualMachine -VM $vmName
 ---
 
 ### Set password for the local Administrator account
+
+After the restart required to complete the installation, the password for the
+Administrator user must be changed before signing in.
 
 ```Console
 PowerShell
@@ -133,7 +136,7 @@ cls
 #### # Move VM to Management VM network and assign static IP address
 
 ```PowerShell
-$vmName = "TT-FS01A"
+$vmName = "TT-FS01B"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
 $vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
 $macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
@@ -189,6 +192,8 @@ Get-NetAdapterAdvancedProperty -DisplayName "Jumbo*"
 
 Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
     -DisplayName "Jumbo Packet" -RegistryValue 9014
+
+Start-Sleep -Seconds 10
 
 ping TT-DC10.corp.technologytoolbox.com -f -l 8900
 ```
@@ -260,7 +265,7 @@ cls
 ### # Rename server
 
 ```PowerShell
-Rename-Computer -NewName TT-FS01A -Restart
+Rename-Computer -NewName TT-FS01B -Restart
 ```
 
 > **Note**
@@ -294,7 +299,7 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "TT-FS01A"
+$vmName = "TT-FS01B"
 
 $targetPath = ("OU=Storage Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
@@ -345,33 +350,6 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 
 ---
 
-## Make virtual machine highly available
-
----
-
-**TT-ADMIN03** - Run as administrator
-
-```PowerShell
-cls
-$vm = Get-SCVirtualMachine -Name "TT-FS01A"
-
-Read-SCVirtualMachine -VM $vm
-
-Stop-SCVirtualMachine -VM $vm
-
-Move-SCVirtualMachine `
-    -VM $vm `
-    -VMHost $vm.HostName `
-    -HighlyAvailable $true `
-    -Path "C:\ClusterStorage\iscsi02-Silver-02" `
-    -UseDiffDiskOptimization `
-    -UseLAN
-
-Start-SCVirtualMachine -VM $vm
-```
-
----
-
 ### Configure storage
 
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
@@ -412,10 +390,10 @@ cls
 ##### # Add disk for data
 
 ```PowerShell
-$vmHost = "TT-HV05C"
-$vmName = "TT-FS01A"
+$vmHost = "TT-HV05E"
+$vmName = "TT-FS01B"
 
-$vhdPath = "C:\ClusterStorage\iscsi02-Silver-02\$vmName\Virtual Hard Disks\" `
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 600GB
@@ -425,7 +403,7 @@ Add-VMHardDiskDrive `
     -Path $vhdPath `
     -ControllerType SCSI
 
-$vhdPath = "C:\ClusterStorage\iscsi02-Silver-03\$vmName\Virtual Hard Disks\" `
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data02.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 600GB
@@ -435,7 +413,7 @@ Add-VMHardDiskDrive `
     -Path $vhdPath `
     -ControllerType SCSI
 
-$vhdPath = "C:\ClusterStorage\iscsi02-Silver-01\$vmName\Virtual Hard Disks\" `
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data03.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 200GB
@@ -581,7 +559,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-ADMIN02** - DPM Management Shell
+**TT-ADMIN03** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -590,7 +568,7 @@ cls
 #### # Attach DPM agent
 
 ```PowerShell
-$productionServer = 'TT-FS01A'
+$productionServer = 'TT-FS01B'
 
 .\Attach-ProductionServer.ps1 `
     -DPMServerName TT-DPM05 `
@@ -605,7 +583,7 @@ $productionServer = 'TT-FS01A'
 
 1. On the **Select recovery type** step, select the **Recover to alternate location** option and click **Browse**.
 
-   E:\ on TT-FS01A
+   E:\ on TT-FS01B
 
 1. On the **Specify recovery options** step, in the **Restore security** section, select **Apply the security settings of the recovery point version**.
 
@@ -662,7 +640,7 @@ Add-DNSServerResourceRecordCName `
     -ComputerName TT-DC10 `
     -ZoneName corp.technologytoolbox.com `
     -Name TT-FS01 `
-    -HostNameAlias TT-FS01A.corp.technologytoolbox.com
+    -HostNameAlias TT-FS01B.corp.technologytoolbox.com
 ```
 
 SMB file server share access is unsuccessful through DNS CNAME alias
