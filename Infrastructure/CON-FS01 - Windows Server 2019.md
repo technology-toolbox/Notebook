@@ -320,7 +320,7 @@ Get-ChildItem D:\Shares |
             -Name $_.Name `
             -Path $_.FullName `
             -CachingMode None `
-            -ChangeAccess Everyone
+            -ChangeAccess "Authenticated Users"
     }
 ```
 
