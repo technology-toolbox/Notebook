@@ -1832,6 +1832,10 @@ GO
 
 ### Increase Temp01 to 4 GB on TT-SQL01C
 
+## Issue - Errors in event log due to SCOM custom messages in SQL Server
+
+[SQL scripts to fix 18054 events in SQL application log – SCOM 2016 and 2019](https://gallery.technet.microsoft.com/SQL-to-fix-event-18054-4d6d9ec1)
+
 **TODO:**
 
 ```PowerShell
