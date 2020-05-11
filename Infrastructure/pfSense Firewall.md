@@ -12,10 +12,19 @@ cat /tmp/config.xml | sed -e '1d' -e '$d' | base64 -d | openssl enc -d -aes-256-
 From <[https://forum.pfsense.org/index.php?topic=111080.msg621529#msg621529](https://forum.pfsense.org/index.php?topic=111080.msg621529#msg621529)>
 
 ```Console
-cat "C:\Users\jjameson\Downloads\config.xml"  | sed -e '1d' -e '$d' | base64 -d | openssl enc -d -aes-256-cbc -out config.xml -k '{password}'
+cat "C:\Users\jjameson\Downloads\config.xml"  | sed -e '1d' -e '$d' | base64 -d | openssl enc -d -aes-256-cbc -md md5 -out config.xml -k '{password}'
+```
 
+> **Note**
+>
+> Specify MD5 Message Digest to avoid issue due to default digest change from
+> MD5 to SHA256 in Openssl 1.1.
+>
+> Reference:
+>
+> [How to resolve the "EVP_DecryptFInal_ex: bad decrypt" during file decryption](https://stackoverflow.com/a/43847627)
 
-
+```Console
 cls; ipconfig /release; ipconfig /release6; ipconfig /renew; ipconfig /renew6; ipconfig /all
 ```
 
