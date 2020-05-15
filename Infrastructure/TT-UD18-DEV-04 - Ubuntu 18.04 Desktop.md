@@ -1388,7 +1388,7 @@ ext install vscode-icons-team.vscode-icons
 
 1. Open the Command Palette (press **Ctrl+Shift+P**).
 2. Type **Preferences: Open User Settings**.
-3. Click** Open settings (JSON)**.
+3. Click **Open settings (JSON)**.
 
 ```JSON
 {
