@@ -102,7 +102,7 @@ sudo reboot
 ### # Install network tools (e.g. ifconfig)
 
 ```Shell
-sudo apt install net-tools
+sudo apt-get -y install net-tools
 ```
 
 ### # Check IP address
@@ -114,7 +114,7 @@ ifconfig | grep inet
 ### # Enable SSH
 
 ```Shell
-sudo apt install openssh-server
+sudo apt-get -y install openssh-server
 ```
 
 ---
@@ -248,7 +248,7 @@ clear
 #### # Install prerequisites for using realmd
 
 ```Shell
-sudo apt install realmd
+sudo apt-get -y install realmd
 ```
 
 #### Configure realmd
@@ -524,7 +524,7 @@ clear
 ## # Install htop
 
 ```Shell
-sudo apt-get install htop
+sudo apt-get -y install htop
 ```
 
 ```Shell
@@ -534,7 +534,7 @@ clear
 ## # Install and configure Powerline
 
 ```Shell
-sudo apt install powerline
+sudo apt-get -y install powerline
 ```
 
 ```Shell
@@ -550,7 +550,7 @@ sudo apt-get upgrade
 
 ```Shell
 clear
-sudo apt-get install git
+sudo apt-get -y install git
 ```
 
 ### Reference
@@ -585,7 +585,7 @@ clear
 ### # Install GitKraken dependencies
 
 ```Shell
-sudo apt --fix-broken install
+sudo apt-get -y --fix-broken install
 ```
 
 ### Reference
@@ -602,14 +602,14 @@ clear
 ### # Add Node.js PPA
 
 ```Shell
-sudo apt-get install curl
+sudo apt-get -y install curl
 curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 ```
 
 ### # Add Node.js PPA
 
 ```Shell
-sudo apt-get install nodejs
+sudo apt-get -y install nodejs
 ```
 
 ```Shell
@@ -664,11 +664,11 @@ clear
 ```Shell
 sudo add-apt-repository universe
 
-sudo apt-get install apt-transport-https
+sudo apt-get -y install apt-transport-https
 
 sudo apt-get update
 
-sudo apt-get install dotnet-sdk-2.2
+sudo apt-get -y install dotnet-sdk-2.2
 ```
 
 ### Reference
@@ -730,7 +730,7 @@ clear
 ### # Install libcurl (dependency)
 
 ```Shell
-sudo apt-get install libcurl4-openssl-dev
+sudo apt-get -y install libcurl4-openssl-dev
 ```
 
 ```Shell
@@ -757,7 +757,7 @@ clear
 
 ```Shell
 sudo apt-get update
-sudo apt-get install wireshark
+sudo apt-get -y install wireshark
 ```
 
 > **Note**
@@ -790,13 +790,12 @@ clear
 #### # Install packages to allow apt to use repository over HTTPS
 
 ```Shell
-sudo apt-get install \
+sudo apt-get -y install \
     apt-transport-https \
     ca-certificates \
     curl \
     gnupg-agent \
-    software-properties-common \
-    -y
+    software-properties-common
 ```
 
 ```Shell
@@ -860,7 +859,7 @@ clear
 #### # Install the latest version of Docker CE and containerd
 
 ```Shell
-sudo apt-get install docker-ce docker-ce-cli containerd.io
+sudo apt-get -y install docker-ce docker-ce-cli containerd.io
 ```
 
 ```Shell
@@ -976,7 +975,7 @@ clear
 #### # Install PowerShell
 
 ```Shell
-sudo apt-get install -y powershell
+sudo apt-get -y install powershell
 ```
 
 ```Shell
@@ -1020,7 +1019,7 @@ clear
 #### # Install "certutil"
 
 ```Shell
-sudo apt install libnss3-tools -y
+sudo apt-get -y install libnss3-tools
 ```
 
 ```Shell
@@ -1030,7 +1029,7 @@ clear
 #### # Install Linuxbrew
 
 ```Shell
-sudo apt install linuxbrew-wrapper -y
+sudo apt-get -y install linuxbrew-wrapper
 ```
 
 #### TODO: Add Linuxbrew to Bash profile
@@ -1103,7 +1102,7 @@ sudo apt-get update
 #### # Install Ruby
 
 ```Shell
-sudo apt-get install ruby-full
+sudo apt-get -y install ruby-full
 ```
 
 ```Shell
@@ -1522,12 +1521,12 @@ sudo apt-get update
 
 ```Shell
 clear
-sudo apt-get install subversion
+sudo apt-get -y install subversion
 ```
 
 ```Shell
 clear
-sudo apt-get install libapache2-svn
+sudo apt-get -y install libapache2-svn
 
 Reading package lists... Done
 Building dependency tree
@@ -1590,7 +1589,7 @@ sudo apt-get update
 
 ```Shell
 clear
-sudo apt-get install default-jdk
+sudo apt-get -y install default-jdk
 ```
 
 #### Issue - Jackcess Encrypt unit tests fail with OpenJDK 11
@@ -1613,11 +1612,7 @@ clear
 
 ```Shell
 sudo apt-get update
-```
-
-```Shell
-clear
-sudo apt-get install openjdk-8-jdk
+sudo apt-get -y install openjdk-8-jdk
 ```
 
 ### Reference
@@ -1633,11 +1628,7 @@ clear
 
 ```Shell
 sudo apt-get update
-```
-
-```Shell
-clear
-sudo apt-get install maven
+sudo apt-get -y install maven
 ```
 
 ### Reference
@@ -1754,5 +1745,5 @@ clear
 ### # Install package for troubleshooting Kerberos (e.g. kinit)
 
 ```Shell
-sudo apt install krb5-user
+sudo apt-get -y install krb5-user
 ```
