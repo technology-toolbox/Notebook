@@ -1724,6 +1724,49 @@ cd ~/SourceForge/jackcessencrypt/trunk
 mvn install
 ```
 
+```Shell
+clear
+```
+
+## # Update Visual Studio Code
+
+```Shell
+sudo snap refresh code --classic
+```
+
+## Install Visual Studio Code extensions for Java development
+
+### Install extension: Java Extension Pack
+
+```Text
+ext install vscjava.vscode-java-pack
+```
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Checkpoint VM
+
+```PowerShell
+$checkpointName = "Jackcess development"
+$vmName = "TT-UD18-DEV-04"
+
+Stop-VM -Name $vmName
+
+Checkpoint-VM `
+    -Name $vmName `
+    -SnapshotName $checkpointName
+
+Start-VM -Name $vmName
+```
+
+---
+
 ## Miscellaneous
 
 ```Shell
