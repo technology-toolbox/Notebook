@@ -1579,7 +1579,21 @@ From <[https://blogs.msdn.microsoft.com/virtual_pc_guy/2014/09/19/changing-ubunt
 
 ## Configure user profile - jjameson
 
+```Shell
+clear
+```
+
 ### Background
+
+```Shell
+gsettings set org.gnome.desktop.background picture-uri ''
+gsettings set org.gnome.desktop.background primary-color 'rgb(74, 84, 89)'
+```
+
+#### Reference
+
+**No background options other than default pictures**\
+From <[https://askubuntu.com/a/1190435](https://askubuntu.com/a/1190435)>
 
 ```Shell
 clear
