@@ -1517,17 +1517,15 @@ clear
 
 ```Shell
 sudo apt-get update
-```
-
-```Shell
-clear
 sudo apt-get -y install subversion
 ```
 
 ```Shell
 clear
 sudo apt-get -y install libapache2-svn
+```
 
+```Text
 Reading package lists... Done
 Building dependency tree
 Reading state information... Done
