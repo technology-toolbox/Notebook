@@ -1583,7 +1583,7 @@ From <[https://blogs.msdn.microsoft.com/virtual_pc_guy/2014/09/19/changing-ubunt
 clear
 ```
 
-### Background
+### # Configure background
 
 ```Shell
 gsettings set org.gnome.desktop.background picture-uri ''
