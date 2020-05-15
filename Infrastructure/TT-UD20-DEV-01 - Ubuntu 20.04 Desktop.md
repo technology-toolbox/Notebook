@@ -1846,7 +1846,21 @@ File - **settings.json**
 clear
 ```
 
-## # Clone repository from Azure DevOps
+## # Configure Git credential store
+
+```Shell
+git config --global credential.helper 'store'
+
+cat ~/.git-credentials
+```
+
+```Shell
+clear
+```
+
+## # Clone repositories from Azure DevOps
+
+### # Clone Training-Docker repository from Azure DevOps
 
 ```Shell
 mkdir ~/techtoolbox
@@ -1854,23 +1868,25 @@ mkdir ~/techtoolbox
 cd ~/techtoolbox
 
 git clone https://techtoolbox@dev.azure.com/techtoolbox/Training-Docker/_git/Training-Docker
-
-Personal access token: dkwy6iplg6a75vnyxgvafmfuqyzl3wsmoimhzxfkca{redacted}
 ```
+
+> **Note:** When prompted for a password, specify a personal access token for
+> Azure DevOps. The secret will be stored in the **.git-credentials** hidden
+> file.
+
+```Shell
+cat ~/.git-credentials
+```
+
+### # Clone Websites/bootstrap-templates repository from Azure DevOps
 
 ```Shell
 clear
-```
+mkdir ~/techtoolbox/Websites
 
-## # Configure Git credential store
+cd ~/techtoolbox/Websites
 
-```Shell
-cd ~/techtoolbox/Training-Docker
-git config credential.helper 'store'
-
-git pull
-
-cat ~/.git-credentials
+git clone https://techtoolbox@dev.azure.com/techtoolbox/Websites/_git/bootstrap-templates
 ```
 
 ---
