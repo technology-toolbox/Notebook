@@ -1021,6 +1021,29 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
+## Configure settings for SQL Server Agent job history log
+
+### Reference
+
+**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field #017**\
+From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/](https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/)>
+
+---
+
+**SQL Server Management Studio** - Database Engine
+
+### -- Do not limit size of SQL Server Agent job history log
+
+```SQL
+USE [msdb]
+GO
+EXEC msdb.dbo.sp_set_sqlagent_properties @jobhistory_max_rows=-1,
+    @jobhistory_max_rows_per_job=-1
+GO
+```
+
+---
+
 **TODO:**
 
 ```PowerShell
