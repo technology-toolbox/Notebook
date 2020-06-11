@@ -4164,3 +4164,91 @@ msiexec.exe /i $msiPath `
 ```
 
 ### Approve manual agent install in Operations Manager
+
+```PowerShell
+cls
+```
+
+## # Upgrade to latest version of Windows 10 (Version 2004)
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+```
+
+### # Import operating system - "Windows 10 Enterprise, Version 2004 (x64)"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows 10" `
+  + "\en_windows_10_business_editions_version_2004_x64_dvd_d06ef8c5.iso"
+
+$imageDriveLetter = Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume |
+    select -ExpandProperty DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "W10Ent-2004-x64"
+
+Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows 10" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+```
+
+```PowerShell
+cls
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+### Modify task sequence to use new version of Windows 10 Enterprise, Version 2004
+
+### Delete old version of Windows 10 Enterprise, Version 1909
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add Control/*
+
+git commit -m "Upgrade to latest version of Windows 10 (Version 2004)"
+
+Pop-Location
+```
+
+---
