@@ -4252,3 +4252,159 @@ Pop-Location
 ```
 
 ---
+
+### Apply updates to avoid issues with MDT and Windows 10 Version 2004
+
+> **Important**
+>
+> There are known issues when using the Microsoft Deployment Toolkit to build
+> images for Windows 10 Version 2004. For example, after running SysPrep and
+> restarting, the VM fails to boot (it loops through the "Loading files..."
+> screen several times and then shuts down).
+>
+> To avoid these issues, it is necessary to
+> overwrite the **Microsoft.BDD.Utility.dll** files on the MDT server and update
+> the deployment share.
+>
+> Refer to the following:
+>
+> **Windows 10 deployments fail with Microsoft Deployment Toolkit on computers with BIOS type firmware**\
+> From <[https://support.microsoft.com/en-us/help/4564442/windows-10-deployments-fail-with-microsoft-deployment-toolkit](https://support.microsoft.com/en-us/help/4564442/windows-10-deployments-fail-with-microsoft-deployment-toolkit)>
+
+#### Download patch for MDT and Windows 10 Version 2004
+
+Download the patch (**MDT_KB4564442.exe**) from Microsoft KB article 4564442 and
+extract the contents.
+
+#### Update Microsoft.BDD.Utility.dll files on MDT server
+
+1. Close **Deployment Workbench**.
+2. Backup the existing versions of the Microsoft.BDD.Utility.dll
+   file in the following locations:\
+   %ProgramFiles%\Microsoft Deployment Toolkit\Templates\Distribution\Tools\x86\
+   %ProgramFiles%\Microsoft Deployment Toolkit\Templates\Distribution\Tools\x64\
+3. Copy the new files extracted from MDT_KB4564442.exe over the old versions.
+
+```PowerShell
+cls
+```
+
+#### # Update Microsoft.BDD.Utility.dll files on MDT deployment shares
+
+```PowerShell
+$mdtPath = "$env:ProgramFiles\Microsoft Deployment Toolkit"
+$filename = 'Microsoft.BDD.Utility.dll'
+
+Copy-Item `
+    "$mdtPath\Templates\Distribution\Tools\x64\$filename" `
+    '\\TT-FS01\MDT-Build$\Tools\x64'
+
+Copy-Item `
+    "$mdtPath\Templates\Distribution\Tools\x86\$filename" `
+    '\\TT-FS01\MDT-Build$\Tools\x86'
+
+Copy-Item `
+    "$mdtPath\Templates\Distribution\Tools\x64\$filename" `
+    '\\TT-FS01\MDT-Deploy$\Tools\x64'
+
+Copy-Item `
+    "$mdtPath\Templates\Distribution\Tools\x86\$filename" `
+    '\\TT-FS01\MDT-Deploy$\Tools\x86'
+```
+
+#### Update MDT deployment share
+
+1. Open **Deployment Workbench**.
+2. Select the **MDT Build Lab (\\\\TT-FS01\MDT-Build\$)** deployment share.
+3. On the **Action** menu, click **Update Deployment Share**.
+4. In the **Update Deployment Share Wizard**, select the
+   **Completely regenerate the boot images** option.
+5. Repeat the previous steps for the
+   **MDT Deployment (\\\\TT-FS01\MDT-Deploy\$)** deployment share.
+
+```PowerShell
+cls
+```
+
+#### # Copy MDT boot images to file server
+
+```PowerShell
+Copy-Item `
+    "\\TT-FS01\MDT-Build$\Boot\MDT-Build-x64.iso" `
+    \\TT-FS01\Products\Microsoft
+
+Copy-Item `
+    "\\TT-FS01\MDT-Build$\Boot\MDT-Build-x86.iso" `
+    \\TT-FS01\Products\Microsoft
+
+Copy-Item `
+    "\\TT-FS01\MDT-Deploy$\Boot\MDT-Deploy-x64.iso" `
+    \\TT-FS01\Products\Microsoft
+
+Copy-Item `
+    "\\TT-FS01\MDT-Deploy$\Boot\MDT-Deploy-x64.iso" `
+    \\TT-FS01\Products\Microsoft
+```
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update MDT Build Lab files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add Tools/*
+
+git commit -m "Apply updates to avoid issues with MDT and Windows 10 Version 2004"
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Update MDT Deployment files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Deploy$ Z:\NotBackedUp\MDT-Deploy /E /MIR /XD .git
+```
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Deploy
+
+git add Tools/*
+
+git commit -m "Apply updates to avoid issues with MDT and Windows 10 Version 2004"
+
+Pop-Location
+```
+
+---
+
