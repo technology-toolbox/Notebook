@@ -4408,3 +4408,62 @@ Pop-Location
 
 ---
 
+### Modify Windows Update MDT script for Windows 10 Version 2004
+
+> **Note**
+>
+> There is a known issue in MDT where all updates for Windows 10 Version 2004
+> are skipped. This is due to patches being incorrectly determined as
+>
+> To avoid this issues, .
+>
+> Refer to the following for more information:
+>
+> **ZTIWindowsUpdate Skipping all updates on Windows 10 build 2004**\
+> From <[https://www.reddit.com/r/MDT/comments/gwnk6l/ztiwindowsupdate_skipping_all_updates_on_windows/](https://www.reddit.com/r/MDT/comments/gwnk6l/ztiwindowsupdate_skipping_all_updates_on_windows/)>
+
+1. Open the Windows Update script on the **MDT Build Lab** share:\
+   \\\\TT-FS01\\MDT-Build\$\\Scripts\\ZTIWindowsUpdate.wsf
+
+2. Comment out the following lines (297-299) by prepending each line with a
+   single quote:
+
+   ```VBScript
+       If item.InstallationBehavior.CanRequestUserInput then
+           bInstall = FALSE ' Do NOT install anything that can Request User Input!
+       End if
+   ```
+
+3. Save the file.
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update MDT Build Lab files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add Scripts/ZTIWindowsUpdate.wsf
+
+git commit -m "Modify Windows Update MDT script for Windows 10 Version 2004"
+
+Pop-Location
+```
