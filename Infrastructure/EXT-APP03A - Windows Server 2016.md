@@ -1,4 +1,4 @@
-﻿# EXT-APP03A
+# EXT-APP03A
 
 Monday, March 26, 2018
 4:03 PM
@@ -5485,3 +5485,29 @@ $certImportToolPath = "\\EXT-FS01\Products\Microsoft" `
 ```
 
 ### Approve manual agent install in Operations Manager
+
+```PowerShell
+cls
+```
+
+## # Upgrade SharePoint after installing latest patches using Windows Update
+
+```PowerShell
+Push-Location ("C:\Program Files\Common Files\microsoft shared" `
+    + "\Web Server Extensions\15\BIN")
+
+.\PSConfig.exe `
+    -cmd upgrade -inplace b2b `
+    -wait `
+    -cmd applicationcontent -install `
+    -cmd installfeatures `
+    -cmd secureresources `
+    -cmd services -install
+
+Pop-Location
+```
+
+### Reference
+
+**Why I prefer PSCONFIGUI.EXE over PSCONFIG.EXE**\
+From <[https://blogs.technet.microsoft.com/stefan_gossner/2015/08/20/why-i-prefer-psconfigui-exe-over-psconfig-exe/](https://blogs.technet.microsoft.com/stefan_gossner/2015/08/20/why-i-prefer-psconfigui-exe-over-psconfig-exe/)>
