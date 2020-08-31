@@ -172,7 +172,8 @@ $source = "C:\NotBackedUp\Public\Toolbox"
 
 $computers = Get-ADComputer -Filter * |
     where { $_.Name -notin
-        @('EXT-SP2013-DEV',
+        @('EXT-SEQ02',
+        'EXT-SP2013-DEV',
         'EXT-SQL01',
         'EXT-SQL01-FC') } |
     select Name
