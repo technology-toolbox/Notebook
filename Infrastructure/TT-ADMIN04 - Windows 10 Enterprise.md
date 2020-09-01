@@ -1,7 +1,7 @@
-﻿# TT-ADMIN03 - Windows 10 Enterprise
+﻿# TT-ADMIN04 - Windows 10 Enterprise
 
-Wednesday, December 4, 2019
-9:21 AM
+Monday, August 31, 2020
+4:51 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Wednesday, December 4, 2019
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05C"
-$vmName = "TT-ADMIN03"
+$vmHost = "TT-HV05F"
+$vmName = "TT-ADMIN04"
 $vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -59,7 +59,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-ADMIN03**.
+  - In the **Computer name** box, type **TT-ADMIN04**.
   - Click **Next**.
 - On the **Applications** step:
   - Select the following applications:
@@ -93,11 +93,11 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
-$vmName = "TT-ADMIN03"
+$vmName = "TT-ADMIN04"
 ```
 
 ### # Move computer to different OU
@@ -112,7 +112,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 ### # Set first boot device to hard drive
 
 ```PowerShell
-$vmHost = "TT-HV05C"
+$vmHost = "TT-HV05F"
 
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
@@ -227,7 +227,7 @@ Enable-PSRemoting -Confirm:$false
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -236,8 +236,8 @@ cls
 #### # Checkpoint VM
 
 ```PowerShell
-$vmHost = "TT-HV05C"
-$vmName = "TT-ADMIN03"
+$vmHost = "TT-HV05F"
+$vmName = "TT-ADMIN04"
 $checkpointName = "Baseline"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
@@ -289,7 +289,11 @@ cls
 
 ```PowerShell
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-Tools-All
+```
 
+**Issue:**
+
+```Text
 Enable-WindowsOptionalFeature : One or several parent features are disabled so current
 feature can not be enabled.
 At line:1 char:1
@@ -390,7 +394,7 @@ Remove-Item $installerPath
 
 ```PowerShell
 $installerPath = "\\TT-FS01\Public\Download\Microsoft\SharePoint\Online" `
-    + "\SharePointOnlineManagementShell_19418-12000_x64_en-us.msi"
+    + "\SharePointOnlineManagementShell_20324-12000_x64_en-us.msi"
 
 Start-Process `
     -FilePath msiexec.exe `
@@ -411,7 +415,7 @@ cls
 #### # Install Git
 
 ```PowerShell
-$setupPath = "\\TT-FS01\Products\Git\Git-2.24.0-64-bit.exe"
+$setupPath = "\\TT-FS01\Products\Git\Git-2.28.0-64-bit.exe"
 
 Start-Process -FilePath $setupPath -Wait
 ```
@@ -464,7 +468,52 @@ $setupPath = "\\TT-FS01\Products\GitHub\GitHubDesktopSetup.exe"
 
 Start-Process `
     -FilePath $setupPath `
-    -ArgumentList $arguments `
+    -Wait
+```
+
+> **Important**
+>
+> Wait for the installation to complete.
+
+```PowerShell
+cls
+```
+
+### # Install PowerShell modules
+
+### # Install posh-git module (e.g. for Powerline Git prompt customization)
+
+#### # Install NuGet package provider (to bypass prompt when installing posh-git module)
+
+```PowerShell
+Install-PackageProvider NuGet -MinimumVersion '2.8.5.201' -Force
+```
+
+#### # Trust PSGallery repository (to bypass prompt when installing posh-git module)
+
+```PowerShell
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+```
+
+#### # Install posh-git module
+
+```PowerShell
+Install-Module -Name 'posh-git'
+```
+
+```PowerShell
+cls
+```
+
+### # Install PowerShell 7
+
+```PowerShell
+$installerPath = "\\TT-FS01\Public\Download\Microsoft\PowerShell" `
+    + "\PowerShell-7.0.3-win-x64.msi"
+
+Start-Process `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" /quiet REGISTER_MANIFEST=1" `
     -Wait
 ```
 
@@ -480,7 +529,7 @@ cls
 
 ```PowerShell
 $setupPath = "\\TT-FS01\Products\Microsoft\Visual Studio Code" `
-    + "\VSCodeSetup-x64-1.40.2.exe"
+    + "\VSCodeSetup-x64-1.48.2.exe"
 
 $arguments = "/silent" `
     + " /mergetasks='!runcode,addcontextmenufiles,addcontextmenufolders" `
@@ -501,10 +550,14 @@ Start-Process `
 **Installer doesn't disable launch of VScode even when installing with /mergetasks=!runcode**\
 From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Microsoft/vscode/issues/46350)>
 
-#### TODO: Modify Visual Studio Code shortcut to use custom extension and user data locations
+```PowerShell
+cls
+```
 
-```Console
-"C:\Program Files\Microsoft VS Code\Code.exe" --extensions-dir "C:\NotBackedUp\vscode-data\extensions" --user-data-dir "C:\NotBackedUp\vscode-data\user-data"
+## # Download PowerShell help files
+
+```PowerShell
+Update-Help
 ```
 
 ## Install updates using Windows Update
@@ -515,7 +568,7 @@ From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Micr
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN03** - Run as administrator
 
 ```PowerShell
 cls
@@ -524,8 +577,8 @@ cls
 ## # Delete VM checkpoint
 
 ```PowerShell
-$vmHost = "TT-HV05C"
-$vmName = "TT-ADMIN03"
+$vmHost = "TT-HV05F"
+$vmName = "TT-ADMIN04"
 $checkpointName = "Baseline"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
@@ -551,7 +604,7 @@ cls
 ### # Migrate VM to shared storage
 
 ```PowerShell
-$vmName = "TT-ADMIN03"
+$vmName = "TT-ADMIN04"
 
 $vm = Get-SCVirtualMachine -Name $vmName
 $vmHost = $vm.VMHost
@@ -590,6 +643,63 @@ Start-SCVirtualMachine -VM $vmName
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/43652C4EB2478B2E77C569C7ABE051AC9AD42E91.png)
 
+### Configure Visual Studio Code
+
+#### Modify Visual Studio Code shortcut to use custom extension and user data locations
+
+```Console
+"C:\Program Files\Microsoft VS Code\Code.exe" --extensions-dir "C:\NotBackedUp\vscode-data\extensions" --user-data-dir "C:\NotBackedUp\vscode-data\user-data"
+```
+
+### Install Visual Studio Code extensions
+
+#### Install extension: GitLens - Git supercharged
+
+#### Install extension: PowerShell
+
+#### Install extension: Prettier - Code formatter
+
+#### Install extension: vscode-icons
+
+#### Install extension: XML Tools
+
+---
+
+#### Configure Visual Studio Code settings
+
+1. Press **Ctrl+Shift+P**
+2. Select **Preferences: Open Settings (JSON)**
+
+---
+
+File - **settings.json**
+
+```JSON
+{
+  "diffEditor.ignoreTrimWhitespace": false,
+  "editor.formatOnSave": true,
+  "editor.renderWhitespace": "boundary",
+  "editor.rulers": [80],
+  "files.trimTrailingWhitespace": true,
+  "git.autofetch": true,
+  "git.suggestSmartCommit": false,
+  "html.format.wrapLineLength": 80,
+  "workbench.editor.highlightModifiedTabs": true,
+  "workbench.iconTheme": "vscode-icons",
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "files.trimTrailingWhitespace": false
+  }
+}
+```
+
+---
+
 ```PowerShell
 cls
 ```
@@ -598,6 +708,74 @@ cls
 
 ```PowerShell
 robocopy \\TT-FS01\Public\cmder-config C:\NotBackedUp\Public\Toolbox\cmder /E
+```
+
+### Install Windows Terminal
+
+Open the **Microsoft Store** app and install **Windows Terminal**.
+
+### Set up Powerline in Windows Terminal
+
+#### Install Powerline font
+
+1. Open Windows Explorer and browse to the following location:
+
+   **\\\\TT-FS01\Public\\Download\\Microsoft\\Fonts\\CascadiaCode-2008.25\\ttf**
+
+2. Right-click **Cascadia Code PL.ttf** and click **Install for all users**.
+
+```PowerShell
+cls
+```
+
+#### # Set up Powerline in PowerShell
+
+##### # Trust PSGallery repository (to bypass prompt when installing posh-git module)
+
+```PowerShell
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+```
+
+##### # Install posh-git module
+
+```PowerShell
+Install-Module -Name posh-git
+```
+
+##### # Install oh-my-posh module
+
+```PowerShell
+Install-Module -Name oh-my-posh
+```
+
+```PowerShell
+cls
+```
+
+##### # Customize PowerShell prompt
+
+```PowerShell
+Notepad $PROFILE
+```
+
+Append the following lines to the file:
+
+```PowerShell
+Import-Module -Name posh-git
+Import-Module -Name oh-my-posh
+Set-Theme -Name Paradox
+```
+
+##### Set Cascadia Code PL as fontFace in settings
+
+Open the settings for Windows Terminal and add the following **fontFace** and **fontSize** properties:
+
+```JSON
+    "profiles": {
+      "defaults": {
+        "fontFace": "Cascadia Code PL",
+        "fontSize": 10
+      },
 ```
 
 **TODO:**
