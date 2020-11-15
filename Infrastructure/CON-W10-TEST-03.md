@@ -1,7 +1,7 @@
-﻿# CON-W10-TEST2
+﻿# CON-W10-TEST-03
 
-Tuesday, February 25, 2020
-12:26 PM
+Sunday, November 15, 2020
+5:41 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Tuesday, February 25, 2020
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05C"
-$vmName = "CON-W10-TEST2"
+$vmHost = "TT-HV05F"
+$vmName = "CON-W10-TEST-03"
 $vmPath = "E:\NotBackedUp\VMs\$vmName"
 $vhdPath = "$vmPath\Virtual Hard Disks\$vmName.vhdx"
 
@@ -31,7 +31,7 @@ New-VM `
     -Generation 2 `
     -Path $vmPath `
     -NewVHDPath $vhdPath `
-    -NewVHDSizeBytes 37GB `
+    -NewVHDSizeBytes 40GB `
     -MemoryStartupBytes 2GB `
     -SwitchName "Embedded Team Switch"
 
@@ -56,7 +56,7 @@ Start-SCVirtualMachine $vmName
 
 - On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **CON-W10-TEST2**.
+  - In the **Computer name** box, type **CON-W10-TEST-03**.
   - Select **Join a workgroup**.
   - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
@@ -70,7 +70,7 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -79,8 +79,8 @@ cls
 ### # Set first boot device to hard drive
 
 ```PowerShell
-$vmHost = "TT-HV05C"
-$vmName = "CON-W10-TEST2"
+$vmHost = "TT-HV05F"
+$vmName = "CON-W10-TEST-03"
 
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
@@ -124,7 +124,7 @@ logoff
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -133,9 +133,9 @@ cls
 #### # Move VM to Contoso network
 
 ```PowerShell
-$vmName = "CON-W10-TEST2"
+$vmName = "CON-W10-TEST-03"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
-$vmNetwork = Get-SCVMNetwork -Name "Contoso VM Network"
+$vmNetwork = Get-SCVMNetwork -Name "Contoso-60 VM Network"
 
 Stop-SCVirtualMachine $vmName
 
@@ -149,6 +149,18 @@ Start-SCVirtualMachine $vmName
 ---
 
 #### Login as .\\foo
+
+#### # Remove stale network adapter
+
+```PowerShell
+$env:devmgr_show_nonpresent_devices = 1
+
+start devmgmt.msc
+```
+
+```PowerShell
+cls
+```
 
 #### # Configure network adapter
 
@@ -173,7 +185,7 @@ Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
 
 Start-Sleep -Seconds 5
 
-ping CON-DC03 -f -l 8900
+ping CON-DC05 -f -l 8900
 ```
 
 ##### # Disable NetBIOS over TCP/IP
@@ -202,7 +214,7 @@ Get-NetAdapter |
 
 | Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
 | ---- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | C:           | 37 GB       | 4K                   | OSDisk       |
+| 0    | C:           | 40 GB       | 4K                   | OSDisk       |
 
 ```PowerShell
 cls
@@ -221,7 +233,7 @@ Add-Computer `
 
 ---
 
-**CON-DC03** - Run as domain administrator
+**CON-DC05** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -230,7 +242,7 @@ cls
 #### # Move computer to different organizational unit
 
 ```PowerShell
-$computerName = "CON-W10-TEST2"
+$computerName = "CON-W10-TEST-03"
 $targetPath = "OU=Workstations,OU=Resources,OU=Quality Assurance" `
     + ",DC=corp,DC=contoso,DC=com"
 
@@ -273,7 +285,7 @@ $groupName = "Domain Users"
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -284,7 +296,7 @@ cls
 #### # Migrate VM to shared storage
 
 ```PowerShell
-$vmName = "CON-W10-TEST2"
+$vmName = "CON-W10-TEST-03"
 
 $vm = Get-SCVirtualMachine -Name $vmName
 $vmHost = $vm.VMHost
@@ -295,6 +307,10 @@ Move-SCVirtualMachine `
     -HighlyAvailable $true `
     -Path "C:\ClusterStorage\iscsi02-Silver-02" `
     -UseDiffDiskOptimization
+```
+
+```PowerShell
+cls
 ```
 
 #### # Allow migration to host with different processor version
