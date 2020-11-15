@@ -4556,3 +4556,172 @@ Pop-Location
 ```
 
 ---
+
+## Upgrade Windows Assessment and Deployment Kit (Windows ADK) for Windows 10
+
+### Uninstall previous verson of Windows ADK for Windows 10
+
+```PowerShell
+cls
+```
+
+### # Install Windows ADK for Windows 10, version 2004
+
+```PowerShell
+& ("\\TT-FS01\Products\Microsoft\Windows Assessment and Deployment Kit" `
+    + "\Windows ADK for Windows 10, version 2004\adksetup.exe")
+```
+
+1. On the **Specify Location** page, click **Next**.
+2. On the **Windows Kits Privacy** page, click **Next**.
+3. On the **License Agreement** page:
+   1. Review the software license terms.
+   2. If you agree to the terms, click **Accept**.
+4. On the **Select the features you want to install** page:
+
+   1. Select the following items:
+      - **Deployment Tools**
+      - **User State Migration Tool (USMT)**
+   2. Click **Install**.
+
+```PowerShell
+cls
+```
+
+### # Install Windows PE add-on for Windows ADK, version 2004
+
+```PowerShell
+& ("\\TT-FS01\Products\Microsoft\Windows Assessment and Deployment Kit" `
+    + "\Windows ADK for Windows 10, version 2004\adkwinpesetup.exe")
+```
+
+1. On the **Specify Location** page, click **Next**.
+2. On the **Windows Kits Privacy** page, click **Next**.
+3. On the **License Agreement** page:
+   1. Review the software license terms.
+   2. If you agree to the terms, click **Accept**.
+4. On the **Select the features you want to install** page:
+   1. Select the following items:
+      - **Windows Preinstallation Environment (Windows PE)**
+   2. Click **Install**.
+
+### Update MDT deployment shares (to regenerate the boot images)
+
+1. Open **Deployment Workbench** and expand **Deployment Shares**.
+2. Right-click **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$))** and then click **Update Deployment Share**.
+3. In the **Update Deployment Share Wizard**:
+   1. On the **Options** step, select **Completely regenerate the boot images**, and then click **Next**.
+   2. On the **Summary** step, click **Next**.
+   3. Wait for the deployment share to be updated, verify no errors occurred during the update, and then click **Finish**.
+4. Repeat the previous steps to update the **MDT Deployment ([\\\\TT-FS01\\MDT-Deploy\$](\\TT-FS01\MDT-Deploy$))** deployment share.
+
+```PowerShell
+cls
+```
+
+#### # Copy boot images to file server
+
+```PowerShell
+@(
+'\\TT-FS01\MDT-Build$\Boot\MDT-Build-x64.iso',
+'\\TT-FS01\MDT-Build$\Boot\MDT-Build-x86.iso',
+'\\TT-FS01\MDT-Deploy$\Boot\MDT-Deploy-x64.iso',
+'\\TT-FS01\MDT-Deploy$\Boot\MDT-Deploy-x86.iso') |
+    foreach {
+        Copy-Item $_ "\\TT-FS01\Products\Microsoft"
+    }
+```
+
+## Replace boot images
+
+### Remove existing boot images using Windows Deployment Services console
+
+```PowerShell
+cls
+```
+
+### # Add boot images
+
+```PowerShell
+Import-WdsBootImage `
+    -Path "\\TT-FS01\MDT-Build$\Boot\LiteTouchPE_x86.wim" `
+    -NewImageName "MDT Build (x86)" `
+    -NewDescription "Choose this image to create a reference build using MDT" `
+    -NewFileName "MDT-Build-x86-boot.wim"
+```
+
+#### Issue
+
+```PowerShell
+Import-WdsBootImage : Access is denied.
+At line:1 char:1
++ Import-WdsBootImage `
++ ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (MSFT_WdsBootImage:root/cimv2/MSFT_WdsBootImage) [Import-WdsBootImage], Ci
+   mException
+    + FullyQualifiedErrorId : 0x5,Import-WdsBootImage
+```
+
+#### Reference
+
+**WDS : GUI or cmdlet : Access is denied**\
+From <[https://social.technet.microsoft.com/Forums/en-US/f3d9c5ef-f63a-4991-a72d-22850b5c2ec6/wds-gui-or-cmdlet-access-is-denied?forum=winserversetup](https://social.technet.microsoft.com/Forums/en-US/f3d9c5ef-f63a-4991-a72d-22850b5c2ec6/wds-gui-or-cmdlet-access-is-denied?forum=winserversetup)>
+
+#### Workaround
+
+Copy the WIM files locally and then call **Import-WdsBootImage**:
+
+```PowerShell
+Copy-Item "\\TT-FS01\MDT-Build$\Boot\LiteTouchPE_x86.wim" C:\NotBackedUp\Temp
+
+Import-WdsBootImage `
+    -Path "C:\NotBackedUp\Temp\LiteTouchPE_x86.wim" `
+    -NewImageName "MDT Build (x86)" `
+    -NewDescription "Choose this image to create a reference build using MDT" `
+    -NewFileName "MDT-Build-x86-boot.wim"
+
+Remove-Item "C:\NotBackedUp\Temp\LiteTouchPE_x86.wim"
+
+Copy-Item "\\TT-FS01\MDT-Build$\Boot\LiteTouchPE_x64.wim" C:\NotBackedUp\Temp
+
+Import-WdsBootImage `
+    -Path "C:\NotBackedUp\Temp\LiteTouchPE_x64.wim" `
+    -NewImageName "MDT Build (x64)" `
+    -NewDescription "Choose this image to create a reference build using MDT" `
+    -NewFileName "MDT-Build-x64-boot.wim"
+
+Remove-Item "C:\NotBackedUp\Temp\LiteTouchPE_x64.wim"
+
+Copy-Item "\\TT-FS01\MDT-Deploy$\Boot\LiteTouchPE_x86.wim" C:\NotBackedUp\Temp
+
+Import-WdsBootImage `
+    -Path "C:\NotBackedUp\Temp\LiteTouchPE_x86.wim" `
+    -NewImageName "MDT Deploy (x86)" `
+    -NewDescription "Choose this image to deploy a reference build" `
+    -NewFileName "MDT-Deploy-x86-boot.wim"
+
+Remove-Item "C:\NotBackedUp\Temp\LiteTouchPE_x86.wim"
+
+Copy-Item "\\TT-FS01\MDT-Deploy$\Boot\LiteTouchPE_x64.wim" C:\NotBackedUp\Temp
+
+Import-WdsBootImage `
+    -Path "C:\NotBackedUp\Temp\LiteTouchPE_x64.wim" `
+    -NewImageName "MDT Deploy (x64)" `
+    -NewDescription "Choose this image to deploy a reference build" `
+    -NewFileName "MDT-Deploy-x64-boot.wim"
+
+Remove-Item "C:\NotBackedUp\Temp\LiteTouchPE_x64.wim"
+```
+
+```PowerShell
+cls
+```
+
+### # Configure display order for boot images
+
+```PowerShell
+Set-WdsBootImage -Architecture x64 -ImageName "MDT Deploy (x64)" -DisplayOrder 10
+Set-WdsBootImage -Architecture x86 -ImageName "MDT Deploy (x86)" -DisplayOrder 100
+Set-WdsBootImage -Architecture x64 -ImageName "MDT Build (x64)" -DisplayOrder 200
+Set-WdsBootImage -Architecture x86 -ImageName "MDT Build (x86)" -DisplayOrder 300
+```
