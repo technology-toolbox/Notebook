@@ -59,6 +59,7 @@ cls
 & 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
     -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
     -SwitchName "Embedded Team Switch" `
+    -VhdSize 40GB `
     -Force
 ```
 
