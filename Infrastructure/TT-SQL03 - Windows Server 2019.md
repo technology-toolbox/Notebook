@@ -1130,6 +1130,16 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
+## Move DPM folder for SQL Server backups to different volume
+
+```PowerShell
+Push-Location "L:\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\Data"
+
+New-Item -ItemType SymbolicLink -Name DPM_SQL_PROTECT -Target Z:\DPM_SQL_PROTECT
+
+Pop-Location
+```
+
 **TODO:**
 
 ---
