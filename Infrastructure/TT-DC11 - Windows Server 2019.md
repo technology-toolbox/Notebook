@@ -626,6 +626,42 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
+## Issue - Insufficient free space to install patches using Windows Update
+
+Error installing **2021-01 Cumulative Update for Windows Server 2019 for x64-based Systems (KB4598230)** due to low disk space.
+
+```PowerShell
+cls
+```
+
+### # Clean up Windows Update files
+
+```PowerShell
+Stop-Service wuauserv
+
+Remove-Item C:\Windows\SoftwareDistribution -Recurse
+
+Start-Service wuauserv
+```
+
+```PowerShell
+cls
+```
+
+### # Clean up the WinSxS folder
+
+```PowerShell
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+```
+
+```PowerShell
+cls
+```
+
+```PowerShell
+Restart-Computer
+```
+
 **TODO:**
 
 ```PowerShell
