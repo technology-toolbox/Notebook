@@ -4912,3 +4912,98 @@ Pop-Location
 ```
 
 ---
+
+```PowerShell
+cls
+```
+
+## # Upgrade to Windows 10, version 20H2 (updated March 2021)
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+```
+
+### # Import operating system - "Windows 10 Enterprise, Version 20H2 (x64)"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows 10" `
+  + "\en_windows_10_business_editions_version_20h2_updated_march_2021_x64_dvd_c2f10533.iso"
+
+$imageDriveLetter = Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume |
+    select -ExpandProperty DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "W10Ent-20H2-Mar-2021-x64"
+
+Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows 10" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+```
+
+```PowerShell
+cls
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+### Modify task sequence to use new version of Windows 10 Enterprise, Version 20H2
+
+1. Expand the **Install** group and select the **Install Operating System**
+   task.
+2. In the **Operating system to install** section, click **Browse** and select
+   the following item:
+
+   **Windows 10 Enterprise in W10Ent-20H2-Mar-2021-x64 install.wim**
+
+### Delete old version of Windows 10 Enterprise, version 20H2
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add Control/*
+
+git commit -m "Upgrade to Windows 10, version 20H2 (updated March 2021)"
+
+Pop-Location
+```
+
+---
