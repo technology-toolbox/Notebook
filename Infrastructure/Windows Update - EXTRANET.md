@@ -1,6 +1,6 @@
 ﻿# Windows Update - EXTRANET
 
-Saturday, January 11, 2014
+Saturday, January 11, 2014\
 7:56 AM
 
 ```Text
@@ -28,10 +28,7 @@ $activity = "Prepare development and test VMs for patching"
 $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05D'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05D'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR3'; VMHost = 'TT-HV05D'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR4'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV05F'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2010-DEV1'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2012-DEV1'; VMHost = 'TT-HV05F'; },
@@ -351,10 +348,7 @@ cls
 $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05D'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05D'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR3'; VMHost = 'TT-HV05D'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR4'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR9'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV05F'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2010-DEV1'; VMHost = 'STORM'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2012-DEV1'; VMHost = 'TT-HV05F'; },
