@@ -1,13 +1,13 @@
 ﻿# Windows Update - TECHTOOLBOX
 
-Saturday, January 11, 2014
+Saturday, January 11, 2014\
 7:56 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Patch TT-ADMIN03 (before patching other machines)
+## Patch TT-ADMIN04 (before patching other machines)
 
 ## Patch remaining TECHTOOLBOX machines
 
@@ -15,7 +15,7 @@ Saturday, January 11, 2014
 
 ---
 
-**TT-ADMIN03** - Run as domain administrator
+**TT-ADMIN04** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -27,12 +27,12 @@ $activity = "Prepare development and test VMs for patching"
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'TT-VS2013-DEV'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'TT-W10-DEV09'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'TT-WIN10-DEV6'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'TT-WIN7-TEST1'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'TT-WIN7-TEST2'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'TT-WIN7-TEST3'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'TT-WIN8-TEST1'; VMHost = 'TT-HV05E'; })
+    [PSCustomObject] @{ VMName = 'TT-W10-DEV-10'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'TT-W10-DEV-11'; VMHost = 'TT-HV05E'; },
+    [PSCustomObject] @{ VMName = 'TT-W7-TEST-04'; VMHost = 'TT-HV05E'; },
+    [PSCustomObject] @{ VMName = 'TT-W7-TEST-05'; VMHost = 'TT-HV05E'; },
+    [PSCustomObject] @{ VMName = 'TT-W7-TEST-06'; VMHost = 'TT-HV05E'; },
+    [PSCustomObject] @{ VMName = 'TT-W8-TEST-02'; VMHost = 'TT-HV05E'; })
 ```
 
 #### # Revert VMs to most recent checkpoint
@@ -540,12 +540,12 @@ cls
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
     [PSCustomObject] @{ VMName = 'TT-VS2013-DEV'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'TT-W10-DEV09'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'TT-WIN10-DEV6'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'TT-WIN7-TEST1'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'TT-WIN7-TEST2'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'TT-WIN7-TEST3'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'TT-WIN8-TEST1'; VMHost = 'TT-HV05E'; })
+    [PSCustomObject] @{ VMName = 'TT-W10-DEV-10'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'TT-W10-DEV-11'; VMHost = 'TT-HV05E'; },
+    [PSCustomObject] @{ VMName = 'TT-W7-TEST-04'; VMHost = 'TT-HV05E'; },
+    [PSCustomObject] @{ VMName = 'TT-W7-TEST-05'; VMHost = 'TT-HV05E'; },
+    [PSCustomObject] @{ VMName = 'TT-W7-TEST-06'; VMHost = 'TT-HV05E'; },
+    [PSCustomObject] @{ VMName = 'TT-W8-TEST-02'; VMHost = 'TT-HV05E'; })
 
 $virtualMachinesWithSnapshots |
     foreach {
