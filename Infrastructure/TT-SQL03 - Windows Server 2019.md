@@ -1,6 +1,6 @@
 ﻿# TT-SQL03 - Windows Server 2019 Standard Edition
 
-Monday, September 23, 2019
+Monday, September 23, 2019\
 7:37 AM
 
 ```Text
@@ -55,11 +55,13 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 #### Install custom Windows Server 2019 image
 
-- On the **Task Sequence** step, select **Windows Server 2019** and click **Next**.
+- On the **Task Sequence** step, select **Windows Server 2019** and click
+  **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **TT-SQL03**.
   - Click **Next**.
-- On the **Applications** step, do not select any applications, and click **Next**.
+- On the **Applications** step, do not select any applications, and click
+  **Next**.
 
 ---
 
@@ -417,20 +419,31 @@ On the **Feature Selection** step, select the following checkbox:
 
 On the **Server Configuration** step:
 
-- For the **SQL Server Agent** service, change the **Startup Type** to **Automatic**.
-- For the **SQL Server Browser** service, leave the **Startup Type** as **Disabled**.
+- For the **SQL Server Agent** service, change the **Startup Type** to
+  **Automatic**.
+- For the **SQL Server Browser** service, leave the **Startup Type** as
+  **Disabled**.
 
 On the **Database Engine Configuration** step:
 
-- On the **Server Configuration** tab, in the **Specify SQL Server administrators** section, click **Add...** and then add the domain group for SQL Server administrators.
+- On the **Server Configuration** tab, in the **Specify SQL Server
+  administrators** section, click **Add...** and then add the domain group for
+  SQL Server administrators.
 - On the **Data Directories** tab:
   - In the **Data root directory** box, type **D:\\Microsoft SQL Server\\**.
-  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
-  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**).
+  - In the **User database log directory** box, change the drive letter to
+    **L:** (the value should be **L:\\Microsoft SQL
+    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **Backup directory** box, change the drive letter to **Z:** (the
+    value should be **Z:\\Microsoft SQL
+    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**).
 - On the **TempDB** tab:
-  - Remove the default data directory (**D:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
-  - Add the data directory on the **Temp01** volume (**T:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
-  - Ensure the **Log directory** is set to **T:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**.
+  - Remove the default data directory (**D:\\Microsoft SQL
+    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
+  - Add the data directory on the **Temp01** volume (**T:\\Microsoft SQL
+    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
+  - Ensure the **Log directory** is set to **T:\\Microsoft SQL
+    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**.
 
 > **Important**
 >
@@ -513,7 +526,8 @@ cls
 
 ##### Reference
 
-**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field #017**\
+**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field
+#017**\
 From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/](https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/)>
 
 ---
@@ -587,9 +601,12 @@ Execute script in SQL Server Management Studio: **JobSchedules.sql**
 
 ### Reference
 
-Set max degree of parallelism (MAXDOP) to 1 for instances of SQL Server that host SharePoint databases to make sure that a single SQL Server process serves each request.
+Set max degree of parallelism (MAXDOP) to 1 for instances of SQL Server that
+host SharePoint databases to make sure that a single SQL Server process serves
+each request.
 
-From <[https://docs.microsoft.com/en-us/sharepoint/administration/best-practices-for-sql-server-in-a-sharepoint-server-farm](https://docs.microsoft.com/en-us/sharepoint/administration/best-practices-for-sql-server-in-a-sharepoint-server-farm)>
+From
+<[https://docs.microsoft.com/en-us/sharepoint/administration/best-practices-for-sql-server-in-a-sharepoint-server-farm](https://docs.microsoft.com/en-us/sharepoint/administration/best-practices-for-sql-server-in-a-sharepoint-server-farm)>
 
 ---
 
@@ -1062,9 +1079,12 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+Review the licensing agreement. If you accept the Microsoft Software License
+Terms, select **I accept the license terms and conditions**, and then click
+**OK**.
 
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall
+exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service
@@ -1179,6 +1199,8 @@ Start-SCVirtualMachine -VM $vmName
 ```
 
 ---
+
+**TODO:**
 
 ```PowerShell
 cls

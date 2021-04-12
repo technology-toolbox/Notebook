@@ -1,6 +1,6 @@
 ﻿# TT-FS01B - Windows Server 2019 File Server
 
-Wednesday, April 22, 2020
+Wednesday, April 22, 2020\
 9:08 AM
 
 ```Text
@@ -543,9 +543,12 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+Review the licensing agreement. If you accept the Microsoft Software License
+Terms, select **I accept the license terms and conditions**, and then click
+**OK**.
 
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall
+exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service
@@ -581,11 +584,14 @@ $productionServer = 'TT-FS01B'
 
 #### Restore user profiles and home directories
 
-1. On the **Select recovery type** step, select the **Recover to alternate location** option and click **Browse**.
+1. On the **Select recovery type** step, select the **Recover to alternate
+   location** option and click **Browse**.
 
    E:\ on TT-FS01B
 
-1. On the **Specify recovery options** step, in the **Restore security** section, select **Apply the security settings of the recovery point version**.
+1. On the **Specify recovery options** step, in the **Restore security**
+   section, select **Apply the security settings of the recovery point
+   version**.
 
 ```PowerShell
 cls

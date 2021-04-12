@@ -1,6 +1,6 @@
 ﻿# TT-HV05F
 
-Saturday, May 30, 2020
+Saturday, May 30, 2020\
 8:10 AM
 
 ```Text
@@ -368,12 +368,20 @@ Get-PhysicalDisk | select DeviceId, Model, SerialNumber, CanPool | sort DeviceId
 
 1. Download the latest AHCI drivers from the Intel website:\
    **Intel® RSTe AHCI & SCU Software RAID Driver for Windows**\
-   From <[https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t](https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t)>
-2. Extract the drivers (**[\\\\TT-FS01\\Public\\Download\\Drivers\\Intel\\RSTe](\TT-FS01\Public\Download\Drivers\Intel\RSTe) AHCI & SCU Software RAID driver for Windows**) and copy the files to a temporary location on the server:
-3. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA AHCI Controller (PCI\\VEN_8086&DEV_8D02&...)**:
-4. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA AHCI Controller (PCI\\VEN_8086&DEV_8D62&...)**:
-5. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA RAID Controller (PCI\\VEN_8086&DEV_8D62&...)**:
-6. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA RAID Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+   From
+   <[https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t](https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t)>
+2. Extract the drivers
+   (**[\\\\TT-FS01\\Public\\Download\\Drivers\\Intel\\RSTe](\TT-FS01\Public\Download\Drivers\Intel\RSTe)
+   AHCI & SCU Software RAID driver for Windows**) and copy the files to a
+   temporary location on the server:
+3. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA AHCI
+   Controller (PCI\\VEN_8086&DEV_8D02&...)**:
+4. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA AHCI
+   Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+5. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA RAID
+   Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+6. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA RAID
+   Controller (PCI\\VEN_8086&DEV_8D62&...)**:
 7. Restart the server.
 
 ```PowerShell
@@ -1011,7 +1019,9 @@ Add-ClusterNode -Cluster TT-HV05-FC
 > **Note:** At this point, the new cluster node should appear in VMM with a
 > "pending" status.
 
-> **Important:** Wait for the **Add virtual machine host** job in VMM to complete.
+> **Important:**
+>
+> Wait for the **Add virtual machine host** job in VMM to complete.
 
 ---
 
@@ -1401,7 +1411,7 @@ Pop-Location
 
 Import the virtual machines using Hyper-V Manager.
 
-TODO
+**TODO:**
 
 ```PowerShell
 cls

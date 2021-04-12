@@ -1,6 +1,6 @@
 ﻿# STORM - Windows 10 Enterprise x64
 
-Monday, July 2, 2018
+Monday, July 2, 2018\
 11:20 AM
 
 ```Text
@@ -11,7 +11,8 @@ Monday, July 2, 2018
 
 ### Install custom Windows 10 image
 
-- On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
+- On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and
+  click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **STORM**.
   - Specify **WORKGROUP**.
@@ -60,7 +61,8 @@ $computerName = "STORM"
 Rename-Computer -NewName $computerName -Restart
 ```
 
-Wait for the VM to restart and then execute the following command to join the **TECHTOOLBOX **domain:
+Wait for the VM to restart and then execute the following command to join the
+**TECHTOOLBOX **domain:
 
 ```PowerShell
 Add-Computer -DomainName corp.technologytoolbox.com -Restart
@@ -259,7 +261,8 @@ On the **Software Selections** step:
 1. Open **Windows Settings**.
 2. In the **Windows Setttings** window, select **Privacy**.
 3. On the **Privacy** page, select **Background apps**.
-4. On the **Background apps** page, disable the following apps from running in the background:
+4. On the **Background apps** page, disable the following apps from running in
+   the background:
    - **3D Viewer**
    - **Calculator**
    - **Camera**
@@ -329,7 +332,8 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Disable-RemoteWindowsUpdate.ps1 `
 
 > **Important**
 >
-> Run the following commands using a non-elevated command prompt (to avoid issues with customizing the folder icons).
+> Run the following commands using a non-elevated command prompt (to avoid
+> issues with customizing the folder icons).
 
 ---
 
@@ -462,7 +466,8 @@ Start-Process -FilePath $setupPath -Wait
 
 #### Reference
 
-**Microsoft Money crashes during import of account transactions or when changing a payee of a downloaded transaction**\
+**Microsoft Money crashes during import of account transactions or when changing
+a payee of a downloaded transaction**\
 From <[http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx](http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx)>
 
 ```PowerShell
@@ -522,7 +527,8 @@ Copy-Item `
 
 #### Configure default invoice template
 
-Edit invoice listing (2008Invoice.ntd) to move the "Technology Toolbox" invoice to the top (so it is selected by default).
+Edit invoice listing (2008Invoice.ntd) to move the "Technology Toolbox" invoice
+to the top (so it is selected by default).
 
 ```Console
 Notepad "C:\Users\All Users\Microsoft\Money\17.0\Invoice\2008Invoice.ntd"
@@ -606,9 +612,12 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+Review the licensing agreement. If you accept the Microsoft Software License
+Terms, select **I accept the license terms and conditions**, and then click
+**OK**.
 
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall
+exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service
@@ -669,39 +678,53 @@ $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
 & ("$imageDriveLetter" + ":\setup.exe")
 ```
 
-On the **Feature Selection** step, click **Select All** and then clear the checkbox for **PolyBase Query Service for External Data **(since this requires the Java Runtime Environment to be installed).
+On the **Feature Selection** step, click **Select All** and then clear the
+checkbox for **PolyBase Query Service for External Data** (since this requires
+the Java Runtime Environment to be installed).
 
 On the **Server Configuration** page:
 
 - For **SQL Server Database Engine**, change the **Startup Type** to **Manual**.
-- For **SQL Server Analysis Services**, change the **Startup Type** to **Manual**.
-- For **SQL Server Integration Services 14.0**, change the **Startup Type** to **Manual**.
-- For **SQL Server Integration Services Scale Out Master 14.0**, change the **Startup Type** to **Manual**.
-- For **SQL Server Integration Services Scale Out Worker 14.0**, change the **Startup Type** to **Manual**.
+- For **SQL Server Analysis Services**, change the **Startup Type** to
+  **Manual**.
+- For **SQL Server Integration Services 14.0**, change the **Startup Type** to
+  **Manual**.
+- For **SQL Server Integration Services Scale Out Master 14.0**, change the
+  **Startup Type** to **Manual**.
+- For **SQL Server Integration Services Scale Out Worker 14.0**, change the
+  **Startup Type** to **Manual**.
 
 On the **Database Engine Configuration** page:
 
 - On the **Server Configuration** tab, click **Add Current User**.
 - On the **Data Directories** tab:
-  - Change the **Data root directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\**
-  - Change the **Backup directory** to **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**
+  - Change the **Data root directory** to **D:\\NotBackedUp\\Microsoft SQL
+    Server\\**
+  - Change the **Backup directory** to **Z:\\Microsoft SQL
+    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**
 
 On the **Analysis Services Configuration** page:
 
 - On the **Server Configuration** tab, click **Add Current User**.
 - On the **Data Directories** tab:
-  - Change the **Data directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Data.**
-  - Change the **Log file directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Log.**
-  - Change the **Temp directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Temp.**
-  - Change the **Backup directory** to **Z:\\NotBackedUp\\Microsoft SQL Server\\MSAS14.MSSQLSERVER\\OLAP\\Backup**.
+  - Change the **Data directory** to **D:\\NotBackedUp\\Microsoft SQL
+    Server\\MSAS14.MSSQLSERVER\\OLAP\\Data.**
+  - Change the **Log file directory** to **D:\\NotBackedUp\\Microsoft SQL
+    Server\\MSAS14.MSSQLSERVER\\OLAP\\Log.**
+  - Change the **Temp directory** to **D:\\NotBackedUp\\Microsoft SQL
+    Server\\MSAS14.MSSQLSERVER\\OLAP\\Temp.**
+  - Change the **Backup directory** to **Z:\\NotBackedUp\\Microsoft SQL
+    Server\\MSAS14.MSSQLSERVER\\OLAP\\Backup**.
 
 On the **Distributed Replay Controller** page, click **Add Current User**.
 
 On the **Distributed Replay Client** page:
 
 - On the **Server Configuration** tab, click **Add Current User**.
-  - Change the **Working Directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\WorkingDir\\.**
-  - Change the **Result Directory** to **D:\\NotBackedUp\\Microsoft SQL Server\\DReplayClient\\ResultDir\\.**
+  - Change the **Working Directory** to **D:\\NotBackedUp\\Microsoft SQL
+    Server\\DReplayClient\\WorkingDir\\.**
+  - Change the **Result Directory** to **D:\\NotBackedUp\\Microsoft SQL
+    Server\\DReplayClient\\ResultDir\\.**
 
 ```PowerShell
 cls
@@ -743,7 +766,8 @@ Set-Location C:
 
 ##### Reference
 
-**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field #017**\
+**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field
+#017**\
 From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/](https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/)>
 
 ```PowerShell
@@ -835,7 +859,8 @@ Start-Process `
 
 ### Issue
 
-**Installer doesn't disable launch of VScode even when installing with /mergetasks=!runcode**\
+**Installer doesn't disable launch of VScode even when installing with
+/mergetasks=!runcode**\
 From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Microsoft/vscode/issues/46350)>
 
 ### Modify Visual Studio Code shortcut to use custom extension and user data locations
@@ -901,7 +926,8 @@ darfka.vbscript
 >
 > HTML formatting issue with Prettier:
 >
-> **Add the missing option to disable crappy Prettier VSCode HTML formatter #636**\
+> **Add the missing option to disable crappy Prettier VSCode HTML formatter
+> #636**\
 > From <[https://github.com/prettier/prettier-vscode/issues/636](https://github.com/prettier/prettier-vscode/issues/636)>
 
 ---
@@ -1025,11 +1051,13 @@ $setupPath = "\\TT-FS01\Products\Git\Git-2.24.0-64-bit.exe"
 Start-Process -FilePath $setupPath -Wait
 ```
 
-On the **Choosing the default editor used by Git** step, select **Use the Nano editor by default**.
+On the **Choosing the default editor used by Git** step, select **Use the Nano
+editor by default**.
 
 > **Important**
 >
-> Wait for the installation to complete and restart PowerShell for environment changes to take effect.
+> Wait for the installation to complete and restart PowerShell for environment
+> changes to take effect.
 
 ```Console
 exit
@@ -1134,7 +1162,8 @@ Start-Process -FilePath $setupPath -Wait
 
 > **Important**
 >
-> Wait for the installation to complete. Restart PowerShell for the change to PATH environment variable to take effect.
+> Wait for the installation to complete. Restart PowerShell for the change to
+> PATH environment variable to take effect.
 
 ```Console
 exit
@@ -1631,7 +1660,8 @@ slmgr /ato
 1. Open **Windows Settings**.
 2. In the **Windows Setttings** window, select **Privacy**.
 3. On the **Privacy** page, select **Background apps**.
-4. On the **Background apps** page, disable the following apps from running in the background:
+4. On the **Background apps** page, disable the following apps from running in
+   the background:
    - **3D Viewer**
    - **Calculator**
    - **Camera**
@@ -1730,7 +1760,9 @@ exit
 
 > **Important**
 >
-> Install global NPM packages using a non-elevated instance of PowerShell (to avoid issues when subsequently running the npm install command as a "normal" user).
+> Install global NPM packages using a non-elevated instance of PowerShell (to
+> avoid issues when subsequently running the npm install command as a "normal"
+> user).
 
 ---
 
@@ -1791,13 +1823,15 @@ $setupPath = "\\TT-FS01\Products\Git\Git-2.24.1.2-64-bit.exe"
 Start-Process -FilePath $setupPath -Wait
 ```
 
-On the **Choosing the default editor used by Git** step, select **Use the Nano editor by default**.
+On the **Choosing the default editor used by Git** step, select **Use the Nano
+editor by default**.
 
 > **Important**
 >
-> Wait for the installation to complete and restart PowerShell for environment changes to take effect.
+> Wait for the installation to complete and restart PowerShell for environment
+> changes to take effect.
 
-**TODO:**\
+**TODO:**
 
 ## Share printer
 
