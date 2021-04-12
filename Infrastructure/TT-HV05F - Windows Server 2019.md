@@ -1411,6 +1411,141 @@ Pop-Location
 
 Import the virtual machines using Hyper-V Manager.
 
+## Replace DPM server (TT-DPM05 --> TT-DPM06)
+
+```PowerShell
+cls
+```
+
+### # Update DPM server
+
+```PowerShell
+cd 'C:\Program Files\Microsoft Data Protection Manager\DPM\bin\'
+
+.\SetDpmServer.exe -dpmServerName TT-DPM06.corp.technologytoolbox.com
+```
+
+---
+
+**TT-ADMIN04** - DPM Management Shell
+
+```PowerShell
+cls
+```
+
+### # Attach DPM agent
+
+```PowerShell
+$productionServer = 'TT-HV05F'
+
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName TT-DPM06 `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
+```
+
+---
+
+That doesn't work...
+
+> Error:\
+> Data Protection Manager Error ID: 307\
+> The protection agent operation failed because DPM detected an unknown DPM
+> protection agent on tt-hv05f.corp.technologytoolbox.com.
+>
+> Recommended action:\
+> Use Add or Remove Programs in Control Panel to uninstall the protection agent from
+> tt-hv05f.corp.technologytoolbox.com, then reinstall the protection agent and perform
+> the operation again.
+
+```PowerShell
+cls
+```
+
+### # Remove DPM 2019 Agent Coordinator
+
+```PowerShell
+msiexec /x `{356B3986-6B7D-4513-B72D-81EB4F43ADE6`}
+```
+
+```PowerShell
+cls
+```
+
+### # Remove DPM 2019 Protection Agent
+
+```PowerShell
+msiexec /x `{CC6B6758-3A68-4BBA-9D61-1F3278D6A7EA`}
+```
+
+> **Important**
+>
+> Restart the computer to complete the removal of the DPM agent.
+
+```PowerShell
+Suspend-ClusterNode -Drain -Wait
+
+Get-VM | where {$_.State -eq 'Running'} | Stop-VM
+
+Restart-Computer
+```
+
+```PowerShell
+Start-VM TT-DPM06
+Start-Sleep -Seconds 30
+Start-VM TT-BUILD01
+Start-Sleep -Seconds 30
+Start-VM TT-WEB01-DEV
+Start-Sleep -Seconds 30
+Start-VM EXT-SEQ02
+Start-Sleep -Seconds 30
+
+Resume-ClusterNode -Failback Immediate
+```
+
+```PowerShell
+cls
+```
+
+### # Install DPM 2019 agent
+
+```PowerShell
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
+    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
+
+$installerArguments = "TT-DPM06.corp.technologytoolbox.com"
+
+Start-Process `
+    -FilePath $installerPath `
+    -ArgumentList "$installerArguments" `
+    -Wait
+```
+
+---
+
+**TT-ADMIN04** - DPM Management Shell
+
+```PowerShell
+cls
+```
+
+### # Attach DPM agent
+
+```PowerShell
+$productionServer = 'TT-HV05F'
+
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName TT-DPM06 `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
+```
+
+---
+
+### Add virtual machines to protection group in DPM
+
 **TODO:**
 
 ```PowerShell
