@@ -1032,11 +1032,11 @@ Set-MpPreference -SevereThreatDefaultAction Remove
 
 #### References
 
+**Run antivirus software on the DPM server**\
+From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
+
 **Antivirus exclusions for DPM 2016/2019**\
 From <[https://social.technet.microsoft.com/Forums/en-US/60b02401-a47b-4738-a497-5f3ebe6c82e6/antivirus-exclusions-for-dpm-20162019?forum=dataprotectionmanager](https://social.technet.microsoft.com/Forums/en-US/60b02401-a47b-4738-a497-5f3ebe6c82e6/antivirus-exclusions-for-dpm-20162019?forum=dataprotectionmanager)>
-
-**Run antivirus software on the DPM server**\
-From <[https://technet.microsoft.com/en-us/library/hh757911](https://technet.microsoft.com/en-us/library/hh757911)>
 
 **Configure Data Protection Manager 2016 AntiVirus Exclusions on Windows Server
 2016**\
