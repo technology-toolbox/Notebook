@@ -1017,7 +1017,12 @@ $excludeFolders = `
     "$env:ProgramFiles\Microsoft System Center\DPM\DPM\Temp\MTA",
     "$env:ProgramFiles\Microsoft System Center\DPM\DPM\XSD"
 
-$excludeProcesses = "csc.exe", "dpmra.exe"
+$excludeProcesses =
+   "$env:windir\Microsoft.NET\Framework\v2.0.50727\csc.exe",
+   "$env:windir\Microsoft.NET\Framework64\v2.0.50727\csc.exe",
+   "$env:windir\Microsoft.NET\Framework\v4.0.30319\csc.exe",
+   "$env:windir\Microsoft.NET\Framework64\v4.0.30319\csc.exe",
+   "$env:ProgramFiles\Microsoft System Center\DPM\DPM\bin\DPMRA.exe"
 
 Set-MpPreference -ExclusionPath $excludeFolders
 Set-MpPreference -ExclusionProcess $excludeProcesses
