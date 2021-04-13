@@ -1012,6 +1012,8 @@ cls
 
 ```PowerShell
 $excludeFolders = `
+    "E:\",
+    "F:\",
     "$env:ProgramFiles\Microsoft System Center\DPM\DPM\Temp\MTA",
     "$env:ProgramFiles\Microsoft System Center\DPM\DPM\XSD"
 
