@@ -1365,6 +1365,37 @@ $productionServer = 'TT-SQL01D'
 
 ### Add databases to protection group in DPM
 
+```PowerShell
+cls
+```
+
+### # Configure antivirus on DPM protected server
+
+#### # Disable real-time monitoring by Windows Defender for DPM server
+
+```PowerShell
+[array] $excludeProcesses = Get-MpPreference | select -ExpandProperty ExclusionProcess
+
+$excludeProcesses +=
+   "$env:ProgramFiles\Microsoft Data Protection Manager\DPM\bin\DPMRA.exe"
+
+Set-MpPreference -ExclusionProcess $excludeProcesses
+```
+
+#### # Configure antivirus software to delete infected files
+
+```PowerShell
+Set-MpPreference -LowThreatDefaultAction Remove
+Set-MpPreference -ModerateThreatDefaultAction Remove
+Set-MpPreference -HighThreatDefaultAction Remove
+Set-MpPreference -SevereThreatDefaultAction Remove
+```
+
+#### Reference
+
+**Run antivirus software on the DPM server**\
+From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
+
 **TODO:**
 
 ```PowerShell
