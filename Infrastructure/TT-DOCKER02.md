@@ -1,7 +1,7 @@
-﻿# TT-DOCKER01
+﻿# TT-DOCKER02
 
-Wednesday, May 8, 2019
-2:43 PM
+Thursday, April 15 2021\
+4:08 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Wednesday, May 8, 2019
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05C"
-$vmName = "TT-DOCKER01"
+$vmHost = "TT-HV05F"
+$vmName = "TT-DOCKER02"
 $vmPath = "D:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -59,22 +59,26 @@ Set-VMFirmware `
 Set-VMDvdDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
-    -Path "\\TT-FS01\Products\Ubuntu\ubuntu-18.04.2-live-server-amd64.iso"
+    -Path "\\TT-FS01\Products\Ubuntu\ubuntu-20.04-live-server-amd64.iso"
+```
 
+```Text
 Set-VMDvdDrive : Failed to add device 'Virtual CD/DVD Disk'.
 User Account does not have permission to open attachment.
-'TT-DOCKER01' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID 59625409-653B-4E4C-A382-0B6AFF01741D)
-'TT-DOCKER01': User account does not have permission required to open attachment
-'\\TT-FS01\Products\Ubuntu\ubuntu-18.04.2-live-server-amd64.iso'. Error: 'General access denied error' (0x80070005). (Virtual machine
-ID 59625409-653B-4E4C-A382-0B6AFF01741D)
+'TT-DOCKER02' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID A71F998E-89DA-4E09-A479-AE5A152C8CE5)
+'TT-DOCKER02': User account does not have permission required to open attachment
+'\\TT-FS01\Products\Ubuntu\ubuntu-20.04-live-server-amd64.iso'. Error: 'General access denied error' (0x80070005).
+(Virtual machine ID A71F998E-89DA-4E09-A479-AE5A152C8CE5)
 At line:1 char:1
 + Set-VMDvdDrive `
 + ~~~~~~~~~~~~~~~~
     + CategoryInfo          : PermissionDenied: (:) [Set-VMDvdDrive], VirtualizationException
     + FullyQualifiedErrorId : AccessDenied,Microsoft.HyperV.PowerShell.Commands.SetVMDvdDrive
+```
 
+```PowerShell
 $iso = Get-SCISO |
-    where {$_.Name -eq "ubuntu-18.04.2-live-server-amd64.iso"}
+    where {$_.Name -eq "ubuntu-20.04-live-server-amd64.iso"}
 
 Get-SCVirtualMachine -Name $vmName | Read-SCVirtualMachine
 
@@ -88,7 +92,12 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-### Install Linux server
+### Install Ubuntu server
+
+- On the **SSH Setup** step, select **Install OpenSSH server**.
+- On the **Featured Server Snaps** step, select the following items:
+    - **docker**
+    - **powershell**
 
 > **Note**
 >
@@ -101,6 +110,10 @@ Start-SCVirtualMachine -VM $vmName
 ```Shell
 sudo apt-get update
 sudo apt-get upgrade -y
+```
+
+```Shell
+clear
 ```
 
 ### # Install security updates
@@ -117,21 +130,25 @@ sudo unattended-upgrade -v
 sudo reboot
 ```
 
+### # Install network tools (e.g. ifconfig)
+
+```Shell
+sudo apt-get -y install net-tools
+```
+
+```Shell
+clear
+```
+
 ### # Check IP address
 
 ```Shell
 ifconfig | grep inet
 ```
 
-### # Enable SSH
-
-```Shell
-sudo apt install openssh-server -y
-```
-
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -140,8 +157,8 @@ cls
 ### # Checkpoint VM
 
 ```PowerShell
-$checkpointName = "Baseline Ubuntu Server 18.04.2"
-$vmName = "TT-DOCKER01"
+$checkpointName = "Baseline Ubuntu Server 20.04.3"
+$vmName = "TT-DOCKER02"
 
 Stop-SCVirtualMachine -VM $vmName
 
@@ -179,14 +196,16 @@ clear
 
 ```PowerShell
 systemd-resolve --status
+```
 
+```Text
 ...
         DNS Servers: 10.1.30.2
                      10.1.30.3
 ...
 ```
 
-```PowerShell
+```Shell
 clear
 ```
 
@@ -196,11 +215,13 @@ clear
 
 ```Shell
 dig -t SRV _ldap._tcp.corp.technologytoolbox.com
+```
 
-; <<>> DiG 9.11.3-1ubuntu1.7-Ubuntu <<>> -t SRV _ldap._tcp.corp.technologytoolbox.com
+```Text
+; <<>> DiG 9.16.1-Ubuntu <<>> -t SRV _ldap._tcp.corp.technologytoolbox.com
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 16964
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 34222
 ;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -209,13 +230,13 @@ dig -t SRV _ldap._tcp.corp.technologytoolbox.com
 ;_ldap._tcp.corp.technologytoolbox.com. IN SRV
 
 ;; ANSWER SECTION:
-_ldap._tcp.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC08.corp.technologytoolbox.com.
-_ldap._tcp.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC09.corp.technologytoolbox.com.
+_ldap._tcp.corp.technologytoolbox.com. 600 IN SRV 0 100 389 tt-dc10.corp.technologytoolbox.com.
+_ldap._tcp.corp.technologytoolbox.com. 600 IN SRV 0 100 389 tt-dc11.corp.technologytoolbox.com.
 
-;; Query time: 1 msec
+;; Query time: 3 msec
 ;; SERVER: 127.0.0.53#53(127.0.0.53)
-;; WHEN: Wed May 08 21:22:31 UTC 2019
-;; MSG SIZE  rcvd: 122
+;; WHEN: Thu Apr 15 22:41:46 UTC 2021
+;; MSG SIZE  rcvd: 174
 ```
 
 ```Shell
@@ -226,13 +247,15 @@ clear
 
 ```Shell
 dig @10.1.30.2 -t SRV _ldap._tcp.dc._msdcs.corp.technologytoolbox.com
+```
 
-; <<>> DiG 9.11.3-1ubuntu1.7-Ubuntu <<>> @10.1.30.2 -t SRV _ldap._tcp.dc._msdcs.corp.technologytoolbox.com
+```Text
+; <<>> DiG 9.16.1-Ubuntu <<>> @10.1.30.2 -t SRV _ldap._tcp.dc._msdcs.corp.technologytoolbox.com
 ; (1 server found)
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 22021
-;; flags: qr aa rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 3
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 54750
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 3, AUTHORITY: 0, ADDITIONAL: 4
 
 ;; OPT PSEUDOSECTION:
 ; EDNS: version: 0, flags:; udp: 4000
@@ -240,17 +263,19 @@ dig @10.1.30.2 -t SRV _ldap._tcp.dc._msdcs.corp.technologytoolbox.com
 ;_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. IN SRV
 
 ;; ANSWER SECTION:
-_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC08.corp.technologytoolbox.com.
-_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC09.corp.technologytoolbox.com.
+_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. 600 IN SRV 0 100 389 tt-dc11.corp.technologytoolbox.com.
+_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. 600 IN SRV 0 100 389 TT-DC10.corp.technologytoolbox.com.
+_ldap._tcp.dc._msdcs.corp.technologytoolbox.com. 600 IN SRV 0 100 389 tt-dc10.corp.technologytoolbox.com.
 
 ;; ADDITIONAL SECTION:
-TT-DC08.corp.technologytoolbox.com. 3600 IN A   10.1.30.2
-TT-DC09.corp.technologytoolbox.com. 3600 IN A   10.1.30.3
+tt-dc11.corp.technologytoolbox.com. 3600 IN A   10.1.30.3
+TT-DC10.corp.technologytoolbox.com. 3600 IN A   10.1.30.2
+tt-dc10.corp.technologytoolbox.com. 3600 IN A   10.1.30.2
 
-;; Query time: 1 msec
+;; Query time: 0 msec
 ;; SERVER: 10.1.30.2#53(10.1.30.2)
-;; WHEN: Wed May 08 21:24:53 UTC 2019
-;; MSG SIZE  rcvd: 216
+;; WHEN: Thu Apr 15 22:42:24 UTC 2021
+;; MSG SIZE  rcvd: 286
 ```
 
 ```Shell
@@ -288,6 +313,10 @@ sudo apt install \
 > Note the default home directory path (specified by the **fallback_homedir** setting in **/etc/sssd/sssd.conf**) is **/home/%u@%d** (e.g. **/home/jjameson@corp.technologytoolbox.com**). To create home directories under a "domain" directory, the **default-home** setting is specified in **/etc/realmd.conf** prior to joining the Active Directory domain.
 
 ```Shell
+clear
+```
+
+```Shell
 sudoedit /etc/realmd.conf
 ```
 
@@ -317,31 +346,25 @@ clear
 #### # Modify hostname to avoid error registering SPN on computer account
 
 ```Shell
-sudoedit /etc/hostname
+cat /etc/hostname
 ```
 
----
-
-File - **/etc/hostname**
-
-```PowerShell
-tt-docker01.corp.technologytoolbox.com
+```Text
+tt-docker02
 ```
 
----
+```Shell
+sudo hostnamectl set-hostname tt-docker02.corp.technologytoolbox.com
+
+cat /etc/hostname
+```
+
+```Text
+tt-docker02.corp.technologytoolbox.com
+```
 
 ```Shell
 sudo reboot
-
-cat /etc/hostname
-
-tt-docker01
-
-sudo hostnamectl set-hostname tt-docker01.corp.technologytoolbox.com
-
-cat /etc/hostname
-
-tt-docker01.corp.technologytoolbox.com
 ```
 
 > **Note**
@@ -350,7 +373,7 @@ tt-docker01.corp.technologytoolbox.com
 >
 > ```Text
 >  * Modifying computer account: userPrincipalName
->  ! Couldn't set service principals on computer account CN=tt-docker01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com: 00002083: AtrErr: DSID-03151904, #1:
+>  ! Couldn't set service principals on computer account CN=tt-docker02,CN=Computers,DC=corp,DC=technologytoolbox,DC=com: 00002083: AtrErr: DSID-03151904, #1:
 >         0: 00002083: DSID-03151904, problem 1006 (ATT_OR_VALUE_EXISTS), data 0, Att 90303 (servicePrincipalName)
 > ```
 >
@@ -365,9 +388,10 @@ clear
 
 ```Shell
 realm discover corp.technologytoolbox.com -v
+```
 
+```Text
  * Resolving: _ldap._tcp.corp.technologytoolbox.com
- * Performing LDAP DSE lookup on: 10.1.30.3
  * Performing LDAP DSE lookup on: 10.1.30.2
  * Successfully discovered: corp.technologytoolbox.com
 corp.technologytoolbox.com
@@ -392,51 +416,68 @@ clear
 #### # Join Active Directory domain
 
 ```Text
-sudo realm join -v -U jjameson-admin corp.technologytoolbox.com --os-name="Linux (Ubuntu Server)" --os-version=18.04
+sudo realm join -v -U jjameson-admin corp.technologytoolbox.com --os-name="Linux (Ubuntu Server)" --os-version=20.04
+```
 
-[sudo] password for foo:
+```Text
  * Resolving: _ldap._tcp.corp.technologytoolbox.com
  * Performing LDAP DSE lookup on: 10.1.30.2
- * Performing LDAP DSE lookup on: 10.1.30.3
  * Successfully discovered: corp.technologytoolbox.com
 Password for jjameson-admin:
  * Unconditionally checking packages
  * Resolving required packages
- * LANG=C /usr/sbin/adcli join --verbose --domain corp.technologytoolbox.com --domain-realm CORP.TECHNOLOGYTOOLBOX.COM --domain-controller 10.1.30.2 --os-name Linux (Ubuntu Server) --os-version 18.04 --login-type user --login-user jjameson-admin --stdin-password
+ * LANG=C /usr/sbin/adcli join --verbose --domain corp.technologytoolbox.com --domain-realm CORP.TECHNOLOGYTOOLBOX.COM --domain-controller 10.1.30.2 --os-name Linux (Ubuntu Server) --os-version 20.04 --login-type user --login-user jjameson-admin --stdin-password
  * Using domain name: corp.technologytoolbox.com
- * Calculated computer account name from fqdn: TT-DOCKER01
+ * Calculated computer account name from fqdn: TT-DOCKER02
  * Using domain realm: corp.technologytoolbox.com
- * Sending netlogon pings to domain controller: cldap://10.1.30.2
- * Received NetLogon info from: TT-DC08.corp.technologytoolbox.com
- * Wrote out krb5.conf snippet to /var/cache/realmd/adcli-krb5-6IKiEq/krb5.d/adcli-krb5-conf-z6bri9
+ * Sending NetLogon ping to domain controller: 10.1.30.2
+ * Received NetLogon info from: TT-DC10.corp.technologytoolbox.com
+ * Wrote out krb5.conf snippet to /var/cache/realmd/adcli-krb5-fwgBVl/krb5.d/adcli-krb5-conf-Jf2BXj
  * Authenticated as user: jjameson-admin@CORP.TECHNOLOGYTOOLBOX.COM
+ * Using GSS-SPNEGO for SASL bind
  * Looked up short domain name: TECHTOOLBOX
- * Using fully qualified name: tt-docker01
+ * Looked up domain SID: S-1-5-21-3914637029-2275272621-3670275343
+ * Using fully qualified name: tt-docker02.corp.technologytoolbox.com
  * Using domain name: corp.technologytoolbox.com
- * Using computer account name: TT-DOCKER01
+ * Using computer account name: TT-DOCKER02
  * Using domain realm: corp.technologytoolbox.com
- * Calculated computer account name from fqdn: TT-DOCKER01
+ * Calculated computer account name from fqdn: TT-DOCKER02
  * Generated 120 character computer password
  * Using keytab: FILE:/etc/krb5.keytab
- * Computer account for TT-DOCKER01$ does not exist
+ * Computer account for TT-DOCKER02$ does not exist
  * Found well known computer container at: CN=Computers,DC=corp,DC=technologytoolbox,DC=com
- * Calculated computer account: CN=TT-DOCKER01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
- * Created computer account: CN=TT-DOCKER01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
+ * Calculated computer account: CN=TT-DOCKER02,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
+ * Encryption type [3] not permitted.
+ * Encryption type [1] not permitted.
+ * Created computer account: CN=TT-DOCKER02,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
+ * Sending NetLogon ping to domain controller: 10.1.30.2
+ * Received NetLogon info from: TT-DC10.corp.technologytoolbox.com
  * Set computer password
- * Retrieved kvno '2' for computer account in directory: CN=TT-DOCKER01,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
- * Modifying computer account: dNSHostName
- * Modifying computer account: userAccountControl
- * Modifying computer account: operatingSystem, operatingSystemVersion, operatingSystemServicePack
- * Modifying computer account: userPrincipalName
+ * Retrieved kvno '2' for computer account in directory: CN=TT-DOCKER02,CN=Computers,DC=corp,DC=technologytoolbox,DC=com
+ * Checking RestrictedKrbHost/tt-docker02.corp.technologytoolbox.com
+ *    Added RestrictedKrbHost/tt-docker02.corp.technologytoolbox.com
+ * Checking RestrictedKrbHost/TT-DOCKER02
+ *    Added RestrictedKrbHost/TT-DOCKER02
+ * Checking host/tt-docker02.corp.technologytoolbox.com
+ *    Added host/tt-docker02.corp.technologytoolbox.com
+ * Checking host/TT-DOCKER02
+ *    Added host/TT-DOCKER02
  * Discovered which keytab salt to use
- * Added the entries to the keytab: TT-DOCKER01$@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
- * Added the entries to the keytab: host/TT-DOCKER01@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
- * Added the entries to the keytab: host/TT-DOCKER01.corp.technologytoolbox.com@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
- * Added the entries to the keytab: RestrictedKrbHost/TT-DOCKER01@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab  * Added the entries to the keytab: RestrictedKrbHost/TT-DOCKER01.corp.technologytoolbox.com@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: TT-DOCKER02$@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: host/TT-DOCKER02@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: host/tt-docker02.corp.technologytoolbox.com@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: RestrictedKrbHost/TT-DOCKER02@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
+ * Added the entries to the keytab: RestrictedKrbHost/tt-docker02.corp.technologytoolbox.com@CORP.TECHNOLOGYTOOLBOX.COM: FILE:/etc/krb5.keytab
  * /usr/sbin/update-rc.d sssd enable
  * /usr/sbin/service sssd restart
  * Successfully enrolled machine in realm
+ ```
 
+ ```Shell
+ clear
+ ```
+
+```Shell
 sudo reboot
 ```
 
@@ -448,7 +489,9 @@ clear
 
 ```Shell
 id jjameson-admin
+```
 
+```Text
 uid=453810610(jjameson-admin) gid=453800513(domain users) groups=453800513(domain users),453805108(sql server admins (dev)),453805111(team foundation server admins (dev)),453800512(domain admins),453805109(sharepoint admins (dev)),453807606(folder redirection users),453820632(network controller (nc01) admins),453804121(sql server admins),453806113(sharepoint admins (test)),453806114(team foundation server admins (test)),453809619(vmm admins),453805619(team foundation server admins),453807608(roaming user profiles users and computers),453805616(sharepoint admins),453800572(denied rodc password replication group),453800519(enterprise admins),453800518(schema admins),453806106(sql server admins (test))
 ```
 
@@ -473,7 +516,6 @@ session required        pam_unix.so
 session required        pam_mkhomedir.so umask=0077
 session optional                        pam_sss.so
 session optional        pam_systemd.so
-session optional        pam_ecryptfs.so unwrap
 # end of pam-auth-update config
 ```
 
@@ -515,10 +557,62 @@ clear
 
 ```Shell
 su - jjameson-admin
+```
 
+```Text
+Broadcast message from systemd-journald@tt-docker02.corp.technologytoolbox.com (Thu 2021-04-15 22:58:51 UTC):
+
+sssd_be[827]: Group Policy Container with DN [cn={09931EAD-8D08-4F58-BD7F-F92B16403B8E},cn=policies,cn=system,DC=corp,DC=technologytoolbox,DC=com] is unreadable or has unreadable or missing attributes. In order to fix this make sure that this AD object has following attributes readable: nTSecurityDescriptor, cn, gPCFileSysPath, gPCMachineExtensionNames, gPCFunctionalityVersion, flags. Alternatively if you do not have access to the server or can not change permissions on this object, you can use option ad_gpo_ignore_unreadable = True which will skip this GPO. See ad_gpo_ignore_unreadable in 'man sssd-ad' for details.
+
+
+Message from syslogd@tt-docker02 at Apr 15 22:58:51 ...
+ sssd_be[827]: Group Policy Container with DN [cn={09931EAD-8D08-4F58-BD7F-F92B16403B8E},cn=policies,cn=system,DC=corp,DC=technologytoolbox,DC=com] is unreadable or has unreadable or missing attributes. In order to fix this make sure that this AD object has following attributes readable: nTSecurityDescriptor, cn, gPCFileSysPath, gPCMachineExtensionNames, gPCFunctionalityVersion, flags. Alternatively if you do not have access to the server or can not change permissions on this object, you can use option ad_gpo_ignore_unreadable = True which will skip this GPO. See ad_gpo_ignore_unreadable in 'man sssd-ad' for details.
+su: System error
+```
+
+```Shell
+clear
+```
+
+#### # Ignore unreadable group policies
+
+```Shell
+sudoedit /etc/sssd/sssd.conf
+```
+
+---
+
+File - **/etc/sssd/sssd.conf**
+
+```Text
+...
+[domain/corp.technologytoolbox.com]
+...
+ad_gpo_ignore_unreadable = True
+```
+
+---
+
+```Shell
+sudo reboot
+```
+
+```Shell
+clear
+```
+
+#### # Login as domain user
+
+```Shell
+su - jjameson-admin
+```
+
+```Text
 Password:
 Creating directory '/home/corp.technologytoolbox.com/jjameson-admin'.
+```
 
+```Shell
 exit
 ```
 
@@ -538,13 +632,18 @@ clear
 
 ## # Install Git
 
+### # Update APT packages
+
 ```Shell
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get upgrade -y
 ```
 
 ```Shell
 clear
+```
+
+```Shell
 sudo apt-get install git
 ```
 
@@ -553,130 +652,28 @@ sudo apt-get install git
 **Installing _Git_ on _Linux_**\
 From <[https://gist.github.com/derhuerst/1b15ff4652a867391f03#file-linux-md](https://gist.github.com/derhuerst/1b15ff4652a867391f03#file-linux-md)>
 
-## Install Docker CE
-
-### Reference
-
-**Get Docker CE for Ubuntu**\
-From <[https://docs.docker.com/install/linux/docker-ce/ubuntu/](https://docs.docker.com/install/linux/docker-ce/ubuntu/)>
-
 ```Shell
 clear
 ```
 
-### # Set up repository
+## # Test Docker installation
 
-#### # Update apt package index
-
-```Shell
-sudo apt-get update
-```
-
-```Shell
-clear
-```
-
-#### # Install packages to allow apt to use repository over HTTPS
-
-```Shell
-sudo apt-get install \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    gnupg-agent \
-    software-properties-common \
-    -y
-```
-
-```Shell
-clear
-```
-
-#### # Add Docker's official GPG key
-
-```Shell
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-```
-
-```Shell
-clear
-```
-
-#### # Verify key with fingerprint 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
-
-```Shell
-sudo apt-key fingerprint 0EBFCD88
-
-pub   rsa4096 2017-02-22 [SCEA]
-      9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88
-uid           [ unknown] Docker Release (CE deb) <docker@docker.com>
-sub   rsa4096 2017-02-22 [S]
-```
-
-```Shell
-clear
-```
-
-#### # Set up stable repository
-
-```PowerShell
-sudo add-apt-repository \
-    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) \
-    stable"
-```
-
-> **Note**
->
-> The **lsb_release -cs** sub-command returns the name of your Ubuntu distribution, such as **bionic**.
-
-```Shell
-clear
-```
-
-### # Install Docker
-
-#### # Update the apt package index
-
-```Shell
-sudo apt-get update
-```
-
-```Shell
-clear
-```
-
-#### # Install the latest version of Docker CE and containerd
-
-```Shell
-sudo apt-get install docker-ce docker-ce-cli containerd.io -y
-```
-
-```Shell
-clear
-```
-
-#### # Verify Docker is installed correctly by running hello-world image
+### # Verify Docker is installed correctly by running hello-world image
 
 ```Shell
 sudo docker run hello-world
 ```
 
-## Install Docker Compose
-
-### Reference
-
-**Install Docker Compose**\
-From <[https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)>
-
 ```Shell
 clear
 ```
 
+## # Install Docker Compose
+
 ### # Download current stable release of Docker Compose
 
 ```Shell
-sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 ```
 
 ```Shell
@@ -689,90 +686,20 @@ clear
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-## Install PowerShell Core
+### # Test Docker Compose installation
+
+```Shell
+docker-compose --version
+```
 
 ### Reference
 
-**Installing PowerShell Core on Linux**\
-From <[https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-6](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-6)>
-
-```Shell
-clear
-```
-
-### # Install via package repository
-
-#### # Download Microsoft repository GPG keys
-
-```PowerShell
-cd /tmp
-
-wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
-```
-
-```PowerShell
-clear
-```
-
-#### # Register Microsoft repository GPG keys
-
-```Shell
-sudo dpkg -i packages-microsoft-prod.deb
-```
-
-```Shell
-clear
-```
-
-#### # Update list of products
-
-```Shell
-sudo apt-get update
-```
-
-```Shell
-clear
-```
-
-#### # Install PowerShell
-
-```Shell
-sudo apt-get install powershell -y
-```
-
-```Shell
-clear
-```
-
-#### # Start PowerShell
-
-```Shell
-pwsh
-```
-
-```Shell
-clear
-```
-
-#### # Update help
-
-```PowerShell
-Update-Help
-```
-
-```PowerShell
-clear
-```
-
-#### # Exit PowerShell
-
-```PowerShell
-exit
-```
+**Install Docker Compose**\
+From <[https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)>
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -781,7 +708,7 @@ cls
 ## # Remove VM checkpoint
 
 ```PowerShell
-$vmName = "TT-DOCKER01"
+$vmName = "TT-DOCKER02"
 ```
 
 ### # Shutdown VM
@@ -807,7 +734,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -818,7 +745,7 @@ cls
 ### # Migrate VM to shared storage
 
 ```PowerShell
-$vmName = "TT-DOCKER01"
+$vmName = "TT-DOCKER02"
 
 $vm = Get-SCVirtualMachine -Name $vmName
 $vmHost = $vm.VMHost
@@ -852,21 +779,6 @@ Start-SCVirtualMachine -VM $vmName
 ### Add virtual machine to Hyper-V protection group in DPM
 
 **TODO:**
-
-## Install MailHog
-
-### Remove MailHog
-
-sudo docker stop mailhog
-
-sudo docker rm mailhog
-
-## Install Bitwarden
-
-### Hosting Installation Id & Key
-
-Installation Id: 6417d075-9d6f-49e4-bea1-{redacted}\
-Installation Key: MZFRpz4Lo25o\*\*\*\*\*\*\*\*
 
 ```Shell
 clear
