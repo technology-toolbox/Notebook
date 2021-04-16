@@ -880,3 +880,29 @@ Set-MpPreference -SevereThreatDefaultAction Remove
 
 **Run antivirus software on the DPM server**\
 From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
+
+---
+
+**TT-ADMIN03** - Run as administrator
+
+## # Configure library server for Virtual Machine Manager (VMM)
+
+### # Install VMM agent on file server
+
+```PowerShell
+$fileServer = "tt-fs01.corp.technologytoolbox.com"
+
+$credential = Get-Credential "TECHTOOLBOX\jjameson-admin"
+
+Add-SCLibraryServer -ComputerName $fileServer -Credential $credential
+```
+
+## # Add file share to VMM library
+
+```PowerShell
+$sharePath = "\\tt-fs01.corp.technologytoolbox.com\Products"
+
+Add-SCLibraryShare -SharePath $sharePath -UseAlternateDataStream $true
+```
+
+---
