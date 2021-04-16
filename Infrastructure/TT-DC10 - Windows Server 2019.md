@@ -899,7 +899,8 @@ cls
 [array] $excludeProcesses = Get-MpPreference | select -ExpandProperty ExclusionProcess
 
 $excludeProcesses +=
-   "$env:ProgramFiles\Microsoft Data Protection Manager\DPM\bin\DPMRA.exe"
+   "$env:ProgramFiles\Microsoft Data Protection Manager\DPM\bin\DPMRA.exe",
+   "$env:windir\System32\wbengine.exe"
 
 Set-MpPreference -ExclusionProcess $excludeProcesses
 ```
