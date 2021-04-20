@@ -1932,6 +1932,70 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 **Install the Azure CLI on Linux**\
 From <[https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt)>
 
+```Shell
+clear
+```
+
+## # Connect to GitHub and GitLab using SSH
+
+### # Generate SSH key
+
+```Shell
+ssh-keygen -t ed25519 -C "jjameson@technologytoolbox.com"
+```
+
+> **Note:**
+>
+> When prompted to **Enter file in which to save the key**, press **Enter**.
+> This accepts the default file location.
+>
+> Type a passphrase to secure the SSH key.
+
+### # Add SSH key to ssh-agent
+
+#### # Start ssh-agent as a background process
+
+eval "$(ssh-agent -s)"
+
+#### # Add SSH private key to ssh-agent
+
+ssh-add ~/.ssh/id_ed25519
+
+> **Note:**
+>
+> When prompted, type the secure passphrase previously specified for the SSH
+> key.
+
+```Shell
+clear
+```
+
+### # Add SSH key to GitHub account
+
+#### # Copy SSH public key to clipboard
+
+```Shell
+sudo apt-get -y install xclip
+
+xclip -selection clipboard < ~/.ssh/id_ed25519.pub
+```
+
+#### Add SSH public key to GitHub
+
+1. Browse to
+   [https://github.com/settings/ssh/new](https://github.com/settings/ssh/new).
+1. In the **Title** box, type **TT-UD20-DEV-01**.
+1. In the **Key** box, paste the SSH public key previously copied the clipboard.
+1. Click **Add SSH key**.
+
+#### Add SSH public key to GitLab
+
+1. Browse to
+   [https://gitlab.com/~/profile/keys](https://gitlab.com/~/profile/keys).
+1. In the **Key** box, paste the SSH public key previously copied the clipboard.
+1. In the **Title** box, type **TT-UD20-DEV-01**.
+1. Click **Add key**.
+
 ---
 
 **STORM** - Run as administrator
