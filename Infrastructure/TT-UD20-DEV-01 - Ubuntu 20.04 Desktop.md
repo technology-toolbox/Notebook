@@ -1917,6 +1917,21 @@ cd ~/techtoolbox/Websites
 git clone https://techtoolbox@dev.azure.com/techtoolbox/Websites/_git/bootstrap-templates
 ```
 
+```Shell
+clear
+```
+
+## # Install Azure CLI
+
+```Shell
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+```
+
+### Reference
+
+**Install the Azure CLI on Linux**\
+From <[https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt)>
+
 ---
 
 **STORM** - Run as administrator
