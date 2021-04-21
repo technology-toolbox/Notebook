@@ -1772,6 +1772,12 @@ ext install ms-vscode.csharp
 ext install msjsdiag.debugger-for-chrome
 ```
 
+#### Install extension: Docker
+
+```Text
+ext install ms-azuretools.vscode-docker
+```
+
 #### Install extension: ESLint
 
 ```Text
