@@ -1976,6 +1976,88 @@ Set-MpPreference -SevereThreatDefaultAction Remove
 **Run antivirus software on the DPM server**\
 From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
 
+## Install Docker for Windows
+
+### Reference
+
+[Install Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/)
+
+### Install Windows Subsystem for Linux (WSL)
+
+#### Reference
+
+[Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+
+```PowerShell
+cls
+```
+
+#### # Enable Windows Subsystem for Linux
+
+```PowerShell
+dism.exe /online /enable-feature `
+    /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+```
+
+```PowerShell
+cls
+```
+
+#### # Enable Virtual Machine feature
+
+```PowerShell
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all `
+    /norestart
+```
+
+#### Download and install Linux kernel update package
+
+[WSL2 Linux kernel update package for x64 machines](https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi)
+
+```PowerShell
+cls
+```
+
+#### # Set WSL 2 as default version
+
+```PowerShell
+wsl --set-default-version 2
+```
+
+#### Install Linux distribution of choice
+
+[Ubuntu 20.04 LTS](https://www.microsoft.com/store/apps/9n6svws3rx71)
+
+### Install Docker Desktop
+
+[Docker Desktop for Windows](https://desktop.docker.com/win/stable/amd64/Docker%20Desktop%20Installer.exe)
+
+### Install additional Visual Studio Code extensions for Docker development
+
+#### Install extension: Docker
+
+```Text
+ext install ms-azuretools.vscode-docker
+```
+
+#### Install extension: Kubernetes
+
+```Text
+ext install ms-kubernetes-tools.vscode-kubernetes-tools
+```
+
+#### Install extension: Remote - Containers
+
+```Text
+ext install ms-vscode-remote.remote-containers
+```
+
+#### Install extension: Remote - WSL
+
+```Text
+ext install ms-vscode-remote.remote-wsl
+```
+
 **TODO:**
 
 ## Share printer
