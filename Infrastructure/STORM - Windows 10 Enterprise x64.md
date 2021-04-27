@@ -2058,6 +2058,35 @@ ext install ms-vscode-remote.remote-containers
 ext install ms-vscode-remote.remote-wsl
 ```
 
+### Issue: Docker images consume large amount of disk space
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F3/5CCB258F8ECC8934921DD9F2FC5A3CBEDF7C91F3.png)
+
+#### Move Docker images from C: drive (SSD) to F: drive (HDD)
+
+#### Quit Docker Desktop
+
+#### # Move Docker Desktop storage (VHDX) used for images
+
+```PowerShell
+wsl --shutdown
+
+wsl --export docker-desktop-data docker-desktop-data.tar
+
+wsl --unregister docker-desktop-data
+
+mkdir F:\NotBackedUp\jjameson\docker-desktop-data
+
+wsl --import docker-desktop-data F:\NotBackedUp\jjameson\docker-desktop-data `
+    .\docker-desktop-data.tar --version 2
+```
+
+#### References
+
+[How to move ext4.vhdx to a non system disk?](https://github.com/docker/for-win/issues/7348)
+
+[how to move the vhdx of wsl2 to other disk](https://github.com/MicrosoftDocs/WSL/issues/412)
+
 **TODO:**
 
 ## Share printer
