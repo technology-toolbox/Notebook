@@ -2075,9 +2075,9 @@ wsl --export docker-desktop-data docker-desktop-data.tar
 
 wsl --unregister docker-desktop-data
 
-mkdir F:\NotBackedUp\jjameson\docker-desktop-data
+mkdir E:\NotBackedUp\jjameson\docker-desktop-data
 
-wsl --import docker-desktop-data F:\NotBackedUp\jjameson\docker-desktop-data `
+wsl --import docker-desktop-data E:\NotBackedUp\jjameson\docker-desktop-data `
     .\docker-desktop-data.tar --version 2
 ```
 
