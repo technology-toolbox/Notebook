@@ -1,34 +1,31 @@
 ﻿# pfSense Firewall
 
-Tuesday, September 12, 2017
+Tuesday, September 12, 2017\
 4:15 PM
 
 ## Decrypt configuration file
 
+Reference:
+
+<[https://docs.netgate.com/pfsense/en/latest/backup/restore.html#encrypted-configuration-files](https://docs.netgate.com/pfsense/en/latest/backup/restore.html#encrypted-configuration-files)>
+
+### 2.5.0 and later
+
 ```Shell
-cat /tmp/config.xml | sed -e '1d' -e '$d' | base64 -d | openssl enc -d -aes-256-cbc -out config-decrypted.xml -k '{password}'
+grep -v "config.xml" "C:\Users\jjameson\Downloads\config.xml" | base64 -d | \
+  openssl enc -d -aes-256-cbc -salt -md sha256 -pbkdf2 \
+    -out config-decrypted.xml -pass pass:{password}
 ```
 
-From <[https://forum.pfsense.org/index.php?topic=111080.msg621529#msg621529](https://forum.pfsense.org/index.php?topic=111080.msg621529#msg621529)>
+### Older versions
 
-```Console
-cat "C:\Users\jjameson\Downloads\config.xml"  | sed -e '1d' -e '$d' | base64 -d | openssl enc -d -aes-256-cbc -md md5 -out config.xml -k '{password}'
+```Shell
+grep -v "config.xml" "C:\Users\jjameson\Downloads\config.xml" | base64 -d | \
+  openssl enc -d -aes-256-cbc -salt -md md5 -out config-decrypted.xml \
+    -pass pass:{password}
 ```
 
-> **Note**
->
-> Specify MD5 Message Digest to avoid issue due to default digest change from
-> MD5 to SHA256 in Openssl 1.1.
->
-> Reference:
->
-> [How to resolve the "EVP_DecryptFInal_ex: bad decrypt" during file decryption](https://stackoverflow.com/a/43847627)
-
-```Console
-cls; ipconfig /release; ipconfig /release6; ipconfig /renew; ipconfig /renew6; ipconfig /all
-```
-
-## References
+## pfSense References
 
 **TCP Flag Definitions**\
 From <[https://www.netgate.com/docs/pfsense/firewall/tcp-flag-definitions.html](https://www.netgate.com/docs/pfsense/firewall/tcp-flag-definitions.html)>
