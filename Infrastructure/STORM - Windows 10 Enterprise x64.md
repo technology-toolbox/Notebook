@@ -62,7 +62,7 @@ Rename-Computer -NewName $computerName -Restart
 ```
 
 Wait for the VM to restart and then execute the following command to join the
-**TECHTOOLBOX **domain:
+**TECHTOOLBOX** domain:
 
 ```PowerShell
 Add-Computer -DomainName corp.technologytoolbox.com -Restart
@@ -504,7 +504,7 @@ In the **New Template** window:
 
 1. Ensure **Create new template** is selected and click **Next**.
 2. In the **Name** box, type **Technology Toolbox** and click **Next**.
-3. Ensure **Portrait **is selected and click **Finish**.
+3. Ensure **Portrait** is selected and click **Finish**.
 4. On the **File** menu, click **Save**.
 
 > **Note**
