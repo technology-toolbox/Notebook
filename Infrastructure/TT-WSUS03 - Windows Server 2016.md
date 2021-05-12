@@ -1,6 +1,6 @@
 ﻿# TT-WSUS03 - Windows Server 2016 Standard Edition
 
-Thursday, March 22, 2018
+Thursday, March 22, 2018\
 4:00 PM
 
 ```Text
@@ -18,7 +18,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 | Setting          | Value                                 |
 | ---------------- | ------------------------------------- |
-| Content location | [\\\\TT-FS01\\WSUS\$](\\TT-FS01\WSUS$) |
+| Content location | [\\\\TT-FS01\\WSUS\$](\TT-FS01\WSUS$) |
 | Current size     | 40.4 GB (3,705 files, 258 folders)    |
 
 ### Deploy and configure the server infrastructure
@@ -64,11 +64,13 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 #### Install custom Windows Server 2016 image
 
-- On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
+- On the **Task Sequence** step, select **Windows Server 2016** and click
+  **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **TT-WSUS03**.
   - Click **Next**.
-- On the **Applications** step, do not select any applications, and click **Next**.
+- On the **Applications** step, do not select any applications, and click
+  **Next**.
 
 ### # Rename local Administrator account and set password
 
@@ -352,16 +354,19 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 **To install the WSUS server role:**
 
-1. In **Server Manager**, click **Manage**, and then click **Add Roles and Features**.
+1. In **Server Manager**, click **Manage**, and then click **Add Roles and
+   Features**.
 2. On the **Before you begin** page, click **Next**.
-3. On the **Select installation type** page, confirm the **Role-based or feature-based installation** option is selected and click **Next**.
+3. On the **Select installation type** page, confirm the **Role-based or
+   feature-based installation** option is selected and click **Next**.
 4. On the **Select destination server** page:
    1. Ensure the **Select a server from the server pool** option is selected.
    2. In the **Server Pool** list, select the server for the WSUS server role.
    3. Click **Next**.
 5. On the **Select server roles** page:
    1. Select **Windows Server Update Services**.
-   2. A dialog window opens for adding the features required for WSUS. Click **Add Features**.
+   2. A dialog window opens for adding the features required for WSUS. Click
+      **Add Features**.
    3. Click **Next**.
 6. On the **Select features** page, click **Next**.
 7. On the **Windows Server Update Services** page, click **Next**.
@@ -371,20 +376,31 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
    3. Select the **SQL Server Connectivity** checkbox.
    4. Click **Next**.
 9. On the **Content location selection** page:
-   1. Ensure the **Store updates in the following location** checkbox is selected.
+   1. Ensure the **Store updates in the following location** checkbox is
+      selected.
    2. In the location box, type **D:\\WSUS**.
    3. Click **Next**.
 10. On the **Database Instance Selection** page:
     1. In the **Specify an existing database server** box, type **HAVOK**.
-    2. Click **Check connection** and confirm the wizard is able to successfully connect to the server.
+    2. Click **Check connection** and confirm the wizard is able to successfully
+       connect to the server.
     3. Click **Next**.
-11. On the **Web Server Role (IIS)** page, review the information, and then click **Next**.
+11. On the **Web Server Role (IIS)** page, review the information, and then
+    click **Next**.
 12. On the **Select roles services** page, click **Next**.
-13. On the **Confirm installation selections** page, review the selected options, and click **Install**. The WSUS installation wizard runs. This might take several minutes to complete.
+13. On the **Confirm installation selections** page, review the selected
+    options, and click **Install**. The WSUS installation wizard runs. This
+    might take several minutes to complete.
 14. Wait for the WSUS installation to complete.
-15. In the summary window on the **Installation progress** page, click **Launch Post-Installation tasks**. The text changes to: **Please wait while your server is configured**.
-16. When the task has finished, the text changes to: **Configuration successfully completed**. Click **Close**.
-17. In **Server Manager**, verify if a notification appears to inform you that a restart is required. This can vary according to the installed server role. If it requires a restart make sure to restart the server to complete the installation.
+15. In the summary window on the **Installation progress** page, click **Launch
+    Post-Installation tasks**. The text changes to: **Please wait while your
+    server is configured**.
+16. When the task has finished, the text changes to: **Configuration
+    successfully completed**. Click **Close**.
+17. In **Server Manager**, verify if a notification appears to inform you that a
+    restart is required. This can vary according to the installed server role.
+    If it requires a restart make sure to restart the server to complete the
+    installation.
 
 ### Configure WSUS
 
@@ -410,7 +426,8 @@ MODIFY FILE ( NAME = N'SUSDB', FILEGROWTH = 102400KB )
 
 #### Configure memory limit for WSUS application pool in IIS
 
-Modify the properties for **WsusPool** to increase the **Private Memory Limit (KB)** to **2500000**.
+Modify the properties for **WsusPool** to increase the **Private Memory Limit
+(KB)** to **2500000**.
 
 ##### Issue - WSUS crashing due to memory constraint
 
@@ -452,18 +469,25 @@ Application pool 'WsusPool' is being automatically disabled due to a series of f
 **To configure WSUS:**
 
 1. In the **Server Manager** navigation pane, select **WSUS**.
-2. In the servers list, right-click the WSUS server (**TT-WSUS03**) and then click **Windows Server Update Services**. The **Windows Server Update Services Wizard** opens.
-3. On the **Before You Begin** page, review the information, and then click **Next**.
-4. On the **Join the Microsoft Update Improvement Program** page, click **Next**.
-5. On the **Choose Upstream Server** page, ensure the **Synchronize from Microsoft Update** option is selected and click **Next**.
-6. On the **Specify Proxy Server** page, ensure the **Use a proxy server when synchronizing** checkbox is not selected, and click **Next**.
+2. In the servers list, right-click the WSUS server (**TT-WSUS03**) and then
+   click **Windows Server Update Services**. The **Windows Server Update
+   Services Wizard** opens.
+3. On the **Before You Begin** page, review the information, and then click
+   **Next**.
+4. On the **Join the Microsoft Update Improvement Program** page, click
+   **Next**.
+5. On the **Choose Upstream Server** page, ensure the **Synchronize from
+   Microsoft Update** option is selected and click **Next**.
+6. On the **Specify Proxy Server** page, ensure the **Use a proxy server when
+   synchronizing** checkbox is not selected, and click **Next**.
 7. On the **Connect to Upstream Server** page, click **Start Connecting**.
 8. Wait for the information to be downloaded and then click **Next**.
 9. On the **Choose Languages** page:
    1. Select the **Download updates in only these languages** option.
    2. In the list of languages, select **English**.
    3. Click **Next**.
-10. After selecting the appropriate language options for your deployment, click **Next** to continue.
+10. After selecting the appropriate language options for your deployment, click
+    **Next** to continue.
 11. On the **Choose Products** page:
     1. Select the following products:\
        **Microsoft**\
@@ -516,9 +540,11 @@ Application pool 'WsusPool' is being automatically disabled due to a series of f
 
 **To create a computer group:**
 
-1. In the **Update Services** console, in the navigation pane, expand **Computers**, and then select **All Computers**.
+1. In the **Update Services** console, in the navigation pane, expand
+   **Computers**, and then select **All Computers**.
 2. In the **Actions** pane, click **Add Computer Group...**
-3. In the **Add Computer Group** window, in the **Name** box, type the name for the new computer group and click **OK**.
+3. In the **Add Computer Group** window, in the **Name** box, type the name for
+   the new computer group and click **OK**.
 
 Computers
 
@@ -587,7 +613,8 @@ Pop-Location
 
 1. Click **Edit**.
 2. In the **Edit Site Binding** window:
-   1. In the **SSL certificate** dropdown, select **wsus.technologytoolbox.com**.
+   1. In the **SSL certificate** dropdown, select
+      **wsus.technologytoolbox.com**.
    2. Click **OK**.
 3. Click **Close**.
 
@@ -628,14 +655,24 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 **To approve and deploy WSUS updates:**
 
-1. In the **Update Services** console, click **Updates**. In the right pane, an update status summary is displayed for **All Updates**, **Critical Updates**, **Security Updates**, and **WSUS Updates**.
+1. In the **Update Services** console, click **Updates**. In the right pane, an
+   update status summary is displayed for **All Updates**, **Critical Updates**,
+   **Security Updates**, and **WSUS Updates**.
 2. In the **All Updates** section, click **Updates needed by computers**.
-3. In the list of updates, select the updates that you want to approve for installation. Information about a selected update is available in the bottom pane of the **Updates** panel. To select multiple contiguous updates, hold down the **shift** key while clicking the update names. To select multiple noncontiguous updates, press down the **CTRL** key while clicking the update names.
+3. In the list of updates, select the updates that you want to approve for
+   installation. Information about a selected update is available in the bottom
+   pane of the **Updates** panel. To select multiple contiguous updates, hold
+   down the **shift** key while clicking the update names. To select multiple
+   noncontiguous updates, press down the **CTRL** key while clicking the update
+   names.
 4. Right-click the selection, and then click **Approve**.
 5. In the **Approve Updates** dialog box:
-   1. Select the desired computer group, click the down arrow, and click **Approved for Install**.
+   1. Select the desired computer group, click the down arrow, and click
+      **Approved for Install**.
    2. Click **OK**.
-6. The **Approval Progress** window appears, which shows the progress of the tasks that affect update approval. When the approval process is complete, click **Close**.
+6. The **Approval Progress** window appears, which shows the progress of the
+   tasks that affect update approval. When the approval process is complete,
+   click **Close**.
 
 #### Configure automatic approval rules
 
@@ -644,13 +681,16 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 1. Open the **Update Services** console.
 2. In the left navigation pane, expand the WSUS server and select **Options**.
 3. In the **Options** pane, select **Automatic Approvals**.
-4. In the **Automatic Approvals** window, on the **Update Rules** tab, select **Default Automatic Approval Rule**.
-5. In the **Rule properties** section, click **Critical Updates, Security Updates**.
+4. In the **Automatic Approvals** window, on the **Update Rules** tab, select
+   **Default Automatic Approval Rule**.
+5. In the **Rule properties** section, click **Critical Updates, Security
+   Updates**.
 6. In the **Choose Update Classifications** window:
    1. Select **Definition Updates**.
    2. Clear the checkboxes for all other update classifications.
-   3. Click** OK**.
-7. Confirm the **Rule properties** for the **Default Automatic Approval Rule** are configured as follows:\
+   3. Click **OK**.
+7. Confirm the **Rule properties** for the **Default Automatic Approval Rule**
+   are configured as follows:\
    \
    **When an update is in _Definition Updates_**\
    \
@@ -659,7 +699,8 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 8. Select the **Default Automatic Approval Rule** checkbox.
 9. Click **New Rule...**
 10. In the **Add Rule** window:
-    1. In the **Step 1: Select properties** section, select** When an update is in a specific classification**.
+    1. In the **Step 1: Select properties** section, select **When an update is
+       in a specific classification**.
     2. In the **Step 2: Edit the properties** section:
        1. Click **any classification**.
           1. In the **Choose Update Classifications** window:
@@ -672,14 +713,17 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
           1. In the **Choose Computer Groups** window:
              1. Clear the **All Computers** checkbox.
              2. Select the following checkboxes:
-                - **Fabrikam / Fabrikam - Quality Assurance / Fabrikam - Beta Testing**
+                - **Fabrikam / Fabrikam - Quality Assurance / Fabrikam - Beta
+                  Testing**
                 - **Technology Toolbox / Quality Assurance / Beta Testing**
           2. Click **OK**.
-    3. In the **Step 3: Specify a name** box, type **Beta Testing Approval Rule**.
+    3. In the **Step 3: Specify a name** box, type **Beta Testing Approval
+       Rule**.
     4. Click **OK**.
 11. In the **Automatic Approvals** window:
 
-    1. Confirm the **Rule properties** for the **Beta Testing Approval Rule** are configured as follows:\
+    1. Confirm the **Rule properties** for the **Beta Testing Approval Rule**
+       are configured as follows:\
        \
        **When an update is in _Critical Updates, Security Updates_**\
        \
@@ -808,7 +852,11 @@ Stop-Service WsusService
 
 > **Note**
 >
-> Use backup/restore -- instead of database detach/attach -- due to different versions of SQL Server running on HAVOK and TT-SQL01. Initially, detach/attach was attempted but it did not restore the log file due to different file location (i.e. "L:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\..." vs. "L:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\...").
+> Use backup/restore -- instead of database detach/attach -- due to different
+> versions of SQL Server running on HAVOK and TT-SQL01. Initially, detach/attach
+> was attempted but it did not restore the log file due to different file
+> location (i.e. "L:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\..." vs.
+> "L:\\Microsoft SQL Server\\MSSQL13.MSSQLSERVER\\...").
 
 ---
 
@@ -1435,7 +1483,8 @@ CREATE NONCLUSTERED INDEX [nclSupercededUpdateID] ON [dbo].[tbRevisionSupersedes
 
 #### Reference
 
-**The complete guide to Microsoft WSUS and Configuration Manager SUP maintenance**\
+**The complete guide to Microsoft WSUS and Configuration Manager SUP
+maintenance**\
 From <[https://support.microsoft.com/en-us/help/4490644/complete-guide-to-microsoft-wsus-and-configuration-manager-sup-maint](https://support.microsoft.com/en-us/help/4490644/complete-guide-to-microsoft-wsus-and-configuration-manager-sup-maint)>
 
 ## Expand D: (Data01) drive
@@ -1587,7 +1636,8 @@ Steps:
 
   - Step name: **Defragment database and update statistics**
   - Type: **Transact-SQL script (T-SQL)**
-  - Command: (click **Open...** and then select script - **"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql"**)
+  - Command: (click **Open...** and then select script -
+    **"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql"**)
   - Database: **SUSDB**\
     Schedule:
 
