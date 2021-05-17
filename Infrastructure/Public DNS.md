@@ -334,3 +334,12 @@ New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
       -Target 'sipfed.online.lync.com.') |
   Out-Null
 ```
+
+## Update name servers on register.com
+
+Name servers for Azure DNS zone:
+
+1. ns1-09.azure-dns.com
+1. ns2-09.azure-dns.net
+1. ns3-09.azure-dns.org
+1. ns4-09.azure-dns.info
