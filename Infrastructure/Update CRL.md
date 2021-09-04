@@ -1,16 +1,22 @@
 ﻿# Update CRL
 
-Monday, August 17, 2015
+Monday, August 17, 2015\
 9:42 AM
 
 ---
 
-**FOOBAR8** - Run as administrator
-
-## # On the Hyper-V host (STORM), start the offline root CA (CRYPTID) and attach a new virtual floppy disk
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
-Invoke-Command -ComputerName STORM -ScriptBlock {
+cls
+```
+
+## # Start offline root CA (CRYPTID) and attach new virtual floppy disk
+
+```PowerShell
+$vmHost = 'TT-HV05D'
+
+Invoke-Command -ComputerName $vmHost -ScriptBlock {
     $rootCA = 'CRYPTID'
 
     Start-VM $rootCA
@@ -19,7 +25,7 @@ Invoke-Command -ComputerName STORM -ScriptBlock {
 
     If ((Test-Path $vfdFolder) -eq $false)
     {
-        New-Item -ItemType Directory -Path $vfdFolder > $null
+        New-Item -ItemType Directory -Path $vfdFolder | Out-Null
     }
 
     $vfdFile = "$vfdFolder\$rootCA.vfd"
@@ -29,7 +35,7 @@ Invoke-Command -ComputerName STORM -ScriptBlock {
         Remove-Item $vfdFile
     }
 
-    New-VFD -Path $vfdFile > $null
+    New-VFD -Path $vfdFile | Out-Null
 
     Set-VMFloppyDiskDrive -VMName $rootCA -Path $vfdFile
 }
@@ -37,7 +43,7 @@ Invoke-Command -ComputerName STORM -ScriptBlock {
 
 ---
 
-## # Republish the CRL on the root CA and copy it to the virtual floppy disk
+## # Republish CRL on root CA and copy it to virtual floppy disk
 
 ---
 
@@ -53,23 +59,23 @@ PowerShell
 certutil -CRL
 ```
 
-### # Format virtual floppy disk in VM
+### # Format virtual floppy disk
 
 ```PowerShell
 format A:
 ```
 
-When prompted for the volume label, press Enter.
+When prompted for the volume label, press **Enter**.
 
-When prompted to format another disk, type **N** and then press Enter.
+When prompted to format another disk, type **N** and then press **Enter**.
 
-### # Copy the certificate file and CRL for root CA to floppy disk
+### # Copy certificate file and CRL for root CA to floppy disk
 
 ```PowerShell
 copy C:\Windows\system32\CertSrv\CertEnroll\*.crl A:\
 ```
 
-### # Verify the CRL for root CA was copied to the floppy disk
+### # Verify CRL for root CA was copied to floppy disk
 
 ```PowerShell
 dir A:\
@@ -79,55 +85,100 @@ dir A:\
 
 ---
 
-**FOOBAR8** - Run as administrator
-
-## # Remove virtual floppy disk from root CA VM and copy the CRL to a file server (ICEMAN)
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
-Invoke-Command -ComputerName STORM -ScriptBlock {
-    $rootCA = 'CRYPTID'
+cls
+```
 
-    Set-VMFloppyDiskDrive -VMName $rootCA -Path $null
+## # Remove virtual floppy disk from root CA virtual machine
 
-    $vfdPath = "C:\NotBackedUp\VMs\$rootCA\Virtual Floppy Disks\$rootCA.vfd"
+```PowerShell
+$vmHost = 'TT-HV05D'
+$rootCA = 'CRYPTID'
 
-    Move-Item $vfdPath '\\ICEMAN\Public\'
+Set-VMFloppyDiskDrive -ComputerName $vmHost -VMName $rootCA -Path $null
+```
+
+```PowerShell
+cls
+```
+
+## # Copy CRL to file server (TT-FS01)
+
+```PowerShell
+$vmHost = 'TT-HV05D'
+$rootCA = 'CRYPTID'
+
+$vfdPath = `
+    "\\$vmHost\C`$\NotBackedUp\VMs\$rootCA\Virtual Floppy Disks\$rootCA.vfd"
+
+Move-Item $vfdPath '\\TT-FS01\Public\'
+```
+
+```PowerShell
+cls
 ```
 
 ### # Shutdown root CA
 
 ```PowerShell
-    Stop-VM $rootCA
+$vmHost = 'TT-HV05D'
+$rootCA = 'CRYPTID'
+
+Stop-VM -ComputerName $vmHost -VMName $rootCA
+```
+
+```PowerShell
+cls
+```
+
+## # Copy CRL to Hyper-V server (TT-HV05F) for issuing CA virtual machine (CIPHER01)
+
+```PowerShell
+$vmHost = 'TT-HV05F'
+$issuingCA = 'CIPHER01'
+$rootCA = 'CRYPTID'
+
+$vfdFolder = "\\$vmHost\C`$\NotBackedUp\VMs\$issuingCA\Virtual Floppy Disks"
+
+If ((Test-Path $vfdFolder) -eq $false)
+{
+    New-Item -ItemType Directory -Path $vfdFolder | Out-Null
 }
+
+$vfdFile = "$vfdFolder\$rootCA.vfd"
+
+If ((Test-Path $vfdFile) -eq $true)
+{
+    Remove-Item $vfdFile
+}
+
+Move-Item "\\TT-FS01\Public\$rootCA.vfd" $vfdFolder
+```
+
+```PowerShell
+cls
 ```
 
 ## # Attach virtual floppy disk containing CRL from root CA to issuing CA
 
 ```PowerShell
-Invoke-Command -ComputerName BEAST -ScriptBlock {
+$vmHost = 'TT-HV05F'
+
+Invoke-Command -ComputerName $vmHost -ScriptBlock {
     $rootCA = 'CRYPTID'
     $issuingCA = 'CIPHER01'
 
     $vfdFolder = "C:\NotBackedUp\VMs\$issuingCA\Virtual Floppy Disks"
-
-    If ((Test-Path $vfdFolder) -eq $false)
-    {
-        New-Item -ItemType Directory -Path $vfdFolder > $null
-    }
-
-    $vfdFile = "$vfdFolder\$rootCA.vfd"
-
-    If ((Test-Path $vfdFile) -eq $true)
-    {
-        Remove-Item $vfdFile
-    }
-
-    Move-Item "\\ICEMAN\Public\$rootCA.vfd" $vfdFolder
-
     $vfdPath = "$vfdFolder\$rootCA.vfd"
 
     Set-VMFloppyDiskDrive -VMName $issuingCA -Path $vfdPath
 }
+```
+
+```PowerShell
+cls
 ```
 
 ## # Publish CRL from root CA to issuing CA (CIPHER01)
@@ -143,10 +194,16 @@ Invoke-Command -ComputerName CIPHER01 -ScriptBlock {
 }
 ```
 
+```PowerShell
+cls
+```
+
 ## # Remove virtual floppy disk from issuing CA and delete it
 
 ```PowerShell
-Invoke-Command -ComputerName BEAST -ScriptBlock {
+$vmHost = 'TT-HV05F'
+
+Invoke-Command -ComputerName $vmHost -ScriptBlock {
     $rootCA = 'CRYPTID'
     $issuingCA = 'CIPHER01'
 
