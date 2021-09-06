@@ -5399,3 +5399,152 @@ Pop-Location
 ```
 
 ---
+
+## Upgrade to Microsoft Deployment Toolkit - build 8450
+
+**Note:** Upgrading to the latest version of MDT (build 8456) from build 8443 is
+not supported. It is necessary to first upgrade from build 8443 to build 8450.
+
+### Reference
+
+**A Geeks Guide for upgrading to MDT 8450**\
+From <[https://www.deploymentresearch.com/a-geeks-guide-for-upgrading-to-mdt-8450/](https://www.deploymentresearch.com/a-geeks-guide-for-upgrading-to-mdt-8450/)>
+
+### Login as TECHTOOLBOX\\jjameson-admin
+
+```PowerShell
+cls
+```
+
+### # Install new version of Microsoft Deployment Toolkit
+
+```PowerShell
+& ("\\TT-FS01\Products\Microsoft\Microsoft Deployment Toolkit" `
+    + "\MDT - build 8450\MicrosoftDeploymentToolkit_x64.msi")
+```
+
+### Upgrade MDT deployment shares
+
+#### Upgrade "MDT Build Lab" deployment share
+
+1. Open **Deployment Workbench** and expand **Deployment Shares**.
+1. Right-click **\\\\TT-FS01\MDT-Build$** and then click **Upgrade Deployment
+   Share**.
+1. In the **Upgrade Deployment Share Wizard**:
+   1. On the **Summary** step, click **Next**.
+   1. Wait for the deployment share to be upgraded, verify no errors occurred
+      during the upgrade, and then click **Finish**.
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add *
+
+git commit -m "Upgrade to Microsoft Deployment Toolkit - build 8450"
+
+git push
+
+Pop-Location
+```
+
+---
+
+#### Upgrade "MDT Deployment" deployment share
+
+1. Open **Deployment Workbench** and expand **Deployment Shares**.
+1. Right-click **\\\\TT-FS01\MDT-Deploy$** and then click **Upgrade Deployment
+   Share**.
+1. In the **Upgrade Deployment Share Wizard**:
+   1. On the **Summary** step, click **Next**.
+   1. Wait for the deployment share to be upgraded, verify no errors occurred
+      during the upgrade, and then click **Finish**.
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Deploy$ Z:\NotBackedUp\MDT-Deploy /E /MIR /XD .git
+```
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Deploy
+
+git add *
+
+git commit -m "Upgrade to Microsoft Deployment Toolkit - build 8450"
+
+git push
+
+Pop-Location
+```
+
+---
+
+### Update boot images for deployment shares
+
+1. Open **Deployment Workbench** and expand **Deployment Shares**.
+1. Right-click **MDT Build Lab
+   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$))** and then click **Update
+   Deployment Share**.
+1. In the **Update Deployment Share Wizard**:
+   1. On the **Options** step, select **Completely regenerate the boot images**,
+      and then click **Next**.
+   1. On the **Summary** step, click **Next**.
+   1. Wait for the deployment share to be updated, verify no errors occurred
+      during the update, and then click **Finish**.
+1. Repeat the previous steps to update the **MDT Deployment
+   ([\\\\TT-FS01\\MDT-Deploy\$](\\TT-FS01\MDT-Deploy$))** deployment share.
+
+```PowerShell
+cls
+```
+
+### # Copy boot images to file server
+
+```PowerShell
+@(
+'\\TT-FS01\MDT-Build$\Boot\MDT-Build-x64.iso',
+'\\TT-FS01\MDT-Build$\Boot\MDT-Build-x86.iso',
+'\\TT-FS01\MDT-Deploy$\Boot\MDT-Deploy-x64.iso',
+'\\TT-FS01\MDT-Deploy$\Boot\MDT-Deploy-x86.iso') |
+    foreach {
+        Copy-Item $_ "\\TT-FS01\Products\Microsoft"
+    }
+```
