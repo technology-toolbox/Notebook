@@ -5663,6 +5663,128 @@ Pop-Location
 
 ---
 
+## Fix BIOS firmware detection issue in MDT
+
+> **Important**
+>
+> There is a known issue when using the Microsoft Deployment Toolkit to build
+> images using the Windows Assessment and Deployment Kit (ADK) for Windows 10,
+> version 2004. Specifically, the BIOS firmware type is incorrectly identified
+> as UEFI.
+>
+> To avoid this issue, it is necessary to overwrite the
+> **Microsoft.BDD.Utility.dll** files on the MDT server and update the
+> deployment shares.
+>
+> Refer to the following for more information:
+>
+> **Windows 10 deployments fail with Microsoft Deployment Toolkit on computers
+> with BIOS type firmware**\
+> From <[https://support.microsoft.com/en-us/topic/windows-10-deployments-fail-with-microsoft-deployment-toolkit-on-computers-with-bios-type-firmware-70557b0b-6be3-81d2-556f-b313e29e2cb7](https://support.microsoft.com/en-us/topic/windows-10-deployments-fail-with-microsoft-deployment-toolkit-on-computers-with-bios-type-firmware-70557b0b-6be3-81d2-556f-b313e29e2cb7)>
+
+### Download patch for MDT and Windows 10 Version 2004
+
+Download the patch (**MDT_KB4564442.exe**) from the URL above and extract the
+contents.
+
+### Update Microsoft.BDD.Utility.dll files on MDT server
+
+1. Close **Deployment Workbench**.
+1. Backup the existing versions of the Microsoft.BDD.Utility.dll file in the
+   following locations:\
+   %ProgramFiles%\Microsoft Deployment Toolkit\Templates\Distribution\Tools\x86\
+   %ProgramFiles%\Microsoft Deployment Toolkit\Templates\Distribution\Tools\x64\
+1. Copy the new files extracted from MDT_KB4564442.exe over the old versions.
+
+```PowerShell
+cls
+```
+
+### # Update Microsoft.BDD.Utility.dll files on MDT deployment shares
+
+```PowerShell
+$mdtPath = "$env:ProgramFiles\Microsoft Deployment Toolkit"
+$filename = 'Microsoft.BDD.Utility.dll'
+
+Copy-Item `
+    "$mdtPath\Templates\Distribution\Tools\x64\$filename" `
+    '\\TT-FS01\MDT-Build$\Tools\x64'
+
+Copy-Item `
+    "$mdtPath\Templates\Distribution\Tools\x86\$filename" `
+    '\\TT-FS01\MDT-Build$\Tools\x86'
+
+Copy-Item `
+    "$mdtPath\Templates\Distribution\Tools\x64\$filename" `
+    '\\TT-FS01\MDT-Deploy$\Tools\x64'
+
+Copy-Item `
+    "$mdtPath\Templates\Distribution\Tools\x86\$filename" `
+    '\\TT-FS01\MDT-Deploy$\Tools\x86'
+```
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update "MDT Build Lab" files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add *
+
+git commit -m "Fix BIOS firmware detection issue in MDT"
+
+Pop-Location
+```
+
+```PowerShell
+cls
+```
+
+### # Update "MDT Deployment" files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Deploy$ Z:\NotBackedUp\MDT-Deploy /E /MIR /XD .git
+```
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Deploy
+
+git add *
+
+git commit -m "Fix BIOS firmware detection issue in MDT"
+
+Pop-Location
+```
+
+---
+
 ### Update boot images for deployment shares
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
