@@ -5816,3 +5816,563 @@ cls
         Copy-Item $_ "\\TT-FS01\Products\Microsoft"
     }
 ```
+
+```PowerShell
+cls
+```
+
+## # Import operating system - Windows Server 2022
+
+### # Create folder - "Operating Systems\\Windows Server 2022"
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+
+New-Item `
+    -Path "DS001:\Operating Systems" `
+    -Name "Windows Server 2022" `
+    -ItemType Folder
+```
+
+### # Import operating system - "Windows Server 2022"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows Server 2022" `
+    + "\en-us_windows_server_2022_x64_dvd_620d7eac.iso"
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "WS2022-RTM"
+
+Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows Server 2022" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+```
+
+```PowerShell
+cls
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add *
+
+git commit -m "Import operating system - Windows Server 2022"
+
+Pop-Location
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Create task sequence for building Windows Server 2022 baseline image
+
+### # Create folder - "Task Sequences\\Windows Server 2022"
+
+```PowerShell
+New-Item `
+    -Path "DS001:\Task Sequences" `
+    -Name "Windows Server 2022" `
+    -ItemType Folder
+```
+
+### # Create task sequence - "Windows Server 2022 - Baseline"
+
+```PowerShell
+$osPath = "DS001:\Operating Systems\Windows Server 2022" `
+    + "\Windows Server 2022 SERVERSTANDARD in WS2022-RTM install.wim"
+
+Import-MDTTaskSequence `
+    -Path "DS001:\Task Sequences\Windows Server 2022" `
+    -ID "WS2022-REF" `
+    -Name "Windows Server 2022 - Baseline" `
+    -Comments "Reference image" `
+    -Version "1.0" `
+    -Template "Server.xml" `
+    -OperatingSystemPath $osPath `
+    -FullName "Windows User" `
+    -OrgName "Technology Toolbox" `
+    -HomePage "about:blank" `
+    -ProductKey "VDYBN-27WPP-V4HQT-9VMD4-VMK7H"
+```
+
+> **Important**
+>
+> The MSDN version of Windows Server 2022 does not honor the
+> `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words,
+> if no product key is specified in the task sequence, when building the
+> reference image it will prompt to enter a product key (but provide an option
+> to do this later).
+>
+> The product key specified above was obtained from the following:
+>
+> **KMS client setup keys**\
+> From <[https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys](https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys)>
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add *
+
+git commit -m "Create task sequence for building Windows Server 2022 baseline image"
+
+Pop-Location
+```
+
+---
+
+Build baseline image
+
+---
+
+**TT-HV05F** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2022 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x64.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+---
+
+## Customize Windows Server 2022 baseline image (step 1)
+
+### Configure task sequence - "Windows Server 2022"
+
+Edit the task sequence to include the actions required to update the reference
+image with the latest updates from WSUS, copy Toolbox content from TT-FS01, and
+easily suspend the deployment process after installing applications.
+
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows
+   Server 2022**, right-click **Windows Server 2022 - Baseline**, and click
+   **Properties**.
+1. In the **Windows Server 2022 - Baseline Properties** window:
+   1. On the **General** tab, configure the following settings:
+      1. Comments: **Reference image - Toolbox content and latest patches**
+   1. On the **Task Sequence** tab, configure the following settings:
+      1. **State Restore**
+         1. Enable the **Windows Update (Pre-Application Installation)** action.
+         1. Clear the **Continue on error** checkbox for the **Windows Update
+            (Pre-Application Installation)** action.
+         1. Enable the **Windows Update (Post-Application Installation)**
+            action.
+         1. Clear the **Continue on error** checkbox for the **Windows Update
+            (Post-Application Installation)** action.
+         1. After the **Tattoo** action, add a new **Group** action with the
+            following setting:
+            1. Name: **Custom Tasks (Pre-Windows Update)**
+         1. After the **Windows Update (Post-Application Installation)** action,
+            rename the **Custom Tasks** group to **Custom Tasks (Post-Windows
+            Update)**.
+         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Run Command Line** action with the following settings:
+            1. Name: **Copy Toolbox content from TT-FS01**
+            2. Command line: **robocopy
+               [\\\\TT-FS01\\Public\\Toolbox](\\TT-FS01\Public\Toolbox)
+               C:\\NotBackedUp\\Public\\Toolbox /E**
+            3. Success codes: **0 1 2 3 4 5 6 7 8 16**
+         1. After the **Install Applications** action, add a new **Run Command
+            Line** action with the following settings:
+            1. Name: **Suspend**
+            2. Command line: **cscript.exe "%SCRIPTROOT%\\LTISuspend.wsf"**
+            3. Disable this step: **Yes (checked)**
+   1. Click **OK**.
+
+> **Note**
+>
+> The reason for adding the applications after the Tattoo action but before
+> running Windows Update is simply to save time during the deployment. This way
+> we can add all applications that will upgrade some of the built-in components
+> and avoid unnecessary updating.
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add *
+
+git commit -m "Customize Windows Server 2022 baseline image (step 1)"
+
+Pop-Location
+```
+
+---
+
+Build baseline images
+
+---
+
+**TT-HV05F** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2022 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x64.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Add custom Windows Server 2022 image to MDT production deployment share
+
+### # Create folder - "Operating Systems\\Windows Server 2022"
+
+```PowerShell
+Import-Module 'C:\Program Files\Microsoft Deployment Toolkit\Bin\MicrosoftDeploymentToolkit.psd1'
+
+New-PSDrive -Name "DS002" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Deploy$
+
+New-Item `
+    -Path "DS002:\Operating Systems" `
+    -Name "Windows Server 2022" `
+    -ItemType Folder
+```
+
+```PowerShell
+cls
+```
+
+### # Import operating system - "Windows Server 2022 Standard - Baseline"
+
+```PowerShell
+$imagePath = "\\TT-FS01\MDT-Build$\Captures\WS2022-REF_9-7-2021-1-30-27-PM.wim"
+
+$destinationFolder = "WS2022"
+
+$os = Import-MDTOperatingSystem `
+    -Path "DS002:\Operating Systems\Windows Server 2022" `
+    -SourceFile $imagePath `
+    -DestinationFolder $destinationFolder `
+    -Move
+
+$os.RenameItem("Windows Server 2022 Standard - Baseline")
+```
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Deploy$ Z:\NotBackedUp\MDT-Deploy /E /MIR /XD .git
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Deploy
+
+git add *
+
+git commit -m "Add custom Windows Server 2022 image to MDT production deployment share"
+
+Pop-Location
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Create task sequence for Windows Server 2022 deployment
+
+### # Create folder - "Task Sequences\\Windows Server 2022"
+
+```PowerShell
+New-Item `
+    -Path "DS002:\Task Sequences" `
+    -Name "Windows Server 2022" `
+    -ItemType Folder
+```
+
+### # Create task sequence - "Windows Server 2022"
+
+```PowerShell
+$osPath = "DS002:\Operating Systems\Windows Server 2022" `
+    + "\Windows Server 2022 Standard - Baseline"
+
+Import-MDTTaskSequence `
+    -Path "DS002:\Task Sequences\Windows Server 2022" `
+    -ID "WS2022" `
+    -Name "Windows Server 2022" `
+    -Comments "Production image" `
+    -Version "1.0" `
+    -Template "Server.xml" `
+    -OperatingSystemPath $osPath `
+    -FullName "Windows User" `
+    -OrgName "Technology Toolbox" `
+    -HomePage "about:blank" `
+    -ProductKey "VDYBN-27WPP-V4HQT-9VMD4-VMK7H"
+```
+
+> **Important**
+>
+> The MSDN version of Windows Server 2022 does not honor the
+> `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words,
+> if no product key is specified in the task sequence, when deploying the
+> baseline image it will prompt to enter a product key (but provide an option to
+> do this later).
+>
+> The product key specified above was obtained from the following:
+>
+> **KMS client setup keys**\
+> From <[https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys](https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys)>
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Deploy$ Z:\NotBackedUp\MDT-Deploy /E /MIR /XD .git
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Deploy
+
+git add *
+
+git commit -m "Create task sequence for Windows Server 2022 deployment"
+
+Pop-Location
+```
+
+---
+
+## Customize Windows Server 2022 baseline image to minimize image size
+
+### Configure task sequence - "Windows Server 2022"
+
+Edit the task sequence to include actions to set MaxPatchCacheSize to 0 and
+clean up the image after patching.
+
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows
+   Server 2022**, right-click **Windows Server 2022 - Baseline**, and click
+   **Properties**.
+1. In the **Windows Server 2022 - Baseline Properties** window:
+   1. On the **General** tab, configure the following settings:
+      1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content,
+         latest patches, and cleanup before Sysprep**
+   1. On the **Task Sequence** tab, configure the following settings:
+      1. **State Restore**
+         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Run Command Line** action with the following settings:
+            1. Name: **Set MaxPatchCacheSize to 0**
+            1. Command line: **PowerShell.exe -Command "& { New-Item -Path
+               'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer';
+               New-ItemProperty -Path
+               'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer' -Name
+               MaxPatchCacheSize -PropertyType DWord -Value 0 | Out-Null }"**
+         1. After the **Apply Local GPO Package** action, add a new group with
+            the following setting:
+            1. Name: **Cleanup before Sysprep**
+         1. Select the **Cleanup before Sysprep** group created in the previous
+            step and add a new group with the following setting:
+            1. Name: **Compress the image**
+         1. Select the **Compress the image** group and add a new **Restart
+            computer** action.
+         1. After the new **Restart computer** action added in the previous
+            step, add a new **Install Application** action with the following
+            settings:
+            1. Name: **Action - Cleanup before Sysprep**
+            1. **Install a single application**
+            1. Application to install: **Action - Cleanup before Sysprep**
+         1. After the action added in the previous step, add a new **Restart
+            computer** action.
+   1. Click **OK**.
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add *
+
+git commit -m "Customize Windows Server 2022 baseline image to minimize image size"
+
+Pop-Location
+```
+
+---
+
+Build baseline images
+
+---
+
+**TT-HV05F** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2022 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x64.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+---

@@ -1,6 +1,6 @@
 ﻿# Update Baseline Images
 
-Tuesday, June 12, 2018
+Tuesday, June 12, 2018\
 8:14 AM
 
 ## Build baseline images
@@ -125,6 +125,19 @@ cls
 ```PowerShell
 & 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
     -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x86.iso `
+    -SwitchName "Embedded Team Switch" `
+    -Force
+```
+
+```PowerShell
+cls
+```
+
+### # Create temporary VM to build image - "Windows Server 2022 - Baseline"
+
+```PowerShell
+& 'C:\NotBackedUp\Public\Toolbox\PowerShell\Create Temporary VM.ps1' `
+    -IsoPath \\TT-FS01\Products\Microsoft\MDT-Build-x64.iso `
     -SwitchName "Embedded Team Switch" `
     -Force
 ```
