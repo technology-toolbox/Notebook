@@ -1,6 +1,6 @@
 ﻿# FAB-WAP01 - Windows Server 2012 R2
 
-Thursday, June 04, 2015
+Thursday, June 04, 2015\
 2:03 PM
 
 ```Text
@@ -235,15 +235,25 @@ Set-ItemProperty -Path $registryKey -Name https -Value 2
 
 ###### Request certificate
 
-1. On the **Welcome** page of the Active Directory Certificate Services site, in the **Select a task** section, click **Request a certificate**.
-2. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+1. On the **Welcome** page of the Active Directory Certificate Services site, in
+   the **Select a task** section, click **Request a certificate**.
+2. On the **Advanced Certificate Request** page, click **Submit a certificate
+   request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal
+   request by using a base-64-encoded PKCS #7 file.**
 3. On the **Submit a Certificate Request or Renewal Request** page:
-   1. In the **Saved Request** box, copy/paste the certificate request generated previously.
-   2. In the **Certificate Template** dropdown list, select **Technology Toolbox Web Server**.
+   1. In the **Saved Request** box, copy/paste the certificate request generated
+      previously.
+   2. In the **Certificate Template** dropdown list, select **Technology Toolbox
+      Web Server**.
    3. Click **Submit >**.
-4. When prompted to allow the Web site to perform a digital certificate operation on your behalf, click **Yes**.
-5. On the **Certificate Issued** page, ensure the **DER encoded** option is selected and click **Download certificate**. When prompted to save the certificate file, click **Save**.
-6. After the file is saved, open the download folder in Windows Explorer and rename the certificate file to match the subject name (i.e. **fs.fabrikam.com.cer**).
+4. When prompted to allow the Web site to perform a digital certificate
+   operation on your behalf, click **Yes**.
+5. On the **Certificate Issued** page, ensure the **DER encoded** option is
+   selected and click **Download certificate**. When prompted to save the
+   certificate file, click **Save**.
+6. After the file is saved, open the download folder in Windows Explorer and
+   rename the certificate file to match the subject name (i.e.
+   **fs.fabrikam.com.cer**).
 
 ##### # Import certificate
 
