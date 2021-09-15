@@ -486,6 +486,133 @@ Start-SCVirtualMachine -VM $vmName
 
 ## Delete VM baseline
 
+## Renew certificate for Windows Admin Center
+
+### Install certificate for Windows Admin Center
+
+---
+
+**TT-ADMIN04** - Run as administrator
+
+```PowerShell
+cls
+```
+
+#### # Create certificate for Windows Admin Center
+
+##### # Create certificate request
+
+```PowerShell
+& "C:\NotBackedUp\Public\Toolbox\PowerShell\New-CertificateRequest.ps1" `
+    -Subject ("CN=admin.technologytoolbox.com,OU=IT,O=Technology Toolbox," `
+        + "L=Parker,S=CO,C=US") `
+    -SANs admin.technologytoolbox.com
+```
+
+##### # Submit certificate request to the Certification Authority
+
+###### # Add Active Directory Certificate Services site to the "Trusted sites" zone and browse to the site
+
+```PowerShell
+[Uri] $adcsUrl = [Uri] "https://cipher01.corp.technologytoolbox.com"
+
+C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
+    -Zone LocalIntranet `
+    -Patterns $adcsUrl.AbsoluteUri
+
+Start-Process $adcsUrl.AbsoluteUri
+```
+
+###### # Submit the certificate request to an enterprise CA
+
+> **Note**
+>
+> Copy the certificate request to the clipboard.
+
+**To submit the certificate request to an enterprise CA:**
+
+1. Start Internet Explorer, and browse to the Active Directory Certificate
+   Services site
+   ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+2. On the **Welcome** page, click **Request a certificate**.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate
+   request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal
+   request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the
+   **Saved Request** text box, paste the contents of the certificate request
+   generated in the previous procedure.
+5. In the **Certificate Template** section, select the certificate template
+   (**Technology Toolbox Web Server - Exportable**), and then click **Submit**.
+   When prompted to allow the digital certificate operation to be performed,
+   click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save
+   the certificate.
+
+```PowerShell
+cls
+```
+
+##### # Import the certificate into the certificate store
+
+```PowerShell
+$certFile = "C:\Users\jjameson-admin\Downloads\certnew.cer"
+
+CertReq.exe -Accept $certFile
+```
+
+```PowerShell
+cls
+```
+
+##### # Delete the certificate file
+
+```PowerShell
+Remove-Item $certFile
+```
+
+##### Export certificate
+
+Filename: **[\\\\TT-FS01\\Users\$\\jjameson-admin\\My
+Documents\\Certificates\\admin.technologytoolbox.com.pfx](\\TT-FS01\Users\$\jjameson-admin\My
+Documents\Certificates\admin.technologytoolbox.com.pfx)**
+
+---
+
+```PowerShell
+cls
+```
+
+#### # Import certificate for Windows Admin Center
+
+```PowerShell
+$certFile = "\\TT-FS01\Users$\jjameson-admin\My Documents\Certificates\admin.technologytoolbox.com.pfx"
+
+Set-ExecutionPolicy RemoteSigned -Scope Process -Force
+
+$certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+
+Import-PfxCertificate `
+    -Password $certPassword `
+    -FilePath $certFile `
+    -CertStoreLocation Cert:\LocalMachine\My
+```
+
+```Text
+   PSParentPath: Microsoft.PowerShell.Security\Certificate::LocalMachine\My
+
+Thumbprint                                Subject
+----------                                -------
+A9AB28D626F2C7D0C19DDD72A4C200D43D37A2A4  CN=admin.technologytoolbox.com, OU=IT, O=Technology Toolbox, L=Parker, S=C...
+```
+
+### Update certificate for Windows Admin Center
+
+1. Open **Settings** and select **Apps & features**.
+1. In the **Apps & features** list, select **Windows Admin Center** and click
+   **Modify**.
+1. In the **Windows Admin Center Setup** window, complete the steps to update
+   the certificate (by specifying the thumbprint for the new certificate).
+
 **TODO:**
 
 ```PowerShell
