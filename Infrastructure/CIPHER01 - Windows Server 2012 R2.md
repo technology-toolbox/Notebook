@@ -2650,3 +2650,79 @@ del $vfdPath
 ```
 
 ---
+
+## Clean up Active Directory Certificate Services
+
+### References
+
+**PowerShell PKI Module**\
+[https://github.com/PKISolutions/PSPKI](https://github.com/PKISolutions/PSPKI)
+
+**Installing PowerShellGet**\
+[https://docs.microsoft.com/en-us/powershell/scripting/gallery/installing-psget](https://docs.microsoft.com/en-us/powershell/scripting/gallery/installing-psget)
+
+**Note:** According to the GitHub project, the PowerShell PKI Module requires
+Windows PowerShell 3.0 or later. However, since the installation is performed
+using the **Install-Module** cmdlet (included in the PowerShellGet module), it
+is recommended to upgrade to PowerShell 5.1.
+
+### Install PowerShell 5.1
+
+Download and install Windows Management Framework 5.1 from the following
+location:
+
+**Windows Management Framework 5.1**\
+[https://www.microsoft.com/en-us/download/details.aspx?id=54616](https://www.microsoft.com/en-us/download/details.aspx?id=54616)
+
+Restart the computer to complete the installation.
+
+### Download and install PowerShell PKI module from PowerShell Gallery
+
+```PowerShell
+cls
+```
+
+#### # Install NuGet package provider
+
+```PowerShell
+[Net.ServicePointManager]::SecurityProtocol = `
+    [Net.ServicePointManager]::SecurityProtocol `
+    -bor [Net.SecurityProtocolType]::Tls12
+
+Install-PackageProvider -Name NuGet -Force
+```
+
+```PowerShell
+cls
+```
+
+#### # Install PowerShellGet module
+
+```PowerShell
+Install-Module PowerShellGet
+```
+
+```PowerShell
+cls
+```
+
+#### # Install PowerShell PKI module
+
+```PowerShell
+Install-Module -Name PSPKI
+```
+
+```PowerShell
+cls
+```
+
+### # Delete expired certificates and failed/pending certificate requests
+
+```PowerShell
+Import-Module -Name PSPKI
+
+Get-CertificationAuthority |
+    Remove-AdcsDatabaseRow `
+        -Filter ExpiredFailedPending `
+        -RemoveBefore $((Get-Date).AddMonths(-6))
+```
