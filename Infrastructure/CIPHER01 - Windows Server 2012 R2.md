@@ -1,6 +1,6 @@
 ﻿# CIPHER01 - Windows Server 2012 R2 Standard
 
-Sunday, February 23, 2014
+Sunday, February 23, 2014\
 5:52 PM
 
 ```Console
@@ -307,7 +307,13 @@ Install-AdcsCertificationAuthority `
     -CryptoProviderName "RSA#Microsoft Software Key Storage Provider"
 ```
 
-WARNING: The Active Directory Certificate Services installation is incomplete. To complete the installation, use the request file "C:\\CIPHER01.corp.technologytoolbox.com_Technology Toolbox Issuing Certificate Authority 01.req" to obtain a certificate from the parent CA. Then, use the Certification Authority snap-in to install the certificate. To complete this procedure, right-click the node with the name of the CA, and then click Install CA Certificate. The operation completed successfully. 0x0 (WIN32: 0)
+WARNING: The Active Directory Certificate Services installation is incomplete.
+To complete the installation, use the request file
+"C:\\CIPHER01.corp.technologytoolbox.com_Technology Toolbox Issuing Certificate
+Authority 01.req" to obtain a certificate from the parent CA. Then, use the
+Certification Authority snap-in to install the certificate. To complete this
+procedure, right-click the node with the name of the CA, and then click Install
+CA Certificate. The operation completed successfully. 0x0 (WIN32: 0)
 
 ```PowerShell
 Move-Item C:\*.req A:
@@ -329,13 +335,23 @@ $vmName = "CRYPTID"
 Set-VMFloppyDiskDrive -VMName $vmName -Path $vfdPath
 ```
 
-- On CRYPTID, from Windows PowerShell, submit the request using the following command:
-- In the **Certification Authority List** window, ensure that **Technology Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click **OK**.
-- Note that the certificate request is pending. Make a note of the request ID number.
-- On ORCA1, you must approve the request. You can do this using Server Manager or by using certutil from the command line.
-  - To use certutil, enter Certutil -resubmit _`<RequestId>`_, replace the actual request number for `<RequestId>`. For example, if the Request ID is 2, you would enter:
-- From the command prompt on ORCA1, retrieve the issued certificate by running the command
-- In the **Certification Authority List** window, ensure that **Technology Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click **OK**.
+- On CRYPTID, from Windows PowerShell, submit the request using the following
+  command:
+- In the **Certification Authority List** window, ensure that **Technology
+  Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click
+  **OK**.
+- Note that the certificate request is pending. Make a note of the request ID
+  number.
+- On ORCA1, you must approve the request. You can do this using Server Manager
+  or by using certutil from the command line.
+  - To use certutil, enter Certutil -resubmit _`<RequestId>`_, replace the
+    actual request number for `<RequestId>`. For example, if the Request ID is
+    2, you would enter:
+- From the command prompt on ORCA1, retrieve the issued certificate by running
+  the command
+- In the **Certification Authority List** window, ensure that **Technology
+  Toolbox Root Certificate Authority (Kerberos)** CA is selected and then click
+  **OK**.
 
 ```Console
 certreq.exe -submit 'A:\CIPHER01.corp.technologytoolbox.com_Technology Toolbox Issuing Certificate Authority 01.req'
@@ -521,7 +537,8 @@ Install-AdcsWebEnrollment
 
 ### Reference
 
-**Installing a Two Tier PKI Hierarchy in Windows Server 2012: Part VII, Enabling SSL on the Web Enrollment Website**\
+**Installing a Two Tier PKI Hierarchy in Windows Server 2012: Part VII, Enabling
+SSL on the Web Enrollment Website**\
 Pasted from <[http://blogs.technet.com/b/xdot509/archive/2013/03/07/installing-a-two-tier-pki-hierarchy-in-windows-server-2012-part-vii-enabling-ssl-on-the-web-enrollment-website.aspx](http://blogs.technet.com/b/xdot509/archive/2013/03/07/installing-a-two-tier-pki-hierarchy-in-windows-server-2012-part-vii-enabling-ssl-on-the-web-enrollment-website.aspx)>
 
 ### # [WIN8-TEST1] Create security group for Web servers
@@ -541,7 +558,9 @@ Add-ADGroupMember "Web Servers" CIPHER01$
 
 ### # Duplicate the Web Server certificate template
 
-A best practice is to duplicate certificate templates instead of using the out-of-the-box templates. This allows you to retain the original templates, without modification.
+A best practice is to duplicate certificate templates instead of using the
+out-of-the-box templates. This allows you to retain the original templates,
+without modification.
 
 Start the **Certification Authority** console (certsrv.msc).
 
@@ -549,44 +568,59 @@ Start the **Certification Authority** console (certsrv.msc).
 
 Expand the CA, right-click **Certificate Templates**, and click **Manage**.
 
-In the **Certificate Templates Console** window, in the list of certificate templates, right-click **Web Server** and then click **Duplicate Template**.
+In the **Certificate Templates Console** window, in the list of certificate
+templates, right-click **Web Server** and then click **Duplicate Template**.
 
-In Windows Server 2012 you will first be presented with the Compatibility tab. The idea is that you select the OS Version of your Certification Authority and the OS Version of clients that will be enrolling for certificates based on this template. This will then only allow you to select options in the Certificate Template that are supported by both the CA and the client/enrollee. In my example, I am going to leave the defaults.
+In Windows Server 2012 you will first be presented with the Compatibility tab.
+The idea is that you select the OS Version of your Certification Authority and
+the OS Version of clients that will be enrolling for certificates based on this
+template. This will then only allow you to select options in the Certificate
+Template that are supported by both the CA and the client/enrollee. In my
+example, I am going to leave the defaults.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/BD/1F9F5A27A6C716142B0A6ADC0DCB988B9FFDF2BD.png)
 
-On the **General** tab, in the **Template display name** box, type **Technology Toolbox Web Server**.
+On the **General** tab, in the **Template display name** box, type **Technology
+Toolbox Web Server**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/CD/F923336BA1295707A0A950457A96694B67115CCD.png)
 
-Next, I have to give the CA the proper permissions for the template, so that it can enroll for a certificate.
+Next, I have to give the CA the proper permissions for the template, so that it
+can enroll for a certificate.
 
 On the **Security** tab, click **Add...**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/13/A8DC697A0C40B9F1B7C2A961E932E302F445A313.png)
 
-In the **Select Users, Computers, Service Accounts, or Groups** window, type **Web Servers**, click **Check Names**, and then click **OK**.
+In the **Select Users, Computers, Service Accounts, or Groups** window, type
+**Web Servers**, click **Check Names**, and then click **OK**.
 
 In the **Technology Toolbox Web Server Properties** window:
 
-1. In the **Permissions for Web Servers** list, click the **Allow** checkbox for **Enroll**.
+1. In the **Permissions for Web Servers** list, click the **Allow** checkbox for
+   **Enroll**.
 2. Click **OK**.
 
 ### Enable the certificate template on the issuing CA
 
-So, now the CA has proper permission to the Certificate Template. Next, I have to make the Certificate Template available on the CA.
+So, now the CA has proper permission to the Certificate Template. Next, I have
+to make the Certificate Template available on the CA.
 
 Start the **Certification Authority** console (certsrv.msc).
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/00/7FE4B8CAA6245B8D17CDCB2161A2D998C7A81400.png)
 
-Expand the CA, right-click **Certificate Templates**, select **New**, then **Certificate Template to Issue**.
+Expand the CA, right-click **Certificate Templates**, select **New**, then
+**Certificate Template to Issue**.
 
-In the **Enable Certificate Templates** window, select** Technology Toolbox Web Server**, and then click **OK**.
+In the **Enable Certificate Templates** window, select** Technology Toolbox Web
+Server**, and then click **OK**.
 
 ### Enroll for the Certificate
 
-I could enroll for the Certificate through IIS. However, I prefer to use the **Certificates** MMC as that gives me more control over the configuration of my request.
+I could enroll for the Certificate through IIS. However, I prefer to use the
+**Certificates** MMC as that gives me more control over the configuration of my
+request.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/41/6E27C890278FEE4140766E30B3F0E30E63F26841.png)
 
@@ -594,16 +628,20 @@ On the **File** menu, click **Add/Remove Snap-in...**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/8C/431720C5C9979258661708A53BDC8269D7AB9F8C.png)
 
-In the **Available snap-ins** list, select **Certificates**, and then click **Add >**.
+In the **Available snap-ins** list, select **Certificates**, and then click
+**Add >**.
 
-In the **Certificates snap-in** window, select to manage certificates for **Computer account**, and click **Next**.\
-In the **Select Computer** window, ensure **Local computer** is selected and click **Finish**.
+In the **Certificates snap-in** window, select to manage certificates for
+**Computer account**, and click **Next**.\
+In the **Select Computer** window, ensure **Local computer** is selected and click
+**Finish**.
 
 In the **Add or Remove Snap-ins** window, click **OK**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/73/AD565EFF2ADABE0C8FC3802C2CA9508239E56A73.png)
 
-Expand **Certificates (Local Computer)**, right-click **Personal**, select **All Tasks**, and then click **Request New Certificate...**
+Expand **Certificates (Local Computer)**, right-click **Personal**, select **All
+Tasks**, and then click **Request New Certificate...**
 
 The **Certificate Enrollment** wizard opens.
 
@@ -613,11 +651,13 @@ On the **Before You Begin** step, click **Next**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/C1/5D634D14B0BC22FCE577CCA0F45D5482C78F0FC1.png)
 
-On the **Select Certificate Enrollment Policy** step, ensure **Active Directory Enrollment Policy** is selected, and click **Next**.
+On the **Select Certificate Enrollment Policy** step, ensure **Active Directory
+Enrollment Policy** is selected, and click **Next**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/7C51F7F1ED83F32762FF1A3CFE2000789F06F2D1.png)
 
-On the **Request Certificates** step, select the checkbox for **Technology Toolbox Web Server**, expand **Details**, and click **Properties**.
+On the **Request Certificates** step, select the checkbox for **Technology
+Toolbox Web Server**, expand **Details**, and click **Properties**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/3A/C669DB3F22681C2ECCC620DB8D74FFB7D075503A.png)
 
@@ -634,7 +674,8 @@ In the **Certificate Properties** window:
    1. In the **Friendly name** box, type **SSL Cert - cipher01**.
    2. Click **OK**.
 3. On the **Request Certificates** step, click **Enroll**.
-4. On the **Certificate Installation Results** step, ensure the certificate enrollment succeeded and click **Finish**.
+4. On the **Certificate Installation Results** step, ensure the certificate
+   enrollment succeeded and click **Finish**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/C7/58C74CEAD59BF58AAF3367574BB4912D02ED3EC7.png)
 
@@ -699,77 +740,117 @@ Remove-VMSnapshot CIPHER01
 
 ### References
 
-**AD CS: User autoenrollment should be enabled when an enterprise CA is installed**\
+**AD CS: User autoenrollment should be enabled when an enterprise CA is
+installed**\
 Pasted from <[http://technet.microsoft.com/en-us/library/dd379539(v=ws.10).aspx](http://technet.microsoft.com/en-us/library/dd379539(v=ws.10).aspx)>
 
-**AD CS: Computer autoenrollment should be enabled when an enterprise CA is installed**\
+**AD CS: Computer autoenrollment should be enabled when an enterprise CA is
+installed**\
 Pasted from <[http://technet.microsoft.com/en-us/library/dd379529.aspx](http://technet.microsoft.com/en-us/library/dd379529.aspx)>
 
 **Test Lab Guide: Deploying an AD CS Two-Tier PKI Hierarchy**\
 Pasted from <[http://technet.microsoft.com/en-us/library/hh831348.aspx](http://technet.microsoft.com/en-us/library/hh831348.aspx)>
 
-To automatically enroll users and client computers for certificates in a domain environment, you must:
+To automatically enroll users and client computers for certificates in a domain
+environment, you must:
 
 - Configure an autoenrollment policy for the domain.
 - Configure certificate templates for autoenrollment.
 - Configure an enterprise CA.
 
-Membership in **Domain Admins** or **Enterprise Admins** is required to complete these procedures.
+Membership in **Domain Admins** or **Enterprise Admins** is required to complete
+these procedures.
 
 ### [WIN8-TEST1] To configure autoenrollment Group Policy for a domain
 
-1. In Server Manager, click **Tools**, and then click **Group Policy Management**.
-2. In the console tree, expand the following objects: **Forest: corp.technologytoolbox.com**, **Domains**, **corp.technologytoolbox.com**.
+1. In Server Manager, click **Tools**, and then click **Group Policy
+   Management**.
+2. In the console tree, expand the following objects: **Forest:
+   corp.technologytoolbox.com**, **Domains**, **corp.technologytoolbox.com**.
 3. Right-click the** Default Domain Policy** GPO, and then click **Edit**...
-4. In the console tree of the **Group Policy Management Editor** window, under **User Configuration**, expand the following objects: **Policies**, **Windows Settings**, **Security Settings**, and then click **Public Key Policies**.
-5. In the details pane, double-click **Certificate Services Client - Auto-Enrollment**.
+4. In the console tree of the **Group Policy Management Editor** window, under
+   **User Configuration**, expand the following objects: **Policies**, **Windows
+   Settings**, **Security Settings**, and then click **Public Key Policies**.
+5. In the details pane, double-click **Certificate Services Client -
+   Auto-Enrollment**.
 6. In the **Certificate Services Client - Auto-Enrollment Properties** window:
    1. In the **Configuration Model** drop-down, select **Enabled**.
-   2. Select the **Renew expired certificates, update pending certificates, and remove revoked certificates** checkbox.
-   3. Select the **Update certificates that use certificate templates** checkbox.
-   4. Select the **Display user notifications for expiring certificates in user and machine MY store** checkbox.
+   2. Select the **Renew expired certificates, update pending certificates, and
+      remove revoked certificates** checkbox.
+   3. Select the **Update certificates that use certificate templates**
+      checkbox.
+   4. Select the **Display user notifications for expiring certificates in user
+      and machine MY store** checkbox.
    5. Click **OK**.
-7. In the console tree of the **Group Policy Management Editor** window, under **Computer Configuration**, expand the following objects: **Policies**, **Windows Settings**, **Security Settings**, and then click **Public Key Policies**.
-8. In the details pane, double-click **Certificate Services Client - Auto-Enrollment**.
+7. In the console tree of the **Group Policy Management Editor** window, under
+   **Computer Configuration**, expand the following objects: **Policies**,
+   **Windows Settings**, **Security Settings**, and then click **Public Key
+   Policies**.
+8. In the details pane, double-click **Certificate Services Client -
+   Auto-Enrollment**.
 9. In the **Certificate Services Client - Auto-Enrollment Properties** window:
    1. In the **Configuration Model** drop-down, select **Enabled**.
-   2. Select the **Renew expired certificates, update pending certificates, and remove revoked certificates** checkbox.
-   3. Select the **Update certificates that use certificate templates** checkbox.
+   2. Select the **Renew expired certificates, update pending certificates, and
+      remove revoked certificates** checkbox.
+   3. Select the **Update certificates that use certificate templates**
+      checkbox.
    4. Click **OK**.
 10. Close Group Policy Management Editor and Group Policy Management Console.
 
 ### To configure user and client computer certificate templates for autoenrollment
 
 1. Start the **Certification Authority** console (certsrv.msc).
-2. In the console tree, expand the CA, right-click **Certificate Templates**, and click **Manage**.
+2. In the console tree, expand the CA, right-click **Certificate Templates**,
+   and click **Manage**.
 3. In the **Certificate Templates Console** window:
-   1. In the details pane, right-click **User** and then click **Duplicate Template**.
+   1. In the details pane, right-click **User** and then click **Duplicate
+      Template**.
    2. In the **Properties of New Template** window:
-      1. On the **General** tab, in **Template display name**, type **Technology Toolbox User**.
-      2. On the **Security** tab, in the **Group or user names **section, click **Domain Users (TECHTOOLBOX\\Domain Users)**.
-      3. In the **Permissions for Domain Users **section, in the **Autoenroll** row, select the **Allow** checkbox. This will cause all domain users to automatically enroll for certificates using this template.
+      1. On the **General** tab, in **Template display name**, type **Technology
+         Toolbox User**.
+      2. On the **Security** tab, in the **Group or user names **section, click
+         **Domain Users (TECHTOOLBOX\\Domain Users)**.
+      3. In the **Permissions for Domain Users **section, in the **Autoenroll**
+         row, select the **Allow** checkbox. This will cause all domain users to
+         automatically enroll for certificates using this template.
       4. Click **OK**.
-   3. In the details pane, right-click **Workstation Authentication** and then click **Duplicate Template**.
+   3. In the details pane, right-click **Workstation Authentication** and then
+      click **Duplicate Template**.
    4. In the **Properties of New Template** window:
-      1. On the **General** tab, in **Template display name**, type **Technology Toolbox Workstation Authentication**.
-      2. On the click the **Security** tab, in the **Group or user names **section, click **Domain Computers (TECHTOOLBOX\\Domain Computers)**.
-      3. In the **Permissions for Domain Computers** section, in the **Autoenroll** row, select the **Allow** checkbox. This will cause all domain computers to automatically enroll for certificates using this template.
+      1. On the **General** tab, in **Template display name**, type **Technology
+         Toolbox Workstation Authentication**.
+      2. On the click the **Security** tab, in the **Group or user names
+         **section, click **Domain Computers (TECHTOOLBOX\\Domain Computers)**.
+      3. In the **Permissions for Domain Computers** section, in the
+         **Autoenroll** row, select the **Allow** checkbox. This will cause all
+         domain computers to automatically enroll for certificates using this
+         template.
       4. Click **OK**.
 
 > **Note**
 >
-> The users also need **Read** permission for the template in order to enroll. However, this permission is already granted to the **Authenticated Users** group. All users in the domain are members of **Authenticated Users**, so they already have the permission to **Read** the template.
+> The users also need **Read** permission for the template in order to enroll.
+> However, this permission is already granted to the **Authenticated Users**
+> group. All users in the domain are members of **Authenticated Users**, so they
+> already have the permission to **Read** the template.
 
 > **Note**
 >
-> The computers also need **Read** permission for the template in order to enroll. However, this permission is already granted to the **Authenticated Users** group. All computer accounts in the domain are members of **Authenticated Users**, so they already have the permission to **Read** the template.
+> The computers also need **Read** permission for the template in order to
+> enroll. However, this permission is already granted to the **Authenticated
+> Users** group. All computer accounts in the domain are members of
+> **Authenticated Users**, so they already have the permission to **Read** the
+> template.
 
-The certificate templates that you have enabled for autoenrollment must be assigned to the CA before users and client computers can automatically enroll for those certificates.
+The certificate templates that you have enabled for autoenrollment must be
+assigned to the CA before users and client computers can automatically enroll
+for those certificates.
 
 ### To assign certificate templates to an enterprise CA
 
 1. Start the **Certification Authority** console (certsrv.msc).
-2. In the console tree, right-click **Certificate Templates**, point to **New**, and click **Certificate Template to Issue**.
+2. In the console tree, right-click **Certificate Templates**, point to **New**,
+   and click **Certificate Template to Issue**.
 3. In the **Enable Certificate Templates** window:
    1. Select the following certificates:
       1. **Technology Toolbox User**
@@ -784,7 +865,9 @@ Logical Disk Fragmentation Level is high
 
 ### Alert Description
 
-The disk C: (C:) on computer CIPHER01.corp.technologytoolbox.com has high fragmentation level. File Percent Fragmentation value is 20%. Defragmentation recommended: true.
+The disk C: (C:) on computer CIPHER01.corp.technologytoolbox.com has high
+fragmentation level. File Percent Fragmentation value is 20%. Defragmentation
+recommended: true.
 
 ### Resolution
 
@@ -809,12 +892,18 @@ Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
 
 1. Start the **Certification Authority** console (certsrv.msc).
 2. Expand the CA, right-click **Certificate Templates**, and click **Manage**.
-3. In the **Certificate Templates Console** window, in the list of certificate templates, right-click **Code Signing** and then click **Duplicate Template**.
+3. In the **Certificate Templates Console** window, in the list of certificate
+   templates, right-click **Code Signing** and then click **Duplicate
+   Template**.
 4. In the **Properties of New Template** window:
-   1. On the **General** tab, in the **Template display name** box, type **Technology Toolbox Code Signing**.
+   1. On the **General** tab, in the **Template display name** box, type
+      **Technology Toolbox Code Signing**.
    2. On the **Security** tab, click **Add...**
-   3. In the **Select Users, Computers, Service Accounts, or Groups** window, type **All Developers**, click **Check Names**, and then click **OK**.
-   4. On the **Security** tab of the template properties window, in the **Permissions for All Developers **list, click the **Allow** checkbox for **Enroll**.
+   3. In the **Select Users, Computers, Service Accounts, or Groups** window,
+      type **All Developers**, click **Check Names**, and then click **OK**.
+   4. On the **Security** tab of the template properties window, in the
+      **Permissions for All Developers **list, click the **Allow** checkbox for
+      **Enroll**.
    5. Click **OK**.
 5. Close or minimize the **Certificate Templates Console** window.
 
@@ -823,8 +912,10 @@ Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
 #### To make the code signing certificate available on the CA
 
 1. Start the **Certification Authority** console (certsrv.msc).
-2. Expand the CA, right-click **Certificate Templates**, select **New**, then **Certificate Template to Issue**.
-3. In the **Enable Certificate Templates** window, select** Technology Toolbox Code Signing**, and then click **OK**.
+2. Expand the CA, right-click **Certificate Templates**, select **New**, then
+   **Certificate Template to Issue**.
+3. In the **Enable Certificate Templates** window, select** Technology Toolbox
+   Code Signing**, and then click **OK**.
 
 ## Request code signing certificate
 
@@ -842,9 +933,11 @@ Click **Yes**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/289DDF7BE327F085403F9747B7D02E57A3ED123D.png)
 
-In the **Certificate Template** dropdown, select **Technology Toolbox Code Signing**.
+In the **Certificate Template** dropdown, select **Technology Toolbox Code
+Signing**.
 
-In the **Key Options** section, select the **Enable strong private key protection** checkbox.
+In the **Key Options** section, select the **Enable strong private key
+protection** checkbox.
 
 Click **Submit >**.
 
@@ -858,7 +951,8 @@ Select the **High** option and then click **Next >**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/9519E3D0C9C2EF25F0AFBFD8C90BDF50167B5EB8.png)
 
-In the **Password** and **Confirm** boxes, type the password to secure the private key for the certificate and then click **Finish**.
+In the **Password** and **Confirm** boxes, type the password to secure the
+private key for the certificate and then click **Finish**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/79/33E8A286E35D4FF7E0BCC6146852B87B2E612279.png)
 
@@ -876,7 +970,8 @@ Click **Install this certificate**.
 
 ## Clean Up the WinSxS Folder
 
-From <[https://technet.microsoft.com/en-us/library/dn251565.aspx](https://technet.microsoft.com/en-us/library/dn251565.aspx)>
+From
+<[https://technet.microsoft.com/en-us/library/dn251565.aspx](https://technet.microsoft.com/en-us/library/dn251565.aspx)>
 
 **Before:**
 
@@ -994,8 +1089,11 @@ In IIS Manager, select **Default Web Site**.\
 In the **Features View**, in the **IIS** section, double-click **HTTP Redirect**.\
 On the **HTTP Redirect** page:
 
-1. Select **Redirect requests to this destination** and type **[https://cipher01.corp.technologytoolbox.com/certsrv](https://cipher01.corp.technologytoolbox.com/certsrv)** in the corresponding box.
-2. In the **Redirect Behavior** section, select **Only redirect requests to content in this directory (not subdirectories)**.
+1. Select **Redirect requests to this destination** and type
+   **[https://cipher01.corp.technologytoolbox.com/certsrv](https://cipher01.corp.technologytoolbox.com/certsrv)**
+   in the corresponding box.
+2. In the **Redirect Behavior** section, select **Only redirect requests to
+   content in this directory (not subdirectories)**.
 3. In the **Actions** pane, click **Apply**.
 
 ### Verify [http://cipher01](http://cipher01) automatically redirects to [https://cipher01.corp.technologytoolbox.com/certsrv](https://cipher01.corp.technologytoolbox.com/certsrv)
@@ -1006,7 +1104,8 @@ On the **HTTP Redirect** page:
 
 1. Open MMC.
 2. Add **Certificates** snap-in for **Computer account** (**Local computer**).
-3. Expand **Certificates (Local Computer)**, right-click **Personal**, select **All Tasks**, and then click **Request New Certificate...**
+3. Expand **Certificates (Local Computer)**, right-click **Personal**, select
+   **All Tasks**, and then click **Request New Certificate...**
 
 The **Certificate Enrollment** wizard opens.
 
@@ -1016,11 +1115,13 @@ On the **Before You Begin** step, click **Next**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/C1/5D634D14B0BC22FCE577CCA0F45D5482C78F0FC1.png)
 
-On the **Select Certificate Enrollment Policy** step, ensure **Active Directory Enrollment Policy** is selected, and click **Next**.
+On the **Select Certificate Enrollment Policy** step, ensure **Active Directory
+Enrollment Policy** is selected, and click **Next**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/7C51F7F1ED83F32762FF1A3CFE2000789F06F2D1.png)
 
-On the **Request Certificates** step, select the checkbox for **Technology Toolbox Web Server**, expand **Details**, and click **Properties**.
+On the **Request Certificates** step, select the checkbox for **Technology
+Toolbox Web Server**, expand **Details**, and click **Properties**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/3A/C669DB3F22681C2ECCC620DB8D74FFB7D075503A.png)
 
@@ -1035,7 +1136,8 @@ In the **Certificate Properties** window:
    1. In the **Friendly name** box, type **pki.technologytoolbox.com**.
    2. Click **OK**.
 3. On the **Request Certificates** step, click **Enroll**.
-4. On the **Certificate Installation Results** step, ensure the certificate enrollment succeeded and click **Finish**.
+4. On the **Certificate Installation Results** step, ensure the certificate
+   enrollment succeeded and click **Finish**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/BB57659E31164B4A154F9089D50CB7DCC1802A71.png)
 
@@ -1083,20 +1185,26 @@ In the **Site Bindings** window, click **Close**.
 
 1. Start the **Certification Authority** console (certsrv.msc).
 2. Expand the CA, right-click **Certificate Templates**, and click **Manage**.
-3. In the **Certificate Templates Console** window, in the list of certificate templates, right-click **Web Server** and then click **Duplicate Template**.
-4. On the **General** tab, in the **Template display name** box, type **Technology Toolbox Web Server - Exportable**.
+3. In the **Certificate Templates Console** window, in the list of certificate
+   templates, right-click **Web Server** and then click **Duplicate Template**.
+4. On the **General** tab, in the **Template display name** box, type
+   **Technology Toolbox Web Server - Exportable**.
 5. On the **Request Handling** tab, select **Allow private key to be exported**.
 6. On the **Security** tab:
    1. Click **Add...**
-   2. In the **Select Users, Computers, Service Accounts, or Groups** window, type **Web Servers**, click **Check Names**, and then click **OK**.
-   3. In the **Permissions for Web Servers** list, click the **Allow** checkbox for **Enroll**.
+   2. In the **Select Users, Computers, Service Accounts, or Groups** window,
+      type **Web Servers**, click **Check Names**, and then click **OK**.
+   3. In the **Permissions for Web Servers** list, click the **Allow** checkbox
+      for **Enroll**.
 7. Click **OK**.
 
 ### Enable the certificate template on the issuing CA
 
 1. Start the **Certification Authority** console (certsrv.msc).
-2. Expand the CA, right-click **Certificate Templates**, select **New**, then **Certificate Template to Issue**.
-3. In the **Enable Certificate Templates** window, select** Technology Toolbox Web Server - Exportable**, and then click **OK**.
+2. Expand the CA, right-click **Certificate Templates**, select **New**, then
+   **Certificate Template to Issue**.
+3. In the **Enable Certificate Templates** window, select** Technology Toolbox
+   Web Server - Exportable**, and then click **OK**.
 
 ## # Configure firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
@@ -1140,31 +1248,45 @@ From <[https://technet.microsoft.com/en-US/library/hh467900.aspx#BKMK_CreateTemp
 
 1. Start the **Certification Authority** console (certsrv.msc).
 2. Expand the CA, right-click **Certificate Templates**, and click **Manage**.
-3. In the **Certificate Templates Console** window, in the list of certificate templates, right-click **IPsec (Offline request)** and then click **Duplicate Template**.
+3. In the **Certificate Templates Console** window, in the list of certificate
+   templates, right-click **IPsec (Offline request)** and then click **Duplicate
+   Template**.
 4. In the **Properties of New Template** window:
-   1. On the **Compatibility** tab, in the **Compatibility Settings **section, click the **Certification Authority** dropdown and select **Windows Server 2008**.
-   2. On the **General** tab, in the **Template display name** box, type **Technology Toolbox Operations Manager**.
-   3. On the **Request Handling** tab, select **Allow private key to be exported**.
+   1. On the **Compatibility** tab, in the **Compatibility Settings **section,
+      click the **Certification Authority** dropdown and select **Windows Server
+      2008**.
+   2. On the **General** tab, in the **Template display name** box, type
+      **Technology Toolbox Operations Manager**.
+   3. On the **Request Handling** tab, select **Allow private key to be
+      exported**.
    4. On the **Extensions** tab:
-      1. In the **Extensions included in this template** list, select **Application Policies**.
+      1. In the **Extensions included in this template** list, select
+         **Application Policies**.
       2. Click **Edit...**
       3. In the **Edit Application Policies Extension** window:
-         1. In the **Application policies** list, select **IP security IKE intermediate**.
+         1. In the **Application policies** list, select **IP security IKE
+            intermediate**.
          2. Click **Remove**.
          3. Click **Add...**
-         4. In the **Add Application Policy** window, select **Client Authentication** and **Server Authentication** and then click **OK**.
+         4. In the **Add Application Policy** window, select **Client
+            Authentication** and **Server Authentication** and then click
+            **OK**.
       4. Click **OK**.
    5. **TODO:** On the **Security** tab:
       1. Click **Add...**
-      2. In the **Select Users, Computers, Service Accounts, or Groups** window, type **Web Servers**, click **Check Names**, and then click **OK**.
-      3. In the **Permissions for Web Servers** list, click the **Allow** checkbox for **Enroll**.
+      2. In the **Select Users, Computers, Service Accounts, or Groups** window,
+         type **Web Servers**, click **Check Names**, and then click **OK**.
+      3. In the **Permissions for Web Servers** list, click the **Allow**
+         checkbox for **Enroll**.
    6. Click **OK**.
 
 ### Enable the certificate template on the issuing CA
 
 1. Start the **Certification Authority** console (certsrv.msc).
-2. Expand the CA, right-click **Certificate Templates**, select **New**, then **Certificate Template to Issue**.
-3. In the **Enable Certificate Templates** window, select** Technology Toolbox Operations Manager**, and then click **OK**.
+2. Expand the CA, right-click **Certificate Templates**, select **New**, then
+   **Certificate Template to Issue**.
+3. In the **Enable Certificate Templates** window, select** Technology Toolbox
+   Operations Manager**, and then click **OK**.
 
 ## Resolve issue with Active Directory Certificate Services
 
@@ -1175,7 +1297,10 @@ Event ID: 100\
 Event Category: 0\
 User: NT AUTHORITY\\SYSTEM\
 Computer: CIPHER01.corp.technologytoolbox.com\
-Event Description: Active Directory Certificate Services did not start: Could not load or verify the current CA certificate. Technology Toolbox Issuing Certificate Authority 01 The revocation function was unable to check revocation because the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE).
+Event Description: Active Directory Certificate Services did not start: Could not
+load or verify the current CA certificate. Technology Toolbox Issuing Certificate
+Authority 01 The revocation function was unable to check revocation because the revocation
+server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE).
 
 ### Solution
 
@@ -1381,7 +1506,11 @@ Event ID: 22\
 Event Category: 0\
 User: NT AUTHORITY\\SYSTEM\
 Computer: CIPHER01.corp.technologytoolbox.com\
-Event Description: Active Directory Certificate Services could not process request 1370 due to an error: The revocation function was unable to check revocation because the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE). The request was for TECHTOOLBOX\\FOOBAR8\$. Additional information: Error Verifying Request Signature or Signing Certificate
+Event Description: Active Directory Certificate Services could not process request
+1370 due to an error: The revocation function was unable to check revocation because
+the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE).
+The request was for TECHTOOLBOX\\FOOBAR8\$. Additional information: Error Verifying
+Request Signature or Signing Certificate
 
 ### Solution
 
@@ -1571,12 +1700,17 @@ Alert: Application Event Log Error\
 Source: CIPHER01.corp.technologytoolbox.com\
 Path: Not Present\
 Last modified by: System\
-Last modified time: 3/16/2017 8:24:51 PM Alert description: Source: Microsoft-Windows-CertificationAuthority\
+Last modified time: 3/16/2017 8:24:51 PM Alert description: Source:
+Microsoft-Windows-CertificationAuthority\
 Event ID: 22\
 Event Category: 0\
 User: NT AUTHORITY\\SYSTEM\
 Computer: CIPHER01.corp.technologytoolbox.com\
-Event Description: Active Directory Certificate Services could not process request 2207 due to an error: The revocation function was unable to check revocation because the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE). The request was for TECHTOOLBOX\\FOOBAR10\$. Additional information: Error Verifying Request Signature or Signing Certificate
+Event Description: Active Directory Certificate Services could not process request
+2207 due to an error: The revocation function was unable to check revocation because
+the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE).
+The request was for TECHTOOLBOX\\FOOBAR10\$. Additional information: Error Verifying
+Request Signature or Signing Certificate
 
 ### Solution
 
@@ -1768,7 +1902,9 @@ Address:  2001:558:feed::1
 
 > **Note**
 >
-> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on the Comcast router -- and subsequently restarting the VM -- the incorrect DNS server is assigned to the network adapter.
+> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on
+> the Comcast router -- and subsequently restarting the VM -- the incorrect DNS
+> server is assigned to the network adapter.
 
 ### Solution
 
