@@ -1396,6 +1396,42 @@ Set-MpPreference -SevereThreatDefaultAction Remove
 **Run antivirus software on the DPM server**\
 From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
 
+## Issue: Disk free space is low on D: drive
+
+---
+
+**TT-ADMIN04** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Increase size of "Data01" VHD
+
+```PowerShell
+$vmHost = "TT-HV05E"
+$vmName = "TT-SQL01D"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + "_Data01.vhdx") `
+    -SizeBytes 70GB
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 1 -PartitionNumber 2)
+Resize-Partition -DiskNumber 1 -PartitionNumber 2 -Size $size.SizeMax
+```
+
 **TODO:**
 
 ```PowerShell
