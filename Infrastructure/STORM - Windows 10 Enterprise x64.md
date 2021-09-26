@@ -2165,6 +2165,26 @@ Get-Content ~/.ssh/id_ed25519.pub | Set-Clipboard
 1. In the **Title** box, type **STORM**.
 1. Click **Add key**.
 
+```PowerShell
+cls
+```
+
+## # Upgrade Git
+
+```PowerShell
+$setupPath = "\\TT-FS01\Products\Git\Git-2.33.0.2-64-bit.exe"
+
+Start-Process -FilePath $setupPath -Wait
+```
+
+On the **Choosing the default editor used by Git** step, select **Use the Nano
+editor by default**.
+
+> **Important**
+>
+> Wait for the installation to complete and restart PowerShell for environment
+> changes to take effect.
+
 **TODO:**
 
 ## Share printer
