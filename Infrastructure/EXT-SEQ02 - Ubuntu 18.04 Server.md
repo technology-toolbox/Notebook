@@ -703,3 +703,45 @@ sudo unattended-upgrade -v
 ```Shell
 sudo reboot
 ```
+
+```Shell
+clear
+```
+
+## # Upgrade Seq
+
+```Shell
+docker ps -a
+```
+
+```Text
+CONTAINER ID    IMAGE                  ...    NAMES
+...             datalust/seq:latest    ...    seq
+...
+```
+
+```Shell
+# Stop container
+
+docker stop seq
+
+# Remove container
+
+docker rm seq
+
+# Remove image
+
+docker rmi seq
+
+# Deploy latest version of Seq
+
+docker run \
+  -d \
+  --restart unless-stopped \
+  --name seq \
+  -e ACCEPT_EULA=Y \
+  --volume seq-data:/data \
+  -p 80:80 \
+  -p 5341:5341 \
+  datalust/seq:latest
+```
