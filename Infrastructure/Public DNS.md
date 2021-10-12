@@ -343,3 +343,51 @@ Name servers for Azure DNS zone:
 1. ns2-09.azure-dns.net
 1. ns3-09.azure-dns.org
 1. ns4-09.azure-dns.info
+
+## # Update DNS records for ACME certificates
+
+```PowerShell
+# Update DNS record for ACME certificate - darkstat.corp.technologytoolbox.com
+
+$dnsRecordSet = Get-AzDnsRecordSet -ResourceGroupName Zeus-02 `
+  -ZoneName technologytoolbox.com `
+  -Name _acme-challenge.darkstat.corp `
+  -RecordType TXT
+
+$dnsRecordSet.Records[0].Value = 'KgrWfKdT08NldrLV564X0Ew1IPuWKcjNbLukWZs7RHQ'
+
+Set-AzDnsRecordSet -RecordSet $dnsRecordSet
+
+# Update DNS record for ACME certificate - fw01.corp.technologytoolbox.com
+
+$dnsRecordSet = Get-AzDnsRecordSet -ResourceGroupName Zeus-02 `
+  -ZoneName technologytoolbox.com `
+  -Name _acme-challenge.fw01.corp `
+  -RecordType TXT
+
+$dnsRecordSet.Records[0].Value = 'i4de92q2gBTZe7O9tQ_rYtLlvuifltZi34jLP5C8HqI'
+
+Set-AzDnsRecordSet -RecordSet $dnsRecordSet
+
+# Update DNS record for ACME certificate - k8s-01.corp.technologytoolbox.com
+
+$dnsRecordSet = Get-AzDnsRecordSet -ResourceGroupName Zeus-02 `
+  -ZoneName technologytoolbox.com `
+  -Name _acme-challenge.k8s-01.corp `
+  -RecordType TXT
+
+$dnsRecordSet.Records[0].Value = 'YVvT_ILl7HpxzLNxfl1N5_0obzmqlqmCzA4Ae7clUNc'
+
+Set-AzDnsRecordSet -RecordSet $dnsRecordSet
+
+# Update DNS record for ACME certificate - sw01.corp.technologytoolbox.com
+
+$dnsRecordSet = Get-AzDnsRecordSet -ResourceGroupName Zeus-02 `
+  -ZoneName technologytoolbox.com `
+  -Name _acme-challenge.sw01.corp `
+  -RecordType TXT
+
+$dnsRecordSet.Records[0].Value = 'rkSOoczn9sw81sIuwErFAGwBAAFXEBZZ1H1DoKn68Os'
+
+Set-AzDnsRecordSet -RecordSet $dnsRecordSet
+```
