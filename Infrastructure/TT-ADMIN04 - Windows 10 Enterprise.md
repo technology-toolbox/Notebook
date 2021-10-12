@@ -790,6 +790,98 @@ Open the settings for Windows Terminal and add the following **fontFace** and
       },
 ```
 
+```PowerShell
+cls
+```
+
+## # Configure backup
+
+### # Install DPM agent
+
+```PowerShell
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
+    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
+
+$installerArguments = "TT-DPM06.corp.technologytoolbox.com"
+
+Start-Process `
+    -FilePath $installerPath `
+    -ArgumentList "$installerArguments" `
+    -Wait
+```
+
+Review the licensing agreement. If you accept the Microsoft Software License
+Terms, select **I accept the license terms and conditions**, and then click
+**OK**.
+
+Confirm the agent installation completed successfully and the following firewall
+exceptions have been added:
+
+- Exception for DPMRA.exe in all profiles
+- Exception for Windows Management Instrumentation service
+- Exception for RemoteAdmin service
+- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
+
+#### Reference
+
+**Installing Protection Agents Manually**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
+
+---
+
+**TT-ADMIN04** - DPM Management Shell
+
+```PowerShell
+cls
+```
+
+### # Attach DPM agent
+
+```PowerShell
+$productionServer = 'TT-ADMIN04'
+
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName TT-DPM06 `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
+```
+
+---
+
+### Add client to DPM protection group
+
+```PowerShell
+cls
+```
+
+### # Configure antivirus on DPM protected server
+
+#### # Disable real-time monitoring by Windows Defender for DPM server
+
+```PowerShell
+[array] $excludeProcesses = Get-MpPreference | select -ExpandProperty ExclusionProcess
+
+$excludeProcesses +=
+   "$env:ProgramFiles\Microsoft Data Protection Manager\DPM\bin\DPMRA.exe"
+
+Set-MpPreference -ExclusionProcess $excludeProcesses
+```
+
+#### # Configure antivirus software to delete infected files
+
+```PowerShell
+Set-MpPreference -LowThreatDefaultAction Remove
+Set-MpPreference -ModerateThreatDefaultAction Remove
+Set-MpPreference -HighThreatDefaultAction Remove
+Set-MpPreference -SevereThreatDefaultAction Remove
+```
+
+#### Reference
+
+**Run antivirus software on the DPM server**\
+From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
+
 **TODO:**
 
 ```PowerShell
