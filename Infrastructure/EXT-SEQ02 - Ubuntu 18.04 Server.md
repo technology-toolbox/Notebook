@@ -1,6 +1,6 @@
 ﻿# EXT-SEQ02 - Ubuntu 18.04 Server
 
-Saturday, March 7, 2020
+Saturday, March 7, 2020\
 9:25 AM
 
 ```Text
@@ -322,7 +322,13 @@ sudo apt install \
 
 > **Note**
 >
-> The default home directory path (specified by the **fallback_homedir** setting in **/etc/sssd/sssd.conf**) is **/home/%u@%d** (e.g. **/home/jjameson-admin@extranet.technologytoolbox.com**). To create home directories under a "domain" directory (e.g. **/home/extranet.technologytoolbox.com/jjameson-admin**), the **default-home** setting is specified in **/etc/realmd.conf** prior to joining the Active Directory domain.
+> The default home directory path (specified by the **fallback_homedir** setting
+> in **/etc/sssd/sssd.conf**) is **/home/%u@%d** (e.g.
+> **/home/jjameson-admin@extranet.technologytoolbox.com**). To create home
+> directories under a "domain" directory (e.g.
+> **/home/extranet.technologytoolbox.com/jjameson-admin**), the **default-home**
+> setting is specified in **/etc/realmd.conf** prior to joining the Active
+> Directory domain.
 
 ```Shell
 clear
@@ -377,7 +383,9 @@ sudo reboot
 
 > **Note**
 >
-> Changing the hostname to the fully qualified domain name avoids an error when creating the service principal name for the computer account when joining the Active Directory domain. For example:
+> Changing the hostname to the fully qualified domain name avoids an error when
+> creating the service principal name for the computer account when joining the
+> Active Directory domain. For example:
 >
 > ```Text
 >  * Modifying computer account: userPrincipalName
@@ -534,7 +542,8 @@ Warning failed to create cache: usr.sbin.sssd
 
 > **Note**
 >
-> When prompted for additional home directories, type **/home/extranet.technologytoolbox.com/** and select **OK**.
+> When prompted for additional home directories, type
+> **/home/extranet.technologytoolbox.com/** and select **OK**.
 
 ##### References
 
