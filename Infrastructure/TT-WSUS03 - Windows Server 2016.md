@@ -1643,6 +1643,25 @@ Please make more space available as soon as possible.
 
 ### Expand D: to 130 GB
 
+## Issue - Low disk space on D:
+
+Source: Windows Server Update Services\
+Event ID: 10042\
+Event Category: 7\
+User: N/A\
+Computer: TT-WSUS03.corp.technologytoolbox.com\
+Event Description: There is less than 200 MB of free disk space on the content drive.
+Please make more space available as soon as possible.
+
+> **Note:**
+>
+> After the **Cleanup WSUS** scheduled task ran, the free space on D: was only
+> 11.4 MB.
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/C037AA5E0826E036EB71CA2468EAB7C4CEF9DDAE.png)
+
+### Expand D: to 150 GB
+
 **TODO:**
 
 ## Create SQL job for WSUS database maintenance
