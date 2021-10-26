@@ -1,7 +1,7 @@
-﻿# TT-FS01B - Windows Server 2019 File Server
+﻿# TT-FS01C - Windows Server 2022 File Server
 
-Wednesday, April 22, 2020\
-9:08 AM
+Saturday, October 23, 2021\
+4:38 PM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Wednesday, April 22, 2020\
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -21,7 +21,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05E"
-$vmName = "TT-FS01B"
+$vmName = "TT-FS01C"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -67,27 +67,20 @@ Set-VMFirmware `
 Set-VMDvdDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
-    -Path "\\TT-FS01\Products\Microsoft\Windows Server 2019\en_windows_server_2019_updated_jan_2020_x64_dvd_9069e1c0.iso"
+    -Path "\\TT-FS01\Products\Microsoft\Windows Server 2022\en-us_windows_server_version_2022_updated_october_2021_x64_dvd_b6e25591.iso"
 ```
 
 ```Text
-Set-VMDvdDrive : Failed to add device 'Virtual CD/DVD Disk'.
+Set-VMDvdDrive: Failed to add device 'Virtual CD/DVD Disk'.
 User Account does not have permission to open attachment.
-'TT-FS01B' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID 9A44221A-99D8-497A-8712-F3B4D37AD483)
-'TT-FS01B': User account does not have permission required to open attachment
-'\\TT-FS01\Products\Microsoft\Windows Server 2019\en_windows_server_2019_updated_jan_2020_x64_dvd_9069e1c0.iso'.
-Error: 'General access denied error' (0x80070005). (Virtual machine ID 9A44221A-99D8-497A-8712-F3B4D37AD483)
-At line:1 char:1
-+ Set-VMDvdDrive `
-+ ~~~~~~~~~~~~~~~~
-    + CategoryInfo          : PermissionDenied: (:) [Set-VMDvdDrive], VirtualizationException
-    + FullyQualifiedErrorId : AccessDenied,Microsoft.HyperV.PowerShell.Commands.SetVMDvdDrive
+'TT-FS01C' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID CC5D1560-BAE1-483C-AEDD-14A6F553DC19)
+'TT-FS01C': User account does not have permission required to open attachment '\\TT-FS01\Products\Microsoft\Windows Server 2022\en-us_windows_server_version_2022_updated_october_2021_x64_dvd_b6e25591.iso'. Error: 'General access denied error' (0x80070005). (Virtual machine ID CC5D1560-BAE1-483C-AEDD-14A6F553DC19)
 ```
 
 ```PowerShell
 cls
 $iso = Get-SCISO |
-    where {$_.Name -eq "en_windows_server_2019_updated_jan_2020_x64_dvd_9069e1c0.iso"}
+    where {$_.Name -eq "en-us_windows_server_version_2022_updated_october_2021_x64_dvd_b6e25591.iso"}
 
 Get-SCVirtualMachine -Name $vmName | Read-SCVirtualMachine
 
@@ -105,11 +98,13 @@ Start-SCVirtualMachine -VM $vmName
 After the restart required to complete the installation, the password for the
 Administrator user must be changed before signing in.
 
-```Console
-PowerShell
+### # Stop SConfig from launching at sign-in
+
+```PowerShell
+Set-SConfig -AutoLaunch $false
 ```
 
-```Console
+```PowerShell
 cls
 ```
 
@@ -127,18 +122,17 @@ logoff
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
 ```
 
-#### # Move VM to Management VM network and assign static IP address
+#### # Assign static IP address to VM
 
 ```PowerShell
-$vmName = "TT-FS01B"
+$vmName = "TT-FS01C"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
-$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
 $macAddressPool = Get-SCMACAddressPool -Name "Default MAC address pool"
 $ipAddressPool = Get-SCStaticIPAddressPool -Name "Management-30 Address Pool"
 
@@ -151,7 +145,6 @@ $macAddress = Grant-SCMACAddress `
 
 Set-SCVirtualNetworkAdapter `
     -VirtualNetworkAdapter $networkAdapter `
-    -VMNetwork $vmNetwork `
     -MACAddressType Static `
     -MACAddress $macAddress `
     -IPv4AddressPools $ipAddressPool `
@@ -163,10 +156,6 @@ Start-SCVirtualMachine $vmName
 ---
 
 #### Login as local administrator account
-
-```Console
-PowerShell
-```
 
 ```PowerShell
 cls
@@ -258,14 +247,14 @@ Get-NetAdapter |
 
 ### Rename server and join domain
 
-```Console
+```PowerShell
 cls
 ```
 
 ### # Rename server
 
 ```PowerShell
-Rename-Computer -NewName TT-FS01B -Restart
+Rename-Computer -NewName TT-FS01C -Restart
 ```
 
 > **Note**
@@ -274,11 +263,7 @@ Rename-Computer -NewName TT-FS01B -Restart
 
 #### Login as local administrator account
 
-```Console
-PowerShell
-```
-
-```Console
+```PowerShell
 cls
 ```
 
@@ -290,7 +275,7 @@ Add-Computer -DomainName corp.technologytoolbox.com -Restart
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -299,7 +284,7 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "TT-FS01B"
+$vmName = "TT-FS01C"
 
 $targetPath = ("OU=Storage Servers,OU=Servers,OU=Resources,OU=IT" `
     + ",DC=corp,DC=technologytoolbox,DC=com")
@@ -319,11 +304,7 @@ Add-ADGroupMember -Identity "Windows Update - Slot 2" -Members ($vmName + '$')
 
 #### Login as local administrator account
 
-```Console
-PowerShell
-```
-
-```Console
+```PowerShell
 cls
 ```
 
@@ -381,7 +362,7 @@ mountvol X: $volumeId
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN04** - Run as administrator
 
 ```PowerShell
 cls
@@ -391,7 +372,7 @@ cls
 
 ```PowerShell
 $vmHost = "TT-HV05E"
-$vmName = "TT-FS01B"
+$vmName = "TT-FS01C"
 
 $vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data01.vhdx"
@@ -479,10 +460,10 @@ cls
 
 ## # Migrate file shares
 
-### # Copy content from TT-FS01
+### # Copy content from old file server (TT-FS01)
 
 ```PowerShell
-robocopy '\\TT-FS01\D$\Shares' D:\Shares /COPYALL /NP /E /MIR /SL
+robocopy '\\TT-FS01\D$\Shares' D:\Shares /B /COPYALL /NP /E /MIR /SL
 ```
 
 > **Note**
@@ -505,99 +486,18 @@ robocopy '\\TT-FS01\D$\Shares' D:\Shares /COPYALL /NP /E /MIR /SL
 > ... `<SYMLINK`> PROWinx64.exe [..\..\Windows 10\PROWinx64.exe]
 
 ```PowerShell
-robocopy '\\TT-FS01\E$\Shares' E:\Shares /COPYALL /NP /E /MIR /XD Profiles`$ Users`$
+robocopy '\\TT-FS01\E$\Shares' E:\Shares /B /COPYALL /NP /E /MIR
 
-robocopy '\\TT-FS01\F$\Shares' F:\Shares /COPYALL /NP /E /MIR
+robocopy '\\TT-FS01\F$\Shares' F:\Shares /B /COPYALL /NP /E /MIR
+```
+
+```PowerShell
+cls
 ```
 
 ### # Create file shares
 
-```PowerShell
-Get-ChildItem D:\Shares, E:\Shares, F:\Shares |
-    foreach {
-        New-SmbShare `
-            -Name $_.Name `
-            -Path $_.FullName `
-            -CachingMode None `
-            -ChangeAccess "Authenticated Users"
-    }
-```
-
-### # Copy user profiles and home directories
-
-```PowerShell
-cls
-```
-
-#### # Install DPM 2019 agent
-
-```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
-    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
-
-$installerArguments = "TT-DPM05.corp.technologytoolbox.com"
-
-Start-Process `
-    -FilePath $installerPath `
-    -ArgumentList "$installerArguments" `
-    -Wait
-```
-
-Review the licensing agreement. If you accept the Microsoft Software License
-Terms, select **I accept the license terms and conditions**, and then click
-**OK**.
-
-Confirm the agent installation completed successfully and the following firewall
-exceptions have been added:
-
-- Exception for DPMRA.exe in all profiles
-- Exception for Windows Management Instrumentation service
-- Exception for RemoteAdmin service
-- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
-
-##### Reference
-
-**Installing Protection Agents Manually**\
-Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
-
----
-
-**TT-ADMIN03** - DPM Management Shell
-
-```PowerShell
-cls
-```
-
-#### # Attach DPM agent
-
-```PowerShell
-$productionServer = 'TT-FS01B'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM05 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
-
-#### Restore user profiles and home directories
-
-1. On the **Select recovery type** step, select the **Recover to alternate
-   location** option and click **Browse**.
-
-   E:\ on TT-FS01B
-
-1. On the **Specify recovery options** step, in the **Restore security**
-   section, select **Apply the security settings of the recovery point
-   version**.
-
-```PowerShell
-cls
-```
-
-#### # Create file shares for user profiles and home directories
+#### # Create file shares for user profiles and home directories (with offline files enabled)
 
 ```PowerShell
 New-SmbShare `
@@ -613,57 +513,38 @@ New-SmbShare `
     -FullAccess "Folder Redirection Users"
 ```
 
+```PowerShell
+cls
+```
+
+#### # Create remaining file shares (with offline files disabled)
+
+```PowerShell
+Get-ChildItem D:\Shares, E:\Shares, F:\Shares |
+    where { $_.FullName -notin ('E:\Shares\Profiles$', 'E:\Shares\Users$') } |
+    foreach {
+        New-SmbShare `
+            -Name $_.Name `
+            -Path $_.FullName `
+            -CachingMode None `
+            -ChangeAccess "Authenticated Users"
+    }
+```
+
+## Rename file servers (cutover)
+
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN04** - Run as domain administrator
 
 ```PowerShell
 cls
 ```
 
-#### # Configure alias in DNS for file server
+### # Rename old file server
 
 ```PowerShell
-Remove-DnsServerResourceRecord `
-    -ComputerName TT-DC10 `
-    -ZoneName corp.technologytoolbox.com `
-    -Name TT-FS01 `
-    -RRType A `
-    -Force
-
-Get-DnsServerResourceRecord `
-    -ComputerName TT-DC10 `
-    -ZoneName 30.1.10.in-addr.arpa `
-    -RRtype Ptr |
-    where { $_.RecordData.PtrDomainName -eq
-        'TT-FS01.corp.technologytoolbox.com.' } |
-    Remove-DnsServerResourceRecord `
-    -ComputerName TT-DC10 `
-    -ZoneName 30.1.10.in-addr.arpa `
-    -Force
-
-Add-DNSServerResourceRecordCName `
-    -ComputerName TT-DC10 `
-    -ZoneName corp.technologytoolbox.com `
-    -Name TT-FS01 `
-    -HostNameAlias TT-FS01B.corp.technologytoolbox.com
-```
-
-SMB file server share access is unsuccessful through DNS CNAME alias
-https://support.microsoft.com/en-us/help/3181029/smb-file-server-share-access-is-unsuccessful-through-dns-cname-alias
-
----
-
-### Rename server
-
-```Console
-cls
-```
-
-### # Rename server
-
-```PowerShell
-Rename-Computer -NewName TT-FS01 -Restart
+Rename-Computer -NewName TT-FS01-OLD -ComputerName TT-FS01 -Restart
 ```
 
 > **Note**
@@ -673,6 +554,18 @@ Rename-Computer -NewName TT-FS01 -Restart
 ```PowerShell
 cls
 ```
+
+### # Rename new file server
+
+```PowerShell
+Rename-Computer -NewName TT-FS01 -ComputerName TT-FS01C -Restart
+```
+
+> **Note**
+>
+> Wait for the VM to restart.
+
+---
 
 ## # Configure monitoring
 
@@ -690,129 +583,13 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
-### Add virtual machine to protection group in DPM
-
 ```PowerShell
 cls
 ```
 
-## # Enter a product key and activate Windows
+## # Configure backup
 
-```PowerShell
-slmgr /ipk {product key}
-```
-
-> **Note**
->
-> When notified that the product key was set successfully, click **OK**.
-
-```Console
-slmgr /ato
-```
-
-```PowerShell
-cls
-```
-
-### # Compare files to ensure identical copies
-
-```PowerShell
-$LeftFolder = "D:\Shares\VM-Library"
-$RightFolder = "F:\Shares\VM-Library"
-
-$LeftSideHash = Get-ChildItem $LeftFolder -Recurse |
-    Get-FileHash |
-    select @{Label="Path";Expression={$_.Path.Replace($LeftFolder,"")}},Hash
-
-$RightSideHash = Get-ChildItem $RightFolder -Recurse |
-    Get-FileHash |
-    select @{Label="Path";Expression={$_.Path.Replace($RightFolder,"")}},Hash
-
-Compare-Object $LeftSideHash $RightSideHash -Property Path,Hash
-```
-
-#### Reference
-
-**Compare contents of two folders using PowerShell Get-FileHash**\
-From <[http://almoselhy.azurewebsites.net/2014/12/compare-contents-of-two-folders-using-powershell-get-filehash/](http://almoselhy.azurewebsites.net/2014/12/compare-contents-of-two-folders-using-powershell-get-filehash/)>
-
-## Replace DPM server (TT-DPM05 --> TT-DPM06)
-
-```PowerShell
-cls
-```
-
-### # Update DPM server
-
-```PowerShell
-cd 'C:\Program Files\Microsoft Data Protection Manager\DPM\bin\'
-
-.\SetDpmServer.exe -dpmServerName TT-DPM06.corp.technologytoolbox.com
-```
-
----
-
-**TT-ADMIN04** - DPM Management Shell
-
-```PowerShell
-cls
-```
-
-### # Attach DPM agent
-
-```PowerShell
-$productionServer = 'TT-FS01'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM06 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
-
-That doesn't work...
-
-> Error:\
-> Data Protection Manager Error ID: 307\
-> The protection agent operation failed because DPM detected an unknown DPM
-> protection agent on tt-fs01.corp.technologytoolbox.com.
->
-> Recommended action:\
-> Use Add or Remove Programs in Control Panel to uninstall the protection agent from
-> tt-fs01.corp.technologytoolbox.com, then reinstall the protection agent and perform
-> the operation again.
-
-```PowerShell
-cls
-```
-
-### # Remove DPM 2019 Agent Coordinator
-
-```PowerShell
-msiexec /x `{356B3986-6B7D-4513-B72D-81EB4F43ADE6`}
-```
-
-```PowerShell
-cls
-```
-
-### # Remove DPM 2019 Protection Agent
-
-```PowerShell
-msiexec /x `{CC6B6758-3A68-4BBA-9D61-1F3278D6A7EA`}
-```
-
-> **Important**
->
-> Restart the computer to complete the removal of the DPM agent.
-
-```PowerShell
-Restart-Computer
-```
-
-### # Install DPM 2019 agent
+### # Install DPM agent
 
 ```PowerShell
 $installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
@@ -825,6 +602,22 @@ Start-Process `
     -ArgumentList "$installerArguments" `
     -Wait
 ```
+
+Review the licensing agreement. If you accept the Microsoft Software License
+Terms, click **Accept**.
+
+Confirm the agent installation completed successfully and the following firewall
+exceptions have been added:
+
+- Exception for DPMRA.exe in all profiles
+- Exception for Windows Management Instrumentation service
+- Exception for RemoteAdmin service
+- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
+
+#### Reference
+
+**Installing Protection Agents Manually**\
+Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
 
 ---
 
@@ -883,7 +676,11 @@ From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?v
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN04** - Run as administrator
+
+```PowerShell
+cls
+```
 
 ## # Configure library server for Virtual Machine Manager (VMM)
 
@@ -906,3 +703,23 @@ Add-SCLibraryShare -SharePath $sharePath -UseAlternateDataStream $true
 ```
 
 ---
+
+**TODO:**
+
+```PowerShell
+cls
+```
+
+## # Enter a product key and activate Windows
+
+```PowerShell
+slmgr /ipk {product key}
+```
+
+> **Note**
+>
+> When notified that the product key was set successfully, click **OK**.
+
+```PowerShell
+slmgr /ato
+```
