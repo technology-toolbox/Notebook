@@ -99,13 +99,7 @@ New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
 
 New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
   -ZoneName technologytoolbox.com `
-  -Name 'em191' -RecordType CNAME -Ttl 3600 `
-  -DnsRecords (New-AzDnsRecordConfig -Cname 'u21544276.wl027.sendgrid.net.') |
-  Out-Null
-
-New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
-  -ZoneName technologytoolbox.com `
-  -Name 'em9248' -RecordType CNAME -Ttl 3600 `
+  -Name 'em2130' -RecordType CNAME -Ttl 3600 `
   -DnsRecords (New-AzDnsRecordConfig -Cname 'u1927534.wl035.sendgrid.net.') |
   Out-Null
 
@@ -147,28 +141,14 @@ New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
   -ZoneName technologytoolbox.com `
   -Name 's1._domainkey' -RecordType CNAME -Ttl 3600 `
   -DnsRecords (
-    New-AzDnsRecordConfig -Cname 's1.domainkey.u21544276.wl027.sendgrid.net.') |
+    New-AzDnsRecordConfig -Cname 's1.domainkey.u1927534.wl035.sendgrid.net.') |
   Out-Null
 
 New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
   -ZoneName technologytoolbox.com `
   -Name 's2._domainkey' -RecordType CNAME -Ttl 3600 `
   -DnsRecords (
-    New-AzDnsRecordConfig -Cname 's2.domainkey.u21544276.wl027.sendgrid.net.') |
-  Out-Null
-
-New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
-  -ZoneName technologytoolbox.com `
-  -Name 'saz._domainkey' -RecordType CNAME -Ttl 3600 `
-  -DnsRecords (
-    New-AzDnsRecordConfig -Cname 'saz.domainkey.u1927534.wl035.sendgrid.net.') |
-  Out-Null
-
-New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
-  -ZoneName technologytoolbox.com `
-  -Name 'saz2._domainkey' -RecordType CNAME -Ttl 3600 `
-  -DnsRecords (
-    New-AzDnsRecordConfig -Cname 'saz2.domainkey.u1927534.wl035.sendgrid.net.') |
+    New-AzDnsRecordConfig -Cname 's2.domainkey.u1927534.wl035.sendgrid.net.') |
   Out-Null
 
 New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
@@ -197,7 +177,7 @@ New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
 
 New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
   -ZoneName technologytoolbox.com `
-  -Name 'url665' -RecordType CNAME -Ttl 3600 `
+  -Name 'url9775' -RecordType CNAME -Ttl 3600 `
   -DnsRecords (New-AzDnsRecordConfig -Cname 'sendgrid.net.') |
   Out-Null
 
