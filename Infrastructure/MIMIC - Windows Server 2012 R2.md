@@ -1,6 +1,6 @@
 ﻿# MIMIC - Windows Server 2012 R2 Standard
 
-Wednesday, March 25, 2015
+Wednesday, March 25, 2015\
 8:05 AM
 
 ```Text
@@ -24,7 +24,8 @@ On the **Settings** page:
 2. Click **Next**.
 3. Type the product key and then click **Next**.
 4. Review the software license terms and then click **I accept**.
-5. Type a password for the built-in administrator account and then click **Finish**.
+5. Type a password for the built-in administrator account and then click
+   **Finish**.
 
 ## # Rename computer and join domain
 
@@ -34,7 +35,8 @@ $computerName = "MIMIC"
 Rename-Computer -NewName $computerName -Restart
 ```
 
-Wait for the VM to restart and then execute the following command to join the **TECHTOOLBOX **domain:
+Wait for the VM to restart and then execute the following command to join the
+**TECHTOOLBOX **domain:
 
 ```PowerShell
 Add-Computer -DomainName corp.technologytoolbox.com -Restart
@@ -95,7 +97,8 @@ msiexec.exe /i $msiPath `
 
 ## Prepare for Deployment with MDT 2013
 
-From <[https://technet.microsoft.com/en-us/library/dn744278.aspx](https://technet.microsoft.com/en-us/library/dn744278.aspx)>
+From
+<[https://technet.microsoft.com/en-us/library/dn744278.aspx](https://technet.microsoft.com/en-us/library/dn744278.aspx)>
 
 ### # Install Windows Assessment and Deployment Kit (Windows ADK) for Windows 8.1
 
@@ -187,16 +190,18 @@ From <[https://technet.microsoft.com/en-us/library/dn744290.aspx](https://techne
 
 ### Create MDT deployment share - "MDT Build Lab (\\\\ICEMAN\\MDT-Build\$)"
 
-1. Open **Deployment Workbench**, right-click **Deployment Shares** and click **New Deployment Share**.
+1. Open **Deployment Workbench**, right-click **Deployment Shares** and click
+   **New Deployment Share**.
 2. Use the following settings for the **New Deployment Share Wizard**:
    1. Path
-      - Deployment share path: **[\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)**
+      - Deployment share path: **[\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)**
    2. Descriptive Name
       - Deployment share description: **MDT Build Lab**
    3. Options
       - **Ask if a computer backup should be performed.**
       - **Ask if an image should be captured.**
-3. Verify that you can access the [\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$) share.
+3. Verify that you can access the [\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)
+   share.
 
 ---
 
@@ -443,7 +448,9 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows 7 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.
+> The MSDN version of Windows 7 will prompt to enter a product key (but provide
+> an option to skip this step). It does not honor the SkipProductKey=YES entry
+> in the MDT CustomSettings.ini file.
 
 ### # Create task sequence - "Windows 7 Ultimate (x64) - Baseline"
 
@@ -467,7 +474,9 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows 7 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.
+> The MSDN version of Windows 7 will prompt to enter a product key (but provide
+> an option to skip this step). It does not honor the SkipProductKey=YES entry
+> in the MDT CustomSettings.ini file.
 
 ```PowerShell
 cls
@@ -503,7 +512,9 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2008 R2 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.
+> The MSDN version of Windows Server 2008 R2 will prompt to enter a product key
+> (but provide an option to skip this step). It does not honor the
+> SkipProductKey=YES entry in the MDT CustomSettings.ini file.
 
 ---
 
@@ -537,17 +548,21 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 
 ### Configure MDT deployment settings
 
-1. Open **Deployment Workbench**, expand **Deployment Shares**, right-click **MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$))**, and click **Properties.**
+1. Open **Deployment Workbench**, expand **Deployment Shares**, right-click
+   **MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$))**, and click
+   **Properties.**
 2. On the **Rules** tab:
    1. Specify the following rules:
    2. Click **Edit Bootstrap.ini** and specify the following information:
 3. On the **Windows PE** tab:
    1. In the **Platform** drop-down list, click **x86**.
-   2. In the **Lite Touch Boot Image Settings** section, configure the following settings:
+   2. In the **Lite Touch Boot Image Settings** section, configure the following
+      settings:
       1. Image description: **MDT Build Lab (x86)**
       2. ISO file name: **MDT-Build-x86.iso**
    3. In the **Platform** drop-down list, click **x64**.
-   4. In the **Lite Touch Boot Image Settings** section, configure the following settings:
+   4. In the **Lite Touch Boot Image Settings** section, configure the following
+      settings:
       1. Image description: **MDT Build Lab (x64)**
       2. ISO file name: **MDT-Build-x64.iso**
 4. Click **OK**.
@@ -622,9 +637,12 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 
 ### Update the deployment share
 
-After the deployment share has been configured, it needs to be updated. This will create the Windows PE boot images.
+After the deployment share has been configured, it needs to be updated. This
+will create the Windows PE boot images.
 
-1. Open **Deployment Workbench**, right-click the **MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$))** and click **Update Deployment Share**.
+1. Open **Deployment Workbench**, right-click the **MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$))** and click **Update
+   Deployment Share**.
 2. Use the default options for the **Update Deployment Share Wizard**.
 
 | **Note**                                                 |
@@ -775,28 +793,46 @@ cls
 
 ### Configure task sequence - "Windows 7 Ultimate (x86) - Baseline"
 
-Edit the task sequence to include the actions required to update the reference image with the latest updates from WSUS, copy Toolbox content from ICEMAN, install .NET Framework 3.5, and easily suspend the deployment process after installing applications.
+Edit the task sequence to include the actions required to update the reference
+image with the latest updates from WSUS, copy Toolbox content from ICEMAN,
+install .NET Framework 3.5, and easily suspend the deployment process after
+installing applications.
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 7**, right-click **Windows 7 Ultimate (x86) - Baseline**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Task Sequences / Windows
+   7**, right-click **Windows 7 Ultimate (x86) - Baseline**, and click
+   **Properties**.
 2. In the **Windows 7 Ultimate (x86) - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, and latest patches**
+      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, and
+         latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
          1. Enable the **Windows Update (Pre-Application Installation)** action.
-         2. Enable the **Windows Update (Post-Application Installation)** action.
-         3. After the **Tattoo** action, add a new **Group** action with the following setting:
+         2. Enable the **Windows Update (Post-Application Installation)**
+            action.
+         3. After the **Tattoo** action, add a new **Group** action with the
+            following setting:
             1. Name: **Custom Tasks (Pre-Windows Update)**
-         4. After the **Windows Update (Post-Application Installation)** action, rename the **Custom Tasks** group to **Custom Tasks (Post-Windows Update)**.
-         5. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Run Command Line** action with the following settings:
+         4. After the **Windows Update (Post-Application Installation)** action,
+            rename the **Custom Tasks** group to **Custom Tasks (Post-Windows
+            Update)**.
+         5. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Run Command Line** action with the following settings:
             1. Name: **Copy Toolbox content from ICEMAN**
-            2. Command line: **robocopy [\\\\ICEMAN\\Public\\Toolbox](\\ICEMAN\Public\Toolbox) C:\\NotBackedUp\\Public\\Toolbox /E**
+            2. Command line: **robocopy
+               [\\\\ICEMAN\\Public\\Toolbox](\ICEMAN\Public\Toolbox)
+               C:\\NotBackedUp\\Public\\Toolbox /E**
             3. Success codes: **0 1 2 3 4 5 6 7 8 16**
-         6. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Install Roles and Features** action with the following settings:
+         6. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Install Roles and Features** action with the following settings:
             1. Name: **Install Microsoft .NET Framework 3.5**
-            2. Select the operating system for which roles are to be installed: **Windows 7**
-            3. Select the roles and features that should be installed: **.NET Framework 3.5.1**
-         7. After the **Install Applications** action, add a new **Run Command Line** action with the following settings:
+            2. Select the operating system for which roles are to be installed:
+               **Windows 7**
+            3. Select the roles and features that should be installed: **.NET
+               Framework 3.5.1**
+         7. After the **Install Applications** action, add a new **Run Command
+            Line** action with the following settings:
             1. Name: **Suspend**
             2. Command line: **cscript.exe "%SCRIPTROOT%\\LTISuspend.wsf"**
             3. Disable this step:** Yes (checked)**
@@ -804,36 +840,58 @@ Edit the task sequence to include the actions required to update the reference i
 
 > **Note**
 >
-> The reason for adding the applications after the Tattoo action but before running Windows Update is simply to save time during the deployment. This way we can add all applications that will upgrade some of the built-in components and avoid unnecessary updating.
+> The reason for adding the applications after the Tattoo action but before
+> running Windows Update is simply to save time during the deployment. This way
+> we can add all applications that will upgrade some of the built-in components
+> and avoid unnecessary updating.
 
 ### Configure task sequence - "Windows 7 Ultimate (x64) - Baseline"
 
-Repeat the steps in the previous section for the **Windows 7 Ultimate (x64) - Baseline** task sequence.
+Repeat the steps in the previous section for the **Windows 7 Ultimate (x64) -
+Baseline** task sequence.
 
 ### Configure task sequence - "Windows Server 2008 R2 - Baseline"
 
-Edit the task sequence to include the actions required to update the reference image with the latest updates from WSUS, copy Toolbox content from ICEMAN, install .NET Framework 3.5, and easily suspend the deployment process after installing applications.
+Edit the task sequence to include the actions required to update the reference
+image with the latest updates from WSUS, copy Toolbox content from ICEMAN,
+install .NET Framework 3.5, and easily suspend the deployment process after
+installing applications.
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows Server 2008 R2**, right-click **Windows Server 2008 R2 - Baseline**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Task Sequences / Windows
+   Server 2008 R2**, right-click **Windows Server 2008 R2 - Baseline**, and
+   click **Properties**.
 2. In the **Windows Server 2008 R2 - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, and latest patches**
+      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, and
+         latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
          1. Enable the **Windows Update (Pre-Application Installation)** action.
-         2. Enable the **Windows Update (Post-Application Installation)** action.
-         3. After the **Tattoo** action, add a new **Group** action with the following setting:
+         2. Enable the **Windows Update (Post-Application Installation)**
+            action.
+         3. After the **Tattoo** action, add a new **Group** action with the
+            following setting:
             1. Name: **Custom Tasks (Pre-Windows Update)**
-         4. After the **Windows Update (Post-Application Installation)** action, rename the **Custom Tasks** group to **Custom Tasks (Post-Windows Update)**.
-         5. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Run Command Line** action with the following settings:
+         4. After the **Windows Update (Post-Application Installation)** action,
+            rename the **Custom Tasks** group to **Custom Tasks (Post-Windows
+            Update)**.
+         5. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Run Command Line** action with the following settings:
             1. Name: **Copy Toolbox content from ICEMAN**
-            2. Command line: **robocopy [\\\\ICEMAN\\Public\\Toolbox](\\ICEMAN\Public\Toolbox) C:\\NotBackedUp\\Public\\Toolbox /E**
+            2. Command line: **robocopy
+               [\\\\ICEMAN\\Public\\Toolbox](\ICEMAN\Public\Toolbox)
+               C:\\NotBackedUp\\Public\\Toolbox /E**
             3. Success codes: **0 1 2 3 4 5 6 7 8 16**
-         6. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Install Roles and Features** action with the following settings:
+         6. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Install Roles and Features** action with the following settings:
             1. Name: **Install Microsoft .NET Framework 3.5**
-            2. Select the operating system for which roles are to be installed: **Windows Server 2008 R2**
-            3. Select the roles and features that should be installed: **.NET Framework 3.5.1**
-         7. After the **Install Applications** action, add a new **Run Command Line** action with the following settings:
+            2. Select the operating system for which roles are to be installed:
+               **Windows Server 2008 R2**
+            3. Select the roles and features that should be installed: **.NET
+               Framework 3.5.1**
+         7. After the **Install Applications** action, add a new **Run Command
+            Line** action with the following settings:
             1. Name: **Suspend**
             2. Command line: **cscript.exe "%SCRIPTROOT%\\LTISuspend.wsf"**
             3. Disable this step:** Yes (checked)**
@@ -841,7 +899,10 @@ Edit the task sequence to include the actions required to update the reference i
 
 > **Note**
 >
-> The reason for adding the applications after the Tattoo action but before running Windows Update is simply to save time during the deployment. This way we can add all applications that will upgrade some of the built-in components and avoid unnecessary updating.
+> The reason for adding the applications after the Tattoo action but before
+> running Windows Update is simply to save time during the deployment. This way
+> we can add all applications that will upgrade some of the built-in components
+> and avoid unnecessary updating.
 
 ```PowerShell
 cls
@@ -900,7 +961,10 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Configure installation settings for Office 2013
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Applications / Microsoft**, right-click **Office 2013 Professional Plus (x86)**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Applications / Microsoft**,
+   right-click **Office 2013 Professional Plus (x86)**, and click
+   **Properties**.
 2. In the **Office 2013 Professional Plus (x86) Properties** window:
    1. On the **Office Products** tab:
       1. In the **Office product to install** dropdown, click **ProPlusr**.
@@ -913,22 +977,30 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Add action to "Windows 7 Ultimate (x86) - Baseline" task sequence to install Office 2013
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 7**, right-click **Windows 7 Ultimate (x86) - Baseline**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Task Sequences / Windows
+   7**, right-click **Windows 7 Ultimate (x86) - Baseline**, and click
+   **Properties**.
 2. In the **Windows 7 Ultimate (x86) - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, Office 2013, and latest patches**
+      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5,
+         Office 2013, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
-         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Install Application** action with the following settings:
+         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Install Application** action with the following settings:
             1. Name: **Install Microsoft Office 2013 Professional Plus (x86)**
             2. **Install a single application**
-            3. Application to install: **Applications / Microsoft / Office 2013 Professional Plus (x86)**
-         2. After the **Install Microsoft Office 2013 Professional Plus (x86)** action, add a new **Restart computer** action.
+            3. Application to install: **Applications / Microsoft / Office 2013
+               Professional Plus (x86)**
+         2. After the **Install Microsoft Office 2013 Professional Plus (x86)**
+            action, add a new **Restart computer** action.
    3. Click **OK**.
 
 ### Add action to "Windows 7 Ultimate (x64) - Baseline" task sequence to install Office 2013
 
-Repeat the steps in the previous section for the **Windows 7 Ultimate (x64) - Baseline** task sequence.
+Repeat the steps in the previous section for the **Windows 7 Ultimate (x64) -
+Baseline** task sequence.
 
 ---
 
@@ -1158,7 +1230,8 @@ cls
 
 ## Set up the MDT production deployment share
 
-From <[https://technet.microsoft.com/en-us/library/dn744279.aspx](https://technet.microsoft.com/en-us/library/dn744279.aspx)>
+From
+<[https://technet.microsoft.com/en-us/library/dn744279.aspx](https://technet.microsoft.com/en-us/library/dn744279.aspx)>
 
 ---
 
@@ -1221,15 +1294,18 @@ icacls D:\Shares\MDT-Deploy$ /grant '"s-mdt-deploy":(OI)(CI)(RX)'
 
 ### Create the MDT production deployment share
 
-1. Open **Deployment Workbench**, right-click **Deployment Shares** and click **New Deployment Share**.
+1. Open **Deployment Workbench**, right-click **Deployment Shares** and click
+   **New Deployment Share**.
 2. Use the following settings for the **New Deployment Share Wizard**:
    1. Path
-      - Deployment share path: **[\\\\ICEMAN\\MDT-Deploy\$](\\ICEMAN\MDT-Deploy$)**
+      - Deployment share path:
+        **[\\\\ICEMAN\\MDT-Deploy\$](\ICEMAN\MDT-Deploy$)**
    2. Descriptive Name
       - Deployment share description: **MDT Deployment**
    3. Options
       - **Ask if a computer backup should be performed.**
-3. Verify that you can access the [\\\\ICEMAN\\MDT-Deploy\$](\\ICEMAN\MDT-Deploy$) share.
+3. Verify that you can access the
+   [\\\\ICEMAN\\MDT-Deploy\$](\ICEMAN\MDT-Deploy$) share.
 
 ---
 
@@ -1408,7 +1484,9 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows 7 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.
+> The MSDN version of Windows 7 will prompt to enter a product key (but provide
+> an option to skip this step). It does not honor the SkipProductKey=YES entry
+> in the MDT CustomSettings.ini file.
 
 ```PowerShell
 cls
@@ -1435,7 +1513,9 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows 7 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.
+> The MSDN version of Windows 7 will prompt to enter a product key (but provide
+> an option to skip this step). It does not honor the SkipProductKey=YES entry
+> in the MDT CustomSettings.ini file.
 
 ```PowerShell
 cls
@@ -1469,7 +1549,9 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2008 R2 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.
+> The MSDN version of Windows Server 2008 R2 will prompt to enter a product key
+> (but provide an option to skip this step). It does not honor the
+> SkipProductKey=YES entry in the MDT CustomSettings.ini file.
 
 ---
 
@@ -1497,17 +1579,21 @@ robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot C
 
 ### Configure MDT deployment settings
 
-1. Open **Deployment Workbench**, expand **Deployment Shares**, right-click **MDT Deployment ([\\\\ICEMAN\\MDT-Deploy\$](\\ICEMAN\MDT-Deploy$))**, and click **Properties.**
+1. Open **Deployment Workbench**, expand **Deployment Shares**, right-click
+   **MDT Deployment ([\\\\ICEMAN\\MDT-Deploy\$](\ICEMAN\MDT-Deploy$))**, and
+   click **Properties.**
 2. On the **Rules** tab:
    1. Specify the following rules:
    2. Click **Edit Bootstrap.ini** and specify the following information:
 3. On the **Windows PE** tab:
    1. In the **Platform** drop-down list, click **x86**.
-   2. In the **Lite Touch Boot Image Settings** section, configure the following settings:
+   2. In the **Lite Touch Boot Image Settings** section, configure the following
+      settings:
       1. Image description: **MDT Deploy (x86)**
       2. ISO file name: **MDT-Deploy-x86.iso**
    3. In the **Platform** drop-down list, click **x64**.
-   4. In the **Lite Touch Boot Image Settings** section, configure the following settings:
+   4. In the **Lite Touch Boot Image Settings** section, configure the following
+      settings:
       1. Image description: **MDT Deploy (x64)**
       2. ISO file name: **MDT-Deploy-x64.iso**
 4. On the **Monitoring** tab, configure the following settings:
@@ -1613,9 +1699,12 @@ robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot C
 
 ### Update the deployment share
 
-After the deployment share has been configured, it needs to be updated. This is the process when the Windows PE boot images are created.
+After the deployment share has been configured, it needs to be updated. This is
+the process when the Windows PE boot images are created.
 
-1. Open **Deployment Workbench**, right-click the **MDT Production ([\\\\ICEMAN\\MDT-Deploy\$](\\ICEMAN\MDT-Deploy$))** and click **Update Deployment Share**.
+1. Open **Deployment Workbench**, right-click the **MDT Production
+   ([\\\\ICEMAN\\MDT-Deploy\$](\ICEMAN\MDT-Deploy$))** and click **Update
+   Deployment Share**.
 2. Use the default options for the **Update Deployment Share Wizard**.
 
 > **Note**
@@ -1761,13 +1850,17 @@ Import-MDTApplication `
 
 #### # Configure application bundle - Adobe Reader 8.3.1
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment ([\\\\ICEMAN\\MDT-Deploy\$](\\ICEMAN\MDT-Deploy$)) / Applications / Adobe**, right-click **Adobe Reader 8.3.1**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment
+   ([\\\\ICEMAN\\MDT-Deploy\$](\ICEMAN\MDT-Deploy$)) / Applications / Adobe**,
+   right-click **Adobe Reader 8.3.1**, and click **Properties**.
 2. In the **Adobe Reader 8.3.1 Properties** window:
    1. On the **Dependencies** tab:
       1. Add the following applications:
          1. **Adobe Reader 8.3**
          2. **Adobe Reader 8.3.1 Update**
-      2. Ensure the applications in the previous step are listed in the specified order. Use the **Up** or **Down** buttons to reorder the applications as necessary.
+      2. Ensure the applications in the previous step are listed in the
+         specified order. Use the **Up** or **Down** buttons to reorder the
+         applications as necessary.
    2. Click **OK**.
 
 ```PowerShell
@@ -1862,16 +1955,24 @@ Remove-Item $tempSourcePath -Force -Recurse
 
 #### Configure Microsoft SharePoint Designer 2013 installation settings
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment ([\\\\ICEMAN\\MDT-Deploy\$](\\ICEMAN\MDT-Deploy$)) / Applications / Microsoft**, right-click **SharePoint Designer 2013 with Service Pack 1 (x86)**, and click **Properties**.
-2. In the **SharePoint Designer 2013 with Service Pack 1 (x86) Properties** window:
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment
+   ([\\\\ICEMAN\\MDT-Deploy\$](\ICEMAN\MDT-Deploy$)) / Applications /
+   Microsoft**, right-click **SharePoint Designer 2013 with Service Pack 1
+   (x86)**, and click **Properties**.
+2. In the **SharePoint Designer 2013 with Service Pack 1 (x86) Properties**
+   window:
    1. On the **Office Products** tab:
-      1. In the **Office product to install** dropdown, ensure **SharePointDesigner** is selected.
+      1. In the **Office product to install** dropdown, ensure
+         **SharePointDesigner** is selected.
       2. In the **Config.xml settings** section:
-         1. Click the **Customer name** checkbox and then type **Technology Toolbox **in the corresponding textbox.
-         2. Click the **Display level** checkbox and then click **None **in the corresponding dropdown list.
+         1. Click the **Customer name** checkbox and then type **Technology
+            Toolbox **in the corresponding textbox.
+         2. Click the **Display level** checkbox and then click **None **in the
+            corresponding dropdown list.
          3. Click the **Accept EULA** checkbox.
          4. Click the **Always suppress reboot** checkbox.
-   2. In the **SharePoint Designer 2013 with Service Pack 1 (x86) Properties** window, click **OK**.
+   2. In the **SharePoint Designer 2013 with Service Pack 1 (x86) Properties**
+      window, click **OK**.
 
 ```PowerShell
 cls
@@ -2228,11 +2329,17 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2012 R2 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.
+> The MSDN version of Windows Server 2012 R2 will prompt to enter a product key
+> (but provide an option to skip this step). It does not honor the
+> SkipProductKey=YES entry in the MDT CustomSettings.ini file.
 
 > **Important**
 >
-> Windows Server 2012 R2 with Update requires a password to be specified for the Administrator account (unlike Windows 8.1). If an Administrator password is not specified in the task sequence, the Lite Touch Installation will prompt for a password (which must be subsequently be entered manually when completing the actions specified in the task sequence).
+> Windows Server 2012 R2 with Update requires a password to be specified for the
+> Administrator account (unlike Windows 8.1). If an Administrator password is
+> not specified in the task sequence, the Lite Touch Installation will prompt
+> for a password (which must be subsequently be entered manually when completing
+> the actions specified in the task sequence).
 
 ---
 
@@ -2505,31 +2612,50 @@ cls
 
 ### Configure task sequence - "Windows 8.1 Enterprise (x64) - Baseline"
 
-Edit the task sequence to include the actions required to update the reference image with the latest updates from WSUS, copy Toolbox content from ICEMAN, install .NET Framework 3.5, update PowerShell help files, and easily suspend the deployment process after installing applications.
+Edit the task sequence to include the actions required to update the reference
+image with the latest updates from WSUS, copy Toolbox content from ICEMAN,
+install .NET Framework 3.5, update PowerShell help files, and easily suspend the
+deployment process after installing applications.
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 8.1**, right-click **Windows 8.1 Enterprise (x64) - Baseline**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Task Sequences / Windows
+   8.1**, right-click **Windows 8.1 Enterprise (x64) - Baseline**, and click
+   **Properties**.
 2. In the **Windows 8.1 Enterprise (x64) - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, PowerShell help files, and latest patches**
+      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5,
+         PowerShell help files, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
          1. Enable the **Windows Update (Pre-Application Installation)** action.
-         2. Enable the **Windows Update (Post-Application Installation)** action.
-         3. After the **Tattoo** action, add a new **Group** action with the following setting:
+         2. Enable the **Windows Update (Post-Application Installation)**
+            action.
+         3. After the **Tattoo** action, add a new **Group** action with the
+            following setting:
             1. Name: **Custom Tasks (Pre-Windows Update)**
-         4. After the **Windows Update (Post-Application Installation)** action, rename the **Custom Tasks** group to **Custom Tasks (Post-Windows Update)**.
-         5. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Run Command Line** action with the following settings:
+         4. After the **Windows Update (Post-Application Installation)** action,
+            rename the **Custom Tasks** group to **Custom Tasks (Post-Windows
+            Update)**.
+         5. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Run Command Line** action with the following settings:
             1. Name: **Copy Toolbox content from ICEMAN**
-            2. Command line: **robocopy [\\\\ICEMAN\\Public\\Toolbox](\\ICEMAN\Public\Toolbox) C:\\NotBackedUp\\Public\\Toolbox /E**
+            2. Command line: **robocopy
+               [\\\\ICEMAN\\Public\\Toolbox](\ICEMAN\Public\Toolbox)
+               C:\\NotBackedUp\\Public\\Toolbox /E**
             3. Success codes: **0 1 2 3 4 5 6 7 8 16**
-         6. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Install Roles and Features** action with the following settings:
+         6. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Install Roles and Features** action with the following settings:
             1. Name: **Install Microsoft .NET Framework 3.5**
-            2. Select the operating system for which roles are to be installed: **Windows 8.1**
-            3. Select the roles and features that should be installed: **.NET Framework 3.5 (includes .NET 2.0 and 3.0)**
-         7. Select **Custom Tasks (Pre-Windows Update)** and add a new **Run Command Line** action with the following settings:
+            2. Select the operating system for which roles are to be installed:
+               **Windows 8.1**
+            3. Select the roles and features that should be installed: **.NET
+               Framework 3.5 (includes .NET 2.0 and 3.0)**
+         7. Select **Custom Tasks (Pre-Windows Update)** and add a new **Run
+            Command Line** action with the following settings:
             1. Name: **Update PowerShell help files**
             2. Command line: **PowerShell.exe -Command "& { Update-Help }"**
-         8. After the **Install Applications** action, add a new **Run Command Line** action with the following settings:
+         8. After the **Install Applications** action, add a new **Run Command
+            Line** action with the following settings:
             1. Name: **Suspend**
             2. Command line: **cscript.exe "%SCRIPTROOT%\\LTISuspend.wsf"**
             3. Disable this step:** Yes (checked)**
@@ -2537,25 +2663,36 @@ Edit the task sequence to include the actions required to update the reference i
 
 > **Note**
 >
-> The reason for adding the applications after the Tattoo action but before running Windows Update is simply to save time during the deployment. This way we can add all applications that will upgrade some of the built-in components and avoid unnecessary updating.
+> The reason for adding the applications after the Tattoo action but before
+> running Windows Update is simply to save time during the deployment. This way
+> we can add all applications that will upgrade some of the built-in components
+> and avoid unnecessary updating.
 
 ### Configure task sequence - "Windows Server 2012 R2 - Baseline"
 
-Repeat the steps in the previous section for the **Windows Server 2012 R2 - Baseline** task sequence.
+Repeat the steps in the previous section for the **Windows Server 2012 R2 -
+Baseline** task sequence.
 
 ## Add action to Windows 8.1 task sequence to install Office 2013
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 8.1**, right-click **Windows 8.1 Enterprise (x64) - Baseline**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Task Sequences / Windows
+   8.1**, right-click **Windows 8.1 Enterprise (x64) - Baseline**, and click
+   **Properties**.
 2. In the **Windows 8.1 Enterprise (x64) - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, PowerShell help files, Office 2013, and latest patches**
+      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5,
+         PowerShell help files, Office 2013, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
-         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Install Application** action with the following settings:
+         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Install Application** action with the following settings:
             1. Name: **Install Microsoft Office 2013 Professional Plus (x86)**
             2. **Install a single application**
-            3. Application to install: **Applications / Microsoft / Office 2013 Professional Plus (x86)**
-         2. After the **Install Microsoft Office 2013 Professional Plus (x86)** action, add a new **Restart computer** action.
+            3. Application to install: **Applications / Microsoft / Office 2013
+               Professional Plus (x86)**
+         2. After the **Install Microsoft Office 2013 Professional Plus (x86)**
+            action, add a new **Restart computer** action.
    3. Click **OK**.
 
 ---
@@ -2974,7 +3111,8 @@ $commandLine = "vs_ultimate.exe /Quiet /NoRestart" `
 
 > **Important**
 >
-> You must specify the full path for the **AdminFile** parameter or else vs_ultimate.exe terminates with an error.
+> You must specify the full path for the **AdminFile** parameter or else
+> vs_ultimate.exe terminates with an error.
 
 ```PowerShell
 Import-MDTApplication `
@@ -3052,7 +3190,8 @@ $commandLine = "vs_ultimate.exe /Quiet /NoRestart" `
 
 > **Important**
 >
-> You must specify the full path for the **AdminFile** parameter or else vs_ultimate.exe terminates with an error.
+> You must specify the full path for the **AdminFile** parameter or else
+> vs_ultimate.exe terminates with an error.
 
 ```PowerShell
 Import-MDTApplication `
@@ -3102,7 +3241,9 @@ cls
 
 #### Download update using Web Platform Installer
 
-- Folder: [\\\\ICEMAN\\Products\\Microsoft\\Visual Studio 2013\\OfficeToolsForVS2013Update1](\\ICEMAN\Products\Microsoft\Visual Studio 2013\OfficeToolsForVS2013Update1)
+- Folder: [\\\\ICEMAN\\Products\\Microsoft\\Visual Studio
+  2013\\OfficeToolsForVS2013Update1](\\ICEMAN\Products\Microsoft\Visual Studio
+  2013\OfficeToolsForVS2013Update1)
 
 #### # Add application
 
@@ -3138,8 +3279,10 @@ cls
 
 - Download link:\
   **SQL Server database tooling in Visual Studio 2013**\
-  From <[https://msdn.microsoft.com/en-us/dn864412](https://msdn.microsoft.com/en-us/dn864412)>
-- Destination folder: [\\\\ICEMAN\\Products\\Microsoft\\Visual Studio 2013\\](\\ICEMAN\Products\Microsoft\Visual Studio 2013\)
+  From
+  <[https://msdn.microsoft.com/en-us/dn864412](https://msdn.microsoft.com/en-us/dn864412)>
+- Destination folder: [\\\\ICEMAN\\Products\\Microsoft\\Visual Studio
+  2013\\](\\ICEMAN\Products\Microsoft\Visual Studio 2013\)
 
 #### # Mount the installation image
 
@@ -3199,14 +3342,20 @@ Import-MDTApplication `
 
 #### # Configure application bundle
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment ([\\\\ICEMAN\\MDT-Deploy\$](\\ICEMAN\MDT-Deploy$)) / Applications / Microsoft**, right-click **Visual Studio 2013 for SP2013 Development**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment
+   ([\\\\ICEMAN\\MDT-Deploy\$](\ICEMAN\MDT-Deploy$)) / Applications /
+   Microsoft**, right-click **Visual Studio 2013 for SP2013 Development**, and
+   click **Properties**.
 2. In the **Visual Studio 2013 for SP2013 Development Properties** window:
    1. On the **Dependencies** tab:
       1. Add the following applications:
          1. **Visual Studio 2013 with Update 4 - SP2013 Development**
-         2. **Microsoft Office Developer Tools for Visual Studio 2013 - November 2014 Update**
+         2. **Microsoft Office Developer Tools for Visual Studio 2013 - November
+            2014 Update**
          3. **Microsoft SQL Server Update for database tooling (VS2013)**
-      2. Ensure the applications in the previous step are listed in the specified order. Use the **Up** or **Down** buttons to reorder the applications as necessary.
+      2. Ensure the applications in the previous step are listed in the
+         specified order. Use the **Up** or **Down** buttons to reorder the
+         applications as necessary.
    2. Click **OK**.
 
 ---
@@ -3342,7 +3491,8 @@ PrerequisiteInstaller.exe %* ^
 
 > **Important**
 >
-> The prerequisite files are copied locally to avoid a prompt when running WcfDataServices.exe (despite unblocking that file in the network file share).
+> The prerequisite files are copied locally to avoid a prompt when running
+> WcfDataServices.exe (despite unblocking that file in the network file share).
 
 ```PowerShell
 cls
@@ -3409,7 +3559,8 @@ $osPath = "DS001:\Operating Systems\Windows Server 2012 R2" `
     + "\Windows Server 2012 R2 Standard with Update"
 ```
 
-\$comments = "Windows Server 2012 R2, SQL Server 2014, Visual Studio 2013 with Update 4, Office 2013, and SharePoint Server 2013"
+\$comments = "Windows Server 2012 R2, SQL Server 2014, Visual Studio 2013 with
+Update 4, Office 2013, and SharePoint Server 2013"
 
 ```PowerShell
 Import-MDTTaskSequence `
@@ -3429,11 +3580,17 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2012 R2 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.
+> The MSDN version of Windows Server 2012 R2 will prompt to enter a product key
+> (but provide an option to skip this step). It does not honor the
+> SkipProductKey=YES entry in the MDT CustomSettings.ini file.
 
 > **Important**
 >
-> Windows Server 2012 R2 with Update requires a password to be specified for the Administrator account (unlike Windows 8.1). If an Administrator password is not specified in the task sequence, the Lite Touch Installation will prompt for a password (which must be subsequently be entered manually when completing the actions specified in the task sequence).
+> Windows Server 2012 R2 with Update requires a password to be specified for the
+> Administrator account (unlike Windows 8.1). If an Administrator password is
+> not specified in the task sequence, the Lite Touch Installation will prompt
+> for a password (which must be subsequently be entered manually when completing
+> the actions specified in the task sequence).
 
 ---
 
@@ -3521,17 +3678,28 @@ $selectedOsFeatures = ($allOsFeatures | where { $requiredFeatures.Contains($_) }
 
 ### Configure task sequence - "SharePoint Server 2013 - Development"
 
-Edit the task sequence to include the actions required to install SQL Server 2014, Visual Studio 2013, Office 2013, and SharePoint Server 2013. Temporarily disable the Windows Update actions (for testing purposes).
+Edit the task sequence to include the actions required to install SQL Server
+2014, Visual Studio 2013, Office 2013, and SharePoint Server 2013. Temporarily
+disable the Windows Update actions (for testing purposes).
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows Server 2012 R2**, right-click **SharePoint Server 2013 - Development** and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Task Sequences / Windows
+   Server 2012 R2**, right-click **SharePoint Server 2013 - Development** and
+   click **Properties**.
 2. In the **SharePoint Server 2013 - Development Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - Windows Server 2012 R2, Toolbox content, Windows features for SharePoint 2013, PowerShell help files, SQL Server 2014, Visual Studio 2013 with Update 4, Office 2013, and SharePoint Server 2013**
+      1. Comments: **Reference image - Windows Server 2012 R2, Toolbox content,
+         Windows features for SharePoint 2013, PowerShell help files, SQL Server
+         2014, Visual Studio 2013 with Update 4, Office 2013, and SharePoint
+         Server 2013**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
-         1. In the **Custom Tasks (Pre-Windows Update)** group, select **Install Microsoft .NET Framework 3.5** and modify the action with the following settings:
+         1. In the **Custom Tasks (Pre-Windows Update)** group, select **Install
+            Microsoft .NET Framework 3.5** and modify the action with the
+            following settings:
             1. Name: **Install Windows features for SharePoint 2013**
-            2. Select the operating system for which roles are to be installed: **Windows Server 2012 R2**
+            2. Select the operating system for which roles are to be installed:
+               **Windows Server 2012 R2**
             3. Select the roles and features that should be installed:
                - Roles
                  - **Application Server**
@@ -3583,38 +3751,61 @@ Edit the task sequence to include the actions required to install SQL Server 201
                    - **Process Model**
                    - **.NET Environment 3.5**
                    - **Configuration APIs**
-         2. After the **Install Windows features for SharePoint 2013** action, add a new **Restart computer** action.
-         3. Select **Custom Tasks (Pre-Windows Update)** and add a new **Install Application** action with the following settings:
-            1. Name: **Install SQL Server 2014 Developer Edition (x64) - Database Engine and Management Tools**
+         2. After the **Install Windows features for SharePoint 2013** action,
+            add a new **Restart computer** action.
+         3. Select **Custom Tasks (Pre-Windows Update)** and add a new **Install
+            Application** action with the following settings:
+            1. Name: **Install SQL Server 2014 Developer Edition (x64) -
+               Database Engine and Management Tools**
             2. **Install a single application**
-            3. Application to install: **SQL Server 2014 Developer Edition (x64) - Database Engine and Management Tools**
-         4. Select **Custom Tasks (Pre-Windows Update)** and add a new **Install Application** action with the following settings:
+            3. Application to install: **SQL Server 2014 Developer Edition
+               (x64) - Database Engine and Management Tools**
+         4. Select **Custom Tasks (Pre-Windows Update)** and add a new **Install
+            Application** action with the following settings:
             1. Name: **Install Visual Studio 2013 for SP2013 Development**
             2. **Install a single application**
-            3. Application to install: **Visual Studio 2013 for SP2013 Development**
-         5. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Install Application** action with the following settings:
+            3. Application to install: **Visual Studio 2013 for SP2013
+               Development**
+         5. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Install Application** action with the following settings:
             1. Name: **Install Microsoft Office 2013 Professional Plus (x86)**
             2. **Install a single application**
-            3. Application to install: **Applications / Microsoft / Office 2013 Professional Plus (x86)**
-         6. Select **Custom Tasks (Pre-Windows Update)** and add a new **Install Application** action with the following settings:
-            1. Name: **Install SharePoint Server 2013 with Service Pack 1 - Prerequisites**
+            3. Application to install: **Applications / Microsoft / Office 2013
+               Professional Plus (x86)**
+         6. Select **Custom Tasks (Pre-Windows Update)** and add a new **Install
+            Application** action with the following settings:
+            1. Name: **Install SharePoint Server 2013 with Service Pack 1 -
+               Prerequisites**
             2. **Install a single application**
-            3. Application to install: **SharePoint Server 2013 with Service Pack 1 - Prerequisites**
-         7. After the **Install SharePoint Server 2013 with Service Pack 1 - Prerequisites** action, add a new **Run Command Line** action with the following settings:
+            3. Application to install: **SharePoint Server 2013 with Service
+               Pack 1 - Prerequisites**
+         7. After the **Install SharePoint Server 2013 with Service Pack 1 -
+            Prerequisites** action, add a new **Run Command Line** action with
+            the following settings:
             1. Name: **Remove SharePoint prerequisite files**
-            2. Command line: **PowerShell.exe -Command "& { Remove-Item C:\\PrerequisiteInstallerFiles_SP1 -Recurse -Force }"**
-               > **Note:** I originally attempted to use the following command line...
+            2. Command line: **PowerShell.exe -Command "& { Remove-Item
+               C:\\PrerequisiteInstallerFiles_SP1 -Recurse -Force }"**
+               > **Note:** I originally attempted to use the following command
+               > line...
                >
                > rmdir /S /Q C:\\PrerequisiteInstallerFiles_SP1
                >
-               > ...but encountered numerous issues (despite adding "1" to the list of success codes -- since rmdir was found to return this value when deleting the folder). Consequently I switched to deleting the folder via PowerShell instead.
-         8. After the **Remove SharePoint prerequisite files** action, add a new **Restart computer** action.
-         9. Select **Custom Tasks (Pre-Windows Update)** and add a new **Install Application** action with the following settings:
+               > ...but encountered numerous issues (despite adding "1" to the
+               > list of success codes -- since rmdir was found to return this
+               > value when deleting the folder). Consequently I switched to
+               > deleting the folder via PowerShell instead.
+         8. After the **Remove SharePoint prerequisite files** action, add a new
+            **Restart computer** action.
+         9. Select **Custom Tasks (Pre-Windows Update)** and add a new **Install
+            Application** action with the following settings:
             1. Name: **Install SharePoint Server 2013 with Service Pack 1**
             2. **Install a single application**
-            3. Application to install: **SharePoint Server 2013 with Service Pack 1**
-         10. Disable the **Windows Update (Pre-Application Installation)** action.
-         11. Disable the **Windows Update (Post-Application Installation)** action.
+            3. Application to install: **SharePoint Server 2013 with Service
+               Pack 1**
+         10. Disable the **Windows Update (Pre-Application Installation)**
+             action.
+         11. Disable the **Windows Update (Post-Application Installation)**
+             action.
    3. Click **OK**.
 
 ---
@@ -3941,14 +4132,21 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 
 Edit the task sequence to enable the Windows Update actions.
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows Server 2012 R2**, right-click **SharePoint Server 2013 - Development** and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Task Sequences / Windows
+   Server 2012 R2**, right-click **SharePoint Server 2013 - Development** and
+   click **Properties**.
 2. In the **SharePoint Server 2013 - Development Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - Windows Server 2012 R2, Toolbox content, Windows features for SharePoint 2013, PowerShell help files, SQL Server 2014, Visual Studio 2013 with Update 4, Office 2013, SharePoint Server 2013, and latest patches**
+      1. Comments: **Reference image - Windows Server 2012 R2, Toolbox content,
+         Windows features for SharePoint 2013, PowerShell help files, SQL Server
+         2014, Visual Studio 2013 with Update 4, Office 2013, SharePoint Server
+         2013, and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
          1. Enable the **Windows Update (Pre-Application Installation)** action.
-         2. Enable the **Windows Update (Post-Application Installation)** action.
+         2. Enable the **Windows Update (Post-Application Installation)**
+            action.
    3. Click **OK**.
 
 ---
@@ -4302,13 +4500,15 @@ robocopy \\ICEMAN\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Cap
 
 **Reference:**
 
-**Nice to Know - Get rid of all junk before Sysprep and Capture when creating a reference image in MDT**\
+**Nice to Know - Get rid of all junk before Sysprep and Capture when creating a
+reference image in MDT**\
 From <[https://anothermike2.wordpress.com/2014/06/05/nice-to-know-get-rid-of-all-junk-before-sysprep-and-capture-when-creating-a-reference-image-in-mdt/](https://anothermike2.wordpress.com/2014/06/05/nice-to-know-get-rid-of-all-junk-before-sysprep-and-capture-when-creating-a-reference-image-in-mdt/)>
 
 ### Download and extract script
 
 1. Download custom script: [http://1drv.ms/ThvLFE](http://1drv.ms/ThvLFE)
-2. Unblock zip file and extract to folder ("C:\\NotBackedUp\\Temp\\Action - Cleanup before Sysprep")
+2. Unblock zip file and extract to folder ("C:\\NotBackedUp\\Temp\\Action -
+   Cleanup before Sysprep")
 
 ### # Create folder - "Applications\\Actions"
 
@@ -4351,26 +4551,38 @@ Remove-Item "C:\NotBackedUp\Temp\Action - Cleanup before Sysprep"
 
 ### Add action to task sequences to cleanup images before Sysprep
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 7**, right-click **Windows 7 Ultimate (x86) - Baseline** and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Task Sequences / Windows
+   7**, right-click **Windows 7 Ultimate (x86) - Baseline** and click
+   **Properties**.
 2. In the **Windows 7 Ultimate (x86) - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, Office 2013, latest patches, and cleanup before Sysprep**
+      1. Comments: **Reference image - Toolbox content, .NET Framework 3.5,
+         Office 2013, latest patches, and cleanup before Sysprep**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
-         1. After the **Apply Local GPO Package** action, add a new **Group** action with the following setting:
+         1. After the **Apply Local GPO Package** action, add a new **Group**
+            action with the following setting:
             1. Name: **Cleanup before Sysprep**
-         2. In the **Cleanup before Sysprep **group, add a new **Group** action with the following setting:
+         2. In the **Cleanup before Sysprep **group, add a new **Group** action
+            with the following setting:
             1. Name: **Compress the image**
-         3. Select **Compress the image** and add a new **Restart computer** action.
-         4. Select **Compress the image** and add a new **Install Application** action with the following settings:
+         3. Select **Compress the image** and add a new **Restart computer**
+            action.
+         4. Select **Compress the image** and add a new **Install Application**
+            action with the following settings:
             1. Name: **Action - Cleanup before Sysprep**
             2. **Install a single application**
-            3. Application to install: **Applications / Actions / Action - Cleanup before Sysprep**
-         5. Select **Compress the image** and add a new **Restart computer** action.
+            3. Application to install: **Applications / Actions / Action -
+               Cleanup before Sysprep**
+         5. Select **Compress the image** and add a new **Restart computer**
+            action.
    3. Right-click the **Cleanup before Sysprep **group and click **Copy**.
    4. Click **OK**.
 
-Add the cleanup action to the other task sequences in the MDT build lab deployment share (right-click the **Apply Local GPO Package** action in each task sequence and then click **Paste**).
+Add the cleanup action to the other task sequences in the MDT build lab
+deployment share (right-click the **Apply Local GPO Package** action in each
+task sequence and then click **Paste**).
 
 ---
 
@@ -4927,20 +5139,34 @@ cls
 
 ### Add action to task sequences to set MaxPatchCacheSize to 0
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows 7**, right-click **Windows 7 Ultimate (x86) - Baseline** and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Task Sequences / Windows
+   7**, right-click **Windows 7 Ultimate (x86) - Baseline** and click
+   **Properties**.
 2. In the **Windows 7 Ultimate (x86) - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content, .NET Framework 3.5, Office 2013, latest patches, and cleanup before Sysprep**
+      1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content,
+         .NET Framework 3.5, Office 2013, latest patches, and cleanup before
+         Sysprep**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
-         1. In the **Custom Tasks (Pre-Windows Update)** group, add a new **Run Command Line** action with the following settings:
+         1. In the **Custom Tasks (Pre-Windows Update)** group, add a new **Run
+            Command Line** action with the following settings:
             1. Name: **Set MaxPatchCacheSize to 0**
-            2. Command Line: **PowerShell.exe -Command "& { New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer'; New-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer' -Name MaxPatchCacheSize -PropertyType DWord -Value 0 | Out-Null }"**
-         2. Move **Set MaxPatchCache to 0** to be the first action in the **Custom Tasks (Pre-Windows Update)** group.
+            2. Command Line: **PowerShell.exe -Command "& { New-Item -Path
+               'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer';
+               New-ItemProperty -Path
+               'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer' -Name
+               MaxPatchCacheSize -PropertyType DWord -Value 0 | Out-Null }"**
+         2. Move **Set MaxPatchCache to 0** to be the first action in the
+            **Custom Tasks (Pre-Windows Update)** group.
    3. Right-click the **Set MaxPatchCacheSize to 0 **group and click **Copy**.
    4. Click **OK**.
 
-Add the copied action to the other task sequences in the MDT build lab deployment share (right-click the **Custom Tasks (Pre-Windows Update)** group in each task sequence, click **Paste**, and then move the action to the first position in the group).
+Add the copied action to the other task sequences in the MDT build lab
+deployment share (right-click the **Custom Tasks (Pre-Windows Update)** group in
+each task sequence, click **Paste**, and then move the action to the first
+position in the group).
 
 ---
 
@@ -5897,11 +6123,17 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2012 R2 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.
+> The MSDN version of Windows Server 2012 R2 will prompt to enter a product key
+> (but provide an option to skip this step). It does not honor the
+> SkipProductKey=YES entry in the MDT CustomSettings.ini file.
 
 > **Important**
 >
-> Windows Server 2012 R2 with Update requires a password to be specified for the Administrator account (unlike Windows 8.1). If an Administrator password is not specified in the task sequence, the Lite Touch Installation will prompt for a password (which must be subsequently be entered manually when completing the actions specified in the task sequence).
+> Windows Server 2012 R2 with Update requires a password to be specified for the
+> Administrator account (unlike Windows 8.1). If an Administrator password is
+> not specified in the task sequence, the Lite Touch Installation will prompt
+> for a password (which must be subsequently be entered manually when completing
+> the actions specified in the task sequence).
 
 ```PowerShell
 cls
@@ -5930,11 +6162,17 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2012 R2 will prompt to enter a product key (but provide an option to skip this step). It does not honor the SkipProductKey=YES entry in the MDT CustomSettings.ini file.
+> The MSDN version of Windows Server 2012 R2 will prompt to enter a product key
+> (but provide an option to skip this step). It does not honor the
+> SkipProductKey=YES entry in the MDT CustomSettings.ini file.
 
 > **Important**
 >
-> Windows Server 2012 R2 with Update requires a password to be specified for the Administrator account (unlike Windows 8.1). If an Administrator password is not specified in the task sequence, the Lite Touch Installation will prompt for a password (which must be subsequently be entered manually when completing the actions specified in the task sequence).
+> Windows Server 2012 R2 with Update requires a password to be specified for the
+> Administrator account (unlike Windows 8.1). If an Administrator password is
+> not specified in the task sequence, the Lite Touch Installation will prompt
+> for a password (which must be subsequently be entered manually when completing
+> the actions specified in the task sequence).
 
 ---
 
@@ -5960,19 +6198,29 @@ robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot C
 
 ## Add action to task sequences to create native images for .NET assemblies
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Production ([\\\\ICEMAN\\MDT-Deploy\$](\\ICEMAN\MDT-Deploy$)) / Task Sequences / Windows 7 **folder, right-click **Windows 7 Ultimate (x86)** and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Production
+   ([\\\\ICEMAN\\MDT-Deploy\$](\ICEMAN\MDT-Deploy$)) / Task Sequences / Windows
+   7 **folder, right-click **Windows 7 Ultimate (x86)** and click
+   **Properties**.
 2. In the **Windows 7 Ultimate (x86) Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Production image - create native images for .NET assemblies**
+      1. Comments: **Production image - create native images for .NET
+         assemblies**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
-         1. In the **Custom Tasks **group, add a new **Run Command Line** action with the following settings:
+         1. In the **Custom Tasks **group, add a new **Run Command Line** action
+            with the following settings:
             1. Name: **Create native images for .NET assemblies**
-            2. Command line: **PowerShell.exe -Command "Get-ChildItem \$env:SystemRoot\\Microsoft.NET -Filter Ngen.exe -Recurse | foreach { & \$\_.FullName executeQueuedItems }"**
-   3. Right-click the **Create native images for .NET assemblies** action and click **Copy**.
+            2. Command line: **PowerShell.exe -Command "Get-ChildItem
+               \$env:SystemRoot\\Microsoft.NET -Filter Ngen.exe -Recurse |
+               foreach { & \$\_.FullName executeQueuedItems }"**
+   3. Right-click the **Create native images for .NET assemblies** action and
+      click **Copy**.
    4. Click **OK**.
 
-Add the copied action to the other task sequences in the MDT production deployment share (right-click the **Custom Tasks **group in each task sequence, and click **Paste**).
+Add the copied action to the other task sequences in the MDT production
+deployment share (right-click the **Custom Tasks **group in each task sequence,
+and click **Paste**).
 
 ## Add SharePoint Designer 2013 to "SharePoint Server 2013 - Development" image
 
@@ -6034,30 +6282,50 @@ Remove-Item $tempSourcePath -Force -Recurse
 
 #### Configure Microsoft SharePoint Designer 2013 installation settings
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Applications / Microsoft**, right-click **SharePoint Designer 2013 with Service Pack 1 (x86)**, and click **Properties**.
-2. In the **SharePoint Designer 2013 with Service Pack 1 (x86) Properties** window:
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Applications / Microsoft**,
+   right-click **SharePoint Designer 2013 with Service Pack 1 (x86)**, and click
+   **Properties**.
+2. In the **SharePoint Designer 2013 with Service Pack 1 (x86) Properties**
+   window:
    1. On the **Office Products** tab:
-      1. In the **Office product to install** dropdown, ensure **SharePointDesigner** is selected.
+      1. In the **Office product to install** dropdown, ensure
+         **SharePointDesigner** is selected.
       2. In the **Config.xml settings** section:
-         1. Click the **Customer name** checkbox and then type **Technology Toolbox **in the corresponding textbox.
-         2. Click the **Display level** checkbox and then click **None **in the corresponding dropdown list.
+         1. Click the **Customer name** checkbox and then type **Technology
+            Toolbox **in the corresponding textbox.
+         2. Click the **Display level** checkbox and then click **None **in the
+            corresponding dropdown list.
          3. Click the **Accept EULA** checkbox.
          4. Click the **Always suppress reboot** checkbox.
-   2. In the **SharePoint Designer 2013 with Service Pack 1 (x86) Properties** window, click **OK**.
+   2. In the **SharePoint Designer 2013 with Service Pack 1 (x86) Properties**
+      window, click **OK**.
 
 ### Add action to "SharePoint Server 2013 - Development" task sequence to install SharePoint Designer 2013
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\ICEMAN\\MDT-Build\$](\\ICEMAN\MDT-Build$)) / Task Sequences / Windows Server 2012 R2**, right-click **SharePoint Server 2012 - Development**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
+   ([\\\\ICEMAN\\MDT-Build\$](\ICEMAN\MDT-Build$)) / Task Sequences / Windows
+   Server 2012 R2**, right-click **SharePoint Server 2012 - Development**, and
+   click **Properties**.
 2. In the **SharePoint Server 2012 - Development** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - Windows Server 2012 R2, MaxPatchCacheSize = 0, Toolbox content, Windows features for SharePoint 2013, PowerShell help files, SQL Server 2014, Visual Studio 2013 with Update 4, Office 2013, SharePoint Designer 2013, SharePoint Server 2013, latest patches, and cleanup before Sysprep**
+      1. Comments: **Reference image - Windows Server 2012 R2, MaxPatchCacheSize
+         = 0, Toolbox content, Windows features for SharePoint 2013, PowerShell
+         help files, SQL Server 2014, Visual Studio 2013 with Update 4, Office
+         2013, SharePoint Designer 2013, SharePoint Server 2013, latest patches,
+         and cleanup before Sysprep**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
-         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Install Application** action with the following settings:
-            1. Name: **Install SharePoint Designer 2013 with Service Pack 1 (x86)**
+         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
+            **Install Application** action with the following settings:
+            1. Name: **Install SharePoint Designer 2013 with Service Pack 1
+               (x86)**
             2. **Install a single application**
-            3. Application to install: **Applications / Microsoft / SharePoint Designer 2013 with Service Pack 1 (x86)**
-         2. Move **Install SharePoint Designer 2013 with Service Pack 1 (x86)** after the **Install Microsoft Office 2013 Professional Plus (x86)** action.
+            3. Application to install: **Applications / Microsoft / SharePoint
+               Designer 2013 with Service Pack 1 (x86)**
+         2. Move **Install SharePoint Designer 2013 with Service Pack 1 (x86)**
+            after the **Install Microsoft Office 2013 Professional Plus (x86)**
+            action.
    3. Click **OK**.
 
 ```PowerShell
@@ -6785,7 +7053,10 @@ TODO:
 
 #### Enable action to run Windows Update after installing applications
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Production ([\\\\ICEMAN\\MDT-Deploy\$](\\ICEMAN\MDT-Deploy$)) / Task Sequences / Windows 8.1 **folder, right-click **Windows 8.1 Enterprise x64** and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Production
+   ([\\\\ICEMAN\\MDT-Deploy\$](\ICEMAN\MDT-Deploy$)) / Task Sequences / Windows
+   8.1 **folder, right-click **Windows 8.1 Enterprise x64** and click
+   **Properties**.
 2. On the **Task Sequence** tab, configure the following settings:
    1. **State Restore**
       1. Enable the **Windows Update (Post-Application Installation)** action.
@@ -6953,7 +7224,8 @@ $commandLine = "vs_ultimate.exe /Quiet /NoRestart" `
 
 > **Important**
 >
-> You must specify the full path for the **AdminFile** parameter or else vs_ultimate.exe terminates with an error.
+> You must specify the full path for the **AdminFile** parameter or else
+> vs_ultimate.exe terminates with an error.
 
 ```PowerShell
 Import-Module 'C:\Program Files\Microsoft Deployment Toolkit\Bin\MicrosoftDeploymentToolkit.psd1'
@@ -7035,7 +7307,8 @@ $commandLine = "vs_ultimate.exe /Quiet /NoRestart" `
 
 > **Important**
 >
-> You must specify the full path for the **AdminFile** parameter or else vs_ultimate.exe terminates with an error.
+> You must specify the full path for the **AdminFile** parameter or else
+> vs_ultimate.exe terminates with an error.
 
 ```PowerShell
 Import-MDTApplication `
@@ -7199,8 +7472,10 @@ Install-WindowsFeature `
 
 ### Configure SMTP Server
 
-1. Open **Server Manager**, select **Tools**, and then select **Internet Information Services (IIS) 6.0 Manager**.
-2. Expand the current server, right-click the **SMTP Virtual Server**, and then click **Properties**.
+1. Open **Server Manager**, select **Tools**, and then select **Internet
+   Information Services (IIS) 6.0 Manager**.
+2. Expand the current server, right-click the **SMTP Virtual Server**, and then
+   click **Properties**.
 3. In the **SMTP Virtual Server Properties** window:
    1. On the **Access** tab:
       1. In the **Access control **section, click **Authentication...**
@@ -7210,13 +7485,17 @@ Install-WindowsFeature `
       3. In the **Relay restrictions **section, click **Relay...**
       4. In the **Relay Restrictions** window:
          1. Ensure the **Only the list below** option is selected.
-         2. Ensure **Allow all computers which successfully authenticate to relay, regardless of the list above** is selected.
+         2. Ensure **Allow all computers which successfully authenticate to
+            relay, regardless of the list above** is selected.
          3. Click **OK**.
    2. Click **OK**.
-4. Expand the **SMTP Virtual Server** node, right-click **Domains**, point to **New**, and select **Domain...**
+4. Expand the **SMTP Virtual Server** node, right-click **Domains**, point to
+   **New**, and select **Domain...**
 5. In the **New SMTP Domain Wizard**:
-   1. On the welcome page, ensure the **Remote** option is selected, and click **Next**.
-   2. On the **Domain Name** page, in the **Name** box, type **technologytoolbox.com**, and click **Finish**.
+   1. On the welcome page, ensure the **Remote** option is selected, and click
+      **Next**.
+   2. On the **Domain Name** page, in the **Name** box, type
+      **technologytoolbox.com**, and click **Finish**.
 
 ### # Configure SMTP service to start automatically
 
@@ -7230,11 +7509,13 @@ Start-Service -Name SMTPSVC
 
 ### Issue
 
-After joining 20 computers to the domain, MDT deployments started failing to join the computers to the domain.
+After joining 20 computers to the domain, MDT deployments started failing to
+join the computers to the domain.
 
 ### Resolution
 
-Grant the service account (TECHTOOLBOX\\s-mdt-deploy) the appropriate permission on the domain:
+Grant the service account (TECHTOOLBOX\\s-mdt-deploy) the appropriate permission
+on the domain:
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/27467670E4C2D22984F1B8E5126C058A684B803C.png)
 
@@ -7371,7 +7652,9 @@ Address:  2001:558:feed::1
 
 > **Note**
 >
-> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on the Comcast router -- and subsequently restarting the VM -- the incorrect DNS server is assigned to the network adapter.
+> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on
+> the Comcast router -- and subsequently restarting the VM -- the incorrect DNS
+> server is assigned to the network adapter.
 
 ### Solution
 
@@ -7517,12 +7800,17 @@ Download
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/54/E87D0A010848FA04D05B3B15F37AB27B14AB4754.png)
 
-Learn more - [https://go.microsoft.com/fwlink/?linkid=850962](https://go.microsoft.com/fwlink/?linkid=850962)
+Learn more -
+[https://go.microsoft.com/fwlink/?linkid=850962](https://go.microsoft.com/fwlink/?linkid=850962)
 
-If you have a single forest on-premises, then the attribute you should use is objectGUID. This is also the attribute used when you use express settings in Azure AD Connect and also the attribute used by DirSync.\
-If you have multiple forests and do not move users between forests and domains, then objectGUID is a good attribute to use even in this case.
+If you have a single forest on-premises, then the attribute you should use is
+objectGUID. This is also the attribute used when you use express settings in
+Azure AD Connect and also the attribute used by DirSync.\
+If you have multiple forests and do not move users between forests and domains, then
+objectGUID is a good attribute to use even in this case.
 
-From <[https://docs.microsoft.com/en-us/azure/active-directory/hybrid/plan-connect-design-concepts](https://docs.microsoft.com/en-us/azure/active-directory/hybrid/plan-connect-design-concepts)>
+From
+<[https://docs.microsoft.com/en-us/azure/active-directory/hybrid/plan-connect-design-concepts](https://docs.microsoft.com/en-us/azure/active-directory/hybrid/plan-connect-design-concepts)>
 
 [https://go.microsoft.com/fwlink/?linkid=862773](https://go.microsoft.com/fwlink/?linkid=862773)
 
