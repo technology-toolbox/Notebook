@@ -613,6 +613,8 @@ A9AB28D626F2C7D0C19DDD72A4C200D43D37A2A4  CN=admin.technologytoolbox.com, OU=IT,
 1. In the **Windows Admin Center Setup** window, complete the steps to update
    the certificate (by specifying the thumbprint for the new certificate).
 
+## Install Azure Active Directory Connect
+
 **TODO:**
 
 ```PowerShell

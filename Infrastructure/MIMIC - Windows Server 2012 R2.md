@@ -7843,3 +7843,8 @@ msiexec.exe /i $msiPath `
 ```
 
 ### Approve manual agent install in Operations Manager
+
+## Remove Azure Active Directory Connect
+
+Note: The current version of Azure AD Connect requires Windows Server 2016 or
+later.
