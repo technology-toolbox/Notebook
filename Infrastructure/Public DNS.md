@@ -371,3 +371,53 @@ $dnsRecordSet.Records[0].Value = 'rkSOoczn9sw81sIuwErFAGwBAAFXEBZZ1H1DoKn68Os'
 
 Set-AzDnsRecordSet -RecordSet $dnsRecordSet
 ```
+
+## Update SPF DNS record for sending e-mail directly to Microsoft 365
+
+**Reference:**
+
+**Option 2: Send mail directly from your printer or application to Microsoft 365
+or Office 365 (direct send)**\
+Pasted from <[https://docs.microsoft.com/en-us/exchange/mail-flow-best-practices/how-to-set-up-a-multifunction-device-or-application-to-send-email-using-microsoft-365-or-office-365#option-2-send-mail-directly-from-your-printer-or-application-to-microsoft-365-or-office-365-direct-send](https://docs.microsoft.com/en-us/exchange/mail-flow-best-practices/how-to-set-up-a-multifunction-device-or-application-to-send-email-using-microsoft-365-or-office-365#option-2-send-mail-directly-from-your-printer-or-application-to-microsoft-365-or-office-365-direct-send)>
+
+```PowerShell
+# Update SPF DNS record
+
+Connect-AzAccount
+```
+
+```PowerShell
+Select-AzSubscription 'Visual Studio Ultimate with MSDN'
+
+$dnsRecordSet = Get-AzDnsRecordSet -ResourceGroupName Zeus-02 `
+  -ZoneName technologytoolbox.com `
+  -Name '@' `
+  -RecordType TXT
+
+$dnsRecordSet.Records
+```
+
+```Text
+Value
+-----
+v=spf1 include:spf.protection.outlook.com -all
+google-site-verification=LzQJ4C7DVBHccHu-iktJPvVPxqiyChEJaB_nf3XXQiI
+google-site-verification=RCaci3p1mj1fzyNvq1LhBaDh2pbF43ydBgR6nRpt5eE
+```
+
+```PowerShell
+$dnsRecordSet.Records[0]
+```
+
+```Text
+Value
+-----
+v=spf1 include:spf.protection.outlook.com -all
+```
+
+```PowerShell
+$dnsRecordSet.Records[0].Value = `
+    'v=spf1 ip4:76.25.116.124 include:spf.protection.outlook.com -all'
+
+Set-AzDnsRecordSet -RecordSet $dnsRecordSet
+```
