@@ -421,3 +421,51 @@ $dnsRecordSet.Records[0].Value = `
 
 Set-AzDnsRecordSet -RecordSet $dnsRecordSet
 ```
+
+## Update SPF DNS record for sending e-mail via SendGrid
+
+```PowerShell
+# Update SPF DNS record
+
+Connect-AzAccount
+```
+
+```PowerShell
+Select-AzSubscription 'Visual Studio Ultimate with MSDN'
+
+$dnsRecordSet = Get-AzDnsRecordSet -ResourceGroupName Zeus-02 `
+  -ZoneName technologytoolbox.com `
+  -Name '@' `
+  -RecordType TXT
+
+$dnsRecordSet.Records
+```
+
+```Text
+Value
+-----
+v=spf1 ip4:76.25.116.124 include:spf.protection.outlook.com -all
+google-site-verification=LzQJ4C7DVBHccHu-iktJPvVPxqiyChEJaB_nf3XXQiI
+google-site-verification=RCaci3p1mj1fzyNvq1LhBaDh2pbF43ydBgR6nRpt5eE
+```
+
+```PowerShell
+$dnsRecordSet.Records[0]
+```
+
+```Text
+Value
+-----
+v=spf1 ip4:76.25.116.124 include:spf.protection.outlook.com -all
+```
+
+```PowerShell
+$dnsRecordSet.Records[0].Value = `
+    ('v=spf1' `
+      + ' ip4:76.25.116.124' `
+      + ' include:spf.protection.outlook.com' `
+      + ' include:sendgrid.net' `
+      + ' -all')
+
+Set-AzDnsRecordSet -RecordSet $dnsRecordSet
+```
