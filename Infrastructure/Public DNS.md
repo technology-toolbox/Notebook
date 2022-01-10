@@ -334,7 +334,7 @@ $dnsRecordSet = Get-AzDnsRecordSet -ResourceGroupName Zeus-02 `
   -Name _acme-challenge.darkstat.corp `
   -RecordType TXT
 
-$dnsRecordSet.Records[0].Value = 'KgrWfKdT08NldrLV564X0Ew1IPuWKcjNbLukWZs7RHQ'
+$dnsRecordSet.Records[0].Value = 're4SItEDoIME0vNkRE15Vs3_I5cnzBEhrSLrBSAptb0'
 
 Set-AzDnsRecordSet -RecordSet $dnsRecordSet
 
@@ -345,7 +345,7 @@ $dnsRecordSet = Get-AzDnsRecordSet -ResourceGroupName Zeus-02 `
   -Name _acme-challenge.fw01.corp `
   -RecordType TXT
 
-$dnsRecordSet.Records[0].Value = 'i4de92q2gBTZe7O9tQ_rYtLlvuifltZi34jLP5C8HqI'
+$dnsRecordSet.Records[0].Value = 'n-rMI55n0YCIZODRP1ou7BynXFnacYwzFM4d7b4ohv0'
 
 Set-AzDnsRecordSet -RecordSet $dnsRecordSet
 
@@ -356,7 +356,7 @@ $dnsRecordSet = Get-AzDnsRecordSet -ResourceGroupName Zeus-02 `
   -Name _acme-challenge.k8s-01.corp `
   -RecordType TXT
 
-$dnsRecordSet.Records[0].Value = 'YVvT_ILl7HpxzLNxfl1N5_0obzmqlqmCzA4Ae7clUNc'
+$dnsRecordSet.Records[0].Value = '6F5zT94P6wRIlG7djWDsTVz3GFxAntU1jMul6qywYqc'
 
 Set-AzDnsRecordSet -RecordSet $dnsRecordSet
 
@@ -367,7 +367,7 @@ $dnsRecordSet = Get-AzDnsRecordSet -ResourceGroupName Zeus-02 `
   -Name _acme-challenge.sw01.corp `
   -RecordType TXT
 
-$dnsRecordSet.Records[0].Value = 'rkSOoczn9sw81sIuwErFAGwBAAFXEBZZ1H1DoKn68Os'
+$dnsRecordSet.Records[0].Value = 'mN6w5hXFO4H1x98JqOEPTNdZ_G7kAqI55d0TM-RdSYQ'
 
 Set-AzDnsRecordSet -RecordSet $dnsRecordSet
 ```
