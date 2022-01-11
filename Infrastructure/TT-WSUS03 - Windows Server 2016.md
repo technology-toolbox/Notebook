@@ -607,28 +607,6 @@ Push-Location 'C:\Program Files\Update Services\Tools\'
 Pop-Location
 ```
 
-```PowerShell
-cls
-```
-
-#### # Configure WSUS to require SSL for some connections
-
-```PowerShell
-@("APIremoting30",
-    "ClientWebService"
-    "DSSAuthWebService",
-    "ServerSyncWebService",
-    "SimpleAuthWebService") |
-    foreach {
-        Set-WebConfigurationProperty `
-             -Filter /system.webServer/security/access `
-             -Name sslFlags `
-             -Value Ssl `
-             -PSPath IIS:\ `
-             -Location "WSUS Administration/$_"
-    }
-```
-
 #### Configure HTTPS binding on IIS website
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/20/D40B6EF7536FD41FFB3A935DEFA6C78603DBB320.png)
