@@ -15,7 +15,7 @@ cls
 New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
   -ZoneName technologytoolbox.com `
   -Name '@' -RecordType A -Ttl 3600 `
-  -DnsRecords (New-AzDnsRecordConfig -Ipv4Address 40.122.160.156) |
+  -DnsRecords (New-AzDnsRecordConfig -Ipv4Address 20.84.237.30) |
   Out-Null
 ```
 
@@ -185,7 +185,7 @@ New-AzDnsRecordSet -ResourceGroupName 'Zeus-02' `
   -ZoneName technologytoolbox.com `
   -Name 'www' -RecordType CNAME -Ttl 3600 `
   -DnsRecords (
-    New-AzDnsRecordConfig -Cname 'nice-wave-0f7d7c51e.azurestaticapps.net.') |
+    New-AzDnsRecordConfig -Cname 'thankful-pond-09e2c5f10.1.azurestaticapps.net.') |
   Out-Null
 ```
 
