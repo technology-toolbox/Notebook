@@ -1883,6 +1883,53 @@ Update-Help
 >
 > Repeat until there are no updates available for the computer.
 
+## Expand L: (Log01) drive
+
+---
+
+**TT-ADMIN04** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Increase size of "Log01" VHD
+
+```PowerShell
+$vmHost = "TT-HV05F"
+$vmName = "TT-DPM06"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + "_Log01.vhdx") `
+    -SizeBytes 2GB
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend partition
+
+```PowerShell
+$driveLetter = "L"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
 **TODO:**
 
 ```PowerShell
