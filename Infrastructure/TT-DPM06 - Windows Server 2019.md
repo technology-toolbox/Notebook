@@ -1930,6 +1930,53 @@ Resize-Partition `
     -Size $size.SizeMax
 ```
 
+## Expand T: (Temp01) drive
+
+---
+
+**TT-ADMIN04** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Increase size of "Temp01" VHD
+
+```PowerShell
+$vmHost = "TT-HV05F"
+$vmName = "TT-DPM06"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + "_Temp01.vhdx") `
+    -SizeBytes 2GB
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend partition
+
+```PowerShell
+$driveLetter = "T"
+
+$partition = Get-Partition -DriveLetter $driveLetter |
+    where { $_.DiskNumber -ne $null }
+
+$size = (Get-PartitionSupportedSize `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber)
+
+Resize-Partition `
+    -DiskNumber $partition.DiskNumber `
+    -PartitionNumber $partition.PartitionNumber `
+    -Size $size.SizeMax
+```
+
 **TODO:**
 
 ```PowerShell
