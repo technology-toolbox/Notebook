@@ -6567,3 +6567,99 @@ Pop-Location
 ```
 
 ---
+
+```PowerShell
+cls
+```
+
+## # Upgrade to latest version of Windows Server 2022 (June 2022)
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+```
+
+### # Import operating system - "Windows Server 2022"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows Server 2022" `
+    + "\en-us_windows_server_2022_updated_june_2022_x64_dvd_ac918027.iso"
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "WS2022-Jun-2022"
+
+Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows Server 2022" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+```
+
+```PowerShell
+cls
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+### Modify task sequence to use new version of Windows Server 2022
+
+1. Expand the **Install** group and select the **Install Operating System**
+   task.
+2. In the **Operating system to install** section, click **Browse** and select
+   the following item:
+
+   **Windows Server 2022 SERVERSTANDARD in WS2022-Jun-2022 install.wim**
+
+### Delete old versions of Windows Server 2022
+
+---
+
+**STORM** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy \\TT-FS01\MDT-Build$ Z:\NotBackedUp\MDT-Build /E /MIR /XD .git
+```
+
+#### Format XML files using Visual Studio
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location Z:\NotBackedUp\MDT-Build
+
+git add Control/*
+
+git commit -m "Upgrade to latest version of Windows Server 2022 (June 2022)"
+
+git push
+
+Pop-Location
+```
+
+---
