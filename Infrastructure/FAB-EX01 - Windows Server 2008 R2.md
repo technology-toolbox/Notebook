@@ -198,12 +198,12 @@ mountvol X: $volumeId
 
 ### Configure VM storage
 
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label      | Host Cache |
-| ---- | ------------ | ----------- | -------------------- | ----------------- | ---------- |
-| 0    | C:           | 127 GB      | 4K                   |                   | Read/Write |
-| 1    | D:           | 50 GB       | 4K                   | Temporary Storage |            |
-| 2    | E:           | 25 GB       | 64K                  | Data01            | Read Only  |
-| 3    | L:           | 5 GB        | 64K                  | Log01             | Read Only  |
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label | Host Cache |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 127 GB | 4K |  | Read/Write |
+| 1 | D: | 50 GB | 4K | Temporary Storage |  |
+| 2 | E: | 25 GB | 64K | Data01 | Read Only |
+| 3 | L: | 5 GB | 64K | Log01 | Read Only |
 
 ### Install Firefox (to download software from MSDN)
 
@@ -292,8 +292,7 @@ Set-Service NetTcpPortSharing -StartupType Automatic
 
 ## Prepare Active Directory and domains
 
-From
-<[https://technet.microsoft.com/en-us/library/bb125224(v=exchg.141).aspx](https://technet.microsoft.com/en-us/library/bb125224(v=exchg.141).aspx)>
+From <[https://technet.microsoft.com/en-us/library/bb125224(v=exchg.141).aspx](https://technet.microsoft.com/en-us/library/bb125224(v=exchg.141).aspx)>
 
 ### Prepare schema
 
@@ -416,15 +415,11 @@ Click **Next**.
 New-ExchangeCertificate -FriendlyName 'Fabrikam E-mail' -GenerateRequest -PrivateKeyExportable $true -KeySize '2048' -SubjectName 'C=US,S="CO",L="Denver",O="Fabrikam Technologies",OU="IT",CN=mail.fabrikam.com' -DomainName 'fab-ex01.corp.fabrikam.com','mail.fabrikam.com','fabrikam.com','autodiscover.fabrikam.com' -Server 'FAB-EX01'
 ```
 
-Step 1: Based on the information you provided, you must use a [Unified
-Communications certificate](Unified Communications certificate). Please get the
-certificate from a certification authority.
+Step 1: Based on the information you provided, you must use a [Unified Communications certificate](Unified Communications certificate). Please get the certificate from a certification authority.
 
-Step 2: Use the Complete Pending Request wizard to map the certificate to the
-certificate request created on the server.
+Step 2: Use the Complete Pending Request wizard to map the certificate to the certificate request created on the server.
 
-Step 3: Assign the Exchange services to the certificate using the Assign
-Services to Certificate wizard.
+Step 3: Assign the Exchange services to the certificate using the Assign Services to Certificate wizard.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/E4/E02A55E7ACC554D4E81D03C4E1B18CEFBC0F1CE4.png)
 
@@ -468,8 +463,7 @@ Set-ItemProperty -Path $registryKey -Name https -Value 2
 & 'C:\Program Files (x86)\Internet Explorer\iexplore.exe' ("https://" + $adcsHostname)
 ```
 
-Browse to
-[https://cipher01.corp.technologytoolbox.com](https://cipher01.corp.technologytoolbox.com).
+Browse to [https://cipher01.corp.technologytoolbox.com](https://cipher01.corp.technologytoolbox.com).
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/10/6F890F12858D8A278B214CC8082EFEB48E583510.png)
 
@@ -477,8 +471,7 @@ Click **Request a certificate**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B2/F2C70E2873CA5FBC949F4E308B4863EBC084D8B2.png)
 
-Click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10
-file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+Click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/DE/35FA6C3C953425DBF7A844268D48F099F6E601DE.png)
 
@@ -500,8 +493,7 @@ Copy certificate to FAB-EX01.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/03/46CEFE2EE46C4E6A7D41E35CFC4C4E213CEBD603.png)
 
-In the Exchange Certificates tab, select the **Fabrikam E-mail** pending
-request.\
+In the Exchange Certificates tab, select the **Fabrikam E-mail** pending request.\
 Click **Complete Pending Request...**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/0B52766AB0C39D8F70DBDA91AD18EA409CD6E8DD.png)
@@ -566,22 +558,17 @@ Enable-Mailbox -Identity FABRIKAM\smasters
 
 ## Simplify the Outlook Web App URL
 
-From
-<[https://technet.microsoft.com/en-us/library/aa998359(v=exchg.141).aspx](https://technet.microsoft.com/en-us/library/aa998359(v=exchg.141).aspx)>
+From <[https://technet.microsoft.com/en-us/library/aa998359(v=exchg.141).aspx](https://technet.microsoft.com/en-us/library/aa998359(v=exchg.141).aspx)>
 
 ### Use IIS Manager to simplify the Outlook Web App URL when SSL is required
 
 1. Start IIS Manager.
-2. Expand the local computer, expand **Sites**, and then click **Default Web
-   Site**.
-3. At the bottom of the **Default Web Site Home** pane, click **Features View**
-   if this option isn't already selected.
+2. Expand the local computer, expand **Sites**, and then click **Default Web Site**.
+3. At the bottom of the **Default Web Site Home** pane, click **Features View** if this option isn't already selected.
 4. In the **IIS** section, double-click **HTTP Redirect**.
 5. Select the **Redirect requests to this destination** check box.
-6. Type the absolute path of the /owa virtual directory -
-   **[https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)**.
-7. Under **Redirect Behavior**, select the **Only redirect requests to content
-   in this directory (not subdirectories)** check box.
+6. Type the absolute path of the /owa virtual directory - **[https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)**.
+7. Under **Redirect Behavior**, select the **Only redirect requests to content in this directory (not subdirectories)** check box.
 8. In the **Status code** list, click **Found (302)**.
 9. In the **Actions** pane, click **Apply**.
 10. Click **Default Web Site**.
@@ -591,12 +578,9 @@ From
 
 ### Test Outlook Web App
 
-1. Open Internet Explorer and browse to
-   [http://mail.fabrikam.com](http://mail.fabrikam.com)
-2. Confirm the browser automatically redirects to
-   [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)
-3. On the Outlook Web App login page, type the user credentials and click **Sign
-   in**.
+1. Open Internet Explorer and browse to [http://mail.fabrikam.com](http://mail.fabrikam.com)
+2. Confirm the browser automatically redirects to [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)
+3. On the Outlook Web App login page, type the user credentials and click **Sign in**.
 4. Confirm the Exchange inbox is displayed.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/9F398A16AECB05A9372BB8B0186CC38DA2CD1484.png)
@@ -662,14 +646,11 @@ cd \NotBackedUp\Temp
 
 ## Fix the Outlook Web App
 
-Applying Exchange Server SP3 reverts the configuration change made previously in
-IIS Manager to clear the **Require SSL** option on the Outlook Web App.
+Applying Exchange Server SP3 reverts the configuration change made previously in IIS Manager to clear the **Require SSL** option on the Outlook Web App.
 
 1. Start IIS Manager.
-2. Expand the local computer, expand **Sites**, and then click **Default Web
-   Site**.
-3. At the bottom of the **Default Web Site Home** pane, click **Features View**
-   if this option isn't already selected.
+2. Expand the local computer, expand **Sites**, and then click **Default Web Site**.
+3. At the bottom of the **Default Web Site Home** pane, click **Features View** if this option isn't already selected.
 4. In the **Default Web Site Home** pane, double-click **SSL Settings**.
 5. In the **SSL Settings** pane, clear the **Require SSL** checkbox.
 6. In the **Actions** pane, click **Apply**.
@@ -678,12 +659,9 @@ IIS Manager to clear the **Require SSL** option on the Outlook Web App.
 
 ### Repro steps
 
-1. Open Internet Explorer and browse to
-   [http://mail.fabrikam.com/owa](http://mail.fabrikam.com/owa)
-   > **Note:** In this case, IIS does not redirect to
-   > [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa).
-2. On the Outlook Web App login page, type the user credentials and click **Sign
-   in**.
+1. Open Internet Explorer and browse to [http://mail.fabrikam.com/owa](http://mail.fabrikam.com/owa)
+   > **Note:** In this case, IIS does not redirect to [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa).
+2. On the Outlook Web App login page, type the user credentials and click **Sign in**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/78/912114981A271CBDF9338BC9589B358FFE92C378.png)
 
@@ -691,27 +669,21 @@ IIS Manager to clear the **Require SSL** option on the Outlook Web App.
 
 ### Resolution
 
-Revert the configuration change made previously in IIS Manager to clear the
-**Require SSL** option on the Outlook Web App.
+Revert the configuration change made previously in IIS Manager to clear the **Require SSL** option on the Outlook Web App.
 
 1. Start IIS Manager.
-2. Expand the local computer, expand **Sites**, and then click **Default Web
-   Site**.
-3. At the bottom of the **Default Web Site Home** pane, click **Features View**
-   if this option isn't already selected.
+2. Expand the local computer, expand **Sites**, and then click **Default Web Site**.
+3. At the bottom of the **Default Web Site Home** pane, click **Features View** if this option isn't already selected.
 4. In the **Default Web Site Home** pane, double-click **SSL Settings**.
 5. In the **SSL Settings** pane, select the **Require SSL** checkbox.
 6. In the **Actions** pane, click **Apply**.
 
 ### Test Outlook Web App
 
-1. Open Internet Explorer and browse to
-   [http://mail.fabrikam.com](http://mail.fabrikam.com)
+1. Open Internet Explorer and browse to [http://mail.fabrikam.com](http://mail.fabrikam.com)
 2. Confirm an HTTP 403 error is returned.
-3. Open Internet Explorer and browse to
-   [https://mail.fabrikam.com](https://mail.fabrikam.com)
-4. Confirm the browser automatically redirects to
-   [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)
+3. Open Internet Explorer and browse to [https://mail.fabrikam.com](https://mail.fabrikam.com)
+4. Confirm the browser automatically redirects to [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/07/B208EDB561A2DB31D53F5F83C3B6E900E23FA107.png)
 
@@ -719,19 +691,15 @@ Revert the configuration change made previously in IIS Manager to clear the
 
 ### Test Exchange control panel
 
-1. Open Internet Explorer and browse to
-   [http://mail.fabrikam.com/ecp](http://mail.fabrikam.com/ecp)
+1. Open Internet Explorer and browse to [http://mail.fabrikam.com/ecp](http://mail.fabrikam.com/ecp)
 2. Confirm an HTTP 403 error is returned.
-3. Open Internet Explorer and browse to
-   [https://mail.fabrikam.com/ecp](https://mail.fabrikam.com/ecp)
+3. Open Internet Explorer and browse to [https://mail.fabrikam.com/ecp](https://mail.fabrikam.com/ecp)
 4. Confirm the browser automatically redirects to the OWA login form.
-5. On the Outlook Web App login page, type the user credentials and click **Sign
-   in**.
+5. On the Outlook Web App login page, type the user credentials and click **Sign in**.
 6. Confirm the Exchange control panel is displayed.
 7. Click **sign out**.
 8. Close Internet Explorer and then open a new instance.
-9. Browse to [https://mail.fabrikam.com/ecp](https://mail.fabrikam.com/ecp) and
-   login using credentials for an Exchange administrator.
+9. Browse to [https://mail.fabrikam.com/ecp](https://mail.fabrikam.com/ecp) and login using credentials for an Exchange administrator.
 10. Confirm the Exchange control panel is displayed as expected.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/287C255A38614093A5EA8B28801D5919CC3591B9.png)
@@ -747,47 +715,36 @@ Revert the configuration change made previously in IIS Manager to clear the
 ### Use IIS Manager to simplify the Outlook Web App URL when SSL is required
 
 1. Start IIS Manager.
-2. In the **Connections** pane, expand the local computer, expand **Sites**, and
-   then click **Default Web Site**.
-3. At the bottom of the **Default Web Site Home** pane, click **Features View**
-   if this option isn't already selected.
+2. In the **Connections** pane, expand the local computer, expand **Sites**, and then click **Default Web Site**.
+3. At the bottom of the **Default Web Site Home** pane, click **Features View** if this option isn't already selected.
 4. In the **IIS** section, double-click **HTTP Redirect**.
 5. Select the **Redirect requests to this destination** check box.
-6. Type the absolute path of the /owa virtual directory -
-   **[https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)**.
-7. Under **Redirect Behavior**, select the **Only redirect requests to content
-   in this directory (not subdirectories)** check box.
+6. Type the absolute path of the /owa virtual directory - **[https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)**.
+7. Under **Redirect Behavior**, select the **Only redirect requests to content in this directory (not subdirectories)** check box.
 8. In the **Status code** list, click **Found (302)**.
 9. In the **Actions** pane, click **Apply**.
 10. In the **Connections** pane, select **Default Web Site**.
 11. In the **Default Web Site Home** pane, double-click **SSL Settings**.
 12. In the **SSL Settings** pane, clear the **Require SSL** checkbox.
 13. In the **Actions** pane, click **Apply**.
-14. In the **Connections** pane, expand **Default Web Site**, and then select
-    **owa**.
+14. In the **Connections** pane, expand **Default Web Site**, and then select **owa**.
 15. In the **/owa Home** pane, double-click **SSL Settings**.
 16. In the **SSL Settings** pane, select the **Require SSL** checkbox.
 17. In the **Actions** pane, click **Apply**.
-18. In the **Connections** pane, expand **Default Web Site**, and then select
-    **ecp**.
+18. In the **Connections** pane, expand **Default Web Site**, and then select **ecp**.
 19. In the **/ecp Home** pane, double-click **SSL Settings**.
 20. In the **SSL Settings** pane, select the **Require SSL** checkbox.
 21. In the **Actions** pane, click **Apply**.
 
 ### Test Outlook Web App
 
-1. Open Internet Explorer and browse to
-   [http://mail.fabrikam.com](http://mail.fabrikam.com)
-2. Confirm the browser automatically redirects to
-   [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)
-3. On the Outlook Web App login page, type the user credentials and click **Sign
-   in**.
+1. Open Internet Explorer and browse to [http://mail.fabrikam.com](http://mail.fabrikam.com)
+2. Confirm the browser automatically redirects to [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)
+3. On the Outlook Web App login page, type the user credentials and click **Sign in**.
 4. Confirm the Exchange inbox is displayed.
-5. Restart Internet Explorer and browse to
-   [http://mail.fabrikam.com/owa](http://mail.fabrikam.com/owa).
+5. Restart Internet Explorer and browse to [http://mail.fabrikam.com/owa](http://mail.fabrikam.com/owa).
 6. Confirm an HTTP 403 error is returned.
-7. Open Internet Explorer and browse to
-   [https://mail.fabrikam.com/ecp](https://mail.fabrikam.com/ecp).
+7. Open Internet Explorer and browse to [https://mail.fabrikam.com/ecp](https://mail.fabrikam.com/ecp).
 8. Confirm an HTTP 403 error is returned.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/9F398A16AECB05A9372BB8B0186CC38DA2CD1484.png)
@@ -858,8 +815,7 @@ Organizational unit "corp.fabrikam.com/Resources/Conference Rooms" was not found
     + FullyQualifiedErrorId : 382C1DB8
 ```
 
-**Workaround:** Force replication from FAB-DC01 to FAB-DC02 using Active
-Directory Sites and Services.
+**Workaround:** Force replication from FAB-DC01 to FAB-DC02 using Active Directory Sites and Services.
 
 ```PowerShell
 New-Mailbox `

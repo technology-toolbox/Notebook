@@ -57,8 +57,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ### Install custom Windows 10 image
 
-- On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and
-  click **Next**.
+- On the **Task Sequence** step, select **Windows 10 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **TT-ADMIN04**.
   - Click **Next**.
@@ -72,8 +71,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
       - **Microsoft Report Viewer 2012 (bundle)**
       - **SQL Server Management Studio**
       - **System Center 2012 R2 Configuration Manager Toolkit**
-      - **System Center Data Protection Manager 2019 - Central Console
-        (bundle)**
+      - **System Center Data Protection Manager 2019 - Central Console (bundle)**
       - **System Center Operations Manager 2019 - Operations Console (bundle)**
       - **System Center Virtual Machine Manager 2019 - Console**
     - **Mozilla**
@@ -83,18 +81,15 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 > **Note**
 >
-> After the custom Windows 10 image is installed, the following message is
-> displayed:\
+> After the custom Windows 10 image is installed, the following message is displayed:\
 > This user can't sign in because this account is currently disabled.\
-> Click **OK** to acknowledge the local Administrator account is disabled by
-> default in Windows 10.
+> Click **OK** to acknowledge the local Administrator account is disabled by default in Windows 10.
 
 ### Login as TECHTOOLBOX\\jjameson-admin
 
 > **Important**
 >
-> Wait for the "Install Applications" and other remaining deployment steps to
-> complete before proceeding.
+> Wait for the "Install Applications" and other remaining deployment steps to complete before proceeding.
 
 ---
 
@@ -226,8 +221,7 @@ Enable-PSRemoting -Confirm:$false
 
 > **Note**
 >
-> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG
-> ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
+> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
 
 ### Baseline virtual machine
 
@@ -284,8 +278,7 @@ Get-WindowsCapability -Name Rsat* -Online | select DisplayName, State
 
 #### Reference
 
-**Use PowerShell to Install the Remote Server Administration Tools (RSAT) on
-Windows 10 version 1809**\
+**Use PowerShell to Install the Remote Server Administration Tools (RSAT) on Windows 10 version 1809**\
 From <[https://mikefrobbins.com/2018/10/03/use-powershell-to-install-the-remote-server-administration-tools-rsat-on-windows-10-version-1809/](https://mikefrobbins.com/2018/10/03/use-powershell-to-install-the-remote-server-administration-tools-rsat-on-windows-10-version-1809/)>
 
 ```PowerShell
@@ -313,8 +306,7 @@ At line:1 char:1
 **Workaround:**
 
 1. Open the **Start** menu and search for **Turn Windows features on or off**.
-2. In the **Windows Features** dialog, expand **Hyper-V** and then select
-   **Hyper-V Management Tools** and click **OK**.
+2. In the **Windows Features** dialog, expand **Hyper-V** and then select **Hyper-V Management Tools** and click **OK**.
 
 ```PowerShell
 cls
@@ -428,13 +420,11 @@ $setupPath = "\\TT-FS01\Products\Git\Git-2.28.0-64-bit.exe"
 Start-Process -FilePath $setupPath -Wait
 ```
 
-On the **Choosing the default editor used by Git** step, select **Use the Nano
-editor by default**.
+On the **Choosing the default editor used by Git** step, select **Use the Nano editor by default**.
 
 > **Important**
 >
-> Wait for the installation to complete and restart PowerShell for environment
-> changes to take effect.
+> Wait for the installation to complete and restart PowerShell for environment changes to take effect.
 
 ```Console
 exit
@@ -557,8 +547,7 @@ Start-Process `
 
 ### Issue
 
-**Installer doesn't disable launch of VScode even when installing with
-/mergetasks=!runcode**\
+**Installer doesn't disable launch of VScode even when installing with /mergetasks=!runcode**\
 From <[https://github.com/Microsoft/vscode/issues/46350](https://github.com/Microsoft/vscode/issues/46350)>
 
 ```PowerShell
@@ -779,8 +768,7 @@ Set-Theme -Name Paradox
 
 ##### Set Cascadia Code PL as fontFace in settings
 
-Open the settings for Windows Terminal and add the following **fontFace** and
-**fontSize** properties:
+Open the settings for Windows Terminal and add the following **fontFace** and **fontSize** properties:
 
 ```JSON
     "profiles": {
@@ -810,12 +798,9 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License
-Terms, select **I accept the license terms and conditions**, and then click
-**OK**.
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
 
-Confirm the agent installation completed successfully and the following firewall
-exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service

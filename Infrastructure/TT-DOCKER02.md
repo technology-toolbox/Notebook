@@ -96,8 +96,8 @@ Start-SCVirtualMachine -VM $vmName
 
 - On the **SSH Setup** step, select **Install OpenSSH server**.
 - On the **Featured Server Snaps** step, select the following items:
-    - **docker**
-    - **powershell**
+  - **docker**
+  - **powershell**
 
 > **Note**
 >
@@ -471,11 +471,11 @@ Password for jjameson-admin:
  * /usr/sbin/update-rc.d sssd enable
  * /usr/sbin/service sssd restart
  * Successfully enrolled machine in realm
- ```
+```
 
- ```Shell
- clear
- ```
+```Shell
+clear
+```
 
 ```Shell
 sudo reboot
@@ -540,7 +540,7 @@ sudo dpkg-reconfigure apparmor
 **How do I make AppArmor work with a non-standard HOME directory?**\
 From <[https://help.ubuntu.com/community/AppArmor](https://help.ubuntu.com/community/AppArmor)>
 
-**How can I use snap when I don’t use /home/\$USER?**\
+**How can I use snap when I donï¿½t use /home/\$USER?**\
 From <[https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352](https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352)>
 
 **Permission denied on launch**\

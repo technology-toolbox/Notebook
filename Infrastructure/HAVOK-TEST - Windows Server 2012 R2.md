@@ -17,13 +17,11 @@ Saturday, January 04, 2014\
 - Memory: **4 GB**
 - VHD size (GB): **25**
 - VHD file name:** HAVOK-TEST**
-- Virtual DVD drive:
-  **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
 - Network Adapter 1:** Virtual LAN 2 - 192-168.10.x**
 - Host:** ROGUE**
 - Automatic actions
-  - **Turn on the virtual machine if it was running with the physical server
-    stopped**
+  - **Turn on the virtual machine if it was running with the physical server stopped**
   - **Save State**
   - Operating system: **Windows Server 2012 R2 Standard**
 
@@ -31,12 +29,9 @@ Saturday, January 04, 2014\
 
 ## Install custom Windows Server 2012 R2 image
 
-- On the **Task Sequence** step, select **Windows Server 2012 R2** and click
-  **Next**.
-- On the **Computer Details** step, in the **Computer name** box, type
-  **HAVOK-TEST** and click **Next**.
-- On the **Applications** step, do not select any applications, and click
-  **Next**.
+- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **HAVOK-TEST** and click **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
 
 ## # Rename local Administrator account and set password
 
@@ -289,47 +284,30 @@ On the **Feature Selection** step, select the following checkboxes:
 
 > **Important**
 >
-> Do not select **Reporting Services - Native**. This will be installed on the
-> TFS App Tier server.
+> Do not select **Reporting Services - Native**. This will be installed on the TFS App Tier server.
 
 On the **Server Configuration** step:
 
-- For the **SQL Server Agent** service, change the **Startup Type** to
-  **Automatic**.
-- For the **SQL Server Browser** service, leave the **Startup Type** as
-  **Disabled**.
+- For the **SQL Server Agent** service, change the **Startup Type** to **Automatic**.
+- For the **SQL Server Browser** service, leave the **Startup Type** as **Disabled**.
 
 On the **Database Engine Configuration** step:
 
-- On the **Server Configuration** tab, in the **Specify SQL Server
-  administrators** section, click **Add...** and then add the domain group for
-  SQL Server administrators.
+- On the **Server Configuration** tab, in the **Specify SQL Server administrators** section, click **Add...** and then add the domain group for SQL Server administrators.
 - On the **Data Directories** tab:
   - In the **Data root directory** box, type **D:\\Microsoft SQL Server\\**.
-  - In the **User database log directory** box, change the drive letter to
-    **L:** (the value should be **L:\\Microsoft SQL
-    Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Data**).
-  - In the **Temp DB directory** box, change the drive letter to **T:** (the
-    value should be **T:\\Microsoft SQL
-    Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Data**).
-  - In the **Backup directory** box, change the drive letter to **Z:** (the
-    value should be **Z:\\Microsoft SQL
-    Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup**).
+  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **Temp DB directory** box, change the drive letter to **T:** (the value should be **T:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL12.MSSQLSERVER\\MSSQL\\Backup**).
 
 On the **Analysis Services Configuration** step:
 
-- On the **Server Configuration** tab, in the **Specify SQL Server
-  administrators** section, click **Add...** and then add the domain group for
-  SQL Server administrators.
+- On the **Server Configuration** tab, in the **Specify SQL Server administrators** section, click **Add...** and then add the domain group for SQL Server administrators.
 - On the **Data Directories** tab:
-  - In the **Data directory** box, type **D:\\Microsoft SQL
-    Server\\MSAS12.MSSQLSERVER\\OLAP\\Data**.
-  - In the **Log file directory** box, type **L:\\Microsoft SQL
-    Server\\MSAS12.MSSQLSERVER\\OLAP\\Log**.
-  - In the **Temp directory** box, type **T:\\Microsoft SQL
-    Server\\MSAS12.MSSQLSERVER\\OLAP\\Temp**.
-  - In the **Backup directory** box, type **Z:\\Microsoft SQL
-    Server\\MSAS12.MSSQLSERVER\\OLAP\\Backup**.
+  - In the **Data directory** box, type **D:\\Microsoft SQL Server\\MSAS12.MSSQLSERVER\\OLAP\\Data**.
+  - In the **Log file directory** box, type **L:\\Microsoft SQL Server\\MSAS12.MSSQLSERVER\\OLAP\\Log**.
+  - In the **Temp directory** box, type **T:\\Microsoft SQL Server\\MSAS12.MSSQLSERVER\\OLAP\\Temp**.
+  - In the **Backup directory** box, type **Z:\\Microsoft SQL Server\\MSAS12.MSSQLSERVER\\OLAP\\Backup**.
 
 ```PowerShell
 cls
@@ -398,12 +376,9 @@ $installer = $imageDriveLetter + ":\SCDPM\Agents\DPMAgentInstaller_x64.exe"
 & $installer JUGGERNAUT.corp.technologytoolbox.com
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License
-Terms, select **I accept the license terms and conditions**, and then click
-**OK**.
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
 
-Confirm the agent installation completed successfully and the following firewall
-exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service
@@ -417,8 +392,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ## Attach DPM agent
 
-On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the
-following commands:
+On the DPM server (JUGGERNAUT), open **DPM Management Shell**, and run the following commands:
 
 ```PowerShell
 $productionServer = "HAVOK-TEST"
@@ -432,8 +406,7 @@ $productionServer = "HAVOK-TEST"
 
 ## Add "Local System" account to SQL Server sysadmin role
 
-On the SQL Server (HAVOK-TEST), open SQL Server Management Studio and execute
-the following:
+On the SQL Server (HAVOK-TEST), open SQL Server Management Studio and execute the following:
 
 ```SQL
 ALTER SERVER ROLE [sysadmin] ADD MEMBER [NT AUTHORITY\SYSTEM]
@@ -476,13 +449,9 @@ Start-Service SQLSERVERAGENT
 
 ### Reference
 
-Ensure the Max degree of parallelism is set to 1. For additional information
-about max degree of parallelism see, [Configure the max degree of parallism
-Server Configuration option](Configure the max degree of parallism Server
-Configuration option) and [Degree of Parallelism](Degree of Parallelism).
+Ensure the Max degree of parallelism is set to 1. For additional information about max degree of parallelism see, [Configure the max degree of parallism Server Configuration option](Configure the max degree of parallism Server Configuration option) and [Degree of Parallelism](Degree of Parallelism).
 
-Pasted from
-<[http://technet.microsoft.com/en-us/library/ee805948.aspx](http://technet.microsoft.com/en-us/library/ee805948.aspx)>
+Pasted from <[http://technet.microsoft.com/en-us/library/ee805948.aspx](http://technet.microsoft.com/en-us/library/ee805948.aspx)>
 
 ```PowerShell
 cls
@@ -718,17 +687,14 @@ GO
 
 ### Add service account to role in TFS OLAP database
 
-In the **Tfs_Analysis** database, add **TECHTOOLBOX\\s-tfs-reports-test** to
-**TfsWarehouseDataReader** role.
+In the **Tfs_Analysis** database, add **TECHTOOLBOX\\s-tfs-reports-test** to **TfsWarehouseDataReader** role.
 
 ### Update data source in TFS OLAP database
 
 Modify **Tfs_AnalysisDataSource** to:
 
-1. Change the database server in the **Connection String** property to
-   **HAVOK-TEST**.
-2. Change the service account specified in the **Impersonation Info** property
-   to **TECHTOOLBOX\\s-tfs-reports-test**.
+1. Change the database server in the **Connection String** property to **HAVOK-TEST**.
+2. Change the service account specified in the **Impersonation Info** property to **TECHTOOLBOX\\s-tfs-reports-test**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/E7/B92862848EBC745B9D14CB14B584CD827511D7E7.png)
 
@@ -947,9 +913,7 @@ Address:  2001:558:feed::1
 
 > **Note**
 >
-> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on
-> the Comcast router -- and subsequently restarting the VM -- the incorrect DNS
-> server is assigned to the network adapter.
+> Even after reconfiguring the **Primary DNS** and **Secondary DNS** settings on the Comcast router -- and subsequently restarting the VM -- the incorrect DNS server is assigned to the network adapter.
 
 ### Solution
 
@@ -1550,12 +1514,9 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License
-Terms, select **I accept the license terms and conditions**, and then click
-**OK**.
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
 
-Confirm the agent installation completed successfully and the following firewall
-exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service
@@ -1661,13 +1622,10 @@ That doesn't work...
 
 > Error:\
 > Data Protection Manager Error ID: 307\
-> The protection agent operation failed because DPM detected an unknown DPM
-> protection agent on havok-test.corp.technologytoolbox.com.
+> The protection agent operation failed because DPM detected an unknown DPM protection agent on havok-test.corp.technologytoolbox.com.
 >
 > Recommended action:\
-> Use Add or Remove Programs in Control Panel to uninstall the protection agent from
-> havok-test.corp.technologytoolbox.com, then reinstall the protection agent and
-> perform the operation again.
+> Use Add or Remove Programs in Control Panel to uninstall the protection agent from havok-test.corp.technologytoolbox.com, then reinstall the protection agent and perform the operation again.
 
 ```PowerShell
 cls

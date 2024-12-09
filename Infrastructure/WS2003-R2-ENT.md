@@ -372,7 +372,7 @@ Start-SCVirtualMachine -VM $vmName
 >
 > This is necessary to avoid a bug in Sysprep where the Administrator password specified during mini-setup is ignored.\
 > Reference:\
-> **Microsoft’s Greatest Glitches: Sysprep Admin Passwords**\
+> **Microsoftï¿½s Greatest Glitches: Sysprep Admin Passwords**\
 > From <[https://mcpmag.com/articles/2006/05/09/microsofts-greatest-glitches-sysprep-admin-passwords.aspx](https://mcpmag.com/articles/2006/05/09/microsofts-greatest-glitches-sysprep-admin-passwords.aspx)>
 
 ### REM SysPrep VM

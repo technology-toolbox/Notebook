@@ -398,13 +398,13 @@ In the **Discover Target Portal** window:
 
 ## Create iSCSI virtual disks
 
-| **Server** | **Name**           | **Volume** | **Path**                                       | **Size** | **Type**              |
-| ---------- | ------------------ | ---------- | ---------------------------------------------- | -------- | --------------------- |
-| ICEMAN     | EXT-SQL01-Quorum   | E:         | E:\\iSCSIVirtualDisks\\EXT-SQL01-Quorum.vhdx   | 512 MB   | Dynamically expanding |
-| ICEMAN     | EXT-SQL01-Data01   | E:         | E:\\iSCSIVirtualDisks\\EXT-SQL01-Data01.vhdx   | 150 GB   | Fixed size            |
-| ICEMAN     | EXT-SQL01-Log01    | E:         | E:\\iSCSIVirtualDisks\\EXT-SQL01-Log01.vhdx    | 25 GB    | Fixed size            |
-| ICEMAN     | EXT-SQL01-Temp01   | E:         | E:\\iSCSIVirtualDisks\\EXT-SQL01-Temp01.vhdx   | 4 GB     | Fixed size            |
-| ICEMAN     | EXT-SQL01-Backup01 | E:         | E:\\iSCSIVirtualDisks\\EXT-SQL01-Backup01.vhdx | 400 GB   | Dynamically expanding |
+| **Server** | **Name** | **Volume** | **Path** | **Size** | **Type** |
+| --- | --- | --- | --- | --- | --- |
+| ICEMAN | EXT-SQL01-Quorum | E: | E:\\iSCSIVirtualDisks\\EXT-SQL01-Quorum.vhdx | 512 MB | Dynamically expanding |
+| ICEMAN | EXT-SQL01-Data01 | E: | E:\\iSCSIVirtualDisks\\EXT-SQL01-Data01.vhdx | 150 GB | Fixed size |
+| ICEMAN | EXT-SQL01-Log01 | E: | E:\\iSCSIVirtualDisks\\EXT-SQL01-Log01.vhdx | 25 GB | Fixed size |
+| ICEMAN | EXT-SQL01-Temp01 | E: | E:\\iSCSIVirtualDisks\\EXT-SQL01-Temp01.vhdx | 4 GB | Fixed size |
+| ICEMAN | EXT-SQL01-Backup01 | E: | E:\\iSCSIVirtualDisks\\EXT-SQL01-Backup01.vhdx | 400 GB | Dynamically expanding |
 
 ## Discover iSCSI target
 

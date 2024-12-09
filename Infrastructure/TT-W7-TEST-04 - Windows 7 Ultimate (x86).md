@@ -55,10 +55,8 @@ Start-SCVirtualMachine $vmName
 
 ### Install custom Windows 7 image
 
-- On the **Task Sequence** step, select **Windows 7 Ultimate (x86)** and click
-  **Next**.
-- On the **Computer Details** step, in the **Computer name** box, type
-  **TT-W7-TEST-04** and click **Next**.
+- On the **Task Sequence** step, select **Windows 7 Ultimate (x86)** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **TT-W7-TEST-04** and click **Next**.
 - On the **Applications** step:
   - Select the following items:
     - Adobe
@@ -153,8 +151,7 @@ netsh interface set interface name="Local Area Connection" `
 1. Open **Network and Sharing Center**.
 2. In the **Network and Sharing Center** window, click **Management**.
 3. In the **Management Status** window, click **Properties**.
-4. In the **Management Properties** window, on the **Networking** tab, click
-   **Configure**.
+4. In the **Management Properties** window, on the **Networking** tab, click **Configure**.
 5. In the **Microsoft Hyper-V Network Adapter Properties** window:
    1. On the **Advanced** tab:
       1. In the **Property** list, select **Jumbo Packet**.
@@ -182,16 +179,12 @@ cls
 1. Open **Network and Sharing Center**.
 2. In the **Network and Sharing Center** window, click **Management**.
 3. In the **Management Status** window, click **Properties**.
-4. In the **Management Properties** window, on the **Networking** tab,
-   select **Internet Protocol Version 4 (TCP/IPv4)**, and click **Properties**.
-5. In the **Internet Protocol Version 4 (TCP/IPv4) Properties** window, click
-   **Advanced...**:
+4. In the **Management Properties** window, on the **Networking** tab, select **Internet Protocol Version 4 (TCP/IPv4)**, and click **Properties**.
+5. In the **Internet Protocol Version 4 (TCP/IPv4) Properties** window, click **Advanced...**:
 6. In the **Advanced TCP/IP Settings** window:
-   1. On the **NetBIOS setting** section, select
-      **Disable NetBIOS over TCP/IP**.
+   1. On the **NetBIOS setting** section, select **Disable NetBIOS over TCP/IP**.
    2. Click **OK**.
-7. In the **Internet Protocol Version 4 (TCP/IPv4) Properties** window, click
-   **OK**.
+7. In the **Internet Protocol Version 4 (TCP/IPv4) Properties** window, click **OK**.
 
 ### Configure storage
 
@@ -259,8 +252,7 @@ Enable-PSRemoting -Confirm:$false
 
 > **Note**
 >
-> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG
-> ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
+> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
 
 ```PowerShell
 cls
@@ -294,8 +286,7 @@ net use \\TT-FS01\ipc$ /USER:TECHTOOLBOX\jjameson
 
 > **Note**
 >
-> It appears Internet Explorer 11 can no longer be installed using Windows
-> Server Update Services (WSUS).
+> It appears Internet Explorer 11 can no longer be installed using Windows Server Update Services (WSUS).
 
 ```PowerShell
 cls

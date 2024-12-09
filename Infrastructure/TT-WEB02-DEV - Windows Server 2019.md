@@ -542,8 +542,7 @@ Notepad Subtext.Web.SetParameters.xml
 
 > **Note**
 >
-> Update the `<setParameter>` element in the parameters XML file as specified
-> in the following table:
+> Update the `<setParameter>` element in the parameters XML file as specified in the following table:
 >
 > | Name                     | Value                              |
 > | ------------------------ | ---------------------------------- |
@@ -591,18 +590,17 @@ Notepad Website.SetParameters.xml
 
 > **Note**
 >
-> Update the `<setParameter>` elements in the parameters XML file as specified
-> in the following table:
+> Update the `<setParameter>` elements in the parameters XML file as specified in the following table:
 >
-> | Name                                        | Value                           |
-> | ------------------------------------------- | ------------------------------- |
-> | IIS Web Application Name                    | www-dev.technologytoolbox.com   |
-> | SMTP Host                                   | smtp-test.technologytoolbox.com |
-> | SMTP Port                                   | 587                             |
-> | SMTP User Name                              |                                 |
-> | SMTP Password                               |                                 |
-> | CaelumEntities-Web.config Connection String | ...data source=TT-SQL03;...     |
-> | CaelumData-Web.config Connection String     | Server=TT-SQL03;...             |
+> | Name | Value |
+> | --- | --- |
+> | IIS Web Application Name | www-dev.technologytoolbox.com |
+> | SMTP Host | smtp-test.technologytoolbox.com |
+> | SMTP Port | 587 |
+> | SMTP User Name |  |
+> | SMTP Password |  |
+> | CaelumEntities-Web.config Connection String | ...data source=TT-SQL03;... |
+> | CaelumData-Web.config Connection String | Server=TT-SQL03;... |
 
 ```PowerShell
 cls

@@ -15,27 +15,24 @@ Thursday, May 28, 2015\
 - VHD file name:** FAB-FOOBAR**
 - Virtual DVD drive:
   - **Existing ISO image**
-  - **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+  - **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
   - **Share file instead of copying it**
 - Network Adapter 1:
   - **Connected to a VM network**
   - VM network: **Virtual LAN 2 - 192.168.10.x**
 - Automatic actions:
-  - **Turn on the virtual machine if it was running when the physical server
-    stopped**
+  - **Turn on the virtual machine if it was running when the physical server stopped**
   - Delay startup (seconds): **90**
 
 ## Install custom Windows Server 2012 R2 image
 
-- On the **Task Sequence** step, select **Windows Server 2012 R2** and click
-  **Next**.
+- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **FAB-FOOBAR**.
   - Select **Join a workgroup**.
   - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
-- On the **Applications** step, do not select any applications, and click
-  **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
 
 ```PowerShell
 cls

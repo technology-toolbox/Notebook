@@ -7,12 +7,12 @@ Wednesday, March 20, 2019\
 
 ### Create project
 
-| Setting         | Value                                                       |
-| --------------- | ----------------------------------------------------------- |
-| **Name**        | **Training-Agile**                                          |
+| Setting | Value |
+| --- | --- |
+| **Name** | **Training-Agile** |
 | **Description** | **Original process template: Agile<br>Created: 2019-03-20** |
-| **Process**     | **Agile**                                                   |
-| **Visibility**  | **Private**                                                 |
+| **Process** | **Agile** |
+| **Visibility** | **Private** |
 
 ### Configure project
 

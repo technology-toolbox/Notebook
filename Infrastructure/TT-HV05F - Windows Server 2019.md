@@ -27,8 +27,7 @@ sconfig
 
 > **Note**
 >
-> Join the **corp.technologytoolbox.com** domain and rename the computer to
-> **TT-HV05F**.
+> Join the **corp.technologytoolbox.com** domain and rename the computer to **TT-HV05F**.
 
 ---
 
@@ -196,8 +195,7 @@ New-NetIPAddress `
     -PrefixLength 24
 ```
 
-> **Note:** A default gateway is not configured on this interface, since it is
-> used exclusively for iSCSI storage.
+> **Note:** A default gateway is not configured on this interface, since it is used exclusively for iSCSI storage.
 
 ```PowerShell
 cls
@@ -273,8 +271,7 @@ New-NetIPAddress `
     -PrefixLength 24
 ```
 
-> **Note:** A default gateway is not configured on this interface, since it is
-> used exclusively for iSCSI storage.
+> **Note:** A default gateway is not configured on this interface, since it is used exclusively for iSCSI storage.
 
 ```PowerShell
 cls
@@ -338,17 +335,17 @@ ipconfig /flushdns
 
 #### Physical disks
 
-| Disk | Model                     | Serial Number            | Capacity | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
-| ---- | ------------------------- | ------------------------ | -------- | ------------ | ----------- | -------------------- | ------------ |
-| 0    | WDC WD1001FALS-00Y6A0     | WD-\*\*\*\*\*\*234344    | 1 TB     |              |             |                      |              |
-| 1    | WDC WD1002FAEX-00Y9A0     | WD-\*\*\*\*\*\*786376    | 1 TB     |              |             |                      |              |
-| 2    | ST4000NM0033-9ZM170       | \*\*\*\*\*EHB            | 4 TB     |              |             |                      |              |
-| 3    | ST4000NM0033-9ZM170       | \*\*\*\*\*5AY            | 4 TB     |              |             |                      |              |
-| 4    | Samsung SSD 850 PRO 128GB | \*\*\*\*\*\*\*\*\*03848M | 128 GB   | C:           | 119 GB      | 4K                   |              |
-| 5    | Samsung SSD 850 PRO 512GB | \*\*\*\*\*\*\*\*\*01139V | 512 GB   |              |             |                      |              |
-| 6    | Samsung SSD 850 PRO 512GB | \*\*\*\*\*\*\*\*\*01138P | 512 GB   |              |             |                      |              |
-| 7    | ST4000NM0033-9ZM170       | \*\*\*\*\*58G            | 4 TB     |              |             |                      |              |
-| 8    | ST4000NM0033-9ZM170       | \*\*\*\*\*42W            | 4 TB     |              |             |                      |              |
+| Disk | Model | Serial Number | Capacity | Drive Letter | Volume Size | Allocation Unit Size | Volume Label |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | WDC WD1001FALS-00Y6A0 | WD-\*\*\*\*\*\*234344 | 1 TB |  |  |  |  |
+| 1 | WDC WD1002FAEX-00Y9A0 | WD-\*\*\*\*\*\*786376 | 1 TB |  |  |  |  |
+| 2 | ST4000NM0033-9ZM170 | \*\*\*\*\*EHB | 4 TB |  |  |  |  |
+| 3 | ST4000NM0033-9ZM170 | \*\*\*\*\*5AY | 4 TB |  |  |  |  |
+| 4 | Samsung SSD 850 PRO 128GB | \*\*\*\*\*\*\*\*\*03848M | 128 GB | C: | 119 GB | 4K |  |
+| 5 | Samsung SSD 850 PRO 512GB | \*\*\*\*\*\*\*\*\*01139V | 512 GB |  |  |  |  |
+| 6 | Samsung SSD 850 PRO 512GB | \*\*\*\*\*\*\*\*\*01138P | 512 GB |  |  |  |  |
+| 7 | ST4000NM0033-9ZM170 | \*\*\*\*\*58G | 4 TB |  |  |  |  |
+| 8 | ST4000NM0033-9ZM170 | \*\*\*\*\*42W | 4 TB |  |  |  |  |
 
 ```PowerShell
 Get-PhysicalDisk | sort DeviceId
@@ -367,21 +364,13 @@ Get-PhysicalDisk | select DeviceId, Model, SerialNumber, CanPool | sort DeviceId
 ##### Update AHCI drivers
 
 1. Download the latest AHCI drivers from the Intel website:\
-   **Intel® RSTe AHCI & SCU Software RAID Driver for Windows**\
-   From
-   <[https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t](https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t)>
-2. Extract the drivers
-   (**[\\\\TT-FS01\\Public\\Download\\Drivers\\Intel\\RSTe](\TT-FS01\Public\Download\Drivers\Intel\RSTe)
-   AHCI & SCU Software RAID driver for Windows**) and copy the files to a
-   temporary location on the server:
-3. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA AHCI
-   Controller (PCI\\VEN_8086&DEV_8D02&...)**:
-4. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA AHCI
-   Controller (PCI\\VEN_8086&DEV_8D62&...)**:
-5. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA RAID
-   Controller (PCI\\VEN_8086&DEV_8D62&...)**:
-6. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA RAID
-   Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+   **Intelï¿½ RSTe AHCI & SCU Software RAID Driver for Windows**\
+   From <[https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t](https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t)>
+2. Extract the drivers (**[\\\\TT-FS01\\Public\\Download\\Drivers\\Intel\\RSTe](\TT-FS01\Public\Download\Drivers\Intel\RSTe) AHCI & SCU Software RAID driver for Windows**) and copy the files to a temporary location on the server:
+3. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA AHCI Controller (PCI\\VEN_8086&DEV_8D02&...)**:
+4. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA AHCI Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+5. Install the drivers for the **Intel(R) C600+/C220+ series chipset SATA RAID Controller (PCI\\VEN_8086&DEV_8D62&...)**:
+6. Install the drivers for the **Intel(R) C600+/C220+ series chipset sSATA RAID Controller (PCI\\VEN_8086&DEV_8D62&...)**:
 7. Restart the server.
 
 ```PowerShell
@@ -718,11 +707,9 @@ $fileSystem = "NTFS"
 
 > **Important**
 >
-> When using storage tiers, format the volume using NTFS (not ReFS). Otherwise,
-> an error occurs when optimizing the storage tiers:
+> When using storage tiers, format the volume using NTFS (not ReFS). Otherwise, an error occurs when optimizing the storage tiers:
 >
-> The operation requested is not supported by the hardware backing the volume.
-> (0x8900002A)
+> The operation requested is not supported by the hardware backing the volume. (0x8900002A)
 >
 > Refer to the following resources for more information:
 >
@@ -739,8 +726,7 @@ $fileSystem = "NTFS"
 > **Windows Server 2016 Storage Spaces Tier ReFS**\
 > From <[https://social.technet.microsoft.com/Forums/lync/en-US/06f07aaf-484c-435e-b655-2761a1dcbb67/windows-server-2016-storage-spaces-tier-refs?forum=winserverfiles](https://social.technet.microsoft.com/Forums/lync/en-US/06f07aaf-484c-435e-b655-2761a1dcbb67/windows-server-2016-storage-spaces-tier-refs?forum=winserverfiles)>
 >
-> "ReFS should be used with Storage Spaces Direct (S2D), and stick with NTFS for
-> all other scenarios."
+> "ReFS should be used with Storage Spaces Direct (S2D), and stick with NTFS for all other scenarios."
 >
 > -- Elden Christensen (MSFT)\
 > Tuesday, November 01, 2016 2:18 AM
@@ -820,15 +806,9 @@ Enable-ScheduledTask $task
 
 > **Important**
 >
-> Simply appending ">> {log file}" (as described in the "To change the Storage
-> Tiers Optimization task to save a report (Task Scheduler)" section of the>
-> [TechNet article](TechNet article)) did not work. Specifically, when running
-> the task, the log file was not created and the task immediately finished
-> without reporting any error.
+> Simply appending ">> {log file}" (as described in the "To change the Storage Tiers Optimization task to save a report (Task Scheduler)" section of the> [TechNet article](TechNet article)) did not work. Specifically, when running the task, the log file was not created and the task immediately finished without reporting any error.
 >
-> Changing the **Program/script** (i.e. the action's **Execute** property) to
-> launch "%windir%\\system32\\defrag.exe" using "%windir%\\system32\\cmd.exe"
-> resolved the issue.
+> Changing the **Program/script** (i.e. the action's **Execute** property) to launch "%windir%\\system32\\defrag.exe" using "%windir%\\system32\\cmd.exe" resolved the issue.
 
 ##### Reference
 
@@ -886,8 +866,7 @@ Start-Service msiscsi
 Enable-WindowsOptionalFeature -Online -FeatureName MultipathIo
 ```
 
-> **Important:** If necessary, restart the server to complete the feature
-> installation.
+> **Important:** If necessary, restart the server to complete the feature installation.
 
 ```PowerShell
 cls
@@ -1016,8 +995,7 @@ Add-ClusterNode -Cluster TT-HV05-FC
 
 ##### Refresh host cluster in Virtual Machine Manager
 
-> **Note:** At this point, the new cluster node should appear in VMM with a
-> "pending" status.
+> **Note:** At this point, the new cluster node should appear in VMM with a "pending" status.
 
 > **Important:**
 >
@@ -1082,11 +1060,7 @@ New-SCVirtualNetwork `
 
 > **Note**
 >
-> When using virtual network adapters, SMB Multichannel worked but throughput
-> was substantially below 1 Gbps on each network adapter. I believe this is due
-> to RSS not being used on the virtual network adapters (even though this is
-> enabled in the corresponding port classification). This speculation is based
-> on the following:
+> When using virtual network adapters, SMB Multichannel worked but throughput was substantially below 1 Gbps on each network adapter. I believe this is due to RSS not being used on the virtual network adapters (even though this is enabled in the corresponding port classification). This speculation is based on the following:
 >
 > ```PowerShell
 > Get-VMNetworkAdapter -ManagementOS |
@@ -1319,12 +1293,9 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License
-Terms, select **I accept the license terms and conditions**, and then click
-**OK**.
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
 
-Confirm the agent installation completed successfully and the following firewall
-exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service
@@ -1451,13 +1422,10 @@ That doesn't work...
 
 > Error:\
 > Data Protection Manager Error ID: 307\
-> The protection agent operation failed because DPM detected an unknown DPM
-> protection agent on tt-hv05f.corp.technologytoolbox.com.
+> The protection agent operation failed because DPM detected an unknown DPM protection agent on tt-hv05f.corp.technologytoolbox.com.
 >
 > Recommended action:\
-> Use Add or Remove Programs in Control Panel to uninstall the protection agent from
-> tt-hv05f.corp.technologytoolbox.com, then reinstall the protection agent and perform
-> the operation again.
+> Use Add or Remove Programs in Control Panel to uninstall the protection agent from tt-hv05f.corp.technologytoolbox.com, then reinstall the protection agent and perform the operation again.
 
 ```PowerShell
 cls

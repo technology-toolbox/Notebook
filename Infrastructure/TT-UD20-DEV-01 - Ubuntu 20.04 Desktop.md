@@ -70,14 +70,12 @@ Start-VM -Name $vmName
 3. On the **Help improve Ubuntu** page:
    1. Click **No, don't send system info**.
    2. Click **Next**.
-4. On the **Privacy** page, ensure **Location Services** is disabled and click
-   **Next**.
+4. On the **Privacy** page, ensure **Location Services** is disabled and click **Next**.
 5. On the **You're ready to go!** page, click **Done**.
 
 > **Note**
 >
-> Skip setup of Livepatch for security updates due to current license
-> limitations (free for up to 3 computers).
+> Skip setup of Livepatch for security updates due to current license limitations (free for up to 3 computers).
 
 ### Install updates using Software Updater
 
@@ -274,11 +272,7 @@ sudo apt-get -y install realmd
 
 > **Note**
 >
-> Note the default home directory path (specified by the **fallback_homedir**
-> setting in **/etc/sssd/sssd.conf**) is **/home/%u@%d** (e.g.
-> **/home/jjameson@corp.technologytoolbox.com**). To create home directories
-> under a "domain" directory, the **default-home** setting is specified in
-> **/etc/realmd.conf** prior to joining the Active Directory domain.
+> Note the default home directory path (specified by the **fallback_homedir** setting in **/etc/sssd/sssd.conf**) is **/home/%u@%d** (e.g. **/home/jjameson@corp.technologytoolbox.com**). To create home directories under a "domain" directory, the **default-home** setting is specified in **/etc/realmd.conf** prior to joining the Active Directory domain.
 
 ```Shell
 clear
@@ -330,9 +324,7 @@ sudo reboot
 
 > **Note**
 >
-> Changing the hostname to the fully qualified domain name avoids an error when
-> creating the service principal name for the computer account when joining the
-> Active Directory domain. For example:
+> Changing the hostname to the fully qualified domain name avoids an error when creating the service principal name for the computer account when joining the Active Directory domain. For example:
 >
 > ```Text
 >  * Modifying computer account: userPrincipalName
@@ -493,15 +485,14 @@ clear
 sudo dpkg-reconfigure apparmor
 ```
 
-When prompted for additional home directories, type
-**/home/corp.technologytoolbox.com/** and select **OK**.
+When prompted for additional home directories, type **/home/corp.technologytoolbox.com/** and select **OK**.
 
 ##### References
 
 **How do I make AppArmor work with a non-standard HOME directory?**\
 From <[https://help.ubuntu.com/community/AppArmor](https://help.ubuntu.com/community/AppArmor)>
 
-**How can I use snap when I don’t use /home/\$USER?**\
+**How can I use snap when I donï¿½t use /home/\$USER?**\
 From <[https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352](https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352)>
 
 **Permission denied on launch**\
@@ -886,11 +877,9 @@ sudo apt-get -y install libcurl4-openssl-dev
 
 #### Reference
 
-diffmerge: error while loading shared libraries: libpng12.so.0: cannot open
-shared object file: No such file or directory
+diffmerge: error while loading shared libraries: libpng12.so.0: cannot open shared object file: No such file or directory
 
-From
-<[https://support.sourcegear.com/viewtopic.php?f=33&t=22981](https://support.sourcegear.com/viewtopic.php?f=33&t=22981)>
+From <[https://support.sourcegear.com/viewtopic.php?f=33&t=22981](https://support.sourcegear.com/viewtopic.php?f=33&t=22981)>
 
 ```Shell
 clear
@@ -927,8 +916,7 @@ sudo apt-get -y install wireshark
 
 > **Note**
 >
-> When prompted whether to allow non-superusers to capture packets, select
-> **Yes**.
+> When prompted whether to allow non-superusers to capture packets, select **Yes**.
 
 ## Install Docker CE
 
@@ -1006,8 +994,7 @@ sudo add-apt-repository \
 
 > **Note**
 >
-> The **lsb_release -cs** sub-command returns the name of your Ubuntu
-> distribution, such as **focal**.
+> The **lsb_release -cs** sub-command returns the name of your Ubuntu distribution, such as **focal**.
 
 ```Shell
 clear
@@ -1483,8 +1470,7 @@ sudo apt-get -y install default-jdk
 
 #### Issue - Jackcess Encrypt unit tests fail with OpenJDK 11
 
-**How to resolve java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException in
-Java 9**\
+**How to resolve java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException in Java 9**\
 From <[https://stackoverflow.com/questions/43574426/how-to-resolve-java-lang-noclassdeffounderror-javax-xml-bind-jaxbexception-in-j](https://stackoverflow.com/questions/43574426/how-to-resolve-java-lang-noclassdeffounderror-javax-xml-bind-jaxbexception-in-j)>
 
 #### Resolution - Use OpenJDK 8 instead
@@ -1904,9 +1890,7 @@ cd ~/techtoolbox
 git clone https://techtoolbox@dev.azure.com/techtoolbox/Training-Docker/_git/Training-Docker
 ```
 
-> **Note:** When prompted for a password, specify a personal access token for
-> Azure DevOps. The secret will be stored in the **.git-credentials** hidden
-> file.
+> **Note:** When prompted for a password, specify a personal access token for Azure DevOps. The secret will be stored in the **.git-credentials** hidden file.
 
 ```Shell
 cat ~/.git-credentials
@@ -1952,8 +1936,7 @@ ssh-keygen -t ed25519 -C "jjameson@technologytoolbox.com"
 
 > **Note:**
 >
-> When prompted to **Enter file in which to save the key**, press **Enter**.
-> This accepts the default file location.
+> When prompted to **Enter file in which to save the key**, press **Enter**. This accepts the default file location.
 >
 > Type a passphrase to secure the SSH key.
 
@@ -1969,8 +1952,7 @@ ssh-add ~/.ssh/id_ed25519
 
 > **Note:**
 >
-> When prompted, type the secure passphrase previously specified for the SSH
-> key.
+> When prompted, type the secure passphrase previously specified for the SSH key.
 
 ```Shell
 clear
@@ -1988,16 +1970,14 @@ xclip -selection clipboard < ~/.ssh/id_ed25519.pub
 
 #### Add SSH public key to GitHub
 
-1. Browse to
-   [https://github.com/settings/ssh/new](https://github.com/settings/ssh/new).
+1. Browse to [https://github.com/settings/ssh/new](https://github.com/settings/ssh/new).
 1. In the **Title** box, type **TT-UD20-DEV-01**.
 1. In the **Key** box, paste the SSH public key previously copied the clipboard.
 1. Click **Add SSH key**.
 
 #### Add SSH public key to GitLab
 
-1. Browse to
-   [https://gitlab.com/~/profile/keys](https://gitlab.com/~/profile/keys).
+1. Browse to [https://gitlab.com/~/profile/keys](https://gitlab.com/~/profile/keys).
 1. In the **Key** box, paste the SSH public key previously copied the clipboard.
 1. In the **Title** box, type **TT-UD20-DEV-01**.
 1. Click **Add key**.
@@ -2052,8 +2032,7 @@ sudo docker run \
 
 ### Reference
 
-**cAdvisor - Analyzes resource usage and performance characteristics of running
-containers**\
+**cAdvisor - Analyzes resource usage and performance characteristics of running containers**\
 From <[https://github.com/google/cadvisor](https://github.com/google/cadvisor)>
 
 ```Shell

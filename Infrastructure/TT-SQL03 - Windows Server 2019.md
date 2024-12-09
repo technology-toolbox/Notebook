@@ -55,13 +55,11 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 #### Install custom Windows Server 2019 image
 
-- On the **Task Sequence** step, select **Windows Server 2019** and click
-  **Next**.
+- On the **Task Sequence** step, select **Windows Server 2019** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **TT-SQL03**.
   - Click **Next**.
-- On the **Applications** step, do not select any applications, and click
-  **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
 
 ---
 
@@ -243,12 +241,12 @@ ping TT-FS01 -f -l 8900
 ### Configure storage
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 45 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 40 GB       | Fixed    | 64K                  | Data01       |
-| 2    | L:           | 10 GB       | Fixed    | 64K                  | Log01        |
-| 3    | T:           | 2 GB        | Fixed    | 64K                  | Temp01       |
-| 4    | Z:           | 50 GB       | Dynamic  | 4K                   | Backup01     |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 45 GB | Dynamic | 4K | OSDisk |
+| 1 | D: | 40 GB | Fixed | 64K | Data01 |
+| 2 | L: | 10 GB | Fixed | 64K | Log01 |
+| 3 | T: | 2 GB | Fixed | 64K | Temp01 |
+| 4 | Z: | 50 GB | Dynamic | 4K | Backup01 |
 
 ---
 
@@ -419,31 +417,20 @@ On the **Feature Selection** step, select the following checkbox:
 
 On the **Server Configuration** step:
 
-- For the **SQL Server Agent** service, change the **Startup Type** to
-  **Automatic**.
-- For the **SQL Server Browser** service, leave the **Startup Type** as
-  **Disabled**.
+- For the **SQL Server Agent** service, change the **Startup Type** to **Automatic**.
+- For the **SQL Server Browser** service, leave the **Startup Type** as **Disabled**.
 
 On the **Database Engine Configuration** step:
 
-- On the **Server Configuration** tab, in the **Specify SQL Server
-  administrators** section, click **Add...** and then add the domain group for
-  SQL Server administrators.
+- On the **Server Configuration** tab, in the **Specify SQL Server administrators** section, click **Add...** and then add the domain group for SQL Server administrators.
 - On the **Data Directories** tab:
   - In the **Data root directory** box, type **D:\\Microsoft SQL Server\\**.
-  - In the **User database log directory** box, change the drive letter to
-    **L:** (the value should be **L:\\Microsoft SQL
-    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
-  - In the **Backup directory** box, change the drive letter to **Z:** (the
-    value should be **Z:\\Microsoft SQL
-    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**).
+  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**).
 - On the **TempDB** tab:
-  - Remove the default data directory (**D:\\Microsoft SQL
-    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
-  - Add the data directory on the **Temp01** volume (**T:\\Microsoft SQL
-    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
-  - Ensure the **Log directory** is set to **T:\\Microsoft SQL
-    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**.
+  - Remove the default data directory (**D:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
+  - Add the data directory on the **Temp01** volume (**T:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
+  - Ensure the **Log directory** is set to **T:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**.
 
 > **Important**
 >
@@ -526,8 +513,7 @@ cls
 
 ##### Reference
 
-**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field
-#017**\
+**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field #017**\
 From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/](https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/)>
 
 ---
@@ -601,12 +587,9 @@ Execute script in SQL Server Management Studio: **JobSchedules.sql**
 
 ### Reference
 
-Set max degree of parallelism (MAXDOP) to 1 for instances of SQL Server that
-host SharePoint databases to make sure that a single SQL Server process serves
-each request.
+Set max degree of parallelism (MAXDOP) to 1 for instances of SQL Server that host SharePoint databases to make sure that a single SQL Server process serves each request.
 
-From
-<[https://docs.microsoft.com/en-us/sharepoint/administration/best-practices-for-sql-server-in-a-sharepoint-server-farm](https://docs.microsoft.com/en-us/sharepoint/administration/best-practices-for-sql-server-in-a-sharepoint-server-farm)>
+From <[https://docs.microsoft.com/en-us/sharepoint/administration/best-practices-for-sql-server-in-a-sharepoint-server-farm](https://docs.microsoft.com/en-us/sharepoint/administration/best-practices-for-sql-server-in-a-sharepoint-server-farm)>
 
 ---
 
@@ -1079,12 +1062,9 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License
-Terms, select **I accept the license terms and conditions**, and then click
-**OK**.
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
 
-Confirm the agent installation completed successfully and the following firewall
-exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service
@@ -1246,13 +1226,10 @@ That doesn't work...
 
 > Error:\
 > Data Protection Manager Error ID: 307\
-> The protection agent operation failed because DPM detected an unknown DPM
-> protection agent on tt-sql03.corp.technologytoolbox.com.
+> The protection agent operation failed because DPM detected an unknown DPM protection agent on tt-sql03.corp.technologytoolbox.com.
 >
 > Recommended action:\
-> Use Add or Remove Programs in Control Panel to uninstall the protection agent from
-> tt-sql03.corp.technologytoolbox.com, then reinstall the protection agent and perform
-> the operation again.
+> Use Add or Remove Programs in Control Panel to uninstall the protection agent from tt-sql03.corp.technologytoolbox.com, then reinstall the protection agent and perform the operation again.
 
 ```PowerShell
 cls

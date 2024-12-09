@@ -261,7 +261,7 @@ Import-MDTApplication `
 
 #### # Configure application bundle
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Applications / Microsoft**, right-click **Visual Studio 2015 for SP2013 Development**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) / Applications / Microsoft**, right-click **Visual Studio 2015 for SP2013 Development**, and click **Properties**.
 2. In the **Visual Studio 2015 for SP2013 Development Properties** window:
    1. On the **Dependencies** tab:
       1. Add the following applications:
@@ -449,7 +449,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 ### Modify task sequence to install Office 2016 and Visual Studio 2015
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows Server 2012 R2**, right-click **SharePoint Server 2013 - Development**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) / Task Sequences / Windows Server 2012 R2**, right-click **SharePoint Server 2013 - Development**, and click **Properties**.
 2. In the **SharePoint Server 2013 - Development Properties** window:
    1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Windows Server 2012 R2, MaxPatchCacheSize = 0, Toolbox content, Windows features for SharePoint 2013, PowerShell help files, SQL Server 2014, SharePoint Designer 2013, Office 2016, SharePoint Server 2013, Visual Studio 2015 with Update 3, latest patches, and cleanup before Sysprep**
@@ -488,7 +488,7 @@ robocopy $source $destination /E /XD Applications Backup Boot Captures Logs "Ope
 
 ### Add action to task sequence to install Office 2016
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows 10**, right-click **Windows 10 Enterprise (x64) - Baseline**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) / Task Sequences / Windows 10**, right-click **Windows 10 Enterprise (x64) - Baseline**, and click **Properties**.
 2. In the **Windows 10 Enterprise (x64) - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content, .NET Framework 3.5, Office 2016, and latest patches**
@@ -574,7 +574,7 @@ cd C:\NotBackedUp\TechnologyToolbox\Infrastructure\Main\Scripts
 
 ### Add action to set MaxPatchCacheSize to 0
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows 10**, right-click **Windows 10 Enterprise (x64) - Baseline**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) / Task Sequences / Windows 10**, right-click **Windows 10 Enterprise (x64) - Baseline**, and click **Properties**.
 2. In the **Windows 10 Enterprise (x64) - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content, .NET Framework 3.5, Office 2016, and latest patches**
@@ -696,11 +696,11 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 ### Add action to cleanup image before Sysprep
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows 8.1**, right-click **Windows 8.1 Enterprise (x64) - Baseline**, and click **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) / Task Sequences / Windows 8.1**, right-click **Windows 8.1 Enterprise (x64) - Baseline**, and click **Properties**.
 2. In the **Windows 8.1 Enterprise (x64) - Baseline Properties** window, on the **Task Sequence** tab:
    1. Right-click the **Cleanup before Sysprep **group and click **Copy**.
    2. Click **Cancel**.
-3. Expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows 10**, right-click **Windows 10 Enterprise (x64) - Baseline**, and click **Properties**.
+3. Expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) / Task Sequences / Windows 10**, right-click **Windows 10 Enterprise (x64) - Baseline**, and click **Properties**.
 4. In the **Windows 10 Enterprise (x64) - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content, .NET Framework 3.5, Office 2016, latest patches, and cleanup before Sysprep**

@@ -214,11 +214,11 @@ From <[http://blogs.technet.com/b/denisrougeau/archive/2014/02/27/enabling-dns-r
 
 #### Configure VM storage
 
-| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label      | Host Cache |
-| ---- | ------------ | ----------- | -------------------- | ----------------- | ---------- |
-| 0    | C:           | 127 GB      | 4K                   |                   | Read/Write |
-| 1    | D:           | 20 GB       | 4K                   | Temporary Storage |            |
-| 2    | E:           | 5 GB        | 4K                   | Data01            | None       |
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label | Host Cache |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 127 GB | 4K |  | Read/Write |
+| 1 | D: | 20 GB | 4K | Temporary Storage |  |
+| 2 | E: | 5 GB | 4K | Data01 | None |
 
 ```PowerShell
 cls

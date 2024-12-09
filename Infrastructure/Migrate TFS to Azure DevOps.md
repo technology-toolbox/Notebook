@@ -18,20 +18,18 @@ Wednesday, February 6, 2019\
 #### Team project collection mapping worksheet
 
 | Collection name: | **DefaultCollection** | Azure DevOps organization name: | **techtoolbox** |
-| ---------------- | --------------------- | ------------------------------- | --------------- |
-
+| --- | --- | --- | --- |
 
 #### Datacenter location
 
 **Task:** Choose the datacenter for your Azure DevOps Services organization.
 
-| Selected region’s shorthand code: | **CUS** |
+| Selected regionï¿½s shorthand code: | **CUS** |
 | --------------------------------- | ------- |
 
-
-| **Geographic Region** | **Azure Region**      | **Import Specification Value** |
-| --------------------- | --------------------- | ------------------------------ |
-| United States         | Central United States | CUS                            |
+| **Geographic Region** | **Azure Region** | **Import Specification Value** |
+| --- | --- | --- |
+| United States | Central United States | CUS |
 
 Azure DevOps Services is available in several Azure [regions](regions). However, not all Azure regions that Azure DevOps Services is present in are supported for import.
 
@@ -694,7 +692,7 @@ From <[https://docs.microsoft.com/en-us/azure/devops/articles/migration-troubles
 
 ### Task summary
 
-**Assign, activate, and map Azure DevOps Services subscriptions:** Ensure that each of the Visual Studio (formerly MSDN) subscriptions are assigned, activated, and mapped to each subscriber’s Azure Active Directory organization.\
+**Assign, activate, and map Azure DevOps Services subscriptions:** Ensure that each of the Visual Studio (formerly MSDN) subscriptions are assigned, activated, and mapped to each subscriberï¿½s Azure Active Directory organization.\
 **Generate import settings:** Generate import settings and related files using the TfsMigrator prepare command.\
 **Provide the configurable settings:** Provide the configurable settings in the Import Specification file.\
 **Review** the Identity Map log file\
@@ -702,7 +700,7 @@ From <[https://docs.microsoft.com/en-us/azure/devops/articles/migration-troubles
 
 ### Subscriptions
 
-**Task:** Ensure that each of the Visual Studio (formerly MSDN) subscriptions are assigned, activated, and mapped to each subscriber’s Azure Active Directory organization.
+**Task:** Ensure that each of the Visual Studio (formerly MSDN) subscriptions are assigned, activated, and mapped to each subscriberï¿½s Azure Active Directory organization.
 
 #### Assign subscription
 
@@ -788,13 +786,13 @@ This step is no longer applicable (i.e. licensing information is no longer inclu
 
 #### Time for each step
 
-|                                                                       | Dry Run Import #1 | Dry Run Import #2 | Dry Run Import #3 |
-| --------------------------------------------------------------------- | ----------------- | ----------------- | ----------------- |
-| Detach Collection                                                     | ~5 minutes        |                   |                   |
-| Generate Backup of SQL Database                                       | ~5 minutes        |                   |                   |
-| Upload Backup and Identity Map to Azure Storage                       | ~30 minutes       |                   |                   |
-| Queue Import                                                          |                   |                   |                   |
-| Final UAT Verification of Imported Azure DevOps Services Organization |                   |                   |                   |
+|  | Dry Run Import #1 | Dry Run Import #2 | Dry Run Import #3 |
+| --- | --- | --- | --- |
+| Detach Collection | ~5 minutes |  |  |
+| Generate Backup of SQL Database | ~5 minutes |  |  |
+| Upload Backup and Identity Map to Azure Storage | ~30 minutes |  |  |
+| Queue Import |  |  |  |
+| Final UAT Verification of Imported Azure DevOps Services Organization |  |  |  |
 
 ### Detach your team project collection from Team Foundation Server
 
@@ -837,7 +835,6 @@ Pop-Location
 
 | Name: | **import** |
 | ----- | ---------- |
-
 
 #### Install AzCopy
 

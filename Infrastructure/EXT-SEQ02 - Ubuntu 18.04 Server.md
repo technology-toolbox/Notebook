@@ -322,13 +322,7 @@ sudo apt install \
 
 > **Note**
 >
-> The default home directory path (specified by the **fallback_homedir** setting
-> in **/etc/sssd/sssd.conf**) is **/home/%u@%d** (e.g.
-> **/home/jjameson-admin@extranet.technologytoolbox.com**). To create home
-> directories under a "domain" directory (e.g.
-> **/home/extranet.technologytoolbox.com/jjameson-admin**), the **default-home**
-> setting is specified in **/etc/realmd.conf** prior to joining the Active
-> Directory domain.
+> The default home directory path (specified by the **fallback_homedir** setting in **/etc/sssd/sssd.conf**) is **/home/%u@%d** (e.g. **/home/jjameson-admin@extranet.technologytoolbox.com**). To create home directories under a "domain" directory (e.g. **/home/extranet.technologytoolbox.com/jjameson-admin**), the **default-home** setting is specified in **/etc/realmd.conf** prior to joining the Active Directory domain.
 
 ```Shell
 clear
@@ -383,9 +377,7 @@ sudo reboot
 
 > **Note**
 >
-> Changing the hostname to the fully qualified domain name avoids an error when
-> creating the service principal name for the computer account when joining the
-> Active Directory domain. For example:
+> Changing the hostname to the fully qualified domain name avoids an error when creating the service principal name for the computer account when joining the Active Directory domain. For example:
 >
 > ```Text
 >  * Modifying computer account: userPrincipalName
@@ -542,15 +534,14 @@ Warning failed to create cache: usr.sbin.sssd
 
 > **Note**
 >
-> When prompted for additional home directories, type
-> **/home/extranet.technologytoolbox.com/** and select **OK**.
+> When prompted for additional home directories, type **/home/extranet.technologytoolbox.com/** and select **OK**.
 
 ##### References
 
 **How do I make AppArmor work with a non-standard HOME directory?**\
 From <[https://help.ubuntu.com/community/AppArmor](https://help.ubuntu.com/community/AppArmor)>
 
-**How can I use snap when I don’t use /home/\$USER?**\
+**How can I use snap when I donï¿½t use /home/\$USER?**\
 From <[https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352](https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352)>
 
 **Permission denied on launch**\

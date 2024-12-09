@@ -172,8 +172,8 @@ ping TT-FS01 -f -l 8900
 ### Configure storage
 
 | **Disk** | **Drive Letter** | **Volume Size** | **Allocation Unit Size** | **Volume Label** |
-| -------- | ---------------- | --------------- | ------------------------ | ---------------- |
-| 0        | C:               | 35 GB           | 4K                       | OSDisk           |
+| --- | --- | --- | --- | --- |
+| 0 | C: | 35 GB | 4K | OSDisk |
 
 ```PowerShell
 cls

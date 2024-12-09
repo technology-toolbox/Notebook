@@ -209,12 +209,12 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 
 ### Configure VM storage
 
-| Disk | Drive Letter | Volume Size                   | Allocation Unit Size | Volume Label      | Host Cache |
-| ---- | ------------ | ----------------------------- | -------------------- | ----------------- | ---------- |
-| 0    | C:           | 127 GB                        | 4K                   |                   | Read/Write |
-| 1    | D:           | 100 GB                        | 4K                   | Temporary Storage |            |
-| 2    | E:           | 300 GB<br>(3x100 GB, striped) | 64K                  | Data01            | None       |
-| 3    | L:           | 60 GB                         | 64K                  | Log01             | None       |
+| Disk | Drive Letter | Volume Size | Allocation Unit Size | Volume Label | Host Cache |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 127 GB | 4K |  | Read/Write |
+| 1 | D: | 100 GB | 4K | Temporary Storage |  |
+| 2 | E: | 300 GB<br>(3x100 GB, striped) | 64K | Data01 | None |
+| 3 | L: | 60 GB | 64K | Log01 | None |
 
 #### # Create storage pool and "Data01" drive
 

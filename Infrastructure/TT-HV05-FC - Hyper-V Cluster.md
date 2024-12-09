@@ -288,7 +288,7 @@ Get-ClusterGroup -Cluster TT-HV05-FC |
         Get-VM -ComputerName $_.OwnerNode -Name $_.Name |
             Get-VMHardDiskDrive |
             Get-VHD -ComputerName $_.OwnerNode |
-            select Path, @{N=’Size’; E={[Math]::Round(($_.Size / 1GB), 2) }}
+            select Path, @{N=ï¿½Sizeï¿½; E={[Math]::Round(($_.Size / 1GB), 2) }}
     } | ft -auto
 ```
 

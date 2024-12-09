@@ -95,8 +95,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ### Set password for the local Administrator account
 
-After the restart required to complete the installation, the password for the
-Administrator user must be changed before signing in.
+After the restart required to complete the installation, the password for the Administrator user must be changed before signing in.
 
 ### # Stop SConfig from launching at sign-in
 
@@ -211,8 +210,7 @@ Get-NetAdapter |
 
 > **Note**
 >
-> This avoids flooding the firewall log with numerous entries for UDP 5355
-> broadcast.
+> This avoids flooding the firewall log with numerous entries for UDP 5355 broadcast.
 
 ```PowerShell
 cls
@@ -242,8 +240,7 @@ Get-NetAdapter |
 
 > **Note**
 >
-> This avoids flooding the firewall log with numerous entries for UDP 137
-> broadcast.
+> This avoids flooding the firewall log with numerous entries for UDP 137 broadcast.
 
 ### Rename server and join domain
 
@@ -468,8 +465,7 @@ robocopy '\\TT-FS01\D$\Shares' D:\Shares /B /COPYALL /NP /E /MIR /SL
 
 > **Note**
 >
-> **D:\Shares\Products\Drivers** contains symbolic links to share installation
-> files for various hardware.
+> **D:\Shares\Products\Drivers** contains symbolic links to share installation files for various hardware.
 >
 > For example:
 >
@@ -603,11 +599,9 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License
-Terms, click **Accept**.
+Review the licensing agreement. If you accept the Microsoft Software License Terms, click **Accept**.
 
-Confirm the agent installation completed successfully and the following firewall
-exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service

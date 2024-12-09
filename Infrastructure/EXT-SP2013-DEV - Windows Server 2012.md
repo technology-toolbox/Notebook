@@ -1296,10 +1296,10 @@ Restart-Service SPTimerV4
 
 #### Configure synchronization connections and import data from Active Directory
 
-| **Connection Name** | **Forest Name**            | **Account Name**            |
-| ------------------- | -------------------------- | --------------------------- |
-| TECHTOOLBOX         | corp.technologytoolbox.com | TECHTOOLBOX\\svc-sp-ups-dev |
-| FABRIKAM            | corp.fabrikam.com          | FABRIKAM\\s-sp-ups-dev      |
+| **Connection Name** | **Forest Name** | **Account Name** |
+| --- | --- | --- |
+| TECHTOOLBOX | corp.technologytoolbox.com | TECHTOOLBOX\\svc-sp-ups-dev |
+| FABRIKAM | corp.fabrikam.com | FABRIKAM\\s-sp-ups-dev |
 
 ### # Configure people search in SharePoint
 

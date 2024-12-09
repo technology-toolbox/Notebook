@@ -49,7 +49,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ## Install custom Windows Server 2008 R2 image
 
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows Server 2008 R2** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-FOOBAR7**.
@@ -177,12 +177,12 @@ ping ICEMAN.corp.technologytoolbox.com -f -l 8900
 ### Configure VM storage
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 50 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 2 GB        | Fixed    | 64K                  | Data01       |
-| 2    | L:           | 1 GB        | Fixed    | 64K                  | Log01        |
-| 3    | T:           | 1 GB        | Fixed    | 64K                  | Temp01       |
-| 4    | Z:           | 10 GB       | Dynamic  | 4K                   | Backup01     |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 50 GB | Dynamic | 4K | OSDisk |
+| 1 | D: | 2 GB | Fixed | 64K | Data01 |
+| 2 | L: | 1 GB | Fixed | 64K | Log01 |
+| 3 | T: | 1 GB | Fixed | 64K | Temp01 |
+| 4 | Z: | 10 GB | Dynamic | 4K | Backup01 |
 
 ---
 

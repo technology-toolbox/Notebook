@@ -57,8 +57,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ### Install custom Windows Server 2019 image
 
-- On the **Task Sequence** step, select **Windows Server 2019** and click
-  **Next**.
+- On the **Task Sequence** step, select **Windows Server 2019** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **TT-ADMIN01**.
   - Click **Next**.
@@ -217,8 +216,7 @@ Enable-PSRemoting -Confirm:$false
 
 > **Note**
 >
-> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG
-> ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
+> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
 
 ## Install updates using Windows Update
 
@@ -300,22 +298,12 @@ Start-Process $adcsUrl.AbsoluteUri
 
 **To submit the certificate request to an enterprise CA:**
 
-1. Start Internet Explorer, and browse to the Active Directory Certificate
-   Services site
-   ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+1. Start Internet Explorer, and browse to the Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
 2. On the **Welcome** page, click **Request a certificate**.
-3. On the **Advanced Certificate Request** page, click **Submit a certificate
-   request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal
-   request by using a base-64-encoded PKCS #7 file.**
-4. On the **Submit a Certificate Request or Renewal Request** page, in the
-   **Saved Request** text box, paste the contents of the certificate request
-   generated in the previous procedure.
-5. In the **Certificate Template** section, select the certificate template
-   (**Technology Toolbox Web Server - Exportable**), and then click **Submit**.
-   When prompted to allow the digital certificate operation to be performed,
-   click **Yes**.
-6. On the **Certificate Issued** page, click **Download certificate** and save
-   the certificate.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the certificate template (**Technology Toolbox Web Server - Exportable**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
 
 ```PowerShell
 cls
@@ -341,9 +329,7 @@ Remove-Item $certFile
 
 ##### Export certificate
 
-Filename: **[\\\\TT-FS01\\Users\$\\jjameson-admin\\My
-Documents\\Certificates\\admin.technologytoolbox.com.pfx](\\TT-FS01\Users\$\jjameson-admin\My
-Documents\Certificates\admin.technologytoolbox.com.pfx)**
+Filename: **[\\\\TT-FS01\\Users\$\\jjameson-admin\\My Documents\\Certificates\\admin.technologytoolbox.com.pfx](\\TT-FS01\Users\$\jjameson-admin\My Documents\Certificates\admin.technologytoolbox.com.pfx)**
 
 ---
 
@@ -403,19 +389,13 @@ $installerArguments = "/qn /L*v log.txt SME_PORT=443 SME_THUMBPRINT=$certThumbpr
 
 > **Note**
 >
-> Specifying **REGISTRY_REDIRECT_PORT_80=1** when installing Windows Admin
-> Center results in the following HTTP header being added to any request that
-> specifies http:// as the protocol:
+> Specifying **REGISTRY_REDIRECT_PORT_80=1** when installing Windows Admin Center results in the following HTTP header being added to any request that specifies http:// as the protocol:
 >
 > Upgrade-Insecure-Requests: 1
 >
-> However, the initial authentication (using NTLM) still takes place over HTTP
-> (not HTTPS). After the initial authentication succeeds, the browser redirects
-> to HTTPS -- which results in a second authentication prompt.
+> However, the initial authentication (using NTLM) still takes place over HTTP (not HTTPS). After the initial authentication succeeds, the browser redirects to HTTPS -- which results in a second authentication prompt.
 >
-> When **REGISTRY_REDIRECT_PORT_80=1** is not specified, users must explicitly
-> connect using HTTPS (i.e. specifying http://... causes the browser to
-> timeout).
+> When **REGISTRY_REDIRECT_PORT_80=1** is not specified, users must explicitly connect using HTTPS (i.e. specifying http://... causes the browser to timeout).
 
 ```PowerShell
 Start-Process `
@@ -531,22 +511,12 @@ Start-Process $adcsUrl.AbsoluteUri
 
 **To submit the certificate request to an enterprise CA:**
 
-1. Start Internet Explorer, and browse to the Active Directory Certificate
-   Services site
-   ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
+1. Start Internet Explorer, and browse to the Active Directory Certificate Services site ([https://cipher01.corp.technologytoolbox.com/](https://cipher01.corp.technologytoolbox.com/)).
 2. On the **Welcome** page, click **Request a certificate**.
-3. On the **Advanced Certificate Request** page, click **Submit a certificate
-   request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal
-   request by using a base-64-encoded PKCS #7 file.**
-4. On the **Submit a Certificate Request or Renewal Request** page, in the
-   **Saved Request** text box, paste the contents of the certificate request
-   generated in the previous procedure.
-5. In the **Certificate Template** section, select the certificate template
-   (**Technology Toolbox Web Server - Exportable**), and then click **Submit**.
-   When prompted to allow the digital certificate operation to be performed,
-   click **Yes**.
-6. On the **Certificate Issued** page, click **Download certificate** and save
-   the certificate.
+3. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
+4. On the **Submit a Certificate Request or Renewal Request** page, in the **Saved Request** text box, paste the contents of the certificate request generated in the previous procedure.
+5. In the **Certificate Template** section, select the certificate template (**Technology Toolbox Web Server - Exportable**), and then click **Submit**. When prompted to allow the digital certificate operation to be performed, click **Yes**.
+6. On the **Certificate Issued** page, click **Download certificate** and save the certificate.
 
 ```PowerShell
 cls
@@ -572,9 +542,7 @@ Remove-Item $certFile
 
 ##### Export certificate
 
-Filename: **[\\\\TT-FS01\\Users\$\\jjameson-admin\\My
-Documents\\Certificates\\admin.technologytoolbox.com.pfx](\\TT-FS01\Users\$\jjameson-admin\My
-Documents\Certificates\admin.technologytoolbox.com.pfx)**
+Filename: **[\\\\TT-FS01\\Users\$\\jjameson-admin\\My Documents\\Certificates\\admin.technologytoolbox.com.pfx](\\TT-FS01\Users\$\jjameson-admin\My Documents\Certificates\admin.technologytoolbox.com.pfx)**
 
 ---
 
@@ -608,10 +576,8 @@ A9AB28D626F2C7D0C19DDD72A4C200D43D37A2A4  CN=admin.technologytoolbox.com, OU=IT,
 ### Update certificate for Windows Admin Center
 
 1. Open **Settings** and select **Apps & features**.
-1. In the **Apps & features** list, select **Windows Admin Center** and click
-   **Modify**.
-1. In the **Windows Admin Center Setup** window, complete the steps to update
-   the certificate (by specifying the thumbprint for the new certificate).
+1. In the **Apps & features** list, select **Windows Admin Center** and click **Modify**.
+1. In the **Windows Admin Center Setup** window, complete the steps to update the certificate (by specifying the thumbprint for the new certificate).
 
 ## Install Azure Active Directory Connect
 

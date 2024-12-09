@@ -114,12 +114,12 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ```
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 100 GB      | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 20 GB       | Dynamic  | 64K                  | Data01       |
-| 2    | L:           | 5 GB        | Dynamic  | 64K                  | Log01        |
-| 3    | T:           | 2 GB        | Dynamic  | 64K                  | Temp01       |
-| 4    | Z:           | 20 GB       | Dynamic  | 4K                   | Backup01     |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 100 GB | Dynamic | 4K | OSDisk |
+| 1 | D: | 20 GB | Dynamic | 64K | Data01 |
+| 2 | L: | 5 GB | Dynamic | 64K | Log01 |
+| 3 | T: | 2 GB | Dynamic | 64K | Temp01 |
+| 4 | Z: | 20 GB | Dynamic | 4K | Backup01 |
 
 ---
 

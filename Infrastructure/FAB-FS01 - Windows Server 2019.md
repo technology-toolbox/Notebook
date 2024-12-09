@@ -367,15 +367,9 @@ Install-WindowsFeature `
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/15EB97C733CA5FC0E1C3D416019827D8A0AD404D.png)
 
-The Storage Migration Service version shipped in Windows Server 2019 doesn't
-support migrating from the NTFS to REFS file systems. You can migrate from NTFS
-to NTFS and REFS to ReFS. This is by design, due to the many differences in
-functionality, metadata, and other aspects that ReFS doesn't duplicate from
-NTFS. ReFS is intended as an application workload file system, not a general
-file system.
+The Storage Migration Service version shipped in Windows Server 2019 doesn't support migrating from the NTFS to REFS file systems. You can migrate from NTFS to NTFS and REFS to ReFS. This is by design, due to the many differences in functionality, metadata, and other aspects that ReFS doesn't duplicate from NTFS. ReFS is intended as an application workload file system, not a general file system.
 
-From
-<[https://docs.microsoft.com/en-us/windows-server/storage/storage-migration-service/faq#ntfs-refs](https://docs.microsoft.com/en-us/windows-server/storage/storage-migration-service/faq#ntfs-refs)>
+From <[https://docs.microsoft.com/en-us/windows-server/storage/storage-migration-service/faq#ntfs-refs](https://docs.microsoft.com/en-us/windows-server/storage/storage-migration-service/faq#ntfs-refs)>
 
 ```PowerShell
 cls

@@ -376,8 +376,7 @@ Set-AzDnsRecordSet -RecordSet $dnsRecordSet
 
 **Reference:**
 
-**Option 2: Send mail directly from your printer or application to Microsoft 365
-or Office 365 (direct send)**\
+**Option 2: Send mail directly from your printer or application to Microsoft 365 or Office 365 (direct send)**\
 Pasted from <[https://docs.microsoft.com/en-us/exchange/mail-flow-best-practices/how-to-set-up-a-multifunction-device-or-application-to-send-email-using-microsoft-365-or-office-365#option-2-send-mail-directly-from-your-printer-or-application-to-microsoft-365-or-office-365-direct-send](https://docs.microsoft.com/en-us/exchange/mail-flow-best-practices/how-to-set-up-a-multifunction-device-or-application-to-send-email-using-microsoft-365-or-office-365#option-2-send-mail-directly-from-your-printer-or-application-to-microsoft-365-or-office-365-direct-send)>
 
 ```PowerShell

@@ -68,13 +68,11 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 #### Install custom Windows Server 2016 image
 
-- On the **Task Sequence** step, select **Windows Server 2016** and click
-  **Next**.
+- On the **Task Sequence** step, select **Windows Server 2016** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **TT-DEPLOY4**.
   - Click **Next**.
-- On the **Applications** step, do not select any applications, and click
-  **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
 
 ---
 
@@ -357,31 +355,21 @@ cls
 #### Change monitoring host to TT-DEPLOY4
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-2. Right-click **MDT Build Lab
-   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$))** and then click
-   **Properties**.
-3. In the **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$))
-   Properties** window:
-   1. On the **Monitoring** tab, in the **Monitoring host** box, type
-      **TT-DEPLOY4**.
+2. Right-click **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$))** and then click **Properties**.
+3. In the **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) Properties** window:
+   1. On the **Monitoring** tab, in the **Monitoring host** box, type **TT-DEPLOY4**.
    2. Click **OK**.
-4. Repeat the previous steps to update the **MDT Deployment
-   ([\\\\TT-FS01\\MDT-Deploy\$](\\TT-FS01\MDT-Deploy$))** deployment share.
+4. Repeat the previous steps to update the **MDT Deployment ([\\\\TT-FS01\\MDT-Deploy\$](\TT-FS01\MDT-Deploy$))** deployment share.
 
 #### Update MDT deployment shares (to regenerate the boot images)
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-2. Right-click **MDT Build Lab
-   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$))** and then click **Update
-   Deployment Share**.
+2. Right-click **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$))** and then click **Update Deployment Share**.
 3. In the **Update Deployment Share Wizard**:
-   1. On the **Options** step, select **Completely regenerate the boot images**,
-      and then click **Next**.
+   1. On the **Options** step, select **Completely regenerate the boot images**, and then click **Next**.
    2. On the **Summary** step, click **Next**.
-   3. Wait for the deployment share to be updated, verify no errors occurred
-      during the update, and then click **Finish**.
-4. Repeat the previous steps to update the **MDT Deployment
-   ([\\\\TT-FS01\\MDT-Deploy\$](\\TT-FS01\MDT-Deploy$))** deployment share.
+   3. Wait for the deployment share to be updated, verify no errors occurred during the update, and then click **Finish**.
+4. Repeat the previous steps to update the **MDT Deployment ([\\\\TT-FS01\\MDT-Deploy\$](\TT-FS01\MDT-Deploy$))** deployment share.
 
 ```PowerShell
 cls
@@ -583,8 +571,7 @@ From <[https://www.mikeslab.net/?p=504](https://www.mikeslab.net/?p=504)>
 
 #### Extract files
 
-Extract the following files to
-[\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
+Extract the following files to [\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
 
 - **core/pxelinux.0**
 - **com32/menu/vesamenu.c32**
@@ -722,8 +709,7 @@ WDSUTIL /Set-Server /N12BootProgram:Boot\x64\pxelinux.com /Architecture:x64
 
 > **Note**
 >
-> For troubleshooting purposes, the following commands can be used to revert WDS
-> to use the default boot programs:
+> For troubleshooting purposes, the following commands can be used to revert WDS to use the default boot programs:
 >
 > ```Console
 > WDSUTIL /Set-Server /BootProgram:boot\x86\pxeboot.com /Architecture:x86
@@ -781,8 +767,7 @@ From <[http://www.syslinux.org/wiki/index.php?title=Hardware_Compatibility#LOCAL
 
 #### Extract file from syslinux-4.07.zip
 
-Extract the following file to
-[\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
+Extract the following file to [\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
 
 - **com32/chain/chain.c32**
 
@@ -888,8 +873,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 #### Extract file from syslinux-4.07.zip
 
-Extract the following file to
-[\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
+Extract the following file to [\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
 
 - **com32/hdt/hdt.c32**
 
@@ -992,8 +976,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 #### Extract file from syslinux-4.07.zip
 
-Extract the following file to
-[\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
+Extract the following file to [\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
 
 - **com32/modules/reboot.c32**
 
@@ -1095,8 +1078,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 #### Extract file from syslinux-4.07.zip
 
-Extract the following file to
-[\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
+Extract the following file to [\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
 
 - **modules/poweroff.com**
 
@@ -1226,8 +1208,7 @@ Pop-Location
 
 #### Extract file
 
-Extract the file to
-[\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\Images\\Linux](\\TT-DEPLOY4\C$\NotBackedUp\Temp\Images\Linux).
+Extract the file to [\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\Images\\Linux](\TT-DEPLOY4\C$\NotBackedUp\Temp\Images\Linux).
 
 ---
 
@@ -1312,8 +1293,7 @@ robocopy $source $destination /E
 
 #### Extract file from syslinux-4.07.zip
 
-Extract the following file to
-[\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
+Extract the following file to [\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
 
 - **memdisk/memdisk**
 
@@ -1356,8 +1336,7 @@ Pop-Location
 
 #### Download Parted Magic 2013_08_01
 
-Download the ISO to
-[\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\Images\\Linux](\\TT-DEPLOY4\C$\NotBackedUp\Temp\Images\Linux).
+Download the ISO to [\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\Images\\Linux](\TT-DEPLOY4\C$\NotBackedUp\Temp\Images\Linux).
 
 ---
 
@@ -1441,8 +1420,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\ID
 
 **FOOBAR10** - Run as administrator
 
-Copy background image to
-[\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
+Copy background image to [\\\\TT-DEPLOY4\\C\$\\NotBackedUp\\Temp\\PXELinux](\TT-DEPLOY4\C$\NotBackedUp\Temp\PXELinux):
 
 - **Technology-Toolbox-Background-640x480.png**
 
@@ -2043,18 +2021,13 @@ Import-MDTApplication `
 
 #### # Configure application bundle - Microsoft Report Viewer 2012 (bundle)
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment
-   ([\\\\TT-FS01\\MDT-Deploy\$](\\TT-FS01\MDT-Deploy$)) / Applications /
-   Microsoft**, right-click **Microsoft Report Viewer 2012 (bundle)**, and click
-   **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment ([\\\\TT-FS01\\MDT-Deploy\$](\TT-FS01\MDT-Deploy$)) / Applications / Microsoft**, right-click **Microsoft Report Viewer 2012 (bundle)**, and click **Properties**.
 2. In the **Microsoft Report Viewer 2012 (bundle) Properties** window:
    1. On the **Dependencies** tab:
       1. Add the following applications:
          1. **Microsoft System CLR Types for SQL Server 2012**
          2. **Microsoft Report Viewer 2012**
-      2. Ensure the applications in the previous step are listed in the
-         specified order. Use the **Up** or **Down** buttons to reorder the
-         applications as necessary.
+      2. Ensure the applications in the previous step are listed in the specified order. Use the **Up** or **Down** buttons to reorder the applications as necessary.
    2. Click **OK**.
 
 ```PowerShell
@@ -2177,20 +2150,14 @@ Import-MDTApplication `
 
 ##### # Configure application bundle - System Center Operations Manager 2016 - Operations console (bundle)
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment
-   ([\\\\TT-FS01\\MDT-Deploy\$](\\TT-FS01\MDT-Deploy$)) / Applications /
-   Microsoft**, right-click **System Center Operations Manager 2016 - Operations
-   console (bundle)**, and click **Properties**.
-2. In the **System Center Operations Manager 2016 - Operations console (bundle)
-   Properties** window:
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment ([\\\\TT-FS01\\MDT-Deploy\$](\TT-FS01\MDT-Deploy$)) / Applications / Microsoft**, right-click **System Center Operations Manager 2016 - Operations console (bundle)**, and click **Properties**.
+2. In the **System Center Operations Manager 2016 - Operations console (bundle) Properties** window:
    1. On the **Dependencies** tab:
       1. Add the following applications:
          1. **Microsoft System CLR Types for SQL Server 2014**
          2. **Microsoft Report Viewer 2015**
          3. **System Center Operations Manager 2016 - Operations console**
-      2. Ensure the applications in the previous step are listed in the
-         specified order. Use the **Up** or **Down** buttons to reorder the
-         applications as necessary.
+      2. Ensure the applications in the previous step are listed in the specified order. Use the **Up** or **Down** buttons to reorder the applications as necessary.
    2. Click **OK**.
 
 ```PowerShell
@@ -2271,20 +2238,14 @@ Import-MDTApplication `
 
 ##### # Configure application bundle - System Center Data Protection Manager 2016 - Central Console (bundle)
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment
-   ([\\\\TT-FS01\\MDT-Deploy\$](\\TT-FS01\MDT-Deploy$)) / Applications /
-   Microsoft**, right-click **System Center Data Protection Manager 2016 -
-   Central Console (bundle)**, and click **Properties**.
-2. In the **System Center Data Protection Manager 2016 - Central Console
-   (bundle) Properties** window:
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Deployment ([\\\\TT-FS01\\MDT-Deploy\$](\TT-FS01\MDT-Deploy$)) / Applications / Microsoft**, right-click **System Center Data Protection Manager 2016 - Central Console (bundle)**, and click **Properties**.
+2. In the **System Center Data Protection Manager 2016 - Central Console (bundle) Properties** window:
    1. On the **Dependencies** tab:
       1. Add the following applications:
          1. **Visual C++ 2008 Redistributable**
          2. **Visual C++ 2010 Redistributable**
          3. **System Center Data Protection Manager 2016 - Central Console**
-      2. Ensure the applications in the previous step are listed in the
-         specified order. Use the **Up** or **Down** buttons to reorder the
-         applications as necessary.
+      2. Ensure the applications in the previous step are listed in the specified order. Use the **Up** or **Down** buttons to reorder the applications as necessary.
    2. Click **OK**.
 
 ```PowerShell
@@ -2476,8 +2437,7 @@ Start-SCVirtualMachine $vmName
 
 Screen clipping taken: 8/6/2018 5:56 PM
 
-**PXEClient, dhcp options 60, 66 and 67, what are they for? Can I use PXE
-without it ?**\
+**PXEClient, dhcp options 60, 66 and 67, what are they for? Can I use PXE without it ?**\
 From <[https://www.experts-exchange.com/articles/2978/PXEClient-dhcp-options-60-66-and-67-what-are-they-for-Can-I-use-PXE-without-it.html](https://www.experts-exchange.com/articles/2978/PXEClient-dhcp-options-60-66-and-67-what-are-they-for-Can-I-use-PXE-without-it.html)>
 
 **PXE Boot files in RemoteInstall folder explained (UEFI)**\
@@ -3037,8 +2997,7 @@ $tf = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\ID
 
 ### Symptom
 
-The network boot starts but stalls during the "Loading files" step. A short time
-later, the following error message is displayed:
+The network boot starts but stalls during the "Loading files" step. A short time later, the following error message is displayed:
 
 Status: 0xc0000001\
 Info: A required device isn't connected or can't be accessed.
@@ -3047,8 +3006,7 @@ Info: A required device isn't connected or can't be accessed.
 
 This is due to a patch installed from Windows Update (KB4489882).
 
-The solution is to disable **Variable Window Extension** in Windows Deployment
-Services:
+The solution is to disable **Variable Window Extension** in Windows Deployment Services:
 
 ```Console
 wdsutil /Set-TransportServer /EnableTftpVariableWindowExtension:No
@@ -3057,12 +3015,10 @@ Restart-Service WDSServer
 ```
 
 1. Open the **Windows Deployment Services** console.
-2. Expand the **Servers** node, right-click the server name, and click
-   **Properties**.
+2. Expand the **Servers** node, right-click the server name, and click **Properties**.
 3. In the **Properties** window:
    1. Select the **TFTP** tab.
-   2. In the **Variable Window Extension** section, clear the **Enable Variable
-      Window Extension** checkbox.
+   2. In the **Variable Window Extension** section, clear the **Enable Variable Window Extension** checkbox.
    3. Click **OK**.
 4. Restart the server.
 
@@ -3071,14 +3027,9 @@ Restart-Service WDSServer
 **Windows Update (KB4489882) broke WDS and MDT**\
 From <[https://social.technet.microsoft.com/Forums/en-US/46e30b31-590e-47b4-b123-faf3776cfe74/windows-update-kb4489882-broke-wds-and-mdt?forum=mdt](https://social.technet.microsoft.com/Forums/en-US/46e30b31-590e-47b4-b123-faf3776cfe74/windows-update-kb4489882-broke-wds-and-mdt?forum=mdt)>
 
-After installing this update, there may be issues using the Preboot Execution
-Environment (PXE) to start a device from a Windows Deployment Services (WDS)
-server configured to use Variable Window Extension. This may cause the
-connection to the WDS server to terminate prematurely while downloading the
-image.
+After installing this update, there may be issues using the Preboot Execution Environment (PXE) to start a device from a Windows Deployment Services (WDS) server configured to use Variable Window Extension. This may cause the connection to the WDS server to terminate prematurely while downloading the image.
 
-To mitigate the issue, disable the Variable Window Extension on WDS server using
-one of the following options:
+To mitigate the issue, disable the Variable Window Extension on WDS server using one of the following options:
 
 Open an Administrator Command prompt and type the following:
 
@@ -3086,13 +3037,12 @@ Wdsutil /Set-TransportServer /EnableTftpVariableWindowExtension:No
 
 Restart the WDSServer service after disabling the Variable Window Extension.
 
-**March 12, 2019—KB4489882 (OS Build 14393.2848)**\
+**March 12, 2019ï¿½KB4489882 (OS Build 14393.2848)**\
 From <[https://support.microsoft.com/en-us/help/4489882/windows-10-update-kb4489882](https://support.microsoft.com/en-us/help/4489882/windows-10-update-kb4489882)>
 
 ## Issue - Not enough free space to install patches using Windows Update
 
-8.5 GB of free space, but unable to install **2019-05 Cumulative Update for
-Windows Server 2016 for x64-based Systems (KB4494440)**.
+8.5 GB of free space, but unable to install **2019-05 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4494440)**.
 
 ### Expand C: volume
 
@@ -3223,8 +3173,7 @@ robocopy \\TT-FS01\MDT-Build$ Main\MDT-Build$ /E /XD Applications Backup Boot Ca
 
 ## Issue - Not enough free space to install patches using Windows Update
 
-4.5 GB of free space, but unable to install **2019-07 Cumulative Update for
-Windows Server 2016 for x64-based Systems (KB4507460)**.
+4.5 GB of free space, but unable to install **2019-07 Cumulative Update for Windows Server 2016 for x64-based Systems (KB4507460)**.
 
 ### Expand C: volume
 
@@ -3390,11 +3339,7 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2019 does not honor the
-> `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words,
-> if no product key is specified in the task sequence, when building the
-> reference image it will prompt to enter a product key (but provide an option
-> to do this later).
+> The MSDN version of Windows Server 2019 does not honor the `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words, if no product key is specified in the task sequence, when building the reference image it will prompt to enter a product key (but provide an option to do this later).
 >
 > The product key specified above was obtained from the following:
 >
@@ -3459,41 +3404,26 @@ cls
 
 ### Configure task sequence - "Windows Server 2019"
 
-Edit the task sequence to include the actions required to update the reference
-image with the latest updates from WSUS, copy Toolbox content from TT-FS01, and
-easily suspend the deployment process after installing applications.
+Edit the task sequence to include the actions required to update the reference image with the latest updates from WSUS, copy Toolbox content from TT-FS01, and easily suspend the deployment process after installing applications.
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
-   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows
-   Server 2019**, right-click **Windows Server 2019 - Baseline**, and click
-   **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) / Task Sequences / Windows Server 2019**, right-click **Windows Server 2019 - Baseline**, and click **Properties**.
 2. In the **Windows Server 2019 - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content and latest patches**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
          1. Enable the **Windows Update (Pre-Application Installation)** action.
-         2. Clear the **Continue on error** checkbox for the **Windows Update
-            (Pre-Application Installation)** action.
-         3. Enable the **Windows Update (Post-Application Installation)**
-            action.
-         4. Clear the **Continue on error** checkbox for the **Windows Update
-            (Post-Application Installation)** action.
-         5. After the **Tattoo** action, add a new **Group** action with the
-            following setting:
+         2. Clear the **Continue on error** checkbox for the **Windows Update (Pre-Application Installation)** action.
+         3. Enable the **Windows Update (Post-Application Installation)** action.
+         4. Clear the **Continue on error** checkbox for the **Windows Update (Post-Application Installation)** action.
+         5. After the **Tattoo** action, add a new **Group** action with the following setting:
             1. Name: **Custom Tasks (Pre-Windows Update)**
-         6. After the **Windows Update (Post-Application Installation)** action,
-            rename the **Custom Tasks** group to **Custom Tasks (Post-Windows
-            Update)**.
-         7. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
-            **Run Command Line** action with the following settings:
+         6. After the **Windows Update (Post-Application Installation)** action, rename the **Custom Tasks** group to **Custom Tasks (Post-Windows Update)**.
+         7. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Run Command Line** action with the following settings:
             1. Name: **Copy Toolbox content from TT-FS01**
-            2. Command line: **robocopy
-               [\\\\TT-FS01\\Public\\Toolbox](\\TT-FS01\Public\Toolbox)
-               C:\\NotBackedUp\\Public\\Toolbox /E**
+            2. Command line: **robocopy [\\\\TT-FS01\\Public\\Toolbox](\TT-FS01\Public\Toolbox) C:\\NotBackedUp\\Public\\Toolbox /E**
             3. Success codes: **0 1 2 3 4 5 6 7 8 16**
-         8. After the **Install Applications** action, add a new **Run Command
-            Line** action with the following settings:
+         8. After the **Install Applications** action, add a new **Run Command Line** action with the following settings:
             1. Name: **Suspend**
             2. Command line: **cscript.exe "%SCRIPTROOT%\\LTISuspend.wsf"**
             3. Disable this step:** Yes (checked)**
@@ -3501,10 +3431,7 @@ easily suspend the deployment process after installing applications.
 
 > **Note**
 >
-> The reason for adding the applications after the Tattoo action but before
-> running Windows Update is simply to save time during the deployment. This way
-> we can add all applications that will upgrade some of the built-in components
-> and avoid unnecessary updating.
+> The reason for adding the applications after the Tattoo action but before running Windows Update is simply to save time during the deployment. This way we can add all applications that will upgrade some of the built-in components and avoid unnecessary updating.
 
 ---
 
@@ -3663,11 +3590,7 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2019 does not honor the
-> `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words,
-> if no product key is specified in the task sequence, when deploying the
-> baseline image it will prompt to enter a product key (but provide an option to
-> do this later).
+> The MSDN version of Windows Server 2019 does not honor the `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words, if no product key is specified in the task sequence, when deploying the baseline image it will prompt to enter a product key (but provide an option to do this later).
 >
 > The product key specified above was obtained from the following:
 >
@@ -3711,43 +3634,27 @@ robocopy \\TT-FS01\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot 
 
 ### Configure task sequence - "Windows Server 2019"
 
-Edit the task sequence to include actions to set MaxPatchCacheSize to 0 and
-clean up the image after patching.
+Edit the task sequence to include actions to set MaxPatchCacheSize to 0 and clean up the image after patching.
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
-   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows
-   Server 2019**, right-click **Windows Server 2019 - Baseline**, and click
-   **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) / Task Sequences / Windows Server 2019**, right-click **Windows Server 2019 - Baseline**, and click **Properties**.
 2. In the **Windows Server 2019 - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content,
-         latest patches, and cleanup before Sysprep**
+      1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content, latest patches, and cleanup before Sysprep**
    2. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
-         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
-            **Run Command Line** action with the following settings:
+         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Run Command Line** action with the following settings:
             1. Name: **Set MaxPatchCacheSize to 0**
-            2. Command line: **PowerShell.exe -Command "& { New-Item -Path
-               'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer';
-               New-ItemProperty -Path
-               'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer' -Name
-               MaxPatchCacheSize -PropertyType DWord -Value 0 | Out-Null }"**
-         2. After the **Apply Local GPO Package** action, add a new group with
-            the following setting:
+            2. Command line: **PowerShell.exe -Command "& { New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer'; New-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer' -Name MaxPatchCacheSize -PropertyType DWord -Value 0 | Out-Null }"**
+         2. After the **Apply Local GPO Package** action, add a new group with the following setting:
             1. Name: **Cleanup before Sysprep**
-         3. Select the **Cleanup before Sysprep** group created in the previous
-            step and add a new group with the following setting:
+         3. Select the **Cleanup before Sysprep** group created in the previous step and add a new group with the following setting:
             1. Name: **Compress the image**
-         4. Select the **Compress the image** group and add a new **Restart
-            computer** action.
-         5. After the new **Restart computer** action added in the previous
-            step, add a new **Install Application** action with the following
-            settings:
+         4. Select the **Compress the image** group and add a new **Restart computer** action.
+         5. After the new **Restart computer** action added in the previous step, add a new **Install Application** action with the following settings:
             1. Name: **Action - Cleanup before Sysprep**
             2. **Install a single application**
             3. Application to install: **Action - Cleanup before Sysprep**
-         6. After the action added in the previous step, add a new **Restart
-            computer** action.
+         6. After the action added in the previous step, add a new **Restart computer** action.
    3. Click **OK**.
 
 ---
@@ -3977,13 +3884,11 @@ Pop-Location
 
 ## Issue - Errors building Windows 7 and Windows Server 2008 baseline images
 
-Error 0x80092004 occurred when installing updates due to missing SHA-1
-signatures (starting with updates released in August 2019).
+Error 0x80092004 occurred when installing updates due to missing SHA-1 signatures (starting with updates released in August 2019).
 
 ### References
 
-**If you get Windows Update error 0x80092004 on Windows 7 or Server 2008 R2 do
-this**\
+**If you get Windows Update error 0x80092004 on Windows 7 or Server 2008 R2 do this**\
 From <[https://www.ghacks.net/2019/08/15/if-you-get-windows-update-error-0x80092004-on-windows-7-or-server-2008-r2-do-this/](https://www.ghacks.net/2019/08/15/if-you-get-windows-update-error-0x80092004-on-windows-7-or-server-2008-r2-do-this/)>
 
 ```PowerShell
@@ -4352,31 +4257,23 @@ Pop-Location
 
 > **Important**
 >
-> There are known issues when using the Microsoft Deployment Toolkit to build
-> images for Windows 10 Version 2004. For example, after running SysPrep and
-> restarting, the VM fails to boot (it loops through the "Loading files..."
-> screen several times and then shuts down).
+> There are known issues when using the Microsoft Deployment Toolkit to build images for Windows 10 Version 2004. For example, after running SysPrep and restarting, the VM fails to boot (it loops through the "Loading files..." screen several times and then shuts down).
 >
-> To avoid these issues, it is necessary to overwrite the
-> **Microsoft.BDD.Utility.dll** files on the MDT server and update the
-> deployment share.
+> To avoid these issues, it is necessary to overwrite the **Microsoft.BDD.Utility.dll** files on the MDT server and update the deployment share.
 >
 > Refer to the following:
 >
-> **Windows 10 deployments fail with Microsoft Deployment Toolkit on computers
-> with BIOS type firmware**\
+> **Windows 10 deployments fail with Microsoft Deployment Toolkit on computers with BIOS type firmware**\
 > From <[https://support.microsoft.com/en-us/help/4564442/windows-10-deployments-fail-with-microsoft-deployment-toolkit](https://support.microsoft.com/en-us/help/4564442/windows-10-deployments-fail-with-microsoft-deployment-toolkit)>
 
 #### Download patch for MDT and Windows 10 Version 2004
 
-Download the patch (**MDT_KB4564442.exe**) from Microsoft KB article 4564442 and
-extract the contents.
+Download the patch (**MDT_KB4564442.exe**) from Microsoft KB article 4564442 and extract the contents.
 
 #### Update Microsoft.BDD.Utility.dll files on MDT server
 
 1. Close **Deployment Workbench**.
-2. Backup the existing versions of the Microsoft.BDD.Utility.dll file in the
-   following locations:\
+2. Backup the existing versions of the Microsoft.BDD.Utility.dll file in the following locations:\
    %ProgramFiles%\Microsoft Deployment Toolkit\Templates\Distribution\Tools\x86\
    %ProgramFiles%\Microsoft Deployment Toolkit\Templates\Distribution\Tools\x64\
 3. Copy the new files extracted from MDT_KB4564442.exe over the old versions.
@@ -4413,10 +4310,8 @@ Copy-Item `
 1. Open **Deployment Workbench**.
 2. Select the **MDT Build Lab (\\\\TT-FS01\MDT-Build\$)** deployment share.
 3. On the **Action** menu, click **Update Deployment Share**.
-4. In the **Update Deployment Share Wizard**, select the **Completely regenerate
-   the boot images** option.
-5. Repeat the previous steps for the **MDT Deployment
-   (\\\\TT-FS01\MDT-Deploy\$)** deployment share.
+4. In the **Update Deployment Share Wizard**, select the **Completely regenerate the boot images** option.
+5. Repeat the previous steps for the **MDT Deployment (\\\\TT-FS01\MDT-Deploy\$)** deployment share.
 
 ```PowerShell
 cls
@@ -4508,8 +4403,7 @@ Pop-Location
 
 > **Note**
 >
-> There is a known issue in MDT where all updates for Windows 10 Version 2004
-> are skipped. This is due to patches being incorrectly determined as
+> There is a known issue in MDT where all updates for Windows 10 Version 2004 are skipped. This is due to patches being incorrectly determined as
 >
 > To avoid this issues, .
 >
@@ -4521,8 +4415,7 @@ Pop-Location
 1. Open the Windows Update script on the **MDT Build Lab** share:\
    \\\\TT-FS01\\MDT-Build\$\\Scripts\\ZTIWindowsUpdate.wsf
 
-2. Comment out the following lines (297-299) by prepending each line with a
-   single quote:
+2. Comment out the following lines (297-299) by prepending each line with a single quote:
 
    ```VBScript
        If item.InstallationBehavior.CanRequestUserInput then
@@ -4704,17 +4597,12 @@ cls
 ### Update MDT deployment shares (to regenerate the boot images)
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-2. Right-click **MDT Build Lab
-   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$))** and then click **Update
-   Deployment Share**.
+2. Right-click **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$))** and then click **Update Deployment Share**.
 3. In the **Update Deployment Share Wizard**:
-   1. On the **Options** step, select **Completely regenerate the boot images**,
-      and then click **Next**.
+   1. On the **Options** step, select **Completely regenerate the boot images**, and then click **Next**.
    2. On the **Summary** step, click **Next**.
-   3. Wait for the deployment share to be updated, verify no errors occurred
-      during the update, and then click **Finish**.
-4. Repeat the previous steps to update the **MDT Deployment
-   ([\\\\TT-FS01\\MDT-Deploy\$](\\TT-FS01\MDT-Deploy$))** deployment share.
+   3. Wait for the deployment share to be updated, verify no errors occurred during the update, and then click **Finish**.
+4. Repeat the previous steps to update the **MDT Deployment ([\\\\TT-FS01\\MDT-Deploy\$](\TT-FS01\MDT-Deploy$))** deployment share.
 
 ```PowerShell
 cls
@@ -4877,10 +4765,8 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Modify task sequence to use new version of Windows 10 Enterprise, Version 20H2
 
-1. Expand the **Install** group and select the **Install Operating System**
-   task.
-2. In the **Operating system to install** section, click **Browse** and select
-   the following item:
+1. Expand the **Install** group and select the **Install Operating System** task.
+2. In the **Operating system to install** section, click **Browse** and select the following item:
 
    **Windows 10 Enterprise in W10Ent-20H2-x64 install.wim**
 
@@ -4971,10 +4857,8 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Modify task sequence to use new version of Windows Server 2019
 
-1. Expand the **Install** group and select the **Install Operating System**
-   task.
-2. In the **Operating system to install** section, click **Browse** and select
-   the following item:
+1. Expand the **Install** group and select the **Install Operating System** task.
+2. In the **Operating system to install** section, click **Browse** and select the following item:
 
    **Windows Server 2019 SERVERSTANDARD in WS2019-Oct-2020 install.wim**
 
@@ -5068,10 +4952,8 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Modify task sequence to use new version of Windows 10 Enterprise, Version 20H2
 
-1. Expand the **Install** group and select the **Install Operating System**
-   task.
-2. In the **Operating system to install** section, click **Browse** and select
-   the following item:
+1. Expand the **Install** group and select the **Install Operating System** task.
+2. In the **Operating system to install** section, click **Browse** and select the following item:
 
    **Windows 10 Enterprise in W10Ent-20H2-Mar-2021-x64 install.wim**
 
@@ -5162,10 +5044,8 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Modify task sequence to use new version of Windows Server 2019
 
-1. Expand the **Install** group and select the **Install Operating System**
-   task.
-2. In the **Operating system to install** section, click **Browse** and select
-   the following item:
+1. Expand the **Install** group and select the **Install Operating System** task.
+2. In the **Operating system to install** section, click **Browse** and select the following item:
 
    **Windows Server 2019 SERVERSTANDARD in WS2019-Mar-2021 install.wim**
 
@@ -5259,10 +5139,8 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Modify task sequence to use new version of Windows 10 Enterprise, Version 21H1
 
-1. Expand the **Install** group and select the **Install Operating System**
-   task.
-2. In the **Operating system to install** section, click **Browse** and select
-   the following item:
+1. Expand the **Install** group and select the **Install Operating System** task.
+2. In the **Operating system to install** section, click **Browse** and select the following item:
 
    **Windows 10 Enterprise in W10Ent-21H1-Aug-2021-x64 install.wim**
 
@@ -5353,10 +5231,8 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Modify task sequence to use new version of Windows Server 2019
 
-1. Expand the **Install** group and select the **Install Operating System**
-   task.
-2. In the **Operating system to install** section, click **Browse** and select
-   the following item:
+1. Expand the **Install** group and select the **Install Operating System** task.
+2. In the **Operating system to install** section, click **Browse** and select the following item:
 
    **Windows Server 2019 SERVERSTANDARD in WS2019-Aug-2021 install.wim**
 
@@ -5402,8 +5278,7 @@ Pop-Location
 
 ## Upgrade to Microsoft Deployment Toolkit - build 8450
 
-**Note:** Upgrading to the latest version of MDT (build 8456) from build 8443 is
-not supported. It is necessary to first upgrade from build 8443 to build 8450.
+**Note:** Upgrading to the latest version of MDT (build 8456) from build 8443 is not supported. It is necessary to first upgrade from build 8443 to build 8450.
 
 ### Reference
 
@@ -5428,12 +5303,10 @@ cls
 #### Upgrade "MDT Build Lab" deployment share
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-1. Right-click **\\\\TT-FS01\MDT-Build$** and then click **Upgrade Deployment
-   Share**.
+1. Right-click **\\\\TT-FS01\MDT-Build$** and then click **Upgrade Deployment Share**.
 1. In the **Upgrade Deployment Share Wizard**:
    1. On the **Summary** step, click **Next**.
-   1. Wait for the deployment share to be upgraded, verify no errors occurred
-      during the upgrade, and then click **Finish**.
+   1. Wait for the deployment share to be upgraded, verify no errors occurred during the upgrade, and then click **Finish**.
 
 ---
 
@@ -5474,12 +5347,10 @@ Pop-Location
 #### Upgrade "MDT Deployment" deployment share
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-1. Right-click **\\\\TT-FS01\MDT-Deploy$** and then click **Upgrade Deployment
-   Share**.
+1. Right-click **\\\\TT-FS01\MDT-Deploy$** and then click **Upgrade Deployment Share**.
 1. In the **Upgrade Deployment Share Wizard**:
    1. On the **Summary** step, click **Next**.
-   1. Wait for the deployment share to be upgraded, verify no errors occurred
-      during the upgrade, and then click **Finish**.
+   1. Wait for the deployment share to be upgraded, verify no errors occurred during the upgrade, and then click **Finish**.
 
 ---
 
@@ -5520,17 +5391,12 @@ Pop-Location
 ### Update boot images for deployment shares
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-1. Right-click **MDT Build Lab
-   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$))** and then click **Update
-   Deployment Share**.
+1. Right-click **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$))** and then click **Update Deployment Share**.
 1. In the **Update Deployment Share Wizard**:
-   1. On the **Options** step, select **Completely regenerate the boot images**,
-      and then click **Next**.
+   1. On the **Options** step, select **Completely regenerate the boot images**, and then click **Next**.
    1. On the **Summary** step, click **Next**.
-   1. Wait for the deployment share to be updated, verify no errors occurred
-      during the update, and then click **Finish**.
-1. Repeat the previous steps to update the **MDT Deployment
-   ([\\\\TT-FS01\\MDT-Deploy\$](\\TT-FS01\MDT-Deploy$))** deployment share.
+   1. Wait for the deployment share to be updated, verify no errors occurred during the update, and then click **Finish**.
+1. Repeat the previous steps to update the **MDT Deployment ([\\\\TT-FS01\\MDT-Deploy\$](\TT-FS01\MDT-Deploy$))** deployment share.
 
 ```PowerShell
 cls
@@ -5574,12 +5440,10 @@ cls
 #### Upgrade "MDT Build Lab" deployment share
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-1. Right-click **\\\\TT-FS01\MDT-Build$** and then click **Upgrade Deployment
-   Share**.
+1. Right-click **\\\\TT-FS01\MDT-Build$** and then click **Upgrade Deployment Share**.
 1. In the **Upgrade Deployment Share Wizard**:
    1. On the **Summary** step, click **Next**.
-   1. Wait for the deployment share to be upgraded, verify no errors occurred
-      during the upgrade, and then click **Finish**.
+   1. Wait for the deployment share to be upgraded, verify no errors occurred during the upgrade, and then click **Finish**.
 
 ---
 
@@ -5620,12 +5484,10 @@ Pop-Location
 #### Upgrade "MDT Deployment" deployment share
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-1. Right-click **\\\\TT-FS01\MDT-Deploy$** and then click **Upgrade Deployment
-   Share**.
+1. Right-click **\\\\TT-FS01\MDT-Deploy$** and then click **Upgrade Deployment Share**.
 1. In the **Upgrade Deployment Share Wizard**:
    1. On the **Summary** step, click **Next**.
-   1. Wait for the deployment share to be upgraded, verify no errors occurred
-      during the upgrade, and then click **Finish**.
+   1. Wait for the deployment share to be upgraded, verify no errors occurred during the upgrade, and then click **Finish**.
 
 ---
 
@@ -5667,31 +5529,23 @@ Pop-Location
 
 > **Important**
 >
-> There is a known issue when using the Microsoft Deployment Toolkit to build
-> images using the Windows Assessment and Deployment Kit (ADK) for Windows 10,
-> version 2004. Specifically, the BIOS firmware type is incorrectly identified
-> as UEFI.
+> There is a known issue when using the Microsoft Deployment Toolkit to build images using the Windows Assessment and Deployment Kit (ADK) for Windows 10, version 2004. Specifically, the BIOS firmware type is incorrectly identified as UEFI.
 >
-> To avoid this issue, it is necessary to overwrite the
-> **Microsoft.BDD.Utility.dll** files on the MDT server and update the
-> deployment shares.
+> To avoid this issue, it is necessary to overwrite the **Microsoft.BDD.Utility.dll** files on the MDT server and update the deployment shares.
 >
 > Refer to the following for more information:
 >
-> **Windows 10 deployments fail with Microsoft Deployment Toolkit on computers
-> with BIOS type firmware**\
+> **Windows 10 deployments fail with Microsoft Deployment Toolkit on computers with BIOS type firmware**\
 > From <[https://support.microsoft.com/en-us/topic/windows-10-deployments-fail-with-microsoft-deployment-toolkit-on-computers-with-bios-type-firmware-70557b0b-6be3-81d2-556f-b313e29e2cb7](https://support.microsoft.com/en-us/topic/windows-10-deployments-fail-with-microsoft-deployment-toolkit-on-computers-with-bios-type-firmware-70557b0b-6be3-81d2-556f-b313e29e2cb7)>
 
 ### Download patch for MDT and Windows 10 Version 2004
 
-Download the patch (**MDT_KB4564442.exe**) from the URL above and extract the
-contents.
+Download the patch (**MDT_KB4564442.exe**) from the URL above and extract the contents.
 
 ### Update Microsoft.BDD.Utility.dll files on MDT server
 
 1. Close **Deployment Workbench**.
-1. Backup the existing versions of the Microsoft.BDD.Utility.dll file in the
-   following locations:\
+1. Backup the existing versions of the Microsoft.BDD.Utility.dll file in the following locations:\
    %ProgramFiles%\Microsoft Deployment Toolkit\Templates\Distribution\Tools\x86\
    %ProgramFiles%\Microsoft Deployment Toolkit\Templates\Distribution\Tools\x64\
 1. Copy the new files extracted from MDT_KB4564442.exe over the old versions.
@@ -5788,17 +5642,12 @@ Pop-Location
 ### Update boot images for deployment shares
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-1. Right-click **MDT Build Lab
-   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$))** and then click **Update
-   Deployment Share**.
+1. Right-click **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$))** and then click **Update Deployment Share**.
 1. In the **Update Deployment Share Wizard**:
-   1. On the **Options** step, select **Completely regenerate the boot images**,
-      and then click **Next**.
+   1. On the **Options** step, select **Completely regenerate the boot images**, and then click **Next**.
    1. On the **Summary** step, click **Next**.
-   1. Wait for the deployment share to be updated, verify no errors occurred
-      during the update, and then click **Finish**.
-1. Repeat the previous steps to update the **MDT Deployment
-   ([\\\\TT-FS01\\MDT-Deploy\$](\\TT-FS01\MDT-Deploy$))** deployment share.
+   1. Wait for the deployment share to be updated, verify no errors occurred during the update, and then click **Finish**.
+1. Repeat the previous steps to update the **MDT Deployment ([\\\\TT-FS01\\MDT-Deploy\$](\TT-FS01\MDT-Deploy$))** deployment share.
 
 ```PowerShell
 cls
@@ -5944,11 +5793,7 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2022 does not honor the
-> `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words,
-> if no product key is specified in the task sequence, when building the
-> reference image it will prompt to enter a product key (but provide an option
-> to do this later).
+> The MSDN version of Windows Server 2022 does not honor the `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words, if no product key is specified in the task sequence, when building the reference image it will prompt to enter a product key (but provide an option to do this later).
 >
 > The product key specified above was obtained from the following:
 >
@@ -6014,41 +5859,26 @@ cls
 
 ### Configure task sequence - "Windows Server 2022"
 
-Edit the task sequence to include the actions required to update the reference
-image with the latest updates from WSUS, copy Toolbox content from TT-FS01, and
-easily suspend the deployment process after installing applications.
+Edit the task sequence to include the actions required to update the reference image with the latest updates from WSUS, copy Toolbox content from TT-FS01, and easily suspend the deployment process after installing applications.
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
-   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows
-   Server 2022**, right-click **Windows Server 2022 - Baseline**, and click
-   **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) / Task Sequences / Windows Server 2022**, right-click **Windows Server 2022 - Baseline**, and click **Properties**.
 1. In the **Windows Server 2022 - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
       1. Comments: **Reference image - Toolbox content and latest patches**
    1. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
          1. Enable the **Windows Update (Pre-Application Installation)** action.
-         1. Clear the **Continue on error** checkbox for the **Windows Update
-            (Pre-Application Installation)** action.
-         1. Enable the **Windows Update (Post-Application Installation)**
-            action.
-         1. Clear the **Continue on error** checkbox for the **Windows Update
-            (Post-Application Installation)** action.
-         1. After the **Tattoo** action, add a new **Group** action with the
-            following setting:
+         1. Clear the **Continue on error** checkbox for the **Windows Update (Pre-Application Installation)** action.
+         1. Enable the **Windows Update (Post-Application Installation)** action.
+         1. Clear the **Continue on error** checkbox for the **Windows Update (Post-Application Installation)** action.
+         1. After the **Tattoo** action, add a new **Group** action with the following setting:
             1. Name: **Custom Tasks (Pre-Windows Update)**
-         1. After the **Windows Update (Post-Application Installation)** action,
-            rename the **Custom Tasks** group to **Custom Tasks (Post-Windows
-            Update)**.
-         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
-            **Run Command Line** action with the following settings:
+         1. After the **Windows Update (Post-Application Installation)** action, rename the **Custom Tasks** group to **Custom Tasks (Post-Windows Update)**.
+         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Run Command Line** action with the following settings:
             1. Name: **Copy Toolbox content from TT-FS01**
-            2. Command line: **robocopy
-               [\\\\TT-FS01\\Public\\Toolbox](\\TT-FS01\Public\Toolbox)
-               C:\\NotBackedUp\\Public\\Toolbox /E**
+            2. Command line: **robocopy [\\\\TT-FS01\\Public\\Toolbox](\TT-FS01\Public\Toolbox) C:\\NotBackedUp\\Public\\Toolbox /E**
             3. Success codes: **0 1 2 3 4 5 6 7 8 16**
-         1. After the **Install Applications** action, add a new **Run Command
-            Line** action with the following settings:
+         1. After the **Install Applications** action, add a new **Run Command Line** action with the following settings:
             1. Name: **Suspend**
             2. Command line: **cscript.exe "%SCRIPTROOT%\\LTISuspend.wsf"**
             3. Disable this step: **Yes (checked)**
@@ -6056,10 +5886,7 @@ easily suspend the deployment process after installing applications.
 
 > **Note**
 >
-> The reason for adding the applications after the Tattoo action but before
-> running Windows Update is simply to save time during the deployment. This way
-> we can add all applications that will upgrade some of the built-in components
-> and avoid unnecessary updating.
+> The reason for adding the applications after the Tattoo action but before running Windows Update is simply to save time during the deployment. This way we can add all applications that will upgrade some of the built-in components and avoid unnecessary updating.
 
 ---
 
@@ -6230,11 +6057,7 @@ Import-MDTTaskSequence `
 
 > **Important**
 >
-> The MSDN version of Windows Server 2022 does not honor the
-> `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words,
-> if no product key is specified in the task sequence, when deploying the
-> baseline image it will prompt to enter a product key (but provide an option to
-> do this later).
+> The MSDN version of Windows Server 2022 does not honor the `SkipProductKey=YES` entry in the MDT CustomSettings.ini file. In other words, if no product key is specified in the task sequence, when deploying the baseline image it will prompt to enter a product key (but provide an option to do this later).
 >
 > The product key specified above was obtained from the following:
 >
@@ -6281,43 +6104,27 @@ Pop-Location
 
 ### Configure task sequence - "Windows Server 2022"
 
-Edit the task sequence to include actions to set MaxPatchCacheSize to 0 and
-clean up the image after patching.
+Edit the task sequence to include actions to set MaxPatchCacheSize to 0 and clean up the image after patching.
 
-1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab
-   ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) / Task Sequences / Windows
-   Server 2022**, right-click **Windows Server 2022 - Baseline**, and click
-   **Properties**.
+1. Open **Deployment Workbench**, expand **Deployment Shares / MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) / Task Sequences / Windows Server 2022**, right-click **Windows Server 2022 - Baseline**, and click **Properties**.
 1. In the **Windows Server 2022 - Baseline Properties** window:
    1. On the **General** tab, configure the following settings:
-      1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content,
-         latest patches, and cleanup before Sysprep**
+      1. Comments: **Reference image - MaxPatchCacheSize = 0, Toolbox content, latest patches, and cleanup before Sysprep**
    1. On the **Task Sequence** tab, configure the following settings:
       1. **State Restore**
-         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new
-            **Run Command Line** action with the following settings:
+         1. Select the **Custom Tasks (Pre-Windows Update)** group and add a new **Run Command Line** action with the following settings:
             1. Name: **Set MaxPatchCacheSize to 0**
-            1. Command line: **PowerShell.exe -Command "& { New-Item -Path
-               'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer';
-               New-ItemProperty -Path
-               'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer' -Name
-               MaxPatchCacheSize -PropertyType DWord -Value 0 | Out-Null }"**
-         1. After the **Apply Local GPO Package** action, add a new group with
-            the following setting:
+            1. Command line: **PowerShell.exe -Command "& { New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer'; New-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer' -Name MaxPatchCacheSize -PropertyType DWord -Value 0 | Out-Null }"**
+         1. After the **Apply Local GPO Package** action, add a new group with the following setting:
             1. Name: **Cleanup before Sysprep**
-         1. Select the **Cleanup before Sysprep** group created in the previous
-            step and add a new group with the following setting:
+         1. Select the **Cleanup before Sysprep** group created in the previous step and add a new group with the following setting:
             1. Name: **Compress the image**
-         1. Select the **Compress the image** group and add a new **Restart
-            computer** action.
-         1. After the new **Restart computer** action added in the previous
-            step, add a new **Install Application** action with the following
-            settings:
+         1. Select the **Compress the image** group and add a new **Restart computer** action.
+         1. After the new **Restart computer** action added in the previous step, add a new **Install Application** action with the following settings:
             1. Name: **Action - Cleanup before Sysprep**
             1. **Install a single application**
             1. Application to install: **Action - Cleanup before Sysprep**
-         1. After the action added in the previous step, add a new **Restart
-            computer** action.
+         1. After the action added in the previous step, add a new **Restart computer** action.
    1. Click **OK**.
 
 ---
@@ -6426,10 +6233,8 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Modify task sequence to use new version of Windows Server 2022
 
-1. Expand the **Install** group and select the **Install Operating System**
-   task.
-2. In the **Operating system to install** section, click **Browse** and select
-   the following item:
+1. Expand the **Install** group and select the **Install Operating System** task.
+2. In the **Operating system to install** section, click **Browse** and select the following item:
 
    **Windows Server 2022 SERVERSTANDARD in WS2022-Oct-2021 install.wim**
 
@@ -6523,10 +6328,8 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Modify task sequence to use new version of Windows 10 Enterprise, Version 21H2
 
-1. Expand the **Install** group and select the **Install Operating System**
-   task.
-2. In the **Operating system to install** section, click **Browse** and select
-   the following item:
+1. Expand the **Install** group and select the **Install Operating System** task.
+2. In the **Operating system to install** section, click **Browse** and select the following item:
 
    **Windows 10 Enterprise in W10Ent-21H2-Jun-2022-x64 install.wim**
 
@@ -6617,10 +6420,8 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Modify task sequence to use new version of Windows Server 2022
 
-1. Expand the **Install** group and select the **Install Operating System**
-   task.
-2. In the **Operating system to install** section, click **Browse** and select
-   the following item:
+1. Expand the **Install** group and select the **Install Operating System** task.
+2. In the **Operating system to install** section, click **Browse** and select the following item:
 
    **Windows Server 2022 SERVERSTANDARD in WS2022-Jun-2022 install.wim**
 

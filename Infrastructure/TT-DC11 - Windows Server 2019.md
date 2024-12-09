@@ -124,8 +124,7 @@ $computerName = "TT-DC11"
 Rename-Computer -NewName $computerName -Restart
 ```
 
-Wait for the VM to restart and then execute the following command to join the
-**TECHTOOLBOX** domain:
+Wait for the VM to restart and then execute the following command to join the **TECHTOOLBOX** domain:
 
 ```PowerShell
 Add-Computer -DomainName corp.technologytoolbox.com -Restart
@@ -408,9 +407,7 @@ Install-ADDSDomainController `
 
 > **Note**
 >
-> When prompted, specify the password for the administrator account when the
-> computer is started in Safe Mode or a variant of Safe Mode, such as Directory
-> Services Restore Mode.
+> When prompted, specify the password for the administrator account when the computer is started in Safe Mode or a variant of Safe Mode, such as Directory Services Restore Mode.
 
 ### # Configure firewall for cross-forest trust (EXTRANET --> TECHTOOLBOX)
 
@@ -456,12 +453,9 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License
-Terms, select **I accept the license terms and conditions**, and then click
-**OK**.
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
 
-Confirm the agent installation completed successfully and the following firewall
-exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service
@@ -507,9 +501,7 @@ Install SCOM agent using Operations Manager console
 
 #### Enable agent proxy
 
-In the **Agent Properties** window, on the **Security** tab, select **Allow this
-agent to act as a proxy and discover managed objects on other computers** and
-then click **OK**.
+In the **Agent Properties** window, on the **Security** tab, select **Allow this agent to act as a proxy and discover managed objects on other computers** and then click **OK**.
 
 ```PowerShell
 cls
@@ -566,12 +558,9 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License
-Terms, select **I accept the license terms and conditions**, and then click
-**OK**.
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
 
-Confirm the agent installation completed successfully and the following firewall
-exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service
@@ -639,8 +628,7 @@ msiexec.exe /i $msiPath `
 
 ## Issue - Insufficient free space to install patches using Windows Update
 
-Error installing **2021-01 Cumulative Update for Windows Server 2019 for
-x64-based Systems (KB4598230)** due to low disk space.
+Error installing **2021-01 Cumulative Update for Windows Server 2019 for x64-based Systems (KB4598230)** due to low disk space.
 
 ```PowerShell
 cls
@@ -714,13 +702,10 @@ That doesn't work...
 
 > Error:\
 > Data Protection Manager Error ID: 307\
-> The protection agent operation failed because DPM detected an unknown DPM
-> protection agent on tt-dc11.corp.technologytoolbox.com.
+> The protection agent operation failed because DPM detected an unknown DPM protection agent on tt-dc11.corp.technologytoolbox.com.
 >
 > Recommended action:\
-> Use Add or Remove Programs in Control Panel to uninstall the protection agent from
-> tt-dc11.corp.technologytoolbox.com, then reinstall the protection agent and perform
-> the operation again.
+> Use Add or Remove Programs in Control Panel to uninstall the protection agent from tt-dc11.corp.technologytoolbox.com, then reinstall the protection agent and perform the operation again.
 
 ```PowerShell
 cls

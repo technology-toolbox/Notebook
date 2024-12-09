@@ -534,13 +534,7 @@ certutil -addstore -f `
 
 > **Note**
 >
-> The first command places the root CA public certificate into the Configuration
-> container of Active Directory. Doing so allows domain client computers to
-> automatically trust the root CA certificate and there is no additional need to
-> distribute that certificate in Group Policy. The second and third commands
-> place the root CA certificate and CRL into the local store of CIPHER01. This
-> provides CIPHER01 immediate trust of root CA public certificate and knowledge
-> of the root CA CRL.
+> The first command places the root CA public certificate into the Configuration container of Active Directory. Doing so allows domain client computers to automatically trust the root CA certificate and there is no additional need to distribute that certificate in Group Policy. The second and third commands place the root CA certificate and CRL into the local store of CIPHER01. This provides CIPHER01 immediate trust of root CA public certificate and knowledge of the root CA CRL.
 
 ```PowerShell
 cls

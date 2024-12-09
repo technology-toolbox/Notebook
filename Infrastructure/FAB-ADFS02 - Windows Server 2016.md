@@ -56,8 +56,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 #### Install Windows Server 2016
 
-- On the **Task Sequence** step, select **Windows Server 2012 R2** and click
-  **Next**.
+- On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-APP02A**.
   - Select **Join a workgroup**.
@@ -238,22 +237,18 @@ mountvol X: $volumeId
 **Note:** Not explicitly required, but recommended
 
 - A group Managed Service Account (gMSA) can be used across multiple servers
-- The password for a gMSA is maintained by the Key Distribution Service (KDS)
-  running on a Windows Server 2012 domain controller
+- The password for a gMSA is maintained by the Key Distribution Service (KDS) running on a Windows Server 2012 domain controller
 - The KDS Root Key must be created using PowerShell
 
 #### Create the KDS Root Key
 
-Before any gMSA accounts can be created the KDS Root Key must be generated using
-PowerShell:
+Before any gMSA accounts can be created the KDS Root Key must be generated using PowerShell:
 
 ```PowerShell
 Add-KdsRootKey -EffectiveImmediately
 ```
 
-However, there is an enforced delay of 10 hours before a gMSA can be created
-after running the command. This is to "guarantee" that the key has propagated to
-all 2012 DCs
+However, there is an enforced delay of 10 hours before a gMSA can be created after running the command. This is to "guarantee" that the key has propagated to all 2012 DCs
 
 For lab work the delay can be overridden using the EffectiveTime parameter.
 
@@ -297,24 +292,15 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-InternetSecurityZoneMapping.ps1 `
 
 ##### Request certificate
 
-1. On the **Welcome** page of the Active Directory Certificate Services site, in
-   the **Select a task** section, click **Request a certificate**.
-2. On the **Advanced Certificate Request** page, click **Submit a certificate
-   request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal
-   request by using a base-64-encoded PKCS #7 file.**
+1. On the **Welcome** page of the Active Directory Certificate Services site, in the **Select a task** section, click **Request a certificate**.
+2. On the **Advanced Certificate Request** page, click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
 3. On the **Submit a Certificate Request or Renewal Request** page:
-   1. In the **Saved Request** box, copy/paste the certificate request generated
-      previously.
-   2. In the **Certificate Template** dropdown list, select **Technology Toolbox
-      Web Server**.
+   1. In the **Saved Request** box, copy/paste the certificate request generated previously.
+   2. In the **Certificate Template** dropdown list, select **Technology Toolbox Web Server**.
    3. Click **Submit >**.
-4. When prompted to allow the Web site to perform a digital certificate
-   operation on your behalf, click **Yes**.
-5. On the **Certificate Issued** page, ensure the **DER encoded** option is
-   selected and click **Download certificate**. When prompted to save the
-   certificate file, click **Save**.
-6. After the file is saved, open the download location in Windows Explorer and
-   copy the path to the certificate file.
+4. When prompted to allow the Web site to perform a digital certificate operation on your behalf, click **Yes**.
+5. On the **Certificate Issued** page, ensure the **DER encoded** option is selected and click **Download certificate**. When prompted to save the certificate file, click **Save**.
+6. After the file is saved, open the download location in Windows Explorer and copy the path to the certificate file.
 
 #### # Import certificate
 
@@ -341,46 +327,32 @@ Install-WindowsFeature ADFS-Federation -IncludeManagementTools
 
 ### Create AD FS farm
 
-1. On the Server Manager **Dashboard** page, click the **Notifications** flag,
-   and then click **Configure the federation service on the server**. The
-   **Active Directory Federation Service Configuration Wizard** opens.
-2. On the **Welcome** page, select **Create the first federation server in a
-   federation server farm**, and then click **Next**.
-3. On the **Connect to Active Directory Domain Services** page, specify an
-   account with domain administrator permissions for the Active Directory domain
-   to which this computer is joined, and then click **Next**.
+1. On the Server Manager **Dashboard** page, click the **Notifications** flag, and then click **Configure the federation service on the server**. The **Active Directory Federation Service Configuration Wizard** opens.
+2. On the **Welcome** page, select **Create the first federation server in a federation server farm**, and then click **Next**.
+3. On the **Connect to Active Directory Domain Services** page, specify an account with domain administrator permissions for the Active Directory domain to which this computer is joined, and then click **Next**.
 4. On the **Specify Service Properties** page:
    1. In the **SSL Certificate** dropdown list, select **fs.fabrikam.com**.
-   2. In the **Federation Service Display Name** box, type **Fabrikam
-      Technologies**.
+   2. In the **Federation Service Display Name** box, type **Fabrikam Technologies**.
    3. Click **Next**.
 5. On the **Specify Service Account** page:
    1. Ensure **Create a Group Managed Service Account** is selected.
    2. In the **Account Name** box, type **s-adfs**.
    3. Click **Next**.
 6. On the **Specify Configuration Database** page:
-   1. Ensure **Create a database on this server using Windows Internal
-      Database** is selected.
+   1. Ensure **Create a database on this server using Windows Internal Database** is selected.
    2. Click **Next**.
-7. On the **Review Options** page, verify your configuration selections, and
-   then click **Next**.
-8. On the **Pre-requisite Checks** page, verify that all prerequisite checks are
-   successfully completed, and then click **Configure**.
+7. On the **Review Options** page, verify your configuration selections, and then click **Next**.
+8. On the **Pre-requisite Checks** page, verify that all prerequisite checks are successfully completed, and then click **Configure**.
 9. On the **Results** page:
    1. Review the results and verify the configuration completed successfully.
-   2. Click **Next steps required for completing your federation service
-      deployment**.
+   2. Click **Next steps required for completing your federation service deployment**.
    3. Click **Close** to exit the wizard.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/EB015E9716674544DD5685FA012F1DBEB7E113D1.png)
 
-A machine restart is required to complete ADFS service configuration. For more
-information, see:
-[http://go.microsoft.com/fwlink/?LinkId=798725](http://go.microsoft.com/fwlink/?LinkId=798725)
+A machine restart is required to complete ADFS service configuration. For more information, see: [http://go.microsoft.com/fwlink/?LinkId=798725](http://go.microsoft.com/fwlink/?LinkId=798725)
 
-The SSL certificate subject alternative names do not support host name
-'certauth.fs.fabrikam.com'. Configuring certificate authentication binding on
-port '49443' and hostname 'fs.fabrikam.com'.
+The SSL certificate subject alternative names do not support host name 'certauth.fs.fabrikam.com'. Configuring certificate authentication binding on port '49443' and hostname 'fs.fabrikam.com'.
 
 #### # Restart the machine
 
@@ -407,20 +379,16 @@ Add-DnsServerResourceRecordA `
 
 > **Important**
 >
-> A DNS Host (A) record must be used. There are known issues if you attempt to
-> use a CNAME record with AD FS.
+> A DNS Host (A) record must be used. There are known issues if you attempt to use a CNAME record with AD FS.
 >
 > #### References
 >
-> **A federated user is repeatedly prompted for credentials during sign-in to
-> Office 365, Azure, or Intune**\
+> **A federated user is repeatedly prompted for credentials during sign-in to Office 365, Azure, or Intune**\
 > From <[https://support.microsoft.com/en-us/kb/2461628](https://support.microsoft.com/en-us/kb/2461628)>
 >
-> "...if you create a CNAME and point that to the server hosting ADFS chances
-> are that you will run into a never ending authentication prompt situation."
+> "...if you create a CNAME and point that to the server hosting ADFS chances are that you will run into a never ending authentication prompt situation."
 >
-> From
-> <[http://blogs.technet.com/b/rmilne/archive/2014/04/28/how-to-install-adfs-2012-r2-for-office-365.aspx](http://blogs.technet.com/b/rmilne/archive/2014/04/28/how-to-install-adfs-2012-r2-for-office-365.aspx)>
+> From <[http://blogs.technet.com/b/rmilne/archive/2014/04/28/how-to-install-adfs-2012-r2-for-office-365.aspx](http://blogs.technet.com/b/rmilne/archive/2014/04/28/how-to-install-adfs-2012-r2-for-office-365.aspx)>
 
 ## Configure SAML-based claims authentication for SecuritasConnect
 
@@ -618,8 +586,7 @@ $certPassword = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
 
 > **Note**
 >
-> When prompted for the secure string, type the password for the exported
-> certificate.
+> When prompted for the secure string, type the password for the exported certificate.
 
 ```PowerShell
 Import-PfxCertificate `

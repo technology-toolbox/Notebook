@@ -17,7 +17,7 @@ Tuesday, April 28, 2015\
 - Memory: **8 GB**
 - VHD size (GB): **45**
 - VHD file name:** POLARIS-TEST**
-- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
 - Network Adapter 1:** Virtual LAN 2 - 192-168.10.x**
 - Host:** ROGUE**
 - Automatic actions
@@ -848,7 +848,7 @@ GO
 **Search account got - Insufficient sql database permissions for user. EXECUTE permission was denied on the object proc_Gettimerrunningjobs**\
 From <[https://social.technet.microsoft.com/Forums/en-US/a0d08e98-1fd6-42cf-b738-6ba3df082210/search-account-got-insufficient-sql-database-permissions-for-user-execute-permission-was-denied?forum=sharepointadmin](https://social.technet.microsoft.com/Forums/en-US/a0d08e98-1fd6-42cf-b738-6ba3df082210/search-account-got-insufficient-sql-database-permissions-for-user-execute-permission-was-denied?forum=sharepointadmin)>
 
-**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ‘proc_putObjectTVP’, database ‘SharePoint_Config’**\
+**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ï¿½proc_putObjectTVPï¿½, database ï¿½SharePoint_Configï¿½**\
 From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html](http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html)>
 
 **EXECUTE permission was denied on the object 'proc_putObjectTVP'**\

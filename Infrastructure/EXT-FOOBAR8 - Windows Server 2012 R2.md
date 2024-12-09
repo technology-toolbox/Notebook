@@ -60,7 +60,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 #### Install custom Windows Server 2012 R2 image
 
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-FOOBAR8**.
@@ -242,12 +242,12 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ### DEV - Configure VM storage, processors, and memory
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 60 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 150 GB      | Dynamic  | 64K                  | Data01       |
-| 2    | L:           | 25 GB       | Dynamic  | 64K                  | Log01        |
-| 3    | T:           | 4 GB        | Dynamic  | 64K                  | Temp01       |
-| 4    | Z:           | 150 GB      | Dynamic  | 4K                   | Backup01     |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 60 GB | Dynamic | 4K | OSDisk |
+| 1 | D: | 150 GB | Dynamic | 64K | Data01 |
+| 2 | L: | 25 GB | Dynamic | 64K | Log01 |
+| 3 | T: | 4 GB | Dynamic | 64K | Temp01 |
+| 4 | Z: | 150 GB | Dynamic | 4K | Backup01 |
 
 ### # Change drive letter for DVD-ROM
 
@@ -905,7 +905,7 @@ Copy-Item `
 
 1. In the **Prince** window, click the **Help** menu and then click **License**.
 2. In the **Prince License** window:
-   1. Click **Open** and then locate the license file (**[\\\\ICEMAN\\Products\\Prince\\Prince-license.dat](\\ICEMAN\Products\Prince\Prince-license.dat)**).
+   1. Click **Open** and then locate the license file (**[\\\\ICEMAN\\Products\\Prince\\Prince-license.dat](\ICEMAN\Products\Prince\Prince-license.dat)**).
    2. Click **Accept** to save the license information.
    3. Verify the license information and then click **Close**.
 3. Close the Prince application.
@@ -1389,7 +1389,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ### Backup databases in SharePoint 2010 environment
 
-(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups))
+(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\ICEMAN\Archive\Clients\Securitas\Backups))
 
 ```PowerShell
 cls
@@ -3256,7 +3256,7 @@ Install Cloud Portal v2.0
 
 ### Backup databases in SharePoint 2010 environment
 
-(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups))
+(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\ICEMAN\Archive\Clients\Securitas\Backups))
 
 ```PowerShell
 cls
@@ -6317,18 +6317,18 @@ If ($? -eq $true)
 
 #### Add public URLs for HTTPS
 
-| **Alternate Access Mapping Collection**        | **Zone** | **Public URL**                                                                       |
-| ---------------------------------------------- | -------- | ------------------------------------------------------------------------------------ |
-| SharePoint - client-local-8.securitasinc.com80 | Default  | [http://client-local-8.securitasinc.com](http://client-local-8.securitasinc.com)     |
-|                                                | Intranet | [https://client2-local-8.securitasinc.com](https://client2-local-8.securitasinc.com) |
-|                                                | Internet | [https://client-local-8.securitasinc.com](https://client-local-8.securitasinc.com)   |
-|                                                | Custom   |                                                                                      |
-|                                                | Extranet |                                                                                      |
-| SharePoint - cloud-local-8.securitasinc.com80  | Default  | [http://cloud-local-8.securitasinc.com](http://cloud-local-8.securitasinc.com)       |
-|                                                | Intranet | [https://cloud2-local-8.securitasinc.com](https://cloud2-local-8.securitasinc.com)   |
-|                                                | Internet | [https://cloud-local-8.securitasinc.com](https://cloud-local-8.securitasinc.com)     |
-|                                                | Custom   |                                                                                      |
-|                                                | Extranet |                                                                                      |
+| **Alternate Access Mapping Collection** | **Zone** | **Public URL** |
+| --- | --- | --- |
+| SharePoint - client-local-8.securitasinc.com80 | Default | [http://client-local-8.securitasinc.com](http://client-local-8.securitasinc.com) |
+|  | Intranet | [https://client2-local-8.securitasinc.com](https://client2-local-8.securitasinc.com) |
+|  | Internet | [https://client-local-8.securitasinc.com](https://client-local-8.securitasinc.com) |
+|  | Custom |  |
+|  | Extranet |  |
+| SharePoint - cloud-local-8.securitasinc.com80 | Default | [http://cloud-local-8.securitasinc.com](http://cloud-local-8.securitasinc.com) |
+|  | Intranet | [https://cloud2-local-8.securitasinc.com](https://cloud2-local-8.securitasinc.com) |
+|  | Internet | [https://cloud-local-8.securitasinc.com](https://cloud-local-8.securitasinc.com) |
+|  | Custom |  |
+|  | Extranet |  |
 
 ```PowerShell
 cls
@@ -7559,7 +7559,7 @@ $relyingPartyDisplayName = $clientPortalUrl.Host
 
 Set-AdfsRelyingPartyWebContent `
     -TargetRelyingPartyName $relyingPartyDisplayName `
-    -CompanyName "SecuritasConnect®" `
+    -CompanyName "SecuritasConnectï¿½" `
     -OrganizationalNameDescriptionText `
         "Enter your Securitas e-mail address and password below." `
     -SignInPageDescription $null `

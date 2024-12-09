@@ -54,8 +54,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ### Install custom Windows Server 2019 image
 
-- On the **Task Sequence** step, select **Windows Server 2019** and click
-  **Next**.
+- On the **Task Sequence** step, select **Windows Server 2019** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **TT-SQL01D**.
   - Click **Next**.
@@ -141,8 +140,7 @@ Enable-PSRemoting -Confirm:$false
 
 > **Note**
 >
-> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG
-> ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
+> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
 
 ```PowerShell
 cls
@@ -181,12 +179,12 @@ ping TT-FS01 -f -l 8900
 #### Configure storage for SQL Server
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label | Storage Level |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ | ------------- |
-| 0    | C:           | 40 GB       | Dynamic  | 4K                   | OSDisk       | Silver        |
-| 1    | D:           | 40 GB       | Fixed    | 64K                  | Data01       | Gold          |
-| 2    | L:           | 15 GB       | Fixed    | 64K                  | Log01        | Gold          |
-| 3    | T:           | 2 GB        | Fixed    | 64K                  | Temp01       | Gold          |
-| 4    | Z:           | 50 GB       | Dynamic  | 4K                   | Backup01     | Silver        |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0 | C: | 40 GB | Dynamic | 4K | OSDisk | Silver |
+| 1 | D: | 40 GB | Fixed | 64K | Data01 | Gold |
+| 2 | L: | 15 GB | Fixed | 64K | Log01 | Gold |
+| 3 | T: | 2 GB | Fixed | 64K | Temp01 | Gold |
+| 4 | Z: | 50 GB | Dynamic | 4K | Backup01 | Silver |
 
 ---
 
@@ -396,8 +394,7 @@ Install-WindowsFeature -Name Failover-Clustering -IncludeManagementTools -Restar
 
 > **Important**
 >
-> After the computer restarts, sign in using the domain setup account for SQL
-> Server (**TECHTOOLBOX\\setup-sql**).
+> After the computer restarts, sign in using the domain setup account for SQL Server (**TECHTOOLBOX\\setup-sql**).
 
 #### Join cluster
 
@@ -436,40 +433,26 @@ On the **Feature Selection** step, select the following checkboxes:
 
 > **Note**
 >
-> System Center Operations Manager 2019 requires the Full-Text Search component
-> to be installed.
+> System Center Operations Manager 2019 requires the Full-Text Search component to be installed.
 
 On the **Server Configuration** step:
 
-- For the **SQL Server Agent** service, change the **Startup Type** to
-  **Automatic**.
-- For the **SQL Server Database Engine** service, change the **Account Name **to
-  **TECHTOOLBOX\\s-sql01**.
-- For the **SQL Server Browser** service, leave the **Startup Type** as
-  **Disabled**.
-- Select the **Grant Perform Volume Maintenance Task privilege to SQL Server
-  Database Engine Service** checkbox.
+- For the **SQL Server Agent** service, change the **Startup Type** to **Automatic**.
+- For the **SQL Server Database Engine** service, change the **Account Name **to **TECHTOOLBOX\\s-sql01**.
+- For the **SQL Server Browser** service, leave the **Startup Type** as **Disabled**.
+- Select the **Grant Perform Volume Maintenance Task privilege to SQL Server Database Engine Service** checkbox.
 
 On the **Database Engine Configuration** step:
 
-- On the **Server Configuration** tab, in the **Specify SQL Server
-  administrators** section, click **Add...** and then add the domain group for
-  SQL Server administrators (**TECHTOOLBOX\\SQL Server Admins**).
+- On the **Server Configuration** tab, in the **Specify SQL Server administrators** section, click **Add...** and then add the domain group for SQL Server administrators (**TECHTOOLBOX\\SQL Server Admins**).
 - On the **Data Directories** tab:
   - In the **Data root directory** box, type **D:\\Microsoft SQL Server\\**.
-  - In the **User database log directory** box, change the drive letter to
-    **L:** (the value should be **L:\\Microsoft SQL
-    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
-  - In the **Backup directory** box, change the drive letter to **Z:** (the
-    value should be **Z:\\Microsoft SQL
-    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**).
+  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Backup**).
 - On the **TempDB** tab:
-  - Remove the default data directory (**D:\\Microsoft SQL
-    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
-  - Add the data directory on the **Temp01** volume (**T:\\Microsoft SQL
-    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
-  - Ensure the **Log directory** is set to **T:\\Microsoft SQL
-    Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**.
+  - Remove the default data directory (**D:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
+  - Add the data directory on the **Temp01** volume (**T:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**).
+  - Ensure the **Log directory** is set to **T:\\Microsoft SQL Server\\MSSQL14.MSSQLSERVER\\MSSQL\\Data**.
 
 > **Important**
 >
@@ -585,8 +568,7 @@ Set-Location C:
 
 ##### Reference
 
-**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field
-#017**\
+**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field #017**\
 From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/](https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/)>
 
 ```PowerShell
@@ -914,8 +896,7 @@ Click **Add Replica...**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/AB/D34E0697581A9D90F3E695E471197127837496AB.png)
 
-Right-click each SQL Server 2016 node and click **Remove from Availability
-Group...**
+Right-click each SQL Server 2016 node and click **Remove from Availability Group...**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/4DE6A3D3A9216E7D0E17F88A842E03D639B54E7E.png)
 
@@ -957,12 +938,9 @@ Start-Process `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License
-Terms, select **I accept the license terms and conditions**, and then click
-**OK**.
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
 
-Confirm the agent installation completed successfully and the following firewall
-exceptions have been added:
+Confirm the agent installation completed successfully and the following firewall exceptions have been added:
 
 - Exception for DPMRA.exe in all profiles
 - Exception for Windows Management Instrumentation service
@@ -1087,8 +1065,7 @@ Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
 Invoke-Sqlcmd : The operation cannot be performed on database "OperationsManager" because it is involved in a database mirroring session or an availability group. Some operations are not allowed on a database that is participating in a database mirroring session or in an availability group.
 ```
 
-Remove database from availability group, enable service broker, and then add
-back to availability group
+Remove database from availability group, enable service broker, and then add back to availability group
 
 ---
 
@@ -1145,9 +1122,7 @@ Start-Service HealthService
 **How to move the Operational database**\
 From <[https://docs.microsoft.com/en-us/system-center/scom/manage-move-opsdb?view=sc-om-2019](https://docs.microsoft.com/en-us/system-center/scom/manage-move-opsdb?view=sc-om-2019)>
 
-**Could not load file or assembly
-'microsoft.enterprisemanagement.sql.userdefineddatatype' in an AlwaysOn
-Availability Group configuration.**\
+**Could not load file or assembly 'microsoft.enterprisemanagement.sql.userdefineddatatype' in an AlwaysOn Availability Group configuration.**\
 From <[https://social.technet.microsoft.com/Forums/en-US/195c0bd5-115c-4cff-8ae3-4109f59c9b1e/could-not-load-file-or-assembly-microsoftenterprisemanagementsqluserdefineddatatype-in-an?forum=operationsmanagerdeployment](https://social.technet.microsoft.com/Forums/en-US/195c0bd5-115c-4cff-8ae3-4109f59c9b1e/could-not-load-file-or-assembly-microsoftenterprisemanagementsqluserdefineddatatype-in-an?forum=operationsmanagerdeployment)>
 
 ```PowerShell
@@ -1249,7 +1224,7 @@ GO
 
 ## Issue - Errors in event log due to SCOM custom messages in SQL Server
 
-[SQL scripts to fix 18054 events in SQL application log – SCOM 2016 and 2019](https://gallery.technet.microsoft.com/SQL-to-fix-event-18054-4d6d9ec1)
+[SQL scripts to fix 18054 events in SQL application log ï¿½ SCOM 2016 and 2019](https://gallery.technet.microsoft.com/SQL-to-fix-event-18054-4d6d9ec1)
 
 ## Replace DPM server (TT-DPM05 --> TT-DPM06)
 
@@ -1291,13 +1266,10 @@ That doesn't work...
 
 > Error:\
 > Data Protection Manager Error ID: 307\
-> The protection agent operation failed because DPM detected an unknown DPM
-> protection agent on tt-sql01d.corp.technologytoolbox.com.
+> The protection agent operation failed because DPM detected an unknown DPM protection agent on tt-sql01d.corp.technologytoolbox.com.
 >
 > Recommended action:\
-> Use Add or Remove Programs in Control Panel to uninstall the protection agent from
-> tt-sql01d.corp.technologytoolbox.com, then reinstall the protection agent and perform
-> the operation again.
+> Use Add or Remove Programs in Control Panel to uninstall the protection agent from tt-sql01d.corp.technologytoolbox.com, then reinstall the protection agent and perform the operation again.
 
 ```PowerShell
 cls

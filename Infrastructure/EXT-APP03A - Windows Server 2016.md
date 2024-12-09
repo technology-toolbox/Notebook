@@ -231,10 +231,10 @@ Start-SCVirtualMachine $vmName
 ### Configure storage
 
 | **Disk** | **Drive Letter** | **Volume Size** | **Allocation Unit Size** | **Volume Label** |
-| -------- | ---------------- | --------------- | ------------------------ | ---------------- |
-| 0        | C:               | 45 GB           | 4K                       | OSDisk           |
-| 1        | D:               | 40 GB           | 4K                       | Data01           |
-| 2        | L:               | 20 GB           | 4K                       | Log01            |
+| --- | --- | --- | --- | --- |
+| 0 | C: | 45 GB | 4K | OSDisk |
+| 1 | D: | 40 GB | 4K | Data01 |
+| 2 | L: | 20 GB | 4K | Log01 |
 
 ---
 
@@ -1012,7 +1012,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ### Backup databases in SharePoint 2010 environment
 
-(Download backup files from PROD to [\\\\TT-FS01\\Archive\\Clients\\Securitas\\Backups](\\TT-FS01\Archive\Clients\Securitas\Backups))
+(Download backup files from PROD to [\\\\TT-FS01\\Archive\\Clients\\Securitas\\Backups](\TT-FS01\Archive\Clients\Securitas\Backups))
 
 #### Copy backup files to SQL Server for SharePoint 2013 farm
 
@@ -3326,7 +3326,7 @@ New-ADUser `
 
 ### Backup databases in SharePoint 2010 environment
 
-(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups))
+(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\ICEMAN\Archive\Clients\Securitas\Backups))
 
 ---
 

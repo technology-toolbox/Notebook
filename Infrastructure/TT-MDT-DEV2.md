@@ -366,15 +366,15 @@ icacls C:\MDT /remove:g "BUILTIN\Users"
 #### Change monitoring host to TT-MDT-DEV2
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-2. Right-click **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$))** and then click **Properties**.
-3. In the **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$)) Properties** window:
+2. Right-click **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$))** and then click **Properties**.
+3. In the **MDT Build Lab ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$)) Properties** window:
    1. On the **Monitoring** tab, in the **Monitoring host** box, type **TT-MDT-DEV2**.
    2. Click **OK**.
 
 #### Update MDT deployment shares (to regenerate the boot images)
 
 1. Open **Deployment Workbench** and expand **Deployment Shares**.
-2. Right-click **MDT ([\\\\TT-FS01\\MDT-Build\$](\\TT-FS01\MDT-Build$))** and then click **Update Deployment Share**.
+2. Right-click **MDT ([\\\\TT-FS01\\MDT-Build\$](\TT-FS01\MDT-Build$))** and then click **Update Deployment Share**.
 3. In the **Update Deployment Share Wizard**:
    1. On the **Options** step, select **Completely regenerate the boot images**, and then click **Next**.
    2. On the **Summary** step, click **Next**.

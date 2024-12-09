@@ -3,12 +3,12 @@
 Thursday, April 5, 2018\
 5:41 PM
 
-| Server   | Motherboard S/N | BMC MAC Address   | Switch Port | IP Address | URL                                                    |
-| -------- | --------------- | ----------------- | ----------- | ---------- | ------------------------------------------------------ |
-| TT-HV05A | NM163S000843    | 0C:C4:7A:AE:F2:24 | 7           | 10.1.14.2  | [https://ipmi-nm163s000843](https://ipmi-nm163s000843) |
-| TT-HV05B | NM169S003213    | 0C:C4:7A:DD:62:89 | 8           | 10.1.14.3  | [https://ipmi-nm169s003213](https://ipmi-nm169s003213) |
-| TT-HV05C | NM15CS027344    | 0C:C4:7A:AE:52:90 | 9           | 10.1.14.4  | [https://ipmi-nm15cs027344](https://ipmi-nm15cs027344) |
-| TT-NAS02 | NM177S506675    | AC:1F:6B:49:CF:B7 | 10          | 10.1.14.5  | [https://ipmi-nm177s506675](https://ipmi-nm177s506675) |
+| Server | Motherboard S/N | BMC MAC Address | Switch Port | IP Address | URL |
+| --- | --- | --- | --- | --- | --- |
+| TT-HV05A | NM163S000843 | 0C:C4:7A:AE:F2:24 | 7 | 10.1.14.2 | [https://ipmi-nm163s000843](https://ipmi-nm163s000843) |
+| TT-HV05B | NM169S003213 | 0C:C4:7A:DD:62:89 | 8 | 10.1.14.3 | [https://ipmi-nm169s003213](https://ipmi-nm169s003213) |
+| TT-HV05C | NM15CS027344 | 0C:C4:7A:AE:52:90 | 9 | 10.1.14.4 | [https://ipmi-nm15cs027344](https://ipmi-nm15cs027344) |
+| TT-NAS02 | NM177S506675 | AC:1F:6B:49:CF:B7 | 10 | 10.1.14.5 | [https://ipmi-nm177s506675](https://ipmi-nm177s506675) |
 
 ```PowerShell
 Function CreateSelfSignedCertificate([string] $ServerName, [switch] $ImportCertificate)

@@ -61,7 +61,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 #### Install custom Windows Server 2012 R2 image
 
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows Server 2012 R2** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **EXT-FOOBAR3**.
@@ -271,12 +271,12 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 ## DEV - Configure VM storage, processors, and memory
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 50 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 3 GB        | Dynamic  | 64K                  | Data01       |
-| 2    | L:           | 1 GB        | Dynamic  | 64K                  | Log01        |
-| 3    | T:           | 1 GB        | Dynamic  | 64K                  | Temp01       |
-| 4    | Z:           | 10 GB       | Dynamic  | 4K                   | Backup01     |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 50 GB | Dynamic | 4K | OSDisk |
+| 1 | D: | 3 GB | Dynamic | 64K | Data01 |
+| 2 | L: | 1 GB | Dynamic | 64K | Log01 |
+| 3 | T: | 1 GB | Dynamic | 64K | Temp01 |
+| 4 | Z: | 10 GB | Dynamic | 4K | Backup01 |
 
 ### # Change drive letter for DVD-ROM
 
@@ -924,7 +924,7 @@ Copy-Item `
 
 1. In the **Prince** window, click the **Help** menu and then click **License**.
 2. In the **Prince License** window:
-   1. Click **Open** and then locate the license file (**[\\\\ICEMAN\\Products\\Prince\\Prince-license.dat](\\ICEMAN\Products\Prince\Prince-license.dat)**).
+   1. Click **Open** and then locate the license file (**[\\\\ICEMAN\\Products\\Prince\\Prince-license.dat](\ICEMAN\Products\Prince\Prince-license.dat)**).
    2. Click **Accept** to save the license information.
    3. Verify the license information and then click **Close**.
 3. Close the Prince application.

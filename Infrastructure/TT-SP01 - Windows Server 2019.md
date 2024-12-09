@@ -241,10 +241,10 @@ ping TT-FS01 -f -l 8900
 ### Configure storage
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 45 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 15 GB       | Dynamic  | 4K                   | Data01       |
-| 2    | L:           | 15 GB       | Dynamic  | 4K                   | Log01        |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 45 GB | Dynamic | 4K | OSDisk |
+| 1 | D: | 15 GB | Dynamic | 4K | Data01 |
+| 2 | L: | 15 GB | Dynamic | 4K | Log01 |
 
 ---
 
@@ -1221,7 +1221,7 @@ GRANT EXECUTE ON [dbo].[proc_putDependency] TO [WSS_Content_Application_Pools]
 **Search account got - Insufficient sql database permissions for user. EXECUTE permission was denied on the object proc_Gettimerrunningjobs**\
 From <[https://social.technet.microsoft.com/Forums/en-US/a0d08e98-1fd6-42cf-b738-6ba3df082210/search-account-got-insufficient-sql-database-permissions-for-user-execute-permission-was-denied?forum=sharepointadmin](https://social.technet.microsoft.com/Forums/en-US/a0d08e98-1fd6-42cf-b738-6ba3df082210/search-account-got-insufficient-sql-database-permissions-for-user-execute-permission-was-denied?forum=sharepointadmin)>
 
-**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ‘proc_putObjectTVP’, database ‘SharePoint_Config’**\
+**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ï¿½proc_putObjectTVPï¿½, database ï¿½SharePoint_Configï¿½**\
 From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html](http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html)>
 
 **EXECUTE permission was denied on the object 'proc_putObjectTVP'**\

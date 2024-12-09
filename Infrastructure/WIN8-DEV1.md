@@ -24,7 +24,7 @@ Friday, July 24, 2015\
 
 ## Install custom Windows 8.1 image
 
-- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
+- Start-up disk: [\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)
 - On the **Task Sequence** step, select **Windows 8 Enterprise (x64)** and click **Next**.
 - On the **Computer Details** step, in the **Computer name** box, type **WIN8-DEV1** and click **Next**.
 - On the Applications step:
@@ -276,8 +276,7 @@ Google Chrome\
 Mozilla Firefox 36.0\
 Mozilla Thunderbird 31.3.0\
 Microsoft Visual Studio 2013 with Update 5\
-Python 2.7.10
-Git 1.9.5\
+Python 2.7.10 Git 1.9.5\
 Node.js v0.12.5
 
 **TODO:**

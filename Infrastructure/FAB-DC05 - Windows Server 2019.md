@@ -150,8 +150,7 @@ $computerName = "FAB-DC05"
 Rename-Computer -NewName $computerName -Restart
 ```
 
-Wait for the VM to restart and then execute the following command to join the
-**FABRIKAM** domain:
+Wait for the VM to restart and then execute the following command to join the **FABRIKAM** domain:
 
 ```PowerShell
 Add-Computer -DomainName corp.fabrikam.com -Restart
@@ -412,9 +411,7 @@ Install-ADDSDomainController `
 
 > **Note**
 >
-> When prompted, specify the password for the administrator account when the
-> computer is started in Safe Mode or a variant of Safe Mode, such as Directory
-> Services Restore Mode.
+> When prompted, specify the password for the administrator account when the computer is started in Safe Mode or a variant of Safe Mode, such as Directory Services Restore Mode.
 
 ### # Configure firewall for cross-forest trust (EXTRANET --> FABRIKAM)
 

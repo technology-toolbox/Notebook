@@ -13,7 +13,7 @@ Wednesday, October 28, 2015\
 - Memory: **10 GB**
 - VHD size (GB): **50**
 - VHD file name:** POLARIS-DEV**
-- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
+- Virtual DVD drive: **[\\\\ICEMAN\\Products\\Microsoft\\MDT-Deploy-x86.iso](\ICEMAN\Products\Microsoft\MDT-Deploy-x86.iso)**
 - Network Adapter 1:** Virtual LAN 2 - 192-168.10.x**
 - Host:** FORGE**
 - Automatic actions
@@ -159,12 +159,12 @@ New-NetFirewallRule `
 ## Configure VM storage
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 50 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 5 GB        | Fixed    | 64K                  | Data01       |
-| 2    | L:           | 1 GB        | Fixed    | 64K                  | Log01        |
-| 3    | T:           | 1 GB        | Fixed    | 64K                  | Temp01       |
-| 4    | Z:           | 10 GB       | Dynamic  | 4K                   | Backup01     |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 50 GB | Dynamic | 4K | OSDisk |
+| 1 | D: | 5 GB | Fixed | 64K | Data01 |
+| 2 | L: | 1 GB | Fixed | 64K | Log01 |
+| 3 | T: | 1 GB | Fixed | 64K | Temp01 |
+| 4 | Z: | 10 GB | Dynamic | 4K | Backup01 |
 
 ---
 
@@ -1634,7 +1634,7 @@ GO
 
 ### References
 
-**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ‘proc_putObjectTVP’, database ‘SharePoint_Config’**\
+**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ï¿½proc_putObjectTVPï¿½, database ï¿½SharePoint_Configï¿½**\
 From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html](http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html)>
 
 **EXECUTE permission was denied on the object 'proc_putObjectTVP'**\

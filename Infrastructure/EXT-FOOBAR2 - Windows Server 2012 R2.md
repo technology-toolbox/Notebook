@@ -260,12 +260,12 @@ Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members ($computerName + 
 ### DEV - Configure VM storage, processors, and memory
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 80 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 210 GB      | Fixed    | 64K                  | Data01       |
-| 2    | L:           | 25 GB       | Fixed    | 64K                  | Log01        |
-| 3    | T:           | 4 GB        | Fixed    | 64K                  | Temp01       |
-| 4    | Z:           | 150 GB      | Dynamic  | 4K                   | Backup01     |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 80 GB | Dynamic | 4K | OSDisk |
+| 1 | D: | 210 GB | Fixed | 64K | Data01 |
+| 2 | L: | 25 GB | Fixed | 64K | Log01 |
+| 3 | T: | 4 GB | Fixed | 64K | Temp01 |
+| 4 | Z: | 150 GB | Dynamic | 4K | Backup01 |
 
 ---
 
@@ -1534,7 +1534,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
 
 ### Backup databases in Production environment
 
-(Download backup files from PROD to [\\\\TT-FS01\\Archive\\Clients\\Securitas\\Backups](\\TT-FS01\Archive\Clients\Securitas\Backups))
+(Download backup files from PROD to [\\\\TT-FS01\\Archive\\Clients\\Securitas\\Backups](\TT-FS01\Archive\Clients\Securitas\Backups))
 
 ---
 
@@ -3424,7 +3424,7 @@ Install Cloud Portal v2.0
 
 ### Backup databases in SharePoint 2010 environment
 
-(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\\ICEMAN\Archive\Clients\Securitas\Backups))
+(Download backup files from PROD to [\\\\ICEMAN\\Archive\\Clients\\Securitas\\Backups](\ICEMAN\Archive\Clients\Securitas\Backups))
 
 ```PowerShell
 cls
@@ -6490,18 +6490,18 @@ If ($? -eq $true)
 
 #### Add public URLs for HTTPS
 
-| **Alternate Access Mapping Collection**        | **Zone** | **Public URL**                                                                       |
-| ---------------------------------------------- | -------- | ------------------------------------------------------------------------------------ |
-| SharePoint - client-local-2.securitasinc.com80 | Default  | [http://client-local-2.securitasinc.com](http://client-local-2.securitasinc.com)     |
-|                                                | Intranet | [https://client2-local-2.securitasinc.com](https://client2-local-2.securitasinc.com) |
-|                                                | Internet | [https://client-local-2.securitasinc.com](https://client-local-2.securitasinc.com)   |
-|                                                | Custom   |                                                                                      |
-|                                                | Extranet |                                                                                      |
-| SharePoint - cloud-local-2.securitasinc.com80  | Default  | [http://cloud-local-2.securitasinc.com](http://cloud-local-2.securitasinc.com)       |
-|                                                | Intranet | [https://cloud2-local-2.securitasinc.com](https://cloud2-local-2.securitasinc.com)   |
-|                                                | Internet | [https://cloud-local-2.securitasinc.com](https://cloud-local-2.securitasinc.com)     |
-|                                                | Custom   |                                                                                      |
-|                                                | Extranet |                                                                                      |
+| **Alternate Access Mapping Collection** | **Zone** | **Public URL** |
+| --- | --- | --- |
+| SharePoint - client-local-2.securitasinc.com80 | Default | [http://client-local-2.securitasinc.com](http://client-local-2.securitasinc.com) |
+|  | Intranet | [https://client2-local-2.securitasinc.com](https://client2-local-2.securitasinc.com) |
+|  | Internet | [https://client-local-2.securitasinc.com](https://client-local-2.securitasinc.com) |
+|  | Custom |  |
+|  | Extranet |  |
+| SharePoint - cloud-local-2.securitasinc.com80 | Default | [http://cloud-local-2.securitasinc.com](http://cloud-local-2.securitasinc.com) |
+|  | Intranet | [https://cloud2-local-2.securitasinc.com](https://cloud2-local-2.securitasinc.com) |
+|  | Internet | [https://cloud-local-2.securitasinc.com](https://cloud-local-2.securitasinc.com) |
+|  | Custom |  |
+|  | Extranet |  |
 
 ```PowerShell
 cls
@@ -7725,7 +7725,7 @@ $relyingPartyDisplayName = $clientPortalUrl.Host
 
 Set-AdfsRelyingPartyWebContent `
     -TargetRelyingPartyName $relyingPartyDisplayName `
-    -CompanyName "SecuritasConnect®" `
+    -CompanyName "SecuritasConnectï¿½" `
     -OrganizationalNameDescriptionText `
         "Enter your Securitas e-mail address and password below." `
     -SignInPageDescription $null `

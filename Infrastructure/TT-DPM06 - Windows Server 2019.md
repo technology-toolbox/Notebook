@@ -137,8 +137,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ### Install custom Windows Server 2019 image
 
-- On the **Task Sequence** step, select **Windows Server 2019** and click
-  **Next**.
+- On the **Task Sequence** step, select **Windows Server 2019** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **TT-DPM06**.
   - Click **Next**.
@@ -210,8 +209,7 @@ Enable-PSRemoting -Confirm:$false
 
 > **Note**
 >
-> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG
-> ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
+> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
 
 ```PowerShell
 cls
@@ -250,12 +248,12 @@ ping TT-FS01 -f -l 8900
 #### Configure storage for SQL Server
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| ---- | ------------ | ----------- | -------- | -------------------- | ------------ |
-| 0    | C:           | 55 GB       | Dynamic  | 4K                   | OSDisk       |
-| 1    | D:           | 3 GB        | Dynamic  | 64K                  | Data01       |
-| 2    | L:           | 1 GB        | Dynamic  | 64K                  | Log01        |
-| 3    | T:           | 1 GB        | Dynamic  | 64K                  | Temp01       |
-| 4    | Z:           | 10 GB       | Dynamic  | 4K                   | Backup01     |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 55 GB | Dynamic | 4K | OSDisk |
+| 1 | D: | 3 GB | Dynamic | 64K | Data01 |
+| 2 | L: | 1 GB | Dynamic | 64K | Log01 |
+| 3 | T: | 1 GB | Dynamic | 64K | Temp01 |
+| 4 | Z: | 10 GB | Dynamic | 4K | Backup01 |
 
 ---
 
@@ -527,35 +525,23 @@ On the **Server Configuration** step:
 - For the **SQL Server Database Engine** service:
   - Change the **Account Name** to **TECHTOOLBOX\\s-sql-dpm06**.
   - Ensure the **Startup Type** is set to **Automatic**.
-- For the **SQL Server Browser** service, ensure the **Startup Type** is set to
-  **Disabled**.
+- For the **SQL Server Browser** service, ensure the **Startup Type** is set to **Disabled**.
 
 > **Important**
 >
-> DPM 2019 does not support the default service accounts for SQL Server. The
-> service accounts must be domain accounts.
+> DPM 2019 does not support the default service accounts for SQL Server. The service accounts must be domain accounts.
 
 On the **Database Engine Configuration** step:
 
-- On the **Server Configuration** tab, in the **Specify SQL Server
-  administrators** section, click **Add...** and then add the domain group for
-  SQL Server administrators (**TECHTOOLBOX\\SQL Server Admins**) and the domain
-  group for DPM administrators (**TECHTOOLBOX\\DPM Admins**).
+- On the **Server Configuration** tab, in the **Specify SQL Server administrators** section, click **Add...** and then add the domain group for SQL Server administrators (**TECHTOOLBOX\\SQL Server Admins**) and the domain group for DPM administrators (**TECHTOOLBOX\\DPM Admins**).
 - On the **Data Directories** tab:
   - In the **Data root directory** box, type **D:\\Microsoft SQL Server\\**.
-  - In the **User database log directory** box, change the drive letter to
-    **L:** (the value should be **L:\\Microsoft SQL
-    Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**).
-  - In the **Backup directory** box, change the drive letter to **Z:** (the
-    value should be **Z:\\Microsoft SQL
-    Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup**).
+  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup**).
 - On the **TempDB** tab:
-  - Remove the default data directory (**D:\\Microsoft SQL
-    Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**).
-  - Add the data directory on the **Temp01** volume (**T:\\Microsoft SQL
-    Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**).
-  - Ensure the **Log directory** is set to **T:\\Microsoft SQL
-    Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**.
+  - Remove the default data directory (**D:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**).
+  - Add the data directory on the **Temp01** volume (**T:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**).
+  - Ensure the **Log directory** is set to **T:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**.
 
 > **Important**
 >
@@ -575,65 +561,46 @@ cls
 
 > **Important**
 >
-> When prompted for which edition of Reporting Services to install, enter a
-> product key for SQL Server Standard Edition. Note the Express Edition cannot
-> use a database server running SQL Server 2019 Standard Edition.
+> When prompted for which edition of Reporting Services to install, enter a product key for SQL Server Standard Edition. Note the Express Edition cannot use a database server running SQL Server 2019 Standard Edition.
 >
 > Wait for the installation to complete and restart the computer.
 
 ##### Configure SQL Server Reporting Services
 
-1. Start **Report Server Configuration Manager**. If prompted by User Account
-   Control to allow the program to make changes to the computer, click **Yes**.
-2. In the **Report Server Configuration Connection** window, ensure the name of
-   the server and SQL Server instance are both correct, and then click
-   **Connect**.
-3. In the **Report Server Status** pane, click **Start** if the server is not
-   already started.
+1. Start **Report Server Configuration Manager**. If prompted by User Account Control to allow the program to make changes to the computer, click **Yes**.
+2. In the **Report Server Configuration Connection** window, ensure the name of the server and SQL Server instance are both correct, and then click **Connect**.
+3. In the **Report Server Status** pane, click **Start** if the server is not already started.
 4. In the navigation pane, click **Service Account**.
-5. In the **Service Account** pane, ensure **Use built-in account** is selected,
-   select **Network Service** from the dropdown list, and click **Apply**.
+5. In the **Service Account** pane, ensure **Use built-in account** is selected, select **Network Service** from the dropdown list, and click **Apply**.
 
    > **Important**
    >
-   > DPM 2019 does not support the default service account (**Virtual Service
-   > Account**).
+   > DPM 2019 does not support the default service account (**Virtual Service Account**).
 
 6. In the navigation pane, click **Web Service URL**.
 7. In the **Web Service URL** pane:
 
    1. Confirm the following warning message appears:
 
-      > Report Server Web Service is not configured. Default values have been
-      > provided to you. To accept these defaults simply press the Apply button,
-      > else change them and then press Apply.
+      > Report Server Web Service is not configured. Default values have been provided to you. To accept these defaults simply press the Apply button, else change them and then press Apply.
 
    2. Click **Apply**.
 
 8. In the navigation pane, click **Database**.
 9. In the **Report Server Database** pane, click **Change Database**.
 10. In the **Report Server Database Configuration Wizard** window:
-    1. In the **Action** pane, ensure **Create a new report server database** is
-       selected, and then click **Next**.
-    2. In the **Database Server** pane, ensure the local computer name is in the
-       **Server Name** box, click **Test Connection** and confirm the test
-       succeeded, and then click **Next**.
-    3. In the **Database** pane, ensure the **Database Name** is set to
-       **ReportServer**, and click **Next**.
-    4. In the **Credentials** pane, ensure **Authentication Type** is set to
-       **Service Credentials** and then click **Next**.
-    5. On the **Summary** page, verify the information is correct, and then
-       click **Next**.
-    6. Wait for the database to be created and then click **Finish** to close
-       the wizard.
+    1. In the **Action** pane, ensure **Create a new report server database** is selected, and then click **Next**.
+    2. In the **Database Server** pane, ensure the local computer name is in the **Server Name** box, click **Test Connection** and confirm the test succeeded, and then click **Next**.
+    3. In the **Database** pane, ensure the **Database Name** is set to **ReportServer**, and click **Next**.
+    4. In the **Credentials** pane, ensure **Authentication Type** is set to **Service Credentials** and then click **Next**.
+    5. On the **Summary** page, verify the information is correct, and then click **Next**.
+    6. Wait for the database to be created and then click **Finish** to close the wizard.
 11. In the navigation pane, click **Web Portal URL**.
 12. In the **Web Portal URL** pane:
 
     1. Confirm the following warning message appears:
 
-       > The Web Portal virtual directory name is not configured. To configure
-       > the directory, enter a name or use the default value that is provided,
-       > and then click Apply.
+       > The Web Portal virtual directory name is not configured. To configure the directory, enter a name or use the default value that is provided, and then click Apply.
 
     2. Click **Apply**.
 
@@ -753,8 +720,7 @@ Set-Location C:
 
 ##### Reference
 
-**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field
-#017**\
+**SQL SERVER - Dude, Where is the SQL Agent Job History? - Notes from the Field #017**\
 From <[https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/](https://blog.sqlauthority.com/2014/02/27/sql-server-dude-where-is-the-sql-agent-job-history-notes-from-the-field-017/)>
 
 ```PowerShell
@@ -910,8 +876,7 @@ $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
 & ($imageDriveLetter + ":\\SCDPM_2019.exe")
 ```
 
-Destination location: **C:\\NotBackedUp\\Temp\\System Center 2019 Data
-Protection Manager**
+Destination location: **C:\\NotBackedUp\\Temp\\System Center 2019 Data Protection Manager**
 
 > **Important**
 >
@@ -941,8 +906,7 @@ cls
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/BC4048F9237335F0D9A774B0668B174B39956EB6.png)
 
-In the **Instance of SQL Server** box, type **TT-DPM06** and click **Check and
-Install**.
+In the **Instance of SQL Server** box, type **TT-DPM06** and click **Check and Install**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/0E2BD8540196FC70693D57670A6B5B1FD8A5D6B1.png)
 
@@ -970,8 +934,7 @@ Restart-Computer
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/563529A99B000095C6131878345CF54B9DB39F7D.png)
 
-In the **Instance of SQL Server** box, type **TT-DPM06** and click **Check and
-Install**.
+In the **Instance of SQL Server** box, type **TT-DPM06** and click **Check and Install**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/17/63CEDD13EF1DF6912384DBD489C568FFB7492317.png)
 
@@ -981,8 +944,7 @@ Install**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/11/9A84D192257012A3A90E52FCD6DEC70E91349811.png)
 
-Click **Use Microsoft Update when I check for updates (recommended)** and then
-click **Next**.
+Click **Use Microsoft Update when I check for updates (recommended)** and then click **Next**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/EC/8E07D63F2E2B3923985C12E85EA73AE1E45DF6EC.png)
 
@@ -999,8 +961,7 @@ DPM Setup has created the following firewall exceptions:\
 - Exception for Msdpm.exe in all profiles.\
 - Exception for DPMRA.exe in all profiles.\
 - Exception for AMSvcHost.exe in all profiles.\
-- Exception for DPMAMService communication on port 6075 (TCP and UDP) in all
-  profiles.
+- Exception for DPMAMService communication on port 6075 (TCP and UDP) in all profiles.
 
 ```PowerShell
 cls
@@ -1045,8 +1006,7 @@ From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?v
 **Antivirus exclusions for DPM 2016/2019**\
 From <[https://social.technet.microsoft.com/Forums/en-US/60b02401-a47b-4738-a497-5f3ebe6c82e6/antivirus-exclusions-for-dpm-20162019?forum=dataprotectionmanager](https://social.technet.microsoft.com/Forums/en-US/60b02401-a47b-4738-a497-5f3ebe6c82e6/antivirus-exclusions-for-dpm-20162019?forum=dataprotectionmanager)>
 
-**Configure Data Protection Manager 2016 AntiVirus Exclusions on Windows Server
-2016**\
+**Configure Data Protection Manager 2016 AntiVirus Exclusions on Windows Server 2016**\
 From <[https://www.normanbauer.com/2018/02/28/configure-data-protection-manager-2016-antivirus-exclusions-on-windows-server-2016/](https://www.normanbauer.com/2018/02/28/configure-data-protection-manager-2016-antivirus-exclusions-on-windows-server-2016/)>
 
 ```PowerShell
@@ -1278,26 +1238,20 @@ Set-Location C:
 #### Create maintenance plan for full backup of all databases
 
 1. Open **SQL Server Management Studio**.
-2. In **Object Explorer**, expand **Management**, right-click **Maintenance
-   Plans**, and click **Maintenance Plan Wizard**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
 3. In the **Maintenance Plan Wizard** window:
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Full Backup of All Databases**.
       2. In the **Schedule** section, click **Change...**
-      3. In the **New Job Schedule** window, configure the settings according to
-         the configuration specified above, and click **OK**.
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
-   3. On the **Select Maintenance Tasks** page, in the list of maintenance
-      tasks, select **Back Up Database (Full)**, and click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Full)**, and click **Next**.
    4. On the **Select Maintenance Task Order** page, click **Next**.
    5. On the **Define Back Up Database (Full) Task** page:
-      1. On the **General** tab, In the **Database(s)** dropdown, select **All
-         databases**.
-      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL
-         Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Full**.
-      3. On the **Options** tab, in the **Set backup compression** dropdown,
-         ensure **Use the default server setting** is selected.
+      1. On the **General** tab, In the **Database(s)** dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Full**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, ensure **Use the default server setting** is selected.
       4. Click **Next**.
    6. On the **Select Report Options** page, click **Next**.
    7. On the **Complete the Wizard** page, click **Finish**.
@@ -1305,26 +1259,20 @@ Set-Location C:
 #### Create maintenance plan for differential backup of all databases
 
 1. Open **SQL Server Management Studio**.
-2. In **Object Explorer**, expand **Management**, right-click **Maintenance
-   Plans**, and click **Maintenance Plan Wizard**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
 3. In the **Maintenance Plan Wizard** window:
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Differential Backup of All Databases**.
       2. In the **Schedule** section, click **Change...**
-      3. In the **New Job Schedule** window, configure the settings according to
-         the configuration specified above, and click **OK**.
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
-   3. On the **Select Maintenance Tasks** page, in the list of maintenance
-      tasks, select **Back Up Database (Differential)**, and click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Differential)**, and click **Next**.
    4. On the **Select Maintenance Task Order** page, click **Next**.
    5. On the **Define Back Up Database (Differential) Task** page:
-      1. On the **General** tab, In the **Database(s)** dropdown, select **All
-         databases**.
-      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL
-         Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Differential**.
-      3. On the **Options** tab, in the **Set backup compression** dropdown,
-         ensure **Use the default server setting** is selected.
+      1. On the **General** tab, In the **Database(s)** dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Differential**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, ensure **Use the default server setting** is selected.
       4. Click **Next**.
    6. On the **Select Report Options** page, click **Next**.
    7. On the **Complete the Wizard** page, click **Finish**.
@@ -1332,26 +1280,20 @@ Set-Location C:
 #### Create maintenance plan for transaction log backup of all databases
 
 1. Open **SQL Server Management Studio**.
-2. In **Object Explorer**, expand **Management**, right-click **Maintenance
-   Plans**, and click **Maintenance Plan Wizard**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
 3. In the **Maintenance Plan Wizard** window:
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Transaction Log Backup of All Databases**.
       2. In the **Schedule** section, click **Change...**
-      3. In the **New Job Schedule** window, configure the settings according to
-         the configuration specified above, and click **OK**.
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
-   3. On the **Select Maintenance Tasks** page, in the list of maintenance
-      tasks, select **Back Up Database (Transaction Log)**, and click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Transaction Log)**, and click **Next**.
    4. On the **Select Maintenance Task Order** page, click **Next**.
    5. On the **Define Back Up Database (Full) Task** page:
-      1. On the **General** tab, In the **Database(s) **dropdown, select **All
-         databases**.
-      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL
-         Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log**.
-      3. On the **Options** tab, in the **Set backup compression** dropdown,
-         ensure **Use the default server setting** is selected.
+      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log**.
+      3. On the **Options** tab, in the **Set backup compression** dropdown, ensure **Use the default server setting** is selected.
       4. Click **Next**.
    6. On the **Select Report Options** page, click **Next**.
    7. On the **Complete the Wizard** page, click **Finish**.
@@ -1443,26 +1385,21 @@ Recurs every: <strong>1</strong> week on</p>
 #### Create maintenance plan to remove old Full and Differential backups
 
 1. Open **SQL Server Management Studio**.
-2. In **Object Explorer**, expand **Management**, right-click **Maintenance
-   Plans**, and click **Maintenance Plan Wizard**.
+2. In **Object Explorer**, expand **Management**, right-click **Maintenance Plans**, and click **Maintenance Plan Wizard**.
 3. In the **Maintenance Plan Wizard** window:
    1. On the starting page, click **Next**.
    2. On the **Select Plan Properties** page:
       1. In the **Name** box, type **Remove Old Database Backups**.
       2. In the **Schedule** section, click **Change...**
-      3. In the **New Job Schedule** window, configure the settings according to
-         the configuration specified above, and click **OK**.
+      3. In the **New Job Schedule** window, configure the settings according to the configuration specified above, and click **OK**.
       4. Click **Next**.
-   3. On the **Select Maintenance Tasks** page, in the list of maintenance
-      tasks, select **Maintenance Cleanup Task**, and click **Next**.
+   3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Maintenance Cleanup Task**, and click **Next**.
    4. On the **Select Maintenance Task Order** page, click **Next**.
    5. On the **Define Maintenance Cleanup Task** page:
-      1. In the **Folder** box, type **Z:\\Microsoft SQL
-         Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\**.
+      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\**.
       2. In the **File extension** box, type **bak**.
       3. Select the **Include first-level subfolders** checkbox.
-      4. In the **File age** section, configure the settings to delete files
-         older than **2 Week(s)**.
+      4. In the **File age** section, configure the settings to delete files older than **2 Week(s)**.
       5. Click **Next**.
    6. On the **Select Report Options** page, click **Next**.
    7. On the **Complete the Wizard** page, click **Finish**.
@@ -1470,8 +1407,7 @@ Recurs every: <strong>1</strong> week on</p>
 #### Modify maintenance plan to remove old Transaction Log backups
 
 1. Open **SQL Server Management Studio**.
-2. In **Object Explorer**, expand **Management**, expand **Maintenance Plans**,
-   right-click **Remove Old Database Backups** and click **Modify**.
+2. In **Object Explorer**, expand **Management**, expand **Maintenance Plans**, right-click **Remove Old Database Backups** and click **Modify**.
 3. In the Maintenance Plan designer:
    1. Right-click **Maintenance Cleanup Task** and click **Properties**.
    2. In the **Properties** window:
@@ -1482,22 +1418,18 @@ Recurs every: <strong>1</strong> week on</p>
    5. In the **Properties** window:
       1. If necessary, expand the **Identification** section.
       2. In the **Name** box, type **Remove Transaction Log Backups**.
-   6. Right-click the **Remove Transaction Log Backups** task and click
-      **Edit...**
+   6. Right-click the **Remove Transaction Log Backups** task and click **Edit...**
    7. In the **Maintenance Cleanup Task** window:
-      1. In the **Folder** box, type **Z:\\Microsoft SQL
-         Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
+      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
       2. In the **File extension** box, type **trn**.
-      3. In the **File age** section, configure the settings to delete files
-         older than **2 Week(s)**.
+      3. In the **File age** section, configure the settings to delete files older than **2 Week(s)**.
       4. Click **OK**.
 4. On the **File** menu, click **Save Selected Items**.
 
 #### Modify maintenance plan to remove historical data
 
 1. Open **SQL Server Management Studio**.
-2. In **Object Explorer**, expand **Management**, expand **Maintenance Plans**,
-   right-click **Remove Old Database Backups** and click **Modify**.
+2. In **Object Explorer**, expand **Management**, expand **Maintenance Plans**, right-click **Remove Old Database Backups** and click **Modify**.
 3. In the Maintenance Plan designer:
    1. Use the **Toolbox** to add a new **History Cleanup Task**.
    2. Right-click **History Cleanup Task** and click **Edit...**
@@ -1547,15 +1479,11 @@ Right-click **Full Backup of All Databases** and click **Execute**.
 
 ## Add disks to the storage pool
 
-1. In DPM Administrator Console, click **Management**, and then click the **Disk
-   Storage**.
-2. Click **Add** on the tool ribbon. The **Add Disks to Storage Pool** dialog
-   box appears. The **Available disks** section lists the disks that you can add
-   to the storage pool.
+1. In DPM Administrator Console, click **Management**, and then click the **Disk Storage**.
+2. Click **Add** on the tool ribbon. The **Add Disks to Storage Pool** dialog box appears. The **Available disks** section lists the disks that you can add to the storage pool.
 3. Select one or more disks, click **Add**, and then click **OK**.
 
-Pasted from
-<[http://technet.microsoft.com/en-us/library/hh758075.aspx](http://technet.microsoft.com/en-us/library/hh758075.aspx)>
+Pasted from <[http://technet.microsoft.com/en-us/library/hh758075.aspx](http://technet.microsoft.com/en-us/library/hh758075.aspx)>
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/F7E834EC19125F786E5CA09DF4554BC44455D212.png)
 
@@ -1587,8 +1515,7 @@ Ensure **Servers** is selected and then click **Next**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/3928FC7352E65E5B26387001B6D0EAA3781D12B9.png)
 
-Expand **TT-DC10**, then expand **System Protection**, and then select **System
-State (includes Active Directory)**.
+Expand **TT-DC10**, then expand **System Protection**, and then select **System State (includes Active Directory)**.
 
 Repeat the previous step for **TT-DC11**.
 
@@ -1653,8 +1580,7 @@ In the **Application recovery points** section, click **Modify...**
 
 ### Add "Local System" account to SQL Server sysadmin role
 
-On the SQL Server (HAVOK-TEST), open SQL Server Management Studio and execute
-the following:
+On the SQL Server (HAVOK-TEST), open SQL Server Management Studio and execute the following:
 
 ```SQL
 ALTER SERVER ROLE [sysadmin] ADD MEMBER [NT AUTHORITY\SYSTEM]
@@ -1682,8 +1608,7 @@ Retention range: **10 days**\
 Synchronization frequency: **Every 30 minutes**\
 File recovery points:
 
-- Recovery points for files: **7:00 AM, 9:00 AM, 11:00 AM, 1:00 PM, 3:00, 5:00
-  PM Everyday**
+- Recovery points for files: **7:00 AM, 9:00 AM, 11:00 AM, 1:00 PM, 3:00, 5:00 PM Everyday**
 
 ## Create protection group for client computers
 
@@ -1692,8 +1617,7 @@ Retention range: **10 days**\
 Synchronization frequency: **Every 1 hour(s)**\
 Client computer recovery points:
 
-- Recovery points: **8:00 AM, 10:00 AM, 12:00 PM, 2:00 PM, 4:00 PM, 6:00 PM
-  Everyday**
+- Recovery points: **8:00 AM, 10:00 AM, 12:00 PM, 2:00 PM, 4:00 PM, 6:00 PM Everyday**
 
 ## Create protection group for Hyper-V
 
@@ -1730,8 +1654,7 @@ $installer = $imageDriveLetter + ":\SCVMM_2019.exe"
 & $installer
 ```
 
-Destination location: **C:\\NotBackedUp\\Temp\\System Center 2019 Virtual
-Machine Manager**
+Destination location: **C:\\NotBackedUp\\Temp\\System Center 2019 Virtual Machine Manager**
 
 ```PowerShell
 Dismount-DiskImage -ImagePath $imagePath
@@ -1748,40 +1671,28 @@ Dismount-DiskImage -ImagePath $imagePath
    ```
 
 2. On the main setup page, click **Install**.
-3. On the **Select features to install** page, select the **VMM console** check
-   box, and click **Next**.
-4. On the **Please read this notice** page, review the license agreement, select
-   the **I agree with the terms of this notice** check box, and then click
-   **Next**.
-5. On the **Diagnostic and Usage Data** page, review the data collection and
-   usage policy and then click **Next**.
-6. On the **Installation location** page, ensure the default path is specified
-   (**C:\\Program Files\\Microsoft System Center\\Virtual Machine Manager**),
-   and then click **Next**.
-7. On the **Port configuration** page, ensure the default port number (**8100**)
-   is specified for communication with the VMM management server, and click
-   **Next**.
-8. On the **Installation summary** page, review your selections and do one of
-   the following:
+3. On the **Select features to install** page, select the **VMM console** check box, and click **Next**.
+4. On the **Please read this notice** page, review the license agreement, select the **I agree with the terms of this notice** check box, and then click **Next**.
+5. On the **Diagnostic and Usage Data** page, review the data collection and usage policy and then click **Next**.
+6. On the **Installation location** page, ensure the default path is specified (**C:\\Program Files\\Microsoft System Center\\Virtual Machine Manager**), and then click **Next**.
+7. On the **Port configuration** page, ensure the default port number (**8100**) is specified for communication with the VMM management server, and click **Next**.
+8. On the **Installation summary** page, review your selections and do one of the following:
 
    - Click **Previous** to change any selections.
    - Click **Install** to install the VMM console.
 
-   After you click **Install**, the **Installing features** page appears and
-   installation progress is displayed.
+   After you click **Install**, the **Installing features** page appears and installation progress is displayed.
 
    > **Important**
    >
-   > During setup, VMM enables the following firewall rules, which remain in
-   > effect even if you later uninstall VMM:
+   > During setup, VMM enables the following firewall rules, which remain in effect even if you later uninstall VMM:
    >
    > - File Server Remote Management
    > - Windows Standards-Based Storage Management firewall rules
 
 9. On the **Setup completed...** page:
    1. Review any warnings that occurred.
-   2. Clear the **Check for the latest Virtual Machine Manager updates**
-      checkbox.
+   2. Clear the **Check for the latest Virtual Machine Manager updates** checkbox.
    3. Clear the **Open the VMM console when this wizard closes** checkbox.
    4. Click **Close** to finish the installation.
 

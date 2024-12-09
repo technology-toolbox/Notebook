@@ -59,10 +59,8 @@ Start-SCVirtualMachine $vmName
 
 ### Install custom Windows 8.1 image
 
-- On the **Task Sequence** step, select **Windows 8.1 Enterprise (x64)** and click
-  **Next**.
-- On the **Computer Details** step, in the **Computer name** box, type
-  **TT-W8-TEST-02** and click **Next**.
+- On the **Task Sequence** step, select **Windows 8.1 Enterprise (x64)** and click **Next**.
+- On the **Computer Details** step, in the **Computer name** box, type **TT-W8-TEST-02** and click **Next**.
 - On the **Applications** step:
   - Select the following items:
     - Adobe
@@ -233,8 +231,7 @@ Enable-PSRemoting -Confirm:$false
 
 > **Note**
 >
-> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG
-> ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
+> PowerShell remoting must be enabled for remote Windows Update using PoshPAIG ([https://github.com/proxb/PoshPAIG](https://github.com/proxb/PoshPAIG)).
 
 ```PowerShell
 cls
