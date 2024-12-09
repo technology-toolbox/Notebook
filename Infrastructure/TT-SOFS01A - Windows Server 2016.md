@@ -1,6 +1,6 @@
-﻿# TT-SOFS01A - Windows Server 2016
+# TT-SOFS01A - Windows Server 2016
 
-Tuesday, January 31, 2017
+Tuesday, January 31, 2017\
 5:04 AM
 
 ```Text

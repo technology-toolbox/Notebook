@@ -1,6 +1,6 @@
-﻿# TT-W10-DEV10 - Windows 10 Enterprise (x64)
+# TT-W10-DEV10 - Windows 10 Enterprise (x64)
 
-Thursday, May 23, 2019
+Thursday, May 23, 2019\
 9:30 AM
 
 ```Text

@@ -1,6 +1,6 @@
-﻿# EXT-DC10 - Windows Server 2019 Domain Controller
+# EXT-DC10 - Windows Server 2019 Domain Controller
 
-Monday, May 20, 2019
+Monday, May 20, 2019\
 1:47 PM
 
 ```Text

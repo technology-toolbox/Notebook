@@ -1,4 +1,4 @@
-﻿# TT-SQL03 - Windows Server 2019 Standard Edition
+# TT-SQL03 - Windows Server 2019 Standard Edition
 
 Monday, September 23, 2019\
 7:37 AM

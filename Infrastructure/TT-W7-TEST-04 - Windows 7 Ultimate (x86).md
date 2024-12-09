@@ -1,6 +1,6 @@
-﻿# TT-W7-TEST-04 - Windows 7 Ultimate (x86)
+# TT-W7-TEST-04 - Windows 7 Ultimate (x86)
 
-Monday, November 23, 2020
+Monday, November 23, 2020\
 8:24 AM
 
 ```Text

@@ -1,6 +1,6 @@
-﻿# TT-TFS02 - TFS 2018 App Tier
+# TT-TFS02 - TFS 2018 App Tier
 
-Thursday, March 22, 2018
+Thursday, March 22, 2018\
 8:08 PM
 
 ```Text

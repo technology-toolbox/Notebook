@@ -1,6 +1,6 @@
-﻿# CON-ADFS01 - Windows Server 2016
+# CON-ADFS01 - Windows Server 2016
 
-Tuesday, August 7, 2018
+Tuesday, August 7, 2018\
 7:26 AM
 
 ```Text

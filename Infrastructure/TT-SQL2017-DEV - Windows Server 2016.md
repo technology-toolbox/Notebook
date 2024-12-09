@@ -1,6 +1,6 @@
-﻿# TT-SQL2017-DEV - Windows Server 2016
+# TT-SQL2017-DEV - Windows Server 2016
 
-Saturday, February 3, 2018
+Saturday, February 3, 2018\
 6:28 AM
 
 ```Text

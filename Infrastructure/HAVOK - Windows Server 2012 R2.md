@@ -1,6 +1,6 @@
-﻿# HAVOK - Windows Server 2012 R2 Standard
+# HAVOK - Windows Server 2012 R2 Standard
 
-Tuesday, September 8, 2015
+Tuesday, September 8, 2015\
 1:30 PM
 
 ```Text

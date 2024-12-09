@@ -1,6 +1,6 @@
-﻿# Azure Virtual Machines
+# Azure Virtual Machines
 
-Friday, June 05, 2015
+Friday, June 05, 2015\
 5:26 AM
 
 ## # Start VMs - sync

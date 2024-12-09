@@ -1,6 +1,6 @@
-﻿# CON-DC06 - Windows Server 2019 Domain Controller
+# CON-DC06 - Windows Server 2019 Domain Controller
 
-Friday, April 10, 2020
+Friday, April 10, 2020\
 9:10 AM
 
 ```Text

@@ -1,6 +1,6 @@
-﻿# Azure Dev/Test
+# Azure Dev/Test
 
-Friday, March 15, 2019
+Friday, March 15, 2019\
 6:29 AM
 
 ## Install the Azure PowerShell module

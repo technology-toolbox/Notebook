@@ -1,6 +1,6 @@
-﻿# ANGEL (originally ICEMAN) - Windows Server 2012 R2 Standard
+# ANGEL (originally ICEMAN) - Windows Server 2012 R2 Standard
 
-Sunday, December 29, 2013
+Sunday, December 29, 2013\
 2:11 PM
 
 ```Text

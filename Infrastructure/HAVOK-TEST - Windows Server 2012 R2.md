@@ -1,4 +1,4 @@
-﻿# HAVOK-TEST - Windows Server 2012 R2 Standard
+# HAVOK-TEST - Windows Server 2012 R2 Standard
 
 Saturday, January 04, 2014\
 1:43 PM

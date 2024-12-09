@@ -1,4 +1,4 @@
-﻿# TT-ADMIN01 - Windows Server 2019
+# TT-ADMIN01 - Windows Server 2019
 
 Monday, September 9, 2019\
 5:38 AM

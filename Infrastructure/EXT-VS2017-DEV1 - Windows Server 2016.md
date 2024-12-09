@@ -1,6 +1,6 @@
-﻿# EXT-VS2017-DEV1 - Windows Server 2016
+# EXT-VS2017-DEV1 - Windows Server 2016
 
-Monday, June 3, 2019
+Monday, June 3, 2019\
 7:23 AM
 
 ```Text

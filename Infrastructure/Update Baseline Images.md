@@ -1,4 +1,4 @@
-﻿# Update Baseline Images
+# Update Baseline Images
 
 Tuesday, June 12, 2018\
 8:14 AM

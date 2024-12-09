@@ -1,6 +1,6 @@
-﻿# CON-NAS01 - FreeNAS Storage Server
+# CON-NAS01 - FreeNAS Storage Server
 
-Wednesday, August 28, 2019
+Wednesday, August 28, 2019\
 8:28 AM
 
 ```Text

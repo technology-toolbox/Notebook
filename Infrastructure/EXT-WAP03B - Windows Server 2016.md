@@ -1,6 +1,6 @@
-﻿# EXT-WAP03B - Windows Server 2016
+# EXT-WAP03B - Windows Server 2016
 
-Thursday, March 29, 2018
+Thursday, March 29, 2018\
 1:27 PM
 
 ```Text

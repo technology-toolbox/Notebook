@@ -1,6 +1,6 @@
-﻿# EXT-VS2019-DEV1 - Windows Server 2019
+# EXT-VS2019-DEV1 - Windows Server 2019
 
-Wednesday, December 11, 2019
+Wednesday, December 11, 2019\
 3:23 AM
 
 ```Text

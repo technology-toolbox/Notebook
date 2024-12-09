@@ -1,6 +1,6 @@
-﻿# TT-MAIL-TEST01
+# TT-MAIL-TEST01
 
-Friday, May 17, 2019
+Friday, May 17, 2019\
 9:08 AM
 
 ```Text
@@ -497,7 +497,7 @@ sudo dpkg-reconfigure apparmor
 **How do I make AppArmor work with a non-standard HOME directory?**\
 From <[https://help.ubuntu.com/community/AppArmor](https://help.ubuntu.com/community/AppArmor)>
 
-**How can I use snap when I don’t use /home/\$USER?**\
+**How can I use snap when I don�t use /home/\$USER?**\
 From <[https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352](https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352)>
 
 **Permission denied on launch**\

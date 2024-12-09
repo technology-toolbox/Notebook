@@ -1,6 +1,6 @@
-﻿# TT-DOCKER02-DEV
+# TT-DOCKER02-DEV
 
-Friday, March 6, 2020
+Friday, March 6, 2020\
 2:25 PM
 
 ```Text

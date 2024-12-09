@@ -1,6 +1,6 @@
-﻿# EXT-WIN8
+# EXT-WIN8
 
-Tuesday, March 03, 2015
+Tuesday, March 03, 2015\
 10:20 AM
 
 Error trying to remote PowerShell from EXT-DC03:

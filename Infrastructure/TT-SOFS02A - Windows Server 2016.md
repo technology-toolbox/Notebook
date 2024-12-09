@@ -1,6 +1,6 @@
-﻿# TT-SOFS02A - Windows Server 2016
+# TT-SOFS02A - Windows Server 2016
 
-Wednesday, February 28, 2018
+Wednesday, February 28, 2018\
 6:04 AM
 
 ```Text

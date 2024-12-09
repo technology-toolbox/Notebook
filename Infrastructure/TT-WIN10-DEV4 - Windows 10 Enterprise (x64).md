@@ -1,6 +1,6 @@
-﻿# TT-WIN10-DEV4 - Windows 10 Enterprise (x64)
+# TT-WIN10-DEV4 - Windows 10 Enterprise (x64)
 
-Thursday, June 14, 2018
+Thursday, June 14, 2018\
 10:31 AM
 
 ```Text

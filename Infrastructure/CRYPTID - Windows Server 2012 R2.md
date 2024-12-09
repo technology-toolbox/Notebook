@@ -1,6 +1,6 @@
-﻿# CRYPTID - Windows Server 2012 R2 Standard
+# CRYPTID - Windows Server 2012 R2 Standard
 
-Saturday, February 22, 2014
+Saturday, February 22, 2014\
 6:05 AM
 
 ```Console

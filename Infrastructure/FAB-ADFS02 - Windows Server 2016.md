@@ -1,4 +1,4 @@
-﻿# FAB-ADFS02 - Windows Server 2016
+# FAB-ADFS02 - Windows Server 2016
 
 Monday, November 28, 2016\
 6:13 AM

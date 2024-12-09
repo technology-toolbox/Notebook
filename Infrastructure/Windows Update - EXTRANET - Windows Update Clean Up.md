@@ -1,6 +1,6 @@
-﻿# Windows Update Clean Up
+# Windows Update Clean Up
 
-Friday, July 14, 2017
+Friday, July 14, 2017\
 4:07 AM
 
 ```Text

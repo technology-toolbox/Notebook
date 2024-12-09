@@ -1,6 +1,6 @@
-﻿# TFS Builds
+# TFS Builds
 
-Wednesday, April 4, 2018
+Wednesday, April 4, 2018\
 11:13 AM
 
 ## Configure build definition for team project

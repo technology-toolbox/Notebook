@@ -1,6 +1,6 @@
-﻿# TT-W10-DEV08 - Windows 10 Enterprise (x64)
+# TT-W10-DEV08 - Windows 10 Enterprise (x64)
 
-Friday, January 4, 2019
+Friday, January 4, 2019\
 6:03 AM
 
 ```Text

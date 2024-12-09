@@ -1,6 +1,6 @@
-﻿# TT-WIN10-TEST9 - Windows 10 Enterprise (x64)
+# TT-WIN10-TEST9 - Windows 10 Enterprise (x64)
 
-Thursday, September 27, 2018
+Thursday, September 27, 2018\
 5:40 AM
 
 ```Text

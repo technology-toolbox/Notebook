@@ -1,6 +1,6 @@
 # TT-WEB03-DEV - Windows Server 2019 (Server Core)
 
-Wednesday, February 26, 2020
+Wednesday, February 26, 2020\
 8:31 AM
 
 ```Text

@@ -1,6 +1,6 @@
-﻿# TT-BUILD01 - TFS 2018 Build Server
+# TT-BUILD01 - TFS 2018 Build Server
 
-Wednesday, April 4, 2018
+Wednesday, April 4, 2018\
 6:26 AM
 
 ```Text

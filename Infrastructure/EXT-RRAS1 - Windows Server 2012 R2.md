@@ -1,6 +1,6 @@
-﻿# EXT-RRAS1 - Windows Server 2012 R2 Standard
+# EXT-RRAS1 - Windows Server 2012 R2 Standard
 
-Monday, March 02, 2015
+Monday, March 02, 2015\
 6:09 AM
 
 ```Console

@@ -1,6 +1,6 @@
-﻿# Network Issue
+# Network Issue
 
-Tuesday, November 20, 2018
+Tuesday, November 20, 2018\
 7:19 AM
 
 ## Repro steps

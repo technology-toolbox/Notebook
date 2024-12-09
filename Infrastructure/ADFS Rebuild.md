@@ -1,6 +1,6 @@
-﻿# ADFS Rebuild
+# ADFS Rebuild
 
-Tuesday, April 3, 2018
+Tuesday, April 3, 2018\
 11:03 AM
 
 ---

@@ -1,4 +1,4 @@
-﻿# STORM - Windows 10 Enterprise x64
+# STORM - Windows 10 Enterprise x64
 
 Monday, July 2, 2018\
 11:20 AM

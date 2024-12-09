@@ -1,6 +1,6 @@
-﻿# EXT-DC07 Windows Server 2016
+# EXT-DC07 Windows Server 2016
 
-Wednesday, May 10, 2017
+Wednesday, May 10, 2017\
 9:54 AM
 
 ```Text

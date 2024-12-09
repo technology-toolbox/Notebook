@@ -1,6 +1,6 @@
-﻿# TT-SQL02 - Windows Server 2016 Standard Edition
+# TT-SQL02 - Windows Server 2016 Standard Edition
 
-Thursday, March 22, 2018
+Thursday, March 22, 2018\
 5:34 PM
 
 ```Text

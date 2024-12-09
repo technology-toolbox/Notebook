@@ -1,6 +1,6 @@
-﻿# Refresh from PROD
+# Refresh from PROD
 
-Wednesday, February 14, 2018
+Wednesday, February 14, 2018\
 7:23 AM
 
 ```Console

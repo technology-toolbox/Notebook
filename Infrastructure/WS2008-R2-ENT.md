@@ -1,6 +1,6 @@
-﻿# WS2008-R2-ENT
+# WS2008-R2-ENT
 
-Monday, April 18, 2016
+Monday, April 18, 2016\
 8:16 AM
 
 ```Text

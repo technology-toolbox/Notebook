@@ -1,6 +1,6 @@
-﻿# WIN81-X64-ENT
+# WIN81-X64-ENT
 
-Sunday, June 22, 2014
+Sunday, June 22, 2014\
 6:16 PM
 
 ```Text

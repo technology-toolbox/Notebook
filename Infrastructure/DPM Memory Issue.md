@@ -1,6 +1,6 @@
-﻿# DPM Memory Issue
+# DPM Memory Issue
 
-Saturday, December 30, 2017
+Saturday, December 30, 2017\
 7:29 AM
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/B0DB99B0077548B8D1E9097736E78745F4647191.png)
@@ -20,7 +20,7 @@ From <[https://msdn.microsoft.com/en-us/library/windows/hardware/dn567645(v=vs.8
 **Too many files causing RAM pressure? (a.k.a. DynCache to the rescue!)**\
 From <[https://blogs.msdn.microsoft.com/arvindsh/2014/03/20/too-many-files-causing-ram-pressure-a-k-a-dyncache-to-the-rescue/](https://blogs.msdn.microsoft.com/arvindsh/2014/03/20/too-many-files-causing-ram-pressure-a-k-a-dyncache-to-the-rescue/)>
 
-**RAMKick™: Like RAMMap but Automatic, Empty System Working Set Memory**\
+**RAMKick�: Like RAMMap but Automatic, Empty System Working Set Memory**\
 From <[http://backupchain.com/i/ramkick-like-rammap-but-automatic-empty-system-working-set-memory](http://backupchain.com/i/ramkick-like-rammap-but-automatic-empty-system-working-set-memory)>
 
 **Windows Server 2008 R2 Metafile RAM Usage**\

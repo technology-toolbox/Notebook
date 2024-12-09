@@ -1,6 +1,6 @@
-﻿# FOOBAR21 - Windows 10 Enterprise (x64)
+# FOOBAR21 - Windows 10 Enterprise (x64)
 
-Thursday, June 20, 2019
+Thursday, June 20, 2019\
 5:12 AM
 
 ```Text

@@ -1,6 +1,6 @@
-﻿# EXT-VS2017-DEV2 - Windows Server 2019
+# EXT-VS2017-DEV2 - Windows Server 2019
 
-Thursday, October 24, 2019
+Thursday, October 24, 2019\
 3:53 AM
 
 ```Text

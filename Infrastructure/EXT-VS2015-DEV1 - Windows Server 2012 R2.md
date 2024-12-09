@@ -1,6 +1,6 @@
-﻿# EXT-VS2015-DEV1 - Windows Server 2012 R2
+# EXT-VS2015-DEV1 - Windows Server 2012 R2
 
-Saturday, June 1, 2019
+Saturday, June 1, 2019\
 7:47 AM
 
 ```Text

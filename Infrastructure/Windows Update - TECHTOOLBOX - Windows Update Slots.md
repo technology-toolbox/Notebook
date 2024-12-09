@@ -1,6 +1,6 @@
-﻿# Windows Update Slots
+# Windows Update Slots
 
-Tuesday, January 23, 2018
+Tuesday, January 23, 2018\
 11:33 AM
 
 ```PowerShell

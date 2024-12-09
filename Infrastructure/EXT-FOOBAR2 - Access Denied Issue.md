@@ -1,6 +1,6 @@
-﻿# Access Denied Issue
+# Access Denied Issue
 
-Sunday, September 24, 2017
+Sunday, September 24, 2017\
 7:52 AM
 
 ```PowerShell

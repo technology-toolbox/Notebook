@@ -1,6 +1,6 @@
-﻿# W10-2019-06
+# W10-2019-06
 
-Tuesday, August 13, 2019
+Tuesday, August 13, 2019\
 3:27 PM
 
 <table>

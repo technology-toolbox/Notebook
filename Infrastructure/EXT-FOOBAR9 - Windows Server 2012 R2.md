@@ -1,6 +1,6 @@
-﻿# EXT-FOOBAR9 - Windows Server 2012 R2 Standard
+# EXT-FOOBAR9 - Windows Server 2012 R2 Standard
 
-Thursday, July 21, 2016
+Thursday, July 21, 2016\
 9:04 AM
 
 ```Text
@@ -6610,7 +6610,7 @@ $relyingPartyDisplayName = $clientPortalUrl.Host
 
 Set-AdfsRelyingPartyWebContent `
     -TargetRelyingPartyName $relyingPartyDisplayName `
-    -CompanyName "SecuritasConnect®" `
+    -CompanyName "SecuritasConnect�" `
     -OrganizationalNameDescriptionText `
         "Enter your Securitas e-mail address and password below." `
     -SignInPageDescription $null `

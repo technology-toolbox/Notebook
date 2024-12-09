@@ -1,6 +1,6 @@
-﻿# Netgear GS724T v4 (192.168.10.239)
+# Netgear GS724T v4 (192.168.10.239)
 
-Monday, April 4, 2016
+Monday, April 4, 2016\
 5:30 AM
 
 ## Change administrator password
@@ -22,12 +22,12 @@ Monday, April 4, 2016
 
 ## Configure Network Time Protocol (NTP)
 
-1. Select the **System → Management → Time → Time Configuration**.
+1. Select the **System ? Management ? Time ? Time Configuration**.
 2. On the **Time Configuration** page:
    1. In the **Time Configuration** section, for the **Clock Source **option, select **SNTP**.
    2. In the **SNTP Global Configuration** section, for the **Client Mode **option, select **Unicast**.
    3. Click **Apply**.
-3. Select the **System → Management → Time → SNTP Server Configuration**.
+3. Select the **System ? Management ? Time ? SNTP Server Configuration**.
 4. On the **SNTP Server Configuration** page:
    1. In the **Server Type** dropdown list, select **IPv4**.
    2. In the **Address** box, type **192.168.10.103**.

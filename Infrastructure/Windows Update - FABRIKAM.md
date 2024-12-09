@@ -1,6 +1,6 @@
-﻿# Windows Update - FABRIKAM
+# Windows Update - FABRIKAM
 
-Saturday, January 11, 2014
+Saturday, January 11, 2014\
 7:56 AM
 
 ```Text

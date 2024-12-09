@@ -1,6 +1,6 @@
-﻿# TT-HV05-FC Performance
+# TT-HV05-FC Performance
 
-Friday, March 9, 2018
+Friday, March 9, 2018\
 5:57 AM
 
 ```Console

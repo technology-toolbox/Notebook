@@ -1,6 +1,6 @@
-﻿# EXT-WAP01A
+# EXT-WAP01A
 
-Tuesday, January 24, 2017
+Tuesday, January 24, 2017\
 5:49 AM
 
 ```Text

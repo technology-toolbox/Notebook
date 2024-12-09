@@ -1,6 +1,6 @@
-﻿# EXT-FOOBAR3 - Windows Server 2012 R2 Standard
+# EXT-FOOBAR3 - Windows Server 2012 R2 Standard
 
-Tuesday, July 26, 2016
+Tuesday, July 26, 2016\
 8:03 AM
 
 ```Text

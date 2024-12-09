@@ -1,6 +1,6 @@
-﻿# TT-WIN10-TEST6 - Windows 10 Enterprise (x64)
+# TT-WIN10-TEST6 - Windows 10 Enterprise (x64)
 
-Sunday, November 12, 2017
+Sunday, November 12, 2017\
 6:20 AM
 
 ```Text

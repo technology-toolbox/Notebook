@@ -1,6 +1,6 @@
-﻿# TT-UD18-DEV-04 - Ubuntu 18.04 Desktop
+# TT-UD18-DEV-04 - Ubuntu 18.04 Desktop
 
-Tuesday, May 7, 2019
+Tuesday, May 7, 2019\
 4:55 PM
 
 ```Text
@@ -458,7 +458,7 @@ When prompted for additional home directories, type **/home/corp.technologytoolb
 **How do I make AppArmor work with a non-standard HOME directory?**\
 From <[https://help.ubuntu.com/community/AppArmor](https://help.ubuntu.com/community/AppArmor)>
 
-**How can I use snap when I don’t use /home/\$USER?**\
+**How can I use snap when I don�t use /home/\$USER?**\
 From <[https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352](https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352)>
 
 **Permission denied on launch**\

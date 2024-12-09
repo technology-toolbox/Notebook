@@ -1,6 +1,6 @@
-﻿# ANGEL (old) - Windows Server 2012 R2 Standard
+# ANGEL (old) - Windows Server 2012 R2 Standard
 
-Monday, January 25, 2016
+Monday, January 25, 2016\
 2:54 PM
 
 ```Text

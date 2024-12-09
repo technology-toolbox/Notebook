@@ -1,6 +1,6 @@
-﻿# TT-W10-DEV09 - Windows 10
+# TT-W10-DEV09 - Windows 10
 
-Thursday, May 23, 2019
+Thursday, May 23, 2019\
 9:23 AM
 
 ```Text

@@ -1,6 +1,6 @@
-﻿# SDN
+# SDN
 
-Monday, July 30, 2018
+Monday, July 30, 2018\
 6:12 AM
 
 ---

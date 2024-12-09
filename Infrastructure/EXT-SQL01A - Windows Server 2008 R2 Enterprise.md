@@ -1,6 +1,6 @@
-﻿# EXT-SQL01A - Windows Server 2008 R2 Enterprise
+# EXT-SQL01A - Windows Server 2008 R2 Enterprise
 
-Sunday, April 17, 2016
+Sunday, April 17, 2016\
 5:27 AM
 
 ```Text

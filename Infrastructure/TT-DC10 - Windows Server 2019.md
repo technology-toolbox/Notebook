@@ -1,4 +1,4 @@
-﻿# TT-DC10 - Windows Server 2019
+# TT-DC10 - Windows Server 2019
 
 Saturday, May 18, 2019\
 6:14 AM

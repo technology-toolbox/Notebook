@@ -1,6 +1,6 @@
-﻿# EXT-WAC02A - Windows Server 2012 R2 Standard
+# EXT-WAC02A - Windows Server 2012 R2 Standard
 
-Friday, April 15, 2016
+Friday, April 15, 2016\
 2:00 PM
 
 ```Text

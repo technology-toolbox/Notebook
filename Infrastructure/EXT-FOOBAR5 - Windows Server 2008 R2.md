@@ -1,6 +1,6 @@
-﻿# EXT-FOOBAR5 - Windows Server 2008 R2
+# EXT-FOOBAR5 - Windows Server 2008 R2
 
-Friday, May 15, 2015
+Friday, May 15, 2015\
 3:17 PM
 
 ```Text

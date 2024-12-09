@@ -1,4 +1,4 @@
-﻿# TT-DEPLOY4 - Windows Server 2016
+# TT-DEPLOY4 - Windows Server 2016
 
 Friday, November 17, 2017\
 6:08 AM
@@ -3086,7 +3086,7 @@ Wdsutil /Set-TransportServer /EnableTftpVariableWindowExtension:No
 
 Restart the WDSServer service after disabling the Variable Window Extension.
 
-**March 12, 2019—KB4489882 (OS Build 14393.2848)**\
+**March 12, 2019�KB4489882 (OS Build 14393.2848)**\
 From <[https://support.microsoft.com/en-us/help/4489882/windows-10-update-kb4489882](https://support.microsoft.com/en-us/help/4489882/windows-10-update-kb4489882)>
 
 ## Issue - Not enough free space to install patches using Windows Update

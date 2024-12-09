@@ -1,6 +1,6 @@
-ï»¿# TT-SP01 - Windows Server 2019 Standard Edition
+# TT-SP01 - Windows Server 2019 Standard Edition
 
-Monday, September 23, 2019
+Monday, September 23, 2019\
 10:39 AM
 
 ```Text
@@ -1221,7 +1221,7 @@ GRANT EXECUTE ON [dbo].[proc_putDependency] TO [WSS_Content_Application_Pools]
 **Search account got - Insufficient sql database permissions for user. EXECUTE permission was denied on the object proc_Gettimerrunningjobs**\
 From <[https://social.technet.microsoft.com/Forums/en-US/a0d08e98-1fd6-42cf-b738-6ba3df082210/search-account-got-insufficient-sql-database-permissions-for-user-execute-permission-was-denied?forum=sharepointadmin](https://social.technet.microsoft.com/Forums/en-US/a0d08e98-1fd6-42cf-b738-6ba3df082210/search-account-got-insufficient-sql-database-permissions-for-user-execute-permission-was-denied?forum=sharepointadmin)>
 
-**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object â€˜proc_putObjectTVPâ€™, database â€˜SharePoint_Configâ€™**\
+**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ‘proc_putObjectTVP’, database ‘SharePoint_Config’**\
 From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html](http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html)>
 
 **EXECUTE permission was denied on the object 'proc_putObjectTVP'**\

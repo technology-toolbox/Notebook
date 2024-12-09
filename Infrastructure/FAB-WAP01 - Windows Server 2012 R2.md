@@ -1,4 +1,4 @@
-﻿# FAB-WAP01 - Windows Server 2012 R2
+# FAB-WAP01 - Windows Server 2012 R2
 
 Thursday, June 04, 2015\
 2:03 PM

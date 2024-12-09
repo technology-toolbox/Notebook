@@ -1,6 +1,6 @@
-﻿# Refresh from PROD
+# Refresh from PROD
 
-Wednesday, July 5, 2017
+Wednesday, July 5, 2017\
 8:21 AM
 
 ## Restore SecuritasPortal database backup

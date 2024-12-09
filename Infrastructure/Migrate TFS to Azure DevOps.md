@@ -1,6 +1,6 @@
-ï»¿# Migrate TFS to Azure DevOps - v3
+# Migrate TFS to Azure DevOps - v3
 
-Wednesday, February 6, 2019
+Wednesday, February 6, 2019\
 12:25 PM
 
 ## Planning
@@ -25,7 +25,7 @@ Wednesday, February 6, 2019
 
 **Task:** Choose the datacenter for your Azure DevOps Services organization.
 
-| Selected regionâ€™s shorthand code: | **CUS** |
+| Selected region’s shorthand code: | **CUS** |
 | --------------------------------- | ------- |
 
 
@@ -694,7 +694,7 @@ From <[https://docs.microsoft.com/en-us/azure/devops/articles/migration-troubles
 
 ### Task summary
 
-**Assign, activate, and map Azure DevOps Services subscriptions:** Ensure that each of the Visual Studio (formerly MSDN) subscriptions are assigned, activated, and mapped to each subscriberâ€™s Azure Active Directory organization.\
+**Assign, activate, and map Azure DevOps Services subscriptions:** Ensure that each of the Visual Studio (formerly MSDN) subscriptions are assigned, activated, and mapped to each subscriber’s Azure Active Directory organization.\
 **Generate import settings:** Generate import settings and related files using the TfsMigrator prepare command.\
 **Provide the configurable settings:** Provide the configurable settings in the Import Specification file.\
 **Review** the Identity Map log file\
@@ -702,7 +702,7 @@ From <[https://docs.microsoft.com/en-us/azure/devops/articles/migration-troubles
 
 ### Subscriptions
 
-**Task:** Ensure that each of the Visual Studio (formerly MSDN) subscriptions are assigned, activated, and mapped to each subscriberâ€™s Azure Active Directory organization.
+**Task:** Ensure that each of the Visual Studio (formerly MSDN) subscriptions are assigned, activated, and mapped to each subscriber’s Azure Active Directory organization.
 
 #### Assign subscription
 

@@ -1,6 +1,6 @@
-﻿# TT-MDT-DEV2
+# TT-MDT-DEV2
 
-Friday, August 30, 2019
+Friday, August 30, 2019\
 7:21 AM
 
 ```Text

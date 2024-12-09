@@ -1,6 +1,6 @@
-﻿# FOOBAR20 - Windows 10 Enterprise (x64)
+# FOOBAR20 - Windows 10 Enterprise (x64)
 
-Thursday, January 3, 2019
+Thursday, January 3, 2019\
 10:31 AM
 
 ```Text

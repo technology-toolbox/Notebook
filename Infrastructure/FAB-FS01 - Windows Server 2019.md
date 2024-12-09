@@ -1,4 +1,4 @@
-﻿# FAB-FS01 - Windows Server 2019
+# FAB-FS01 - Windows Server 2019
 
 Wednesday, May 22, 2019\
 5:34 AM

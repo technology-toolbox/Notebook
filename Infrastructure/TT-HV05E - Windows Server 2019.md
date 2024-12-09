@@ -1,4 +1,4 @@
-﻿# TT-HV05E
+# TT-HV05E
 
 Friday, April 3, 2020\
 8:32 AM
@@ -357,7 +357,7 @@ Get-PhysicalDisk | select DeviceId, Model, SerialNumber, CanPool | sort DeviceId
 ##### Update AHCI drivers
 
 1. Download the latest AHCI drivers from the Intel website:\
-   **Intel® RSTe AHCI & SCU Software RAID Driver for Windows**\
+   **Intel� RSTe AHCI & SCU Software RAID Driver for Windows**\
    From
    <[https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t](https://downloadcenter.intel.com/download/27308/Intel-RSTe-AHCI-SCU-Software-RAID-Driver-for-Windows-?v=t)>
 2. Extract the drivers

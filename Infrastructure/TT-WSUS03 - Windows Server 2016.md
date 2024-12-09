@@ -1,4 +1,4 @@
-﻿# TT-WSUS03 - Windows Server 2016 Standard Edition
+# TT-WSUS03 - Windows Server 2016 Standard Edition
 
 Thursday, March 22, 2018\
 4:00 PM

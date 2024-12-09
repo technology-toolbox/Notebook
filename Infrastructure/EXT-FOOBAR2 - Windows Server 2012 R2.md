@@ -1,6 +1,6 @@
-﻿# EXT-FOOBAR2
+# EXT-FOOBAR2
 
-Tuesday, May 1, 2018
+Tuesday, May 1, 2018\
 5:41 AM
 
 ```Text
@@ -7725,7 +7725,7 @@ $relyingPartyDisplayName = $clientPortalUrl.Host
 
 Set-AdfsRelyingPartyWebContent `
     -TargetRelyingPartyName $relyingPartyDisplayName `
-    -CompanyName "SecuritasConnect®" `
+    -CompanyName "SecuritasConnect�" `
     -OrganizationalNameDescriptionText `
         "Enter your Securitas e-mail address and password below." `
     -SignInPageDescription $null `

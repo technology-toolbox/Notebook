@@ -1,6 +1,6 @@
-﻿# Migrate from TFS to Git
+# Migrate from TFS to Git
 
-Wednesday, August 14, 2019
+Wednesday, August 14, 2019\
 10:34 AM
 
 ## Reference

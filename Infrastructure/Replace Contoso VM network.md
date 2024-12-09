@@ -1,6 +1,6 @@
-﻿# Replace Contoso VM network
+# Replace Contoso VM network
 
-Tuesday, August 14, 2018
+Tuesday, August 14, 2018\
 10:24 AM
 
 ```PowerShell

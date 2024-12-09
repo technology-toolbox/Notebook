@@ -1,6 +1,6 @@
-﻿# EXT-VS2008-DEV1 - Windows Server 2008 R2
+# EXT-VS2008-DEV1 - Windows Server 2008 R2
 
-Wednesday, November 13, 2019
+Wednesday, November 13, 2019\
 3:51 AM
 
 ```Text

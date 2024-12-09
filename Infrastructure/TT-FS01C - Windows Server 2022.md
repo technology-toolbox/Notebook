@@ -1,4 +1,4 @@
-﻿# TT-FS01C - Windows Server 2022 File Server
+# TT-FS01C - Windows Server 2022 File Server
 
 Saturday, October 23, 2021\
 4:38 PM

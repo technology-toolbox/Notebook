@@ -1,6 +1,6 @@
-﻿# TT-SCOM01C - Windows Server 2019
+# TT-SCOM01C - Windows Server 2019
 
-Wednesday, November 27, 2019
+Wednesday, November 27, 2019\
 2:17 PM
 
 ```Text

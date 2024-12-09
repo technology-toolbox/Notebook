@@ -1,4 +1,4 @@
-﻿# FAB-FOOBAR - Windows Server 2012 R2
+# FAB-FOOBAR - Windows Server 2012 R2
 
 Thursday, May 28, 2015\
 5:32 PM

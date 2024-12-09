@@ -1,6 +1,6 @@
-﻿# EXT-FOOBAR6 - Windows Server 2012 R2
+# EXT-FOOBAR6 - Windows Server 2012 R2
 
-Tuesday, May 26, 2015
+Tuesday, May 26, 2015\
 5:15 AM
 
 ```Text

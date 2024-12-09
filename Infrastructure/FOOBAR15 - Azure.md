@@ -1,6 +1,6 @@
-﻿# FOOBAR15 - Azure
+# FOOBAR15 - Azure
 
-Wednesday, February 25, 2015
+Wednesday, February 25, 2015\
 6:16 AM
 
 Standard A4 VM - 8 CPU, 14 GB

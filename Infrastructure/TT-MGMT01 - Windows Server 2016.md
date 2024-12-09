@@ -1,6 +1,6 @@
-﻿# TT-MGMT01 - Windows Server 2016
+# TT-MGMT01 - Windows Server 2016
 
-Saturday, January 21, 2017
+Saturday, January 21, 2017\
 7:37 AM
 
 ```Text

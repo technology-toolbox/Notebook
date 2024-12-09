@@ -1,4 +1,4 @@
-﻿# TT-SQL01D - Windows Server 2019
+# TT-SQL01D - Windows Server 2019
 
 Tuesday, November 26, 2019\
 8:32 AM
@@ -1249,7 +1249,7 @@ GO
 
 ## Issue - Errors in event log due to SCOM custom messages in SQL Server
 
-[SQL scripts to fix 18054 events in SQL application log – SCOM 2016 and 2019](https://gallery.technet.microsoft.com/SQL-to-fix-event-18054-4d6d9ec1)
+[SQL scripts to fix 18054 events in SQL application log � SCOM 2016 and 2019](https://gallery.technet.microsoft.com/SQL-to-fix-event-18054-4d6d9ec1)
 
 ## Replace DPM server (TT-DPM05 --> TT-DPM06)
 

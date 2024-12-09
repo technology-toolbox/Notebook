@@ -1,6 +1,6 @@
-﻿# TT-VMM01D - Windows Server 2019
+# TT-VMM01D - Windows Server 2019
 
-Wednesday, November 27, 2019
+Wednesday, November 27, 2019\
 8:41 AM
 
 ```Text

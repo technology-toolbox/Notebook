@@ -1,6 +1,6 @@
-﻿# EXT-GW01A - Windows Server 2016
+# EXT-GW01A - Windows Server 2016
 
-Friday, January 13, 2017
+Friday, January 13, 2017\
 1:37 PM
 
 ```Text

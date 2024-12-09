@@ -1,6 +1,6 @@
-﻿# Replace Fabrikam VM network
+# Replace Fabrikam VM network
 
-Tuesday, August 14, 2018
+Tuesday, August 14, 2018\
 10:24 AM
 
 ```PowerShell

@@ -1,6 +1,6 @@
-﻿# BANSHEE - Windows Server 2003 R2 x64 Enterprise
+# BANSHEE - Windows Server 2003 R2 x64 Enterprise
 
-Friday, February 14, 2014
+Friday, February 14, 2014\
 9:22 AM
 
 ```Console

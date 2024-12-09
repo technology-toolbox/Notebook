@@ -1,6 +1,6 @@
-﻿# Demo Users
+# Demo Users
 
-Wednesday, September 26, 2018
+Wednesday, September 26, 2018\
 5:11 PM
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/E5/49E863DD20D4C619DD64D0945AE5F45A0E3A1CE5.png)

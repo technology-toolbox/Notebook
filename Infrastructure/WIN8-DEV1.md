@@ -1,6 +1,6 @@
-﻿# WIN8-DEV1
+# WIN8-DEV1
 
-Friday, July 24, 2015
+Friday, July 24, 2015\
 2:29 PM
 
 ```Text

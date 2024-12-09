@@ -1,6 +1,6 @@
-﻿# CON-W10-TEST-03
+# CON-W10-TEST-03
 
-Sunday, November 15, 2020
+Sunday, November 15, 2020\
 5:41 AM
 
 ```Text

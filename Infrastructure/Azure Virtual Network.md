@@ -1,6 +1,6 @@
-﻿# Azure Virtual Network
+# Azure Virtual Network
 
-Thursday, May 11, 2017
+Thursday, May 11, 2017\
 2:40 PM
 
 ## Reference

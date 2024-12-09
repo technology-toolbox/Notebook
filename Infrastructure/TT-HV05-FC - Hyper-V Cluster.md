@@ -1,6 +1,6 @@
-ï»¿# TT-HV05-FC - Hyper-V Cluster
+# TT-HV05-FC - Hyper-V Cluster
 
-Thursday, June 14, 2018
+Thursday, June 14, 2018\
 12:20 PM
 
 ```PowerShell
@@ -288,7 +288,7 @@ Get-ClusterGroup -Cluster TT-HV05-FC |
         Get-VM -ComputerName $_.OwnerNode -Name $_.Name |
             Get-VMHardDiskDrive |
             Get-VHD -ComputerName $_.OwnerNode |
-            select Path, @{N=â€™Sizeâ€™; E={[Math]::Round(($_.Size / 1GB), 2) }}
+            select Path, @{N=’Size’; E={[Math]::Round(($_.Size / 1GB), 2) }}
     } | ft -auto
 ```
 

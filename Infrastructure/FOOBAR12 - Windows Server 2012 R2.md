@@ -1,6 +1,6 @@
-﻿# FOOBAR12 - Windows Server 2012 R2 Standard
+# FOOBAR12 - Windows Server 2012 R2 Standard
 
-Sunday, January 19, 2014
+Sunday, January 19, 2014\
 10:39 AM
 
 ```Console

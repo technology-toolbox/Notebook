@@ -1,4 +1,4 @@
-﻿# pfSense Firewall
+# pfSense Firewall
 
 Tuesday, September 12, 2017\
 4:15 PM

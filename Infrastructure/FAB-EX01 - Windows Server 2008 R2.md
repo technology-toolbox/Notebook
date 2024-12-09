@@ -1,4 +1,4 @@
-﻿# FAB-EX01 - Windows Server 2008 R2
+# FAB-EX01 - Windows Server 2008 R2
 
 Wednesday, May 13, 2015\
 1:55 PM

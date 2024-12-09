@@ -1,6 +1,6 @@
-﻿# EXT-SQL03 - Windows Server 2012 R2 Standard
+# EXT-SQL03 - Windows Server 2012 R2 Standard
 
-Monday, March 26, 2018
+Monday, March 26, 2018\
 1:50 PM
 
 ```Text

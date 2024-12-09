@@ -1,6 +1,6 @@
-﻿# VS2015
+# VS2015
 
-Thursday, November 9, 2017
+Thursday, November 9, 2017\
 8:11 AM
 
 ```PowerShell

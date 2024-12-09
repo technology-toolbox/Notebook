@@ -1,6 +1,6 @@
-﻿# EXT-ADFS03A - Windows Server 2016
+# EXT-ADFS03A - Windows Server 2016
 
-Wednesday, March 28, 2018
+Wednesday, March 28, 2018\
 8:45 AM
 
 ```Text

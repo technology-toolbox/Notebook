@@ -1,6 +1,6 @@
-﻿# WS2012-R2-Std-Core
+# WS2012-R2-Std-Core
 
-Thursday, February 2, 2017
+Thursday, February 2, 2017\
 8:04 AM
 
 ```Text

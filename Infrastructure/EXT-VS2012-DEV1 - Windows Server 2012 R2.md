@@ -1,6 +1,6 @@
-﻿# EXT-VS2012-DEV1 - Windows Server 2012 R2
+# EXT-VS2012-DEV1 - Windows Server 2012 R2
 
-Tuesday, November 12, 2019
+Tuesday, November 12, 2019\
 9:43 AM
 
 ```Text

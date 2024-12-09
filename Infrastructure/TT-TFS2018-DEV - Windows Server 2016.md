@@ -1,6 +1,6 @@
-﻿# TT-TFS2018-DEV - Windows Server 2016
+# TT-TFS2018-DEV - Windows Server 2016
 
-Saturday, February 3, 2018
+Saturday, February 3, 2018\
 8:27 AM
 
 ```Text

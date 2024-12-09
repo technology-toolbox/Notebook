@@ -1,6 +1,6 @@
-﻿# Contoso IPv6 Configuration
+# Contoso IPv6 Configuration
 
-Monday, August 20, 2018
+Monday, August 20, 2018\
 10:12 AM
 
 ## System / Advanced / Networking

@@ -1,6 +1,6 @@
-﻿# TT-WEB01-DEV - Windows Server 2016
+# TT-WEB01-DEV - Windows Server 2016
 
-Friday, June 29, 2018
+Friday, June 29, 2018\
 10:49 AM
 
 ```Text

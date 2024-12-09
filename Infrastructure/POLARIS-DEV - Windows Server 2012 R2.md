@@ -1,6 +1,6 @@
-ï»¿# POLARIS-DEV - Windows Server 2012 R2 Standard
+# POLARIS-DEV - Windows Server 2012 R2 Standard
 
-Wednesday, October 28, 2015
+Wednesday, October 28, 2015\
 4:30 AM
 
 ```Text
@@ -1634,7 +1634,7 @@ GO
 
 ### References
 
-**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object â€˜proc_putObjectTVPâ€™, database â€˜SharePoint_Configâ€™**\
+**Resolution of SharePoint Event ID 5214: EXECUTE permission was denied on the object ‘proc_putObjectTVP’, database ‘SharePoint_Config’**\
 From <[http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html](http://sharepointpaul.blogspot.com/2013/09/resolution-of-sharepoint-event-id-5214.html)>
 
 **EXECUTE permission was denied on the object 'proc_putObjectTVP'**\

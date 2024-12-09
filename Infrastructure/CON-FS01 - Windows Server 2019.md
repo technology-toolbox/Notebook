@@ -1,6 +1,6 @@
-﻿# CON-FS01 - Windows Server 2019 File Server
+# CON-FS01 - Windows Server 2019 File Server
 
-Wednesday, August 28, 2019
+Wednesday, August 28, 2019\
 7:16 AM
 
 ```Text

@@ -1,6 +1,6 @@
-﻿# TT-GW02 - Windows Server 2012 R2
+# TT-GW02 - Windows Server 2012 R2
 
-Sunday, January 15, 2017
+Sunday, January 15, 2017\
 5:49 AM
 
 ```Text

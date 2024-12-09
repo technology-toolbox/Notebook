@@ -1,6 +1,6 @@
-﻿# Azure DevOps
+# Azure DevOps
 
-Wednesday, March 20, 2019
+Wednesday, March 20, 2019\
 1:39 PM
 
 ## Create and configure project
@@ -39,5 +39,5 @@ Wednesday, March 20, 2019
 
 #### Configure team areas
 
-1. Browse to the **Team configuration** settings page (**Project settings → Boards → Team configuration**).
+1. Browse to the **Team configuration** settings page (**Project settings ? Boards ? Team configuration**).
 2. For the top-level area, open the context menu (**...**), and select **Include sub areas**.

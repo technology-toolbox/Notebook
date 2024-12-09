@@ -1,4 +1,4 @@
-﻿# TT-UD20-DEV-01 - Ubuntu 20.04 Desktop
+# TT-UD20-DEV-01 - Ubuntu 20.04 Desktop
 
 Friday, May 15, 2020\
 7:55 AM
@@ -501,7 +501,7 @@ When prompted for additional home directories, type
 **How do I make AppArmor work with a non-standard HOME directory?**\
 From <[https://help.ubuntu.com/community/AppArmor](https://help.ubuntu.com/community/AppArmor)>
 
-**How can I use snap when I don’t use /home/\$USER?**\
+**How can I use snap when I don�t use /home/\$USER?**\
 From <[https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352](https://forum.snapcraft.io/t/how-can-i-use-snap-when-i-dont-use-home-user/3352)>
 
 **Permission denied on launch**\

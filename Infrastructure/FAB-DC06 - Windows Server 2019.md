@@ -1,4 +1,4 @@
-﻿# FAB-DC06 - Windows Server 2019
+# FAB-DC06 - Windows Server 2019
 
 Monday, May 20, 2019\
 11:14 AM

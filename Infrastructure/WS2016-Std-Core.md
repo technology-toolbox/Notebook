@@ -1,6 +1,6 @@
-﻿# WS2016-Std-Core
+# WS2016-Std-Core
 
-Saturday, January 14, 2017
+Saturday, January 14, 2017\
 1:29 PM
 
 ```Text

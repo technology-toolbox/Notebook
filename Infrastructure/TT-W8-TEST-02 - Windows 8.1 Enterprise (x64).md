@@ -1,6 +1,6 @@
-﻿# TT-W8-TEST-02 - Windows 8.1 Enterprise (x64)
+# TT-W8-TEST-02 - Windows 8.1 Enterprise (x64)
 
-Monday, November 23, 2020
+Monday, November 23, 2020\
 2:37 PM
 
 ```Text

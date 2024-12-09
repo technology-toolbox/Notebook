@@ -1,6 +1,6 @@
-﻿# EXT-ADFS01A - Windows Server 2016
+# EXT-ADFS01A - Windows Server 2016
 
-Tuesday, January 24, 2017
+Tuesday, January 24, 2017\
 5:48 AM
 
 ```Text

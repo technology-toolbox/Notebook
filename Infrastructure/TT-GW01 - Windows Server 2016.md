@@ -1,6 +1,6 @@
-﻿# TT-GW01 - Windows Server 2016
+# TT-GW01 - Windows Server 2016
 
-Wednesday, February 1, 2017
+Wednesday, February 1, 2017\
 5:36 PM
 
 ```Text

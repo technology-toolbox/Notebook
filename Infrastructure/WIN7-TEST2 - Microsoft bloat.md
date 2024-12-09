@@ -1,6 +1,6 @@
-﻿# WIN7-TEST2 - Microsoft bloat
+# WIN7-TEST2 - Microsoft bloat
 
-Friday, March 13, 2015
+Friday, March 13, 2015\
 11:54 AM
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/CB/0A2B575CE386AC59250FE84E5FB5491DF6DB93CB.png)

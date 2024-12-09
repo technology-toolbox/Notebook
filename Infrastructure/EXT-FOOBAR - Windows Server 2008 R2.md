@@ -1,6 +1,6 @@
-﻿# EXT-FOOBAR - Windows Server 2008 R2 Standard
+# EXT-FOOBAR - Windows Server 2008 R2 Standard
 
-Tuesday, December 15, 2015
+Tuesday, December 15, 2015\
 4:16 PM
 
 ```Text

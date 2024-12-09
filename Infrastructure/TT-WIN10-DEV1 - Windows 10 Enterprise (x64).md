@@ -1,6 +1,6 @@
-﻿# TT-WIN10-DEV1 - Windows 10 Enterprise (x64)
+# TT-WIN10-DEV1 - Windows 10 Enterprise (x64)
 
-Thursday, November 2, 2017
+Thursday, November 2, 2017\
 7:24 AM
 
 ```Text

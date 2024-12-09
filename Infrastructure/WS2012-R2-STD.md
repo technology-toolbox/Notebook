@@ -1,6 +1,6 @@
-﻿# WS2012-R2-Std
+# WS2012-R2-Std
 
-Thursday, February 2, 2017
+Thursday, February 2, 2017\
 1:09 PM
 
 ```Text

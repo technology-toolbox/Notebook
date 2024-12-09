@@ -1,6 +1,6 @@
-﻿# EXT-SP2013-DEV - Windows Server 2012 Standard
+# EXT-SP2013-DEV - Windows Server 2012 Standard
 
-Tuesday, February 23, 2016
+Tuesday, February 23, 2016\
 5:55 AM
 
 ```Text

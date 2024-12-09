@@ -1,4 +1,4 @@
-﻿# MIMIC - Windows Server 2012 R2 Standard
+# MIMIC - Windows Server 2012 R2 Standard
 
 Wednesday, March 25, 2015\
 8:05 AM

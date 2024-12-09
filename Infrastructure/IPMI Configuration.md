@@ -1,6 +1,6 @@
-﻿# IPMI Configuration
+# IPMI Configuration
 
-Thursday, April 5, 2018
+Thursday, April 5, 2018\
 5:41 PM
 
 | Server   | Motherboard S/N | BMC MAC Address   | Switch Port | IP Address | URL                                                    |

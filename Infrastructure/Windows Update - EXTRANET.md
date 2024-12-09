@@ -1,4 +1,4 @@
-﻿# Windows Update - EXTRANET
+# Windows Update - EXTRANET
 
 Saturday, January 11, 2014\
 7:56 AM

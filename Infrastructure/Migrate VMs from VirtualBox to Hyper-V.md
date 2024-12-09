@@ -1,6 +1,6 @@
-﻿# Migrate VMs from VirtualBox to Hyper-V
+# Migrate VMs from VirtualBox to Hyper-V
 
-Friday, July 31, 2015
+Friday, July 31, 2015\
 3:12 PM
 
 ## # Create virtual machine (WIN7-TEST1)

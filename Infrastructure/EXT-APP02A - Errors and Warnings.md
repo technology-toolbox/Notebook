@@ -1,6 +1,6 @@
-﻿# Errors and Warnings
+# Errors and Warnings
 
-Monday, June 20, 2016
+Monday, June 20, 2016\
 8:42 AM
 
 <table>

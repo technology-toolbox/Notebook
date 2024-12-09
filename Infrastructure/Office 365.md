@@ -1,6 +1,6 @@
-﻿# Office 365
+# Office 365
 
-Thursday, December 6, 2018
+Thursday, December 6, 2018\
 4:16 AM
 
 ## Settings

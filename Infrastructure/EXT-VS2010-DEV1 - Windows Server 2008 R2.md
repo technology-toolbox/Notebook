@@ -1,6 +1,6 @@
-﻿# EXT-VS2010-DEV1 - Windows Server 2008 R2
+# EXT-VS2010-DEV1 - Windows Server 2008 R2
 
-Friday, May 31, 2019
+Friday, May 31, 2019\
 8:54 AM
 
 ```Text

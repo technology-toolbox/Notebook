@@ -1,6 +1,6 @@
-ï»¿# TT-HV03 - Windows Server 2016
+# TT-HV03 - Windows Server 2016
 
-Monday, January 30, 2017
+Monday, January 30, 2017\
 4:39 PM
 
 ```Text
@@ -1402,7 +1402,7 @@ Screen clipping taken: 2/16/2018 3:22 PM
 ### Update AHCI drivers
 
 1. Download the latest AHCI drivers from the Intel website:\
-   **IntelÂ® Rapid Storage Technology (IntelÂ® RST) User Interface and Driver**\
+   **Intel® Rapid Storage Technology (Intel® RST) User Interface and Driver**\
    From <[https://downloadcenter.intel.com/download/23496/Intel-Rapid-Storage-Technology-Intel-RST-User-Interface-and-Driver](https://downloadcenter.intel.com/download/23496/Intel-Rapid-Storage-Technology-Intel-RST-User-Interface-and-Driver)>
 2. Extract the drivers (**[\\\\TT-FS01\\Public\\Download\\Drivers\\Intel\\RST](\\TT-FS01\Public\Download\Drivers\Intel\RST) Driver for ASUS P8Z77-V**) and copy the files to a temporary location on the server:
 3. Install the drivers for the **Intel(R) 7 Series/C216 Chipset Family SATA AHCI Controller (PCI\\VEN_8086&DEV_1E02&...)**:

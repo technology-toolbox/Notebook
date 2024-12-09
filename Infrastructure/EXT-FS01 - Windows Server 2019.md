@@ -1,6 +1,6 @@
-﻿# EXT-FS01 - Windows Server 2019 File Server
+# EXT-FS01 - Windows Server 2019 File Server
 
-Monday, June 3, 2019
+Monday, June 3, 2019\
 8:04 AM
 
 ```Text

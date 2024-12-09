@@ -1,4 +1,4 @@
-﻿# Windows Update - TECHTOOLBOX
+# Windows Update - TECHTOOLBOX
 
 Saturday, January 11, 2014\
 7:56 AM

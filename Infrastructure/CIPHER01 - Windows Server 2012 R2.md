@@ -1,4 +1,4 @@
-﻿# CIPHER01 - Windows Server 2012 R2 Standard
+# CIPHER01 - Windows Server 2012 R2 Standard
 
 Sunday, February 23, 2014\
 5:52 PM

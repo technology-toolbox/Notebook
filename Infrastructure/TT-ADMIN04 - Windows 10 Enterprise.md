@@ -1,4 +1,4 @@
-﻿# TT-ADMIN04 - Windows 10 Enterprise
+# TT-ADMIN04 - Windows 10 Enterprise
 
 Monday, August 31, 2020\
 4:51 PM
