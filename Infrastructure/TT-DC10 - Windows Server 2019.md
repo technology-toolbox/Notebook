@@ -1,7 +1,7 @@
 # TT-DC10 - Windows Server 2019
 
-Saturday, May 18, 2019\
-6:14 AM
+Monday, December 23, 2024\
+4:55 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Saturday, May 18, 2019\
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -20,7 +20,7 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05A"
+$vmHost = "TT-HV05D"
 $vmName = "TT-DC10"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
@@ -61,22 +61,28 @@ Set-VMFirmware `
 Set-VMDvdDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
-    -Path "\\TT-FS01\Products\Microsoft\Windows Server 2019\en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso"
+    -Path "\\TT-FS01\Products\Microsoft\Windows Server 2019\en-us_windows_server_2019_updated_aug_2021_x64_dvd_a6431a28.iso"
+```
 
+error:
+
+```text
 Set-VMDvdDrive : Failed to add device 'Virtual CD/DVD Disk'.
 User Account does not have permission to open attachment.
-'TT-DC10' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID EC05A148-C379-45A8-B3A4-67B62105F7A0)
-'TT-DC10': User account does not have permission required to open attachment '\\TT-FS01\Products\Microsoft\Windows Server
-2019\en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso'. Error: 'General access denied error' (0x80070005). (Virtual
-machine ID EC05A148-C379-45A8-B3A4-67B62105F7A0)
+'TT-DC10' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID 4AC795B3-FBF6-431E-A2F2-7348F6507616)
+'TT-DC10': User account does not have permission required to open attachment '\\TT-FS01\Products\Microsoft\Windows
+Server 2019\en-us_windows_server_2019_updated_aug_2021_x64_dvd_a6431a28.iso'. Error: 'General access denied error'
+(0x80070005). (Virtual machine ID 4AC795B3-FBF6-431E-A2F2-7348F6507616)
 At line:1 char:1
 + Set-VMDvdDrive `
 + ~~~~~~~~~~~~~~~~
     + CategoryInfo          : PermissionDenied: (:) [Set-VMDvdDrive], VirtualizationException
     + FullyQualifiedErrorId : AccessDenied,Microsoft.HyperV.PowerShell.Commands.SetVMDvdDrive
+```
 
+```PowerShell
 $iso = Get-SCISO |
-    where {$_.Name -eq "en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso"}
+    where {$_.Name -eq "en-us_windows_server_2019_updated_aug_2021_x64_dvd_a6431a28.iso"}
 
 Get-SCVirtualMachine -Name $vmName | Read-SCVirtualMachine
 
@@ -184,7 +190,7 @@ mountvol X: $volumeId
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -193,7 +199,7 @@ cls
 ##### # Add disk for Active Directory data
 
 ```PowerShell
-$vmHost = "TT-HV05A"
+$vmHost = "TT-HV05D"
 $vmName = "TT-DC10"
 
 $vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
@@ -229,7 +235,7 @@ Get-Disk 1 |
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -358,7 +364,7 @@ Set-DNSClientServerAddress `
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -431,7 +437,7 @@ Restart-Computer
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -440,7 +446,7 @@ cls
 ### # Disable Hyper-V time synchronization service
 
 ```PowerShell
-$vmHost = "TT-HV05A"
+$vmHost = "TT-HV05D"
 $vmName = "TT-DC10"
 
 Disable-VMIntegrationService `
@@ -541,10 +547,10 @@ cls
 ### # Install DPM agent
 
 ```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
     + "\DPM\Agents\DPMAgentInstaller_x64.exe"
 
-$installerArguments = "TT-DPM02.corp.technologytoolbox.com"
+$installerArguments = "TT-DPM06.corp.technologytoolbox.com"
 
 Start-Process `
     -FilePath $installerPath `
@@ -568,7 +574,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**FOOBAR18** - DPM Management Shell
+**TT-ADMIN05** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -580,7 +586,7 @@ cls
 $productionServer = 'TT-DC10'
 
 .\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM02 `
+    -DPMServerName TT-DPM06 `
     -PSName $productionServer `
     -Domain TECHTOOLBOX `
     -UserName jjameson-admin
