@@ -3426,7 +3426,7 @@ Edit the task sequence to include the actions required to update the reference i
          8. After the **Install Applications** action, add a new **Run Command Line** action with the following settings:
             1. Name: **Suspend**
             2. Command line: **cscript.exe "%SCRIPTROOT%\\LTISuspend.wsf"**
-            3. Disable this step:** Yes (checked)**
+            3. Disable this step: **Yes (checked)**
    3. Click **OK**.
 
 > **Note**
@@ -6457,6 +6457,109 @@ Push-Location Z:\NotBackedUp\MDT-Build
 git add Control/*
 
 git commit -m "Upgrade to latest version of Windows Server 2022 (June 2022)"
+
+git push
+
+Pop-Location
+```
+
+---
+
+```PowerShell
+cls
+```
+
+## # Upgrade to latest version of Windows Server 2016 (Dec 2024)
+
+```PowerShell
+Add-PSSnapin Microsoft.BDD.PSSnapIn
+
+New-PSDrive -Name "DS001" -PSProvider MDTProvider -Root \\TT-FS01\MDT-Build$
+```
+
+### # Import operating system - "Windows Server 2016"
+
+#### # Mount the installation image
+
+```PowerShell
+$imagePath = "\\TT-FS01\Products\Microsoft\Windows Server 2016" `
+    + "\en_windows_server_2016_updated_dec_2024_x64_dvd_techtoolbox.iso"
+
+$imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
+    Get-Volume).DriveLetter
+
+$sourcePath = $imageDriveLetter + ":\"
+```
+
+#### # Import operating system
+
+```PowerShell
+$destinationFolder = "WS2016-Dec-2024"
+
+Import-MDTOperatingSystem `
+    -Path "DS001:\Operating Systems\Windows Server 2016" `
+    -SourcePath $sourcePath `
+    -DestinationFolder $destinationFolder
+```
+
+```PowerShell
+cls
+```
+
+#### # Dismount the installation image
+
+```PowerShell
+Dismount-DiskImage -ImagePath $imagePath
+```
+
+### Modify task sequence to use new version of Windows Server 2016
+
+1. Expand the **Install** group and select the **Install Operating System** task.
+2. In the **Operating system to install** section, click **Browse** and select the following item:
+
+   **Windows Server 2016 SERVERSTANDARD in WS2016-Dec-2024 install.wim**
+
+### Delete old versions of Windows Server 2016
+
+---
+
+**TT-W11-DEV-01** - Run as TECHTOOLBOX\jjameson-admin
+
+```PowerShell
+cls
+```
+
+### # Update files in GitHub
+
+#### # Sync files
+
+```PowerShell
+robocopy `
+    \\TT-FS01\MDT-Build$ `
+    C:\BackedUp\GitHub\technology-toolbox\MDT-Build `
+    /E /MIR `
+    /XD .git Applications Backup Boot Captures Logs "Operating Systems" `
+        "Out-of-Box Drivers" Packages Servicing Templates
+```
+
+---
+
+**TT-W11-DEV-01** - Run as TECHTOOLBOX\jjameson
+
+#### Format XML files using Visual Studio Code
+
+```PowerShell
+cls
+```
+
+#### # Check-in files
+
+```PowerShell
+Push-Location C:\BackedUp\GitHub\technology-toolbox\MDT-Build
+
+git add Control/*
+
+git commit -m "Upgrade to latest version of Windows Server 2016 (December 2024)"
 
 git push
 
