@@ -39,11 +39,16 @@ $tempFileName = $tempFileName.Replace(".tmp", ".ps1")
 
 Set-Content -Path $tempFileName -Value ($script -replace "`n", "`r`n")
 
+$computersToExclude = @(
+    'EXT-SQL01',       # SQL Server failover cluster
+    'EXT-SQL01-FC'     # SQL Server failover cluster
+    'EXT-SEQ02',       # Ubuntu server
+    'EXT-UD20-DEV-01'  # Ubuntu server
+    )
+
 $computers = Get-ADComputer -Filter * |
-    where { $_.Name -notin
-        @('EXT-SP2013-DEV',
-        'EXT-SQL01',
-        'EXT-SQL01-FC') } |
+    where { $_.Name -notin $computersToExclude } |
+    sort Name |
     select -ExpandProperty Name
 
 $computers |
