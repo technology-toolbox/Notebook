@@ -1,4 +1,4 @@
-# NAS02
+﻿# NAS02
 
 Friday, March 30, 2018\
 10:38 AM
@@ -15,7 +15,7 @@ Friday, March 30, 2018\
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -31,10 +31,13 @@ $activity = 'Upgrade NAS'
 
 ```PowerShell
 $coreVirtualMachines = @(
-    'EXT-DC08',
-    'FAB-DC01',
-    'FAB-DC03',
-    'FOOBAR18')
+    'CON-DC05',
+    'CON-DC06',
+    'EXT-DC10',
+    'EXT-DC11',
+    'FAB-DC05',
+    'FAB-DC06',
+    'TT-ADMIN05')
 
 Get-SCVirtualMachine |
     where { $_.Location -like 'C:\ClusterStorage\*' } |
