@@ -1,7 +1,7 @@
-# TT-SQL03 - Windows Server 2019 Standard Edition
+# TT-SQL03 - Windows Server 2019 / SQL Server 2019
 
-Monday, September 23, 2019\
-7:37 AM
+Monday, January 6, 2025\
+8:21 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -13,7 +13,7 @@ Monday, September 23, 2019\
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -22,7 +22,7 @@ cls
 #### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05A"
+$vmHost = "TT-HV05D"
 $vmName = "TT-SQL03"
 $vmPath = "E:\NotBackedUp\VMs\$vmName"
 $vhdPath = "$vmPath\Virtual Hard Disks\$vmName.vhdx"
@@ -63,7 +63,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -84,7 +84,7 @@ Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 #### # Set first boot device to hard drive
 
 ```PowerShell
-$vmHost = "TT-HV05A"
+$vmHost = "TT-HV05D"
 
 $vmHardDiskDrive = Get-VMHardDiskDrive `
     -ComputerName $vmHost `
@@ -165,7 +165,7 @@ logman start "Server Manager Performance Monitor"
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -250,7 +250,7 @@ ping TT-FS01 -f -l 8900
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -259,7 +259,7 @@ cls
 #### # Configure storage for the SQL Server
 
 ```PowerShell
-$vmHost = "TT-HV05A"
+$vmHost = "TT-HV05D"
 $vmName = "TT-SQL03"
 $vmPath = "E:\NotBackedUp\VMs\$vmName"
 ```
@@ -407,9 +407,9 @@ $imagePath = ("\\TT-FS01\Products\Microsoft\SQL Server 2017" `
 
 $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
     Get-Volume).DriveLetter
-```
 
-& ("\$imageDriveLetter" + ":\\setup.exe")
+& ($imageDriveLetter + ":\\setup.exe")
+```
 
 On the **Feature Selection** step, select the following checkbox:
 
@@ -541,7 +541,7 @@ From <[https://ola.hallengren.com/](https://ola.hallengren.com/)>
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -624,49 +624,16 @@ Restart-Service MSSQLSERVER
 Start-Service SQLSERVERAGENT
 ```
 
-## Baseline virtual machine
-
----
-
-**TT-ADMIN02** - Run as administrator
-
-```PowerShell
-cls
-```
-
-### # Checkpoint VM
-
-```PowerShell
-$vmHost = "TT-HV05A"
-$vmName = "TT-SQL03"
-$checkpointName = "Baseline"
-
-Stop-VM -ComputerName $vmHost -Name $vmName
-
-Checkpoint-VM `
-    -ComputerName $vmHost `
-    -Name $vmName `
-    -SnapshotName $checkpointName
-```
-
----
-
-## Back up virtual machine
-
-```PowerShell
-cls
-```
-
 ## # Configure monitoring
 
 ### # Install Operations Manager agent
 
 ```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016\SCOM\Agent\AMD64" `
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019\SCOM\Agent\AMD64" `
     + "\MOMAgent.msi"
 
 $installerArguments = "MANAGEMENT_GROUP=HQ" `
-    + " MANAGEMENT_SERVER_DNS=TT-SCOM03" `
+    + " MANAGEMENT_SERVER_DNS=TT-SCOM01C" `
     + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
 
 Start-Process `
@@ -722,29 +689,16 @@ cls
 ### # Install DPM agent
 
 ```PowerShell
-$installer = "\\TT-FS01\Products\Microsoft\System Center 2016" `
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
     + "\DPM\Agents\DPMAgentInstaller_x64.exe"
 
-& $installer TT-DPM02.corp.technologytoolbox.com
+$installerArguments = "TT-DPM06.corp.technologytoolbox.com"
+
+Start-Process `
+    -FilePath $installerPath `
+    -ArgumentList "$installerArguments" `
+    -Wait
 ```
-
-### Attach DPM agent
-
----
-
-**TT-ADMIN02** - DPM Management Shell
-
-```PowerShell
-$productionServer = 'TT-SQL03'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM02 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
 
 ### Add "Local System" account to SQL Server sysadmin role
 
@@ -764,376 +718,41 @@ GO
 **Protection agent jobs may fail for SQL Server 2012 databases**\
 Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://technet.microsoft.com/en-us/library/dn281948.aspx)>
 
-### Configure backups
+### # Configure antivirus on DPM protected server
 
-#### Add server to SQL Server protection group in DPM
-
----
-
-**TT-ADMIN02** - Run as administrator
+#### # Disable real-time monitoring by Windows Defender for DPM server
 
 ```PowerShell
-cls
+[array] $excludeProcesses = Get-MpPreference | select -ExpandProperty ExclusionProcess
+
+$excludeProcesses +=
+   "$env:ProgramFiles\Microsoft Data Protection Manager\DPM\bin\DPMRA.exe"
+
+Set-MpPreference -ExclusionProcess $excludeProcesses
 ```
 
-## # Delete VM checkpoint - "Baseline"
+#### # Configure antivirus software to delete infected files
 
 ```PowerShell
-$vmHost = 'TT-HV05A'
-$vmName = 'TT-SQL03'
-
-Remove-VMSnapshot `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Name 'Baseline'
-
-# Wait a few seconds for merge to start...
-Start-Sleep -Seconds 5
-
-while (Get-VM -ComputerName $vmHost -VMName $vmName |
-    Where Status -eq "Merging disks") {
-    Write-Host "." -NoNewline
-    Start-Sleep -Seconds 5
-}
-
-Write-Host
-Write-Host "VM checkpoint deleted"
+Set-MpPreference -LowThreatDefaultAction Remove
+Set-MpPreference -ModerateThreatDefaultAction Remove
+Set-MpPreference -HighThreatDefaultAction Remove
+Set-MpPreference -SevereThreatDefaultAction Remove
 ```
-
----
-
-## Copy databases from SQL Server 2014 environment
-
----
-
-**SQL Server Management Studio** - Database Engine - **HAVOK**
-
-### -- Backup databases in SQL Server 2014 environment
-
-```SQL
-DECLARE @backupPath NVARCHAR(255) = N'\\TT-FS01\Backups\HAVOK'
-
-DECLARE @backupFilePath NVARCHAR(255)
-```
-
-#### -- Backup database - AdventureWorks2012
-
-```Console
-SET @backupFilePath = @backupPath + N'\AdventureWorks2012.bak'
-
-BACKUP DATABASE [AdventureWorks2012]
-TO DISK = @backupFilePath
-WITH NOFORMAT, NOINIT
-    , NAME = N'AdventureWorks2012-Full Database Backup'
-    , SKIP, NOREWIND, NOUNLOAD, STATS = 10, COPY_ONLY
-```
-
-#### -- Backup database - AdventureWorksLT2012
-
-```Console
-SET @backupFilePath = @backupPath + N'\AdventureWorksLT2012.bak'
-
-BACKUP DATABASE [AdventureWorksLT2012]
-TO DISK = @backupFilePath
-WITH NOFORMAT, NOINIT
-    , NAME = N'AdventureWorksLT2012-Full Database Backup'
-    , SKIP, NOREWIND, NOUNLOAD, STATS = 10, COPY_ONLY
-```
-
-#### -- Backup database - Caelum
-
-```Console
-SET @backupFilePath = @backupPath + N'\Caelum.bak'
-
-BACKUP DATABASE [Caelum]
-TO DISK = @backupFilePath
-WITH NOFORMAT, NOINIT
-    , NAME = N'Caelum-Full Database Backup'
-    , SKIP, NOREWIND, NOUNLOAD, STATS = 10, COPY_ONLY
-```
-
-#### -- Backup database - Caelum_Warehouse
-
-```Console
-SET @backupFilePath = @backupPath + N'\Caelum_Warehouse.bak'
-
-BACKUP DATABASE [Caelum_Warehouse]
-TO DISK = @backupFilePath
-WITH NOFORMAT, NOINIT
-    , NAME = N'Caelum_Warehouse-Full Database Backup'
-    , SKIP, NOREWIND, NOUNLOAD, STATS = 10, COPY_ONLY
-```
-
-#### -- Backup database - LoadTest2010
-
-```Console
-SET @backupFilePath = @backupPath + N'\LoadTest2010.bak'
-
-BACKUP DATABASE [LoadTest2010]
-TO DISK = @backupFilePath
-WITH NOFORMAT, NOINIT
-    , NAME = N'LoadTest2010-Full Database Backup'
-    , SKIP, NOREWIND, NOUNLOAD, STATS = 10, COPY_ONLY
-```
-
-#### -- Backup database - Tfs_IntegrationPlatform
-
-```Console
-SET @backupFilePath = @backupPath + N'\Tfs_IntegrationPlatform.bak'
-
-BACKUP DATABASE [Tfs_IntegrationPlatform]
-TO DISK = @backupFilePath
-WITH NOFORMAT, NOINIT
-    , NAME = N'Tfs_IntegrationPlatform-Full Database Backup'
-    , SKIP, NOREWIND, NOUNLOAD, STATS = 10, COPY_ONLY
-```
-
----
-
----
-
-**TT-SQL03** - Run as administrator
-
-```PowerShell
-cls
-```
-
-### # Copy backup files to SQL Server 2017 environment
-
-```PowerShell
-robocopy `
-    '\\TT-FS01\Backups\HAVOK' `
-    'Z:\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\Backup\Full'
-```
-
----
-
----
-
-**SQL Server Management Studio** - Database Engine - **TT-SQL03**
-
-### -- Restore databases in SQL Server 2017 environment
-
-```Console
-DECLARE @backupPath AS NVARCHAR(255)
-SET @backupPath =
-    N'Z:\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\Backup\Full'
-
-DECLARE @dataPath AS NVARCHAR(255)
-SET @dataPath = N'D:\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\Data'
-
-DECLARE @logPath AS NVARCHAR(255)
-SET @logPath = N'L:\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\Data'
-
-DECLARE @backupFile AS NVARCHAR(255)
-DECLARE @dataFile AS NVARCHAR(255)
-DECLARE @logFile AS NVARCHAR(255)
-```
-
-#### -- Restore database - AdventureWorks2012
-
-```Console
-SET @backupFile = @backupPath + N'\AdventureWorks2012.bak'
-SET @dataFile = @dataPath + N'\AdventureWorks2012.mdf'
-SET @logFile = @logPath + N'\AdventureWorks2012.ldf'
-
-RESTORE DATABASE AdventureWorks2012
-FROM DISK = @backupFile
-WITH
-  FILE = 1
-  , MOVE N'AdventureWorks2012_Data' TO @dataFile
-  , MOVE N'AdventureWorks2012_Log' TO @logFile
-  , NOUNLOAD, STATS = 5
-```
-
-#### -- Restore database - AdventureWorksLT2012
-
-```Console
-SET @backupFile = @backupPath + N'\AdventureWorksLT2012.bak'
-SET @dataFile = @dataPath + N'\AdventureWorksLT2012.mdf'
-SET @logFile = @logPath + N'\AdventureWorksLT2012.ldf'
-
-RESTORE DATABASE AdventureWorksLT2012
-FROM DISK = @backupFile
-WITH
-  FILE = 1
-  , MOVE N'AdventureWorksLT2008_Data' TO @dataFile
-  , MOVE N'AdventureWorksLT2008_Log' TO @logFile
-  , NOUNLOAD, STATS = 5
-```
-
-#### -- Restore database - Caelum
-
-```Console
-SET @backupFile = @backupPath + N'\Caelum.bak'
-SET @dataFile = @dataPath + N'\Caelum.mdf'
-SET @logFile = @logPath + N'\Caelum.ldf'
-
-RESTORE DATABASE Caelum
-FROM DISK = @backupFile
-WITH
-  FILE = 1
-  , MOVE N'Caelum_Data' TO @dataFile
-  , MOVE N'Caelum_Log' TO @logFile
-  , NOUNLOAD, STATS = 5
-```
-
-#### -- Restore database - Caelum_Warehouse
-
-```Console
-SET @backupFile = @backupPath + N'\Caelum_Warehouse.bak'
-SET @dataFile = @dataPath + N'\Caelum_Warehouse.mdf'
-SET @logFile = @logPath + N'\Caelum_Warehouse.ldf'
-
-RESTORE DATABASE Caelum_Warehouse
-FROM DISK = @backupFile
-WITH
-  FILE = 1
-  , MOVE N'Caelum_Warehouse' TO @dataFile
-  , MOVE N'Caelum_Warehouse_log' TO @logFile
-  , NOUNLOAD, STATS = 5
-```
-
-#### -- Restore database - LoadTest2010
-
-```Console
-SET @backupFile = @backupPath + N'\LoadTest2010.bak'
-SET @dataFile = @dataPath + N'\LoadTest2010.mdf'
-SET @logFile = @logPath + N'\LoadTest2010.ldf'
-
-RESTORE DATABASE LoadTest2010
-FROM DISK = @backupFile
-WITH
-  FILE = 1
-  , MOVE N'LoadTest2010' TO @dataFile
-  , MOVE N'LoadTest2010_log' TO @logFile
-  , NOUNLOAD, STATS = 5
-```
-
-#### -- Restore database - Tfs_IntegrationPlatform
-
-```Console
-SET @backupFile = @backupPath + N'\Tfs_IntegrationPlatform.bak'
-SET @dataFile = @dataPath + N'\Tfs_IntegrationPlatform.mdf'
-SET @logFile = @logPath + N'\Tfs_IntegrationPlatform.ldf'
-
-RESTORE DATABASE Tfs_IntegrationPlatform
-FROM DISK = @backupFile
-WITH
-  FILE = 1
-  , MOVE N'Tfs_IntegrationPlatform' TO @dataFile
-  , MOVE N'Tfs_IntegrationPlatform_log' TO @logFile
-  , NOUNLOAD, STATS = 5
-```
-
----
-
-## Upgrade to Data Protection Manager 2019
-
-```PowerShell
-cls
-```
-
-### # Remove DPM 2016 agent
-
-```PowerShell
-msiexec /x `{14DD5B44-17CE-4E89-8BEB-2E6536B81B35`}
-```
-
-> **Important**
->
-> Restart the computer to complete the removal of the DPM agent.
-
-```PowerShell
-Restart-Computer
-```
-
-### # Install DPM 2019 agent
-
-```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
-    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
-
-$installerArguments = "TT-DPM05.corp.technologytoolbox.com"
-
-Start-Process `
-    -FilePath $installerPath `
-    -ArgumentList "$installerArguments" `
-    -Wait
-```
-
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
-
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
-
-- Exception for DPMRA.exe in all profiles
-- Exception for Windows Management Instrumentation service
-- Exception for RemoteAdmin service
-- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
 
 #### Reference
 
-**Installing Protection Agents Manually**\
-Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
+**Run antivirus software on the DPM server**\
+From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
 
----
-
-**TT-ADMIN02** - DPM Management Shell
-
-```PowerShell
-cls
-```
-
-### # Attach DPM agent
-
-```PowerShell
-$productionServer = 'TT-SQL03'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM05 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
-
-### Add virtual machine to DPM protection group
-
-## Upgrade to Operations Manager 2019
-
-```PowerShell
-cls
-```
-
-### # Remove SCOM 2016 agent
-
-```PowerShell
-msiexec /x `{742D699D-56EB-49CC-A04A-317DE01F31CD`}
-```
-
-```PowerShell
-cls
-```
-
-### # Install SCOM agent
-
-```PowerShell
-$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2019\SCOM\agent\AMD64" `
-    + "\MOMAgent.msi"
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=TT-SCOM01C `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-### Approve manual agent install in Operations Manager
+## Restore databases from DPM backups
 
 ## Move DPM folder for SQL Server backups to different volume
 
 ```PowerShell
 Push-Location "L:\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\Data"
+
+robocopy /COPYALL /E /MOVE DPM_SQL_PROTECT Z:\DPM_SQL_PROTECT
 
 New-Item -ItemType SymbolicLink -Name DPM_SQL_PROTECT -Target Z:\DPM_SQL_PROTECT
 
@@ -1144,7 +763,7 @@ Pop-Location
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -1182,153 +801,6 @@ Start-SCVirtualMachine -VM $vmName
 
 **TODO:**
 
-```PowerShell
-cls
-```
-
-## Replace DPM server (TT-DPM05 --> TT-DPM06)
-
-```PowerShell
-cls
-```
-
-### # Update DPM server
-
-```PowerShell
-cd 'C:\Program Files\Microsoft Data Protection Manager\DPM\bin\'
-
-.\SetDpmServer.exe -dpmServerName TT-DPM06.corp.technologytoolbox.com
-```
-
----
-
-**TT-ADMIN04** - DPM Management Shell
-
-```PowerShell
-cls
-```
-
-### # Attach DPM agent
-
-```PowerShell
-$productionServer = 'TT-SQL03'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM06 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
-
-That doesn't work...
-
-> Error:\
-> Data Protection Manager Error ID: 307\
-> The protection agent operation failed because DPM detected an unknown DPM protection agent on tt-sql03.corp.technologytoolbox.com.
->
-> Recommended action:\
-> Use Add or Remove Programs in Control Panel to uninstall the protection agent from tt-sql03.corp.technologytoolbox.com, then reinstall the protection agent and perform the operation again.
-
-```PowerShell
-cls
-```
-
-### # Remove DPM 2019 Agent Coordinator
-
-```PowerShell
-msiexec /x `{356B3986-6B7D-4513-B72D-81EB4F43ADE6`}
-```
-
-```PowerShell
-cls
-```
-
-### # Remove DPM 2019 Protection Agent
-
-```PowerShell
-msiexec /x `{CC6B6758-3A68-4BBA-9D61-1F3278D6A7EA`}
-```
-
-> **Important**
->
-> Restart the computer to complete the removal of the DPM agent.
-
-```PowerShell
-Restart-Computer
-```
-
-### # Install DPM 2019 agent
-
-```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
-    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
-
-$installerArguments = "TT-DPM06.corp.technologytoolbox.com"
-
-Start-Process `
-    -FilePath $installerPath `
-    -ArgumentList "$installerArguments" `
-    -Wait
-```
-
----
-
-**TT-ADMIN04** - DPM Management Shell
-
-```PowerShell
-cls
-```
-
-### # Attach DPM agent
-
-```PowerShell
-$productionServer = 'TT-SQL03'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM06 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
-
-### Add databases to protection group in DPM
-
-```PowerShell
-cls
-```
-
-### # Configure antivirus on DPM protected server
-
-#### # Disable real-time monitoring by Windows Defender for DPM server
-
-```PowerShell
-[array] $excludeProcesses = Get-MpPreference | select -ExpandProperty ExclusionProcess
-
-$excludeProcesses +=
-   "$env:ProgramFiles\Microsoft Data Protection Manager\DPM\bin\DPMRA.exe"
-
-Set-MpPreference -ExclusionProcess $excludeProcesses
-```
-
-#### # Configure antivirus software to delete infected files
-
-```PowerShell
-Set-MpPreference -LowThreatDefaultAction Remove
-Set-MpPreference -ModerateThreatDefaultAction Remove
-Set-MpPreference -HighThreatDefaultAction Remove
-Set-MpPreference -SevereThreatDefaultAction Remove
-```
-
-#### Reference
-
-**Run antivirus software on the DPM server**\
-From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
-
-**TODO:**
 
 ```PowerShell
 cls
