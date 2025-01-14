@@ -573,7 +573,7 @@ Start the **Certification Authority** console (certsrv.msc).
 
 Expand the CA, right-click **Certificate Templates**, select **New**, then **Certificate Template to Issue**.
 
-In the **Enable Certificate Templates** window, select** Technology Toolbox Web Server**, and then click **OK**.
+In the **Enable Certificate Templates** window, select **Technology Toolbox Web Server**, and then click **OK**.
 
 ### Enroll for the Certificate
 
@@ -615,7 +615,7 @@ On the **Request Certificates** step, select the checkbox for **Technology Toolb
 In the **Certificate Properties** window:
 
 1. On the **Subject** tab:
-   1. In the **Alternative Name **section:
+   1. In the **Alternative Name** section:
       1. In the **Type** list, select **DNS**.
       2. In the **Value** box, type the short name for the issuing CA server.
       3. Click **Add >**.
@@ -711,7 +711,7 @@ Membership in **Domain Admins** or **Enterprise Admins** is required to complete
 
 1. In Server Manager, click **Tools**, and then click **Group Policy Management**.
 2. In the console tree, expand the following objects: **Forest: corp.technologytoolbox.com**, **Domains**, **corp.technologytoolbox.com**.
-3. Right-click the** Default Domain Policy** GPO, and then click **Edit**...
+3. Right-click the **Default Domain Policy** GPO, and then click **Edit**...
 4. In the console tree of the **Group Policy Management Editor** window, under **User Configuration**, expand the following objects: **Policies**, **Windows Settings**, **Security Settings**, and then click **Public Key Policies**.
 5. In the details pane, double-click **Certificate Services Client - Auto-Enrollment**.
 6. In the **Certificate Services Client - Auto-Enrollment Properties** window:
@@ -737,13 +737,13 @@ Membership in **Domain Admins** or **Enterprise Admins** is required to complete
    1. In the details pane, right-click **User** and then click **Duplicate Template**.
    2. In the **Properties of New Template** window:
       1. On the **General** tab, in **Template display name**, type **Technology Toolbox User**.
-      2. On the **Security** tab, in the **Group or user names **section, click **Domain Users (TECHTOOLBOX\\Domain Users)**.
-      3. In the **Permissions for Domain Users **section, in the **Autoenroll** row, select the **Allow** checkbox. This will cause all domain users to automatically enroll for certificates using this template.
+      2. On the **Security** tab, in the **Group or user names** section, click **Domain Users (TECHTOOLBOX\\Domain Users)**.
+      3. In the **Permissions for Domain Users** section, in the **Autoenroll** row, select the **Allow** checkbox. This will cause all domain users to automatically enroll for certificates using this template.
       4. Click **OK**.
    3. In the details pane, right-click **Workstation Authentication** and then click **Duplicate Template**.
    4. In the **Properties of New Template** window:
       1. On the **General** tab, in **Template display name**, type **Technology Toolbox Workstation Authentication**.
-      2. On the click the **Security** tab, in the **Group or user names **section, click **Domain Computers (TECHTOOLBOX\\Domain Computers)**.
+      2. On the click the **Security** tab, in the **Group or user names** section, click **Domain Computers (TECHTOOLBOX\\Domain Computers)**.
       3. In the **Permissions for Domain Computers** section, in the **Autoenroll** row, select the **Allow** checkbox. This will cause all domain computers to automatically enroll for certificates using this template.
       4. Click **OK**.
 
@@ -805,7 +805,7 @@ Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
    1. On the **General** tab, in the **Template display name** box, type **Technology Toolbox Code Signing**.
    2. On the **Security** tab, click **Add...**
    3. In the **Select Users, Computers, Service Accounts, or Groups** window, type **All Developers**, click **Check Names**, and then click **OK**.
-   4. On the **Security** tab of the template properties window, in the **Permissions for All Developers **list, click the **Allow** checkbox for **Enroll**.
+   4. On the **Security** tab of the template properties window, in the **Permissions for All Developers** list, click the **Allow** checkbox for **Enroll**.
    5. Click **OK**.
 5. Close or minimize the **Certificate Templates Console** window.
 
@@ -815,7 +815,7 @@ Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
 
 1. Start the **Certification Authority** console (certsrv.msc).
 2. Expand the CA, right-click **Certificate Templates**, select **New**, then **Certificate Template to Issue**.
-3. In the **Enable Certificate Templates** window, select** Technology Toolbox Code Signing**, and then click **OK**.
+3. In the **Enable Certificate Templates** window, select **Technology Toolbox Code Signing**, and then click **OK**.
 
 ## Request code signing certificate
 
@@ -1018,7 +1018,7 @@ On the **Request Certificates** step, select the checkbox for **Technology Toolb
 In the **Certificate Properties** window:
 
 1. On the **Subject** tab:
-   1. In the **Alternative Name **section:
+   1. In the **Alternative Name** section:
       1. In the **Type** list, select **DNS**.
       2. In the **Value** box, type **pki.technologytoolbox.com**.
    2. Click **Apply**.
@@ -1087,7 +1087,7 @@ In the **Site Bindings** window, click **Close**.
 
 1. Start the **Certification Authority** console (certsrv.msc).
 2. Expand the CA, right-click **Certificate Templates**, select **New**, then **Certificate Template to Issue**.
-3. In the **Enable Certificate Templates** window, select** Technology Toolbox Web Server - Exportable**, and then click **OK**.
+3. In the **Enable Certificate Templates** window, select **Technology Toolbox Web Server - Exportable**, and then click **OK**.
 
 ## # Configure firewall rule for [http://poshpaig.codeplex.com/](POSHPAIG)
 
@@ -1133,7 +1133,7 @@ From <[https://technet.microsoft.com/en-US/library/hh467900.aspx#BKMK_CreateTemp
 2. Expand the CA, right-click **Certificate Templates**, and click **Manage**.
 3. In the **Certificate Templates Console** window, in the list of certificate templates, right-click **IPsec (Offline request)** and then click **Duplicate Template**.
 4. In the **Properties of New Template** window:
-   1. On the **Compatibility** tab, in the **Compatibility Settings **section, click the **Certification Authority** dropdown and select **Windows Server 2008**.
+   1. On the **Compatibility** tab, in the **Compatibility Settings** section, click the **Certification Authority** dropdown and select **Windows Server 2008**.
    2. On the **General** tab, in the **Template display name** box, type **Technology Toolbox Operations Manager**.
    3. On the **Request Handling** tab, select **Allow private key to be exported**.
    4. On the **Extensions** tab:
@@ -1155,7 +1155,7 @@ From <[https://technet.microsoft.com/en-US/library/hh467900.aspx#BKMK_CreateTemp
 
 1. Start the **Certification Authority** console (certsrv.msc).
 2. Expand the CA, right-click **Certificate Templates**, select **New**, then **Certificate Template to Issue**.
-3. In the **Enable Certificate Templates** window, select** Technology Toolbox Operations Manager**, and then click **OK**.
+3. In the **Enable Certificate Templates** window, select **Technology Toolbox Operations Manager**, and then click **OK**.
 
 ## Resolve issue with Active Directory Certificate Services
 
@@ -1361,7 +1361,7 @@ Active Directory Certificate Services denied request 1295 because The EMail name
 
 ### Solution
 
-Create mailbox on BANSHEE (svc-tfs@technologytoolbox.com)
+Create mailbox on BANSHEE (<svc-tfs@technologytoolbox.com>)
 
 ## Resolve issue with Active Directory Certificate Services
 
