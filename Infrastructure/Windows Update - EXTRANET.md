@@ -15,7 +15,7 @@ Saturday, January 11, 2014\
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -26,20 +26,20 @@ $activity = "Prepare development and test VMs for patching"
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05D'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05D'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV05F'; },
+    [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV06A'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV06A'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV06B'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV06C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2010-DEV1'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2012-DEV1'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2013-DEV1'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2015-DEV1'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV1'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV2'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV3'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV1'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV2'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05D'; })
+    [PSCustomObject] @{ VMName = 'EXT-VS2012-DEV1'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2013-DEV1'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2015-DEV1'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV1'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV2'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV3'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV1'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV2'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV06A'; })
 ```
 
 #### # Revert VMs to most recent checkpoint
@@ -64,7 +64,7 @@ $virtualMachinesWithSnapshots |
 #### # Start VMs
 
 ```PowerShell
-$startupDelayInSeconds = 30
+$startupDelayInSeconds = 60
 
 $virtualMachinesWithSnapshots |
     foreach {
@@ -127,7 +127,7 @@ Get-Content "C:\Users\jjameson-admin\Desktop\Computer List for Windows Update.tx
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -198,7 +198,7 @@ cd C:\NotBackedUp\Public\Toolbox\PowerShell\PoshPAIG_2_1_5_1
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -336,7 +336,7 @@ Get-Content "C:\Users\jjameson-admin\Desktop\Computer List for Windows Update.tx
 
 ---
 
-**TT-ADMIN03** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -346,20 +346,20 @@ cls
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV05D'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV05D'; },
-    [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV05E'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV05F'; },
+    [PSCustomObject] @{ VMName = 'EXT-ADFS01A'; VMHost = 'TT-HV06A'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR2'; VMHost = 'TT-HV06A'; },
+    [PSCustomObject] @{ VMName = 'EXT-FOOBAR8'; VMHost = 'TT-HV06B'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2008-DEV1'; VMHost = 'TT-HV06C'; },
     [PSCustomObject] @{ VMName = 'EXT-VS2010-DEV1'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2012-DEV1'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2013-DEV1'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2015-DEV1'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV1'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV2'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV3'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV1'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV2'; VMHost = 'TT-HV05F'; },
-    [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV05D'; })
+    [PSCustomObject] @{ VMName = 'EXT-VS2012-DEV1'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2013-DEV1'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2015-DEV1'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV1'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV2'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2017-DEV3'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV1'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-VS2019-DEV2'; VMHost = 'TT-HV06C'; },
+    [PSCustomObject] @{ VMName = 'EXT-WAP01A'; VMHost = 'TT-HV06A'; })
 ```
 
 #### # Stop VMs after patching and update "Baseline" checkpoints
