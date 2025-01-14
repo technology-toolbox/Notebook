@@ -1,11 +1,11 @@
-# Update CRL
+# Update Certificate Revocation List (CRL)
 
 Monday, August 17, 2015\
 9:42 AM
 
 ---
 
-**TT-ADMIN04** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -14,7 +14,7 @@ cls
 ## # Start offline root CA (CRYPTID) and attach new virtual floppy disk
 
 ```PowerShell
-$vmHost = 'TT-HV05D'
+$vmHost = 'TT-HV06A'
 
 Invoke-Command -ComputerName $vmHost -ScriptBlock {
     $rootCA = 'CRYPTID'
@@ -85,7 +85,7 @@ dir A:\
 
 ---
 
-**TT-ADMIN04** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -94,7 +94,7 @@ cls
 ## # Remove virtual floppy disk from root CA virtual machine
 
 ```PowerShell
-$vmHost = 'TT-HV05D'
+$vmHost = 'TT-HV06A'
 $rootCA = 'CRYPTID'
 
 Set-VMFloppyDiskDrive -ComputerName $vmHost -VMName $rootCA -Path $null
@@ -107,11 +107,11 @@ cls
 ## # Copy CRL to file server (TT-FS01)
 
 ```PowerShell
-$vmHost = 'TT-HV05D'
+$vmHost = 'TT-HV06A'
 $rootCA = 'CRYPTID'
 
 $vfdPath = `
-    "\\$vmHost\C`$\NotBackedUp\VMs\$rootCA\Virtual Floppy Disks\$rootCA.vfd"
+    "\\$vmHost\C$\NotBackedUp\VMs\$rootCA\Virtual Floppy Disks\$rootCA.vfd"
 
 Move-Item $vfdPath '\\TT-FS01\Public\'
 ```
@@ -123,7 +123,7 @@ cls
 ### # Shutdown root CA
 
 ```PowerShell
-$vmHost = 'TT-HV05D'
+$vmHost = 'TT-HV06A'
 $rootCA = 'CRYPTID'
 
 Stop-VM -ComputerName $vmHost -VMName $rootCA
@@ -133,10 +133,10 @@ Stop-VM -ComputerName $vmHost -VMName $rootCA
 cls
 ```
 
-## # Copy CRL to Hyper-V server (TT-HV05F) for issuing CA virtual machine (CIPHER01)
+## # Copy CRL to Hyper-V server (TT-HV06C) for issuing CA virtual machine (CIPHER01)
 
 ```PowerShell
-$vmHost = 'TT-HV05F'
+$vmHost = 'TT-HV06C'
 $issuingCA = 'CIPHER01'
 $rootCA = 'CRYPTID'
 
@@ -164,7 +164,7 @@ cls
 ## # Attach virtual floppy disk containing CRL from root CA to issuing CA
 
 ```PowerShell
-$vmHost = 'TT-HV05F'
+$vmHost = 'TT-HV06C'
 
 Invoke-Command -ComputerName $vmHost -ScriptBlock {
     $rootCA = 'CRYPTID'
@@ -201,7 +201,7 @@ cls
 ## # Remove virtual floppy disk from issuing CA and delete it
 
 ```PowerShell
-$vmHost = 'TT-HV05F'
+$vmHost = 'TT-HV06C'
 
 Invoke-Command -ComputerName $vmHost -ScriptBlock {
     $rootCA = 'CRYPTID'
