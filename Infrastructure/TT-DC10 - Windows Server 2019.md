@@ -910,6 +910,68 @@ Set-MpPreference -SevereThreatDefaultAction Remove
 **Run antivirus software on the DPM server**\
 From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
 
+```PowerShell
+cls
+```
+
+## # Upgrade to Data Protection Manager 2022
+
+### # Remove DPM 2019 Protection Agent
+
+```PowerShell
+msiexec /x `{CC6B6758-3A68-4BBA-9D61-1F3278D6A7EA`}
+
+Restart-Computer
+```
+
+> **Note**
+>
+> Wait for the computer to restart to complete the removal of the DPM agent.
+
+### # Install DPM 2022 agent
+
+```PowerShell
+$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2022" `
+    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
+
+$installerArguments = "TT-DPM07.corp.technologytoolbox.com"
+
+Start-Process `
+    -FilePath $installerPath `
+    -ArgumentList "$installerArguments" `
+    -Wait
+```
+
+Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+
+#### Reference
+
+[Install the agent manually](https://learn.microsoft.com/en-us/system-center/dpm/deploy-dpm-protection-agent?view=sc-dpm-2022#BKMK_Manual)
+
+---
+
+**TT-DPM07** - DPM Management Shell
+
+```PowerShell
+cls
+```
+
+### # Attach DPM agent
+
+```PowerShell
+$productionServer = 'TT-DC10'
+
+.\Attach-ProductionServer.ps1 `
+    -DPMServerName TT-DPM07 `
+    -PSName $productionServer `
+    -Domain TECHTOOLBOX `
+    -UserName jjameson-admin
+```
+
+---
+
+### Add virtual machine to domain controllers protection group in DPM
+
 **TODO:**
 
 ```PowerShell
