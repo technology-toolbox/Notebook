@@ -1,27 +1,28 @@
-# TT-DPM06 - Windows Server 2019
+# TT-DPM07 - Windows Server 2022 / Data Protection Manager 2022
 
-Sunday, April 11, 2021\
-6:50 AM
+Wednesday, January 15, 2025\
+8:17 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Deploy and configure infrastructure
+## Deploy and configure server infrastructure
 
 ---
 
-**TT-ADMIN04** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
 ```
 
-### # Create domain group for DPM administrators
+### # Create domain group for Data Protection Manager (DPM) administrators
 
 ```PowerShell
 $dpmAdminsGroup = "DPM Admins"
-$orgUnit = "OU=Groups,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+$orgUnit = "OU=Groups,OU=Information Technology," `
+    + "DC=corp,DC=technologytoolbox,DC=com"
 
 New-ADGroup `
     -Name $dpmAdminsGroup `
@@ -30,10 +31,48 @@ New-ADGroup `
     -Path $orgUnit
 ```
 
-### # Add setup account to DPM administrators domain group
+```PowerShell
+cls
+```
+
+### # Create and configure setup account for DPM
+
+#### # Create setup account for DPM
 
 ```PowerShell
-Add-ADGroupMember -Identity $dpmAdminsGroup -Members setup-systemcenter
+$displayName = "Setup account for Data Protection Manager"
+$defaultUserName = "setup-dpm"
+
+$cred = Get-Credential -Message $displayName -UserName $defaultUserName
+
+$userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
+$orgUnit = "OU=Setup Accounts,OU=Information Technology," `
+    + "DC=corp,DC=technologytoolbox,DC=com"
+
+New-ADUser `
+    -Name $displayName `
+    -DisplayName $displayName `
+    -SamAccountName $cred.UserName `
+    -AccountPassword $cred.Password `
+    -UserPrincipalName $userPrincipalName `
+    -Path $orgUnit `
+    -Enabled:$true `
+    -CannotChangePassword:$true `
+    -PasswordNeverExpires:$true
+```
+
+#### # Disable setup account for DPM (enabled temporarily during installation)
+
+```PowerShell
+Disable-ADAccount -Identity $cred.UserName
+```
+
+#### # Add setup account to DPM administrators domain group
+
+```PowerShell
+Add-ADGroupMember `
+    -Identity $dpmAdminsGroup `
+    -Members $cred.UserName
 ```
 
 ```PowerShell
@@ -43,13 +82,14 @@ cls
 ### # Create service account for DPM SQL Server instance
 
 ```PowerShell
-$displayName = "Service account for SQL Server instance on TT-DPM06"
-$defaultUserName = "s-sql-dpm06"
+$displayName = "Service account for SQL Server instance on DPM server"
+$defaultUserName = "s-sql-dpm"
 
 $cred = Get-Credential -Message $displayName -UserName $defaultUserName
 
 $userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
-$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+$orgUnit = "OU=Service Accounts,OU=Information Technology," `
+    + "DC=corp,DC=technologytoolbox,DC=com"
 
 New-ADUser `
     -Name $displayName `
@@ -76,7 +116,8 @@ $defaultUserName = "s-backup"
 $cred = Get-Credential -Message $displayName -UserName $defaultUserName
 
 $userPrincipalName = $cred.UserName + "@corp.technologytoolbox.com"
-$orgUnit = "OU=Service Accounts,OU=IT,DC=corp,DC=technologytoolbox,DC=com"
+$orgUnit = "OU=Service Accounts,OU=Information Technology," `
+    + "DC=corp,DC=technologytoolbox,DC=com"
 
 New-ADUser `
     -Name $displayName `
@@ -90,12 +131,6 @@ New-ADUser `
     -PasswordNeverExpires:$true
 ```
 
----
-
----
-
-**TT-ADMIN04** - Run as administrator
-
 ```PowerShell
 cls
 ```
@@ -103,8 +138,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05F"
-$vmName = "TT-DPM06"
+$vmHost = "TT-HV06C"
+$vmName = "TT-DPM07"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -135,11 +170,11 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ---
 
-### Install custom Windows Server 2019 image
+### Install custom Windows Server 2022 image
 
-- On the **Task Sequence** step, select **Windows Server 2019** and click **Next**.
+- On the **Task Sequence** step, select **Windows Server 2022** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **TT-DPM06**.
+  - In the **Computer name** box, type **TT-DPM07**.
   - Click **Next**.
 - On the **Applications** step, ensure no items are selected and click **Next**.
 
@@ -147,7 +182,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 cls
 ```
 
-### # Rename local Administrator account and set password
+### # Rename local administrator account and set password
 
 ```PowerShell
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -157,7 +192,7 @@ $password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
 
 > **Note**
 >
-> When prompted, type the password for the local Administrator account.
+> When prompted, type the password for the local administrator account.
 
 ```PowerShell
 $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
@@ -172,7 +207,7 @@ logoff
 
 ---
 
-**TT-ADMIN04** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -181,10 +216,11 @@ cls
 ### # Move computer to different OU
 
 ```PowerShell
-$vmName = "TT-DPM06"
+$vmName = "TT-DPM07"
 
-$targetPath = ("OU=System Center Servers,OU=Servers,OU=Resources,OU=IT" `
-    + ",DC=corp,DC=technologytoolbox,DC=com")
+$targetPath = ("OU=System Center Servers,OU=Servers,OU=Resources," `
+    + "OU=Information Technology," `
+    + "DC=corp,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 ```
@@ -199,9 +235,9 @@ Add-ADGroupMember -Identity "Manual Windows Update" -Members ($vmName + '$')
 
 ---
 
-### Login as local administrator account
+#### Login as local administrator account
 
-## # Enable PowerShell remoting
+#### # Enable PowerShell remoting for remote Windows Update
 
 ```PowerShell
 Enable-PSRemoting -Confirm:$false
@@ -243,21 +279,21 @@ Start-Sleep -Seconds 5
 ping TT-FS01 -f -l 8900
 ```
 
-### Configure storage
-
-#### Configure storage for SQL Server
+### Configure direct-attached storage
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| --- | --- | --- | --- | --- | --- |
-| 0 | C: | 55 GB | Dynamic | 4K | OSDisk |
-| 1 | D: | 3 GB | Dynamic | 64K | Data01 |
-| 2 | L: | 1 GB | Dynamic | 64K | Log01 |
-| 3 | T: | 1 GB | Dynamic | 64K | Temp01 |
-| 4 | Z: | 10 GB | Dynamic | 4K | Backup01 |
+| --- | --- | ---    | ---     | ---          | ---      |
+| 0   | C:  | 55 GB  | Dynamic | 4K (default) | OSDisk   |
+| 1   | D:  | 3 GB   | Fixed   | 64K          | Data01   |
+| 2   | L:  | 2 GB   | Fixed   | 64K          | Log01    |
+| 3   | T:  | 2 GB   | Fixed   | 64K          | Temp01   |
+| 4   | Z:  | 10 GB  | Dynamic | 4K (default) | Backup01 |
+| 5   | E:  | 3.6 TB | Fixed   | 4K (default) | Data02   |
+| 6   | F:  | 3.6 TB | Fixed   | 4K (default) | Data03   |
 
 ---
 
-**TT-ADMIN04** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -266,8 +302,8 @@ cls
 #### # Add virtual disks for SQL Server
 
 ```PowerShell
-$vmHost = "TT-HV05F"
-$vmName = "TT-DPM06"
+$vmHost = "TT-HV06C"
+$vmName = "TT-DPM07"
 $vmPath = "E:\NotBackedUp\VMs\$vmName"
 ```
 
@@ -276,7 +312,7 @@ $vmPath = "E:\NotBackedUp\VMs\$vmName"
 ```PowerShell
 $vhdPath = $vmPath + "\Virtual Hard Disks\$vmName" + "_Data01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 3GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 3GB
 Add-VMHardDiskDrive `
   -ComputerName $vmHost `
   -VMName $vmName `
@@ -289,7 +325,7 @@ Add-VMHardDiskDrive `
 ```PowerShell
 $vhdPath = $vmPath + "\Virtual Hard Disks\$vmName" + "_Log01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 1GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 2GB
 Add-VMHardDiskDrive `
   -ComputerName $vmHost `
   -VMName $vmName `
@@ -302,7 +338,7 @@ Add-VMHardDiskDrive `
 ```PowerShell
 $vhdPath = $vmPath + "\Virtual Hard Disks\$vmName" + "_Temp01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 1GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 2GB
 Add-VMHardDiskDrive `
   -ComputerName $vmHost `
   -VMName $vmName `
@@ -323,7 +359,11 @@ Add-VMHardDiskDrive `
   -ControllerType SCSI
 ```
 
-#### # Add virtual disks for Data Protection Manager
+```PowerShell
+cls
+```
+
+#### # Add virtual disks for Data Protection Manager backups
 
 ##### # Add "Data02" VHD
 
@@ -447,7 +487,7 @@ From <[https://docs.microsoft.com/en-us/system-center/dpm/install-dpm?view=sc-dp
 cls
 ```
 
-### # Add DPM administrators domain group to local Administrators group
+### # Add DPM administrators domain group to local administrators group
 
 ```PowerShell
 $domain = "TECHTOOLBOX"
@@ -457,11 +497,11 @@ $domainGroup = "DPM Admins"
     "WinNT://$domain/$domainGroup,group")
 ```
 
-### # Install and configure SQL Server 2019
+### # Install and configure SQL Server 2022
 
 ---
 
-**TT-ADMIN04** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -477,7 +517,7 @@ Enable-ADAccount -Identity setup-sql
 
 #### # Prepare server for SQL Server installation
 
-##### # Add setup account to local Administrators group
+##### # Add setup account to local administrators group
 
 ```PowerShell
 $domain = "TECHTOOLBOX"
@@ -497,21 +537,25 @@ logoff
 
 ```PowerShell
 New-Item `
-    -Path "T:\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Data" `
+    -Path "T:\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\Data" `
     -ItemType Directory
 ```
 
-#### # Install SQL Server 2019
+#### # Install SQL Server 2022
 
 ```PowerShell
-$imagePath = ("\\TT-FS01\Products\Microsoft\SQL Server 2019" `
-    + "\en_sql_server_2019_standard_x64_dvd_46f0ba38.iso")
+$imagePath = ("\\TT-FS01\Products\Microsoft\SQL Server 2022" `
+    + "\enu_sql_server_2022_developer_edition_x64_dvd_7cacf733.iso")
 
 $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
     Get-Volume).DriveLetter
 
 & ($imageDriveLetter + ":\setup.exe")
 ```
+
+On the **Azure Extension for SQL Server** step, clear the following checkbox:
+
+- **Azure Extension for SQL Server**
 
 On the **Feature Selection** step, select the following checkbox:
 
@@ -520,28 +564,28 @@ On the **Feature Selection** step, select the following checkbox:
 On the **Server Configuration** step:
 
 - For the **SQL Server Agent** service:
-  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-dpm06**.
+  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-dpm**.
   - Change the **Startup Type** to **Automatic**.
 - For the **SQL Server Database Engine** service:
-  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-dpm06**.
+  - Change the **Account Name** to **TECHTOOLBOX\\s-sql-dpm**.
   - Ensure the **Startup Type** is set to **Automatic**.
 - For the **SQL Server Browser** service, ensure the **Startup Type** is set to **Disabled**.
 
 > **Important**
 >
-> DPM 2019 does not support the default service accounts for SQL Server. The service accounts must be domain accounts.
+> DPM 2022 does not support the default service accounts for SQL Server. The service accounts must be domain accounts.
 
 On the **Database Engine Configuration** step:
 
 - On the **Server Configuration** tab, in the **Specify SQL Server administrators** section, click **Add...** and then add the domain group for SQL Server administrators (**TECHTOOLBOX\\SQL Server Admins**) and the domain group for DPM administrators (**TECHTOOLBOX\\DPM Admins**).
 - On the **Data Directories** tab:
   - In the **Data root directory** box, type **D:\\Microsoft SQL Server\\**.
-  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**).
-  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup**).
+  - In the **User database log directory** box, change the drive letter to **L:** (the value should be **L:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Data**).
+  - In the **Backup directory** box, change the drive letter to **Z:** (the value should be **Z:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Backup**).
 - On the **TempDB** tab:
-  - Remove the default data directory (**D:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**).
-  - Add the data directory on the **Temp01** volume (**T:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**).
-  - Ensure the **Log directory** is set to **T:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Data**.
+  - Remove the default data directory (**D:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Data**).
+  - Add the data directory on the **Temp01** volume (**T:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Data**).
+  - Ensure the **Log directory** is set to **T:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Data**.
 
 > **Important**
 >
@@ -556,14 +600,14 @@ cls
 ##### # Install SQL Server Reporting Services
 
 ```PowerShell
-& "\\TT-FS01\Products\Microsoft\SQL Server 2019\SQLServerReportingServices.exe"
+& "\\TT-FS01\Products\Microsoft\SQL Server 2022\SQLServerReportingServices.exe"
 ```
 
 > **Important**
 >
-> When prompted for which edition of Reporting Services to install, enter a product key for SQL Server Standard Edition. Note the Express Edition cannot use a database server running SQL Server 2019 Standard Edition.
+> When prompted for which edition of Reporting Services to install, enter a product key for SQL Server Standard Edition. Note the Express Edition cannot use a database server running SQL Server 2022 Standard Edition.
 >
-> Wait for the installation to complete and restart the computer.
+> Wait for the installation to complete and click **Configure report server**.
 
 ##### Configure SQL Server Reporting Services
 
@@ -575,7 +619,7 @@ cls
 
    > **Important**
    >
-   > DPM 2019 does not support the default service account (**Virtual Service Account**).
+   > DPM 2022 does not support the default service account (**Virtual Service Account**).
 
 6. In the navigation pane, click **Web Service URL**.
 7. In the **Web Service URL** pane:
@@ -606,8 +650,8 @@ cls
 
 13. In the navigation pane, click **E-mail Settings**.
 14. In the **E-mail Settings**:
-    1. In the **Sender Address** box, type **s-backup@technologytoolbox.com**.
-    2. In the **SMTP Server** box, type **smtp.technologytoolbox.com**.
+    1. In the **Sender Address** box, type **<s-backup@technologytoolbox.com>**.
+    2. In the **SMTP Server** box, type **smtp-test.technologytoolbox.com**.
     3. Click **Apply**.
 15. In the navigation pane, click **Encryption Keys**.
 16. In the **Encryption Keys** pane, click **Backup**.
@@ -621,15 +665,33 @@ cls
 cls
 ```
 
+#### # Install SQL Server Native Client
+
+```PowerShell
+& "\\TT-FS01\Products\Microsoft\SQL Server 2012\Native Client\x64\sqlncli.msi"
+```
+
+> **Note**
+>
+> DPM requires SQL Server Native Client -- but it is not included in SQL Server 2022. The latest version of SQL Server Native Client is from SQL Server 2012.
+
+```PowerShell
+cls
+```
+
 #### # Install SQL Server Management Studio
 
 ```PowerShell
-& "\\TT-FS01\Products\Microsoft\SQL Server Management Studio\18.8\SSMS-Setup-ENU.exe"
+& "\\TT-FS01\Products\Microsoft\SQL Server Management Studio\20.2\SSMS-Setup-ENU.exe"
 ```
 
 > **Important**
 >
 > Wait for the installation to complete and restart the computer.
+
+> **Note**
+>
+> The computer must be restarted before the cumulative update for SQL Server can be installed.
 
 ```PowerShell
 cls
@@ -638,7 +700,8 @@ cls
 #### # Install cumulative update for SQL Server
 
 ```PowerShell
-& "\\TT-FS01\Products\Microsoft\SQL Server 2019\Patches\CU10\SQLServer2019-KB5001090-x64.exe"
+& ("\\TT-FS01\Products\Microsoft\SQL Server 2022\Patches" `
+    + "\CU16\SQLServer2022-KB5048033-x64.exe")
 ```
 
 > **Important**
@@ -671,17 +734,19 @@ New-NetFirewallRule `
     -Action Allow
 ```
 
+#### Enable TCP/IP network protocol for SQL Server
+
+1. Start **SQL Server 2022 Configuration Manager**.
+1. In **SQL Server Configuration Manager**, in the console pane, expand **SQL Server Network Configuration**.
+1. In the console pane, select **Protocols for MSSQLSERVER**.
+1. In the details pane, right-click **TCP/IP**, and then select **Enable**. A warning appears stating the changes will not take effect until the service is stopped and restarted. Click **OK**.
+1. In the console pane, select **SQL Server Services**.
+1. In the details pane, right-click **SQL Server (MSSQLSERVER)**, and then select **Restart**.
+
 #### # Configure permissions for Software Usage Metrics feature
 
 ```PowerShell
-icacls C:\Windows\System32\LogFiles\Sum\Api.chk `
-    /grant "NT Service\MSSQLSERVER:(M)"
-
-icacls C:\Windows\System32\LogFiles\Sum\Api.log `
-    /grant "NT Service\MSSQLSERVER:(M)"
-
-icacls C:\Windows\System32\LogFiles\Sum\SystemIdentity.mdb `
-    /grant "NT Service\MSSQLSERVER:(M)"
+icacls C:\Windows\System32\LogFiles\Sum /grant "TECHTOOLBOX\s-sql-dpm:(M)" /T
 ```
 
 ##### Reference
@@ -714,8 +779,6 @@ EXEC msdb.dbo.sp_set_sqlagent_properties @jobhistory_max_rows=-1,
 "@
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
 ```
 
 ##### Reference
@@ -735,23 +798,19 @@ cls
 $sqlcmd = "CREATE DATABASE SqlMaintenance"
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
 ```
 
 ##### # Create maintenance table, stored procedures, and jobs
 
 ```PowerShell
 $url = "https://raw.githubusercontent.com/technology-toolbox" `
-    + "/sql-server-maintenance-solution/master/MaintenanceSolution.sql"
+    + "/sql-server-maintenance-solution/main/MaintenanceSolution.sql"
 
 $tempFileName = [System.IO.Path]::GetTempFileName()
 
 Invoke-WebRequest -Uri $url -OutFile $tempFileName
 
 Invoke-Sqlcmd -InputFile $tempFileName -Verbose -Debug:$false
-
-Set-Location C:
 
 Remove-Item $tempFileName
 ```
@@ -760,15 +819,13 @@ Remove-Item $tempFileName
 
 ```PowerShell
 $url = "https://raw.githubusercontent.com/technology-toolbox" `
-    + "/sql-server-maintenance-solution/master/JobSchedules.sql"
+    + "/sql-server-maintenance-solution/main/JobSchedules.sql"
 
 $tempFileName = [System.IO.Path]::GetTempFileName()
 
 Invoke-WebRequest -Uri $url -OutFile $tempFileName
 
 Invoke-Sqlcmd -InputFile $tempFileName -Verbose -Debug:$false
-
-Set-Location C:
 
 Remove-Item $tempFileName
 ```
@@ -804,13 +861,19 @@ RECONFIGURE WITH OVERRIDE
 "@
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+```
 
-Set-Location C:
+> **Important**
+>
+> Sign out and then sign in using the setup account for DPM.
+
+```Console
+logoff
 ```
 
 ---
 
-**TT-ADMIN04** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -822,17 +885,23 @@ cls
 Disable-ADAccount -Identity setup-sql
 ```
 
+### # Enable setup account for DPM
+
+```PowerShell
+Enable-ADAccount -Identity setup-dpm
+```
+
 ---
 
 ### Configure server after SQL Server installation
 
-#### Login as .\\foo
+#### Login as setup account for DPM (TECHTOOLBOX\\setup-dpm)
 
 ```PowerShell
 cls
 ```
 
-#### # Remove setup account from local Administrators group
+#### # Remove setup account for SQL Server from local administrators group
 
 ```PowerShell
 $domain = "TECHTOOLBOX"
@@ -842,59 +911,39 @@ $username = "setup-sql"
     "WinNT://$domain/$username,user")
 ```
 
----
-
-**TT-ADMIN04** - Run as administrator
-
-```PowerShell
-cls
-```
-
-### # Enable setup account for System Center
-
-```PowerShell
-Enable-ADAccount -Identity setup-systemcenter
-```
-
----
-
 ```PowerShell
 cls
 ```
 
 ## # Install Data Protection Manager
 
-### # Insert DPM 2019 installation media and extract setup files
+### # Insert DPM 2022 installation media and extract setup files
 
 ```PowerShell
-$imagePath = ("\\TT-FS01\Products\Microsoft\System Center 2019" `
-    + "\mu_system_center_data_protection_manager_2019_x64_dvd_b9964d9f.iso")
+$imagePath = ("\\TT-FS01\Products\Microsoft\System Center 2022" `
+    + "\mul_system_center_data_protection_manager_2022_x64_dvd_66e6b00a.iso")
 
 $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
     Get-Volume).DriveLetter
 
-& ($imageDriveLetter + ":\\SCDPM_2019.exe")
+& ($imageDriveLetter + ":\\SCDPM_2022.exe")
 ```
 
-Destination location: **C:\\NotBackedUp\\Temp\\System Center 2019 Data Protection Manager**
-
-> **Important**
->
-> Sign out and then sign in using the setup account for System Center.
-
-### Login as TECHTOOLBOX\\setup-systemcenter
+Destination location: **C:\\NotBackedUp\\Temp\\System Center 2022 Data Protection Manager**
 
 ```PowerShell
 cls
 ```
 
-### # Install DPM 2019
+### # Install DPM 2022
+
+#### # Install DPM prerequisites
 
 ```PowerShell
-& "C:\NotBackedUp\Temp\System Center 2019 Data Protection Manager\setup.exe"
+& "C:\NotBackedUp\Temp\System Center 2022 Data Protection Manager\setup.exe"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E0/425DE962318315F055035081F946D87BE67C09E0.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C8/4DEC424CD30763CF5705CE35887C9E8E9F41A7C8.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/42D95212B3D0E18439BA413D21265C250A26DCB9.png)
 
@@ -906,11 +955,11 @@ cls
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/BC4048F9237335F0D9A774B0668B174B39956EB6.png)
 
-In the **Instance of SQL Server** box, type **TT-DPM06** and click **Check and Install**.
+In the **Instance of SQL Server** box, type **TT-DPM07** and click **Check and Install**.
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/0E2BD8540196FC70693D57670A6B5B1FD8A5D6B1.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/90/D08C7617E9266E3E04952852EE8971F5479E2D90.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9B/E040B63FF26B2BEA1345201A42AD7305A752C29B.png)
 
 Wait for the DPM prerequisites to be installed and then restart the server.
 
@@ -918,15 +967,17 @@ Wait for the DPM prerequisites to be installed and then restart the server.
 Restart-Computer
 ```
 
-#### Login as TECHTOOLBOX\\setup-systemcenter
+> **Note**
+>
+> Wait for the computer to restart and then login using the setup account for DPM (TECHTOOLBOX\\setup-dpm)
 
 #### # Restart DPM setup
 
 ```PowerShell
-& "C:\NotBackedUp\Temp\System Center 2019 Data Protection Manager\setup.exe"
+& "C:\NotBackedUp\Temp\System Center 2022 Data Protection Manager\setup.exe"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E0/425DE962318315F055035081F946D87BE67C09E0.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/C8/4DEC424CD30763CF5705CE35887C9E8E9F41A7C8.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/42D95212B3D0E18439BA413D21265C250A26DCB9.png)
 
@@ -934,13 +985,13 @@ Restart-Computer
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/563529A99B000095C6131878345CF54B9DB39F7D.png)
 
-In the **Instance of SQL Server** box, type **TT-DPM06** and click **Check and Install**.
+In the **Instance of SQL Server** box, type **TT-DPM07** and click **Check and Install**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/17/63CEDD13EF1DF6912384DBD489C568FFB7492317.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/9B/E040B63FF26B2BEA1345201A42AD7305A752C29B.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/15/1A69776F26BB9A89B6B66CD58AC0D2E37A1F9C15.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/68DA6BF8D3CD74E98789147BC044694821FA9EAF.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/87E22584087DD9C8CEE48AA32972A047E1141646.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/11/9A84D192257012A3A90E52FCD6DEC70E91349811.png)
 
@@ -952,62 +1003,16 @@ Click **Use Microsoft Update when I check for updates (recommended)** and then c
 
 Data Protection Manager installation has completed successfully.
 
-Please click on the link to check for the latest DPM updates:\
-[http://go.microsoft.com/fwlink/?linkid=820914](http://go.microsoft.com/fwlink/?linkid=820914)
+Please click on the link to check for the latest DPM updates:
+<https://go.microsoft.com/fwlink/?linkid=2185649>
 
-DPM Setup has created the following firewall exceptions:\
+DPM Setup has created the following firewall exceptions:
 
-- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles.\
-- Exception for Msdpm.exe in all profiles.\
-- Exception for DPMRA.exe in all profiles.\
-- Exception for AMSvcHost.exe in all profiles.\
+- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles.
+- Exception for Msdpm.exe in all profiles.
+- Exception for DPMRA.exe in all profiles.
+- Exception for AMSvcHost.exe in all profiles.
 - Exception for DPMAMService communication on port 6075 (TCP and UDP) in all profiles.
-
-```PowerShell
-cls
-```
-
-### # Configure antivirus on DPM server
-
-#### # Disable real-time monitoring by Windows Defender for DPM server
-
-```PowerShell
-$excludeFolders = `
-    "E:\",
-    "F:\",
-    "$env:ProgramFiles\Microsoft System Center\DPM\DPM\Temp\MTA",
-    "$env:ProgramFiles\Microsoft System Center\DPM\DPM\XSD"
-
-$excludeProcesses =
-   "$env:windir\Microsoft.NET\Framework\v2.0.50727\csc.exe",
-   "$env:windir\Microsoft.NET\Framework64\v2.0.50727\csc.exe",
-   "$env:windir\Microsoft.NET\Framework\v4.0.30319\csc.exe",
-   "$env:windir\Microsoft.NET\Framework64\v4.0.30319\csc.exe",
-   "$env:ProgramFiles\Microsoft System Center\DPM\DPM\bin\DPMRA.exe"
-
-Set-MpPreference -ExclusionPath $excludeFolders
-Set-MpPreference -ExclusionProcess $excludeProcesses
-```
-
-#### # Configure antivirus software to delete infected files
-
-```PowerShell
-Set-MpPreference -LowThreatDefaultAction Remove
-Set-MpPreference -ModerateThreatDefaultAction Remove
-Set-MpPreference -HighThreatDefaultAction Remove
-Set-MpPreference -SevereThreatDefaultAction Remove
-```
-
-#### References
-
-**Run antivirus software on the DPM server**\
-From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
-
-**Antivirus exclusions for DPM 2016/2019**\
-From <[https://social.technet.microsoft.com/Forums/en-US/60b02401-a47b-4738-a497-5f3ebe6c82e6/antivirus-exclusions-for-dpm-20162019?forum=dataprotectionmanager](https://social.technet.microsoft.com/Forums/en-US/60b02401-a47b-4738-a497-5f3ebe6c82e6/antivirus-exclusions-for-dpm-20162019?forum=dataprotectionmanager)>
-
-**Configure Data Protection Manager 2016 AntiVirus Exclusions on Windows Server 2016**\
-From <[https://www.normanbauer.com/2018/02/28/configure-data-protection-manager-2016-antivirus-exclusions-on-windows-server-2016/](https://www.normanbauer.com/2018/02/28/configure-data-protection-manager-2016-antivirus-exclusions-on-windows-server-2016/)>
 
 ```PowerShell
 cls
@@ -1016,8 +1021,8 @@ cls
 ### # Copy DPM setup files to file share
 
 ```PowerShell
-$source = "C:\NotBackedUp\Temp\System Center 2019 Data Protection Manager"
-$destination = "\\TT-FS01\Products\Microsoft\System Center 2019\DPM"
+$source = "C:\NotBackedUp\Temp\System Center 2022 Data Protection Manager"
+$destination = "\\TT-FS01\Products\Microsoft\System Center 2022\DPM"
 
 robocopy $source $destination /E /NP
 ```
@@ -1030,17 +1035,17 @@ cls
 
 ```PowerShell
 Remove-Item `
-    -Path "C:\NotBackedUp\Temp\System Center 2019 Data Protection Manager" `
+    -Path "C:\NotBackedUp\Temp\System Center 2022 Data Protection Manager" `
     -Recurse
 ```
 
 ## Configure DPM database
 
-### Move log file for DPM database from D: to L:
+### Move log file for DPM database from data disk to log disk
 
 > **Note**
 >
-> DPM 2019 does not honor the default path for SQL Server log files.
+> DPM 2022 does not honor the default path for SQL Server log files.
 
 ```PowerShell
 cls
@@ -1065,36 +1070,32 @@ cls
 
 ```PowerShell
 $sqlcmd = @"
-EXEC master.dbo.sp_detach_db @dbname = N'DPMDB_TT_DPM06'
+EXEC master.dbo.sp_detach_db @dbname = N'DPMDB_TT_DPM07'
 "@
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
 ```
 
-#### # Move the log file for the DPM database
+#### # Move log file for DPM database
 
 ```PowerShell
-$dataPath = "D:\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA"
-$logPath = "L:\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Data"
+$dataPath = "D:\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA"
+$logPath = "L:\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\Data"
 
-Move-Item "$dataPath\MSDPM2012`$DPMDB_TT_DPM06_log.ldf" $logPath
+Move-Item "$dataPath\MSDPM2012`$DPMDB_TT_DPM07_log.ldf" $logPath
 ```
 
 #### # Attach DPM database
 
 ```PowerShell
 $sqlcmd = @"
-CREATE DATABASE [DPMDB_TT_DPM06] ON
-    (FILENAME = N'$dataPath\MSDPM2012`$DPMDB_TT_DPM06.mdf'),
-    (FILENAME = N'$logPath\MSDPM2012`$DPMDB_TT_DPM06_log.ldf')
+CREATE DATABASE [DPMDB_TT_DPM07] ON
+    (FILENAME = N'$dataPath\MSDPM2012`$DPMDB_TT_DPM07.mdf'),
+    (FILENAME = N'$logPath\MSDPM2012`$DPMDB_TT_DPM07_log.ldf')
     FOR ATTACH
 "@
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
 ```
 
 ```PowerShell
@@ -1114,30 +1115,48 @@ $dpmServices | foreach { Start-Service $_ }
 
 ```PowerShell
 $sqlcmd = @"
-ALTER DATABASE [DPMDB_TT_DPM06]
+ALTER DATABASE [DPMDB_TT_DPM07]
     MODIFY FILE (
-        NAME = N'MSDPM2012`$DPMDB_TT_DPM06_dat',
+        NAME = N'MSDPM2012`$DPMDB_TT_DPM07_dat',
         FILEGROWTH = 100MB
     )
 
-ALTER DATABASE [DPMDB_TT_DPM06]
+ALTER DATABASE [DPMDB_TT_DPM07]
     MODIFY FILE (
-        NAME = N'MSDPM2012`$DPMDB_TT_DPM06Log_dat',
+        NAME = N'MSDPM2012`$DPMDB_TT_DPM07Log_dat',
         FILEGROWTH = 25MB
     )
 "@
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
 ```
 
-## # Configure SQL Server backups
-
-### # Create folders for backups
+## # Configure backups for DPM database
 
 ```PowerShell
-$backupPath = "Z:\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Backup"
+cls
+```
+
+### # Configure database settings to compress backups by default
+
+```PowerShell
+$sqlcmd = @"
+EXEC sys.sp_configure N'backup compression default', N'1'
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+
+$sqlcmd = @"
+RECONFIGURE WITH OVERRIDE
+"@
+
+Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
+```
+
+### # Create folders for SQL Server backups
+
+```PowerShell
+$backupPath = "Z:\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\Backup"
 
 New-Item -ItemType Directory -Path "$backupPath\Differential"
 New-Item -ItemType Directory -Path "$backupPath\Full"
@@ -1213,28 +1232,6 @@ Ending at:<strong> 11:59:59 PM</strong></p>
 </tr>
 </table>
 
-```PowerShell
-cls
-```
-
-#### # Configure database settings to compress backups by default
-
-```PowerShell
-$sqlcmd = @"
-EXEC sys.sp_configure N'backup compression default', N'1'
-"@
-
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-$sqlcmd = @"
-RECONFIGURE WITH OVERRIDE
-"@
-
-Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
-```
-
 #### Create maintenance plan for full backup of all databases
 
 1. Open **SQL Server Management Studio**.
@@ -1250,7 +1247,7 @@ Set-Location C:
    4. On the **Select Maintenance Task Order** page, click **Next**.
    5. On the **Define Back Up Database (Full) Task** page:
       1. On the **General** tab, In the **Database(s)** dropdown, select **All databases**.
-      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Full**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Backup\\Full**.
       3. On the **Options** tab, in the **Set backup compression** dropdown, ensure **Use the default server setting** is selected.
       4. Click **Next**.
    6. On the **Select Report Options** page, click **Next**.
@@ -1271,7 +1268,7 @@ Set-Location C:
    4. On the **Select Maintenance Task Order** page, click **Next**.
    5. On the **Define Back Up Database (Differential) Task** page:
       1. On the **General** tab, In the **Database(s)** dropdown, select **All databases**.
-      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Differential**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Backup\\Differential**.
       3. On the **Options** tab, in the **Set backup compression** dropdown, ensure **Use the default server setting** is selected.
       4. Click **Next**.
    6. On the **Select Report Options** page, click **Next**.
@@ -1290,9 +1287,9 @@ Set-Location C:
       4. Click **Next**.
    3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Back Up Database (Transaction Log)**, and click **Next**.
    4. On the **Select Maintenance Task Order** page, click **Next**.
-   5. On the **Define Back Up Database (Full) Task** page:
-      1. On the **General** tab, In the **Database(s) **dropdown, select **All databases**.
-      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log**.
+   5. On the **Define Back Up Database (Transaction Log) Task** page:
+      1. On the **General** tab, In the **Database(s)** dropdown, select **All databases**.
+      2. On the **Destination** tab, in the Folder box, type **Z:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log**.
       3. On the **Options** tab, in the **Set backup compression** dropdown, ensure **Use the default server setting** is selected.
       4. Click **Next**.
    6. On the **Select Report Options** page, click **Next**.
@@ -1339,7 +1336,7 @@ Recurs every: <strong>1</strong> week on</p>
 <ul>
 <li><strong>Search folder and delete files based on an extension</strong>
 <ul>
-<li><strong>Folder: Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\</strong></li>
+<li><strong>Folder: Z:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Backup\\</strong></li>
 <li><strong>File Extension: bak</strong></li>
 <li><strong>Include first-level subfolders: Yes (checked)</strong></li>
 </ul>
@@ -1359,7 +1356,7 @@ Recurs every: <strong>1</strong> week on</p>
 <ul>
 <li><strong>Search folder and delete files based on an extension</strong>
 <ul>
-<li><strong>Folder: Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\</strong></li>
+<li><strong>Folder: Z:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\</strong></li>
 <li><strong>File Extension: trn</strong></li>
 <li><strong>Include first-level subfolders: No (unchecked)</strong></li>
 </ul>
@@ -1396,7 +1393,7 @@ Recurs every: <strong>1</strong> week on</p>
    3. On the **Select Maintenance Tasks** page, in the list of maintenance tasks, select **Maintenance Cleanup Task**, and click **Next**.
    4. On the **Select Maintenance Task Order** page, click **Next**.
    5. On the **Define Maintenance Cleanup Task** page:
-      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\**.
+      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Backup\\**.
       2. In the **File extension** box, type **bak**.
       3. Select the **Include first-level subfolders** checkbox.
       4. In the **File age** section, configure the settings to delete files older than **2 Week(s)**.
@@ -1420,7 +1417,7 @@ Recurs every: <strong>1</strong> week on</p>
       2. In the **Name** box, type **Remove Transaction Log Backups**.
    6. Right-click the **Remove Transaction Log Backups** task and click **Edit...**
    7. In the **Maintenance Cleanup Task** window:
-      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
+      1. In the **Folder** box, type **Z:\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\Backup\\Transaction Log\\**.
       2. In the **File extension** box, type **trn**.
       3. In the **File age** section, configure the settings to delete files older than **2 Week(s)**.
       4. Click **OK**.
@@ -1447,37 +1444,63 @@ Right-click **Full Backup of All Databases** and click **Execute**.
 
 ## Configure DPM
 
-### Configure SMTP server for DPM
+### # Configure antivirus on DPM server
 
-#### Configure SMTP server in DPM
+#### # Disable real-time monitoring by Windows Defender for DPM server
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F6/E51173C49C68578735C26A4014119C2F61DBB1F6.png)
+```PowerShell
+$excludeFolders = `
+    "E:\",
+    "F:\",
+    "$env:ProgramFiles\Microsoft System Center\DPM\DPM\Temp",
+    "$env:ProgramFiles\Microsoft System Center\DPM\DPM\XSD"
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/5A11E744DEA74BA4352505ED7637774E1F5F46B6.png)
+$excludeProcesses =
+    "$env:ProgramFiles\Microsoft System Center 2022\DPM\DPM\bin\msdpm.exe",
+    "$env:ProgramFiles\Microsoft System Center 2022\DPM\DPM\bin\DPMRA.exe"
+    "$env:windir\Microsoft.NET\Framework\v2.0.50727\csc.exe",
+    "$env:windir\Microsoft.NET\Framework64\v2.0.50727\csc.exe",
+    "$env:windir\Microsoft.NET\Framework\v4.0.30319\csc.exe",
+    "$env:windir\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/7D96607EC1ADB828DE5384AAC494D42677D67C8D.png)
+Set-MpPreference -ExclusionPath $excludeFolders
+Set-MpPreference -ExclusionProcess $excludeProcesses
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/286112B581EC44A519DCB215AE0DE763A62DC739.png)
+#### # Configure antivirus software to delete infected files
 
-#### Configure spam filter in Office 365
+```PowerShell
+Set-MpPreference -LowThreatDefaultAction Remove
+Set-MpPreference -ModerateThreatDefaultAction Remove
+Set-MpPreference -HighThreatDefaultAction Remove
+Set-MpPreference -SevereThreatDefaultAction Remove
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/32/82E077425AC6F28A41271EAD613AA3BA71791532.png)
+#### References
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/70/7FA4D747662F00480D7D9F1B45CC3D3404B40D70.png)
+**Run antivirus software on the DPM server**\
+From <[https://learn.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2022](https://learn.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2022)>
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CF/8036CBE7D9E4D24BDFF23F58703AA7573A1AD6CF.png)
+**Configure Data Protection Manager 2016 AntiVirus Exclusions on Windows Server 2016**\
+From <[https://www.normanbauer.com/2018/02/28/configure-data-protection-manager-2016-antivirus-exclusions-on-windows-server-2016/](https://www.normanbauer.com/2018/02/28/configure-data-protection-manager-2016-antivirus-exclusions-on-windows-server-2016/)>
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/D4830AFAD42D6CA84F83E7547825EB67BC1F3CF4.png)
+```PowerShell
+cls
+```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/CFE2C943457EE17E13F409415D70BF607C01C188.png)
+### Configure SMTP server in DPM
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C3/C452ADD0D18F810A65E2E3089AC0EFA6D91DB6C3.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FC/99325F52833D4C19D24142AD4F54BE424E3AE1FC.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/EB83A6564D926E75A086BBEBC8977BA06B33350C.png)
+
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/BB4B1D8D98691E95D59AC5FEDD3C2CA960D328BB.png)
 
 ### Configure DPM notifications
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/28/CE1A7614F53D267EE0938B5DB3A202FBD98B9428.png)
 
-## Add disks to the storage pool
+### Add disks to DPM storage pool
 
 1. In DPM Administrator Console, click **Management**, and then click the **Disk Storage**.
 2. Click **Add** on the tool ribbon. The **Add Disks to Storage Pool** dialog box appears. The **Available disks** section lists the disks that you can add to the storage pool.
@@ -1495,9 +1518,170 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh758075.aspx](http://t
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/4A/77C4C32AFC7A433A484441173DA3F850273F2B4A.png)
 
-## Upgrade DPM agents to DPM 2019
+## Deploy DPM protection agent
 
-## Create protection group for domain controllers
+Before installing the DPM 2022 agent, remove the DPM agent from computers
+protected by the previous version of DPM. Next, create temporary firewall rules
+on each protected computer to allow the DPM agent to be installed remotely.
+Then install the agents and remove the temporary firewall rules.
+
+### Remove DPM 2019 agent
+
+Remove the old version of the DPM agent from the following computers:
+
+- HAVOK-TEST
+- STORM
+- TT-ADMIN05
+- TT-DC10
+- TT-DC11
+- TT-FS01
+- TT-SQL01C
+- TT-SQL01D
+- TT-SQL03
+
+```PowerShell
+cls
+```
+
+### # Create firewall rules for remote installation of DPM agent
+
+```PowerShell
+@(
+    "HAVOK-TEST",
+    "STORM",
+    "TT-ADMIN05",
+    "TT-DC10",
+    "TT-DC11",
+    "TT-FS01",
+    "TT-HV06A",
+    "TT-HV06B",
+    "TT-HV06C",
+    "TT-SQL01C",
+    "TT-SQL01D",
+    "TT-SQL03",
+    "TT-W11-DEV-01"
+    ) |
+    foreach {
+        $computer = $_
+
+        Invoke-Command `
+            -ComputerName $computer `
+            -ScriptBlock {
+                New-NetFirewallRule `
+                    -Name "DPM Agent Installation" `
+                    -DisplayName "DPM Agent Installation" `
+                    -Group "Technology Toolbox (Custom)" `
+                    -Direction Inbound `
+                    -RemoteAddress 10.1.30.74 `
+                    -Service any `
+                    -Action Allow |
+                    Out-Null
+            }
+    }
+```
+
+### Install DPM agent
+
+Using the DPM console, add the computers specified in the previous section to
+install the DPM agent.
+
+```PowerShell
+cls
+```
+
+### # Remove firewall rules for remote installation of DPM agent
+
+```PowerShell
+@(
+    "HAVOK-TEST",
+    "STORM",
+    "TT-ADMIN05",
+    "TT-DC10",
+    "TT-DC11",
+    "TT-FS01",
+    "TT-HV06A",
+    "TT-HV06B",
+    "TT-HV06C",
+    "TT-SQL01C",
+    "TT-SQL01D",
+    "TT-SQL03",
+    "TT-W11-DEV-01"
+    ) |
+    foreach {
+        $computer = $_
+
+        Invoke-Command `
+            -ComputerName $computer `
+            -ScriptBlock {
+                Remove-NetFirewallRule -Name "DPM Agent Installation"
+            }
+    }
+```
+
+## Configure backup/restore policy
+
+### Create group policy to exclude user profile AppData files from backup
+
+Scope: **corp.technologytoolbox.com** (entire domain)
+
+Name: **Backup/Restore Policy**
+
+Settings:
+
+- **Computer Configuration**
+  - **Policies**
+    - **Windows Settings**
+      - **Scripts (Startup/Shutdown)**
+        - **Startup**
+          - **PowerShell Scripts**
+            - **Set-UserProfileAppDataFilesNotToBackup.ps1**
+
+---
+
+#### Set-UserProfileAppDataFilesNotToBackup.ps1
+
+```PowerShell
+$userProfileAppDataFilesNotToBackup = @("%UserProfile%\AppData\* /s")
+
+# Note: "%UserProfile%\AppData\*" only works for the currently logged in
+# user. To exclude the AppData files for *all* users, enumerate each user
+# profile folder and add the AppData folder for each one in the list of
+# files not to backup.
+Get-WmiObject -ClassName Win32_UserProfile |
+    # exclude "special" user profiles (e.g. LocalService and NetworkService)
+    Where-Object { $_.Special -eq $false } |
+    # exclude NT_SERVICE user profiles (e.g. MSSQLSERVER)
+    Where-Object { $_.SID -notlike "S-1-5-80-*" } |
+    # exclude IIS user profiles (e.g. DefaultAppPool)
+    Where-Object { $_.SID -notlike "S-1-5-82-*" } |
+    # sort the items (to make it easier to inspect the registry value)
+    Sort-Object LocalPath |
+    # add the AppData files for each user profile to the list
+    ForEach-Object {
+        $userProfileAppDataFilesNotToBackup += `
+             ($_.LocalPath + "\AppData\* /s")
+    }
+
+Set-ItemProperty `
+    -Path ("HKLM:\SYSTEM\CurrentControlSet\Control\BackupRestore" `
+        + "\FilesNotToBackup") `
+    -Name "User Profile AppData" `
+    -Value $userProfileAppDataFilesNotToBackup `
+    -Type MultiString
+```
+
+---
+
+## Create protection groups
+
+### Create protection group for domain controllers
+
+| Member                                   | Computer |
+| ---------------------------------------- | -------- |
+| System State (includes Active Directory) | TT-DC10  |
+| Volume - D:\                             | TT-DC10  |
+| System State (includes Active Directory) | TT-DC11  |
+| Volume - D:\                             | TT-DC11  |
 
 Protection group name: **Domain Controllers**\
 Retention range: **5 days**\
@@ -1505,7 +1689,7 @@ Application recovery points:
 
 - Express Full Backup: **8:00 PM Everyday**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/41/2990BCEE38D3AF1136E0168D3A02EC8CC8DFEE41.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FB/5A1F04716E203CB3844B347F7B6389C04B7F6AFB.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/06/5D5C5F73D37B3F4227C5DD8587FE8DDC70234F06.png)
 
@@ -1513,33 +1697,37 @@ Application recovery points:
 
 Ensure **Servers** is selected and then click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/3928FC7352E65E5B26387001B6D0EAA3781D12B9.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/8F8449A1D22E3973E07F015CDEB04BD18F8BD56A.png)
 
 Expand **TT-DC10**, then expand **System Protection**, and then select **System State (includes Active Directory)**.
 
 Repeat the previous step for **TT-DC11**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/CE14CCEE84424D98586BE462E0A07CE834FD944D.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/5EEDE2D593269BE9A52B4489026279364A305E8D.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/1005417D40057B5AF5352C5595801B899E9E1B9F.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/A7AC3CC9D35DE9358FC22DBAE88EA34915AA8F91.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/31/BA7C105F9C9B334C2504D7371D9F80A826D55C31.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5A/508AA204F60B7C54EE7857A5C216D960B161045A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/9D4CB62169FA336A124BCB70C8E53064A4BA153B.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/233563E79215ECA44FE6156BB65B5085DF98B8FF.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A4/C102548568779FE5D6D328F0178DEAE47C06F7A4.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7A/E65D589FD0BE524531A130552ADD086F60571C7A.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A5/62F056A6FD15F04C274A710DC70C4527955265A5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A4/D1BEA07D2E33B60AA61AE042E26BD3105C39ECA4.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/92EAB75CD1C4D8A8EB0BF6C31978FA991EDFCA5E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/82/7EDFEF7B758A9BFB15E930BC42D8575B807C1D82.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/56/5A56B1D8EAF08B462AC0E9927994637364F2F756.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BA/1AC3A63E2414F10A2342C6D696AC1B46B5B41EBA.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/6E845EDF868DFA147B82685E6754888EBFEF95F4.png)
 
-## Create protection group for SQL Server databases (TEST)
+### Create protection group for SQL Server databases (TEST)
+
+| Member              | Computer   |
+| ------------------- | ---------- |
+| SQL Server - (Auto) | HAVOK-TEST |
 
 Protection group name: **SQL Server Databases (TEST)**\
 Retention range: **10 days**\
@@ -1548,13 +1736,13 @@ Application recovery points:
 
 - Express Full Backup: **7:00 PM Everyday**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/E332F82552FE4C711D2E687B28EE1169427AE2CE.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/4C/9B44FF94EEB14F792EF573270E2C633261E1ED4C.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/64/2FCB901232ED512BD305BCE0D08582DA8672BC64.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/80/B678373417117E40108C346679C8F330048C2880.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/08/ECAA9557048D6DC7F053F3595B0F6F7A2D8F2208.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/A96E0D1645B8D438E8B2E549180A99E473077365.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/5A/546C97814C22CBF7C69BB1F12D54A173A1E6DC5A.png)
 
@@ -1572,13 +1760,13 @@ In the **Application recovery points** section, click **Modify...**
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/A5/E7D3A39889A4F0A0264D896B027CA831477C65A5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/411F7B4DE7B998D4EE55796B17BB7F8E27BDDC69.png)
+![(screenshot)](https://assets.technologytoolbox.com/screenshots/7A/E65D589FD0BE524531A130552ADD086F60571C7A.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/FB/682A84E45970EA42899318F5C68BF8F08180E7FB.png)
 
 ![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/0725D28E72009F997074B92C3BC2C6AA67A804E1.png)
 
-### Add "Local System" account to SQL Server sysadmin role
+#### Add "Local System" account to SQL Server sysadmin role
 
 On the SQL Server (HAVOK-TEST), open SQL Server Management Studio and execute the following:
 
@@ -1587,12 +1775,17 @@ ALTER SERVER ROLE [sysadmin] ADD MEMBER [NT AUTHORITY\SYSTEM]
 GO
 ```
 
-#### Reference
+##### Reference
 
 **Protection agent jobs may fail for SQL Server 2012 databases**\
 Pasted from <[http://technet.microsoft.com/en-us/library/dn281948.aspx](http://technet.microsoft.com/en-us/library/dn281948.aspx)>
 
-## Create protection group for SQL Server databases
+### Create protection group for SQL Server databases
+
+| Member              | Computer  |
+| ------------------- | --------- |
+| SQL Server - (Auto) | TT-SQL01D |
+| SQL Server - (Auto) | TT-SQL03  |
 
 Protection group name: **SQL Server Databases**\
 Retention range: **10 days**\
@@ -1601,7 +1794,11 @@ Application recovery points:
 
 - Express Full Backup: **6:00 PM Everyday**
 
-## Create protection group for file servers
+### Create protection group for file servers
+
+| Member      | Computer |
+| ----------- | -------- |
+| All Volumes | TT-FS01  |
 
 Protection group name: **Critical Files**\
 Retention range: **10 days**\
@@ -1610,8 +1807,24 @@ File recovery points:
 
 - Recovery points for files: **7:00 AM, 9:00 AM, 11:00 AM, 1:00 PM, 3:00, 5:00 PM Everyday**
 
-## Create protection group for client computers
+### Create protection group for client computers
 
+| Folder Path    | Rule     |
+| -------------- | -------- |
+| C:\BackedUp    | Include  |
+| D:\BackedUp    | Include  |
+| E:\BackedUp    | Include  |
+| F:\BackedUp    | Include  |
+| G:\BackedUp    | Include  |
+| User Profiles  | Include  |
+| C:\NotBackedUp | Exclude  |
+| D:\NotBackedUp | Exclude  |
+| E:\NotBackedUp | Exclude  |
+| F:\NotBackedUp | Exclude  |
+| G:\NotBackedUp | Exclude  |
+| Program Files  | Exclude  |
+
+Allow users to specify protection group members: **Yes (checked)**
 Protection group name: **Clients - Gold**\
 Retention range: **10 days**\
 Synchronization frequency: **Every 1 hour(s)**\
@@ -1619,13 +1832,15 @@ Client computer recovery points:
 
 - Recovery points: **8:00 AM, 10:00 AM, 12:00 PM, 2:00 PM, 4:00 PM, 6:00 PM Everyday**
 
-## Create protection group for Hyper-V
+### Create protection group for Hyper-V
 
 Protection group name: **Hyper-V**\
 Retention range: **5 days**\
 Application recovery points:
 
 - Express Full Backup: **11:00 PM Everyday**
+
+TODO:
 
 ## Set up protection for live migration
 
@@ -1643,18 +1858,18 @@ cls
 #### # Extract VMM setup files
 
 ```PowerShell
-$imagePath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
-    + "\mu_system_center_virtual_machine_manager_2019_x64_dvd_06c18108.iso"
+$imagePath = "\\TT-FS01\Products\Microsoft\System Center 2022" `
+    + "\mu_system_center_virtual_machine_manager_2022_x64_dvd_06c18108.iso"
 
 $imageDriveLetter = (Mount-DiskImage -ImagePath $imagePath -PassThru |
     Get-Volume).DriveLetter
 
-$installer = $imageDriveLetter + ":\SCVMM_2019.exe"
+$installer = $imageDriveLetter + ":\SCVMM_2022.exe"
 
 & $installer
 ```
 
-Destination location: **C:\\NotBackedUp\\Temp\\System Center 2019 Virtual Machine Manager**
+Destination location: **C:\\NotBackedUp\\Temp\\System Center 2022 Virtual Machine Manager**
 
 ```PowerShell
 Dismount-DiskImage -ImagePath $imagePath
@@ -1667,7 +1882,7 @@ Dismount-DiskImage -ImagePath $imagePath
 1. Start the Virtual Machine Manager Setup Wizard.
 
    ```PowerShell
-   & "C:\NotBackedUp\Temp\System Center 2019 Virtual Machine Manager\Setup.exe"
+   & "C:\NotBackedUp\Temp\System Center 2022 Virtual Machine Manager\Setup.exe"
    ```
 
 2. On the main setup page, click **Install**.
@@ -1704,7 +1919,7 @@ cls
 
 ```PowerShell
 Remove-Item `
-    -Path "C:\NotBackedUp\Temp\System Center 2019 Virtual Machine Manager" `
+    -Path "C:\NotBackedUp\Temp\System Center 2022 Virtual Machine Manager" `
     -Recurse
 ```
 
@@ -1723,7 +1938,7 @@ cls
 ```PowerShell
 $userRole = Get-SCUserRole -Name "DPM Servers"
 
-Set-SCUserRole -UserRole $userRole -AddMember @("TECHTOOLBOX\TT-DPM06`$")
+Set-SCUserRole -UserRole $userRole -AddMember @("TECHTOOLBOX\TT-DPM07`$")
 ```
 
 ---
@@ -1735,7 +1950,7 @@ cls
 ### # Connect DPM server to VMM server
 
 ```PowerShell
-Set-DPMGlobalProperty -DPMServerName TT-DPM06 -KnownVMMServers TT-VMM01
+Set-DPMGlobalProperty -DPMServerName TT-DPM07 -KnownVMMServers TT-VMM01
 ```
 
 ```PowerShell
@@ -1747,7 +1962,7 @@ cls
 ### # Install SCOM agent
 
 ```PowerShell
-$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2019\SCOM\agent\AMD64" `
+$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2022\SCOM\agent\AMD64" `
     + "\MOMAgent.msi"
 
 msiexec.exe /i $msiPath `
@@ -1758,143 +1973,29 @@ msiexec.exe /i $msiPath `
 
 ### Approve manual agent install in Operations Manager
 
-```PowerShell
-logoff
-```
-
----
-
-**TT-ADMIN04** - Run as administrator
-
-```PowerShell
-cls
-```
-
-### # Disable setup account for System Center
-
-```PowerShell
-Disable-ADAccount -Identity setup-systemcenter
-```
-
----
-
-```PowerShell
-cls
-```
-
-## # Update PowerShell help
-
-```PowerShell
-Update-Help
-```
-
 ## Install updates using Windows Update
 
 > **Note**
 >
 > Repeat until there are no updates available for the computer.
 
-## Expand L: (Log01) drive
-
----
-
-**TT-ADMIN04** - Run as administrator
+## Disable setup account for DPM
 
 ```PowerShell
-cls
-```
-
-### # Increase size of "Log01" VHD
-
-```PowerShell
-$vmHost = "TT-HV05F"
-$vmName = "TT-DPM06"
-
-Resize-VHD `
-    -ComputerName $vmHost `
-    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-        + $vmName + "_Log01.vhdx") `
-    -SizeBytes 2GB
+logoff
 ```
 
 ---
 
-```PowerShell
-cls
-```
-
-### # Extend partition
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
-$driveLetter = "L"
-
-$partition = Get-Partition -DriveLetter $driveLetter |
-    where { $_.DiskNumber -ne $null }
-
-$size = (Get-PartitionSupportedSize `
-    -DiskNumber $partition.DiskNumber `
-    -PartitionNumber $partition.PartitionNumber)
-
-Resize-Partition `
-    -DiskNumber $partition.DiskNumber `
-    -PartitionNumber $partition.PartitionNumber `
-    -Size $size.SizeMax
-```
-
-## Expand T: (Temp01) drive
-
----
-
-**TT-ADMIN04** - Run as administrator
-
-```PowerShell
-cls
-```
-
-### # Increase size of "Temp01" VHD
-
-```PowerShell
-$vmHost = "TT-HV05F"
-$vmName = "TT-DPM06"
-
-Resize-VHD `
-    -ComputerName $vmHost `
-    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
-        + $vmName + "_Temp01.vhdx") `
-    -SizeBytes 2GB
+Disable-ADAccount -Identity setup-dpm
 ```
 
 ---
 
-```PowerShell
-cls
-```
-
-### # Extend partition
-
-```PowerShell
-$driveLetter = "T"
-
-$partition = Get-Partition -DriveLetter $driveLetter |
-    where { $_.DiskNumber -ne $null }
-
-$size = (Get-PartitionSupportedSize `
-    -DiskNumber $partition.DiskNumber `
-    -PartitionNumber $partition.PartitionNumber)
-
-Resize-Partition `
-    -DiskNumber $partition.DiskNumber `
-    -PartitionNumber $partition.PartitionNumber `
-    -Size $size.SizeMax
-```
-
-**TODO:**
-
-```PowerShell
-cls
-```
-
-## # Enter a product key and activate Windows
+## # Enter product key and activate Windows
 
 ```PowerShell
 slmgr /ipk {product key}
