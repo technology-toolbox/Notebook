@@ -1,7 +1,7 @@
 # TT-SQL01C - Windows Server 2019
 
-Tuesday, November 26, 2019\
-8:29 AM
+Sunday, January 19, 2025\
+11:48 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -11,7 +11,7 @@ Tuesday, November 26, 2019\
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -20,7 +20,7 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05A"
+$vmHost = "TT-HV06A"
 $vmName = "TT-SQL01C"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
@@ -89,7 +89,7 @@ logoff
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -100,8 +100,8 @@ cls
 ```PowerShell
 $vmName = "TT-SQL01C"
 
-$targetPath = ("OU=SQL Servers,OU=Servers,OU=Resources,OU=IT" `
-    + ",DC=corp,DC=technologytoolbox,DC=com")
+$targetPath = ("OU=SQL Servers,OU=Servers,OU=Resources" `
+    + ",OU=Information Technology,DC=corp,DC=technologytoolbox,DC=com")
 
 Get-ADComputer $vmName | Move-ADObject -TargetPath $targetPath
 ```
@@ -181,14 +181,14 @@ ping TT-FS01 -f -l 8900
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label | Storage Level |
 | --- | --- | --- | --- | --- | --- | --- |
 | 0 | C: | 40 GB | Dynamic | 4K | OSDisk | Silver |
-| 1 | D: | 40 GB | Fixed | 64K | Data01 | Gold |
-| 2 | L: | 15 GB | Fixed | 64K | Log01 | Gold |
-| 3 | T: | 2 GB | Fixed | 64K | Temp01 | Gold |
+| 1 | D: | 80 GB | Fixed | 64K | Data01 | Gold |
+| 2 | L: | 25 GB | Fixed | 64K | Log01 | Gold |
+| 3 | T: | 4 GB | Fixed | 64K | Temp01 | Gold |
 | 4 | Z: | 50 GB | Dynamic | 4K | Backup01 | Silver |
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -197,7 +197,7 @@ cls
 #### # Add virtual disks for SQL Server
 
 ```PowerShell
-$vmHost = "TT-HV05A"
+$vmHost = "TT-HV06A"
 $vmName = "TT-SQL01C"
 $goldStoragePath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
 $silverStoragePath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
@@ -208,7 +208,7 @@ $silverStoragePath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks"
 ```PowerShell
 $vhdPath = $goldStoragePath + "\$vmName" + "_Data01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 40GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 80GB
 Add-VMHardDiskDrive `
   -ComputerName $vmHost `
   -VMName $vmName `
@@ -221,7 +221,7 @@ Add-VMHardDiskDrive `
 ```PowerShell
 $vhdPath = $goldStoragePath + "\$vmName" + "_Log01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 15GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 25GB
 Add-VMHardDiskDrive `
   -ComputerName $vmHost `
   -VMName $vmName `
@@ -234,7 +234,7 @@ Add-VMHardDiskDrive `
 ```PowerShell
 $vhdPath = $goldStoragePath + "\$vmName" + "_Temp01.vhdx"
 
-New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 2GB
+New-VHD -ComputerName $vmHost -Path $vhdPath -Fixed -SizeBytes 4GB
 Add-VMHardDiskDrive `
   -ComputerName $vmHost `
   -VMName $vmName `
@@ -334,7 +334,7 @@ $domainGroup = "SQL Server Admins"
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -438,9 +438,9 @@ $imagePath = ("\\TT-FS01\Products\Microsoft\SQL Server 2017" `
 
 $imageDriveLetter = (Mount-DiskImage -ImagePath $ImagePath -PassThru |
     Get-Volume).DriveLetter
-```
 
-& ("\$imageDriveLetter" + ":\\setup.exe")
+& ($imageDriveLetter + ":\\setup.exe")
+```
 
 On the **Feature Selection** step, select the following checkboxes:
 
@@ -481,7 +481,8 @@ cls
 ### # Install SQL Server Management Studio
 
 ```PowerShell
-& "\\TT-FS01\Products\Microsoft\SQL Server Management Studio\18.4\SSMS-Setup-ENU.exe"
+& ("\\TT-FS01\Products\Microsoft\SQL Server Management Studio\18.12.1" `
+    + "\SSMS-Setup-ENU.exe")
 ```
 
 > **Important**
@@ -495,7 +496,8 @@ cls
 ### # Install cumulative update for SQL Server
 
 ```PowerShell
-& "\\TT-FS01\Products\Microsoft\SQL Server 2017\Patches\CU17\SQLServer2017-KB4515579-x64.exe"
+& ("\\TT-FS01\Products\Microsoft\SQL Server 2017\Patches\CU31" `
+    + "\SQLServer2017-KB5016884-x64.exe")
 ```
 
 > **Important**
@@ -572,14 +574,9 @@ cls
 $sqlcmd = @"
 EXEC msdb.dbo.sp_set_sqlagent_properties @jobhistory_max_rows=-1,
     @jobhistory_max_rows_per_job=-1
-```
-
 "@
 
-```PowerShell
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
 ```
 
 ##### Reference
@@ -599,8 +596,6 @@ cls
 $sqlcmd = "CREATE DATABASE SqlMaintenance"
 
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
 ```
 
 ##### # Create maintenance table, stored procedures, and jobs
@@ -614,8 +609,6 @@ $tempFileName = [System.IO.Path]::GetTempFileName()
 Invoke-WebRequest -Uri $url -OutFile $tempFileName
 
 Invoke-Sqlcmd -InputFile $tempFileName -Verbose -Debug:$false
-
-Set-Location C:
 
 Remove-Item $tempFileName
 ```
@@ -631,8 +624,6 @@ $tempFileName = [System.IO.Path]::GetTempFileName()
 Invoke-WebRequest -Uri $url -OutFile $tempFileName
 
 Invoke-Sqlcmd -InputFile $tempFileName -Verbose -Debug:$false
-
-Set-Location C:
 
 Remove-Item $tempFileName
 ```
@@ -1545,7 +1536,7 @@ Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://t
 
 ---
 
-**TT-ADMIN02** - DPM Management Shell
+**TT-ADMIN05** - DPM Management Shell
 
 ```PowerShell
 cls
@@ -1631,14 +1622,9 @@ $sqlcmd = @"
 EXEC sp_configure 'clr enabled', 1;
 RECONFIGURE;
 GO
-```
-
 "@
 
-```PowerShell
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
-
-Set-Location C:
 ```
 
 ```PowerShell
@@ -1652,11 +1638,8 @@ $sqlcmd = @"
 ALTER DATABASE OperationsManager SET SINGLE_USER WITH ROLLBACK IMMEDIATE
 ALTER DATABASE OperationsManager SET ENABLE_BROKER
 ALTER DATABASE OperationsManager SET MULTI_USER
-```
-
 "@
 
-```PowerShell
 Invoke-Sqlcmd $sqlcmd -Verbose -Debug:$false
 
 Invoke-Sqlcmd : The operation cannot be performed on database "OperationsManager" because it is involved in a database mirroring session or an availability group. Some operations are not allowed on a database that is participating in a database mirroring session or in an availability group.
@@ -1765,7 +1748,7 @@ msiexec.exe /i $msiPath `
 
 ---
 
-**TT-ADMIN02** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -1774,7 +1757,7 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05A"
+$vmHost = "TT-HV06A"
 $vmName = "TT-SQL01C"
 
 Stop-VM -ComputerName $vmHost -Name $vmName
