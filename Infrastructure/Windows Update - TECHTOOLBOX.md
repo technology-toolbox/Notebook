@@ -26,8 +26,8 @@ $activity = "Prepare development and test VMs for patching"
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'TT-VS2013-DEV'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'TT-W10-DEV-10'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'TT-VS2013-DEV'; VMHost = 'TT-W11-DEV-01'; },
+    [PSCustomObject] @{ VMName = 'TT-W10-DEV-10'; VMHost = 'TT-W11-DEV-01'; },
     [PSCustomObject] @{ VMName = 'TT-W10-DEV-11'; VMHost = 'TT-HV06B'; },
     [PSCustomObject] @{ VMName = 'TT-W7-TEST-04'; VMHost = 'TT-HV06B'; },
     [PSCustomObject] @{ VMName = 'TT-W7-TEST-05'; VMHost = 'TT-HV06B'; },
@@ -539,8 +539,8 @@ cls
 
 ```PowerShell
 $virtualMachinesWithSnapshots = @(
-    [PSCustomObject] @{ VMName = 'TT-VS2013-DEV'; VMHost = 'STORM'; },
-    [PSCustomObject] @{ VMName = 'TT-W10-DEV-10'; VMHost = 'STORM'; },
+    [PSCustomObject] @{ VMName = 'TT-VS2013-DEV'; VMHost = 'TT-W11-DEV-01'; },
+    [PSCustomObject] @{ VMName = 'TT-W10-DEV-10'; VMHost = 'TT-W11-DEV-01'; },
     [PSCustomObject] @{ VMName = 'TT-W10-DEV-11'; VMHost = 'TT-HV06B'; },
     [PSCustomObject] @{ VMName = 'TT-W7-TEST-04'; VMHost = 'TT-HV06B'; },
     [PSCustomObject] @{ VMName = 'TT-W7-TEST-05'; VMHost = 'TT-HV06B'; },
