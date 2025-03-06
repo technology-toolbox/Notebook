@@ -1993,6 +1993,34 @@ logoff
 Disable-ADAccount -Identity setup-dpm
 ```
 
+## Expand D: (Data01) drive
+
+---
+
+**TT-ADMIN05** - Run as administrator
+
+### # Increase the size of "Data01" VHD
+
+```PowerShell
+$vmHost = "TT-HV06C"
+$vmName = "TT-DPM07"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + "_Data01.vhdx") `
+    -SizeBytes 4GB
+```
+
+---
+
+### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 1 -PartitionNumber 2)
+Resize-Partition -DiskNumber 1 -PartitionNumber 2 -Size $size.SizeMax
+```
+
 ---
 
 ## # Enter product key and activate Windows
