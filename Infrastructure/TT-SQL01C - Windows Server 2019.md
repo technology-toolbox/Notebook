@@ -1997,6 +1997,42 @@ $size = (Get-PartitionSupportedSize -DiskNumber 1 -PartitionNumber 2)
 Resize-Partition -DiskNumber 1 -PartitionNumber 2 -Size $size.SizeMax
 ```
 
+## Issue: Disk free space is low on T: drive
+
+---
+
+**TT-ADMIN05** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Increase size of "Temp01" VHD
+
+```PowerShell
+$vmHost = "TT-HV06A"
+$vmName = "TT-SQL01C"
+
+Resize-VHD `
+    -ComputerName $vmHost `
+    -Path ("D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+        + $vmName + "_Temp01.vhdx") `
+    -SizeBytes 6GB
+```
+
+---
+
+```PowerShell
+cls
+```
+
+### # Extend partition
+
+```PowerShell
+$size = (Get-PartitionSupportedSize -DiskNumber 3 -PartitionNumber 2)
+Resize-Partition -DiskNumber 3 -PartitionNumber 2 -Size $size.SizeMax
+```
+
 **TODO:**
 
 ```PowerShell
