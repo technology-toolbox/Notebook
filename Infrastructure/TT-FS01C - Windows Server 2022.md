@@ -698,6 +698,80 @@ Add-SCLibraryShare -SharePath $sharePath -UseAlternateDataStream $true
 
 ---
 
+## Issue: Low disk space on D: volume (~4.5GB)
+
+### Move MDT-Build$ share from D:\ to E:\
+
+#### Copy files from D:\ to E:\
+
+```PowerShell
+robocopy 'D:\Shares\MDT-Build$\' 'E:\Shares\MDT-Build$\' /DCOPY:T /COPYALL /MIR
+```
+
+```PowerShell
+cls
+```
+
+#### # Remove files on source volume after verifying checksums on destination
+
+```PowerShell
+Get-ChildItem 'D:\Shares\MDT-Build$\' -Recurse -File -Force |
+     foreach {
+         $sourcePath = $_.FullName
+
+         $sourceHash = Get-FileHash -Algorithm SHA1 $sourcePath |
+            select -ExpandProperty Hash
+
+         $destPath = $sourcePath.Replace('D:', 'E:')
+
+         $destHash = Get-FileHash -Algorithm SHA1 $destPath |
+            select -ExpandProperty Hash
+
+         if (40 -eq $sourceHash.Length) {
+             if ($sourceHash -eq $destHash) {
+                 Remove-Item $sourcePath -Force -Verbose
+             }
+         }
+     }
+```
+
+#### Verify source path (**D:\Shares\MDT-Build$**) contains only empty folders
+
+#### Remove source path - **D:\Shares\MDT-Build$**
+
+```PowerShell
+cls
+```
+
+#### # Modify path for file share
+
+```Console
+regedit
+```
+
+1. In **Registry Editor**, go to the following key:
+
+    ```Text
+    HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer\Shares
+    ```
+
+1. Edit the **MDT-Build$** value to change the path from **D:\Shares\MDT-Build$** to **E:\Shares\MDT-Build$**.
+
+##### Reference
+
+**Saving and restoring existing Windows shares**\
+Pasted from <[https://learn.microsoft.com/en-us/troubleshoot/windows-client/networking/saving-restoring-existing-windows-shares](https://learn.microsoft.com/en-us/troubleshoot/windows-client/networking/saving-restoring-existing-windows-shares)>
+
+```PowerShell
+cls
+```
+
+#### # Restart server
+
+```Console
+Restart-Computer
+```
+
 **TODO:**
 
 ```PowerShell
