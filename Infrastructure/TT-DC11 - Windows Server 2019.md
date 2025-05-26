@@ -1,17 +1,17 @@
-# TT-DC11 - Windows Server 2019
+# TT-DC13 - Windows Server 2022 Domain Controller
 
-Saturday, May 18, 2019\
-6:14 AM
+Monday, May 26, 2025\
+6:15 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 ```
 
-## Deploy and configure infrastructure
+## Deploy and configure server infrastructure
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05B"
-$vmName = "TT-DC11"
+$vmHost = "TT-HV06B"
+$vmName = "TT-DC13"
 $vmPath = "E:\NotBackedUp\VMs"
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -44,116 +44,70 @@ Set-VM `
     -MemoryMaximumBytes 4GB `
     -AutomaticCheckpointsEnabled $false
 
-Add-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName
-
-$vmDvdDrive = Get-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName
-
-Set-VMFirmware `
+Set-VMNetworkAdapterVlan `
     -ComputerName $vmHost `
     -VMName $vmName `
-    -EnableSecureBoot Off `
-    -FirstBootDevice $vmDvdDrive
+    -Access `
+    -VlanId 30
 
-Set-VMDvdDrive `
-    -ComputerName $vmHost `
-    -VMName $vmName `
-    -Path "\\TT-FS01\Products\Microsoft\Windows Server 2019\en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso"
-
-Set-VMDvdDrive : Failed to add device 'Virtual CD/DVD Disk'.
-User Account does not have permission to open attachment.
-'TT-DC11' failed to add device 'Virtual CD/DVD Disk'. (Virtual machine ID B341BB2A-1E6E-443C-A8C4-1B078B7AB259)
-'TT-DC11': User account does not have permission required to open attachment '\\TT-FS01\Products\Microsoft\Windows Server
-2019\en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso'. Error: 'General access denied error' (0x80070005). (Virtual
-machine ID B341BB2A-1E6E-443C-A8C4-1B078B7AB259)
-At line:1 char:1
-+ Set-VMDvdDrive `
-+ ~~~~~~~~~~~~~~~~
-    + CategoryInfo          : PermissionDenied: (:) [Set-VMDvdDrive], VirtualizationException
-    + FullyQualifiedErrorId : AccessDenied,Microsoft.HyperV.PowerShell.Commands.SetVMDvdDrive
-
-$iso = Get-SCISO |
-    where {$_.Name -eq "en_windows_server_2019_updated_march_2019_x64_dvd_2ae967ab.iso"}
-
-Get-SCVirtualMachine -Name $vmName | Read-SCVirtualMachine
-
-Get-SCVirtualMachine -Name $vmName |
-    Get-SCVirtualDVDDrive |
-    Set-SCVirtualDVDDrive -ISO $iso -Link
-
-#Start-VM -ComputerName $vmHost -Name $vmName
-Start-SCVirtualMachine -VM $vmName
+Start-VM -ComputerName $vmHost -Name $vmName
 ```
 
 ---
 
-### Install Windows Server 2019
+### Install custom Windows Server 2022 image
 
-1. When prompted, select **Windows Server 2019 Standard (Desktop Experience)**.
-2. Specify a password for the local Administrator account.
+- On the **Task Sequence** step, select **Windows Server 2022** and click **Next**.
+- On the **Computer Details** step:
+  - In the **Computer name** box, type **TT-DC13**.
+  - Ensure the **Join a domain** option is selected and the **Domain to join** box contains **corp.technologytoolbox.com**.
+  - Click **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
 
-### # Rename local Administrator account
+### # Rename local Administrator account and set password
 
 ```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+$password = C:\NotBackedUp\Public\Toolbox\PowerShell\Get-SecureString.ps1
+```
+
+> **Note**
+>
+> When prompted, type the password for the local administrator account.
+
+```PowerShell
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
+
 $adminUser = [ADSI] 'WinNT://./Administrator,User'
 $adminUser.Rename('foo')
+$adminUser.SetPassword($plainPassword)
 
 logoff
 ```
 
-### Login as .\\foo
+---
+
+### Log in as local administrator account
+
+---
+
+**TT-ADMIN05** - Run as domain administrator
 
 ```PowerShell
 cls
 ```
 
-### # Set time zone
+### # Configure Windows Update
+
+#### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
-tzutil /s "Mountain Standard Time"
+Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "TT-DC13$"
 ```
 
-### # Rename computer and join domain
-
-```PowerShell
-$computerName = "TT-DC11"
-
-Rename-Computer -NewName $computerName -Restart
-```
-
-Wait for the VM to restart and then execute the following command to join the **TECHTOOLBOX** domain:
-
-```PowerShell
-Add-Computer -DomainName corp.technologytoolbox.com -Restart
-```
-
-### # Copy Toolbox content
-
-```PowerShell
-net use \\TT-FS01\IPC$ /USER:TECHTOOLBOX\jjameson
-```
-
-> **Note**
->
-> When prompted, type the password to connect to the file share.
-
-```PowerShell
-$source = "\\TT-FS01\Public\Toolbox"
-$destination = "C:\NotBackedUp\Public\Toolbox"
-
-robocopy $source $destination /E /XD git-for-windows "Microsoft SDKs"
-```
-
-### # Set MaxPatchCacheSize to 0 (recommended)
-
-```PowerShell
-Set-ExecutionPolicy Bypass -Scope Process -Force
-
-C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
-```
+---
 
 ### Configure storage
 
@@ -161,30 +115,13 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-MaxPatchCacheSize.ps1 0
 | ---- | ------------ | ----------- | -------------------- | ------------ |
 | 0    | C:           | 32 GB       | 4K                   | OSDisk       |
 | 1    | D:           | 5 GB        | 4K                   | Data01       |
+| 2    | Z:           | 20 GB       | 4K                   | Backup01     |
 
-```PowerShell
-cls
-```
-
-#### # Change drive letter for DVD-ROM
-
-```PowerShell
-$cdrom = Get-WmiObject -Class Win32_CDROMDrive
-$driveLetter = $cdrom.Drive
-
-$volumeId = mountvol $driveLetter /L
-$volumeId = $volumeId.Trim()
-
-mountvol $driveLetter /D
-
-mountvol X: $volumeId
-```
-
-#### Configure separate VHD for Active Directory data
+#### Configure separate VHDs for Active Directory data and backups
 
 ---
 
-**FOOBAR18** - Run as administrator
+**TT-ADMIN05** - Run as administrator
 
 ```PowerShell
 cls
@@ -193,13 +130,27 @@ cls
 ##### # Add disk for Active Directory data
 
 ```PowerShell
-$vmHost = "TT-HV05B"
-$vmName = "TT-DC11"
+$vmHost = "TT-HV06B"
+$vmName = "TT-DC13"
 
 $vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
     + $vmName + "_Data01.vhdx"
 
 New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 5GB
+Add-VMHardDiskDrive `
+    -ComputerName $vmHost `
+    -VMName $vmName `
+    -Path $vhdPath `
+    -ControllerType SCSI
+```
+
+##### # Add disk for local backups using Windows Server Backup
+
+```PowerShell
+$vhdPath = "E:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
+    + $vmName + "_Backup01.vhdx"
+
+New-VHD -ComputerName $vmHost -Path $vhdPath -Dynamic -SizeBytes 20GB
 Add-VMHardDiskDrive `
     -ComputerName $vmHost `
     -VMName $vmName `
@@ -215,6 +166,8 @@ cls
 
 ##### # Initialize disks and format volumes
 
+###### # Initialize data disk and format volume
+
 ```PowerShell
 Get-Disk 1 |
     Initialize-Disk -PartitionStyle GPT -PassThru |
@@ -225,33 +178,23 @@ Get-Disk 1 |
         -Confirm:$false
 ```
 
-### Configure networking
+###### # Initialize backup disk and format volume
 
----
-
-**FOOBAR18** - Run as administrator
+```PowerShell
+Get-Disk 2 |
+    Initialize-Disk -PartitionStyle GPT -PassThru |
+    New-Partition -UseMaximumSize -DriveLetter Z |
+    Format-Volume `
+        -FileSystem NTFS `
+        -NewFileSystemLabel "Backup01" `
+        -Confirm:$false
+```
 
 ```PowerShell
 cls
 ```
 
-#### # Move VM to Management VM network
-
-```PowerShell
-$vmName = "TT-DC11"
-$networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
-$vmNetwork = Get-SCVMNetwork -Name "Management VM Network"
-
-Stop-SCVirtualMachine $vmName
-
-Set-SCVirtualNetworkAdapter `
-    -VirtualNetworkAdapter $networkAdapter `
-    -VMNetwork $vmNetwork
-
-Start-SCVirtualMachine $vmName
-```
-
----
+### # Configure networking
 
 ```PowerShell
 $interfaceAlias = "Management"
@@ -276,12 +219,94 @@ Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
 
 Start-Sleep -Seconds 5
 
-ping TT-FS01 -f -l 8900
+ping TT-DC11 -f -l 8900
 ```
+
+```PowerShell
+cls
+```
+
+#### # Disable Link-Layer Topology Discovery
+
+```PowerShell
+Get-NetAdapter |
+    foreach {
+        $interfaceAlias = $_.Name
+
+        Write-Host ("Disabling Link-Layer Topology Discovery on interface" `
+            + " ($interfaceAlias)...")
+
+        Disable-NetAdapterBinding -Name $interfaceAlias `
+            -DisplayName "Link-Layer Topology Discovery Mapper I/O Driver"
+
+        Disable-NetAdapterBinding -Name $interfaceAlias `
+            -DisplayName "Link-Layer Topology Discovery Responder"
+    }
+```
+
+> **Note**
+>
+> This avoids flooding the firewall log with numerous entries for UDP 5355 broadcast.
+
+```PowerShell
+cls
+```
+
+#### # Disable NetBIOS over TCP/IP
+
+```PowerShell
+Get-NetAdapter |
+    foreach {
+        $interfaceAlias = $_.Name
+
+        Write-Host ("Disabling NetBIOS over TCP/IP on interface" `
+            + " ($interfaceAlias)...")
+
+        $adapter = Get-WmiObject -Class "Win32_NetworkAdapter" `
+            -Filter "NetConnectionId = '$interfaceAlias'"
+
+        $adapterConfig = `
+            Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" `
+                -Filter "Index= '$($adapter.DeviceID)'"
+
+        # Disable NetBIOS over TCP/IP
+        $adapterConfig.SetTcpipNetbios(2)
+    }
+```
+
+> **Note**
+>
+> This avoids flooding the firewall log with numerous entries for UDP 137 broadcast.
 
 ---
 
-**TT-DC09** - Run as administrator
+**TT-DC11** - Run as domain administrator
+
+```PowerShell
+cls
+```
+
+#### # Validate health of domain controllers and replication services
+
+##### # Validate health of domain controllers
+
+```Console
+dcdiag /s:TT-DC11
+```
+
+```Console
+dcdiag /s:TT-DC12
+```
+
+```PowerShell
+cls
+```
+
+##### # Validate health of replication services
+
+```Console
+repadmin /replsummary
+```
 
 ```PowerShell
 cls
@@ -303,11 +328,19 @@ Uninstall-ADDSDomainController `
 >
 > When prompted, specify the password for the local administrator account.
 
-##### Remove Active Directory Domain Services and DNS roles
-
-> **Note**
+> **Important**
 >
-> Restart the computer to complete the removal of the roles.
+> Wait for the computer to restart to complete the process of demoting the domain controller.
+
+##### # Remove Active Directory Domain Services and DNS roles
+
+```PowerShell
+Uninstall-WindowsFeature AD-Domain-Services, DNS -Restart
+```
+
+> **Important**
+>
+> Wait for the computer to restart to complete the removal of the roles.
 
 ##### # Stop server
 
@@ -356,27 +389,9 @@ Set-DNSClientServerAddress `
     -ServerAddresses 10.1.30.2
 ```
 
----
-
-**FOOBAR18** - Run as administrator
-
-```PowerShell
-cls
-```
-
-### # Configure Windows Update
-
-#### # Add machine to security group for Windows Update schedule
-
-```PowerShell
-Add-ADGroupMember -Identity "Windows Update - Slot 4" -Members "TT-DC11$"
-```
-
----
-
 ## Configure domain controller
 
-### Login as TECHTOOLBOX\\jjameson-admin
+### Log in as domain administrator
 
 ### # Install Active Directory Domain Services
 
@@ -409,6 +424,10 @@ Install-ADDSDomainController `
 >
 > When prompted, specify the password for the administrator account when the computer is started in Safe Mode or a variant of Safe Mode, such as Directory Services Restore Mode.
 
+> **Important**
+>
+> Wait for the initial directory synchronization to complete and for the server to restart.
+
 ### # Configure firewall for cross-forest trust (EXTRANET --> TECHTOOLBOX)
 
 ```PowerShell
@@ -417,11 +436,33 @@ reg add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters `
 
 reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters `
     /v DCTcpipPort /t REG_DWORD /d 51164
-```
 
-```PowerShell
 Restart-Computer
 ```
+
+## # Remove obsolete domain controller
+
+### # Remove obsolete domain controller from Active Directory
+
+```PowerShell
+Get-ADComputer TT-DC11 | Remove-ADObject -Recursive -Confirm:$false
+```
+
+---
+
+**TT-ADMIN05** - Run as administrator
+
+```PowerShell
+cls
+```
+
+### # Delete obsolete domain controller VM
+
+```PowerShell
+Remove-SCVirtualMachine TT-DC11
+```
+
+---
 
 ```PowerShell
 cls
@@ -429,73 +470,121 @@ cls
 
 ## # Configure backups
 
-### # Add Windows Server Backup feature (DPM dependency for System State backups)
+### # Add Windows Server Backup feature
 
 ```PowerShell
 Add-WindowsFeature Windows-Server-Backup
 ```
 
+### # Add exclusions to Microsoft Defender Antivirus scans for backups
+
+#### # Add exclusion for dedicated backup disk
+
+```PowerShell
+Add-MpPreference -ExclusionPath "\Device\HarddiskVolumeShadowCopy*\"
+```
+
+##### Reference
+
+[Exclude backups (Volume Shadow Copy) from Windows Defender](https://superuser.com/a/1704700)
+
+> **Note**
+>
+> The above exclusion avoids antivirus scanning when _writing_ files to the disk dedicated for backups (which can be observed -- without the exclusion added -- by using Process Monitor from the Sysinternals tools). However, if that is the only exclusion configured, very high CPU usage is still observed for the **Antimalware Service Executable** process when a backup is running (due to antivirus scans when _reading_ files to backup). To avoid this, exclude the process for **Windows Server Backup** as well.
+
+#### # Add exclusion for Windows Server Backup process
+
+```PowerShell
+Add-MpPreference -ExclusionProcess "C:\Windows\System32\wbengine.exe"
+```
+
 ```PowerShell
 cls
 ```
 
-### # Install DPM agent
+### # Add server to DPM protection group
+
+#### # Configure firewall rule for remote install of DPM agent
 
 ```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2016" `
-    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
+New-NetFirewallRule `
+    -Name "DPM Remote Agent Install" `
+    -DisplayName "DPM Remote Agent Install" `
+    -Group "Technology Toolbox (Custom)" `
+    -Direction Inbound `
+    -RemoteAddress (Resolve-DnsName TT-DPM07).IPAddress `
+    -Action Allow
+```
 
-$installerArguments = "TT-DPM02.corp.technologytoolbox.com"
+#### Install DPM protection agent
+
+```PowerShell
+cls
+```
+
+#### # Disable firewall rule for remote install of DPM agent
+
+```PowerShell
+Disable-NetFirewallRule -Name "DPM Remote Agent Install"
+```
+
+#### Add server to Domain Controllers protection group in DPM
+
+| Selected Members                                           | Computer     |
+| ---------------------------------------------------------- | ------------ |
+| System Protection\System State (includes Active Directory) | TT-DC13      |
+| D:\                                                        | TT-DC13      |
+
+```PowerShell
+cls
+```
+
+## # Configure monitoring
+
+### # Copy SCOM agent installation files
+
+```PowerShell
+$source = "\\TT-FS01\Products\Microsoft\System Center 2019\SCOM\Agent\AMD64"
+$destination = "C:\NotBackedUp\Temp\SCOM\Agent\AMD64"
+
+robocopy $source $destination /E
+```
+
+### # Install SCOM agent
+
+```PowerShell
+$installerPath = "C:\NotBackedUp\Temp\SCOM\Agent\AMD64\MOMAgent.msi"
+
+$installerArguments = "MANAGEMENT_GROUP=HQ" `
+    + " MANAGEMENT_SERVER_DNS=tt-scom01c.corp.technologytoolbox.com" `
+    + " ACTIONS_USE_COMPUTER_ACCOUNT=1"
 
 Start-Process `
-    -FilePath $installerPath `
-    -ArgumentList "$installerArguments" `
+    -FilePath msiexec.exe `
+    -ArgumentList "/i `"$installerPath`" $installerArguments" `
     -Wait
 ```
 
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
+In the **Microsoft Monitoring Agent Setup** window:
 
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
+1. On the **Agent Setup Options** step, select the **Connect the agent to System Center Operations Manager** checkbox, and then click **Next**.
+1. On the **Microsoft Update** step, select **Use Microsoft Update when I check for updates (recommended)**, and then click **Next**.
 
-- Exception for DPMRA.exe in all profiles
-- Exception for Windows Management Instrumentation service
-- Exception for RemoteAdmin service
-- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
-
-#### Reference
-
-**Installing Protection Agents Manually**\
-Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
-
----
-
-**FOOBAR18** - DPM Management Shell
+> **Important**
+>
+> Wait for the installation to complete.
 
 ```PowerShell
 cls
 ```
 
-### # Attach DPM agent
+#### # Remove Operations Manager installation files
 
 ```PowerShell
-$productionServer = 'TT-DC11'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM02 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
+Remove-Item C:\NotBackedUp\Temp\SCOM -Recurse
 ```
 
----
-
-### Add virtual machine to domain controllers protection group in DPM
-
-## Configure monitoring
-
-### Install Operations Manager agent
-
-Install SCOM agent using Operations Manager console
+### Approve manual agent install in Operations Manager
 
 ### Configure SCOM agent for domain controller
 
@@ -523,287 +612,6 @@ Restart-Service HealthService
 
 **Deploying SCOM 2016 Agents to Domain controllers - some assembly required**\
 From <[https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/](https://blogs.technet.microsoft.com/kevinholman/2016/11/04/deploying-scom-2016-agents-to-domain-controllers-some-assembly-required/)>
-
-## Upgrade to Data Protection Manager 2019
-
-```PowerShell
-cls
-```
-
-### # Remove DPM 2016 agent
-
-```PowerShell
-msiexec /x `{14DD5B44-17CE-4E89-8BEB-2E6536B81B35`}
-```
-
-> **Important**
->
-> Restart the computer to complete the removal of the DPM agent.
-
-```PowerShell
-Restart-Computer
-```
-
-### # Install DPM 2019 agent
-
-```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
-    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
-
-$installerArguments = "TT-DPM05.corp.technologytoolbox.com"
-
-Start-Process `
-    -FilePath $installerPath `
-    -ArgumentList "$installerArguments" `
-    -Wait
-```
-
-Review the licensing agreement. If you accept the Microsoft Software License Terms, select **I accept the license terms and conditions**, and then click **OK**.
-
-Confirm the agent installation completed successfully and the following firewall exceptions have been added:
-
-- Exception for DPMRA.exe in all profiles
-- Exception for Windows Management Instrumentation service
-- Exception for RemoteAdmin service
-- Exception for DCOM communication on port 135 (TCP and UDP) in all profiles
-
-#### Reference
-
-**Installing Protection Agents Manually**\
-Pasted from <[http://technet.microsoft.com/en-us/library/hh757789.aspx](http://technet.microsoft.com/en-us/library/hh757789.aspx)>
-
----
-
-**TT-ADMIN02** - DPM Management Shell
-
-```PowerShell
-cls
-```
-
-### # Attach DPM agent
-
-```PowerShell
-$productionServer = 'TT-DC11'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM05 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
-
-### Add virtual machine to domain controllers protection group in DPM
-
-## Upgrade to Operations Manager 2019
-
-```PowerShell
-cls
-```
-
-### # Remove SCOM 2016 agent
-
-```PowerShell
-msiexec /x `{742D699D-56EB-49CC-A04A-317DE01F31CD`}
-```
-
-```PowerShell
-cls
-```
-
-### # Install SCOM agent
-
-```PowerShell
-$msiPath = "\\TT-FS01\Products\Microsoft\System Center 2019\SCOM\agent\AMD64" `
-    + "\MOMAgent.msi"
-
-msiexec.exe /i $msiPath `
-    MANAGEMENT_GROUP=HQ `
-    MANAGEMENT_SERVER_DNS=TT-SCOM01C `
-    ACTIONS_USE_COMPUTER_ACCOUNT=1
-```
-
-### Approve manual agent install in Operations Manager
-
-## Issue - Insufficient free space to install patches using Windows Update
-
-Error installing **2021-01 Cumulative Update for Windows Server 2019 for x64-based Systems (KB4598230)** due to low disk space.
-
-```PowerShell
-cls
-```
-
-### # Clean up Windows Update files
-
-```PowerShell
-Stop-Service wuauserv
-
-Remove-Item C:\Windows\SoftwareDistribution -Recurse
-
-Start-Service wuauserv
-```
-
-```PowerShell
-cls
-```
-
-### # Clean up the WinSxS folder
-
-```PowerShell
-Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
-```
-
-```PowerShell
-cls
-```
-
-```PowerShell
-Restart-Computer
-```
-
-## Replace DPM server (TT-DPM05 --> TT-DPM06)
-
-```PowerShell
-cls
-```
-
-### # Update DPM server
-
-```PowerShell
-cd 'C:\Program Files\Microsoft Data Protection Manager\DPM\bin\'
-
-.\SetDpmServer.exe -dpmServerName TT-DPM06.corp.technologytoolbox.com
-```
-
----
-
-**TT-ADMIN04** - DPM Management Shell
-
-```PowerShell
-cls
-```
-
-### # Attach DPM agent
-
-```PowerShell
-$productionServer = 'TT-DC11'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM06 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
-
-That doesn't work...
-
-> Error:\
-> Data Protection Manager Error ID: 307\
-> The protection agent operation failed because DPM detected an unknown DPM protection agent on tt-dc11.corp.technologytoolbox.com.
->
-> Recommended action:\
-> Use Add or Remove Programs in Control Panel to uninstall the protection agent from tt-dc11.corp.technologytoolbox.com, then reinstall the protection agent and perform the operation again.
-
-```PowerShell
-cls
-```
-
-### # Remove DPM 2019 Agent Coordinator
-
-```PowerShell
-msiexec /x `{356B3986-6B7D-4513-B72D-81EB4F43ADE6`}
-```
-
-```PowerShell
-cls
-```
-
-### # Remove DPM 2019 Protection Agent
-
-```PowerShell
-msiexec /x `{CC6B6758-3A68-4BBA-9D61-1F3278D6A7EA`}
-```
-
-> **Important**
->
-> Restart the computer to complete the removal of the DPM agent.
-
-```PowerShell
-Restart-Computer
-```
-
-### # Install DPM 2019 agent
-
-```PowerShell
-$installerPath = "\\TT-FS01\Products\Microsoft\System Center 2019" `
-    + "\DPM\Agents\DPMAgentInstaller_x64.exe"
-
-$installerArguments = "TT-DPM06.corp.technologytoolbox.com"
-
-Start-Process `
-    -FilePath $installerPath `
-    -ArgumentList "$installerArguments" `
-    -Wait
-```
-
----
-
-**TT-ADMIN04** - DPM Management Shell
-
-```PowerShell
-cls
-```
-
-### # Attach DPM agent
-
-```PowerShell
-$productionServer = 'TT-DC11'
-
-.\Attach-ProductionServer.ps1 `
-    -DPMServerName TT-DPM06 `
-    -PSName $productionServer `
-    -Domain TECHTOOLBOX `
-    -UserName jjameson-admin
-```
-
----
-
-### Add system state to protection group in DPM
-
-```PowerShell
-cls
-```
-
-### # Configure antivirus on DPM protected server
-
-#### # Disable real-time monitoring by Windows Defender for DPM server
-
-```PowerShell
-[array] $excludeProcesses = Get-MpPreference | select -ExpandProperty ExclusionProcess
-
-$excludeProcesses +=
-   "$env:ProgramFiles\Microsoft Data Protection Manager\DPM\bin\DPMRA.exe",
-   "$env:windir\System32\wbengine.exe"
-
-Set-MpPreference -ExclusionProcess $excludeProcesses
-```
-
-#### # Configure antivirus software to delete infected files
-
-```PowerShell
-Set-MpPreference -LowThreatDefaultAction Remove
-Set-MpPreference -ModerateThreatDefaultAction Remove
-Set-MpPreference -HighThreatDefaultAction Remove
-Set-MpPreference -SevereThreatDefaultAction Remove
-```
-
-#### Reference
-
-**Run antivirus software on the DPM server**\
-From <[https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019](https://docs.microsoft.com/en-us/system-center/dpm/run-antivirus-server?view=sc-dpm-2019)>
 
 **TODO:**
 
