@@ -1031,8 +1031,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 8. Select the **Default Automatic Approval Rule** checkbox.
 9. Click **New Rule...**
 10. In the **Add Rule** window:
-    1. In the **Step 1: Select properties** section, select **When an update is
-       in a specific classification**.
+    1. In the **Step 1: Select properties** section, select **When an update is in a specific classification**.
     2. In the **Step 2: Edit the properties** section:
        1. Click **any classification**.
           1. In the **Choose Update Classifications** window:
@@ -1040,6 +1039,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
              2. Select the following checkboxes:
                 - **Critical Updates**
                 - **Security Updates**
+                - **Update Rollups**
           2. Click **OK**.
        2. Click **all computers**
           1. In the **Choose Computer Groups** window:
@@ -1059,7 +1059,7 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
     1. Confirm the **Rule properties** for the **Preview Approval Rule**
        are configured as follows:\
        \
-       **When an update is in *Critical Updates, Security Updates***\
+       **When an update is in *Critical Updates, Security Updates, Update Rollups***\
        \
        **Approve the update for *Contoso - Preview, Fabrikam - Preview***
 
