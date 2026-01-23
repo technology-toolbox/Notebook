@@ -348,7 +348,7 @@ Install-WindowsFeature ADFS-Federation -IncludeManagementTools
    2. Click **Next steps required for completing your federation service deployment**.
    3. Click **Close** to exit the wizard.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/EB015E9716674544DD5685FA012F1DBEB7E113D1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D1/EB015E9716674544DD5685FA012F1DBEB7E113D1.png)
 
 A machine restart is required to complete ADFS service configuration. For more information, see: [http://go.microsoft.com/fwlink/?LinkId=798725](http://go.microsoft.com/fwlink/?LinkId=798725)
 
@@ -397,59 +397,59 @@ From <[https://technet.microsoft.com/en-us/library/hh305235.aspx](https://techne
 
 ### Configure AD FS for a relying party
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/1CE81C0CAE3EC1F6A643131C4ED51AE9358121CE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CE/1CE81C0CAE3EC1F6A643131C4ED51AE9358121CE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/87/87B390B4AEAAF22508DB60C9A3B4CDA21BA08B87.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/87/87B390B4AEAAF22508DB60C9A3B4CDA21BA08B87.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1A/607DDDAA50B46B27153E2BB51ED8B7734C7BE51A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1A/607DDDAA50B46B27153E2BB51ED8B7734C7BE51A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F9/38966C2EFD06871ECBC1DCEA7AF65BEC194854F9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F9/38966C2EFD06871ECBC1DCEA7AF65BEC194854F9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/44/FD08E4C03F8CFB90803760AEE7A2EFD639808C44.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/44/FD08E4C03F8CFB90803760AEE7A2EFD639808C44.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/423F04CC7771D3C5B35C0FF48A8FFE2D76BD9A4F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4F/423F04CC7771D3C5B35C0FF48A8FFE2D76BD9A4F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/6F91E83F2F92D0518F130C2E8F4822DB557CDF1C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1C/6F91E83F2F92D0518F130C2E8F4822DB557CDF1C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/89/27BCA18D6F15FF15ADD4452B3578C4459F18CD89.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/89/27BCA18D6F15FF15ADD4452B3578C4459F18CD89.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D6/8EA9EBB91D184C4B18977FE2C0E45598292FDCD6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D6/8EA9EBB91D184C4B18977FE2C0E45598292FDCD6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/63/557FC9D3A85D2AA0D21F9462FB843043059B1563.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/63/557FC9D3A85D2AA0D21F9462FB843043059B1563.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/C65655E9DBC535699682257CEA205428928B605C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5C/C65655E9DBC535699682257CEA205428928B605C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/C0253CA6E945C90C7BCF8AE3C260A99F80DC1ED1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D1/C0253CA6E945C90C7BCF8AE3C260A99F80DC1ED1.png)
 
 ### Configure the claim rule
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1B/10331D0987D56CD40E5C27E3B117A1C5F771511B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1B/10331D0987D56CD40E5C27E3B117A1C5F771511B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/E23AEBFCB13328E48526648AC47449717E94E73B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3B/E23AEBFCB13328E48526648AC47449717E94E73B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/C3495D2B2A755FC7668669A00DDEAB904258CEDB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DB/C3495D2B2A755FC7668669A00DDEAB904258CEDB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/15/83B89CF9AC1D679C1BDA5615E0AB0C1186ED0B15.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/15/83B89CF9AC1D679C1BDA5615E0AB0C1186ED0B15.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/19/4AA3A16D9E765C8B5E3E53EDA948D6B67C32E219.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/19/4AA3A16D9E765C8B5E3E53EDA948D6B67C32E219.png)
 
 ### Export the token signing certificate
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/8EF0047F9B3F5EC7D08458B8C0064D68EEDE0C9D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9D/8EF0047F9B3F5EC7D08458B8C0064D68EEDE0C9D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/00/5676B027D7ACCED5273B6437253F4DFDD2C38D00.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/00/5676B027D7ACCED5273B6437253F4DFDD2C38D00.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6F/CB7F64E55C60E8968AA90A038364DAA01189676F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6F/CB7F64E55C60E8968AA90A038364DAA01189676F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/3EDC2106856C070AF5E6D3ED610E30EF76EA5DEF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EF/3EDC2106856C070AF5E6D3ED610E30EF76EA5DEF.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E6/54A9EDD43268EEED727857568498FE867D78ACE6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E6/54A9EDD43268EEED727857568498FE867D78ACE6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/96/578BB84AE2DD0BB2AF0B085251006565E45C8C96.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/96/578BB84AE2DD0BB2AF0B085251006565E45C8C96.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/F393492A8E78D4A9F5376C17164DED9B30F4B80E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0E/F393492A8E78D4A9F5376C17164DED9B30F4B80E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/59FF9A0B43CDB1F9B3FA385EEC89D94AB63A3C6A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6A/59FF9A0B43CDB1F9B3FA385EEC89D94AB63A3C6A.png)
 
 ### Phase 3: Configure SharePoint 2013 to trust AD FS as an identity provider
 
@@ -846,19 +846,19 @@ Process
 
 #### # Associate web applications with the ADFS identity provider
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D8/7F642FAA44021E95DB1A7A6FD9F2677B23C0BDD8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D8/7F642FAA44021E95DB1A7A6FD9F2677B23C0BDD8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/A24CA7BB784A301C0B2F807A037A4A6A11DD241E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1E/A24CA7BB784A301C0B2F807A037A4A6A11DD241E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/261788A78C597B7B328B3AA6A02A1D0BCDE47DD7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D7/261788A78C597B7B328B3AA6A02A1D0BCDE47DD7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/3961FD8DDEC896049CABAED6C8AE3A3699790C5E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5E/3961FD8DDEC896049CABAED6C8AE3A3699790C5E.png)
 
 In the **Authentication Providers** window, click **Extranet**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AC/186F5C73F0D1F5C63212C085C66949AA49270FAC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AC/186F5C73F0D1F5C63212C085C66949AA49270FAC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/23C3B22B6BCD53BA3BDDFD63FDD6E72954959D1C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1C/23C3B22B6BCD53BA3BDDFD63FDD6E72954959D1C.png)
 
 ---
 
@@ -969,31 +969,31 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Add-Hostnames.ps1 `
     -Hostnames fs.contoso.com
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6D/CB602CAE1566470CA8F3BC2E9EAB6132D6008C6D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6D/CB602CAE1566470CA8F3BC2E9EAB6132D6008C6D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/DD1910BA8F6AE78C00C82B20593CB41D8B8BD02F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2F/DD1910BA8F6AE78C00C82B20593CB41D8B8BD02F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/D8B080A53B0B76217A471071215F2F877885B686.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/86/D8B080A53B0B76217A471071215F2F877885B686.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/ED/4421084548D03A492CC5DF11D18922B4CAEDF8ED.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/ED/4421084548D03A492CC5DF11D18922B4CAEDF8ED.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9E/5A0A7D524A794F1DB169C4C6FA26D88FAA7CA29E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9E/5A0A7D524A794F1DB169C4C6FA26D88FAA7CA29E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/38DA58BC55EEF13586F819A3E5F95C553D0B4CE2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E2/38DA58BC55EEF13586F819A3E5F95C553D0B4CE2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/34/F51DA62281CC644464C0D0F7524CC3521420DD34.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/34/F51DA62281CC644464C0D0F7524CC3521420DD34.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/A154911313189EF6DC96A8ADCEBC49EF70695E46.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/46/A154911313189EF6DC96A8ADCEBC49EF70695E46.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3B/E23AEBFCB13328E48526648AC47449717E94E73B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3B/E23AEBFCB13328E48526648AC47449717E94E73B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/67/87BDA6F851FB8A53FF87EAC9AF424ADDE3566267.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/67/87BDA6F851FB8A53FF87EAC9AF424ADDE3566267.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/20/4C46FB0D6BA4B19551431471C451F99141AA7B20.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/20/4C46FB0D6BA4B19551431471C451F99141AA7B20.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6F/D6EC718CB995FE61ACC2B2F5B892B419B934A76F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6F/D6EC718CB995FE61ACC2B2F5B892B419B934A76F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/C22BAB8B2EDF42FA2B7325D7FFEBDA366C048EA9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A9/C22BAB8B2EDF42FA2B7325D7FFEBDA366C048EA9.png)
 
 [https://fs.contoso.com/adfs/ls/?wa=wsignin1.0&wtrealm=http%3a%2f%2ffs.fabrikam.com%2fadfs%2fservices%2ftrust&wctx=9ab97163-e20c-45e5-840f-6f14462d6356](https://fs.contoso.com/adfs/ls/?wa=wsignin1.0&wtrealm=http%3a%2f%2ffs.fabrikam.com%2fadfs%2fservices%2ftrust&wctx=9ab97163-e20c-45e5-840f-6f14462d6356)
 

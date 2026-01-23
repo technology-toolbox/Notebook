@@ -46,7 +46,7 @@ robocopy C:\NotBackedUp\Products\ '\\TT-HV05B\C$\NotBackedUp\Products' /E /NP
    Ended : Friday, March 9, 2018 5:48:54 AM
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/64/E29A78A1363EB1C6D91F8E52A32BEC4BB72C5164.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/64/E29A78A1363EB1C6D91F8E52A32BEC4BB72C5164.png)
 
 ---
 

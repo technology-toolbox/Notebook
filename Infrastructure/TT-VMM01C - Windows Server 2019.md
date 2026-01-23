@@ -456,53 +456,53 @@ $installer = "C:\NotBackedUp\Temp\System Center 2019 Virtual Machine Manager\Set
 & $installer
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/49/8980EE550F999BA601ED161BD50D80AB17A1F149.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/49/8980EE550F999BA601ED161BD50D80AB17A1F149.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/17/F2C93ECC5B6E78397806774C97CEA0C507075217.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/17/F2C93ECC5B6E78397806774C97CEA0C507075217.png)
 
 Select **VMM management server**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/A81D34253F981ACA23D73EAEA7B14C97D6AB7E38.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/38/A81D34253F981ACA23D73EAEA7B14C97D6AB7E38.png)
 
 Click **Yes**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/31FB44CCCAB708DDDB01796586AFA9EA679FB7E2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E2/31FB44CCCAB708DDDB01796586AFA9EA679FB7E2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/A6405A6CC28A7AF0C645C889A5CE25DDE857653F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3F/A6405A6CC28A7AF0C645C889A5CE25DDE857653F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F7/5770101827A2DF142BEAE80BFE8BD39BB70107F7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F7/5770101827A2DF142BEAE80BFE8BD39BB70107F7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F0/1D293461DB0CB4DD97C94A76C35DC530CA5720F0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F0/1D293461DB0CB4DD97C94A76C35DC530CA5720F0.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/89/B0A2BAC7B947DCDDC3930DF33813AD2E114D4589.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/89/B0A2BAC7B947DCDDC3930DF33813AD2E114D4589.png)
 
 Select **On (recommended)** and then click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/17BC0DFE309C354D56D6173B7190807C331A5E1E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1E/17BC0DFE309C354D56D6173B7190807C331A5E1E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/B4F0F55A92B3F1CC8AAAC2968E1B611B3E116684.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/84/B4F0F55A92B3F1CC8AAAC2968E1B611B3E116684.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/A6B2F5C7834764A06A7C72EF5FA8DA9FAEA409F8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F8/A6B2F5C7834764A06A7C72EF5FA8DA9FAEA409F8.png)
 
 Click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/76/0E83B9261334D0F8A7844969D0FF65F9B738A976.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/76/0E83B9261334D0F8A7844969D0FF65F9B738A976.png)
 
 Click **Yes**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A0/14B7E89B6941504B085A58E005DF5D0EA8A118A0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A0/14B7E89B6941504B085A58E005DF5D0EA8A118A0.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/D54C91E22022CFD3E01BD0FECE4E366F868B641E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1E/D54C91E22022CFD3E01BD0FECE4E366F868B641E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/53/ABDB42DCD38BB178365646890EB6A45904A37F53.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/53/ABDB42DCD38BB178365646890EB6A45904A37F53.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/9DD2BDEB4EB56F65D3B9E9CADA2B48089672D92C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2C/9DD2BDEB4EB56F65D3B9E9CADA2B48089672D92C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/A022F4B39CFE4D259668FEC02E96878D7C240C9A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9A/A022F4B39CFE4D259668FEC02E96878D7C240C9A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/E32DCDD78EDA6828F7DABC82F50CD8A584859E0E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0E/E32DCDD78EDA6828F7DABC82F50CD8A584859E0E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7A/AFCF65D058EA2E8B7B78936087D0D46DB0600B7A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7A/AFCF65D058EA2E8B7B78936087D0D46DB0600B7A.png)
 
 Unable to create or access the Active Directory container 'CN=VMM Distributed Key Management,CN=System,DC=corp,DC=technologytoolbox,DC=com'. Access is denied.\
 Specify the distinguished name for the container and verify that you have GenericRead|CreateChild|WriteProperty rights on the container.
@@ -518,7 +518,7 @@ Using ADSI Edit, change the owner on the following container to **TECHTOOLBOX\\s
 
 Run the setup process again.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C2/A52646A1176FD3844650763209F3B5AF2EADCAC2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C2/A52646A1176FD3844650763209F3B5AF2EADCAC2.png)
 
 ```PowerShell
 cls

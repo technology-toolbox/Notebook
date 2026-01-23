@@ -382,39 +382,39 @@ cls
 
 ###### C: (SSD - Samsung 850 Pro 128GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/09/3E25995B738C4DF9831A68587B0D0450E477D209.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/09/3E25995B738C4DF9831A68587B0D0450E477D209.png)
 
 ###### D: (SSD - Samsung 850 PRO 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A3/2245E9E386AB0DDBA7894D60A7F5DAA221DE37A3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A3/2245E9E386AB0DDBA7894D60A7F5DAA221DE37A3.png)
 
 ###### E: (SSD - Samsung 850 PRO 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A4/56DFFAD33AAEB3C0CA6BFD7448ECC76F3DD5C9A4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A4/56DFFAD33AAEB3C0CA6BFD7448ECC76F3DD5C9A4.png)
 
 ###### F: (HDD - ST4000NM0033-9ZM170)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/1AA68FBC16A66F5F093A7EF39495E5E1BD5EBA4F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4F/1AA68FBC16A66F5F093A7EF39495E5E1BD5EBA4F.png)
 
 ###### G: (HDD - ST4000NM0033-9ZM170)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/600B31D803FAE2A3406A39EAA74CDC4247214586.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/86/600B31D803FAE2A3406A39EAA74CDC4247214586.png)
 
 ###### H: (HDD - ST4000NM0033-9ZM170)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/30E0AA9FA2E0B1307D36FD00E5FF038FE63CA4D4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D4/30E0AA9FA2E0B1307D36FD00E5FF038FE63CA4D4.png)
 
 ###### I: (HDD - ST4000NM0033-9ZM170)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/ED/934A20F134758E140FA35D92A236A2F4F8F49BED.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/ED/934A20F134758E140FA35D92A236A2F4F8F49BED.png)
 
 ###### J: (HDD - WDC WD1001FALS-0)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F2/7005FE2ACF28B918ED08832F4F813F559DBB09F2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F2/7005FE2ACF28B918ED08832F4F813F559DBB09F2.png)
 
 ###### K: (HDD - WDC WD1002FAEX-0)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/70/58DA49D23B249D9C870E323D9F0692D1F3DEC370.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/70/58DA49D23B249D9C870E323D9F0692D1F3DEC370.png)
 
 ```PowerShell
 cls
@@ -665,15 +665,15 @@ cls
 
 ##### D: (Mirror SSD storage space - Samsung 850 Pro 512GB x2)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/4D0096BA6E7294CB70A589679AB96C4FD996CA39.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/39/4D0096BA6E7294CB70A589679AB96C4FD996CA39.png)
 
 ##### E: (Mirror SSD/HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/25/CD47000380CE44C7282715060AE1DBBA12B81F25.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/25/CD47000380CE44C7282715060AE1DBBA12B81F25.png)
 
 ##### F: (Mirror HDD storage space with SSD write cache)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/79/A64205271134FDBC21D49F3DE2CFD6DB5C412179.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/79/A64205271134FDBC21D49F3DE2CFD6DB5C412179.png)
 
 ```PowerShell
 cls

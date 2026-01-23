@@ -1079,51 +1079,51 @@ Remove-Item $tempJsFile
 
 ### Configure relying party on Contoso ADFS server
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/33/2B5216F84AAFB3DFC63888F3DE30598319C3AE33.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/33/2B5216F84AAFB3DFC63888F3DE30598319C3AE33.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/6AC72383753C7437044F9BB0237657795084FC37.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/37/6AC72383753C7437044F9BB0237657795084FC37.png)
 
 [https://](https://)[fs.technologytoolbox.com](fs.technologytoolbox.com)[/federationmetadata/2007-06/federationmetadata.xml](/federationmetadata/2007-06/federationmetadata.xml)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/66/E6497979EDB38928014DEEF533DFB62A249EE166.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/66/E6497979EDB38928014DEEF533DFB62A249EE166.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/ABDC199E6C277A1EF4CA199E47798EFAD80B1AE2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E2/ABDC199E6C277A1EF4CA199E47798EFAD80B1AE2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/87/C4A976ECD7C04A54FA053713E58F6FE464114B87.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/87/C4A976ECD7C04A54FA053713E58F6FE464114B87.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AD/0FFEE9494D540725C2F33F5145CA0DE6AC7997AD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AD/0FFEE9494D540725C2F33F5145CA0DE6AC7997AD.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/E9DCC7042E274A8C238E56F02A9519603057E1D4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D4/E9DCC7042E274A8C238E56F02A9519603057E1D4.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A0/DE335A5D02CFB34A2894BC08697FDEDA10CFF3A0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A0/DE335A5D02CFB34A2894BC08697FDEDA10CFF3A0.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B4/E4D6C1557280E6BC69A073A2D6D0AA7578BDEFB4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B4/E4D6C1557280E6BC69A073A2D6D0AA7578BDEFB4.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F0/F8F1A92198DB69F6D9E1061056FA507DE12932F0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F0/F8F1A92198DB69F6D9E1061056FA507DE12932F0.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A8/B6878427FB8AA53BE2169485DBA667A25607B4A8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A8/B6878427FB8AA53BE2169485DBA667A25607B4A8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/C3495D2B2A755FC7668669A00DDEAB904258CEDB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DB/C3495D2B2A755FC7668669A00DDEAB904258CEDB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C2/5C1FE5B7AE6BF64E1FE4B0DABC2923F96F5646C2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C2/5C1FE5B7AE6BF64E1FE4B0DABC2923F96F5646C2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CD/F02F79505BCC37987CFDD0F35917A89DDE9CA9CD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CD/F02F79505BCC37987CFDD0F35917A89DDE9CA9CD.png)
 
 ### Export the token-signing certificate from Contoso ADFS server
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B2/1F44EDD0EFECD117B9FFC90CCBE7516AA22C0FB2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B2/1F44EDD0EFECD117B9FFC90CCBE7516AA22C0FB2.png)
 
 Right-click the token-signing certificate and click **View Certificate...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/98/C5A23A82A2B602C450373A9E87E41CD44749FB98.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/98/C5A23A82A2B602C450373A9E87E41CD44749FB98.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AD/5731B10ABF95185DBC39E1831215E4452287A2AD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AD/5731B10ABF95185DBC39E1831215E4452287A2AD.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EF/3EDC2106856C070AF5E6D3ED610E30EF76EA5DEF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EF/3EDC2106856C070AF5E6D3ED610E30EF76EA5DEF.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E6/54A9EDD43268EEED727857568498FE867D78ACE6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E6/54A9EDD43268EEED727857568498FE867D78ACE6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/2B96A5526809347461B44BF394BB759CA2CFFC86.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/86/2B96A5526809347461B44BF394BB759CA2CFFC86.png)
 
 In the **Save As** window:
 
@@ -1132,54 +1132,54 @@ In the **Save As** window:
 
 In the **Certificate Export Wizard**, click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/57/3659B355327C8EAA4FD9D76C233D8506286D5A57.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/57/3659B355327C8EAA4FD9D76C233D8506286D5A57.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/59FF9A0B43CDB1F9B3FA385EEC89D94AB63A3C6A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6A/59FF9A0B43CDB1F9B3FA385EEC89D94AB63A3C6A.png)
 
 ### Copy token-signing certificate to ADFS server
 
 ### Create claims provider trust
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6D/CB602CAE1566470CA8F3BC2E9EAB6132D6008C6D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6D/CB602CAE1566470CA8F3BC2E9EAB6132D6008C6D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/DD1910BA8F6AE78C00C82B20593CB41D8B8BD02F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2F/DD1910BA8F6AE78C00C82B20593CB41D8B8BD02F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/35/64DF815A9BF1E186343EEE877D80614D0E410835.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/35/64DF815A9BF1E186343EEE877D80614D0E410835.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4C/E239513A36451D9ED73962CC7304536510F7E94C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4C/E239513A36451D9ED73962CC7304536510F7E94C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/570761A2B8CA8649785F855F82F2A09DE6AC1F0C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0C/570761A2B8CA8649785F855F82F2A09DE6AC1F0C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/B4FC297A36F47CCF3604927A95F45AAC589126DA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DA/B4FC297A36F47CCF3604927A95F45AAC589126DA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CD/F462EFC0354B8DED4FDFED6D0F96ED09F3BAF3CD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CD/F462EFC0354B8DED4FDFED6D0F96ED09F3BAF3CD.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EA/388850787F014AA82125D1779C4EA576006E25EA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EA/388850787F014AA82125D1779C4EA576006E25EA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/A1AEDF452D1CA129380FA55AECF614602CDF4BAF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AF/A1AEDF452D1CA129380FA55AECF614602CDF4BAF.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9E/372A04FF18E2AF7D5DB54606AE5D13AD18E5829E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9E/372A04FF18E2AF7D5DB54606AE5D13AD18E5829E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/2804A8A9D2E7C330F0A21BB1D9955BF73A697BBC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BC/2804A8A9D2E7C330F0A21BB1D9955BF73A697BBC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/38DA58BC55EEF13586F819A3E5F95C553D0B4CE2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E2/38DA58BC55EEF13586F819A3E5F95C553D0B4CE2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/9BAC5EACAF3B3AF7519BB6FD8B1D6E44746F555C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5C/9BAC5EACAF3B3AF7519BB6FD8B1D6E44746F555C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/67/87BDA6F851FB8A53FF87EAC9AF424ADDE3566267.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/67/87BDA6F851FB8A53FF87EAC9AF424ADDE3566267.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/20/4C46FB0D6BA4B19551431471C451F99141AA7B20.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/20/4C46FB0D6BA4B19551431471C451F99141AA7B20.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6F/D6EC718CB995FE61ACC2B2F5B892B419B934A76F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6F/D6EC718CB995FE61ACC2B2F5B892B419B934A76F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/C22BAB8B2EDF42FA2B7325D7FFEBDA366C048EA9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A9/C22BAB8B2EDF42FA2B7325D7FFEBDA366C048EA9.png)
 
 Repeat the previous steps to pass through the following additional claims:
 
 - **Name (pass through all claim values)**
 - **UPN (pass through only claim values that match a specific email suffix value - contoso.com)**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/C88F2C430D53FF49358980D8366A732772C01FA2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A2/C88F2C430D53FF49358980D8366A732772C01FA2.png)
 
 ```PowerShell
 cls
@@ -1230,7 +1230,7 @@ Invalid object name 'SqlQueryNotificationService-90ad86ae-721c-47e4-bbbf-e3a897b
 
 ##### Stored procedures
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/C2A7E59B3FCA149031BE395C806A513AE149F65E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5E/C2A7E59B3FCA149031BE395C806A513AE149F65E.png)
 
 ##### Service queues
 

@@ -546,47 +546,47 @@ $installer = "C:\NotBackedUp\Temp\System Center 2019 Operations Manager\Setup.ex
 & $installer
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/90/9D0ACEA121DCC6B8392B2293966ACD8B70168690.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/90/9D0ACEA121DCC6B8392B2293966ACD8B70168690.png)
 
 Select **Download the latest updates to the setup program** and then click **Install**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C3/69E51AF74AEFF1F18F2BDD99ECBC41937E8313C3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C3/69E51AF74AEFF1F18F2BDD99ECBC41937E8313C3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2C/C26E900F8AC5746A7B593DBF1E443E382084F82C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2C/C26E900F8AC5746A7B593DBF1E443E382084F82C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/14/F717A65FECCFC0E233BE0ACC05C332CF607A2714.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/14/F717A65FECCFC0E233BE0ACC05C332CF607A2714.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/50980880FF09A8326AFD27D4401A3FBE9BD85EDA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DA/50980880FF09A8326AFD27D4401A3FBE9BD85EDA.png)
 
 Click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/F4171C51626FF785F36E63BDB90B89B9144310A9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A9/F4171C51626FF785F36E63BDB90B89B9144310A9.png)
 
 On the **Specify an installation option** step, select **Add a Management server to an existing management group**, and click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/E62E4D05FE244C71525142E78D10A3C63F4E38BC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BC/E62E4D05FE244C71525142E78D10A3C63F4E38BC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8F/D70264AD5813CF07F1EB9408170AF3A84E3F968F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8F/D70264AD5813CF07F1EB9408170AF3A84E3F968F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5D/4A0151F5621475ABC552E9D18BA9AB39B70B605D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5D/4A0151F5621475ABC552E9D18BA9AB39B70B605D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/11/6CF9044E99C924947F02CD40A277819AB86FDA11.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/11/6CF9044E99C924947F02CD40A277819AB86FDA11.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/B3F0599D66B0E6EFA33987977DD41C04A260639F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9F/B3F0599D66B0E6EFA33987977DD41C04A260639F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/64/06F98E3B6C813787F2FA3FCD4A30738B7788D864.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/64/06F98E3B6C813787F2FA3FCD4A30738B7788D864.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/30C30287D53FC4D5E1C823AB168634F4213D68B1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B1/30C30287D53FC4D5E1C823AB168634F4213D68B1.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/0C0149237B10B4B1085C9D6A4C403214720A18C6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C6/0C0149237B10B4B1085C9D6A4C403214720A18C6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/16D8C77E85FC93A0DC4FEA4A0C75EA8CE48376C6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C6/16D8C77E85FC93A0DC4FEA4A0C75EA8CE48376C6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/99/F8D01F0B713EB4C2BC06C3944E3AADD8B4F9E699.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/99/F8D01F0B713EB4C2BC06C3944E3AADD8B4F9E699.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A4/2C5185042A006E12E9B7152FD78FAE9794E99BA4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A4/2C5185042A006E12E9B7152FD78FAE9794E99BA4.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/D27F63E136DB3BC0D2998E2E9F535E2BA289D2D9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D9/D27F63E136DB3BC0D2998E2E9F535E2BA289D2D9.png)
 
 ## Complete post-installation tasks
 
@@ -913,7 +913,6 @@ GO
    4. Click **Apply**.
 6. In the navigation pane, click **Web Service URL**.
 7. In the **Web Service URL** pane:
-
    1. Confirm the following warning message appears:
 
       > Report Server Web Service is not configured. Default values have been provided to you. To accept these defaults simply press the Apply button, else change them and then press Apply.
@@ -938,7 +937,6 @@ GO
     6. Click **Finish** to close the wizard.
 11. In the navigation pane, click **Web Portal URL**.
 12. In the **Web Portal URL** pane:
-
     1. Confirm the following warning message appears:
 
        > The Web Portal virtual directory name is not configured. To configure the directory, enter a name or use the default value that is provided, and then click Apply.
@@ -954,7 +952,6 @@ GO
 13. In the navigation pane, click **Encryption Keys**.
 14. In the **Encryption Keys** pane, click **Restore**.
 15. In the **Restore Encryption Key** window:
-
     1. In the **File Location** box, specify the location of the backup file for the encryption key.
 
        **\\TT-FS01\Backups\Encryption Keys\Reporting Services - SCOM.snk**
@@ -1014,27 +1011,27 @@ $installer = "C:\NotBackedUp\Temp\System Center 2019 Operations Manager\Setup.ex
 & $installer
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/90/9D0ACEA121DCC6B8392B2293966ACD8B70168690.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/90/9D0ACEA121DCC6B8392B2293966ACD8B70168690.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/74713DE162C94F271190288BD9E697B7D15AF0AE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AE/74713DE162C94F271190288BD9E697B7D15AF0AE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/29/2D5906DEEA47CA879D7FE2A9DDCF1A2D77266A29.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/29/2D5906DEEA47CA879D7FE2A9DDCF1A2D77266A29.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/50980880FF09A8326AFD27D4401A3FBE9BD85EDA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DA/50980880FF09A8326AFD27D4401A3FBE9BD85EDA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DB/DF92B4E77BC58494F34FA4B6C4F8E0564C78A2DB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DB/DF92B4E77BC58494F34FA4B6C4F8E0564C78A2DB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/5237CFCC6DBEBE4910D04ABB3AAD5BDD15352F9A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9A/5237CFCC6DBEBE4910D04ABB3AAD5BDD15352F9A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7A/B12C8A3653FA03B873A6145933F3F680BCB0107A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7A/B12C8A3653FA03B873A6145933F3F680BCB0107A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/35/85E1E77B6EF1EF20AF90DEDA68292E9388385735.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/35/85E1E77B6EF1EF20AF90DEDA68292E9388385735.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/327F48D7331882639314E3270635D964BCE9587F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7F/327F48D7331882639314E3270635D964BCE9587F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8B/5FD07C8A2B1BEB25037FD134ED8AAEC42FF00C8B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8B/5FD07C8A2B1BEB25037FD134ED8AAEC42FF00C8B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F7/4F4E0ED2F0A5C135814443B958F09DBDEFAC7DF7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F7/4F4E0ED2F0A5C135814443B958F09DBDEFAC7DF7.png)
 
 ---
 

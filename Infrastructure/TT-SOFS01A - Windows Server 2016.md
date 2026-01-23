@@ -655,7 +655,7 @@ TT-SOFS01-FC
 
 ### Issue: Wrong disk used for disk witness
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/2520B11DF5BA4DD1BAAB25B167DECB83C94933F8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F8/2520B11DF5BA4DD1BAAB25B167DECB83C94933F8.png)
 
 ```PowerShell
 cls

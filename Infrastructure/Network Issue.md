@@ -203,7 +203,7 @@ PS C:\NotBackedUp\Temp> robocopy "\\TT-HV05C\C`$\NotBackedUp\Temp" C:\NotBackedU
 PS C:\NotBackedUp\Temp>
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/A024C5DAF64EDC3CE9FBE88D3038912F1C4621E1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E1/A024C5DAF64EDC3CE9FBE88D3038912F1C4621E1.png)
 
 ```PowerShell
 Get-NetAdapter -Physical | sort MacAddress | select MacAddress, Name, InterfaceDescription, ifIndex

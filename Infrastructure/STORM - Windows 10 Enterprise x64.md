@@ -1548,17 +1548,17 @@ robocopy $source $destination /E
 & "$destination\Microsoft\SharePoint v4\AssemblyFoldersEx - x64.reg"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/DE96621F16BC51A75B6410BE1B94F33F9B8A0F62.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/62/DE96621F16BC51A75B6410BE1B94F33F9B8A0F62.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/06DBAE68F16F7F83442A5F1916BFBEFEFC0DD15E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5E/06DBAE68F16F7F83442A5F1916BFBEFEFC0DD15E.png)
 
 ```PowerShell
 & "$destination\Microsoft\SharePoint v5\AssemblyFoldersEx - x64.reg"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/E9FD2601E62121DA76E1227B4436C7ED8F069CAE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AE/E9FD2601E62121DA76E1227B4436C7ED8F069CAE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/9A7DF5FF756E44DAC0D8F600AA2D457598370EBB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BB/9A7DF5FF756E44DAC0D8F600AA2D457598370EBB.png)
 
 ```PowerShell
 cls
@@ -2023,7 +2023,7 @@ ext install ms-vscode-remote.remote-wsl
 
 ### Issue: Docker images consume large amount of disk space
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F3/5CCB258F8ECC8934921DD9F2FC5A3CBEDF7C91F3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F3/5CCB258F8ECC8934921DD9F2FC5A3CBEDF7C91F3.png)
 
 #### Move Docker images from C: drive (SSD) to F: drive (HDD)
 
@@ -2146,11 +2146,11 @@ On the **Choosing the default editor used by Git** step, select **Use the Nano e
 
 ## Share printer
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/01/2EDCC101189FC9A8E4E5FD9205D12E8EB82B2F01.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/01/2EDCC101189FC9A8E4E5FD9205D12E8EB82B2F01.png)
 
 Click **Change Sharing Options**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/39D600ED528C73CAE3772FDA8A9E263E29CBF094.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/94/39D600ED528C73CAE3772FDA8A9E263E29CBF094.png)
 
 ## Other stuff that may need to be done
 
@@ -2231,7 +2231,7 @@ Start-Process `
 
 #### Install Android SDK Platform-tools
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/75601D9C9EF795A16D815FE580D6571F20B23C1E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1E/75601D9C9EF795A16D815FE580D6571F20B23C1E.png)
 
 #### Detect devices
 

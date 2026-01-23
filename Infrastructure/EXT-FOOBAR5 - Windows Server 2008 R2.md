@@ -195,7 +195,7 @@ $endpointNames |
 | 2 | E: | 300 GB<br>(3x100 GB, striped) | 64K | Data01 | None |
 | 3 | L: | 60 GB | 64K | Log01 | None |
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4E/4F3728FFAF0E10870250FE284CCD64697C903C4E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4E/4F3728FFAF0E10870250FE284CCD64697C903C4E.png)
 
 ### Set MaxPatchCacheSize to 0 (Recommended)
 

@@ -282,14 +282,14 @@ ping TT-FS01 -f -l 8900
 ### Configure direct-attached storage
 
 | Disk | Drive Letter | Volume Size | VHD Type | Allocation Unit Size | Volume Label |
-| --- | --- | ---    | ---     | ---          | ---      |
-| 0   | C:  | 55 GB  | Dynamic | 4K (default) | OSDisk   |
-| 1   | D:  | 3 GB   | Fixed   | 64K          | Data01   |
-| 2   | L:  | 2 GB   | Fixed   | 64K          | Log01    |
-| 3   | T:  | 2 GB   | Fixed   | 64K          | Temp01   |
-| 4   | Z:  | 10 GB  | Dynamic | 4K (default) | Backup01 |
-| 5   | E:  | 3.6 TB | Fixed   | 4K (default) | Data02   |
-| 6   | F:  | 3.6 TB | Fixed   | 4K (default) | Data03   |
+| --- | --- | --- | --- | --- | --- |
+| 0 | C: | 55 GB | Dynamic | 4K (default) | OSDisk |
+| 1 | D: | 3 GB | Fixed | 64K | Data01 |
+| 2 | L: | 2 GB | Fixed | 64K | Log01 |
+| 3 | T: | 2 GB | Fixed | 64K | Temp01 |
+| 4 | Z: | 10 GB | Dynamic | 4K (default) | Backup01 |
+| 5 | E: | 3.6 TB | Fixed | 4K (default) | Data02 |
+| 6 | F: | 3.6 TB | Fixed | 4K (default) | Data03 |
 
 ---
 
@@ -623,7 +623,6 @@ cls
 
 6. In the navigation pane, click **Web Service URL**.
 7. In the **Web Service URL** pane:
-
    1. Confirm the following warning message appears:
 
       > Report Server Web Service is not configured. Default values have been provided to you. To accept these defaults simply press the Apply button, else change them and then press Apply.
@@ -641,7 +640,6 @@ cls
     6. Wait for the database to be created and then click **Finish** to close the wizard.
 11. In the navigation pane, click **Web Portal URL**.
 12. In the **Web Portal URL** pane:
-
     1. Confirm the following warning message appears:
 
        > The Web Portal virtual directory name is not configured. To configure the directory, enter a name or use the default value that is provided, and then click Apply.
@@ -943,23 +941,23 @@ cls
 & "C:\NotBackedUp\Temp\System Center 2022 Data Protection Manager\setup.exe"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C8/4DEC424CD30763CF5705CE35887C9E8E9F41A7C8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C8/4DEC424CD30763CF5705CE35887C9E8E9F41A7C8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/42D95212B3D0E18439BA413D21265C250A26DCB9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B9/42D95212B3D0E18439BA413D21265C250A26DCB9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/9984D7236AB79246561263B84A44EF8E7A6F6793.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/93/9984D7236AB79246561263B84A44EF8E7A6F6793.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/87DE5C0FB2B235434DC4A33995406C01B2BEB8F4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F4/87DE5C0FB2B235434DC4A33995406C01B2BEB8F4.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/40/D6D356DB09DDC634628C6603249A5058AE695640.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/40/D6D356DB09DDC634628C6603249A5058AE695640.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/BC4048F9237335F0D9A774B0668B174B39956EB6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B6/BC4048F9237335F0D9A774B0668B174B39956EB6.png)
 
 In the **Instance of SQL Server** box, type **TT-DPM07** and click **Check and Install**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/0E2BD8540196FC70693D57670A6B5B1FD8A5D6B1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B1/0E2BD8540196FC70693D57670A6B5B1FD8A5D6B1.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9B/E040B63FF26B2BEA1345201A42AD7305A752C29B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9B/E040B63FF26B2BEA1345201A42AD7305A752C29B.png)
 
 Wait for the DPM prerequisites to be installed and then restart the server.
 
@@ -977,34 +975,33 @@ Restart-Computer
 & "C:\NotBackedUp\Temp\System Center 2022 Data Protection Manager\setup.exe"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C8/4DEC424CD30763CF5705CE35887C9E8E9F41A7C8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C8/4DEC424CD30763CF5705CE35887C9E8E9F41A7C8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/42D95212B3D0E18439BA413D21265C250A26DCB9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B9/42D95212B3D0E18439BA413D21265C250A26DCB9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D2/32C0FC74CDB24FB848267B56004DD52C2A9E5AD2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D2/32C0FC74CDB24FB848267B56004DD52C2A9E5AD2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/563529A99B000095C6131878345CF54B9DB39F7D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7D/563529A99B000095C6131878345CF54B9DB39F7D.png)
 
 In the **Instance of SQL Server** box, type **TT-DPM07** and click **Check and Install**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9B/E040B63FF26B2BEA1345201A42AD7305A752C29B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9B/E040B63FF26B2BEA1345201A42AD7305A752C29B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/15/1A69776F26BB9A89B6B66CD58AC0D2E37A1F9C15.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/15/1A69776F26BB9A89B6B66CD58AC0D2E37A1F9C15.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/87E22584087DD9C8CEE48AA32972A047E1141646.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/46/87E22584087DD9C8CEE48AA32972A047E1141646.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/11/9A84D192257012A3A90E52FCD6DEC70E91349811.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/11/9A84D192257012A3A90E52FCD6DEC70E91349811.png)
 
 Click **Use Microsoft Update when I check for updates (recommended)** and then click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EC/8E07D63F2E2B3923985C12E85EA73AE1E45DF6EC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EC/8E07D63F2E2B3923985C12E85EA73AE1E45DF6EC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/22/BEEA665C22A58537D51329105F21E1A363284A22.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/22/BEEA665C22A58537D51329105F21E1A363284A22.png)
 
 Data Protection Manager installation has completed successfully.
 
-Please click on the link to check for the latest DPM updates:
-<https://go.microsoft.com/fwlink/?linkid=2185649>
+Please click on the link to check for the latest DPM updates: <https://go.microsoft.com/fwlink/?linkid=2185649>
 
 DPM Setup has created the following firewall exceptions:
 
@@ -1490,15 +1487,15 @@ cls
 
 ### Configure SMTP server in DPM
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FC/99325F52833D4C19D24142AD4F54BE424E3AE1FC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FC/99325F52833D4C19D24142AD4F54BE424E3AE1FC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0C/EB83A6564D926E75A086BBEBC8977BA06B33350C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0C/EB83A6564D926E75A086BBEBC8977BA06B33350C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/BB4B1D8D98691E95D59AC5FEDD3C2CA960D328BB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BB/BB4B1D8D98691E95D59AC5FEDD3C2CA960D328BB.png)
 
 ### Configure DPM notifications
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/28/CE1A7614F53D267EE0938B5DB3A202FBD98B9428.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/28/CE1A7614F53D267EE0938B5DB3A202FBD98B9428.png)
 
 ### Add disks to DPM storage pool
 
@@ -1508,22 +1505,19 @@ cls
 
 Pasted from <[http://technet.microsoft.com/en-us/library/hh758075.aspx](http://technet.microsoft.com/en-us/library/hh758075.aspx)>
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/F7E834EC19125F786E5CA09DF4554BC44455D212.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/12/F7E834EC19125F786E5CA09DF4554BC44455D212.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/4159548686D6B8E77AE3C534B73BF3D7952DC339.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/39/4159548686D6B8E77AE3C534B73BF3D7952DC339.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/10/C5B9986DADAF55100015FA9B5125DC210B9A1710.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/10/C5B9986DADAF55100015FA9B5125DC210B9A1710.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/3F06B80EF78A3A40F653DE31DD865FD6D6CD9F1E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1E/3F06B80EF78A3A40F653DE31DD865FD6D6CD9F1E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4A/77C4C32AFC7A433A484441173DA3F850273F2B4A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4A/77C4C32AFC7A433A484441173DA3F850273F2B4A.png)
 
 ## Deploy DPM protection agent
 
-Before installing the DPM 2022 agent, remove the DPM agent from computers
-protected by the previous version of DPM. Next, create temporary firewall rules
-on each protected computer to allow the DPM agent to be installed remotely.
-Then install the agents and remove the temporary firewall rules.
+Before installing the DPM 2022 agent, remove the DPM agent from computers protected by the previous version of DPM. Next, create temporary firewall rules on each protected computer to allow the DPM agent to be installed remotely. Then install the agents and remove the temporary firewall rules.
 
 ### Remove DPM 2019 agent
 
@@ -1582,8 +1576,7 @@ cls
 
 ### Install DPM agent
 
-Using the DPM console, add the computers specified in the previous section to
-install the DPM agent.
+Using the DPM console, add the computers specified in the previous section to install the DPM agent.
 
 ```PowerShell
 cls
@@ -1689,39 +1682,39 @@ Application recovery points:
 
 - Express Full Backup: **8:00 PM Everyday**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FB/5A1F04716E203CB3844B347F7B6389C04B7F6AFB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FB/5A1F04716E203CB3844B347F7B6389C04B7F6AFB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/06/5D5C5F73D37B3F4227C5DD8587FE8DDC70234F06.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/06/5D5C5F73D37B3F4227C5DD8587FE8DDC70234F06.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/B646345DCB55B30A515DF41940973B8A8D5B4F74.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/74/B646345DCB55B30A515DF41940973B8A8D5B4F74.png)
 
 Ensure **Servers** is selected and then click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/8F8449A1D22E3973E07F015CDEB04BD18F8BD56A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6A/8F8449A1D22E3973E07F015CDEB04BD18F8BD56A.png)
 
 Expand **TT-DC10**, then expand **System Protection**, and then select **System State (includes Active Directory)**.
 
 Repeat the previous step for **TT-DC11**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/5EEDE2D593269BE9A52B4489026279364A305E8D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8D/5EEDE2D593269BE9A52B4489026279364A305E8D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/1005417D40057B5AF5352C5595801B899E9E1B9F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9F/1005417D40057B5AF5352C5595801B899E9E1B9F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/A7AC3CC9D35DE9358FC22DBAE88EA34915AA8F91.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/91/A7AC3CC9D35DE9358FC22DBAE88EA34915AA8F91.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5A/508AA204F60B7C54EE7857A5C216D960B161045A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5A/508AA204F60B7C54EE7857A5C216D960B161045A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/233563E79215ECA44FE6156BB65B5085DF98B8FF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FF/233563E79215ECA44FE6156BB65B5085DF98B8FF.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7A/E65D589FD0BE524531A130552ADD086F60571C7A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7A/E65D589FD0BE524531A130552ADD086F60571C7A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A5/62F056A6FD15F04C274A710DC70C4527955265A5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A5/62F056A6FD15F04C274A710DC70C4527955265A5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/92EAB75CD1C4D8A8EB0BF6C31978FA991EDFCA5E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5E/92EAB75CD1C4D8A8EB0BF6C31978FA991EDFCA5E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/56/5A56B1D8EAF08B462AC0E9927994637364F2F756.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/56/5A56B1D8EAF08B462AC0E9927994637364F2F756.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/6E845EDF868DFA147B82685E6754888EBFEF95F4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F4/6E845EDF868DFA147B82685E6754888EBFEF95F4.png)
 
 ### Create protection group for SQL Server databases (TEST)
 
@@ -1736,17 +1729,17 @@ Application recovery points:
 
 - Express Full Backup: **7:00 PM Everyday**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4C/9B44FF94EEB14F792EF573270E2C633261E1ED4C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4C/9B44FF94EEB14F792EF573270E2C633261E1ED4C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/64/2FCB901232ED512BD305BCE0D08582DA8672BC64.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/64/2FCB901232ED512BD305BCE0D08582DA8672BC64.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/80/B678373417117E40108C346679C8F330048C2880.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/80/B678373417117E40108C346679C8F330048C2880.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/A96E0D1645B8D438E8B2E549180A99E473077365.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/65/A96E0D1645B8D438E8B2E549180A99E473077365.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5A/546C97814C22CBF7C69BB1F12D54A173A1E6DC5A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5A/546C97814C22CBF7C69BB1F12D54A173A1E6DC5A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AA/7304968C775A559CB763324A467D86610A215DAA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AA/7304968C775A559CB763324A467D86610A215DAA.png)
 
 For **Retention range**, specify **10 days**.
 
@@ -1754,17 +1747,17 @@ For **Synchronization frequency**, specify **Every 4 hour(s)**.
 
 In the **Application recovery points** section, click **Modify...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/2F292830A07D7DE7753059EB66CD5EF77ACF3365.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/65/2F292830A07D7DE7753059EB66CD5EF77ACF3365.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/47/F41BB7037633C1D36BA70947848B2B501C1BC247.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/47/F41BB7037633C1D36BA70947848B2B501C1BC247.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A5/E7D3A39889A4F0A0264D896B027CA831477C65A5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A5/E7D3A39889A4F0A0264D896B027CA831477C65A5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7A/E65D589FD0BE524531A130552ADD086F60571C7A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7A/E65D589FD0BE524531A130552ADD086F60571C7A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FB/682A84E45970EA42899318F5C68BF8F08180E7FB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FB/682A84E45970EA42899318F5C68BF8F08180E7FB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/0725D28E72009F997074B92C3BC2C6AA67A804E1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E1/0725D28E72009F997074B92C3BC2C6AA67A804E1.png)
 
 #### Add "Local System" account to SQL Server sysadmin role
 
@@ -1809,23 +1802,22 @@ File recovery points:
 
 ### Create protection group for client computers
 
-| Folder Path    | Rule     |
-| -------------- | -------- |
-| C:\BackedUp    | Include  |
-| D:\BackedUp    | Include  |
-| E:\BackedUp    | Include  |
-| F:\BackedUp    | Include  |
-| G:\BackedUp    | Include  |
-| User Profiles  | Include  |
-| C:\NotBackedUp | Exclude  |
-| D:\NotBackedUp | Exclude  |
-| E:\NotBackedUp | Exclude  |
-| F:\NotBackedUp | Exclude  |
-| G:\NotBackedUp | Exclude  |
-| Program Files  | Exclude  |
+| Folder Path    | Rule    |
+| -------------- | ------- |
+| C:\BackedUp    | Include |
+| D:\BackedUp    | Include |
+| E:\BackedUp    | Include |
+| F:\BackedUp    | Include |
+| G:\BackedUp    | Include |
+| User Profiles  | Include |
+| C:\NotBackedUp | Exclude |
+| D:\NotBackedUp | Exclude |
+| E:\NotBackedUp | Exclude |
+| F:\NotBackedUp | Exclude |
+| G:\NotBackedUp | Exclude |
+| Program Files  | Exclude |
 
-Allow users to specify protection group members: **Yes (checked)**
-Protection group name: **Clients - Gold**\
+Allow users to specify protection group members: **Yes (checked)** Protection group name: **Clients - Gold**\
 Retention range: **10 days**\
 Synchronization frequency: **Every 1 hour(s)**\
 Client computer recovery points:
@@ -1892,7 +1884,6 @@ Dismount-DiskImage -ImagePath $imagePath
 6. On the **Installation location** page, ensure the default path is specified (**C:\\Program Files\\Microsoft System Center\\Virtual Machine Manager**), and then click **Next**.
 7. On the **Port configuration** page, ensure the default port number (**8100**) is specified for communication with the VMM management server, and click **Next**.
 8. On the **Installation summary** page, review your selections and do one of the following:
-
    - Click **Previous** to change any selections.
    - Click **Install** to install the VMM console.
 

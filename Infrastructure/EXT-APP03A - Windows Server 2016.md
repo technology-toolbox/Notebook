@@ -1695,7 +1695,7 @@ Start-Process `
 Start time: 8:39:09 AM\
 End time: 10:42:03 AM
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2D/3D42ED13B66022BF88AD7E9F79000F1EBF6ED82D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2D/3D42ED13B66022BF88AD7E9F79000F1EBF6ED82D.png)
 
 ### Create and configure search service application
 

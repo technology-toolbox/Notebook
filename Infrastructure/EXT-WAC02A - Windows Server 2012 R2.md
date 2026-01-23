@@ -664,13 +664,13 @@ New-OfficeWebAppsFarm `
 
 #### Issue
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/61/9EDCF85C481207094C603DB0641238783C2DC161.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/61/9EDCF85C481207094C603DB0641238783C2DC161.png)
 
 #### Solution
 
 Login as **EXTRANET\\jjameson-admin** and create the Office Web Apps farm
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/ED/4F0BA0F2647568F8E881AC8EE712D89C0B404EED.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/ED/4F0BA0F2647568F8E881AC8EE712D89C0B404EED.png)
 
 #### # Verify that the Office Web Apps Server farm was created successfully
 

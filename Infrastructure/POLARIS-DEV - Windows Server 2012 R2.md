@@ -719,9 +719,9 @@ When prompted for the **Passphrase**, type a passphrase that meets the following
   - Numerals (from 0 through 9)
   - Nonalphabetic characters (such as !, \$, #, %)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/964C96CC4F564F80C7C7B64829E05FF0879D6512.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/12/964C96CC4F564F80C7C7B64829E05FF0879D6512.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/FDA1888FC8EA7331AE366E4121596AEDE00F0BA2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A2/FDA1888FC8EA7331AE366E4121596AEDE00F0BA2.png)
 
 ```PowerShell
 cls
@@ -1287,7 +1287,7 @@ cls
 $appPoolCredential = Get-Credential "TECHTOOLBOX\s-web-intranet-dev"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/E41717DE0ABA51E9A18489CF55E181D8BF52E93C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3C/E41717DE0ABA51E9A18489CF55E181D8BF52E93C.png)
 
 ```PowerShell
 $appPoolAccount = New-SPManagedAccount -Credential $appPoolCredential
@@ -1351,7 +1351,7 @@ cls
 $appPoolCredential = Get-Credential "TECHTOOLBOX\s-web-my-team-dev"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/1835B3BB4604787F6622E49778F8CB747DFF825C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5C/1835B3BB4604787F6622E49778F8CB747DFF825C.png)
 
 ```PowerShell
 $appPoolAccount = New-SPManagedAccount -Credential $appPoolCredential

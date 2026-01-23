@@ -205,7 +205,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ### Configure Automatic Updates
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/56/8C1B99C77A8B2E904A298E353F363590FD5ED956.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/56/8C1B99C77A8B2E904A298E353F363590FD5ED956.png)
 
 ```Console
 cls

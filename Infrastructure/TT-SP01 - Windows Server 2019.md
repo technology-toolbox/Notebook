@@ -518,19 +518,19 @@ cls
 >
 > Wait for the installation to complete.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CC/56CFC640FEA4E74AFADD9D7A00EFB9C97D9F51CC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CC/56CFC640FEA4E74AFADD9D7A00EFB9C97D9F51CC.png)
 
 Click **Install SharePoint Server**. UAC, click Yes.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/6B4AA8D4347B5E5CE0E3A78681130258A27A59A9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A9/6B4AA8D4347B5E5CE0E3A78681130258A27A59A9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/79/8B74B8D6D172788F910B0B8DB841DE63A1B92579.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/79/8B74B8D6D172788F910B0B8DB841DE63A1B92579.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/43/25DAB95A5E67618BF15DD4D18E7AC1C9A909B043.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/43/25DAB95A5E67618BF15DD4D18E7AC1C9A909B043.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0D/525DE25E307A8CD379C427766F32964C4621820D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0D/525DE25E307A8CD379C427766F32964C4621820D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/49/7A7B4A12579D8943D9974D41F94222D9378A3A49.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/49/7A7B4A12579D8943D9974D41F94222D9378A3A49.png)
 
 Clear the checkbox and click **Close**.
 
@@ -629,9 +629,9 @@ cd C:\NotBackedUp\Public\Toolbox\SharePoint\Scripts
 > When prompted for the service account, specify **TECHTOOLBOX\\s-sharepoint**.\
 > Expect the previous operation to complete in approximately 18 minutes.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D3/E24650FC6C2E6056BA585A6D5C4C4BE2B21570D3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D3/E24650FC6C2E6056BA585A6D5C4C4BE2B21570D3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/C6DC76E4A62A141C1F0E30D11B37BC3FF7A4775F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5F/C6DC76E4A62A141C1F0E30D11B37BC3FF7A4775F.png)
 
 ### Add Web servers to SharePoint farm
 

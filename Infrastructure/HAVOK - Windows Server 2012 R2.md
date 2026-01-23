@@ -756,7 +756,7 @@ In the **Tfs_Analysis** database, add **TECHTOOLBOX\\s-tfs-reports** to **TfsWar
 
 Modify **Tfs_AnalysisDataSource** to change the service account specified in the **Impersonation Info** property to **TECHTOOLBOX\\s-tfs-reports**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E7/B92862848EBC745B9D14CB14B584CD827511D7E7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E7/B92862848EBC745B9D14CB14B584CD827511D7E7.png)
 
 Process the **Tfs_Analysis** database.
 
@@ -1083,7 +1083,7 @@ Resize-Partition -DriveLetter C -Size $maxSize
 
 ### Before
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A7/2AA29D5C835DC5D321A03122A10772AAA4F986A7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A7/2AA29D5C835DC5D321A03122A10772AAA4F986A7.png)
 
 Screen clipping taken: 11/18/2017 2:21 PM
 
@@ -1123,7 +1123,7 @@ Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
 
 ### After
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/23/116AFC969938D10DCACA70A3EB8FE69BDB023723.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/23/116AFC969938D10DCACA70A3EB8FE69BDB023723.png)
 
 Screen clipping taken: 11/18/2017 2:52 PM
 
@@ -1131,7 +1131,7 @@ Screen clipping taken: 11/18/2017 2:52 PM
 
 ### Before
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/849BD17720CFF9CDDD9D8BBF000D5D66661DFE8D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8D/849BD17720CFF9CDDD9D8BBF000D5D66661DFE8D.png)
 
 Screen clipping taken: 3/27/2018 5:51 AM
 
@@ -1184,7 +1184,7 @@ Resize-Partition `
 
 ### After
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/88/2C9CE6418BF1348A4A5E8AF6F78E77F78D99EB88.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/88/2C9CE6418BF1348A4A5E8AF6F78E77F78D99EB88.png)
 
 Screen clipping taken: 3/27/2018 5:56 AM
 

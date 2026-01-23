@@ -378,7 +378,7 @@ Install-WindowsFeature ADFS-Federation -IncludeManagementTools
    2. Click **Next steps required for completing your federation service deployment**.
    3. Click **Close** to exit the wizard.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/58/DD52C95FC9552A750F9087C85FB26CC83F8AF958.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/58/DD52C95FC9552A750F9087C85FB26CC83F8AF958.png)
 
 A machine restart is required to complete ADFS service configuration. For more information, see: [http://go.microsoft.com/fwlink/?LinkId=798725](http://go.microsoft.com/fwlink/?LinkId=798725)
 

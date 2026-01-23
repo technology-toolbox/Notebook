@@ -225,13 +225,13 @@ ping TT-FS01 -f -l 8900
 
 ## Examine disk usage
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8F/03428FEEA3474F470AD7FA038FB6635435F3B88F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8F/03428FEEA3474F470AD7FA038FB6635435F3B88F.png)
 
 ```Console
 C:\NotBackedUp\Public\Toolbox\Wdu.exe
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/81/04F04E15484B9F568CA9FB3CD37645E0AE190C81.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/81/04F04E15484B9F568CA9FB3CD37645E0AE190C81.png)
 
 ---
 

@@ -398,17 +398,17 @@ robocopy $source $destination /E
 & "$destination\Microsoft\SharePoint v4\AssemblyFoldersEx - x64.reg"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6C/902A6F7E87FE80BE063AE9BCAB23370FFA39AC6C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6C/902A6F7E87FE80BE063AE9BCAB23370FFA39AC6C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/015FE6C9EB4A879F2DD482B9CC976A5C0718C9C6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C6/015FE6C9EB4A879F2DD482B9CC976A5C0718C9C6.png)
 
 ```PowerShell
 & "$destination\Microsoft\SharePoint v5\AssemblyFoldersEx - x64.reg"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/44/2CA7474E335103FFC798B5E4DC2557A18C302944.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/44/2CA7474E335103FFC798B5E4DC2557A18C302944.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F2/8549DDC36653E1D36BBE2C9DEAE28FD64EDE40F2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F2/8549DDC36653E1D36BBE2C9DEAE28FD64EDE40F2.png)
 
 ```PowerShell
 cls

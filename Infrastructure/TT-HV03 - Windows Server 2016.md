@@ -462,11 +462,11 @@ cls
 
 ##### C: (HDD - Western Digital 640 GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6F/D3394F70F2011A00BB61F6B1C975AF2235740C6F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6F/D3394F70F2011A00BB61F6B1C975AF2235740C6F.png)
 
 ##### D: (Mirror SSD/HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/59/14C906ADCEF453E8FC8786FAC1FF3D233B6C2359.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/59/14C906ADCEF453E8FC8786FAC1FF3D233B6C2359.png)
 
 ## Prepare infrastructure for Hyper-V installation
 
@@ -1386,11 +1386,11 @@ $productionServer = 'TT-HV03'
 
 ## Issue - Poor write performance on D: drive (tiered storage pool)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/92AD79946E869E7EE199D69FF682AC28D3950627.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/27/92AD79946E869E7EE199D69FF682AC28D3950627.png)
 
 Screen clipping taken: 2/16/2018 3:21 PM
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/93/5FE0D64D7B2E7DFEAC548790049D3EE07C151F93.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/93/5FE0D64D7B2E7DFEAC548790049D3EE07C151F93.png)
 
 Screen clipping taken: 2/16/2018 3:22 PM
 
@@ -1487,14 +1487,14 @@ cls
 
 ##### C: (HDD - Western Digital 640 GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/4E4FF1D27A05B6573DC99739EB15379BBBE64C1C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1C/4E4FF1D27A05B6573DC99739EB15379BBBE64C1C.png)
 
 Screen clipping taken: 3/3/2018 10:48 AM
 
 ##### D: (Mirror SSD/HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/22/CE52951231D7017E63D6FF0775C2FCB3EA0B4F22.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/22/CE52951231D7017E63D6FF0775C2FCB3EA0B4F22.png)
 
 Screen clipping taken: 3/3/2018 10:57 AM
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/0981D178ECB7617FC6E16B930C70AF20EA3D11B6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B6/0981D178ECB7617FC6E16B930C70AF20EA3D11B6.png)

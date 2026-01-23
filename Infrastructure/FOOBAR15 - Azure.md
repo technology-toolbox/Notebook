@@ -5,7 +5,7 @@ Wednesday, February 25, 2015\
 
 Standard A4 VM - 8 CPU, 14 GB
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/0EBCD9008812784FF8402D22E5FFB4684034EFDA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DA/0EBCD9008812784FF8402D22E5FFB4684034EFDA.png)
 
 Page file on D: (DAS)
 
@@ -43,7 +43,7 @@ PS C:\ConfigureDeveloperDesktop\Scripts>
 
 Startup time from "cold start" (i.e. flushing IE cache and iisreset):
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D5/3229B66CCCD0E7A203800AA4E5A17334E7B3A4D5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D5/3229B66CCCD0E7A203800AA4E5A17334E7B3A4D5.png)
 
 ## Creating farm using my script
 

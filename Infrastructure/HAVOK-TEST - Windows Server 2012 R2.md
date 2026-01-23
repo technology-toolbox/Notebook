@@ -696,7 +696,7 @@ Modify **Tfs_AnalysisDataSource** to:
 1. Change the database server in the **Connection String** property to **HAVOK-TEST**.
 2. Change the service account specified in the **Impersonation Info** property to **TECHTOOLBOX\\s-tfs-reports-test**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E7/B92862848EBC745B9D14CB14B584CD827511D7E7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E7/B92862848EBC745B9D14CB14B584CD827511D7E7.png)
 
 Process the **Tfs_Analysis** database.
 
@@ -1054,7 +1054,7 @@ Resize-Partition -DriveLetter C -Size $maxSize
 
 ### Before
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/6BE528730B32CF63F1FC200B30C20BB59C110855.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/55/6BE528730B32CF63F1FC200B30C20BB59C110855.png)
 
 Screen clipping taken: 11/17/2017 4:41 AM
 
@@ -1093,7 +1093,7 @@ Resize-Partition -DiskNumber 0 -PartitionNumber 2 -Size $size.SizeMax
 
 ### After
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FA/998B034A9532A882E6613BEF5CBEEC60C2DE06FA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FA/998B034A9532A882E6613BEF5CBEEC60C2DE06FA.png)
 
 Screen clipping taken: 11/17/2017 4:45 AM
 
@@ -1193,7 +1193,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ### Before
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FD/64BA619418419BFEB13B2FEA54FE602F1A0725FD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FD/64BA619418419BFEB13B2FEA54FE602F1A0725FD.png)
 
 Screen clipping taken: 3/27/2018 5:45 AM
 
@@ -1247,7 +1247,7 @@ Resize-Partition `
 
 ### After
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/69E07321F070A57523E3AE1A9FCBE498B21C457F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7F/69E07321F070A57523E3AE1A9FCBE498B21C457F.png)
 
 Screen clipping taken: 3/27/2018 5:49 AM
 

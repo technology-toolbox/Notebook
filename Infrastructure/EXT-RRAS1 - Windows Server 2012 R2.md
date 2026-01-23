@@ -585,15 +585,15 @@ Set-DNSClientServerAddress `
 
 ## # Recreate S2S VPN interface
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/368D1BF856D544BAB764530D68B45E246B4CA93F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3F/368D1BF856D544BAB764530D68B45E246B4CA93F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5A/3C1FF964225D17A2B3251A5A64DBCEC7A8D3AB5A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5A/3C1FF964225D17A2B3251A5A64DBCEC7A8D3AB5A.png)
 
 ```PowerShell
 Remove-VpnS2SInterface -Name "Azure VPN"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FA/50368F1FB51E070F76778E0532373B330E90ECFA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FA/50368F1FB51E070F76778E0532373B330E90ECFA.png)
 
 ```PowerShell
 Add-VpnS2SInterface `
@@ -698,7 +698,7 @@ cls
 Connect-VpnS2SInterface -Name "Azure VPN"
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/BFCE3E53A37ECD5B0EAB68FE5C1100CDF93774F5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F5/BFCE3E53A37ECD5B0EAB68FE5C1100CDF93774F5.png)
 
 ## Issue - IPv6 address range changed by Comcast
 
