@@ -647,45 +647,45 @@ Enable-SqlAlwaysOn -ServerInstance $env:COMPUTERNAME -Force
 
 ## Add first SQL Server 2017 replica to availability group
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E5/1DD66178CD15185A84D292518F78CBE3F55BEFE5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E5/1DD66178CD15185A84D292518F78CBE3F55BEFE5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/29/7F43815A19EB6AB88B73543493097BC886E5AF29.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/29/7F43815A19EB6AB88B73543493097BC886E5AF29.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D0/A91DBC4F622DC14101FC7936859D70C81571B8D0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D0/A91DBC4F622DC14101FC7936859D70C81571B8D0.png)
 
 Right-click the availability group and select **Add replica...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/15/F44AE3B420D4AFD464A52CCEBA210D88147FBA15.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/15/F44AE3B420D4AFD464A52CCEBA210D88147FBA15.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/31/DF6E82822FD3F925C311DC211D86A220842C1931.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/31/DF6E82822FD3F925C311DC211D86A220842C1931.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/DE0DFA2E344C39698CF2268E4AD5F10147B591B9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B9/DE0DFA2E344C39698CF2268E4AD5F10147B591B9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7B/C7BB1D0636F34047B426D4B020523778E4AC257B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7B/C7BB1D0636F34047B426D4B020523778E4AC257B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0A/2F661C7EB9B02E573A5F2232D030A269E8B04C0A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0A/2F661C7EB9B02E573A5F2232D030A269E8B04C0A.png)
 
 Click **Add Replica...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/5BDC73B76249B1D245B5AE096F9B58D023242174.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/74/5BDC73B76249B1D245B5AE096F9B58D023242174.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D6/8FEC429B14DE81B35B83634402458AF1579954D6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D6/8FEC429B14DE81B35B83634402458AF1579954D6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/40/3D097D167E19117045538679AB1C1F0DF8CD5A40.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/40/3D097D167E19117045538679AB1C1F0DF8CD5A40.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AB/17DECC7FE061D578A04882F6C89A64DF1FC032AB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AB/17DECC7FE061D578A04882F6C89A64DF1FC032AB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4B/B5F3F92A4173621EB07052D0E2030DAED596B34B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4B/B5F3F92A4173621EB07052D0E2030DAED596B34B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/1F21F67D9AB02C2DC914D4016979A5102F82F339.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/39/1F21F67D9AB02C2DC914D4016979A5102F82F339.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F7/24FCFD21A9C929054F54CB458DBDCE23466C8BF7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F7/24FCFD21A9C929054F54CB458DBDCE23466C8BF7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/97FB333675167197F39FB48E600354CABFEF84C6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C6/97FB333675167197F39FB48E600354CABFEF84C6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/35/8CCA25E8C3FE0B57A849C3FE750FA5A7DB853635.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/35/8CCA25E8C3FE0B57A849C3FE750FA5A7DB853635.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5A/2481D6716BFA2992C37E0DD82FDB0F7D37A5035A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5A/2481D6716BFA2992C37E0DD82FDB0F7D37A5035A.png)
 
 Ugh...
 
@@ -1101,15 +1101,15 @@ WITH FILE = 1, NORECOVERY
 >
 > Expect the previous operation to complete in approximately 13 minutes.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/A8FA98C3C477CC3954F24910C6371D1ABE96CFD7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D7/A8FA98C3C477CC3954F24910C6371D1ABE96CFD7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/54/1BF3FEACEA4C7D5AB2960889B2F7833AFF1F2854.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/54/1BF3FEACEA4C7D5AB2960889B2F7833AFF1F2854.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/D125BF2AF1495C006DC433DE7E19440CD03DD5E2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E2/D125BF2AF1495C006DC433DE7E19440CD03DD5E2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/25/E8124A83A11DB2D4415AB92F2BF7A8E2A5E08725.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/25/E8124A83A11DB2D4415AB92F2BF7A8E2A5E08725.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/C55C05892A95324539CEAD272B4D9128766C457F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7F/C55C05892A95324539CEAD272B4D9128766C457F.png)
 
 ## Add secondary SQL Server 2017 replica to availability group
 
@@ -1376,33 +1376,33 @@ WITH FILE = 1, NORECOVERY
 >
 > Expect the previous operation to complete in approximately 13 minutes.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/CAFEDA3A094DE3086A07603DCA0FFA128756E427.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/27/CAFEDA3A094DE3086A07603DCA0FFA128756E427.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/7CE781DD1E21CEA41AF933AD02C576595683457D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7D/7CE781DD1E21CEA41AF933AD02C576595683457D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/B5765C022C97DF6A396B52A94E5E5C8129A990A9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A9/B5765C022C97DF6A396B52A94E5E5C8129A990A9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DE/ECE41673EE95BA9E2DEABD9295D117124DDBD4DE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DE/ECE41673EE95BA9E2DEABD9295D117124DDBD4DE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/24/BE54AABD5278FB0F5ECA150B3DA3018718D93924.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/24/BE54AABD5278FB0F5ECA150B3DA3018718D93924.png)
 
 Click **Add Replica...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CC/D53C814035094311DB429B6026A26966978C19CC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CC/D53C814035094311DB429B6026A26966978C19CC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/A08BF50D1B7D192AC47E2277C8012644E14865B8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B8/A08BF50D1B7D192AC47E2277C8012644E14865B8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3A/1CF3C0A930C223B9B86E107A3013C83086A8073A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3A/1CF3C0A930C223B9B86E107A3013C83086A8073A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/7222180AA2ECF6CDF7D1DC0F9EE4675A67F61FFF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FF/7222180AA2ECF6CDF7D1DC0F9EE4675A67F61FFF.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C6/C4D84F819F8F117EEB2D258C205B523475439CC6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C6/C4D84F819F8F117EEB2D258C205B523475439CC6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CB/A5DB20DAAE27A3403F98430631E9FF647C6CABCB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CB/A5DB20DAAE27A3403F98430631E9FF647C6CABCB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/04167D4DAF5F09DED5ACF3578238240C5FD6AAE2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E2/04167D4DAF5F09DED5ACF3578238240C5FD6AAE2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D5/3EDF24BE50BEE779173ABA00D59DDE33E28E49D5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D5/3EDF24BE50BEE779173ABA00D59DDE33E28E49D5.png)
 
 ## Upgrade databases in availability group to SQL Server 2017
 
@@ -1410,53 +1410,53 @@ Click **Add Replica...**
 
 Right-click the availability group (**TT-SQL01**) and click **Failover...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/73/C682C906B479FAB364D7D874FF78BECFB0937973.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/73/C682C906B479FAB364D7D874FF78BECFB0937973.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F3/EA06F00057963168C0A74ACFFB3B9DDF9564F1F3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F3/EA06F00057963168C0A74ACFFB3B9DDF9564F1F3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/32/2C0B94E4A1DB5F7F22AFB502B4000165161E6932.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/32/2C0B94E4A1DB5F7F22AFB502B4000165161E6932.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A7/DD033A44267B91BEA91AFCD29DDF50351EE8DEA7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A7/DD033A44267B91BEA91AFCD29DDF50351EE8DEA7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/98/5E08909BCD61347364DE91AC09209F187D767D98.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/98/5E08909BCD61347364DE91AC09209F187D767D98.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7B/40CAFA67933787ACF266FA2DB68C224101D39E7B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7B/40CAFA67933787ACF266FA2DB68C224101D39E7B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/C8939A51C2E8004A6B8D7EFF32C19F90188E5521.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/21/C8939A51C2E8004A6B8D7EFF32C19F90188E5521.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/EEF33CDD5625107F2D6E65BE53A22FF48151754F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4F/EEF33CDD5625107F2D6E65BE53A22FF48151754F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/73323988CEF69AEE5E3E23233131BF691722E839.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/39/73323988CEF69AEE5E3E23233131BF691722E839.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EE/A29860730514CD9AB07EE9D32928714368AECEEE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EE/A29860730514CD9AB07EE9D32928714368AECEEE.png)
 
 Right-click **Databases** and click **Refresh**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FD/269E9064CD89F0BC17D130D75A56D012B202C1FD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FD/269E9064CD89F0BC17D130D75A56D012B202C1FD.png)
 
 ## Complete cluster upgrade to SQL Server 2017
 
 ### Remove SQL Server 2016 cluster nodes
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AB/D34E0697581A9D90F3E695E471197127837496AB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AB/D34E0697581A9D90F3E695E471197127837496AB.png)
 
 Right-click each SQL Server 2016 node and click **Remove from Availability Group...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7E/4DE6A3D3A9216E7D0E17F88A842E03D639B54E7E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7E/4DE6A3D3A9216E7D0E17F88A842E03D639B54E7E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/7DBD37D19E93A2B11D06FE9B161C632E799C3C46.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/46/7DBD37D19E93A2B11D06FE9B161C632E799C3C46.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/F9D8174CEDC6EE73FA2B0982B58996FB921FD07C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7C/F9D8174CEDC6EE73FA2B0982B58996FB921FD07C.png)
 
 ### Configure secondary replicate to use synchronous replication
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7B/973D45E3CDAC6218F4A7F077E8F361617336257B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7B/973D45E3CDAC6218F4A7F077E8F361617336257B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/9CDCADEF084100FE68D07CE79B9BC44C8FA112A2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A2/9CDCADEF084100FE68D07CE79B9BC44C8FA112A2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/35/0188895AC57E2F26470DC5370F35B4DF4F5B5335.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/35/0188895AC57E2F26470DC5370F35B4DF4F5B5335.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C7/47D6DFB157B07D1E5370BB886583221E8CDD56C7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C7/47D6DFB157B07D1E5370BB886583221E8CDD56C7.png)
 
 ```PowerShell
 cls
@@ -1807,9 +1807,9 @@ GO
 
 ## Issue - Low disk space on Temp01
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6E/36B16116AF62ED563C121FAADEB2EA4FCE82376E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6E/36B16116AF62ED563C121FAADEB2EA4FCE82376E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/63/5F4859D4FD324C2820D97C566F1781C9C94A4263.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/63/5F4859D4FD324C2820D97C566F1781C9C94A4263.png)
 
 ### Increase Temp01 to 4 GB on TT-SQL01D
 

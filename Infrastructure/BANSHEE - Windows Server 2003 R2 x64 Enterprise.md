@@ -40,17 +40,17 @@ Add-VMHardDiskDrive -VMName $vmName -Path $vhdPath
 Start-VM $vmName
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/29/D82D2F58075A6E7A4C92CAB5077A399285E41429.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/29/D82D2F58075A6E7A4C92CAB5077A399285E41429.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0F/18CFA0F2AEB71EF715E78359FD22C187C38F400F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0F/18CFA0F2AEB71EF715E78359FD22C187C38F400F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/D9B77AED760465AB0230AFF7F3D639C96F9CA9E1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E1/D9B77AED760465AB0230AFF7F3D639C96F9CA9E1.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A3/5CA57ACAD746E8433A751C4E6C5709F365E94FA3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A3/5CA57ACAD746E8433A751C4E6C5709F365E94FA3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/32/E44CDC2E6475EF56C2964521F1AD89B8EB67DE32.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/32/E44CDC2E6475EF56C2964521F1AD89B8EB67DE32.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/92/8139BEF13C3D8E228027826046469C7F7F65A792.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/92/8139BEF13C3D8E228027826046469C7F7F65A792.png)
 
 ## Add mail server role
 
@@ -73,21 +73,21 @@ In the **Configure Your Server Wizard** window:
 
 In the **Authentication** window, select both **Anonymous access** and **Integrated Windows Authentication** and then click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/928BB1B4484FA3ACD24CCA2045856EA408D89A4F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4F/928BB1B4484FA3ACD24CCA2045856EA408D89A4F.png)
 
 In the **Outbound Security** window:
 
 1. Select **Integrated Windows Authentication** and specify the credentials for the mail service account.
 2. Click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1F/097125F6759D5366927EED3FEFD5E6901C6DAB1F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1F/097125F6759D5366927EED3FEFD5E6901C6DAB1F.png)
 
 In the **Advanced Delivery** window:
 
 1. In the **Smart host** box, type **smarthost.technologytoolbox.com**.
 2. Click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/17DC4D37ADFD4E5CF31758EBA134629657DF4584.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/84/17DC4D37ADFD4E5CF31758EBA134629657DF4584.png)
 
 ## Add mailboxes
 
@@ -135,24 +135,24 @@ AND !(ProtocolName == "SSDP")
 
 In the **Outbound Security** window, select **Anonymous access**. (When **Integrated Windows Authentication** was selected, BANSHEE would attempt to authenticate with FAB-EX01 using the TECHTOOLBOX\\svc-mail account -- which obviously doesn't work.)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/125E12DCA7A5C6524DE85FC915133EB5099D9E55.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/55/125E12DCA7A5C6524DE85FC915133EB5099D9E55.png)
 
 In the **Advanced Delivery** window, clear the **Smart host** box (since **smarthost.technologytoolbox.com** is no longer used).
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CF/7F26F2FC904B232A87A81A101A239AD692EF77CF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CF/7F26F2FC904B232A87A81A101A239AD692EF77CF.png)
 
 ## Convert BANSHEE to test SMTP server
 
 ### Disable relay e-mail
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/DE6F627F9344E9272A223D51852E694F01F66112.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/12/DE6F627F9344E9272A223D51852E694F01F66112.png)
 
 On the **Default SMTP Virtual Server Properties** window:
 
 1. Click **Relay...**
 2. On the **Relay Restrictions** window, clear the checkbox for **Allow all computers which successfully authenticate to relay, regardless of the list above** and click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/0AAE7E4E85AA9E696F9AA63149A0EDB9B7E64BCA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CA/0AAE7E4E85AA9E696F9AA63149A0EDB9B7E64BCA.png)
 
 ## Upgrade to System Center Operations Manager 2016
 
@@ -419,22 +419,22 @@ Start-SCVirtualMachine $vmName
 
 ---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5D/B9863955FFDF5D6F82242156BC035C74275E2B5D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5D/B9863955FFDF5D6F82242156BC035C74275E2B5D.png)
 
 Screen clipping taken: 5/24/2019 6:09 AM
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F8/F3D84FBE83D2C432A8619A15ADADE597C9FB8DF8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F8/F3D84FBE83D2C432A8619A15ADADE597C9FB8DF8.png)
 
 Screen clipping taken: 5/24/2019 6:09 AM
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/43/D481BC9D1DCDF0FCB1A2E3DFBFCF1B6ACC26C343.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/43/D481BC9D1DCDF0FCB1A2E3DFBFCF1B6ACC26C343.png)
 
 Screen clipping taken: 5/24/2019 6:10 AM
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/C52C04A14F8E7715EF0849039A6151FA5D45170E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0E/C52C04A14F8E7715EF0849039A6151FA5D45170E.png)
 
 Screen clipping taken: 5/24/2019 6:10 AM
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1B/260337FACF2A8346BA43B1B04022D9DEE1E1501B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1B/260337FACF2A8346BA43B1B04022D9DEE1E1501B.png)
 
 Screen clipping taken: 5/24/2019 6:10 AM

@@ -641,7 +641,7 @@ Start-SCVirtualMachine -VM $vmName
 
 ### Configure Start menu
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/43652C4EB2478B2E77C569C7ABE051AC9AD42E91.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/91/43652C4EB2478B2E77C569C7ABE051AC9AD42E91.png)
 
 ### Configure Visual Studio Code
 

@@ -9,7 +9,7 @@ Friday, March 30, 2018\
 | igb0      | Storage-10 | AC:1F:6B:43:D0:CA | 14   |
 | igb1      | Storage-13 | AC:1F:6B:43:D0:CB | 13   |
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/19/42467F91F9ECEF93E7114F75394DAC9C37C64519.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/19/42467F91F9ECEF93E7114F75394DAC9C37C64519.png)
 
 ## Upgrade NAS
 

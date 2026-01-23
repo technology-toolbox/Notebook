@@ -397,27 +397,27 @@ cls
 
 ###### C: (SSD - Samsung 850 Pro 128GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/CFD56459B85CC259A973C944C94EBB1EB306A47D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7D/CFD56459B85CC259A973C944C94EBB1EB306A47D.png)
 
 ###### D: (SSD - Crucial M4 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0A/B0C2F977A132ABACA957690CB8BDA6A5AF387D0A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0A/B0C2F977A132ABACA957690CB8BDA6A5AF387D0A.png)
 
 ###### E: (SSD - Samsung 850 PRO 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E8/79113588BCA6B7BAAC76B2D1530F06ED1D0C30E8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E8/79113588BCA6B7BAAC76B2D1530F06ED1D0C30E8.png)
 
 ###### F: (HDD - ST2000NM0033-9ZM175)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6C/A6817BC87791DD3D391ABB38A8002581A4CD4A6C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6C/A6817BC87791DD3D391ABB38A8002581A4CD4A6C.png)
 
 ###### G: (HDD - WDC WD3000F9YZ-09N20L0)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/4B7ACC87E610F80C168C4ECD1DC874EB9D8C6184.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/84/4B7ACC87E610F80C168C4ECD1DC874EB9D8C6184.png)
 
 ###### H: (HDD - WDC WD3000F9YZ-09N20L0)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AE/652B29E953A96CEF5E532097B8E9040DFF2DA1AE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AE/652B29E953A96CEF5E532097B8E9040DFF2DA1AE.png)
 
 ```PowerShell
 cls
@@ -668,15 +668,15 @@ cls
 
 ##### D: (Mirror SSD storage space - Samsung 850 Pro 512GB and Crucial M4 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D6/7FF8F620600E6DB40608DA2CB795298D208ACDD6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D6/7FF8F620600E6DB40608DA2CB795298D208ACDD6.png)
 
 ##### E: (Mirror SSD/HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/41/E77C2571F4BE6988CE54074E784BFFECDE3CFD41.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/41/E77C2571F4BE6988CE54074E784BFFECDE3CFD41.png)
 
 ##### F: (Mirror HDD storage space with SSD write cache)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/82/D673ADD9FEE53A7A2281B09C1E82EF54A29DB482.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/82/D673ADD9FEE53A7A2281B09C1E82EF54A29DB482.png)
 
 ```PowerShell
 cls
@@ -1193,7 +1193,7 @@ Get-CimInstance `
             -InputObject $_ `
             -ResultClassName MSCluster_DiskPartition |
             select -ExpandProperty VolumeLabel
-            
+
             [PSCustomObject] @{ Name = $name; VolumeLabel = $volumeLabel }
     }
 ```

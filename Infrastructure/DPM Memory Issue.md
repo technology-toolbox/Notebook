@@ -3,11 +3,11 @@
 Saturday, December 30, 2017\
 7:29 AM
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/B0DB99B0077548B8D1E9097736E78745F4647191.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/91/B0DB99B0077548B8D1E9097736E78745F4647191.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/A6D10B5D84BF6A486A49415C8877AA9FE2CA763D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3D/A6D10B5D84BF6A486A49415C8877AA9FE2CA763D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D6/61BB74E507D2801E0EFF46C030C55460F7274DD6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D6/61BB74E507D2801E0EFF46C030C55460F7274DD6.png)
 
 ## References
 

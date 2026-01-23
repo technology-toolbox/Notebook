@@ -156,7 +156,7 @@ netsh advfirewall firewall set rule `
 
 ### Enable jumbo frames
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/627387A552E5A1C4E5B253696DFD0AF44E76F530.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/30/627387A552E5A1C4E5B253696DFD0AF44E76F530.png)
 
 ```Console
 ping ICEMAN.corp.technologytoolbox.com -f -l 8900
@@ -164,11 +164,11 @@ ping ICEMAN.corp.technologytoolbox.com -f -l 8900
 
 ### TODO: Configure static IPv4 address
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B1/27EDED6A67DA9043BCD77EA71B861AE5F460D1B1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B1/27EDED6A67DA9043BCD77EA71B861AE5F460D1B1.png)
 
 ### TODO: Configure static IPv6 address
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/06/25889C9CFFD2BFC09A990EC8C3847A8559396106.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/06/25889C9CFFD2BFC09A990EC8C3847A8559396106.png)
 
 ### Configure VM storage
 
@@ -1147,7 +1147,7 @@ Remove-Item C:\Windows\Temp\* -Recurse -Force
 
 ## # Configure paging file
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/65A59940B553562ECE63D0A02BE1F2B3503BFC3D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3D/65A59940B553562ECE63D0A02BE1F2B3503BFC3D.png)
 
 ## -- Configure TempDB
 

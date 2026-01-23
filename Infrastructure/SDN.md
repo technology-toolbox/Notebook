@@ -560,7 +560,7 @@ char:5
     + FullyQualifiedErrorId : FailToProcessConfiguration
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/5E488D17719CC9C85AAD662331E3795CA7D66E9F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9F/5E488D17719CC9C85AAD662331E3795CA7D66E9F.png)
 
 Screen clipping taken: 7/30/2018 7:33 AM
 

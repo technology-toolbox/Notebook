@@ -504,7 +504,7 @@ At line:1 char:1
     + FullyQualifiedErrorId : 0x5,Import-WdsBootImage
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/035C7B5933D61C9098E622B937DCB65347ED8221.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/21/035C7B5933D61C9098E622B937DCB65347ED8221.png)
 
 #### Reference
 
@@ -2433,7 +2433,7 @@ Start-SCVirtualMachine $vmName
 
 ## Issue - PXE boot only works from Management VLAN
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/83C753A25F16B02A79BC6A8CB0200AB63E5277DD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DD/83C753A25F16B02A79BC6A8CB0200AB63E5277DD.png)
 
 Screen clipping taken: 8/6/2018 5:56 PM
 
@@ -4567,7 +4567,6 @@ cls
    1. Review the software license terms.
    2. If you agree to the terms, click **Accept**.
 4. On the **Select the features you want to install** page:
-
    1. Select the following items:
       - **Deployment Tools**
       - **User State Migration Tool (USMT)**

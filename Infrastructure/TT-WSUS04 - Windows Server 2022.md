@@ -64,13 +64,11 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 ### Install custom Windows Server 2022 image
 
-- On the **Task Sequence** step, select **Windows Server 2022** and click
-  **Next**.
+- On the **Task Sequence** step, select **Windows Server 2022** and click **Next**.
 - On the **Computer Details** step:
   - In the **Computer name** box, type **TT-WSUS04**.
   - Click **Next**.
-- On the **Applications** step, do not select any applications, and click
-  **Next**.
+- On the **Applications** step, do not select any applications, and click **Next**.
 
 ### # Rename local Administrator account and set password
 
@@ -361,8 +359,7 @@ $vmName = "TT-WSUS04"
 
 > **Note**
 >
-> The WSUS console requires Report Viewer 2012 (which in turn requires System
-> CLR Types for SQL Server 2012).
+> The WSUS console requires Report Viewer 2012 (which in turn requires System CLR Types for SQL Server 2012).
 
 ```PowerShell
 cls
@@ -396,8 +393,7 @@ Start-Process `
 
 > **Note**
 >
-> The scheduled task for updating WSUS computer operating systems requires the
-> SQL Server PowerShell module.
+> The scheduled task for updating WSUS computer operating systems requires the SQL Server PowerShell module.
 
 ```PowerShell
 cls
@@ -422,19 +418,16 @@ From <[https://learn.microsoft.com/en-us/windows-server/administration/windows-s
 
 **To install the WSUS server role:**
 
-1. In **Server Manager**, click **Manage**, and then click **Add Roles and
-   Features**.
+1. In **Server Manager**, click **Manage**, and then click **Add Roles and Features**.
 2. On the **Before you begin** page, click **Next**.
-3. On the **Select installation type** page, confirm the **Role-based or
-   feature-based installation** option is selected and click **Next**.
+3. On the **Select installation type** page, confirm the **Role-based or feature-based installation** option is selected and click **Next**.
 4. On the **Select destination server** page:
    1. Ensure the **Select a server from the server pool** option is selected.
    2. In the **Server Pool** list, select the server for the WSUS server role.
    3. Click **Next**.
 5. On the **Select server roles** page:
    1. Select **Windows Server Update Services**.
-   2. A dialog window opens for adding the features required for WSUS. Click
-      **Add Features**.
+   2. A dialog window opens for adding the features required for WSUS. Click **Add Features**.
    3. Click **Next**.
 6. On the **Select features** page, click **Next**.
 7. On the **Windows Server Update Services** page, click **Next**.
@@ -444,31 +437,20 @@ From <[https://learn.microsoft.com/en-us/windows-server/administration/windows-s
    3. Select the **SQL Server Connectivity** checkbox.
    4. Click **Next**.
 9. On the **Content location selection** page:
-   1. Ensure the **Store updates in the following location** checkbox is
-      selected.
+   1. Ensure the **Store updates in the following location** checkbox is selected.
    2. In the location box, type **D:\\WSUS**.
    3. Click **Next**.
 10. On the **Database Instance Selection** page:
     1. In the **Specify an existing database server** box, type **TT-SQL01**.
-    2. Click **Check connection** and confirm the wizard is able to successfully
-       connect to the server.
+    2. Click **Check connection** and confirm the wizard is able to successfully connect to the server.
     3. Click **Next**.
-11. On the **Web Server Role (IIS)** page, review the information, and then
-    click **Next**.
+11. On the **Web Server Role (IIS)** page, review the information, and then click **Next**.
 12. On the **Select roles services** page, click **Next**.
-13. On the **Confirm installation selections** page, review the selected
-    options, and click **Install**. The WSUS installation wizard runs. This
-    might take several minutes to complete.
+13. On the **Confirm installation selections** page, review the selected options, and click **Install**. The WSUS installation wizard runs. This might take several minutes to complete.
 14. Wait for the WSUS installation to complete.
-15. In the summary window on the **Installation progress** page, click **Launch
-    Post-Installation tasks**. The text changes to: **Please wait while your
-    server is configured**.
-16. When the task has finished, the text changes to: **Configuration
-    successfully completed**. Click **Close**.
-17. In **Server Manager**, verify if a notification appears to inform you that a
-    restart is required. This can vary according to the installed server role.
-    If it requires a restart make sure to restart the server to complete the
-    installation.
+15. In the summary window on the **Installation progress** page, click **Launch Post-Installation tasks**. The text changes to: **Please wait while your server is configured**.
+16. When the task has finished, the text changes to: **Configuration successfully completed**. Click **Close**.
+17. In **Server Manager**, verify if a notification appears to inform you that a restart is required. This can vary according to the installed server role. If it requires a restart make sure to restart the server to complete the installation.
 
 ## Step 2: Configure WSUS
 
@@ -578,104 +560,95 @@ Set-ItemProperty `
 **To configure WSUS:**
 
 1. In the **Server Manager** navigation pane, select **WSUS**.
-2. In the servers list, right-click the WSUS server (**TT-WSUS04**) and then
-   click **Windows Server Update Services**. The **Windows Server Update
-   Services Wizard** opens.
-3. On the **Before You Begin** page, review the information, and then click
-   **Next**.
-4. On the **Join the Microsoft Update Improvement Program** page, click
-   **Next**.
-5. On the **Choose Upstream Server** page, ensure the **Synchronize from
-   Microsoft Update** option is selected and click **Next**.
-6. On the **Specify Proxy Server** page, ensure the **Use a proxy server when
-   synchronizing** checkbox is not selected, and click **Next**.
+2. In the servers list, right-click the WSUS server (**TT-WSUS04**) and then click **Windows Server Update Services**. The **Windows Server Update Services Wizard** opens.
+3. On the **Before You Begin** page, review the information, and then click **Next**.
+4. On the **Join the Microsoft Update Improvement Program** page, click **Next**.
+5. On the **Choose Upstream Server** page, ensure the **Synchronize from Microsoft Update** option is selected and click **Next**.
+6. On the **Specify Proxy Server** page, ensure the **Use a proxy server when synchronizing** checkbox is not selected, and click **Next**.
 7. On the **Connect to Upstream Server** page, click **Start Connecting**.
-    > **Note**
-    >
-    > When connecting to the upstream server, WSUS performs a partial
-    > synchronization (which subsequently appears in the **Synchronizations**
-    > list in the WSUS console). This initial synchronization may take
-    > approximately 30 minutes to complete.
+   > **Note**
+   >
+   > When connecting to the upstream server, WSUS performs a partial synchronization (which subsequently appears in the **Synchronizations** list in the WSUS console). This initial synchronization may take approximately 30 minutes to complete.
 8. Wait for the information to be downloaded and then click **Next**.
 9. On the **Choose Languages** page:
    1. Select the **Download updates in only these languages** option.
    2. In the list of languages, select **English**.
    3. Click **Next**.
-10. After selecting the appropriate language options for your deployment, click
-    **Next** to continue.
+10. After selecting the appropriate language options for your deployment, click **Next** to continue.
 11. On the **Choose Products** page:
     1. Select the following products:
-        - [ ] **Microsoft**
-            - [x] **Azure File Sync**
-            - [ ] **Developer Tools, Runtimes, and Redistributables**
-                - [x] **.NET 5.0**
-                - [x] **.NET 6.0**
-                - [x] **.NET 7.0**
-                - [x] **.NET 8.0**
-                - [x] **.NET Core 2.1**
-                - [x] **.NET Core 3.1**
-                - [x] **Visual Studio 2017**
-                - [x] **Visual Studio 2019**
-                - [x] **Visual Studio 2022**
-            - [ ] **Expression**
-                - [x] **Expression Design 4**
-                - [x] **Expression Web 4**
-            - [ ] **Office**
-                - [x] **Microsoft 365 Apps/Office 2019/Office LTSC**
-                - [x] **SharePoint Server 2019/Office Online Server**
-                - [x] **SharePoint Server Subscription Edition**
-            - [ ] **PowerShell**
-                - [x] **PowerShell - x64**
-            - [x] **Silverlight**
-            - [ ] **SQL Server**
-                - [x] **Microsoft SQL Server 2016**
-                - [x] **Microsoft SQL Server 2017**
-                - [x] **Microsoft SQL Server 2019**
-                - [x] **Microsoft SQL Server 2022**
-                - [x] **Microsoft SQL Server Management Studio v18**
-                - [x] **Microsoft SQL Server Management Studio v20**
-            - [ ] **System Center**
-                - [x] **System Center 2019 - Operations Manager**
-                - [x] **System Center 2019 - Orchestrator**
-                - [x] **System Center 2019 - Virtual Machine Manager**
-                - [x] **System Center 2019 Data Protection Manager**
-                - [x] **System Center 2022 - Data Protection Manager**
-                - [x] **System Center 2022 - Operations Manager**
-                - [x] **System Center 2022 - Orchestrator**
-                - [x] **System Center 2022 - Virtual Machine Manager**
-            - [x] **Windows Admin Center**
-            - [x] **Windows Subsystem for Linux**
-            - [ ] **Windows**
-                - [x] **Microsoft Defender Antivirus**
-                - [x] **Microsoft Edge**
-                - [x] **Microsoft Server operating system-21H2**
-                - [x] **Microsoft Server Operating System-22H2**
-                - [x] **Microsoft Server Operating System-23H2**
-                - [x] **Microsoft Server Operating System-24H2**
-                - [x] **Windows 10, version 1903 and later**
-                - [x] **Windows 10**
-                - [x] **Windows 11**
-                - [x] **Windows Server 2012 R2**
-                - [x] **Windows Server 2016**
-                - [x] **Windows Server 2019**
+       - [ ] **Microsoft**
+         - [x] **Azure File Sync**
+         - [ ] **Developer Tools, Runtimes, and Redistributables**
+           - [x] **.NET 5.0**
+           - [x] **.NET 6.0**
+           - [x] **.NET 7.0**
+           - [x] **.NET 8.0**
+           - [x] **.NET Core 2.1**
+           - [x] **.NET Core 3.1**
+           - [x] **Visual Studio 2017**
+           - [x] **Visual Studio 2019**
+           - [x] **Visual Studio 2022**
+         - [ ] **Expression**
+           - [x] **Expression Design 4**
+           - [x] **Expression Web 4**
+         - [ ] **Office**
+           - [x] **Microsoft 365 Apps/Office 2019/Office LTSC**
+           - [x] **SharePoint Server 2019/Office Online Server**
+           - [x] **SharePoint Server Subscription Edition**
+         - [ ] **PowerShell**
+           - [x] **PowerShell - x64**
+         - [x] **Silverlight**
+         - [ ] **SQL Server**
+           - [x] **Microsoft SQL Server 2016**
+           - [x] **Microsoft SQL Server 2017**
+           - [x] **Microsoft SQL Server 2019**
+           - [x] **Microsoft SQL Server 2022**
+           - [x] **Microsoft SQL Server Management Studio v18**
+           - [x] **Microsoft SQL Server Management Studio v20**
+         - [ ] **System Center**
+           - [x] **System Center 2019 - Operations Manager**
+           - [x] **System Center 2019 - Orchestrator**
+           - [x] **System Center 2019 - Virtual Machine Manager**
+           - [x] **System Center 2019 Data Protection Manager**
+           - [x] **System Center 2022 - Data Protection Manager**
+           - [x] **System Center 2022 - Operations Manager**
+           - [x] **System Center 2022 - Orchestrator**
+           - [x] **System Center 2022 - Virtual Machine Manager**
+         - [x] **Windows Admin Center**
+         - [x] **Windows Subsystem for Linux**
+         - [ ] **Windows**
+           - [x] **Microsoft Defender Antivirus**
+           - [x] **Microsoft Edge**
+           - [x] **Microsoft Server operating system-21H2**
+           - [x] **Microsoft Server Operating System-22H2**
+           - [x] **Microsoft Server Operating System-23H2**
+           - [x] **Microsoft Server Operating System-24H2**
+           - [x] **Windows 10, version 1903 and later**
+           - [x] **Windows 10**
+           - [x] **Windows 11**
+           - [x] **Windows Server 2012 R2**
+           - [x] **Windows Server 2016**
+           - [x] **Windows Server 2019**
     2. Click **Next**.
 12. On the **Choose Classifications** page:
     1. Select the following classifications:
-        - **Critical Updates**
-        - **Definition Updates**
-        - **Feature Packs**
-        - **Security Updates**
-        - **Service Packs**
-        - **Tools**
-        - **Update Rollups**
-        - **Updates**
-        - **Upgrades**
+       - **Critical Updates**
+       - **Definition Updates**
+       - **Feature Packs**
+       - **Security Updates**
+       - **Service Packs**
+       - **Tools**
+       - **Update Rollups**
+       - **Updates**
+       - **Upgrades**
 
-        > **Important**
-        >
-        > Ensure the **Driver Sets** and **Drivers** classifications are *not*
-        > selected. WSUS has a number of known issues when drivers are included.
+       > **Important**
+       >
+       > Ensure the **Driver Sets** and **Drivers** classifications are _not_ selected. WSUS has a number of known issues when drivers are included.
+
     2. Click **Next**.
+
 13. On the **Set Sync Schedule** page:
     1. Select the **Synchronize automatically** option.
     2. In the **First synchronization** box, specify **11:10:00 PM**.
@@ -693,11 +666,9 @@ Set-ItemProperty `
 
 **To create a computer group:**
 
-1. In the **Update Services** console, in the navigation pane, expand
-   **Computers**, and then select **All Computers**.
+1. In the **Update Services** console, in the navigation pane, expand **Computers**, and then select **All Computers**.
 2. In the **Actions** pane, click **Add Computer Group...**
-3. In the **Add Computer Group** window, in the **Name** box, type the name for
-   the new computer group and click **OK**.
+3. In the **Add Computer Group** window, in the **Name** box, type the name for the new computer group and click **OK**.
 
 Configure the computer groups as follows:
 
@@ -719,7 +690,7 @@ Configure the computer groups as follows:
 2. Connect to the WSUS database server (**TT-SQL01C**).
 3. Execute the following SQL script:
 
-    **C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql**
+   **C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql**
 
 ### Add WSUS database to AlwaysOn Availability Group
 
@@ -948,8 +919,7 @@ Get-Content 'C:\NotBackedUp\Public\Toolbox\WSUS\WSUS Server Cleanup.xml' |
 
 #### Reference
 
-**The complete guide to Microsoft WSUS and Configuration Manager SUP
-maintenance**\
+**The complete guide to Microsoft WSUS and Configuration Manager SUP maintenance**\
 From <[https://support.microsoft.com/en-us/help/4490644/complete-guide-to-microsoft-wsus-and-configuration-manager-sup-maint](https://support.microsoft.com/en-us/help/4490644/complete-guide-to-microsoft-wsus-and-configuration-manager-sup-maint)>
 
 ### Create SQL job for WSUS database maintenance
@@ -958,17 +928,14 @@ Name: **WsusDBMaintenance**\
 Steps:
 
 - Step 1
-
   - Step name: **Defragment database and update statistics**
   - Type: **Transact-SQL script (T-SQL)**
-  - Command: (click **Open...** and then select script -
-    **"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql"**)
+  - Command: (click **Open...** and then select script - **"C:\\NotBackedUp\\Public\\Toolbox\\WSUS\\WsusDBMaintenance.sql"**)
   - Database: **SUSDB**
 
 Schedule:
 
 - Schedule 1
-
   - Name: **Weekly**
   - Frequency:
     - Occurs: **Weekly**
@@ -987,24 +954,14 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 
 **To approve and deploy WSUS updates:**
 
-1. In the **Update Services** console, click **Updates**. In the right pane, an
-   update status summary is displayed for **All Updates**, **Critical Updates**,
-   **Security Updates**, and **WSUS Updates**.
+1. In the **Update Services** console, click **Updates**. In the right pane, an update status summary is displayed for **All Updates**, **Critical Updates**, **Security Updates**, and **WSUS Updates**.
 2. In the **All Updates** section, click **Updates needed by computers**.
-3. In the list of updates, select the updates that you want to approve for
-   installation. Information about a selected update is available in the bottom
-   pane of the **Updates** panel. To select multiple contiguous updates, hold
-   down the **shift** key while clicking the update names. To select multiple
-   noncontiguous updates, press down the **CTRL** key while clicking the update
-   names.
+3. In the list of updates, select the updates that you want to approve for installation. Information about a selected update is available in the bottom pane of the **Updates** panel. To select multiple contiguous updates, hold down the **shift** key while clicking the update names. To select multiple noncontiguous updates, press down the **CTRL** key while clicking the update names.
 4. Right-click the selection, and then click **Approve**.
 5. In the **Approve Updates** dialog box:
-   1. Select the desired computer group, click the down arrow, and click
-      **Approved for Install**.
+   1. Select the desired computer group, click the down arrow, and click **Approved for Install**.
    2. Click **OK**.
-6. The **Approval Progress** window appears, which shows the progress of the
-   tasks that affect update approval. When the approval process is complete,
-   click **Close**.
+6. The **Approval Progress** window appears, which shows the progress of the tasks that affect update approval. When the approval process is complete, click **Close**.
 
 ### Configure automatic approval rules
 
@@ -1013,20 +970,17 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
 1. Open the **Update Services** console.
 2. In the left navigation pane, expand the WSUS server and select **Options**.
 3. In the **Options** pane, select **Automatic Approvals**.
-4. In the **Automatic Approvals** window, on the **Update Rules** tab, select
-   **Default Automatic Approval Rule**.
-5. In the **Rule properties** section, click **Critical Updates, Security
-   Updates**.
+4. In the **Automatic Approvals** window, on the **Update Rules** tab, select **Default Automatic Approval Rule**.
+5. In the **Rule properties** section, click **Critical Updates, Security Updates**.
 6. In the **Choose Update Classifications** window:
    1. Select **Definition Updates**.
    2. Clear the checkboxes for all other update classifications.
    3. Click **OK**.
-7. Confirm the **Rule properties** for the **Default Automatic Approval Rule**
-   are configured as follows:\
+7. Confirm the **Rule properties** for the **Default Automatic Approval Rule** are configured as follows:\
    \
-   **When an update is in *Definition Updates***\
+   **When an update is in _Definition Updates_**\
    \
-   **Approve the update for *all computers***
+   **Approve the update for _all computers_**
 
 8. Select the **Default Automatic Approval Rule** checkbox.
 9. Click **New Rule...**
@@ -1046,22 +1000,20 @@ From <[https://docs.microsoft.com/en-us/windows-server/administration/windows-se
              1. Clear the **All Computers** checkbox.
              2. Select the following checkboxes:
                 - [ ] **Contoso - Critical**
-                    - [ ] **Contoso - Broad**
-                        - [x] **Contoso - Preview**
+                  - [ ] **Contoso - Broad**
+                    - [x] **Contoso - Preview**
                 - [ ] **Fabrikam - Critical**
-                    - [ ] **Fabrikam - Broad**
-                        - [x] **Fabrikam - Preview**
+                  - [ ] **Fabrikam - Broad**
+                    - [x] **Fabrikam - Preview**
           2. Click **OK**.
     3. In the **Step 3: Specify a name** box, type **Preview Approval Rule**.
     4. Click **OK**.
 11. In the **Automatic Approvals** window:
-
-    1. Confirm the **Rule properties** for the **Preview Approval Rule**
-       are configured as follows:\
+    1. Confirm the **Rule properties** for the **Preview Approval Rule** are configured as follows:\
        \
-       **When an update is in *Critical Updates, Security Updates, Update Rollups***\
+       **When an update is in _Critical Updates, Security Updates, Update Rollups_**\
        \
-       **Approve the update for *Contoso - Preview, Fabrikam - Preview***
+       **Approve the update for _Contoso - Preview, Fabrikam - Preview_**
 
     2. Click **OK**.
 
@@ -1082,15 +1034,15 @@ C:\NotBackedUp\Public\Toolbox\WSUS\Decline-SupersededUpdates.ps1 `
 
 ### Configure "default Windows Update" group policy
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/90D027F45985EDDE45459FFE24B90162DB4EC7FF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FF/90D027F45985EDDE45459FFE24B90162DB4EC7FF.png)
 
 ### Configure "manual Windows Update" group policy
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/6E21C9B289F9BA9956C626E0233D90918321943D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3D/6E21C9B289F9BA9956C626E0233D90918321943D.png)
 
 ### Configure group policies for each "Windows Update slot"
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/70/30DD2864E090A114EA8533C7805470816BC07470.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/70/30DD2864E090A114EA8533C7805470816BC07470.png)
 
 **TODO:**
 

@@ -310,7 +310,7 @@ setup /PrepareAllDomains
 
 F:\\SETUP.EXE
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DE/881EE1346305F68CA506E610C028C55AE734ADDE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DE/881EE1346305F68CA506E610C028C55AE734ADDE.png)
 
 ## # Restart server
 
@@ -334,11 +334,11 @@ cd \NotBackedUp\Temp
 D:\NotBackedUp\Temp\Setup.exe
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/FC18CB793AFB5F0E8A7C4F76DAF576CDAB6E8494.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/94/FC18CB793AFB5F0E8A7C4F76DAF576CDAB6E8494.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4E/C0E95168C903840BD30CF6BE55D4DAEA213E214E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4E/C0E95168C903840BD30CF6BE55D4DAEA213E214E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/4C601777DC382B6D65173DE4EFEE28BB20600838.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/38/4C601777DC382B6D65173DE4EFEE28BB20600838.png)
 
 ## Enter product key
 
@@ -361,9 +361,9 @@ Remove-AcceptedDomain -Identity corp.fabrikam.com
 
 ## Rename default mailbox database
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BE/BE28B8430A590038A5A4953C6582EE3032F966BE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BE/BE28B8430A590038A5A4953C6582EE3032F966BE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/18/C7FD439D6D2559A6101707A21A3CB1776FDC7C18.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/18/C7FD439D6D2559A6101707A21A3CB1776FDC7C18.png)
 
 ## # Move default mailbox database files
 
@@ -383,33 +383,33 @@ From <[http://www.msexchange.org/articles-tutorials/exchange-server-2010/managem
 
 ### Create certificate request
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CB/5AD55BF825A3F7F170D92A35C4BDA065B2F4F8CB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CB/5AD55BF825A3F7F170D92A35C4BDA065B2F4F8CB.png)
 
 Click **New Exchange Certificate...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A9/AAC4DF663194086BA6BE5D2570F224B60F3AC2A9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A9/AAC4DF663194086BA6BE5D2570F224B60F3AC2A9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/30/4AF18B8264AA3BF3769B4DF5017DF5008E06A530.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/30/4AF18B8264AA3BF3769B4DF5017DF5008E06A530.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/05/3F87DA956149B03EDF6720CE6826A27530FF1805.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/05/3F87DA956149B03EDF6720CE6826A27530FF1805.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/76C5CCE93ABAD3C59484F8272FCD05B94D1FC786.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/86/76C5CCE93ABAD3C59484F8272FCD05B94D1FC786.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/01/CDF575E9B26624B53C1008AA7EB7F1072A062E01.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/01/CDF575E9B26624B53C1008AA7EB7F1072A062E01.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6D/2AB8DB9C44B3AED46840CD80390E600482E5F66D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6D/2AB8DB9C44B3AED46840CD80390E600482E5F66D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/52/078211E16928F1DB6980F94341E1671B3D8F1152.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/52/078211E16928F1DB6980F94341E1671B3D8F1152.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/9BED43AF0EA4EC1A4BC46C35FEC47E60D198804F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4F/9BED43AF0EA4EC1A4BC46C35FEC47E60D198804F.png)
 
 Click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B0/3BBF2997639B787A02C7BE65235D91F411EBF7B0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B0/3BBF2997639B787A02C7BE65235D91F411EBF7B0.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/07/F5986FF2F25895BD37579EA8A943320574676407.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/07/F5986FF2F25895BD37579EA8A943320574676407.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B6/C052D4851F5224A5A63CFF8B16699B7252D7BFB6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B6/C052D4851F5224A5A63CFF8B16699B7252D7BFB6.png)
 
 ```PowerShell
 New-ExchangeCertificate -FriendlyName 'Fabrikam E-mail' -GenerateRequest -PrivateKeyExportable $true -KeySize '2048' -SubjectName 'C=US,S="CO",L="Denver",O="Fabrikam Technologies",OU="IT",CN=mail.fabrikam.com' -DomainName 'fab-ex01.corp.fabrikam.com','mail.fabrikam.com','fabrikam.com','autodiscover.fabrikam.com' -Server 'FAB-EX01'
@@ -421,7 +421,7 @@ Step 2: Use the Complete Pending Request wizard to map the certificate to the ce
 
 Step 3: Assign the Exchange services to the certificate using the Assign Services to Certificate wizard.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E4/E02A55E7ACC554D4E81D03C4E1B18CEFBC0F1CE4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E4/E02A55E7ACC554D4E81D03C4E1B18CEFBC0F1CE4.png)
 
 ### Create certificate
 
@@ -465,25 +465,25 @@ Set-ItemProperty -Path $registryKey -Name https -Value 2
 
 Browse to [https://cipher01.corp.technologytoolbox.com](https://cipher01.corp.technologytoolbox.com).
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/10/6F890F12858D8A278B214CC8082EFEB48E583510.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/10/6F890F12858D8A278B214CC8082EFEB48E583510.png)
 
 Click **Request a certificate**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B2/F2C70E2873CA5FBC949F4E308B4863EBC084D8B2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B2/F2C70E2873CA5FBC949F4E308B4863EBC084D8B2.png)
 
 Click **Submit a certificate request by using a base-64-encoded CMC or PKCS #10 file, or submit a renewal request by using a base-64-encoded PKCS #7 file.**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DE/35FA6C3C953425DBF7A844268D48F099F6E601DE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DE/35FA6C3C953425DBF7A844268D48F099F6E601DE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/97/05800E882A75A3D9A01B1512998DE8FB734FFE97.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/97/05800E882A75A3D9A01B1512998DE8FB734FFE97.png)
 
 Click **Submit**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/1FEE9498AE08C24EBCEB1E5EDD965FA72D96EA65.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/65/1FEE9498AE08C24EBCEB1E5EDD965FA72D96EA65.png)
 
 Click **Yes**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FE/2D4884D0AD83D74E046E1CD52E61876AAF95D3FE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FE/2D4884D0AD83D74E046E1CD52E61876AAF95D3FE.png)
 
 Click **Download certificate**.
 
@@ -491,30 +491,30 @@ Copy certificate to FAB-EX01.
 
 ### Import certificate
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/03/46CEFE2EE46C4E6A7D41E35CFC4C4E213CEBD603.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/03/46CEFE2EE46C4E6A7D41E35CFC4C4E213CEBD603.png)
 
 In the Exchange Certificates tab, select the **Fabrikam E-mail** pending request.\
 Click **Complete Pending Request...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/0B52766AB0C39D8F70DBDA91AD18EA409CD6E8DD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DD/0B52766AB0C39D8F70DBDA91AD18EA409CD6E8DD.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/A1CAC30152B9476A4A38F12B05DAC276704927B9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B9/A1CAC30152B9476A4A38F12B05DAC276704927B9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/861FEC6357D4C54096E8CAFB8905F861F83A7EA2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A2/861FEC6357D4C54096E8CAFB8905F861F83A7EA2.png)
 
 ```PowerShell
 Import-ExchangeCertificate -Server 'FAB-EX01' -FileData '<Binary Data>'
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6F/9328AACAC797C95F211A0480DDD9535C8E42046F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6F/9328AACAC797C95F211A0480DDD9535C8E42046F.png)
 
 Click **Assign Services to Certificate...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/20/104B8D06AF821416B5761629489B52A5622A3520.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/20/104B8D06AF821416B5761629489B52A5622A3520.png)
 
 Click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/0CC3DE0FEC916B31780F5C2E2A4EB7A34C553DCE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CE/0CC3DE0FEC916B31780F5C2E2A4EB7A34C553DCE.png)
 
 On the **Select Services** step:
 
@@ -525,21 +525,21 @@ On the **Select Services** step:
    4. **Internet Information Services (IIS)**
 2. Click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/E0FDF558813E9E8479964955DF6405DB18EB9E3D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3D/E0FDF558813E9E8479964955DF6405DB18EB9E3D.png)
 
 Click **Assign**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0B/C0F68E1BFA3FDBE0F3FA41F714BB025567C0A30B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0B/C0F68E1BFA3FDBE0F3FA41F714BB025567C0A30B.png)
 
 Click **Yes**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6E/4C6ACB7D1CEF68818441C99875CC62896D43706E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6E/4C6ACB7D1CEF68818441C99875CC62896D43706E.png)
 
 ```PowerShell
 Enable-ExchangeCertificate -Server 'FAB-EX01' -Services 'IMAP, POP, IIS, SMTP' -Thumbprint '4AE773744C7CDE6552EC41F66BC8F860369F8AC4'
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/85/FFBB2F162B3FDC57E6E6869702EDEFEEC8389685.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/85/FFBB2F162B3FDC57E6E6869702EDEFEEC8389685.png)
 
 ## # Create mailboxes for existing users
 
@@ -583,9 +583,9 @@ From <[https://technet.microsoft.com/en-us/library/aa998359(v=exchg.141).aspx](h
 3. On the Outlook Web App login page, type the user credentials and click **Sign in**.
 4. Confirm the Exchange inbox is displayed.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/9F398A16AECB05A9372BB8B0186CC38DA2CD1484.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/84/9F398A16AECB05A9372BB8B0186CC38DA2CD1484.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/40CB412BD3DB7DF4888C14A0F119B659E2776DB8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B8/40CB412BD3DB7DF4888C14A0F119B659E2776DB8.png)
 
 ## Create SMTP send connector (for outbound mail)
 
@@ -663,9 +663,9 @@ Applying Exchange Server SP3 reverts the configuration change made previously in
    > **Note:** In this case, IIS does not redirect to [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa).
 2. On the Outlook Web App login page, type the user credentials and click **Sign in**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/78/912114981A271CBDF9338BC9589B358FFE92C378.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/78/912114981A271CBDF9338BC9589B358FFE92C378.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4E/91924AC40EEF3261400A3580F0F10C6C8F93EF4E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4E/91924AC40EEF3261400A3580F0F10C6C8F93EF4E.png)
 
 ### Resolution
 
@@ -685,9 +685,9 @@ Revert the configuration change made previously in IIS Manager to clear the **Re
 3. Open Internet Explorer and browse to [https://mail.fabrikam.com](https://mail.fabrikam.com)
 4. Confirm the browser automatically redirects to [https://mail.fabrikam.com/owa](https://mail.fabrikam.com/owa)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/07/B208EDB561A2DB31D53F5F83C3B6E900E23FA107.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/07/B208EDB561A2DB31D53F5F83C3B6E900E23FA107.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/39/62019D5D9B08A4030580056173DB44F4B61FA539.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/39/62019D5D9B08A4030580056173DB44F4B61FA539.png)
 
 ### Test Exchange control panel
 
@@ -702,13 +702,13 @@ Revert the configuration change made previously in IIS Manager to clear the **Re
 9. Browse to [https://mail.fabrikam.com/ecp](https://mail.fabrikam.com/ecp) and login using credentials for an Exchange administrator.
 10. Confirm the Exchange control panel is displayed as expected.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B9/287C255A38614093A5EA8B28801D5919CC3591B9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B9/287C255A38614093A5EA8B28801D5919CC3591B9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/9F398A16AECB05A9372BB8B0186CC38DA2CD1484.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/84/9F398A16AECB05A9372BB8B0186CC38DA2CD1484.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/19/8106C36C72E3E5E05963BD0E90B23FE37857F619.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/19/8106C36C72E3E5E05963BD0E90B23FE37857F619.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/AEB8F34BDC0F028909E2AD3A2DD9BBEEB7FB94DA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DA/AEB8F34BDC0F028909E2AD3A2DD9BBEEB7FB94DA.png)
 
 ## Simplify the Outlook Web App URL
 
@@ -747,13 +747,13 @@ Revert the configuration change made previously in IIS Manager to clear the **Re
 7. Open Internet Explorer and browse to [https://mail.fabrikam.com/ecp](https://mail.fabrikam.com/ecp).
 8. Confirm an HTTP 403 error is returned.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/9F398A16AECB05A9372BB8B0186CC38DA2CD1484.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/84/9F398A16AECB05A9372BB8B0186CC38DA2CD1484.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/40CB412BD3DB7DF4888C14A0F119B659E2776DB8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B8/40CB412BD3DB7DF4888C14A0F119B659E2776DB8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/3BAE92BE5C4E4D2BB659BF709299459DFACCB89D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9D/3BAE92BE5C4E4D2BB659BF709299459DFACCB89D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/9856A066F686690FFE37FAF30EB4D5525AD53474.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/74/9856A066F686690FFE37FAF30EB4D5525AD53474.png)
 
 ## Resolve EdgeSync initialization issue
 

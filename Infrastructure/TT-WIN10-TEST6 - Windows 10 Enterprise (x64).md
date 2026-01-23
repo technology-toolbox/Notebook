@@ -253,15 +253,15 @@ mountvol X: $volumeId
 
 ## Examine disk usage
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/B5102804865E764F95035C1DBDC89A3DE69603C5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C5/B5102804865E764F95035C1DBDC89A3DE69603C5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D7/E7259BF109597F294635D72CCBBFF7948F09FED7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D7/E7259BF109597F294635D72CCBBFF7948F09FED7.png)
 
 ## # Clean up the WinSxS folder
 
 ### Before
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C5/B5102804865E764F95035C1DBDC89A3DE69603C5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C5/B5102804865E764F95035C1DBDC89A3DE69603C5.png)
 
 ```Console
 Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
@@ -269,7 +269,7 @@ Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
 
 ### After
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/E5DD31AAC2432F3B070FA53CC499BF3363308ED9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D9/E5DD31AAC2432F3B070FA53CC499BF3363308ED9.png)
 
 ```PowerShell
 cls
@@ -279,7 +279,7 @@ cls
 
 ### # Before
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/E5DD31AAC2432F3B070FA53CC499BF3363308ED9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D9/E5DD31AAC2432F3B070FA53CC499BF3363308ED9.png)
 
 ```PowerShell
 Stop-Service wuauserv
@@ -289,7 +289,7 @@ Remove-Item C:\Windows\SoftwareDistribution -Recurse
 
 ### After
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F7/0CCCF21AB8382943FD7123C043143A06DCB9ACF7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F7/0CCCF21AB8382943FD7123C043143A06DCB9ACF7.png)
 
 ```PowerShell
 cls

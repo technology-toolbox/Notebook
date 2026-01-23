@@ -380,15 +380,15 @@ finished (0)
 
 **Start** -> **iSCSI Initiator**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/3F6DE64EBF1E201BDD47D798802EEBB2C9A72CDF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DF/3F6DE64EBF1E201BDD47D798802EEBB2C9A72CDF.png)
 
 Click **Yes**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5B/38F75FA3835C75B20A80D63314FE3463D9B3095B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5B/38F75FA3835C75B20A80D63314FE3463D9B3095B.png)
 
 On the **Discovery** tab, click **Discover Portal...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/997A95199AEF4EA39C096740C00C6E13D59C4884.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/84/997A95199AEF4EA39C096740C00C6E13D59C4884.png)
 
 In the **Discover Target Portal** window:
 
@@ -410,42 +410,42 @@ In the **Discover Target Portal** window:
 
 On the **Targets** tab, in the **Discovered targets** section, click **Refresh**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2D/7223A178CAADEDCA2A2B38149467775F97BFFC2D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2D/7223A178CAADEDCA2A2B38149467775F97BFFC2D.png)
 
 Click **Connect**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0F/F822B682F3FA259F81BCBC2D1F2CA28BB42C840F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0F/F822B682F3FA259F81BCBC2D1F2CA28BB42C840F.png)
 
 In the Connect To Target window:
 
 1. Ensure **Add this connection to the list of Favorite Targets** is selected.
 2. Click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/2AE588CD3B9A672DC74995AB45446DD528C75EAF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AF/2AE588CD3B9A672DC74995AB45446DD528C75EAF.png)
 
 On the **Volumes and Devices** tab, click **Auto Configure**.
 
 ## Format the iSCSI disks
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/58/6C0090FB5D9B2C7374718A5010E32C78396F3A58.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/58/6C0090FB5D9B2C7374718A5010E32C78396F3A58.png)
 
 Right-click **Disk 1** and then click **Online**. The status of the disk changes from **Offline** to **Not Initialized**.
 
 Right-click **Disk 1** and then click **Initialize Disk**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B5/DFF44CFEAB403757ACFD84F51C1C888A022605B5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B5/DFF44CFEAB403757ACFD84F51C1C888A022605B5.png)
 
 Right-click the unallocated space on **Disk 1** and click **New Simple Volume..**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/42/0430C4C9ABFCC78D659DCFA2D93713CEDD821A42.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/42/0430C4C9ABFCC78D659DCFA2D93713CEDD821A42.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/C9C2317AB04FD707FBB58C861439316FA9023B5C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5C/C9C2317AB04FD707FBB58C861439316FA9023B5C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/42/5A19FDE6EF7FD5ACF090DD5FB24936E8EBCD9042.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/42/5A19FDE6EF7FD5ACF090DD5FB24936E8EBCD9042.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/28/D3642189D41FFC353BA86E21FB0156EB36C10B28.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/28/D3642189D41FFC353BA86E21FB0156EB36C10B28.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/CA8C8078B0AA0D8B4662A6DFE75C526B7DC14A46.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/46/CA8C8078B0AA0D8B4662A6DFE75C526B7DC14A46.png)
 
 Repeat the steps above for the remaining disks.
 
@@ -453,17 +453,17 @@ Repeat the steps above for the remaining disks.
 >
 > When formatting the **Data01**, **Log01**, **Temp01**, and** Backup01** disks, specify **64K** for the allocation unit size.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F5/37DBBA865AF96917C4ABC03CBE75DEC0361773F5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F5/37DBBA865AF96917C4ABC03CBE75DEC0361773F5.png)
 
 ## Install Failover Clustering feature
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/1A03746120FCA9D70FF9B0086946EBA2D22ADFBB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BB/1A03746120FCA9D70FF9B0086946EBA2D22ADFBB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/BA9E71E2A3841BD0E56D47A1E27CD74CF4858969.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/69/BA9E71E2A3841BD0E56D47A1E27CD74CF4858969.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/A3796F4D78CA6FE2E3A30845DDE0541546AEABA2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A2/A3796F4D78CA6FE2E3A30845DDE0541546AEABA2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E4/DDC573BC740127AC6A82BBB21D6A7580D3A547E4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E4/DDC573BC740127AC6A82BBB21D6A7580D3A547E4.png)
 
 ## Install Failover Clustering feature - EXT-SQL01B
 
@@ -471,71 +471,71 @@ Repeat the steps above for the remaining disks.
 
 The following steps must be performed by a member of the **EXTRANET\\Domain Admins** group (in order to create and configure the **EXT-SQL01** computer account in Active Directory -- i.e. the failover cluster virtual network name account).
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/92/30168140DCBE391C3899AEE66451A7B7EB4E5292.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/92/30168140DCBE391C3899AEE66451A7B7EB4E5292.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/90/EDD87C0E2684E9E285BC3FEE03BB17F5B7BB9B90.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/90/EDD87C0E2684E9E285BC3FEE03BB17F5B7BB9B90.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/57169AFB95049F585E2A7FC715E35AEF5334A891.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/91/57169AFB95049F585E2A7FC715E35AEF5334A891.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CE/5ECF8F7917DC7815148BF367D62B9D2E5B51D7CE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CE/5ECF8F7917DC7815148BF367D62B9D2E5B51D7CE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2E/A9E142F0DE946BBE28ED10B6E79A16914F297D2E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2E/A9E142F0DE946BBE28ED10B6E79A16914F297D2E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D2/CD81BE5279351C5EACA88CF5999086E0ED6EECD2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D2/CD81BE5279351C5EACA88CF5999086E0ED6EECD2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/34/1E647BAFCCE714F0C7782CBE727006DE3222EA34.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/34/1E647BAFCCE714F0C7782CBE727006DE3222EA34.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A7/3E1D513547FFA3833EC4E71169A66ED7D4800BA7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A7/3E1D513547FFA3833EC4E71169A66ED7D4800BA7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/A898AC2170E787E180410B8FDE8BAFE54928A386.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/86/A898AC2170E787E180410B8FDE8BAFE54928A386.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/781F3F66CFE950E3592063E5AA3171963F34931C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1C/781F3F66CFE950E3592063E5AA3171963F34931C.png)
 
 Click **Create the cluster now using the validated nodes...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/96/EEF5C609EA1E2824C8F14B847D210F5ED4B62496.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/96/EEF5C609EA1E2824C8F14B847D210F5ED4B62496.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C2/C70A87B55EC0E0D20F1326C576D2704684886EC2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C2/C70A87B55EC0E0D20F1326C576D2704684886EC2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/636C53F6CCF7F3C0BFA03180E05DDEC113A8D571.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/71/636C53F6CCF7F3C0BFA03180E05DDEC113A8D571.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/9E88AEF333BA6AFC9CADE611B76288700D25C0DA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DA/9E88AEF333BA6AFC9CADE611B76288700D25C0DA.png)
 
 ## Confirm cluster quorum settings
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A1/BD7BE781250976838BD789C73DD5B3B64DD716A1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A1/BD7BE781250976838BD789C73DD5B3B64DD716A1.png)
 
 ## Install .NET Framework 3.5
 
 **Note:** SQL Server 2008 R2 Setup requires Microsoft .NET Framework 3.5 SP1 to be installed.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/392A74F1E8F7FBAF8878636FA76058D9C2633B5E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5E/392A74F1E8F7FBAF8878636FA76058D9C2633B5E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/59074FC1C70A065F1DD17C47DB81DD531FA17D91.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/91/59074FC1C70A065F1DD17C47DB81DD531FA17D91.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/24/82BC5B510F0B9674E890DE59A21285C71F661424.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/24/82BC5B510F0B9674E890DE59A21285C71F661424.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C4/051689FF752F56810DE36FB3885D8D946F1495C4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C4/051689FF752F56810DE36FB3885D8D946F1495C4.png)
 
 ## Install SQL Server 2008 R2
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/31/674C362999BC5BF4D0D18A1D7DA44D3B879D2831.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/31/674C362999BC5BF4D0D18A1D7DA44D3B879D2831.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/3A4841EFCCB0A52384424C3CA17A7FB65E793538.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/38/3A4841EFCCB0A52384424C3CA17A7FB65E793538.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/59/F40D442C8F42759CD42EBA64C63B0BBB1D957A59.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/59/F40D442C8F42759CD42EBA64C63B0BBB1D957A59.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AD/568DE4ACC70DD8930E9FE9147B7B1822295FEEAD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AD/568DE4ACC70DD8930E9FE9147B7B1822295FEEAD.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EA/BC46DFC6DB9E448D59E2797E49344782D48629EA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EA/BC46DFC6DB9E448D59E2797E49344782D48629EA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/0990195491E5432E96FB8578D08249D004CF6CDA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DA/0990195491E5432E96FB8578D08249D004CF6CDA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A6/1A6E475424F9648C941D91E89FB0304D53A90CA6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A6/1A6E475424F9648C941D91E89FB0304D53A90CA6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/51DD07BE7BC72545A180AB4C478F03AEA613E26A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6A/51DD07BE7BC72545A180AB4C478F03AEA613E26A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/45083D27C0F58C4946DE010A99EB6803410E683F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3F/45083D27C0F58C4946DE010A99EB6803410E683F.png)
 
 Fix binding order and run SQL Server Setup again.
 
@@ -592,9 +592,9 @@ From Detail.txt:
 
 Restart SQL Server setup.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6C/DFD89F35828006CF77C4BCAB95EC6832F843866C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6C/DFD89F35828006CF77C4BCAB95EC6832F843866C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/873F41C6CB5F3F7F68CEDA8BF0C467B5007A7AB8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B8/873F41C6CB5F3F7F68CEDA8BF0C467B5007A7AB8.png)
 
 Select:
 
@@ -603,23 +603,23 @@ Select:
 
 **Note:** When **Database Engine Services** is selected, **SQL Server Replication** and **Full-Text Search** are automatically selected (and cannot be cleared without also clearing **Database Engine Services**). Similarly, **Management Tools - Basic** is automatically selected when **Management Tools - Complete** is selected.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/79/AAAD714C71FB93377FEEB0B0319DB126FD6E2D79.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/79/AAAD714C71FB93377FEEB0B0319DB126FD6E2D79.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/20/5E6E65E2E98D6E16268F0CF4C17F2151011ABF20.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/20/5E6E65E2E98D6E16268F0CF4C17F2151011ABF20.png)
 
 In the **SQL Server Network Name** box, type the SQL Server cluster name (**EXT-SQL01**).
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/405A3A36A68A097D87FFE439F51CAB2A481A75FF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FF/405A3A36A68A097D87FFE439F51CAB2A481A75FF.png)
 
 On the **Cluster Resource Group** page, ensure **SQL Server cluster resource group name** is set to the default value of **SQL Server (MSSQLSERVER)**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F3/C433F98BE513D16CA1EC1648C025E2C3C3FC0DF3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F3/C433F98BE513D16CA1EC1648C025E2C3C3FC0DF3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/F4213B26C52A73AC3084071B982CDF1C6159C02F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2F/F4213B26C52A73AC3084071B982CDF1C6159C02F.png)
 
 On the **Cluster Disk Selection** page, select all of the available cluster disks (**Cluster Disk 2**, **Cluster Disk 3**, **Cluster Disk 4**, and **Cluster Disk 5**).
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/36/67F72027648299B0F68E2AE87FC934E1F85A5236.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/36/67F72027648299B0F68E2AE87FC934E1F85A5236.png)
 
 On the **Cluster Network Configuration** page:
 
@@ -628,77 +628,77 @@ On the **Cluster Network Configuration** page:
    2. In the **Address** column, type the IP address (**192.168.10.205**) corresponding to the SQL Server cluster name.
 2. In the **IPv6** row, clear the checkbox to prevent IPv6 from being used for the cluster network.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/C58149F179EDD10BA67A6AC5E03AB55BEBED824D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4D/C58149F179EDD10BA67A6AC5E03AB55BEBED824D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/66/0BB08D4B587A9C54FEAA436DA1E093A214873D66.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/66/0BB08D4B587A9C54FEAA436DA1E093A214873D66.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9B/09CAC25426C11B6DEDDA722B81130E627BE38D9B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9B/09CAC25426C11B6DEDDA722B81130E627BE38D9B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/72/22F845557E0A095E75E2CFD6A271B3F312AE0C72.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/72/22F845557E0A095E75E2CFD6A271B3F312AE0C72.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/18/CBA8AFAC0A7493F6BD668F3D016EDD356CD78718.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/18/CBA8AFAC0A7493F6BD668F3D016EDD356CD78718.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CA/089D56FD79DF2D4F68D7C4CD57F6B6CDF5F4E7CA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CA/089D56FD79DF2D4F68D7C4CD57F6B6CDF5F4E7CA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/07/589984854AA7DCE7B652336A2494E073CEDDC707.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/07/589984854AA7DCE7B652336A2494E073CEDDC707.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/5CE6820A04DD494D8C11F0624C83510EE5817969.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/69/5CE6820A04DD494D8C11F0624C83510EE5817969.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/13/230BCD1D043B28DF451CBD351F190C387EFE3013.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/13/230BCD1D043B28DF451CBD351F190C387EFE3013.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/92/891EF81D2D651820480819886CBED1D3A59EFD92.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/92/891EF81D2D651820480819886CBED1D3A59EFD92.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/361209BF9D3E52E83E937B7FDF4E31FD40043091.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/91/361209BF9D3E52E83E937B7FDF4E31FD40043091.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D6/8140E264B00C0542EB1D1F72F3E0E09C0AF6F7D6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D6/8140E264B00C0542EB1D1F72F3E0E09C0AF6F7D6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/DEFB5839B73E4833FC0010A2EE497B4BC051EF5F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5F/DEFB5839B73E4833FC0010A2EE497B4BC051EF5F.png)
 
 ## Add node to SQL Server failover cluster - EXT-SQL01B
 
 ## Install SQL Server 2008 R2 Service Pack 3
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/51F97F9682528CBEECC6FC68E17134DD988A2E71.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/71/51F97F9682528CBEECC6FC68E17134DD988A2E71.png)
 
 In the **Server Name** section, right-click the SQL Server cluster name and click **Properties**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/C34227E3F6CA5B633E91A8E44546B879A9ED05A2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A2/C34227E3F6CA5B633E91A8E44546B879A9ED05A2.png)
 
 In the **Possible Owners** list, clear the checkbox for the passive node (**EXT-SQL01B**) and then click **OK**.
 
 Install service pack on EXT-SQL01B.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/4BA7A05164145C4ECC3CF501D83B559E0C26D1DD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DD/4BA7A05164145C4ECC3CF501D83B559E0C26D1DD.png)
 
 UAC, click **Yes**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/48/810D807FC363531FA3EB129D6CFCA49F2D0D7948.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/48/810D807FC363531FA3EB129D6CFCA49F2D0D7948.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/19/8FF2BFD7F337D56388A0681D02881B5064934D19.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/19/8FF2BFD7F337D56388A0681D02881B5064934D19.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/40/A097E11B4A027FC22196B8614B1C946CB56F9C40.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/40/A097E11B4A027FC22196B8614B1C946CB56F9C40.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9A/233D7B030E24C173D4861AA0DCE300B49431129A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9A/233D7B030E24C173D4861AA0DCE300B49431129A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/50598949BF657AF427F770EE6981D71D1E36932F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2F/50598949BF657AF427F770EE6981D71D1E36932F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/12/D66DFD1B39F191703B9E557519CF7CFC29ADA112.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/12/D66DFD1B39F191703B9E557519CF7CFC29ADA112.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/87/E5DE0103903B7F3797C9D20C0C2319DE8441B587.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/87/E5DE0103903B7F3797C9D20C0C2319DE8441B587.png)
 
 In the **Server Name** section, right-click the SQL Server cluster name and click **Properties**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/18/EA852AA03D3B6830A56DC00FBEAF6F496F028018.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/18/EA852AA03D3B6830A56DC00FBEAF6F496F028018.png)
 
 In the **Possible Owners** list, select the checkbox for the passive node (**EXT-SQL01B**) and then click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/CED77B4D9FA75A43DCC5F8CEC295234479BBE474.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/74/CED77B4D9FA75A43DCC5F8CEC295234479BBE474.png)
 
 Under **Services and applications**, right-click **SQL Server (MSSQLSERVER)**, point to **Move this service or application to another node**, and click **1 - Move to node EXT-SQL01B**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D3/8B12513F87E733A61616137F3891F738960920D3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D3/8B12513F87E733A61616137F3891F738960920D3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/DD82C16614D2F7B35A09022C6577F35B437E25E2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E2/DD82C16614D2F7B35A09022C6577F35B437E25E2.png)
 
 Wait for the **Status** column to show **Online** for all of the resources.
 

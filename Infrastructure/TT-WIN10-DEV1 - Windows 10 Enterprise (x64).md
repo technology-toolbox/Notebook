@@ -311,15 +311,15 @@ Start-Process `
 Dismount-DiskImage -ImagePath $imagePath
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/02/DC91550586E4CF6143806056086329E222598802.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/02/DC91550586E4CF6143806056086329E222598802.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/4FEA005C13861DA4BFFFE3D7D551BCBB028B13DD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DD/4FEA005C13861DA4BFFFE3D7D551BCBB028B13DD.png)
 
 Click **INSTALL**.
 
 UAC -> click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F0/4AC9DE14AC57036C04C831C1C69235CFFB53DFF0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F0/4AC9DE14AC57036C04C831C1C69235CFFB53DFF0.png)
 
 Click **LAUNCH**.
 
@@ -330,9 +330,9 @@ Click **LAUNCH**.
 3. In the **Extensions and Updates** window, click **Updates**.
 4. In the **Visual Studio 2012 Update 5** item, click **Update**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/46/1BAE0D9BCF48AAC0178C64847226746215A9D446.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/46/1BAE0D9BCF48AAC0178C64847226746215A9D446.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EE/B70BBF35264EF6FCF30733542A8F65B591CB1EEE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EE/B70BBF35264EF6FCF30733542A8F65B591CB1EEE.png)
 
 > **Note**
 >
@@ -358,19 +358,19 @@ Start-Process `
     -Wait
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2E/D74C9ED403CF4A1C9AFD266FB33B551290809D2E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2E/D74C9ED403CF4A1C9AFD266FB33B551290809D2E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8E/77A9F6C6C496EB60F62B649CDE236D6854D11B8E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8E/77A9F6C6C496EB60F62B649CDE236D6854D11B8E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4B/941E1A768BB914C23C54769C6197964C26DC3F4B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4B/941E1A768BB914C23C54769C6197964C26DC3F4B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3E/F2CA6164A62CDEF045C9D1E6D17128F2320F913E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3E/F2CA6164A62CDEF045C9D1E6D17128F2320F913E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/D0C32112954749D82BB0E39B353D741B2D889574.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/74/D0C32112954749D82BB0E39B353D741B2D889574.png)
 
 #### Issue
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/9C6C1B725C38F6A5583DE67F594F70E9E39030BC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BC/9C6C1B725C38F6A5583DE67F594F70E9E39030BC.png)
 
 #### Solution
 
@@ -386,9 +386,9 @@ ALTER SERVER ROLE [dbcreator] ADD MEMBER [TECHTOOLBOX\svc-tfs]
 
 ---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E9/405B71E89649E7720F589C7533774CA436F018E9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E9/405B71E89649E7720F589C7533774CA436F018E9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/33/3DCF1D2C6C58DCDB7A6726E7DE6BF08094E6F433.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/33/3DCF1D2C6C58DCDB7A6726E7DE6BF08094E6F433.png)
 
 ---
 

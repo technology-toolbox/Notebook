@@ -380,15 +380,15 @@ finished (0)
 
 **Start** -> **iSCSI Initiator**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/3F6DE64EBF1E201BDD47D798802EEBB2C9A72CDF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DF/3F6DE64EBF1E201BDD47D798802EEBB2C9A72CDF.png)
 
 Click **Yes**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5B/38F75FA3835C75B20A80D63314FE3463D9B3095B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5B/38F75FA3835C75B20A80D63314FE3463D9B3095B.png)
 
 On the **Discovery** tab, click **Discover Portal...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/997A95199AEF4EA39C096740C00C6E13D59C4884.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/84/997A95199AEF4EA39C096740C00C6E13D59C4884.png)
 
 In the **Discover Target Portal** window:
 
@@ -402,64 +402,64 @@ In the **Discover Target Portal** window:
 
 On the **Targets** tab, in the **Discovered targets** section, click **Refresh**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2D/7223A178CAADEDCA2A2B38149467775F97BFFC2D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2D/7223A178CAADEDCA2A2B38149467775F97BFFC2D.png)
 
 Click **Connect**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0F/F822B682F3FA259F81BCBC2D1F2CA28BB42C840F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0F/F822B682F3FA259F81BCBC2D1F2CA28BB42C840F.png)
 
 In the Connect To Target window:
 
 1. Ensure **Add this connection to the list of Favorite Targets** is selected.
 2. Click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AF/2AE588CD3B9A672DC74995AB45446DD528C75EAF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AF/2AE588CD3B9A672DC74995AB45446DD528C75EAF.png)
 
 On the **Volumes and Devices** tab, click **Auto Configure**.
 
 ## Confirm the iSCSI disks appear offline
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/16/76835E27A9DE92EA475DD3B894973EAFA64A0F16.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/16/76835E27A9DE92EA475DD3B894973EAFA64A0F16.png)
 
 ## Install Failover Clustering feature
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/1A03746120FCA9D70FF9B0086946EBA2D22ADFBB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BB/1A03746120FCA9D70FF9B0086946EBA2D22ADFBB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/69/BA9E71E2A3841BD0E56D47A1E27CD74CF4858969.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/69/BA9E71E2A3841BD0E56D47A1E27CD74CF4858969.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A2/A3796F4D78CA6FE2E3A30845DDE0541546AEABA2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A2/A3796F4D78CA6FE2E3A30845DDE0541546AEABA2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E4/DDC573BC740127AC6A82BBB21D6A7580D3A547E4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E4/DDC573BC740127AC6A82BBB21D6A7580D3A547E4.png)
 
 ## Install .NET Framework 3.5
 
 **Note:** SQL Server 2008 R2 Setup requires Microsoft .NET Framework 3.5 SP1 to be installed.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5E/392A74F1E8F7FBAF8878636FA76058D9C2633B5E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5E/392A74F1E8F7FBAF8878636FA76058D9C2633B5E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/91/59074FC1C70A065F1DD17C47DB81DD531FA17D91.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/91/59074FC1C70A065F1DD17C47DB81DD531FA17D91.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/24/82BC5B510F0B9674E890DE59A21285C71F661424.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/24/82BC5B510F0B9674E890DE59A21285C71F661424.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C4/051689FF752F56810DE36FB3885D8D946F1495C4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C4/051689FF752F56810DE36FB3885D8D946F1495C4.png)
 
 ## Add node to SQL Server failover cluster
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A1/E768E1A1AF8244A2AD175B3ECE385CE1B673F3A1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A1/E768E1A1AF8244A2AD175B3ECE385CE1B673F3A1.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/3A4841EFCCB0A52384424C3CA17A7FB65E793538.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/38/3A4841EFCCB0A52384424C3CA17A7FB65E793538.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/59/F40D442C8F42759CD42EBA64C63B0BBB1D957A59.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/59/F40D442C8F42759CD42EBA64C63B0BBB1D957A59.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AD/568DE4ACC70DD8930E9FE9147B7B1822295FEEAD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AD/568DE4ACC70DD8930E9FE9147B7B1822295FEEAD.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EA/BC46DFC6DB9E448D59E2797E49344782D48629EA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EA/BC46DFC6DB9E448D59E2797E49344782D48629EA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/99/99282EC453EC3A4FA77746FC24C50D778C92E799.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/99/99282EC453EC3A4FA77746FC24C50D778C92E799.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A6/1A6E475424F9648C941D91E89FB0304D53A90CA6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A6/1A6E475424F9648C941D91E89FB0304D53A90CA6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6A/51DD07BE7BC72545A180AB4C478F03AEA613E26A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6A/51DD07BE7BC72545A180AB4C478F03AEA613E26A.png)
 
 Fix binding order:
 
@@ -505,21 +505,21 @@ finished (0)
 
 Click **Re-run**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1E/2F67AA29F3A9C33695D705F26E807CF9BDD8851E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1E/2F67AA29F3A9C33695D705F26E807CF9BDD8851E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E8/D666103CC55D6810EFD349F727C8B02AF75D16E8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E8/D666103CC55D6810EFD349F727C8B02AF75D16E8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4A/8AFC7EE8FFC962DEB3B621CBC2F56DC9C42A604A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4A/8AFC7EE8FFC962DEB3B621CBC2F56DC9C42A604A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/D2F42A5EB09582E2FF1D0AE8F0609F7C6B6AB5BB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BB/D2F42A5EB09582E2FF1D0AE8F0609F7C6B6AB5BB.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/917F2CC4307468C57D42F9F8FABD38D3CDC38F0E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0E/917F2CC4307468C57D42F9F8FABD38D3CDC38F0E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4E/141B72144E29F2C8A98D58E96E8B4B54FC48734E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4E/141B72144E29F2C8A98D58E96E8B4B54FC48734E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A5/1BC8A4A8DF5AF8159B0F3AA0E65A740B6717ADA5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A5/1BC8A4A8DF5AF8159B0F3AA0E65A740B6717ADA5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D6/40B7743F2E4104AAEE7ADA4C11B475E584943CD6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D6/40B7743F2E4104AAEE7ADA4C11B475E584943CD6.png)
 
 ## Install SQL Server 2008 R2 Service Pack 2
 

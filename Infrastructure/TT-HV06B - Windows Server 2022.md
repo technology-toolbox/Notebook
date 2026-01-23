@@ -370,11 +370,11 @@ cls
 
 ###### C: (SSD - Samsung 850 Pro 128GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/92/ED0B38F2FA1CA7EF5E9192377EAA1CBE419D5992.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/92/ED0B38F2FA1CA7EF5E9192377EAA1CBE419D5992.png)
 
 ###### D: (SSD - Samsung 840 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/64/3EDFCA115BFCC4411B4309C698F7D1DC81F18E64.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/64/3EDFCA115BFCC4411B4309C698F7D1DC81F18E64.png)
 
 > Note
 >
@@ -384,15 +384,15 @@ cls
 
 ###### E: (SSD - Samsung 840 512GB)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E6/F8A765C07CD5117F7EEFBF091FBCC4D4BCA639E6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E6/F8A765C07CD5117F7EEFBF091FBCC4D4BCA639E6.png)
 
 ###### F: (HDD - WDC WD4002FYYZ-0)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/66/C4059C6A6B968A1FC5C1E0E1FF6CF59EAF424066.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/66/C4059C6A6B968A1FC5C1E0E1FF6CF59EAF424066.png)
 
 ###### G: (HDD - WDC WD4002FYYZ-0)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/63881283BD56BB1882BB632CC257B54A8163960E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0E/63881283BD56BB1882BB632CC257B54A8163960E.png)
 
 ```PowerShell
 cls
@@ -643,15 +643,15 @@ cls
 
 ##### D: (Mirror SSD storage space - Samsung 840 512GB x2)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/0ECF3FE75545C45B9D715AEFBAE864DFB9DF2386.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/86/0ECF3FE75545C45B9D715AEFBAE864DFB9DF2386.png)
 
 ##### E: (Mirror SSD/HDD storage space)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DF/F9E951E194B221DB791AC2A6172A817529DEBFDF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DF/F9E951E194B221DB791AC2A6172A817529DEBFDF.png)
 
 ##### F: (Mirror HDD storage space with SSD write cache)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/96/379C9B0AA3A999DCC81A1CB196E6D5A136F89396.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/96/379C9B0AA3A999DCC81A1CB196E6D5A136F89396.png)
 
 ```PowerShell
 cls

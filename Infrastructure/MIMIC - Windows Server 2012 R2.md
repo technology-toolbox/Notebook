@@ -7049,7 +7049,7 @@ Import-MDTApplication `
 
 #### Replace application dependency
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5B/20DBE2F9F7F30CED09B3359BDFD561FE0FAD085B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5B/20DBE2F9F7F30CED09B3359BDFD561FE0FAD085B.png)
 
 ```PowerShell
 cls
@@ -7151,15 +7151,15 @@ robocopy \\ICEMAN\MDT-Deploy$ Main\MDT-Deploy$ /E /XD Applications Backup Boot C
 
 ## Install Azure Active Directory Connect
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EC/428AD7FCE7641926C4151DA1BDC20AF9AE8813EC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EC/428AD7FCE7641926C4151DA1BDC20AF9AE8813EC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/37/6BE3FA2F5E0A130A80D237DE3947B9FE3C5DCE37.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/37/6BE3FA2F5E0A130A80D237DE3947B9FE3C5DCE37.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/95/32FBEB5B4929E9C4F61E4C2897D987380BBB2695.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/95/32FBEB5B4929E9C4F61E4C2897D987380BBB2695.png)
 
 {missing screenshot - click **Install**}
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/58/EE2C173BA729BA90B43F2C082ECC031DEBB26958.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/58/EE2C173BA729BA90B43F2C082ECC031DEBB26958.png)
 
 ```PowerShell
 cls
@@ -7236,7 +7236,7 @@ After joining 20 computers to the domain, MDT deployments started failing to joi
 
 Grant the service account (TECHTOOLBOX\\s-mdt-deploy) the appropriate permission on the domain:
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/27467670E4C2D22984F1B8E5126C058A684B803C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3C/27467670E4C2D22984F1B8E5126C058A684B803C.png)
 
 ## Update baseline images
 
@@ -7499,23 +7499,23 @@ Get-NetAdapter -InterfaceDescription "Microsoft Hyper-V Network Adapter" |
 
 Download
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E6/16E98AA5E46B1B4495FDE0176A04B7F957A37BE6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E6/16E98AA5E46B1B4495FDE0176A04B7F957A37BE6.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/03/4643EED1C1F1434208E0A03BB494EED94767C303.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/03/4643EED1C1F1434208E0A03BB494EED94767C303.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D4/A1DBF1E3AE8BF21D9EB0AA7DE8BA68C30E9166D4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D4/A1DBF1E3AE8BF21D9EB0AA7DE8BA68C30E9166D4.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/1009CB1B7A6446A5AC874DC87EB88667E73EF362.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/62/1009CB1B7A6446A5AC874DC87EB88667E73EF362.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/97/D3AEB5873F70A365CD0745A119E4FFF178C24E97.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/97/D3AEB5873F70A365CD0745A119E4FFF178C24E97.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/F67F7AA640308BC779B2702CE1BAF798E8044984.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/84/F67F7AA640308BC779B2702CE1BAF798E8044984.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AC/B01727CF66D3D146A64B7131C628EC5519D933AC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AC/B01727CF66D3D146A64B7131C628EC5519D933AC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FF/ADB8557ECF919D8B61FD07ECB5A78FF0895F00FF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FF/ADB8557ECF919D8B61FD07ECB5A78FF0895F00FF.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/54/E87D0A010848FA04D05B3B15F37AB27B14AB4754.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/54/E87D0A010848FA04D05B3B15F37AB27B14AB4754.png)
 
 Learn more - [https://go.microsoft.com/fwlink/?linkid=850962](https://go.microsoft.com/fwlink/?linkid=850962)
 

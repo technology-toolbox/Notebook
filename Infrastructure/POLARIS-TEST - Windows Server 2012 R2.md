@@ -412,21 +412,21 @@ cls
 & X:\setup.cmd
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/59/6B1DE3E800C79386E287D5C9C6CE0EDAA054C059.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/59/6B1DE3E800C79386E287D5C9C6CE0EDAA054C059.png)
 
 Click **Install SharePoint Server**. UAC, click Yes.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/70/B9728A9EC8B2E461903B5F5CBCA913E8CE475370.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/70/B9728A9EC8B2E461903B5F5CBCA913E8CE475370.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/F56DEDCBD96796B1F3701899FBE37FAA568ACCD1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D1/F56DEDCBD96796B1F3701899FBE37FAA568ACCD1.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/D1A9D4606736C1E893C47039BC8714A50638994D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4D/D1A9D4606736C1E893C47039BC8714A50638994D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/68/CBC9CE76C09F2E586169E4BB1491A72E28310668.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/68/CBC9CE76C09F2E586169E4BB1491A72E28310668.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4F/AE6CA3F8549AD45E5467B4EDAB13023C56D0F74F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4F/AE6CA3F8549AD45E5467B4EDAB13023C56D0F74F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/51/3699E1E0D221E52F4448A8BBA346E21EED5FB251.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/51/3699E1E0D221E52F4448A8BBA346E21EED5FB251.png)
 
 Clear the checkbox and click **Close**.
 
@@ -519,9 +519,9 @@ When prompted for the **Passphrase**, type a passphrase that meets the following
   - Numerals (from 0 through 9)
   - Nonalphabetic characters (such as !, \$, #, %)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CF/EBA2B44FEDD93940FCC035C8F2D3462BAD9673CF.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CF/EBA2B44FEDD93940FCC035C8F2D3462BAD9673CF.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/6E/E713F4F7DD238AD32EA382E1A65749A44B8CC56E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/6E/E713F4F7DD238AD32EA382E1A65749A44B8CC56E.png)
 
 ```PowerShell
 cls
@@ -1052,7 +1052,7 @@ New-SPWebApplication `
     -Port 80
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F2/42094FC9AF85C53238C252C896E30AE67973B4F2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F2/42094FC9AF85C53238C252C896E30AE67973B4F2.png)
 
 ---
 
@@ -1123,7 +1123,7 @@ New-SPWebApplication `
     -Port 80
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/BA22D97D4AF3509A3A450F1751D6938BE8AF1FE1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E1/BA22D97D4AF3509A3A450F1751D6938BE8AF1FE1.png)
 
 ---
 

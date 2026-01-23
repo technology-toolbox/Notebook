@@ -277,7 +277,7 @@ copy "\\iceman.corp.technologytoolbox.com\Products\Mozilla\Firefox\Firefox Setup
 
 ### Change download location in Firefox
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/392B34873E861E3C872AB9C2C1716B60210D05B8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B8/392B34873E861E3C872AB9C2C1716B60210D05B8.png)
 
 ### Download products from MSDN
 
@@ -1113,7 +1113,7 @@ From <[http://www.jonthenerd.com/2013/01/22/sharepoint-2010-migrateuser-error-va
 
 Workaround:
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B2/3C2ED5DF8DACE53A99AAA665B6BB891E5F7FF6B2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B2/3C2ED5DF8DACE53A99AAA665B6BB891E5F7FF6B2.png)
 
 ```PowerShell
 Migrating users on site (http://cloud-local.securitasinc.com/sites/Fabrikam-Shipping)...

@@ -788,7 +788,7 @@ net use D: \\TT-SOFS02\VM-Storage-Bronze
 & 'C:\NotBackedUp\Public\Toolbox\ATTO Disk Benchmark\Bench32.exe'
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BD/13D161AF443F54248815CBCCEBA1C203EADA55BD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BD/13D161AF443F54248815CBCCEBA1C203EADA55BD.png)
 
 Screen clipping taken: 2/28/2018 3:18 PM
 

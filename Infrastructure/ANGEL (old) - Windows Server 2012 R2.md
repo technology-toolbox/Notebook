@@ -372,29 +372,29 @@ Set-VMHost -VirtualMachinePath D:\NotBackedUp\VMs
 
 ### Configure constrained delegation in Active Directory
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5C/D3EC4C2C5F12EB526565EAE8D4580A9D7E3C755C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5C/D3EC4C2C5F12EB526565EAE8D4580A9D7E3C755C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3F/037C5A725AE3D3662EF852D262A15DFFD8EE283F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3F/037C5A725AE3D3662EF852D262A15DFFD8EE283F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/0DE0367750156A9F3D9AEA75678C5F900F143C1C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1C/0DE0367750156A9F3D9AEA75678C5F900F143C1C.png)
 
 Click Add...
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8D/18818661BC0C359C33EE49E6F3341FAAF867998D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8D/18818661BC0C359C33EE49E6F3341FAAF867998D.png)
 
 Click Users or Computers...
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/4F1C5C01B85E16F2B3B7492F185F705F911D057C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7C/4F1C5C01B85E16F2B3B7492F185F705F911D057C.png)
 
 Click OK.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8F/465D67CC0249DDDBFA2BEE019FEE6F4D8C98C18F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8F/465D67CC0249DDDBFA2BEE019FEE6F4D8C98C18F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B4/DC763B77707277FB7C22421AB8B2C93257EFF5B4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B4/DC763B77707277FB7C22421AB8B2C93257EFF5B4.png)
 
 Click OK.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D0/12B1553B39D8AA5F324180076E0D98EBA5466DD0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D0/12B1553B39D8AA5F324180076E0D98EBA5466DD0.png)
 
 ### # Configure the server for live migration
 

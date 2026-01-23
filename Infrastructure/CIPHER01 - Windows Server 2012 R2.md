@@ -536,7 +536,7 @@ A best practice is to duplicate certificate templates instead of using the out-o
 
 Start the **Certification Authority** console (certsrv.msc).
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/00/7FE4B8CAA6245B8D17CDCB2161A2D998C7A81400.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/00/7FE4B8CAA6245B8D17CDCB2161A2D998C7A81400.png)
 
 Expand the CA, right-click **Certificate Templates**, and click **Manage**.
 
@@ -544,17 +544,17 @@ In the **Certificate Templates Console** window, in the list of certificate temp
 
 In Windows Server 2012 you will first be presented with the Compatibility tab. The idea is that you select the OS Version of your Certification Authority and the OS Version of clients that will be enrolling for certificates based on this template. This will then only allow you to select options in the Certificate Template that are supported by both the CA and the client/enrollee. In my example, I am going to leave the defaults.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BD/1F9F5A27A6C716142B0A6ADC0DCB988B9FFDF2BD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BD/1F9F5A27A6C716142B0A6ADC0DCB988B9FFDF2BD.png)
 
 On the **General** tab, in the **Template display name** box, type **Technology Toolbox Web Server**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CD/F923336BA1295707A0A950457A96694B67115CCD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CD/F923336BA1295707A0A950457A96694B67115CCD.png)
 
 Next, I have to give the CA the proper permissions for the template, so that it can enroll for a certificate.
 
 On the **Security** tab, click **Add...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/13/A8DC697A0C40B9F1B7C2A961E932E302F445A313.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/13/A8DC697A0C40B9F1B7C2A961E932E302F445A313.png)
 
 In the **Select Users, Computers, Service Accounts, or Groups** window, type **Web Servers**, click **Check Names**, and then click **OK**.
 
@@ -569,7 +569,7 @@ So, now the CA has proper permission to the Certificate Template. Next, I have t
 
 Start the **Certification Authority** console (certsrv.msc).
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/00/7FE4B8CAA6245B8D17CDCB2161A2D998C7A81400.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/00/7FE4B8CAA6245B8D17CDCB2161A2D998C7A81400.png)
 
 Expand the CA, right-click **Certificate Templates**, select **New**, then **Certificate Template to Issue**.
 
@@ -579,11 +579,11 @@ In the **Enable Certificate Templates** window, select **Technology Toolbox Web 
 
 I could enroll for the Certificate through IIS. However, I prefer to use the **Certificates** MMC as that gives me more control over the configuration of my request.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/41/6E27C890278FEE4140766E30B3F0E30E63F26841.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/41/6E27C890278FEE4140766E30B3F0E30E63F26841.png)
 
 On the **File** menu, click **Add/Remove Snap-in...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8C/431720C5C9979258661708A53BDC8269D7AB9F8C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8C/431720C5C9979258661708A53BDC8269D7AB9F8C.png)
 
 In the **Available snap-ins** list, select **Certificates**, and then click **Add >**.
 
@@ -592,25 +592,25 @@ In the **Select Computer** window, ensure **Local computer** is selected and cli
 
 In the **Add or Remove Snap-ins** window, click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/73/AD565EFF2ADABE0C8FC3802C2CA9508239E56A73.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/73/AD565EFF2ADABE0C8FC3802C2CA9508239E56A73.png)
 
 Expand **Certificates (Local Computer)**, right-click **Personal**, select **All Tasks**, and then click **Request New Certificate...**
 
 The **Certificate Enrollment** wizard opens.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/19/4359CCCE1C716C836452CA9311EEE9A40F53F119.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/19/4359CCCE1C716C836452CA9311EEE9A40F53F119.png)
 
 On the **Before You Begin** step, click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C1/5D634D14B0BC22FCE577CCA0F45D5482C78F0FC1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C1/5D634D14B0BC22FCE577CCA0F45D5482C78F0FC1.png)
 
 On the **Select Certificate Enrollment Policy** step, ensure **Active Directory Enrollment Policy** is selected, and click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/7C51F7F1ED83F32762FF1A3CFE2000789F06F2D1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D1/7C51F7F1ED83F32762FF1A3CFE2000789F06F2D1.png)
 
 On the **Request Certificates** step, select the checkbox for **Technology Toolbox Web Server**, expand **Details**, and click **Properties**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3A/C669DB3F22681C2ECCC620DB8D74FFB7D075503A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3A/C669DB3F22681C2ECCC620DB8D74FFB7D075503A.png)
 
 In the **Certificate Properties** window:
 
@@ -627,17 +627,17 @@ In the **Certificate Properties** window:
 3. On the **Request Certificates** step, click **Enroll**.
 4. On the **Certificate Installation Results** step, ensure the certificate enrollment succeeded and click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C7/58C74CEAD59BF58AAF3367574BB4912D02ED3EC7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C7/58C74CEAD59BF58AAF3367574BB4912D02ED3EC7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D9/6C24B981CDEAF366B692FC7C255385BE0BA53DD9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D9/6C24B981CDEAF366B692FC7C255385BE0BA53DD9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E5/83AE504A53E4A474CB4D236F7133018C67C3F3E5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E5/83AE504A53E4A474CB4D236F7133018C67C3F3E5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B3/DC1C7B402EE1D242A6201D1FB7948F26C37864B3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B3/DC1C7B402EE1D242A6201D1FB7948F26C37864B3.png)
 
 ### Configure SSL certificate in IIS
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/E90206A71CDAEB62B2320D0BACC2A337731F8555.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/55/E90206A71CDAEB62B2320D0BACC2A337731F8555.png)
 
 In Internet Information Services (IIS) Manager:\
 Expand the server node.\
@@ -645,11 +645,11 @@ Expand **Sites**.\
 Click **Default Web Site**.\
 In the **Actions** pane, in the **Edit Site** section, click **Bindings...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/73/578D41E4E5C085D89DB329F5531369CDD114BB73.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/73/578D41E4E5C085D89DB329F5531369CDD114BB73.png)
 
 In the **Site Bindings** window, **Add...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/52/864E8F12888F31247338AC431C80816D73DB9A52.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/52/864E8F12888F31247338AC431C80816D73DB9A52.png)
 
 In the **Add Site Binding** window:
 
@@ -657,28 +657,28 @@ In the **Add Site Binding** window:
 2. In the **SSL certificate** drop-down, select **SSL Cert - CIPHER01**.
 3. Click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/50/9EA42566CF2139EEB41FF8CA8F4704648A384150.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/50/9EA42566CF2139EEB41FF8CA8F4704648A384150.png)
 
 In the **Site Bindings** window, click **Close**.
 
 Expand **Default Web Site** and click the **CertSrv** virtual directory.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/AA/C96E9319FE9F44B75EFBF5310A43D338962FF4AA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/AA/C96E9319FE9F44B75EFBF5310A43D338962FF4AA.png)
 
 Double-click **SSL Settings**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/58/D5FA9B070C78C8839BB60011375DB23D18C42458.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/58/D5FA9B070C78C8839BB60011375DB23D18C42458.png)
 
 In the **SSL Settings** view:
 
 1. Select the **Require SSL** checkbox.
 2. In the **Actions** pane, click **Apply**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/7E99A3A8719E6763F83DCF49BD328BBDCA531C7C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7C/7E99A3A8719E6763F83DCF49BD328BBDCA531C7C.png)
 
 ### [WIN8-TEST1] Verify the Web Enrollment site is now configured with SSL
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3C/EEAB5120F16941CE0E671748BA43B99363FCF93C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3C/EEAB5120F16941CE0E671748BA43B99363FCF93C.png)
 
 ## # [STORM] Delete the checkpoint for issuing CA VM
 
@@ -819,19 +819,19 @@ Register-ScheduledTask -TaskName "Optimize Drives" -Xml $xml
 
 ## Request code signing certificate
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/25/EAEB0AA7043E887232F3EE16314935472DDFBD25.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/25/EAEB0AA7043E887232F3EE16314935472DDFBD25.png)
 
 Click **Request a certificate**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7C/4005E083BB18F200FDFDAE6D33C4BE9D9634667C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7C/4005E083BB18F200FDFDAE6D33C4BE9D9634667C.png)
 
 Click **Create and submit a request to this CA**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/14/DBA5EF4538B42D223DC70E83C09D2CEEC3C33214.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/14/DBA5EF4538B42D223DC70E83C09D2CEEC3C33214.png)
 
 Click **Yes**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/289DDF7BE327F085403F9747B7D02E57A3ED123D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3D/289DDF7BE327F085403F9747B7D02E57A3ED123D.png)
 
 In the **Certificate Template** dropdown, select **Technology Toolbox Code Signing**.
 
@@ -839,31 +839,31 @@ In the **Key Options** section, select the **Enable strong private key protectio
 
 Click **Submit >**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/5F/A0F9E512808FE79FC27694D982840923C82DFC5F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/5F/A0F9E512808FE79FC27694D982840923C82DFC5F.png)
 
 Click **Set Security Level...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F4/83DFBF124361EAACECA3865E1B769796A03CD3F4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F4/83DFBF124361EAACECA3865E1B769796A03CD3F4.png)
 
 Select the **High** option and then click **Next >**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B8/9519E3D0C9C2EF25F0AFBFD8C90BDF50167B5EB8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B8/9519E3D0C9C2EF25F0AFBFD8C90BDF50167B5EB8.png)
 
 In the **Password** and **Confirm** boxes, type the password to secure the private key for the certificate and then click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/79/33E8A286E35D4FF7E0BCC6146852B87B2E612279.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/79/33E8A286E35D4FF7E0BCC6146852B87B2E612279.png)
 
 Click **OK**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B2/EAC403299086FE51F5F400419D69FD597919F0B2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B2/EAC403299086FE51F5F400419D69FD597919F0B2.png)
 
 Click **Yes**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/65/39DE2165522BDBA5643D160E60ECCD92303AE865.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/65/39DE2165522BDBA5643D160E60ECCD92303AE865.png)
 
 Click **Install this certificate**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D8/F85CB3D1E7492F03A7624E60440816F693FB44D8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D8/F85CB3D1E7492F03A7624E60440816F693FB44D8.png)
 
 ## Clean Up the WinSxS Folder
 
@@ -871,7 +871,7 @@ From <[https://technet.microsoft.com/en-us/library/dn251565.aspx](https://techne
 
 **Before:**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/44/72B3999D6568E2587BD7119DB91433E0BF867944.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/44/72B3999D6568E2587BD7119DB91433E0BF867944.png)
 
 ```INI
 C:\Windows\system32>dism /Online /Cleanup-Image /AnalyzeComponentStore
@@ -913,7 +913,7 @@ The operation completed successfully.
 
 **After (a little better - but not much):**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9E/3027AFCFB03D768E11C88AE56E7DB86B3853659E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9E/3027AFCFB03D768E11C88AE56E7DB86B3853659E.png)
 
 ```INI
 C:\Windows\system32>dism /Online /Cleanup-Image /AnalyzeComponentStore
@@ -967,11 +967,11 @@ powercfg.exe /L
 
 ### Modify binding on Default Web Site to require Server Name Indication
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0E/79AAC9816660F91CED604BE98430152AA061FF0E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0E/79AAC9816660F91CED604BE98430152AA061FF0E.png)
 
 Click **Edit...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A6/EA956C8F869E7DCFE6545BB256F16074556672A6.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A6/EA956C8F869E7DCFE6545BB256F16074556672A6.png)
 
 In the **Edit Site Binding** window:
 
@@ -991,7 +991,7 @@ On the **HTTP Redirect** page:
 
 ### Verify [http://cipher01](http://cipher01) automatically redirects to [https://cipher01.corp.technologytoolbox.com/certsrv](https://cipher01.corp.technologytoolbox.com/certsrv)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/E528CDD0C1C3A327336DEE614172D9163DFD3062.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/62/E528CDD0C1C3A327336DEE614172D9163DFD3062.png)
 
 ### Enroll certificate for [https://pki.technologytoolbox.com](https://pki.technologytoolbox.com)
 
@@ -1001,19 +1001,19 @@ On the **HTTP Redirect** page:
 
 The **Certificate Enrollment** wizard opens.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/19/4359CCCE1C716C836452CA9311EEE9A40F53F119.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/19/4359CCCE1C716C836452CA9311EEE9A40F53F119.png)
 
 On the **Before You Begin** step, click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C1/5D634D14B0BC22FCE577CCA0F45D5482C78F0FC1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C1/5D634D14B0BC22FCE577CCA0F45D5482C78F0FC1.png)
 
 On the **Select Certificate Enrollment Policy** step, ensure **Active Directory Enrollment Policy** is selected, and click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D1/7C51F7F1ED83F32762FF1A3CFE2000789F06F2D1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D1/7C51F7F1ED83F32762FF1A3CFE2000789F06F2D1.png)
 
 On the **Request Certificates** step, select the checkbox for **Technology Toolbox Web Server**, expand **Details**, and click **Properties**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3A/C669DB3F22681C2ECCC620DB8D74FFB7D075503A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3A/C669DB3F22681C2ECCC620DB8D74FFB7D075503A.png)
 
 In the **Certificate Properties** window:
 
@@ -1028,17 +1028,17 @@ In the **Certificate Properties** window:
 3. On the **Request Certificates** step, click **Enroll**.
 4. On the **Certificate Installation Results** step, ensure the certificate enrollment succeeded and click **Finish**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/71/BB57659E31164B4A154F9089D50CB7DCC1802A71.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/71/BB57659E31164B4A154F9089D50CB7DCC1802A71.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/CE4BEE4BB7C73937952426A819072E1F8EA60521.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/21/CE4BEE4BB7C73937952426A819072E1F8EA60521.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E5/83AE504A53E4A474CB4D236F7133018C67C3F3E5.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E5/83AE504A53E4A474CB4D236F7133018C67C3F3E5.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B3/DC1C7B402EE1D242A6201D1FB7948F26C37864B3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B3/DC1C7B402EE1D242A6201D1FB7948F26C37864B3.png)
 
 ### Configure SSL certificate in IIS
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/E90206A71CDAEB62B2320D0BACC2A337731F8555.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/55/E90206A71CDAEB62B2320D0BACC2A337731F8555.png)
 
 In Internet Information Services (IIS) Manager:\
 Expand the server node.\
@@ -1046,11 +1046,11 @@ Expand **Sites**.\
 Click **pki.technologytoolbox.com**.\
 In the **Actions** pane, in the **Edit Site** section, click **Bindings...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/73/578D41E4E5C085D89DB329F5531369CDD114BB73.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/73/578D41E4E5C085D89DB329F5531369CDD114BB73.png)
 
 In the **Site Bindings** window, **Add...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/52/864E8F12888F31247338AC431C80816D73DB9A52.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/52/864E8F12888F31247338AC431C80816D73DB9A52.png)
 
 In the **Add Site Binding** window:
 
@@ -1064,9 +1064,9 @@ In the **Site Bindings** window, click **Close**.
 
 ### Verify the PKI site supports both HTTP and HTTPS
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/CC/5351EB2C6B82149463B1CD39B1E20C9C45B929CC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/CC/5351EB2C6B82149463B1CD39B1E20C9C45B929CC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/90/F4A5ED6163638B3A56B837E1D9BAA681E47A3E90.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/90/F4A5ED6163638B3A56B837E1D9BAA681E47A3E90.png)
 
 ## Configure Web Server certificate template with exportable private key
 

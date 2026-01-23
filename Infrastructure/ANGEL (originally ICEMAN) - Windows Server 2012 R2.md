@@ -321,25 +321,25 @@ list disk
 
 ## Create iSCSI virtual disk (BEAST-Backup02.vhdx)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/94/8A46C109719A2E0D2A0DC3CC581BBB61D7775394.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/94/8A46C109719A2E0D2A0DC3CC581BBB61D7775394.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/86/DF9A21AF2F94041BA811B57922AA9D05328EA786.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/86/DF9A21AF2F94041BA811B57922AA9D05328EA786.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/31/FE1ED57D87939AB3F2735DCDFE67D0C8A9D33F31.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/31/FE1ED57D87939AB3F2735DCDFE67D0C8A9D33F31.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/27/05F7CADA34DA6BCA410BCBBA2891ACA117035127.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/27/05F7CADA34DA6BCA410BCBBA2891ACA117035127.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2F/16EB813537A5C688DA2522151F47C5AFFA1DF22F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2F/16EB813537A5C688DA2522151F47C5AFFA1DF22F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7F/FB864BBD1CB47E15C1340F1D8D6FC5B3F44CB37F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7F/FB864BBD1CB47E15C1340F1D8D6FC5B3F44CB37F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/BE8408A36EA8B71A816D5CFD258B5AF991BA4721.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/21/BE8408A36EA8B71A816D5CFD258B5AF991BA4721.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E4/71C1BB115AB0918208A53814B2B605F4495E87E4.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E4/71C1BB115AB0918208A53814B2B605F4495E87E4.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1C/49E27ECCBB2DE7BD18F6236C762901DB222B141C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1C/49E27ECCBB2DE7BD18F6236C762901DB222B141C.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/21/9CC80061FE07EECB787DAF2158BC44777FC05521.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/21/9CC80061FE07EECB787DAF2158BC44777FC05521.png)
 
 ## Create file shares
 
@@ -430,115 +430,115 @@ $productionServer = "ICEMAN"
 
 ## Create share for TFS builds
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/1B/4464774519D35962D43997A35B52BB85E98B261B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/1B/4464774519D35962D43997A35B52BB85E98B261B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7B/4587A4E307CCF80FFE9C976C05D9E52D6485497B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7B/4587A4E307CCF80FFE9C976C05D9E52D6485497B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/0D/7155D1840B9D0F87FBDDC4428CFB6D50DC7BDC0D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/0D/7155D1840B9D0F87FBDDC4428CFB6D50DC7BDC0D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E7/649C4976EEED95889D960BC29944B7C564D3F2E7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E7/649C4976EEED95889D960BC29944B7C564D3F2E7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/95/95D420FD63DF58EEA603E619C76AB32623F2B095.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/95/95D420FD63DF58EEA603E619C76AB32623F2B095.png)
 
 Clear the **Allow caching of share** checkbox and click **Next**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FC/6008874110A054831AF216122A9EADB52C8B96FC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FC/6008874110A054831AF216122A9EADB52C8B96FC.png)
 
 Click **Customize permissions...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/4301102AC1E21CAE8A8678C1FE59A43CC7F682BC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BC/4301102AC1E21CAE8A8678C1FE59A43CC7F682BC.png)
 
 Click **Disable inheritance**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/28/45F9E2F5240D55B6E1C43890D3D3879450AEF128.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/28/45F9E2F5240D55B6E1C43890D3D3879450AEF128.png)
 
 Remove permissions for **Users (ICEMAN\\Users)**.
 
 Click **Add**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BB/27DAB15DD5E3190D7D50C9A5557CF36080C597BB.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BB/27DAB15DD5E3190D7D50C9A5557CF36080C597BB.png)
 
 In the **Basic permissions** section, select **Modify**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F3/EEAEAD5DA3B024AED6C4155D862D07DEDD54CAF3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F3/EEAEAD5DA3B024AED6C4155D862D07DEDD54CAF3.png)
 
 Click **Add**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E1/DEB2D7865E20996988F635AB6606A5164AB572E1.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E1/DEB2D7865E20996988F635AB6606A5164AB572E1.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/A7/DEF8A4D88C885877B4266FC9287C2023F7B2A2A7.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/A7/DEF8A4D88C885877B4266FC9287C2023F7B2A2A7.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/D8/36DA02F912474DECE4197C41A58F173A0D9889D8.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/D8/36DA02F912474DECE4197C41A58F173A0D9889D8.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C0/9D236A1D3A75E57252E57D793989B3248F4B1EC0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C0/9D236A1D3A75E57252E57D793989B3248F4B1EC0.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/5C7267CDFA76264DF1A16855B165E2B60C8010DD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DD/5C7267CDFA76264DF1A16855B165E2B60C8010DD.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/14/50E4F221A1A4A30336E03EE7800DADCB75B79714.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/14/50E4F221A1A4A30336E03EE7800DADCB75B79714.png)
 
 ## Create share for WSUS content
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DD/B3769D6754084CAA44B0838B97B8F13EFEDA00DD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DD/B3769D6754084CAA44B0838B97B8F13EFEDA00DD.png)
 
 On the **TASKS** menu, click **New Share...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/45/3ACAD3842C10466C1BE55E3F91503C0EE5BEBD45.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/45/3ACAD3842C10466C1BE55E3F91503C0EE5BEBD45.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C3/C588A3BD1073180E3A10EE09640237CF4293C8C3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C3/C588A3BD1073180E3A10EE09640237CF4293C8C3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B3/0072FC73C55540231BDDF1C816C829AFEA614FB3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B3/0072FC73C55540231BDDF1C816C829AFEA614FB3.png)
 
 Clear the **Allow caching of share** checkbox.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3A/9D0F8F4E9ED6C0F4C4669DB2C1D92E23622BC93A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3A/9D0F8F4E9ED6C0F4C4669DB2C1D92E23622BC93A.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/18/30DA1CDBE2A4305C3D7DACF97552416C977D1818.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/18/30DA1CDBE2A4305C3D7DACF97552416C977D1818.png)
 
 Click **Customize permissions...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/35/AA2900786DB12CEA7FD505C2D640895127FB7D35.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/35/AA2900786DB12CEA7FD505C2D640895127FB7D35.png)
 
 Click **Disable inheritance**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/7D/A7D2C9BCA83AF82B0DBA90746E9AD85103FE287D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/7D/A7D2C9BCA83AF82B0DBA90746E9AD85103FE287D.png)
 
 Remove permissions for **Users (ICEMAN\\Users)**.
 
 Click **Add**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/62/7A9D9243611C69A419121D041D70B9BAD3949362.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/62/7A9D9243611C69A419121D041D70B9BAD3949362.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DA/5B05E519CE33E4BF0D55B02870794A34BB4808DA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DA/5B05E519CE33E4BF0D55B02870794A34BB4808DA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/38/9FEB87B8840CBAFCC550AD034BEACC8501800638.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/38/9FEB87B8840CBAFCC550AD034BEACC8501800638.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/C0/633A816366CE28B340EB26C5EF44E7B51EB041C0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/C0/633A816366CE28B340EB26C5EF44E7B51EB041C0.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/55/2F595B04E3AA4499605CD6EFA312676ECF781455.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/55/2F595B04E3AA4499605CD6EFA312676ECF781455.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9D/A6B78DC2A2A554469DC4D7411D186EDD9E1D0E9D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9D/A6B78DC2A2A554469DC4D7411D186EDD9E1D0E9D.png)
 
 ## Create iSCSI virtual disk (EXT-SQL01-Quorum.vhdx)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FD/35948179ECB3BC7FA22D690DBEE24A4EC5DBFAFD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FD/35948179ECB3BC7FA22D690DBEE24A4EC5DBFAFD.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B0/569F1BBCD4525007DCFE1B658079BAAC8F6F64B0.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B0/569F1BBCD4525007DCFE1B658079BAAC8F6F64B0.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EE/C851E3B79CE9BD2103AEB00A74665E48119402EE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EE/C851E3B79CE9BD2103AEB00A74665E48119402EE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E2/5257A96C70A0FEDB7A41E439FCD454CB035A72E2.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E2/5257A96C70A0FEDB7A41E439FCD454CB035A72E2.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/05/3149502FDFD305B6F0FBDC6D671464251AC9B205.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/05/3149502FDFD305B6F0FBDC6D671464251AC9B205.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/5724AD4D0DBD4C7197F6F61AFA56B9E840A05E74.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/74/5724AD4D0DBD4C7197F6F61AFA56B9E840A05E74.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/F9/551ED6B2353BA8DA0BB0EA94E461B00FC07A63F9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/F9/551ED6B2353BA8DA0BB0EA94E461B00FC07A63F9.png)
 
 Click **Add...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FA/462F4CE59A3F577D05E87973414024443881ACFA.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FA/462F4CE59A3F577D05E87973414024443881ACFA.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2B/6B997E115288522B40325FA7F41ACA9281A74E2B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2B/6B997E115288522B40325FA7F41ACA9281A74E2B.png)
 
 On the **Enable Authentication** page, ensure **Enable CHAP** is not selected.
 
@@ -546,61 +546,61 @@ On the **Enable Authentication** page, ensure **Enable CHAP** is not selected.
 >
 > Due to a bug in the Microsoft iSCSI initiator, CHAP must be configured after discovering the iSCSI target.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/B3/E73DD3A84FE81C611D39C4621D403CABEDBB48B3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/B3/E73DD3A84FE81C611D39C4621D403CABEDBB48B3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/07/FC90D66DA8630DC746910515A397FFCCA1D20307.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/07/FC90D66DA8630DC746910515A397FFCCA1D20307.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/EC/D5B7854904A97CBEC76E0BD052AEBDF4BA0753EC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/EC/D5B7854904A97CBEC76E0BD052AEBDF4BA0753EC.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8C/641FDE4D85DBF0B73FAE77A4CB2D51E674B2D28C.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8C/641FDE4D85DBF0B73FAE77A4CB2D51E674B2D28C.png)
 
 ## Add iSCSI initiator to existing iSCSI target - ICEMAN
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4D/84036776E5E28F8C0E911894BBCCB78A3485F84D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4D/84036776E5E28F8C0E911894BBCCB78A3485F84D.png)
 
 In the **iSCSI TARGETS** section, right-click the iSCSI target (**ext-sql01**) and click **Properties**.
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/33/A23A31EAC597BA540338286123DCB7FB44FA6733.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/33/A23A31EAC597BA540338286123DCB7FB44FA6733.png)
 
 Click **Add...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DE/61CD557B0C71DA6BD9C8425295B692E4C3E3DCDE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DE/61CD557B0C71DA6BD9C8425295B692E4C3E3DCDE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/9F/564CD45E460A42B1445CBACACED58CAE0B90279F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/9F/564CD45E460A42B1445CBACACED58CAE0B90279F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4E/8198DD4D0107CEEB4EC1AE6D37985E3D92785B4E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4E/8198DD4D0107CEEB4EC1AE6D37985E3D92785B4E.png)
 
 ## Create iSCSI virtual disk (EXT-SQL01-Data01.vhdx)
 
 On the **iSCSI** panel, on the **TASKS** menu, click **New iSCSI Virtual Disk...**
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2E/7816AA9A43A682CFAB89C8298E2748F78F22F22E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2E/7816AA9A43A682CFAB89C8298E2748F78F22F22E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E3/56F5C341CA6227D8BF6B4AF828F087C249E1A1E3.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E3/56F5C341CA6227D8BF6B4AF828F087C249E1A1E3.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/52/1490ADFA4B56E382778E037D3228C52F0F417352.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/52/1490ADFA4B56E382778E037D3228C52F0F417352.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8F/327EA6F2280FC6F210DFF25E84EF4B23BFD3EC8F.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8F/327EA6F2280FC6F210DFF25E84EF4B23BFD3EC8F.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/DE/185895CD3742913C6901048526EFA1CC96F859DE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/DE/185895CD3742913C6901048526EFA1CC96F859DE.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/80/1BCBCAC3A5D9BBECD84F55F5E8267684E12DEA80.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/80/1BCBCAC3A5D9BBECD84F55F5E8267684E12DEA80.png)
 
 Wait for the virtual disk to be initialized.
 
 ## Create iSCSI virtual disk (EXT-SQL01-Log01.vhdx)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FD/910B7039054BD6C412B494A459F12DA103AA58FD.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FD/910B7039054BD6C412B494A459F12DA103AA58FD.png)
 
 Wait for the virtual disk to be initialized.
 
 ## Create iSCSI virtual disk (EXT-SQL01-Temp01.vhdx)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E9/AD8CF411CC00C29C82676C008182615365ECA3E9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E9/AD8CF411CC00C29C82676C008182615365ECA3E9.png)
 
 ## Create iSCSI virtual disk (EXT-SQL01-Backup01.vhdx)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/31/E6273391EB1F2E4912B48D96BDA34C02E4D43431.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/31/E6273391EB1F2E4912B48D96BDA34C02E4D43431.png)
 
 ## # Configure Live Migration (without Failover Clustering)
 

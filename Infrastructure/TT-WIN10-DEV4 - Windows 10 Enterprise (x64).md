@@ -311,7 +311,7 @@ Dismount-DiskImage -ImagePath $imagePath
 
 ### Issue
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/84/80C336B1EB474B5CF3255B0725E509FED420FA84.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/84/80C336B1EB474B5CF3255B0725E509FED420FA84.png)
 
 ```PowerShell
 cls
@@ -413,19 +413,19 @@ Start-Process `
     -Wait
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/2E/D74C9ED403CF4A1C9AFD266FB33B551290809D2E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/2E/D74C9ED403CF4A1C9AFD266FB33B551290809D2E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/8E/77A9F6C6C496EB60F62B649CDE236D6854D11B8E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/8E/77A9F6C6C496EB60F62B649CDE236D6854D11B8E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/4B/941E1A768BB914C23C54769C6197964C26DC3F4B.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/4B/941E1A768BB914C23C54769C6197964C26DC3F4B.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3E/F2CA6164A62CDEF045C9D1E6D17128F2320F913E.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3E/F2CA6164A62CDEF045C9D1E6D17128F2320F913E.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/74/D0C32112954749D82BB0E39B353D741B2D889574.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/74/D0C32112954749D82BB0E39B353D741B2D889574.png)
 
 #### Issue
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/BC/9C6C1B725C38F6A5583DE67F594F70E9E39030BC.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/BC/9C6C1B725C38F6A5583DE67F594F70E9E39030BC.png)
 
 #### Solution
 
@@ -441,9 +441,9 @@ ALTER SERVER ROLE [dbcreator] ADD MEMBER [TECHTOOLBOX\svc-tfs]
 
 ---
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/E9/405B71E89649E7720F589C7533774CA436F018E9.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/E9/405B71E89649E7720F589C7533774CA436F018E9.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/33/3DCF1D2C6C58DCDB7A6726E7DE6BF08094E6F433.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/33/3DCF1D2C6C58DCDB7A6726E7DE6BF08094E6F433.png)
 
 ---
 

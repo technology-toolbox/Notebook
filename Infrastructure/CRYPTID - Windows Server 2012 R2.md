@@ -328,7 +328,7 @@ cls
 certutil -renewCert ReuseKeys
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3A/134E75A60266C88C119A85BE34A2A17C3333563A.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3A/134E75A60266C88C119A85BE34A2A17C3333563A.png)
 
 **Error renewing standalone root CA certificate**\
 From <[https://social.technet.microsoft.com/Forums/en-US/cd841a4e-f44f-440c-ab35-d72da737f286/error-renewing-standalone-root-ca-certificate?forum=winserversecurity](https://social.technet.microsoft.com/Forums/en-US/cd841a4e-f44f-440c-ab35-d72da737f286/error-renewing-standalone-root-ca-certificate?forum=winserversecurity)>
@@ -365,9 +365,9 @@ cls
 certutil -renewCert ReuseKeys
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/3D/453968EA6405D6AF4CD840C0E9E64D99F54D2E3D.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/3D/453968EA6405D6AF4CD840C0E9E64D99F54D2E3D.png)
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/FE/112ED769FA60CEA3B865D5D6805F8D28E49A3FFE.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/FE/112ED769FA60CEA3B865D5D6805F8D28E49A3FFE.png)
 
 ```PowerShell
 cls
@@ -650,7 +650,7 @@ cls
 certutil -renewCert ReuseKeys
 ```
 
-![(screenshot)](https://assets.technologytoolbox.com/screenshots/56/A4B35B7E30248CC9F74FD980F6FB565C4C8E8C56.png)
+![(screenshot)](https://assets.techtoolbox.us/screenshots/56/A4B35B7E30248CC9F74FD980F6FB565C4C8E8C56.png)
 
 Click **Cancel**.
 
