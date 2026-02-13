@@ -1,7 +1,7 @@
-# TT-HV06B - Windows Server 2022 Hyper-V cluster node
+# TT-HV06E - Windows Server 2022 Hyper-V cluster node
 
-Thursday, January 12, 2025\
-8:05 AM
+Thursday, February 13, 2026\
+10:34 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -21,7 +21,8 @@ Thursday, January 12, 2025\
 
 > **Note**
 >
-> Join the **corp.technologytoolbox.com** domain and rename the computer to **TT-HV06B**.
+> Join the **corp.technologytoolbox.com** domain and rename the computer to
+> **TT-HV06E**.
 
 ---
 
@@ -34,7 +35,7 @@ cls
 ### # Move computer to "Hyper-V Servers" organizational unit
 
 ```PowerShell
-$computerName = "TT-HV06B"
+$computerName = "TT-HV06E"
 $targetPath = ("OU=Hyper-V Servers,OU=Servers,OU=Resources," `
     + "OU=Information Technology,DC=corp,DC=technologytoolbox,DC=com")
 
@@ -45,7 +46,7 @@ Get-ADComputer $computerName | Move-ADObject -TargetPath $targetPath
 
 ```PowerShell
 Import-Module ActiveDirectory
-Add-ADGroupMember -Identity "Hyper-V Servers" -Members TT-HV06B$
+Add-ADGroupMember -Identity "Hyper-V Servers" -Members TT-HV06E$
 ```
 
 ### # Add fabric administrators domain group to local administrators group
@@ -216,7 +217,8 @@ New-NetIPAddress `
     -PrefixLength 24
 ```
 
-> **Note:** A default gateway is not configured on this interface, since it is used exclusively for iSCSI storage.
+> **Note:** A default gateway is not configured on this interface, since it is
+> used exclusively for iSCSI storage.
 
 ```PowerShell
 cls
@@ -248,7 +250,8 @@ New-NetIPAddress `
     -PrefixLength 24
 ```
 
-> **Note:** A default gateway is not configured on this interface, since it is used exclusively for iSCSI storage.
+> **Note:** A default gateway is not configured on this interface, since it is
+> used exclusively for iSCSI storage.
 
 ```PowerShell
 cls
@@ -1049,25 +1052,25 @@ cls
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-KCD.ps1 `
-    -TrustedComputer TT-HV06B `
+    -TrustedComputer TT-HV06E `
     -TrustingComputer TT-HV06A `
     -ServiceType cifs `
     -Add
 
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-KCD.ps1 `
-    -TrustedComputer TT-HV06B `
+    -TrustedComputer TT-HV06E `
     -TrustingComputer TT-HV06A `
     -ServiceType "Microsoft Virtual System Migration Service" `
     -Add
 
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-KCD.ps1 `
-    -TrustedComputer TT-HV06B `
+    -TrustedComputer TT-HV06E `
     -TrustingComputer TT-HV06C `
     -ServiceType cifs `
     -Add
 
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-KCD.ps1 `
-    -TrustedComputer TT-HV06B `
+    -TrustedComputer TT-HV06E `
     -TrustingComputer TT-HV06C `
     -ServiceType "Microsoft Virtual System Migration Service" `
     -Add
@@ -1077,7 +1080,7 @@ C:\NotBackedUp\Public\Toolbox\PowerShell\Set-KCD.ps1 `
 # "Use Kerberos only" configuration is used, VM migration fails with error
 # 0x8009030E - "No credentials were available in the security package."
 Set-ADAccountControl `
-    -Identity TT-HV06B$ `
+    -Identity TT-HV06E$ `
     -TrustedToAuthForDelegation $true
 ```
 
@@ -1097,7 +1100,7 @@ cls
 
 ```PowerShell
 C:\NotBackedUp\Public\Toolbox\PowerShell\Set-KCD.ps1 `
-    -TrustedComputer TT-HV06B `
+    -TrustedComputer TT-HV06E `
     -TrustingComputer TT-FS01 `
     -ServiceType cifs `
     -Add
