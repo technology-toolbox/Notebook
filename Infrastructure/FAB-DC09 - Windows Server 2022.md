@@ -1,7 +1,7 @@
-# FAB-DC07 - Windows Server 2022 Domain Controller
+# FAB-DC09 - Windows Server 2022 Domain Controller
 
-Wednesday, January 1, 2025\
-3:40 PM
+Saturday, October 31, 2026\
+10:36 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05D"
-$vmName = "FAB-DC07"
+$vmHost = "TT-HV06A"
+$vmName = "FAB-DC09"
 $vmPath = "D:\NotBackedUp\VMs" # Start with SSD storage, then migrate to NAS
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -59,7 +59,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows Server 2022** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **FAB-DC07**.
+  - In the **Computer name** box, type **FAB-DC09**.
   - Select **Join a workgroup.**
   - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
@@ -99,7 +99,7 @@ cls
 ### # Move VM to Fabrikam VM network
 
 ```PowerShell
-$vmName = "FAB-DC07"
+$vmName = "FAB-DC09"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
 $vmNetwork = Get-SCVMNetwork -Name "Fabrikam VM Network"
 
@@ -132,7 +132,7 @@ Add-Computer -DomainName corp.fabrikam.com -Restart
 
 ---
 
-**FAB-DC05** - Run as domain administrator
+**FAB-DC07** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -143,7 +143,7 @@ cls
 #### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
-Add-ADGroupMember -Identity "Windows Update - Slot 19" -Members "FAB-DC07$"
+Add-ADGroupMember -Identity "Windows Update - Slot 19" -Members "FAB-DC09$"
 ```
 
 ---
@@ -154,7 +154,7 @@ Add-ADGroupMember -Identity "Windows Update - Slot 19" -Members "FAB-DC07$"
 | ---- | ------------ | ----------- | -------------------- | ------------ |
 | 0    | C:           | 32 GB       | 4K                   | OSDisk       |
 | 1    | D:           | 5 GB        | 4K                   | Data01       |
-| 2*   | (none)       | 65 GB       | 4K                   | Backup01     |
+| 2\*  | (none)       | 65 GB       | 4K                   | Backup01     |
 
 \* - Dedicated backup disk managed by Windows Server Backup
 
@@ -171,8 +171,8 @@ cls
 ##### # Add disk for Active Directory data
 
 ```PowerShell
-$vmHost = "TT-HV05D"
-$vmName = "FAB-DC07"
+$vmHost = "TT-HV06A"
+$vmName = "FAB-DC09"
 
 # Start with SSD storage, then migrate to NAS
 $vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
@@ -252,7 +252,7 @@ Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
 
 Start-Sleep -Seconds 5
 
-ping FAB-DC05 -f -l 8900
+ping FAB-DC07 -f -l 8900
 ```
 
 ```PowerShell
@@ -313,7 +313,7 @@ Get-NetAdapter |
 
 ---
 
-**FAB-DC05** - Run as domain administrator
+**FAB-DC07** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -324,7 +324,7 @@ cls
 ##### # Validate health of domain controllers
 
 ```Console
-dcdiag /s:FAB-DC05
+dcdiag /s:FAB-DC07
 ```
 
 ```Console
@@ -478,7 +478,7 @@ Restart-Computer
 ### # Remove obsolete domain controller from Active Directory
 
 ```PowerShell
-Get-ADComputer FAB-DC05 | Remove-ADObject -Recursive -Confirm:$false
+Get-ADComputer FAB-DC07 | Remove-ADObject -Recursive -Confirm:$false
 ```
 
 ---
@@ -492,7 +492,7 @@ cls
 ### # Delete obsolete domain controller VM
 
 ```PowerShell
-Remove-SCVirtualMachine FAB-DC05
+Remove-SCVirtualMachine FAB-DC07
 ```
 
 ---
@@ -510,7 +510,7 @@ cls
 ### # Migrate VM to shared storage
 
 ```PowerShell
-$vmName = "FAB-DC07"
+$vmName = "FAB-DC09"
 
 $vm = Get-SCVirtualMachine -Name $vmName
 $vmHost = $vm.VMHost
@@ -556,7 +556,7 @@ $antiAffinityClassNames.Add("FAB-DC")
 
 (Get-ClusterGroup `
     -Cluster TT-HV05-FC `
-    -Name 'SCVMM FAB-DC07 Resources' `
+    -Name 'SCVMM FAB-DC09 Resources' `
     ).AntiAffinityClassNames = $antiAffinityClassNames
 
 (Get-ClusterGroup `
@@ -673,8 +673,8 @@ cls
 ### # Disable Hyper-V time synchronization service
 
 ```PowerShell
-$vmHost = "TT-HV05D"
-$vmName = "FAB-DC07"
+$vmHost = "TT-HV06A"
+$vmName = "FAB-DC09"
 
 Disable-VMIntegrationService `
     -ComputerName $vmHost `
@@ -772,7 +772,7 @@ Get-DnsServerResourceRecord -ZoneName corp.fabrikam.com -Name ntp |
 Add-DnsServerResourceRecordCName `
     -ZoneName "corp.fabrikam.com" `
     -Name "ntp" `
-    -HostNameAlias "FAB-DC07.corp.fabrikam.com"
+    -HostNameAlias "FAB-DC09.corp.fabrikam.com"
 ```
 
 **TODO:**
