@@ -1,7 +1,7 @@
-# FAB-DC08 - Windows Server 2022 Domain Controller
+# FAB-DC10 - Windows Server 2022 Domain Controller
 
-Monday, January 6, 2025\
-5:41 AM
+Saturday, October 31, 2026\
+11:09 AM
 
 ```Text
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -20,8 +20,8 @@ cls
 ### # Create virtual machine
 
 ```PowerShell
-$vmHost = "TT-HV05E"
-$vmName = "FAB-DC08"
+$vmHost = "TT-HV06E"
+$vmName = "FAB-DC10"
 $vmPath = "D:\NotBackedUp\VMs" # Start with SSD storage, then migrate to NAS
 $vhdPath = "$vmPath\$vmName\Virtual Hard Disks\$vmName.vhdx"
 
@@ -59,7 +59,7 @@ Start-VM -ComputerName $vmHost -Name $vmName
 
 - On the **Task Sequence** step, select **Windows Server 2022** and click **Next**.
 - On the **Computer Details** step:
-  - In the **Computer name** box, type **FAB-DC08**.
+  - In the **Computer name** box, type **FAB-DC10**.
   - Select **Join a workgroup.**
   - In the **Workgroup** box, type **WORKGROUP**.
   - Click **Next**.
@@ -99,7 +99,7 @@ cls
 ### # Move VM to Fabrikam VM network
 
 ```PowerShell
-$vmName = "FAB-DC08"
+$vmName = "FAB-DC10"
 $networkAdapter = Get-SCVirtualNetworkAdapter -VM $vmName
 $vmNetwork = Get-SCVMNetwork -Name "Fabrikam VM Network"
 
@@ -132,7 +132,7 @@ Add-Computer -DomainName corp.fabrikam.com -Restart
 
 ---
 
-**FAB-DC06** - Run as domain administrator
+**FAB-DC08** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -143,7 +143,7 @@ cls
 #### # Add machine to security group for Windows Update schedule
 
 ```PowerShell
-Add-ADGroupMember -Identity "Windows Update - Slot 18" -Members "FAB-DC08$"
+Add-ADGroupMember -Identity "Windows Update - Slot 18" -Members "FAB-DC10$"
 ```
 
 ---
@@ -154,7 +154,7 @@ Add-ADGroupMember -Identity "Windows Update - Slot 18" -Members "FAB-DC08$"
 | ---- | ------------ | ----------- | -------------------- | ------------ |
 | 0    | C:           | 32 GB       | 4K                   | OSDisk       |
 | 1    | D:           | 5 GB        | 4K                   | Data01       |
-| 2*   | (none)       | 65 GB       | 4K                   | Backup01     |
+| 2\*  | (none)       | 65 GB       | 4K                   | Backup01     |
 
 \* - Dedicated backup disk managed by Windows Server Backup
 
@@ -171,8 +171,8 @@ cls
 ##### # Add disk for Active Directory data
 
 ```PowerShell
-$vmHost = "TT-HV05E"
-$vmName = "FAB-DC08"
+$vmHost = "TT-HV06E"
+$vmName = "FAB-DC10"
 
 # Start with SSD storage, then migrate to NAS
 $vhdPath = "D:\NotBackedUp\VMs\$vmName\Virtual Hard Disks\" `
@@ -252,7 +252,7 @@ Set-NetAdapterAdvancedProperty -Name $interfaceAlias `
 
 Start-Sleep -Seconds 5
 
-ping FAB-DC06 -f -l 8900
+ping FAB-DC08 -f -l 8900
 ```
 
 ```PowerShell
@@ -313,7 +313,7 @@ Get-NetAdapter |
 
 ---
 
-**FAB-DC06** - Run as domain administrator
+**FAB-DC08** - Run as domain administrator
 
 ```PowerShell
 cls
@@ -328,7 +328,7 @@ dcdiag /s:FAB-DC07
 ```
 
 ```Console
-dcdiag /s:FAB-DC06
+dcdiag /s:FAB-DC08
 ```
 
 ```PowerShell
@@ -478,7 +478,7 @@ Restart-Computer
 ### # Remove obsolete domain controller from Active Directory
 
 ```PowerShell
-Get-ADComputer FAB-DC06 | Remove-ADObject -Recursive -Confirm:$false
+Get-ADComputer FAB-DC08 | Remove-ADObject -Recursive -Confirm:$false
 ```
 
 ---
@@ -492,7 +492,7 @@ cls
 ### # Delete obsolete domain controller VM
 
 ```PowerShell
-Remove-SCVirtualMachine FAB-DC06
+Remove-SCVirtualMachine FAB-DC08
 ```
 
 ---
@@ -510,7 +510,7 @@ cls
 ### # Migrate VM to shared storage
 
 ```PowerShell
-$vmName = "FAB-DC08"
+$vmName = "FAB-DC10"
 
 $vm = Get-SCVirtualMachine -Name $vmName
 $vmHost = $vm.VMHost
@@ -561,7 +561,7 @@ $antiAffinityClassNames.Add("FAB-DC")
 
 (Get-ClusterGroup `
     -Cluster TT-HV05-FC `
-    -Name 'SCVMM FAB-DC08 Resources' `
+    -Name 'SCVMM FAB-DC10 Resources' `
     ).AntiAffinityClassNames = $antiAffinityClassNames
 
 Get-ClusterGroup -Cluster TT-HV05-FC |
